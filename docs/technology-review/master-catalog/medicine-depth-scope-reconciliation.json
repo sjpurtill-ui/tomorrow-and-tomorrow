@@ -1,0 +1,52 @@
+{
+  "status": "scope_clarification_for_review",
+  "adds_discovery_identities": 0,
+  "mappings": [
+    {
+      "existing_id": "clinical_chemistry",
+      "scope": "General clinical chemistry interpretation and assay quality across specimen types; it does not separately count every assay mechanism.",
+      "distinct_children": [
+        "enzymatic_glucose_assays",
+        "clinical_electrolyte_sensing",
+        "blood_gas_analysis"
+      ]
+    },
+    {
+      "existing_id": "rehabilitation_services",
+      "scope": "Organizing assessed functional rehabilitation and follow-up; device fitting and specific communication or swallowing mechanisms are separate applications with distinct operating evidence.",
+      "distinct_children": [
+        "orthotic_support_design",
+        "wheelchair_seating_services",
+        "speech_language_rehabilitation",
+        "swallowing_function_services"
+      ]
+    },
+    {
+      "existing_id": "medicine_quality_assurance",
+      "scope": "General product identity, consistency and handling; specific purification, potency-assay and release-formulation mechanisms are separately authored.",
+      "distinct_children": [
+        "medicine_potency_standardization",
+        "insulin_product_purification",
+        "oral_dosage_release_design"
+      ]
+    },
+    {
+      "existing_id": "intensive_care_services",
+      "scope": "Coordinating sustained care and monitoring; it does not grant every organ-support device or gas supply.",
+      "distinct_children": [
+        "mechanical_ventilation_services",
+        "medical_oxygen_supply_qualification"
+      ]
+    },
+    {
+      "existing_id": "clinical_observation_rounds",
+      "scope": "Repeated longitudinal observation; the sensory or instrument measurement mechanism of each assessment remains separate.",
+      "distinct_children": [
+        "physical_percussion_examination",
+        "clinical_palpation_mapping",
+        "respiratory_rate_assessment"
+      ]
+    }
+  ],
+  "runtime_effect": "None; prior records retained. Integrator must preserve these distinctions when mapping clinical services and discovery effects."
+}

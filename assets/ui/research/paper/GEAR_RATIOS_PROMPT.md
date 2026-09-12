@@ -1,0 +1,9 @@
+# Gear Ratios illustration
+
+Generated with the built-in imagegen tool on 2026-09-11 using `apprentice_contracts.png` as a style reference. Saved as `gear_ratios.png` (1254 × 1254). Visually inspected for the two unequal cogwheels, preindustrial craftsmanship, paper texture, restrained palette, open composition and absence of lettering. The scene depicts the mechanical idea; it is not a technical construction drawing.
+
+Source: `/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-0c075432-cf68-47e3-9fa7-67284fd6f95d.png`.
+
+## Exact prompt
+
+Create ONE finished square technology-tree illustration for Tomorrow and Tomorrow, 1024x1024. The input image is a binding STYLE reference only: retain its spare matte gouache, fibrous warm ivory paper, dry brushed edges, distressed pigment grain, flat simplified silhouettes, almost featureless faces, muted ochre, terracotta, charcoal and dark olive. Subject: Gear Ratios. In a quiet preindustrial millwright's open workshop, an artisan in plain linen work clothes crouches beside two clearly meshing wooden cogwheels, one large and one small, mounted on sturdy wooden shafts in a low timber frame. The different wheel diameters and coarse wooden teeth are the visual focus. The artisan slowly turns a short handle while a second apprentice in muted ochre watches the small wheel turn. A few wooden pegs and a plain mallet lie on the earth. Simple credible wood craftsmanship; no modern clothes or metal industrial machinery, no clocks, no diagrams or formulae. Compose the figures and mechanism as one asymmetrical group in the lower third to half, leaving broad untouched ivory paper across the upper half; only a few soft wall and ground strokes suggest the workshop. Restrained human scene with readable cogwheels, not a technical schematic. No labels, lettering, numbers, logos, border, UI, montage, watermark, photorealism, glossy rendering or dramatic lighting.

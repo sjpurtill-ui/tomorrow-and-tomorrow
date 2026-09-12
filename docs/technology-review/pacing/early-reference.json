@@ -1,0 +1,292 @@
+{
+  "scope": "early isolated AI reference only; not millennial campaign acceptance",
+  "baseline_commit": "6e1b88d",
+  "before": {
+    "annual_snapshots": [
+      {
+        "active_inquiries": 3,
+        "completed_buildings": 0,
+        "day": 0,
+        "food_days": 30.0,
+        "food_security": 0.82,
+        "knowledge_workers": 4,
+        "known": 0,
+        "population": 120,
+        "settled": false,
+        "year": 0.0
+      },
+      {
+        "active_inquiries": 1,
+        "completed_buildings": 0,
+        "day": 1,
+        "food_days": 31.5185644344519,
+        "food_security": 0.824757128260138,
+        "knowledge_workers": 4,
+        "known": 0,
+        "population": 120,
+        "settled": true,
+        "year": 0.00273972602739726
+      },
+      {
+        "active_inquiries": 1,
+        "completed_buildings": 2,
+        "day": 365,
+        "food_days": 60.2329074316429,
+        "food_security": 0.979999999586313,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 120,
+        "settled": true,
+        "year": 1.0
+      },
+      {
+        "active_inquiries": 1,
+        "completed_buildings": 2,
+        "day": 730,
+        "food_days": 74.1588248383007,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 122,
+        "settled": true,
+        "year": 2.0
+      },
+      {
+        "active_inquiries": 1,
+        "completed_buildings": 2,
+        "day": 1095,
+        "food_days": 65.3304401711904,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 125,
+        "settled": true,
+        "year": 3.0
+      },
+      {
+        "active_inquiries": 1,
+        "completed_buildings": 2,
+        "day": 1460,
+        "food_days": 65.2196903517648,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 127,
+        "settled": true,
+        "year": 4.0
+      },
+      {
+        "active_inquiries": 1,
+        "completed_buildings": 2,
+        "day": 1825,
+        "food_days": 62.3905653829077,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 128,
+        "settled": true,
+        "year": 5.0
+      }
+    ],
+    "days_per_second": 85.4594897224666,
+    "discoveries": [
+      {
+        "day": 1911,
+        "id": "drainage",
+        "year": 5.23561643835616
+      }
+    ],
+    "final": {
+      "active_inquiries": 0,
+      "completed_buildings": 2,
+      "day": 2137,
+      "food_days": 56.2450234500268,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 1,
+      "population": 129,
+      "settled": true,
+      "year": 5.85479452054795
+    },
+    "full_campaign_verified": false,
+    "initial": {
+      "active_inquiries": 3,
+      "completed_buildings": 0,
+      "day": 0,
+      "food_days": 30.0,
+      "food_security": 0.82,
+      "knowledge_workers": 4,
+      "known": 0,
+      "population": 120,
+      "settled": false,
+      "year": 0.0
+    },
+    "limitations": [
+      "One isolated seat, not a full world or a player campaign",
+      "Synthetic local water and land authority; no rendered geography",
+      "No foreign acquisition, war or dependency-recovery scenario",
+      "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+      "Short or collapsed runs do not validate millennial pacing"
+    ],
+    "live_catalog": 316,
+    "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; no foreign exchange",
+    "schema": 1,
+    "seed": 91420,
+    "simulated_days": 2137,
+    "stop_reason": "wall-time budget reached",
+    "target_days": 1095000,
+    "target_reached": false,
+    "wall_seconds": 25.006
+  },
+  "after": {
+    "annual_snapshots": [
+      {
+        "active_inquiries": 3,
+        "completed_buildings": 0,
+        "day": 0,
+        "food_days": 30.0,
+        "food_security": 0.82,
+        "knowledge_workers": 4,
+        "known": 0,
+        "population": 120,
+        "settled": false,
+        "year": 0.0
+      },
+      {
+        "active_inquiries": 2,
+        "completed_buildings": 0,
+        "day": 1,
+        "food_days": 31.5185644344519,
+        "food_security": 0.824757128260138,
+        "knowledge_workers": 4,
+        "known": 0,
+        "population": 120,
+        "settled": true,
+        "year": 0.00273972602739726
+      },
+      {
+        "active_inquiries": 2,
+        "completed_buildings": 2,
+        "day": 365,
+        "food_days": 60.2330606598253,
+        "food_security": 0.979999999586313,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 120,
+        "settled": true,
+        "year": 1.0
+      },
+      {
+        "active_inquiries": 2,
+        "completed_buildings": 2,
+        "day": 730,
+        "food_days": 74.1590887113149,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 122,
+        "settled": true,
+        "year": 2.0
+      },
+      {
+        "active_inquiries": 2,
+        "completed_buildings": 2,
+        "day": 1095,
+        "food_days": 65.3306521225904,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 125,
+        "settled": true,
+        "year": 3.0
+      },
+      {
+        "active_inquiries": 2,
+        "completed_buildings": 2,
+        "day": 1460,
+        "food_days": 65.2199007328647,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 0,
+        "population": 127,
+        "settled": true,
+        "year": 4.0
+      },
+      {
+        "active_inquiries": 4,
+        "completed_buildings": 2,
+        "day": 1825,
+        "food_days": 62.4526589817179,
+        "food_security": 0.979999999999999,
+        "knowledge_workers": 3,
+        "known": 1,
+        "population": 128,
+        "settled": true,
+        "year": 5.0
+      }
+    ],
+    "days_per_second": 144.832260250762,
+    "discoveries": [
+      {
+        "day": 1732,
+        "id": "drainage",
+        "year": 4.74520547945205
+      },
+      {
+        "day": 2136,
+        "id": "watch_rotation",
+        "year": 5.85205479452055
+      }
+    ],
+    "final": {
+      "active_inquiries": 3,
+      "completed_buildings": 2,
+      "day": 2137,
+      "food_days": 56.1973342206454,
+      "food_security": 0.979999999999999,
+      "knowledge_workers": 3,
+      "known": 2,
+      "population": 129,
+      "settled": true,
+      "year": 5.85479452054795
+    },
+    "full_campaign_verified": false,
+    "initial": {
+      "active_inquiries": 3,
+      "completed_buildings": 0,
+      "day": 0,
+      "food_days": 30.0,
+      "food_security": 0.82,
+      "knowledge_workers": 4,
+      "known": 0,
+      "population": 120,
+      "settled": false,
+      "year": 0.0
+    },
+    "limitations": [
+      "One isolated seat, not a full world or a player campaign",
+      "Synthetic local water and land authority; no rendered geography",
+      "No foreign acquisition, war or dependency-recovery scenario",
+      "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+      "Short or collapsed runs do not validate millennial pacing"
+    ],
+    "live_catalog": 316,
+    "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; no foreign exchange",
+    "schema": 1,
+    "seed": 91420,
+    "simulated_days": 2137,
+    "stop_reason": "target reached",
+    "target_days": 2137,
+    "target_reached": true,
+    "wall_seconds": 14.755
+  },
+  "repeatability": {
+    "initial": true,
+    "final": true,
+    "annual_snapshots": true,
+    "discoveries": true
+  },
+  "full_goal_complete": false,
+  "diagnostic_defect": "Version 1 left WorldSimulation.enabled false and omitted surface catchments, skipping normal owned geology and surface-material initialization. Retained as historical observations only; not a representative resource-constrained pacing run.",
+  "superseded_by_harness_schema": 2
+}

@@ -1,0 +1,35 @@
+{
+  "status": "scope_reconciliation_for_review",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "materials_service_requalification",
+      "existing_id": "component_reuse_certification",
+      "reason": "Reassessment for a new service is already represented by the existing reuse qualification mechanism."
+    }
+  ],
+  "mappings": [
+    {
+      "existing_id": "thermoplastic_processing",
+      "scope": "General heat-softened material processing; injection, blow molding, film extrusion and thermoforming are distinct forming mechanisms with distinct plant requirements.",
+      "distinct_children": [
+        "polymer_injection_molding",
+        "polymer_blow_molding",
+        "polymer_film_extrusion",
+        "polymer_thermoforming"
+      ]
+    },
+    {
+      "existing_id": "polymer_chain_models",
+      "scope": "Models of chain structure; qualified empirical synthesis may precede complete explanation and is not automatically supplied by the model.",
+      "distinct_children": [
+        "radical_chain_polymerization",
+        "ionic_chain_polymerization",
+        "coordination_polymerization",
+        "condensative_step_polymerization",
+        "additive_step_polymerization",
+        "ring_opening_polymerization"
+      ]
+    }
+  ]
+}

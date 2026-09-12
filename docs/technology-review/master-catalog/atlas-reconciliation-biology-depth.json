@@ -1,0 +1,238 @@
+{
+  "mappings": [
+    {
+      "review_id": "D15-01",
+      "candidate_name": "Animal taming",
+      "mapped_ids": [
+        "animal_taming"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-02",
+      "candidate_name": "Seed germination trials",
+      "mapped_ids": [
+        "germination_trials"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-03",
+      "candidate_name": "Yeast culture maintenance",
+      "mapped_ids": [
+        "fermentation_starter_cultures"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Yeast-starter maintenance is a qualified application of the shared starter-culture mechanism, not a second discovery."
+    },
+    {
+      "review_id": "D15-04",
+      "candidate_name": "Selective herd breeding",
+      "mapped_ids": [
+        "selective_herd_breeding"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-05",
+      "candidate_name": "Plant disease observation",
+      "mapped_ids": [
+        "plant_pathology_diagnosis"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-06",
+      "candidate_name": "Comparative anatomy",
+      "mapped_ids": [
+        "comparative_anatomy"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-07",
+      "candidate_name": "Microscopy",
+      "mapped_ids": [
+        "compound_microscopy",
+        "microscopic_cell_observation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-08",
+      "candidate_name": "Biological classification",
+      "mapped_ids": [
+        "biological_classification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-09",
+      "candidate_name": "Controlled breeding trials",
+      "mapped_ids": [
+        "heredity_experiments",
+        "controlled_pollination"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-10",
+      "candidate_name": "Fermentation cultures",
+      "mapped_ids": [
+        "fermentation_starter_cultures"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Same starter-culture mechanism as D15-03; repeated atlas wording adds no discovery."
+    },
+    {
+      "review_id": "D15-11",
+      "candidate_name": "Cell theory",
+      "mapped_ids": [
+        "cell_theory"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-12",
+      "candidate_name": "Heredity experiments",
+      "mapped_ids": [
+        "heredity_experiments"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-13",
+      "candidate_name": "Microbial isolation",
+      "mapped_ids": [
+        "microbial_isolation_methods"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-14",
+      "candidate_name": "Enzyme chemistry",
+      "mapped_ids": [
+        "enzyme_catalysis"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-15",
+      "candidate_name": "Evolutionary population analysis",
+      "mapped_ids": [
+        "population_genetics",
+        "evolutionary_selection_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-16",
+      "candidate_name": "DNA sequencing",
+      "mapped_ids": [
+        "dna_sequence_reading"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-17",
+      "candidate_name": "Recombinant production",
+      "mapped_ids": [
+        "recombinant_bioproduction"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-18",
+      "candidate_name": "Genomic selection",
+      "mapped_ids": [
+        "genomic_selection"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-19",
+      "candidate_name": "Gene editing",
+      "mapped_ids": [
+        "targeted_genome_editing",
+        "gene_editing_outcome_review"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-20",
+      "candidate_name": "Tissue culture methods",
+      "mapped_ids": [
+        "cell_culture_methods",
+        "tissue_culture_propagation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-21",
+      "candidate_name": "Engineered microbial consortia",
+      "mapped_ids": [
+        "engineered_microbial_consortia"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-22",
+      "candidate_name": "Programmable cell systems",
+      "mapped_ids": [
+        "programmable_cell_systems"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-23",
+      "candidate_name": "Biomanufacturing containment",
+      "mapped_ids": [
+        "biomanufacturing_containment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-24",
+      "candidate_name": "Organ scaffold cultivation",
+      "mapped_ids": [
+        "tissue_scaffold_engineering",
+        "tissue_perfusion_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped once to existing stable mechanisms; candidate labels add no identities. Biological outcomes remain method- and context-specific."
+    },
+    {
+      "review_id": "D15-25",
+      "candidate_name": "Evolution resistant bioprocesses",
+      "mapped_ids": [
+        "bioprocess_evolution_monitoring",
+        "bioprocess_stability_design"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Maps to measured change monitoring and stability design, not a guarantee that biological evolution stops or a process remains stable forever."
+    }
+  ],
+  "adds_discovery_identities": 0,
+  "partial_candidates": 0
+}

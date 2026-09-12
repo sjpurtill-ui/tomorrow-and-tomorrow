@@ -1,0 +1,25 @@
+{
+  "scenario": "17 static locations, 30 successive days, 90-day forecasts; same stocks and demand; isolated diagnostic, concurrent host load",
+  "before": {
+    "cache_sites": 16,
+    "days": 30,
+    "forecasts": 510,
+    "full_campaign_verified": false,
+    "microseconds": 1814257,
+    "sites": 17,
+    "summary_hash": "ae35597cb8d0d4ca58bd0c0d77472a85a1af433564b09808a11c9faac620f4c5",
+    "warm_site_visits": 0
+  },
+  "after": {
+    "cache_sites": 17,
+    "days": 30,
+    "forecasts": 510,
+    "full_campaign_verified": false,
+    "microseconds": 992185,
+    "sites": 17,
+    "summary_hash": "ae35597cb8d0d4ca58bd0c0d77472a85a1af433564b09808a11c9faac620f4c5",
+    "warm_site_visits": 493
+  },
+  "result_parity": true,
+  "full_campaign_verified": false
+}

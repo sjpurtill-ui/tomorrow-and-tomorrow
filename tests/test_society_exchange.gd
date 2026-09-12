@@ -325,3 +325,28 @@ func test_dispatched_influence_party_physically_brings_knowledge_home_without_in
 	assert_int(E.returned(trip,end).size()).is_greater(0)
 	assert_int(E.arrive(trip,end)).is_equal(0)
 	assert_float(GameState.population_exact).is_equal(200.0)
+
+func _archive_item(index:int)->Dictionary:
+	return {"id":"archive-%d" % index,"kind":"knowledge","name":"Returned account %d" % index,"source_id":"","source_name":"Collection fixture","position":{"x":0.0,"z":0.0},"observed_day":index,"returned_day":index,"discovery_id":"tallies","study":1.0,"work":120.0,"signals":[]}
+func test_large_collection_roundtrip_preserves_records_beyond_old_limit()->void:
+	for index in range(5001):E.data().collections["archive-%d" % index]=_archive_item(index)
+	E.data().evidence.tallies="archive-5000"
+	var restored:Dictionary=JSON.parse_string(JSON.stringify(E.data()))
+	assert_bool(E.valid(restored)).is_true()
+	assert_int(restored.collections.size()).is_equal(5001)
+	assert_str(restored.evidence.tallies).is_equal("archive-5000")
+	assert_int(E.COLLECTION_LIMIT).is_greater_equal(30000)
+func test_collection_pagination_reaches_oldest_records_and_resets_filter()->void:
+	for index in range(45):E.data().collections["archive-%d" % index]=_archive_item(index)
+	var view:=CollectionPanel.new();add_child(view)
+	assert_str(view.page_label.text).is_equal("Page 1 of 2 · 45 finds")
+	assert_bool(view.previous_page.disabled).is_true()
+	view.next_page.pressed.emit()
+	assert_str(view.page_label.text).is_equal("Page 2 of 2 · 45 finds")
+	assert_bool(view.next_page.disabled).is_true()
+	assert_int(view.cards.get_child_count()).is_equal(5)
+	view.filter.select(1);view.filter.item_selected.emit(1)
+	assert_int(view.page).is_equal(0)
+	assert_str(view.page_label.text).is_equal("Page 1 of 1 · 0 finds")
+	await get_tree().process_frame
+	view.free()

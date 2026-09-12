@@ -48,7 +48,7 @@ func test_oversized_prototype_build_waits_instead_of_accepting_partial_cohort()-
 	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(40)
 	assert_array(MilitaryCampaign.training_queue).is_empty()
 	assert_bool(bool(result.get("waiting",false))).is_true()
-	assert_str(String(result.message)).contains("Prototype intake")
+	assert_str(String(result.message)).contains("Experimental units are limited")
 
 
 func test_training_counts_are_capped_to_missing_build_places()->void:

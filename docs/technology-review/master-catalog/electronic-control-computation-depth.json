@@ -1,0 +1,2404 @@
+[
+  {
+    "field": "D21",
+    "id": "resistive_bridge_measurement",
+    "name": "Resistive Bridge Measurement",
+    "foundations": "electrical_measurement",
+    "mechanism": "Infer an unknown or changing resistance from a qualified balanced circuit comparison",
+    "operating_requirement": "Actual stable reference elements, source and sensitive detector",
+    "consequence": "Measure selected resistance changes with reference and temperature limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "resistive_bridge_measurement",
+      "local_demonstration": "Infer an unknown or changing resistance from a qualified balanced circuit comparison",
+      "operating_requirements": "Actual stable reference elements, source and sensitive detector",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "differential_amplifier_circuits",
+    "name": "Differential Amplifier Circuits",
+    "foundations": "electrical_measurement",
+    "mechanism": "Amplify a difference between input signals while bounding response to their shared component",
+    "operating_requirement": "Matched qualified active devices, power and component tolerances",
+    "consequence": "Extract a differential signal within common-mode and noise limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [
+      [
+        "triode_valves",
+        "transistor_amplifiers"
+      ]
+    ],
+    "branching_note": "Qualified valve or transistor gain can support the circuit; monolithic semiconductor integration is not mandatory.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "differential_amplifier_circuits",
+      "local_demonstration": "Amplify a difference between input signals while bounding response to their shared component",
+      "operating_requirements": "Matched qualified active devices, power and component tolerances",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "negative_feedback_amplifiers",
+    "name": "Negative-Feedback Amplifiers",
+    "foundations": "",
+    "mechanism": "Return a qualified fraction of amplifier output to reduce error against the input",
+    "operating_requirement": "Actual active gain, feedback network and stability margins",
+    "consequence": "Trade available gain for controlled response without eliminating noise or instability",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "feedback_stability_analysis",
+        "electrical_measurement"
+      ],
+      [
+        "triode_valves",
+        "transistor_amplifiers"
+      ]
+    ],
+    "branching_note": "Measured circuit response can support qualified negative feedback before formal closed-loop theory; valve or transistor gain and demonstrated stability are still required.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "negative_feedback_amplifiers",
+      "local_demonstration": "Return a qualified fraction of amplifier output to reduce error against the input",
+      "operating_requirements": "Actual active gain, feedback network and stability margins",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "operational_amplifier_blocks",
+    "name": "Operational Amplifier Blocks",
+    "foundations": "differential_amplifier_circuits,negative_feedback_amplifiers",
+    "mechanism": "Provide a high-gain differential block usable in several qualified feedback configurations",
+    "operating_requirement": "Actual active circuitry, supply rails and characterized operating limits",
+    "consequence": "Support reusable analog functions without an ideal infinite-gain assumption",
+    "status": "authored_draft",
+    "requires_all": [
+      "differential_amplifier_circuits",
+      "negative_feedback_amplifiers"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "operational_amplifier_blocks",
+      "local_demonstration": "Provide a high-gain differential block usable in several qualified feedback configurations",
+      "operating_requirements": "Actual active circuitry, supply rails and characterized operating limits",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "instrumentation_amplifier_circuits",
+    "name": "Instrumentation Amplifier Circuits",
+    "foundations": "differential_amplifier_circuits",
+    "mechanism": "Combine differential gain and high input impedance for a qualified measurement interface",
+    "operating_requirement": "Matched gain elements, reference and supply control and calibrated input limits",
+    "consequence": "Read weak differential sources while retaining drift and common-mode errors",
+    "status": "authored_draft",
+    "requires_all": [
+      "differential_amplifier_circuits"
+    ],
+    "requires_any": [
+      [
+        "operational_amplifier_blocks",
+        "transistor_amplifiers"
+      ]
+    ],
+    "branching_note": "Qualified composite analog blocks or discrete active-device networks can provide a high-impedance differential interface.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "instrumentation_amplifier_circuits",
+      "local_demonstration": "Combine differential gain and high input impedance for a qualified measurement interface",
+      "operating_requirements": "Matched gain elements, reference and supply control and calibrated input limits",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "active_filter_circuits",
+    "name": "Active Filter Circuits",
+    "foundations": "operational_amplifier_blocks,harmonic_analysis",
+    "mechanism": "Shape frequency response with active gain and reactive circuit elements",
+    "operating_requirement": "Qualified components, power and a stable topology",
+    "consequence": "Select a useful signal band with finite attenuation and distortion",
+    "status": "authored_draft",
+    "requires_all": [
+      "operational_amplifier_blocks",
+      "harmonic_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "active_filter_circuits",
+      "local_demonstration": "Shape frequency response with active gain and reactive circuit elements",
+      "operating_requirements": "Qualified components, power and a stable topology",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "sample_hold_circuits",
+    "name": "Sample-and-Hold Circuits",
+    "foundations": "signal_sampling",
+    "mechanism": "Capture an analog signal state and retain it for a bounded processing interval",
+    "operating_requirement": "Qualified switch, storage element, timing and buffered readout",
+    "consequence": "Hold a finite-accuracy sample while retaining acquisition and droop errors",
+    "status": "authored_draft",
+    "requires_all": [
+      "signal_sampling"
+    ],
+    "requires_any": [
+      [
+        "foil_capacitors",
+        "dielectric_layer_control"
+      ]
+    ],
+    "branching_note": "Qualified discrete or fabricated capacitive storage can hold an analog value. A generic digital memory array is not assumed to provide a sample-and-hold circuit.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sample_hold_circuits",
+      "local_demonstration": "Capture an analog signal state and retain it for a bounded processing interval",
+      "operating_requirements": "Qualified switch, storage element, timing and buffered readout",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "analog_digital_conversion",
+    "name": "Analog-to-Digital Conversion",
+    "foundations": "signal_sampling",
+    "mechanism": "Quantize a qualified analog input into a finite digital representation",
+    "operating_requirement": "Actual conversion circuit, reference, timing and input conditioning",
+    "consequence": "Produce bounded numerical measurements with noise and quantization limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "signal_sampling"
+    ],
+    "requires_any": [
+      [
+        "binary_counters",
+        "arithmetic_logic_units"
+      ]
+    ],
+    "branching_note": "Counter-based or other qualified coded conversion can precede a microprocessor; physical conversion accuracy still requires demonstration.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "analog_digital_conversion",
+      "local_demonstration": "Quantize a qualified analog input into a finite digital representation",
+      "operating_requirements": "Actual conversion circuit, reference, timing and input conditioning",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "digital_analog_conversion",
+    "name": "Digital-to-Analog Conversion",
+    "foundations": "binary_counters",
+    "mechanism": "Generate a qualified analog output corresponding to an encoded value",
+    "operating_requirement": "Actual converter, reference, output stage and settling time",
+    "consequence": "Drive an analog interface with finite resolution and reconstruction errors",
+    "status": "authored_draft",
+    "requires_all": [
+      "binary_counters"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "digital_analog_conversion",
+      "local_demonstration": "Generate a qualified analog output corresponding to an encoded value",
+      "operating_requirements": "Actual converter, reference, output stage and settling time",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "phase_locked_loop_control",
+    "name": "Phase-Locked Loop Control",
+    "foundations": "frequency_stabilization,feedback_stability_analysis",
+    "mechanism": "Adjust a controlled oscillator from a qualified phase-error comparison",
+    "operating_requirement": "Actual oscillator, detector and stable loop components",
+    "consequence": "Track a reference over a finite acquisition and lock range",
+    "status": "authored_draft",
+    "requires_all": [
+      "frequency_stabilization",
+      "feedback_stability_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "phase_locked_loop_control",
+      "local_demonstration": "Adjust a controlled oscillator from a qualified phase-error comparison",
+      "operating_requirements": "Actual oscillator, detector and stable loop components",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "precision_voltage_references",
+    "name": "Precision Voltage References",
+    "foundations": "electrical_measurement",
+    "mechanism": "Maintain and characterize a repeatable voltage reference against supply and environmental change",
+    "operating_requirement": "Qualified circuit, calibration and controlled operating conditions",
+    "consequence": "Reduce reference uncertainty without perfectly invariant voltage",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "precision_voltage_references",
+      "local_demonstration": "Maintain and characterize a repeatable voltage reference against supply and environmental change",
+      "operating_requirements": "Qualified circuit, calibration and controlled operating conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "low_noise_signal_frontends",
+    "name": "Low-Noise Signal Frontends",
+    "foundations": "differential_amplifier_circuits",
+    "mechanism": "Match input circuitry and bandwidth to a source while budgeting added noise and interference",
+    "operating_requirement": "Actual components, grounding, shielding and measured source characteristics",
+    "consequence": "Preserve some weak-signal information without recovering signals below all physical limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "differential_amplifier_circuits"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "low_noise_signal_frontends",
+      "local_demonstration": "Match input circuitry and bandwidth to a source while budgeting added noise and interference",
+      "operating_requirements": "Actual components, grounding, shielding and measured source characteristics",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "photodiode_signal_detection",
+    "name": "Photodiode Signal Detection",
+    "foundations": "photoconductivity",
+    "mechanism": "Convert incident optical energy into a measured qualified junction-current response",
+    "operating_requirement": "Actual photosensitive junction, optics and readout electronics",
+    "consequence": "Sense a bounded optical signal with spectral and noise limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "photoconductivity"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "photodiode_signal_detection",
+      "local_demonstration": "Convert incident optical energy into a measured qualified junction-current response",
+      "operating_requirements": "Actual photosensitive junction, optics and readout electronics",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "charge_coupled_image_sensors",
+    "name": "Charge-Coupled Image Sensors",
+    "foundations": "photodiode_signal_detection",
+    "mechanism": "Collect spatially distributed photocharge and transfer it through a controlled readout sequence",
+    "operating_requirement": "Actual photosensitive array, clocking, readout and fabrication quality",
+    "consequence": "Acquire a digitalizable image while retaining transfer and dark-noise effects",
+    "status": "authored_draft",
+    "requires_all": [
+      "photodiode_signal_detection"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "charge_coupled_image_sensors",
+      "local_demonstration": "Collect spatially distributed photocharge and transfer it through a controlled readout sequence",
+      "operating_requirements": "Actual photosensitive array, clocking, readout and fabrication quality",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "active_pixel_image_sensors",
+    "name": "Active-Pixel Image Sensors",
+    "foundations": "photodiode_signal_detection,mos_transistor_design",
+    "mechanism": "Integrate qualified pixel-level charge sensing with addressed array readout",
+    "operating_requirement": "Actual fabricated array, timing, power and calibration",
+    "consequence": "Acquire images through an active-pixel architecture with noise and fill-factor tradeoffs",
+    "status": "authored_draft",
+    "requires_all": [
+      "photodiode_signal_detection",
+      "mos_transistor_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "active_pixel_image_sensors",
+      "local_demonstration": "Integrate qualified pixel-level charge sensing with addressed array readout",
+      "operating_requirements": "Actual fabricated array, timing, power and calibration",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "hall_effect_sensing",
+    "name": "Hall-Effect Sensing",
+    "foundations": "electrical_measurement,electromagnetic_induction",
+    "mechanism": "Measure a qualified transverse electrical response to magnetic field in a supplied conductor",
+    "operating_requirement": "Actual sensing material, excitation and calibrated geometry",
+    "consequence": "Infer a specified magnetic field component within drift and range limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "electromagnetic_induction"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hall_effect_sensing",
+      "local_demonstration": "Measure a qualified transverse electrical response to magnetic field in a supplied conductor",
+      "operating_requirements": "Actual sensing material, excitation and calibrated geometry",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "magnetoresistive_sensing",
+    "name": "Magnetoresistive Sensing",
+    "foundations": "resistive_bridge_measurement",
+    "mechanism": "Infer magnetic conditions from qualified field-dependent resistance changes",
+    "operating_requirement": "Actual responsive material, reference circuit and calibration",
+    "consequence": "Provide a distinct magnetic sensing route with hysteresis and temperature limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "resistive_bridge_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "magnetoresistive_sensing",
+      "local_demonstration": "Infer magnetic conditions from qualified field-dependent resistance changes",
+      "operating_requirements": "Actual responsive material, reference circuit and calibration",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "capacitive_displacement_sensing",
+    "name": "Capacitive Displacement Sensing",
+    "foundations": "electrical_measurement",
+    "mechanism": "Infer displacement from a qualified capacitance change in measured geometry",
+    "operating_requirement": "Actual electrodes, readout and controlled parasitic effects",
+    "consequence": "Measure bounded movement without assuming all capacitance changes are motion",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "capacitive_displacement_sensing",
+      "local_demonstration": "Infer displacement from a qualified capacitance change in measured geometry",
+      "operating_requirements": "Actual electrodes, readout and controlled parasitic effects",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "piezoresistive_strain_sensing",
+    "name": "Piezoresistive Strain Sensing",
+    "foundations": "resistive_bridge_measurement,elastic_deformation",
+    "mechanism": "Measure deformation through qualified strain-dependent resistance",
+    "operating_requirement": "Actual sensing element, mechanical coupling and temperature compensation",
+    "consequence": "Estimate selected strain while retaining creep and cross-sensitivity",
+    "status": "authored_draft",
+    "requires_all": [
+      "resistive_bridge_measurement",
+      "elastic_deformation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "piezoresistive_strain_sensing",
+      "local_demonstration": "Measure deformation through qualified strain-dependent resistance",
+      "operating_requirements": "Actual sensing element, mechanical coupling and temperature compensation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "micromachined_inertial_sensors",
+    "name": "Micromachined Inertial Sensors",
+    "foundations": "photolithographic_patterning",
+    "mechanism": "Measure inertial effects on a fabricated movable microstructure through qualified readout",
+    "operating_requirement": "Actual released structure, packaging, excitation and calibration",
+    "consequence": "Sense bounded acceleration or rotation with bias, drift and shock limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "photolithographic_patterning"
+    ],
+    "requires_any": [
+      [
+        "capacitive_displacement_sensing",
+        "piezoresistive_strain_sensing"
+      ]
+    ],
+    "branching_note": "Different qualified readout mechanisms can measure microstructure motion; neither makes the device bias-free.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "micromachined_inertial_sensors",
+      "local_demonstration": "Measure inertial effects on a fabricated movable microstructure through qualified readout",
+      "operating_requirements": "Actual released structure, packaging, excitation and calibration",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "pulse_width_modulation_control",
+    "name": "Pulse-Width Modulation Control",
+    "foundations": "timed_signal_sequences",
+    "mechanism": "Control average delivered action through the duration of repeated qualified pulses",
+    "operating_requirement": "Actual switching path, timing and compatible load response",
+    "consequence": "Modulate an average output while retaining ripple and switching losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "timed_signal_sequences"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pulse_width_modulation_control",
+      "local_demonstration": "Control average delivered action through the duration of repeated qualified pulses",
+      "operating_requirements": "Actual switching path, timing and compatible load response",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "switch_mode_power_conversion",
+    "name": "Switch-Mode Power Conversion",
+    "foundations": "pulse_width_modulation_control",
+    "mechanism": "Transfer energy through switched storage elements under qualified regulation",
+    "operating_requirement": "Actual switches, inductive or capacitive storage, control and heat rejection",
+    "consequence": "Convert electrical supply with finite efficiency and load limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "pulse_width_modulation_control"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "switch_mode_power_conversion",
+      "local_demonstration": "Transfer energy through switched storage elements under qualified regulation",
+      "operating_requirements": "Actual switches, inductive or capacitive storage, control and heat rejection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "linear_voltage_regulation",
+    "name": "Linear Voltage Regulation",
+    "foundations": "negative_feedback_amplifiers",
+    "mechanism": "Regulate a supply through a controlled dissipative pass element",
+    "operating_requirement": "Actual regulator, voltage headroom and adequate heat rejection",
+    "consequence": "Provide bounded voltage regulation while dissipating excess power",
+    "status": "authored_draft",
+    "requires_all": [
+      "negative_feedback_amplifiers"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "linear_voltage_regulation",
+      "local_demonstration": "Regulate a supply through a controlled dissipative pass element",
+      "operating_requirements": "Actual regulator, voltage headroom and adequate heat rejection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "power_factor_correction_control",
+    "name": "Power-Factor Correction Control",
+    "foundations": "switch_mode_power_conversion",
+    "mechanism": "Shape qualified input current against the supply waveform while regulating delivered power",
+    "operating_requirement": "Actual sensing, switching hardware and stable control",
+    "consequence": "Improve a specified input behavior without free energy or zero harmonics",
+    "status": "authored_draft",
+    "requires_all": [
+      "switch_mode_power_conversion"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "power_factor_correction_control",
+      "local_demonstration": "Shape qualified input current against the supply waveform while regulating delivered power",
+      "operating_requirements": "Actual sensing, switching hardware and stable control",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "galvanic_signal_isolation",
+    "name": "Galvanic Signal Isolation",
+    "foundations": "electrical_measurement",
+    "mechanism": "Transfer a qualified signal across an electrically insulating boundary",
+    "operating_requirement": "Actual isolation barrier, compatible coupling and verified insulation limits",
+    "consequence": "Separate circuit potentials while retaining bandwidth and barrier-failure limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [
+      [
+        "wound_transformers",
+        "photodiode_signal_detection"
+      ]
+    ],
+    "branching_note": "Magnetic or optical coupling can carry a qualified signal across a barrier; actual insulation and fault limits remain required.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "galvanic_signal_isolation",
+      "local_demonstration": "Transfer a qualified signal across an electrically insulating boundary",
+      "operating_requirements": "Actual isolation barrier, compatible coupling and verified insulation limits",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "gate_drive_circuit_design",
+    "name": "Gate-Drive Circuit Design",
+    "foundations": "mos_transistor_design",
+    "mechanism": "Provide controlled switching commands to a power device while managing its gate charge and reference",
+    "operating_requirement": "Actual driver, supply and compatible power-device interface",
+    "consequence": "Control switching transitions without removing device loss or voltage limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "mos_transistor_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "gate_drive_circuit_design",
+      "local_demonstration": "Provide controlled switching commands to a power device while managing its gate charge and reference",
+      "operating_requirements": "Actual driver, supply and compatible power-device interface",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "power_semiconductor_switching",
+    "name": "Power Semiconductor Switching",
+    "foundations": "mos_transistor_design",
+    "mechanism": "Qualify a semiconductor switching path against current, voltage, switching and thermal constraints",
+    "operating_requirement": "Actual qualified device, gate drive and thermal path",
+    "consequence": "Control a bounded power flow without treating a logic transistor as a power switch",
+    "status": "authored_draft",
+    "requires_all": [
+      "mos_transistor_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "power_semiconductor_switching",
+      "local_demonstration": "Qualify a semiconductor switching path against current, voltage, switching and thermal constraints",
+      "operating_requirements": "Actual qualified device, gate drive and thermal path",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "thyristor_switching",
+    "name": "Thyristor Switching",
+    "foundations": "semiconductor_doping",
+    "mechanism": "Use qualified regenerative semiconductor action for controlled latching conduction",
+    "operating_requirement": "Actual device, triggering and suitable current interruption or commutation",
+    "consequence": "Provide a latching power-control route with turn-off constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_doping"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "thyristor_switching",
+      "local_demonstration": "Use qualified regenerative semiconductor action for controlled latching conduction",
+      "operating_requirements": "Actual device, triggering and suitable current interruption or commutation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "insulated_gate_bipolar_switching",
+    "name": "Insulated-Gate Bipolar Switching",
+    "foundations": "mos_transistor_design,bipolar_junction_transistors",
+    "mechanism": "Combine insulated-gate control with bipolar conduction in a qualified power device",
+    "operating_requirement": "Actual fabricated device, driver and thermal management",
+    "consequence": "Provide a distinct switching tradeoff with tail-current and voltage limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "mos_transistor_design",
+      "bipolar_junction_transistors"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "insulated_gate_bipolar_switching",
+      "local_demonstration": "Combine insulated-gate control with bipolar conduction in a qualified power device",
+      "operating_requirements": "Actual fabricated device, driver and thermal management",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "wide_bandgap_power_devices",
+    "name": "Wide-Bandgap Power Devices",
+    "foundations": "power_semiconductor_switching",
+    "mechanism": "Qualify a switching architecture using suitable wider-bandgap semiconductor material",
+    "operating_requirement": "Actual material, fabrication, packaging and driver compatibility",
+    "consequence": "Explore different field and temperature performance without universally superior efficiency",
+    "status": "authored_draft",
+    "requires_all": [
+      "power_semiconductor_switching"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wide_bandgap_power_devices",
+      "local_demonstration": "Qualify a switching architecture using suitable wider-bandgap semiconductor material",
+      "operating_requirements": "Actual material, fabrication, packaging and driver compatibility",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "electronic_motor_commutation",
+    "name": "Electronic Motor Commutation",
+    "foundations": "electric_motors,power_semiconductor_switching",
+    "mechanism": "Switch winding excitation according to a qualified motor-position and torque-control scheme",
+    "operating_requirement": "Actual motor, switching stage and usable position or state evidence",
+    "consequence": "Drive a compatible motor without mechanical commutation while retaining sensing and power limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electric_motors",
+      "power_semiconductor_switching"
+    ],
+    "requires_any": [
+      [
+        "hall_effect_sensing",
+        "incremental_encoder_feedback",
+        "mathematical_model_validation"
+      ]
+    ],
+    "branching_note": "Qualified position sensing or a validated state observer can support commutation; one encoder technology is not universal.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electronic_motor_commutation",
+      "local_demonstration": "Switch winding excitation according to a qualified motor-position and torque-control scheme",
+      "operating_requirements": "Actual motor, switching stage and usable position or state evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "incremental_encoder_feedback",
+    "name": "Incremental Encoder Feedback",
+    "foundations": "electrical_measurement",
+    "mechanism": "Count qualified movement-related events from a retained reference",
+    "operating_requirement": "Actual encoded track or scale, sensor and event tracking",
+    "consequence": "Measure relative movement while retaining lost-count and reference-loss risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "incremental_encoder_feedback",
+      "local_demonstration": "Count qualified movement-related events from a retained reference",
+      "operating_requirements": "Actual encoded track or scale, sensor and event tracking",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "absolute_position_encoders",
+    "name": "Absolute Position Encoders",
+    "foundations": "electrical_measurement",
+    "mechanism": "Read a qualified position-specific code rather than reconstructing all prior motion",
+    "operating_requirement": "Actual coded geometry, compatible sensing and decoding",
+    "consequence": "Recover bounded position after interruption without perfect measurement certainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "absolute_position_encoders",
+      "local_demonstration": "Read a qualified position-specific code rather than reconstructing all prior motion",
+      "operating_requirements": "Actual coded geometry, compatible sensing and decoding",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "redundant_sensor_voting",
+    "name": "Redundant Sensor Voting",
+    "foundations": "",
+    "mechanism": "Compare multiple qualified measurements under an explicit disagreement and selection rule",
+    "operating_requirement": "Actual sufficiently independent sensors, fault model and monitored decision logic",
+    "consequence": "Tolerate specified faults without assuming several identical sensors cannot fail together",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "electronic_machine_control",
+        "electromagnetic_relays"
+      ]
+    ],
+    "branching_note": "Qualified relay or electronic logic can implement disagreement rules before modern programmable controllers.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "redundant_sensor_voting",
+      "local_demonstration": "Compare multiple qualified measurements under an explicit disagreement and selection rule",
+      "operating_requirements": "Actual sufficiently independent sensors, fault model and monitored decision logic",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "watchdog_recovery_circuits",
+    "name": "Watchdog Recovery Circuits",
+    "foundations": "real_time_computing",
+    "mechanism": "Detect missing qualified progress indications and trigger a bounded recovery action",
+    "operating_requirement": "Actual timer, meaningful heartbeat contract and recoverable system state",
+    "consequence": "Respond to some stalled execution without proving correct behavior from a heartbeat",
+    "status": "authored_draft",
+    "requires_all": [
+      "real_time_computing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "watchdog_recovery_circuits",
+      "local_demonstration": "Detect missing qualified progress indications and trigger a bounded recovery action",
+      "operating_requirements": "Actual timer, meaningful heartbeat contract and recoverable system state",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "brownout_reset_control",
+    "name": "Brownout Reset Control",
+    "foundations": "precision_voltage_references",
+    "mechanism": "Hold or reset circuitry when supply leaves a qualified operating range",
+    "operating_requirement": "Actual voltage monitoring, reset path and startup-state handling",
+    "consequence": "Avoid some invalid low-voltage execution without preserving unsaved work automatically",
+    "status": "authored_draft",
+    "requires_all": [
+      "precision_voltage_references"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "brownout_reset_control",
+      "local_demonstration": "Hold or reset circuitry when supply leaves a qualified operating range",
+      "operating_requirements": "Actual voltage monitoring, reset path and startup-state handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "industrial_interlock_logic",
+    "name": "Industrial Interlock Logic",
+    "foundations": "",
+    "mechanism": "Permit an action only while declared process conditions and protective constraints are satisfied",
+    "operating_requirement": "Actual sensors, maintained decision logic and effective actuator authority",
+    "consequence": "Block specified unsafe sequences without guaranteeing every hazard is represented",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "electronic_machine_control",
+        "electromagnetic_relays"
+      ]
+    ],
+    "branching_note": "Protective sequences can use qualified relay logic as well as electronic control; actual authority over the actuator is required.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "industrial_interlock_logic",
+      "local_demonstration": "Permit an action only while declared process conditions and protective constraints are satisfied",
+      "operating_requirements": "Actual sensors, maintained decision logic and effective actuator authority",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "fail_safe_actuator_states",
+    "name": "Fail-Safe Actuator States",
+    "foundations": "industrial_interlock_logic",
+    "mechanism": "Design an actuator response to loss of power or command against a specified hazard analysis",
+    "operating_requirement": "Actual return mechanism or retained energy and tested fault response",
+    "consequence": "Reach a declared lower-risk state for specified failures without one universal safe position",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_interlock_logic"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fail_safe_actuator_states",
+      "local_demonstration": "Design an actuator response to loss of power or command against a specified hazard analysis",
+      "operating_requirements": "Actual return mechanism or retained energy and tested fault response",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "stack_machine_execution",
+    "name": "Stack-Machine Execution",
+    "foundations": "stored_program_control",
+    "mechanism": "Execute operations using an explicit operand stack and qualified control conventions",
+    "operating_requirement": "Actual interpreter or processor, stack storage and bounds handling",
+    "consequence": "Provide an execution architecture with stack-management costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "stored_program_control"
+    ],
+    "requires_any": [],
+    "branching_note": "An operand stack can be interpreted on a suitable stored-program machine or realized in dedicated hardware; a microprocessor is not mandatory.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "stack_machine_execution",
+      "local_demonstration": "Execute operations using an explicit operand stack and qualified control conventions",
+      "operating_requirements": "Actual interpreter or processor, stack storage and bounds handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "tracing_heap_collection",
+    "name": "Tracing Heap Collection",
+    "foundations": "algorithmic_procedures,stored_program_control",
+    "mechanism": "Identify reachable allocated objects from declared roots and reclaim unreachable storage",
+    "operating_requirement": "Actual runtime metadata, traversal work and valid pointer information",
+    "consequence": "Recover some unused memory while consuming time and retaining reachability leaks",
+    "status": "authored_draft",
+    "requires_all": [
+      "algorithmic_procedures",
+      "stored_program_control"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tracing_heap_collection",
+      "local_demonstration": "Identify reachable allocated objects from declared roots and reclaim unreachable storage",
+      "operating_requirements": "Actual runtime metadata, traversal work and valid pointer information",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending.",
+    "branching_note": "Runtime object bookkeeping can precede hardware memory protection. It still needs real storage, valid references and paid execution time."
+  },
+  {
+    "field": "D21",
+    "id": "reference_counted_reclamation",
+    "name": "Reference-Counted Reclamation",
+    "foundations": "algorithmic_procedures,stored_program_control",
+    "mechanism": "Reclaim an object when tracked ownership references reach a qualified release condition",
+    "operating_requirement": "Actual reference bookkeeping and concurrency rules",
+    "consequence": "Release selected storage promptly while retaining cyclic-reference and bookkeeping costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "algorithmic_procedures",
+      "stored_program_control"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reference_counted_reclamation",
+      "local_demonstration": "Reclaim an object when tracked ownership references reach a qualified release condition",
+      "operating_requirements": "Actual reference bookkeeping and concurrency rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending.",
+    "branching_note": "Runtime object bookkeeping can precede hardware memory protection. It still needs real storage, valid references and paid execution time."
+  },
+  {
+    "field": "D21",
+    "id": "borrow_checked_memory_access",
+    "name": "Borrow-Checked Memory Access",
+    "foundations": "static_type_systems",
+    "mechanism": "Check declared ownership, aliasing and lifetime constraints before allowed memory access",
+    "operating_requirement": "Actual language rules, verifier and justified escape boundaries",
+    "consequence": "Prevent specified invalid accesses without proving all program behavior correct",
+    "status": "authored_draft",
+    "requires_all": [
+      "static_type_systems"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "borrow_checked_memory_access",
+      "local_demonstration": "Check declared ownership, aliasing and lifetime constraints before allowed memory access",
+      "operating_requirements": "Actual language rules, verifier and justified escape boundaries",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "deterministic_execution_replay",
+    "name": "Deterministic Execution Replay",
+    "foundations": "checkpoint_restart_computation",
+    "mechanism": "Reproduce a qualified execution from captured initial state and nondeterministic inputs",
+    "operating_requirement": "Actual logs, compatible execution environment and retained external inputs",
+    "consequence": "Reconstruct specified behavior without assuming omitted events can be recovered",
+    "status": "authored_draft",
+    "requires_all": [
+      "checkpoint_restart_computation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "deterministic_execution_replay",
+      "local_demonstration": "Reproduce a qualified execution from captured initial state and nondeterministic inputs",
+      "operating_requirements": "Actual logs, compatible execution environment and retained external inputs",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "conflict_free_replicated_data",
+    "name": "Conflict-Free Replicated Data",
+    "foundations": "distributed_storage_replication",
+    "mechanism": "Design replicated state or operations with declared merge properties under an explicit delivery model",
+    "operating_requirement": "Compatible replicas, actual messages and validated merge rules",
+    "consequence": "Converge selected data types without imposing one global operation order",
+    "status": "authored_draft",
+    "requires_all": [
+      "distributed_storage_replication"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "conflict_free_replicated_data",
+      "local_demonstration": "Design replicated state or operations with declared merge properties under an explicit delivery model",
+      "operating_requirements": "Compatible replicas, actual messages and validated merge rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "structured_concurrency_control",
+    "name": "Structured Concurrency Control",
+    "foundations": "process_scheduling",
+    "mechanism": "Bind child task lifetime and cancellation to an explicit parent scope",
+    "operating_requirement": "Actual runtime support and defined failure-propagation behavior",
+    "consequence": "Contain some task leaks and incomplete work without automatic deadlock freedom",
+    "status": "authored_draft",
+    "requires_all": [
+      "process_scheduling"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "structured_concurrency_control",
+      "local_demonstration": "Bind child task lifetime and cancellation to an explicit parent scope",
+      "operating_requirements": "Actual runtime support and defined failure-propagation behavior",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "actor_message_execution",
+    "name": "Actor-Message Execution",
+    "foundations": "process_scheduling,message_framing",
+    "mechanism": "Encapsulate state behind independently processed messages and declared actor behavior",
+    "operating_requirement": "Actual mailboxes, scheduling and message-delivery resources",
+    "consequence": "Provide a concurrency model with queue, ordering and failure constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "process_scheduling",
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "actor_message_execution",
+      "local_demonstration": "Encapsulate state behind independently processed messages and declared actor behavior",
+      "operating_requirements": "Actual mailboxes, scheduling and message-delivery resources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "dataflow_execution_models",
+    "name": "Dataflow Execution Models",
+    "foundations": "algorithmic_procedures",
+    "mechanism": "Trigger qualified operations from available input dependencies rather than one fixed instruction sequence",
+    "operating_requirement": "Actual graph representation, scheduler and finite storage",
+    "consequence": "Expose some parallel work while retaining dependency and resource bottlenecks",
+    "status": "authored_draft",
+    "requires_all": [
+      "algorithmic_procedures"
+    ],
+    "requires_any": [
+      [
+        "structured_programming",
+        "programmable_logic_arrays"
+      ]
+    ],
+    "branching_note": "A qualified software scheduler or data-driven hardware can realize the graph; physical resources still bound parallelism.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dataflow_execution_models",
+      "local_demonstration": "Trigger qualified operations from available input dependencies rather than one fixed instruction sequence",
+      "operating_requirements": "Actual graph representation, scheduler and finite storage",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "functional_evaluation_models",
+    "name": "Functional Evaluation Models",
+    "foundations": "formal_logic_calculi,algorithmic_procedures",
+    "mechanism": "Evaluate expressions under declared substitution and effect rules",
+    "operating_requirement": "Actual expression representation and execution mechanism",
+    "consequence": "Support a functional programming route without automatic termination or low resource use",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_logic_calculi",
+      "algorithmic_procedures"
+    ],
+    "requires_any": [],
+    "branching_note": "A formal evaluator needs an actual execution mechanism but need not follow a modern imperative-language lineage.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "functional_evaluation_models",
+      "local_demonstration": "Evaluate expressions under declared substitution and effect rules",
+      "operating_requirements": "Actual expression representation and execution mechanism",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "logic_program_resolution",
+    "name": "Logic-Program Resolution",
+    "foundations": "formal_logic_calculi",
+    "mechanism": "Search for consequences of declared relations through a qualified resolution procedure",
+    "operating_requirement": "Actual rules, query representation and finite search resources",
+    "consequence": "Answer supported logical queries while retaining incompleteness or nontermination limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_logic_calculi"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "logic_program_resolution",
+      "local_demonstration": "Search for consequences of declared relations through a qualified resolution procedure",
+      "operating_requirements": "Actual rules, query representation and finite search resources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "constraint_solver_search",
+    "name": "Constraint-Solver Search",
+    "foundations": "constrained_optimization",
+    "mechanism": "Propagate declared constraints and search remaining choices under qualified consistency rules",
+    "operating_requirement": "Actual constraint model, computation and bounded search policy",
+    "consequence": "Find or reject some feasible assignments without solving every instance quickly",
+    "status": "authored_draft",
+    "requires_all": [
+      "constrained_optimization"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "constraint_solver_search",
+      "local_demonstration": "Propagate declared constraints and search remaining choices under qualified consistency rules",
+      "operating_requirements": "Actual constraint model, computation and bounded search policy",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "automatic_differentiation",
+    "name": "Automatic Differentiation",
+    "foundations": "differential_calculus,structured_programming",
+    "mechanism": "Propagate derivative information through a qualified composition of executed operations",
+    "operating_requirement": "Actual differentiable operation rules, computation and memory",
+    "consequence": "Compute supported derivatives without treating discontinuities as smooth",
+    "status": "authored_draft",
+    "requires_all": [
+      "differential_calculus",
+      "structured_programming"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "automatic_differentiation",
+      "local_demonstration": "Propagate derivative information through a qualified composition of executed operations",
+      "operating_requirements": "Actual differentiable operation rules, computation and memory",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "sparse_matrix_computation",
+    "name": "Sparse-Matrix Computation",
+    "foundations": "numerical_simulation_software",
+    "mechanism": "Exploit known nonzero structure in matrix storage and operations",
+    "operating_requirement": "Actual sparse representation, algorithms and available memory",
+    "consequence": "Reduce selected computation and storage costs without benefit for every matrix",
+    "status": "authored_draft",
+    "requires_all": [
+      "numerical_simulation_software"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sparse_matrix_computation",
+      "local_demonstration": "Exploit known nonzero structure in matrix storage and operations",
+      "operating_requirements": "Actual sparse representation, algorithms and available memory",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "tensor_processing_arrays",
+    "name": "Tensor-Processing Arrays",
+    "foundations": "parallel_processor_architecture",
+    "mechanism": "Map qualified tensor operations onto a coordinated arithmetic array and data movement plan",
+    "operating_requirement": "Actual array, memory bandwidth and compatible workload",
+    "consequence": "Accelerate selected operations without speeding unrelated work automatically",
+    "status": "authored_draft",
+    "requires_all": [
+      "parallel_processor_architecture"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tensor_processing_arrays",
+      "local_demonstration": "Map qualified tensor operations onto a coordinated arithmetic array and data movement plan",
+      "operating_requirements": "Actual array, memory bandwidth and compatible workload",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "in_memory_computation",
+    "name": "In-Memory Computation",
+    "foundations": "semiconductor_memory_arrays",
+    "mechanism": "Perform qualified operations near or within stored state to reduce selected data movement",
+    "operating_requirement": "Actual compatible memory devices, sensing and precision management",
+    "consequence": "Trade movement cost against device variability and operation limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "semiconductor_memory_arrays"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "in_memory_computation",
+      "local_demonstration": "Perform qualified operations near or within stored state to reduce selected data movement",
+      "operating_requirements": "Actual compatible memory devices, sensing and precision management",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending.",
+    "outcome_contract": {
+      "guarantees_advantage": false,
+      "guarantees_useful_scale": false,
+      "requires_measured_system_performance": true
+    }
+  },
+  {
+    "field": "D21",
+    "id": "superconducting_logic_circuits",
+    "name": "Superconducting Logic Circuits",
+    "foundations": "electron_physics",
+    "mechanism": "Use qualified superconducting circuit states for logical signal operations",
+    "operating_requirement": "Actual superconducting devices, cryogenic support and compatible control",
+    "consequence": "Explore a logic architecture while retaining cooling and interface costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "electron_physics"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "superconducting_logic_circuits",
+      "local_demonstration": "Use qualified superconducting circuit states for logical signal operations",
+      "operating_requirements": "Actual superconducting devices, cryogenic support and compatible control",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending.",
+    "outcome_contract": {
+      "guarantees_advantage": false,
+      "guarantees_useful_scale": false,
+      "requires_measured_system_performance": true
+    }
+  },
+  {
+    "field": "D21",
+    "id": "reversible_logic_computation",
+    "name": "Reversible Logic Computation",
+    "foundations": "formal_logic_calculi",
+    "mechanism": "Represent computation with logically reversible transformations and explicit state cleanup",
+    "operating_requirement": "Actual reversible operations, retained information and physical implementation",
+    "consequence": "Explore reduced logical information loss without zero physical dissipation",
+    "status": "authored_draft",
+    "requires_all": [
+      "formal_logic_calculi"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reversible_logic_computation",
+      "local_demonstration": "Represent computation with logically reversible transformations and explicit state cleanup",
+      "operating_requirements": "Actual reversible operations, retained information and physical implementation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending.",
+    "outcome_contract": {
+      "guarantees_advantage": false,
+      "guarantees_useful_scale": false,
+      "requires_measured_system_performance": true
+    }
+  },
+  {
+    "field": "D21",
+    "id": "superconducting_qubit_devices",
+    "name": "Superconducting Qubit Devices",
+    "foundations": "quantum_information_models",
+    "mechanism": "Qualify controllable quantum states in a superconducting circuit architecture",
+    "operating_requirement": "Actual fabricated devices, cryogenic support, control and readout",
+    "consequence": "Provide one qubit implementation route with coherence and scaling limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "quantum_information_models"
+    ],
+    "requires_any": [
+      [
+        "superconducting_logic_circuits",
+        "thin_film_deposition"
+      ]
+    ],
+    "branching_note": "Qualified superconducting device research can proceed without first constructing a superconducting classical computer.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "superconducting_qubit_devices",
+      "local_demonstration": "Qualify controllable quantum states in a superconducting circuit architecture",
+      "operating_requirements": "Actual fabricated devices, cryogenic support, control and readout",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending.",
+    "outcome_contract": {
+      "guarantees_advantage": false,
+      "guarantees_useful_scale": false,
+      "requires_measured_system_performance": true
+    }
+  },
+  {
+    "field": "D21",
+    "id": "trapped_ion_qubit_devices",
+    "name": "Trapped-Ion Qubit Devices",
+    "foundations": "quantum_information_models",
+    "mechanism": "Qualify controlled internal states of confined ions for quantum operations",
+    "operating_requirement": "Actual trapping, vacuum, optical control and readout infrastructure",
+    "consequence": "Provide another qubit route with addressing, motion and scaling limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "quantum_information_models"
+    ],
+    "requires_any": [
+      [
+        "laser_light_generation",
+        "atomic_timekeeping"
+      ]
+    ],
+    "branching_note": "Optical state-control or precision atomic-method experience can support qualified trapped-ion device research; vacuum and trapping hardware remain actual requirements.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "trapped_ion_qubit_devices",
+      "local_demonstration": "Qualify controlled internal states of confined ions for quantum operations",
+      "operating_requirements": "Actual trapping, vacuum, optical control and readout infrastructure",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending.",
+    "outcome_contract": {
+      "guarantees_advantage": false,
+      "guarantees_useful_scale": false,
+      "requires_measured_system_performance": true
+    }
+  },
+  {
+    "field": "D21",
+    "id": "counting_board_operations",
+    "name": "Counting-Board Operations",
+    "foundations": "tallies",
+    "mechanism": "Represent and manipulate quantities through counters in an agreed spatial arrangement",
+    "operating_requirement": "Actual board or marked surface, counters and trained operators",
+    "consequence": "Perform specified arithmetic operations without an electronic computer",
+    "status": "authored_draft",
+    "requires_all": [
+      "tallies"
+    ],
+    "requires_any": [],
+    "branching_note": "Physical representation and trained operation precede electronic computation. Actual apparatus and its demonstrated arithmetic scope remain necessary.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "counting_board_operations",
+      "local_demonstration": "Represent and manipulate quantities through counters in an agreed spatial arrangement",
+      "operating_requirements": "Actual board or marked surface, counters and trained operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  },
+  {
+    "field": "D21",
+    "id": "mechanical_digit_carry",
+    "name": "Mechanical Digit Carry",
+    "foundations": "place_value,gear_ratios",
+    "mechanism": "Transfer a completed digit cycle into a qualified movement of the next positional register",
+    "operating_requirement": "Actual coupled digit mechanisms, carry linkage, drive effort and adjustment",
+    "consequence": "Mechanize selected positional arithmetic while retaining carry jams, backlash and finite register width",
+    "status": "authored_draft",
+    "requires_all": [
+      "place_value",
+      "gear_ratios"
+    ],
+    "requires_any": [],
+    "branching_note": "Physical representation and trained operation precede electronic computation. Actual apparatus and its demonstrated arithmetic scope remain necessary.",
+    "recovery": "Obtain competent instruction, partner designs or evidence, commissioned analysis, a qualified supplied device or service, or delivered hardware and records for examination. Pay access, transport and local qualification. A bought processor, sensor or control service does not grant the entire manufacturing or software knowledge chain.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mechanical_digit_carry",
+      "local_demonstration": "Transfer a completed digit cycle into a qualified movement of the next positional register",
+      "operating_requirements": "Actual coupled digit mechanisms, carry linkage, drive effort and adjustment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual hardware or information delivery",
+        "finite local replication and validation",
+        "continuing components, power, cooling, software and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite engineering instruction; local staff reproduce the qualified circuit, program behavior or measurement.",
+        "partnership": "Contribute actual hardware, staff, test evidence or funds; shared results still require compatible local implementation and available resources.",
+        "purchased_research": "Commission a defined design or performance question from a capable provider; pay for delivered evidence without guaranteed feasibility or operational advantage.",
+        "licensed_or_imported_service": "Pay for an actual supported component or bounded computing/control service; supply, licenses, maintenance and provider reachability remain dependencies.",
+        "reverse_engineering": "Study delivered hardware, software or authorized records with finite analysis; unknown fabrication, calibration and failure behavior remain gaps until demonstrated."
+      }
+    },
+    "scope_boundary": "A proposed electronic or computational mechanism. It creates no hardware, power, reliable sensor state, correct software or autonomous authority. Actual installed capacity and qualified failure behavior govern use.",
+    "implementation_status": "Authored proposal; components, operating circuits, runtime resource accounting, acquisition penalties, AI choices and coupled system tests remain pending."
+  }
+]

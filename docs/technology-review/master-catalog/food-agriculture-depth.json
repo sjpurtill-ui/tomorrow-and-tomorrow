@@ -1,0 +1,2273 @@
+[
+  {
+    "field": "D01",
+    "id": "edible_resource_recognition",
+    "name": "Edible Resource Recognition",
+    "foundations": "",
+    "mechanism": "Distinguish locally known food resources through transmitted observations and verified identification",
+    "operating_requirement": "Competent local knowledge, actual accessible resources and careful handling",
+    "consequence": "Expand recognized food opportunities without treating unknown organisms as safe",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "edible_resource_recognition",
+      "local_demonstration": "Distinguish locally known food resources through transmitted observations and verified identification",
+      "operating_requirements": "Competent local knowledge, actual accessible resources and careful handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Repeated local recognition and transmitted experience form an early root practice; a complete seasonal calendar is not required. Unknown resources are not assumed safe."
+  },
+  {
+    "field": "D01",
+    "id": "wild_food_harvest_rotation",
+    "name": "Wild Food Harvest Rotation",
+    "foundations": "edible_resource_recognition",
+    "mechanism": "Rotate gathering effort according to observed renewal and depletion of local food patches",
+    "operating_requirement": "Accessible patches, repeated observation and coordinated gatherers",
+    "consequence": "Reduce some local overharvest while finite seasonal yields remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wild_food_harvest_rotation",
+      "local_demonstration": "Rotate gathering effort according to observed renewal and depletion of local food patches",
+      "operating_requirements": "Accessible patches, repeated observation and coordinated gatherers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "digging_stick_harvesting",
+    "name": "Digging Stick Harvesting",
+    "foundations": "hafted_tools,edible_resource_recognition",
+    "mechanism": "Use a shaped tool to recover selected underground foods with controlled soil disturbance",
+    "operating_requirement": "Suitable tools, recognized food plants and human effort",
+    "consequence": "Access specific resources while breakage and regrowth constrain repeated harvest",
+    "status": "authored_draft",
+    "requires_all": [
+      "hafted_tools",
+      "edible_resource_recognition"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "digging_stick_harvesting",
+      "local_demonstration": "Use a shaped tool to recover selected underground foods with controlled soil disturbance",
+      "operating_requirements": "Suitable tools, recognized food plants and human effort",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_pounding_mortars",
+    "name": "Food Pounding Mortars",
+    "foundations": "",
+    "mechanism": "Break or separate suitable food material through controlled impact in a fitted receptacle",
+    "operating_requirement": "Compatible pounding tools, actual food and labor",
+    "consequence": "Prepare selected foods with finite work and tool wear",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "stone_sorting",
+        "hafted_tools"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_pounding_mortars",
+      "local_demonstration": "Break or separate suitable food material through controlled impact in a fitted receptacle",
+      "operating_requirements": "Compatible pounding tools, actual food and labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Suitable pounding equipment may follow selected stone or worked-tool traditions; the receptacle need not be stone."
+  },
+  {
+    "field": "D01",
+    "id": "hearth_roasting_control",
+    "name": "Hearth Roasting Control",
+    "foundations": "",
+    "mechanism": "Manage distance and exposure of suitable food to a controlled hearth",
+    "operating_requirement": "Fuel, maintained hearth, suitable food and attentive cooks",
+    "consequence": "Prepare evaluated roasted foods while fuel and uneven heat limit output",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hearth_roasting_control",
+      "local_demonstration": "Manage distance and exposure of suitable food to a controlled hearth",
+      "operating_requirements": "Fuel, maintained hearth, suitable food and attentive cooks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Controlled fire is an actual operating requirement and may be learned in this root practice; pottery kiln control is not a historical prerequisite."
+  },
+  {
+    "field": "D01",
+    "id": "earth_oven_cooking",
+    "name": "Earth Oven Cooking",
+    "foundations": "hearth_roasting_control",
+    "mechanism": "Retain and transfer heat through an enclosed heated-earth or stone cooking arrangement",
+    "operating_requirement": "Suitable site and materials, fuel, food and practiced operators",
+    "consequence": "Cook suitable batches with retained heat and finite preparation time",
+    "status": "authored_draft",
+    "requires_all": [
+      "hearth_roasting_control"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "earth_oven_cooking",
+      "local_demonstration": "Retain and transfer heat through an enclosed heated-earth or stone cooking arrangement",
+      "operating_requirements": "Suitable site and materials, fuel, food and practiced operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_steaming_vessels",
+    "name": "Food Steaming Vessels",
+    "foundations": "hearth_roasting_control",
+    "mechanism": "Transfer heat to food through a qualified steam-producing vessel arrangement",
+    "operating_requirement": "Compatible vessels, clean water, fuel and careful operation",
+    "consequence": "Prepare selected foods without assuming one heating method suits all products",
+    "status": "authored_draft",
+    "requires_all": [
+      "hearth_roasting_control"
+    ],
+    "requires_any": [
+      [
+        "clay_shaping",
+        "basketry"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_steaming_vessels",
+      "local_demonstration": "Transfer heat to food through a qualified steam-producing vessel arrangement",
+      "operating_requirements": "Compatible vessels, clean water, fuel and careful operation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Qualified basket or pottery arrangements can provide different steam-cooking equipment; actual compatible heat and water handling remain necessary."
+  },
+  {
+    "field": "D01",
+    "id": "cereal_dehulling",
+    "name": "Cereal Dehulling",
+    "foundations": "grain_milling",
+    "mechanism": "Separate protective grain coverings while limiting loss of edible material",
+    "operating_requirement": "Suitable grain, mechanical tools and practiced separation",
+    "consequence": "Recover an edible fraction while accounting for hulls and broken grain",
+    "status": "authored_draft",
+    "requires_all": [
+      "grain_milling"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cereal_dehulling",
+      "local_demonstration": "Separate protective grain coverings while limiting loss of edible material",
+      "operating_requirements": "Suitable grain, mechanical tools and practiced separation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "starch_washing_separation",
+    "name": "Starch Washing Separation",
+    "foundations": "food_pounding_mortars,clean_water",
+    "mechanism": "Separate suitable starch-rich fractions by controlled washing and settling",
+    "operating_requirement": "Recognized feedstock, suitable water, vessels and labor",
+    "consequence": "Produce evaluated starch ingredients with water use and residue losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_pounding_mortars",
+      "clean_water"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "starch_washing_separation",
+      "local_demonstration": "Separate suitable starch-rich fractions by controlled washing and settling",
+      "operating_requirements": "Recognized feedstock, suitable water, vessels and labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "alkaline_grain_processing",
+    "name": "Alkaline Grain Processing",
+    "foundations": "grain_milling,lime_burning",
+    "mechanism": "Apply an established food-compatible alkaline process to suitable grain with controlled washing",
+    "operating_requirement": "Qualified food-grade inputs, suitable vessels, water and trained preparation",
+    "consequence": "Change selected grain processing and nutritional properties within validated product limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "grain_milling",
+      "lime_burning"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "alkaline_grain_processing",
+      "local_demonstration": "Apply an established food-compatible alkaline process to suitable grain with controlled washing",
+      "operating_requirements": "Qualified food-grade inputs, suitable vessels, water and trained preparation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "hand_dough_forming",
+    "name": "Hand Dough Forming",
+    "foundations": "grain_milling",
+    "mechanism": "Shape a prepared dough through repeated hand or simple-tool work",
+    "operating_requirement": "Suitable ingredients, working surface and skilled labor",
+    "consequence": "Produce consistent forms for compatible cooking processes",
+    "status": "authored_draft",
+    "requires_all": [
+      "grain_milling"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hand_dough_forming",
+      "local_demonstration": "Shape a prepared dough through repeated hand or simple-tool work",
+      "operating_requirements": "Suitable ingredients, working surface and skilled labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "managed_bee_hives",
+    "name": "Managed Bee Hives",
+    "foundations": "seasonal_patterns",
+    "mechanism": "Maintain suitable bee colonies in accessible constructed nesting spaces",
+    "operating_requirement": "Appropriate bees, forage, hive materials and practiced care",
+    "consequence": "Obtain finite colony products while colony survival and forage limit yield",
+    "status": "authored_draft",
+    "requires_all": [
+      "seasonal_patterns"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "managed_bee_hives",
+      "local_demonstration": "Maintain suitable bee colonies in accessible constructed nesting spaces",
+      "operating_requirements": "Appropriate bees, forage, hive materials and practiced care",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "movable_comb_frames",
+    "name": "Movable Comb Frames",
+    "foundations": "managed_bee_hives,joinery",
+    "mechanism": "Support removable comb structures that permit qualified colony inspection and product handling",
+    "operating_requirement": "Compatible hive design, fitted frames and trained beekeepers",
+    "consequence": "Inspect and harvest selected colonies with less structural disturbance",
+    "status": "authored_draft",
+    "requires_all": [
+      "managed_bee_hives",
+      "joinery"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "movable_comb_frames",
+      "local_demonstration": "Support removable comb structures that permit qualified colony inspection and product handling",
+      "operating_requirements": "Compatible hive design, fitted frames and trained beekeepers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "bee_colony_health_observation",
+    "name": "Bee Colony Health Observation",
+    "foundations": "managed_bee_hives",
+    "mechanism": "Track colony behavior, brood condition and population changes against seasonal context",
+    "operating_requirement": "Repeated inspections, competent interpretation and suitable management resources",
+    "consequence": "Identify concerning changes without diagnosing every cause from one observation",
+    "status": "authored_draft",
+    "requires_all": [
+      "managed_bee_hives"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bee_colony_health_observation",
+      "local_demonstration": "Track colony behavior, brood condition and population changes against seasonal context",
+      "operating_requirements": "Repeated inspections, competent interpretation and suitable management resources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "managed_pollination_contracts",
+    "name": "Managed Pollination Contracts",
+    "foundations": "managed_bee_hives,orchard_pollination_planning",
+    "mechanism": "Coordinate suitable pollinator service with crop flowering and colony requirements",
+    "operating_requirement": "Healthy compatible colonies, flowering crops, actual transport and negotiated service",
+    "consequence": "Support pollination-dependent crop production without benefiting every crop equally",
+    "status": "authored_draft",
+    "requires_all": [
+      "managed_bee_hives",
+      "orchard_pollination_planning"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "managed_pollination_contracts",
+      "local_demonstration": "Coordinate suitable pollinator service with crop flowering and colony requirements",
+      "operating_requirements": "Healthy compatible colonies, flowering crops, actual transport and negotiated service",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "honey_extraction_separation",
+    "name": "Honey Extraction Separation",
+    "foundations": "movable_comb_frames",
+    "mechanism": "Separate and handle qualified hive products while preserving identity and quality",
+    "operating_requirement": "Suitable extraction equipment, clean containers and beekeeping labor",
+    "consequence": "Recover usable honey with handling and storage limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "movable_comb_frames"
+    ],
+    "requires_any": [
+      [
+        "food_batch_traceability",
+        "sealed_vessels"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "honey_extraction_separation",
+      "local_demonstration": "Separate and handle qualified hive products while preserving identity and quality",
+      "operating_requirements": "Suitable extraction equipment, clean containers and beekeeping labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Careful product handling can precede modern lot tracking; physical cleanliness and product suitability remain required."
+  },
+  {
+    "field": "D01",
+    "id": "fish_net_mesh_design",
+    "name": "Fish Net Mesh Design",
+    "foundations": "cordage",
+    "mechanism": "Construct and select meshes against target catch and observed escape characteristics",
+    "operating_requirement": "Suitable fibers, net-making skill, accessible fish stocks and maintenance",
+    "consequence": "Catch a bounded size range while bycatch and stock effects remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "cordage"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fish_net_mesh_design",
+      "local_demonstration": "Construct and select meshes against target catch and observed escape characteristics",
+      "operating_requirements": "Suitable fibers, net-making skill, accessible fish stocks and maintenance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "fish_trap_flow_siting",
+    "name": "Fish Trap Flow Siting",
+    "foundations": "basketry,seasonal_patterns",
+    "mechanism": "Place retrievable traps using observed fish movement and local water flow",
+    "operating_requirement": "Suitable traps, permitted access, actual stocks and checking labor",
+    "consequence": "Obtain finite catches with ecological and animal-welfare consequences",
+    "status": "authored_draft",
+    "requires_all": [
+      "basketry",
+      "seasonal_patterns"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fish_trap_flow_siting",
+      "local_demonstration": "Place retrievable traps using observed fish movement and local water flow",
+      "operating_requirements": "Suitable traps, permitted access, actual stocks and checking labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "shellfish_harvest_area_assessment",
+    "name": "Shellfish Harvest Area Assessment",
+    "foundations": "edible_resource_recognition",
+    "mechanism": "Assess harvest-area conditions against qualified contamination and closure evidence",
+    "operating_requirement": "Reliable local observations, appropriate monitoring and accountable harvest decisions",
+    "consequence": "Restrict unsafe harvest rather than assuming appearance establishes edibility",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [
+      [
+        "raw_water_quality_sampling",
+        "food_contaminant_sampling_plans"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "shellfish_harvest_area_assessment",
+      "local_demonstration": "Assess harvest-area conditions against qualified contamination and closure evidence",
+      "operating_requirements": "Reliable local observations, appropriate monitoring and accountable harvest decisions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Qualified water or product evidence can support harvest decisions; neither visual appearance nor a generic gathering skill proves absence of contaminants."
+  },
+  {
+    "field": "D01",
+    "id": "ice_chilling_foods",
+    "name": "Ice Chilling Foods",
+    "foundations": "",
+    "mechanism": "Transfer heat from suitable food into melting ice through a controlled chilled handling arrangement",
+    "operating_requirement": "Actual suitable ice, compatible clean containers, drainage, handling labor and validated product conditions",
+    "consequence": "Slow selected food deterioration while consuming finite ice and retaining time-temperature limits",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "food_freezing",
+        "seasonal_patterns"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ice_chilling_foods",
+      "local_demonstration": "Transfer heat from suitable food into melting ice through a controlled chilled handling arrangement",
+      "operating_requirements": "Actual suitable ice, compatible clean containers, drainage, handling labor and validated product conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Suitable ice may be manufactured or obtained from a verified natural seasonal source; knowledge creates neither ice nor safe indefinite storage."
+  },
+  {
+    "field": "D01",
+    "id": "shellfish_aquaculture_substrates",
+    "name": "Shellfish Aquaculture Substrates",
+    "foundations": "pond_aquaculture",
+    "mechanism": "Provide suitable settlement and growing structures for evaluated shellfish cultivation",
+    "operating_requirement": "Appropriate seed stocks, water conditions, farm structures and husbandry",
+    "consequence": "Grow finite shellfish biomass while disease and site carrying capacity remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "pond_aquaculture"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "shellfish_aquaculture_substrates",
+      "local_demonstration": "Provide suitable settlement and growing structures for evaluated shellfish cultivation",
+      "operating_requirements": "Appropriate seed stocks, water conditions, farm structures and husbandry",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "seaweed_farm_cultivation",
+    "name": "Seaweed Farm Cultivation",
+    "foundations": "seasonal_patterns,cordage",
+    "mechanism": "Establish and manage suitable seaweed growth on qualified farm structures",
+    "operating_requirement": "Appropriate propagules, water conditions, access and farm labor",
+    "consequence": "Harvest finite algal biomass without assuming all species are edible or ecologically suitable",
+    "status": "authored_draft",
+    "requires_all": [
+      "seasonal_patterns",
+      "cordage"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "seaweed_farm_cultivation",
+      "local_demonstration": "Establish and manage suitable seaweed growth on qualified farm structures",
+      "operating_requirements": "Appropriate propagules, water conditions, access and farm labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "fish_stock_catch_assessment",
+    "name": "Fish Stock Catch Assessment",
+    "foundations": "material_accounting",
+    "mechanism": "Relate observed catches and sampling to uncertain stock change and harvest effort",
+    "operating_requirement": "Catch records, representative monitoring and analytical labor",
+    "consequence": "Guide bounded harvest decisions without guaranteeing exact stock abundance",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting"
+    ],
+    "requires_any": [
+      [
+        "population_mark_recapture",
+        "statistical_sampling"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fish_stock_catch_assessment",
+      "local_demonstration": "Relate observed catches and sampling to uncertain stock change and harvest effort",
+      "operating_requirements": "Catch records, representative monitoring and analytical labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Representative catch and effort sampling can support stock assessment without marking individual fish; uncertainty remains explicit."
+  },
+  {
+    "field": "D01",
+    "id": "animal_handling_enclosures",
+    "name": "Animal Handling Enclosures",
+    "foundations": "animal_taming,joinery",
+    "mechanism": "Organize accessible barriers and handling spaces matched to animal behavior",
+    "operating_requirement": "Suitable materials, space, trained handlers and actual animals",
+    "consequence": "Improve controlled handling while crowding and welfare constrain use",
+    "status": "authored_draft",
+    "requires_all": [
+      "animal_taming",
+      "joinery"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "animal_handling_enclosures",
+      "local_demonstration": "Organize accessible barriers and handling spaces matched to animal behavior",
+      "operating_requirements": "Suitable materials, space, trained handlers and actual animals",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "livestock_body_condition_scoring",
+    "name": "Livestock Body Condition Scoring",
+    "foundations": "animal_taming,standard_measures",
+    "mechanism": "Compare species-appropriate condition observations using a repeatable assessment scale",
+    "operating_requirement": "Trained observers, repeated access and feeding or care options",
+    "consequence": "Identify changing nutritional condition without equating size with health",
+    "status": "authored_draft",
+    "requires_all": [
+      "animal_taming",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "livestock_body_condition_scoring",
+      "local_demonstration": "Compare species-appropriate condition observations using a repeatable assessment scale",
+      "operating_requirements": "Trained observers, repeated access and feeding or care options",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "livestock_birth_support",
+    "name": "Livestock Birth Support",
+    "foundations": "animal_taming",
+    "mechanism": "Observe birth-related needs and provide qualified assistance or referral",
+    "operating_requirement": "Competent animal carers, suitable space and veterinary access where available",
+    "consequence": "Support viable births without guaranteed offspring or survival",
+    "status": "authored_draft",
+    "requires_all": [
+      "animal_taming"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "livestock_birth_support",
+      "local_demonstration": "Observe birth-related needs and provide qualified assistance or referral",
+      "operating_requirements": "Competent animal carers, suitable space and veterinary access where available",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "veterinary_case_records",
+    "name": "Veterinary Case Records",
+    "foundations": "case_records,animal_taming",
+    "mechanism": "Retain animal identity and longitudinal care observations for clinical review",
+    "operating_requirement": "Identified animals, trained carers and usable records",
+    "consequence": "Support continuity of animal care rather than automatic disease protection",
+    "status": "authored_draft",
+    "requires_all": [
+      "case_records",
+      "animal_taming"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "veterinary_case_records",
+      "local_demonstration": "Retain animal identity and longitudinal care observations for clinical review",
+      "operating_requirements": "Identified animals, trained carers and usable records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "herd_quarantine_practice",
+    "name": "Herd Quarantine Practice",
+    "foundations": "animal_taming,isolation_practice",
+    "mechanism": "Separate and observe incoming or affected animals through a qualified health protocol",
+    "operating_requirement": "Suitable separate space, staff, feed, water and veterinary evidence",
+    "consequence": "Reduce selected disease introduction risks while isolation consumes real capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "animal_taming",
+      "isolation_practice"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "herd_quarantine_practice",
+      "local_demonstration": "Separate and observe incoming or affected animals through a qualified health protocol",
+      "operating_requirements": "Suitable separate space, staff, feed, water and veterinary evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "livestock_parasite_monitoring",
+    "name": "Livestock Parasite Monitoring",
+    "foundations": "veterinary_case_records",
+    "mechanism": "Use qualified observations or tests to assess relevant parasite burdens",
+    "operating_requirement": "Competent animal-health staff, suitable diagnostics and records",
+    "consequence": "Guide indicated management without routine universal treatment bonuses",
+    "status": "authored_draft",
+    "requires_all": [
+      "veterinary_case_records"
+    ],
+    "requires_any": [
+      [
+        "microbial_observation",
+        "clinical_observation_rounds"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "livestock_parasite_monitoring",
+      "local_demonstration": "Use qualified observations or tests to assess relevant parasite burdens",
+      "operating_requirements": "Competent animal-health staff, suitable diagnostics and records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Qualified observation can detect selected visible parasites before microscopy; each diagnostic method retains its narrower limits."
+  },
+  {
+    "field": "D01",
+    "id": "animal_feed_storage_hygiene",
+    "name": "Animal Feed Storage Hygiene",
+    "foundations": "livestock_feed_rations",
+    "mechanism": "Maintain feed quality through controlled handling, exclusion and condition checks",
+    "operating_requirement": "Suitable feed stores, actual stocks, monitoring and cleaning labor",
+    "consequence": "Reduce avoidable contamination and loss while feed remains finite",
+    "status": "authored_draft",
+    "requires_all": [
+      "livestock_feed_rations"
+    ],
+    "requires_any": [
+      [
+        "food_process_hazard_analysis",
+        "raised_granaries"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "animal_feed_storage_hygiene",
+      "local_demonstration": "Maintain feed quality through controlled handling, exclusion and condition checks",
+      "operating_requirements": "Suitable feed stores, actual stocks, monitoring and cleaning labor",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Practical exclusion and dry storage can precede formal hazard analysis; contaminated feed does not become suitable by discovery grant."
+  },
+  {
+    "field": "D01",
+    "id": "feed_digestibility_trials",
+    "name": "Feed Digestibility Trials",
+    "foundations": "livestock_feed_rations,experimental_controls",
+    "mechanism": "Compare usable nutritional contribution of defined feed under controlled evidence",
+    "operating_requirement": "Qualified trial design, animal care, characterized feeds and measurements",
+    "consequence": "Improve feed evaluation without treating laboratory composition as complete utilization",
+    "status": "authored_draft",
+    "requires_all": [
+      "livestock_feed_rations",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "feed_digestibility_trials",
+      "local_demonstration": "Compare usable nutritional contribution of defined feed under controlled evidence",
+      "operating_requirements": "Qualified trial design, animal care, characterized feeds and measurements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "pasture_forage_budgeting",
+    "name": "Pasture Forage Budgeting",
+    "foundations": "rotational_grazing_plans,material_accounting",
+    "mechanism": "Match planned grazing demand to measured forage growth and accessible reserves",
+    "operating_requirement": "Pasture observations, actual herd demand and controllable access",
+    "consequence": "Reduce grazing shortfalls without creating forage from a schedule",
+    "status": "authored_draft",
+    "requires_all": [
+      "rotational_grazing_plans",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pasture_forage_budgeting",
+      "local_demonstration": "Match planned grazing demand to measured forage growth and accessible reserves",
+      "operating_requirements": "Pasture observations, actual herd demand and controllable access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "livestock_heat_stress_management",
+    "name": "Livestock Heat Stress Management",
+    "foundations": "livestock_body_condition_scoring",
+    "mechanism": "Identify heat exposure and apply qualified shade, ventilation or water support",
+    "operating_requirement": "Appropriate shelters, actual water, labor and species-specific observations",
+    "consequence": "Reduce selected heat-related losses within resource and environmental limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "livestock_body_condition_scoring"
+    ],
+    "requires_any": [
+      [
+        "temperature_station_networks",
+        "seasonal_patterns"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "livestock_heat_stress_management",
+      "local_demonstration": "Identify heat exposure and apply qualified shade, ventilation or water support",
+      "operating_requirements": "Appropriate shelters, actual water, labor and species-specific observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Experienced local heat observation can support early care before regional instrument networks; available shade, water and ventilation limit assistance."
+  },
+  {
+    "field": "D01",
+    "id": "milking_machine_qualification",
+    "name": "Milking Machine Qualification",
+    "foundations": "clean_milk_handling,vacuum_pumps",
+    "mechanism": "Qualify controlled mechanical milk extraction and hygienic equipment handling",
+    "operating_requirement": "Compatible machines, power, cleaning supplies and trained herd care",
+    "consequence": "Collect milk with finite equipment throughput and animal-health constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "clean_milk_handling",
+      "vacuum_pumps"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "milking_machine_qualification",
+      "local_demonstration": "Qualify controlled mechanical milk extraction and hygienic equipment handling",
+      "operating_requirements": "Compatible machines, power, cleaning supplies and trained herd care",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "milk_pasteurization_control",
+    "name": "Milk Pasteurization Control",
+    "foundations": "clean_milk_handling,thermal_process_validation",
+    "mechanism": "Apply and verify a product-specific evaluated heat process to milk",
+    "operating_requirement": "Qualified heating and cooling equipment, measurements and hygienic handling",
+    "consequence": "Reduce specified hazards while preventing post-process recontamination remains necessary",
+    "status": "authored_draft",
+    "requires_all": [
+      "clean_milk_handling",
+      "thermal_process_validation"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "milk_pasteurization_control",
+      "local_demonstration": "Apply and verify a product-specific evaluated heat process to milk",
+      "operating_requirements": "Qualified heating and cooling equipment, measurements and hygienic handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "milk_homogenization",
+    "name": "Milk Homogenization",
+    "foundations": "clean_milk_handling,pressure_vessels",
+    "mechanism": "Alter fat-droplet distribution through qualified mechanical processing",
+    "operating_requirement": "Compatible equipment, power and hygienic product handling",
+    "consequence": "Change physical milk stability without independently providing microbial safety",
+    "status": "authored_draft",
+    "requires_all": [
+      "clean_milk_handling",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "milk_homogenization",
+      "local_demonstration": "Alter fat-droplet distribution through qualified mechanical processing",
+      "operating_requirements": "Compatible equipment, power and hygienic product handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "fermentation_starter_cultures",
+    "name": "Fermentation Starter Cultures",
+    "foundations": "fermentation_control",
+    "mechanism": "Maintain and use characterized cultures for a specified food fermentation",
+    "operating_requirement": "Qualified cultures, suitable substrate, hygiene and controlled process conditions",
+    "consequence": "Improve reproducibility while contamination and culture drift remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "fermentation_control"
+    ],
+    "requires_any": [
+      [
+        "microbial_isolation_methods",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fermentation_starter_cultures",
+      "local_demonstration": "Maintain and use characterized cultures for a specified food fermentation",
+      "operating_requirements": "Qualified cultures, suitable substrate, hygiene and controlled process conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Maintained selected mixed starters can precede isolated pure cultures; empirical repeatability does not establish universal product safety."
+  },
+  {
+    "field": "D01",
+    "id": "food_water_activity_measurement",
+    "name": "Food Water Activity Measurement",
+    "foundations": "food_process_hazard_analysis,humidity_measurement",
+    "mechanism": "Measure available water in a defined food matrix against a validated method",
+    "operating_requirement": "Qualified instrument, representative samples and competent interpretation",
+    "consequence": "Support product-specific stability assessment without substituting for all hazard controls",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_process_hazard_analysis",
+      "humidity_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_water_activity_measurement",
+      "local_demonstration": "Measure available water in a defined food matrix against a validated method",
+      "operating_requirements": "Qualified instrument, representative samples and competent interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_acidity_measurement",
+    "name": "Food Acidity Measurement",
+    "foundations": "food_process_hazard_analysis,electrochemical_cells",
+    "mechanism": "Measure a specified acidity property with calibrated food-analysis methods",
+    "operating_requirement": "Qualified testing, representative samples and retained process context",
+    "consequence": "Inform product assessment without assuming acidity alone establishes safety",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_process_hazard_analysis",
+      "electrochemical_cells"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_acidity_measurement",
+      "local_demonstration": "Measure a specified acidity property with calibrated food-analysis methods",
+      "operating_requirements": "Qualified testing, representative samples and retained process context",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_freeze_concentration",
+    "name": "Food Freeze Concentration",
+    "foundations": "food_freezing",
+    "mechanism": "Separate ice from suitable liquids to concentrate retained constituents",
+    "operating_requirement": "Qualified freezing and separation equipment, power and hygiene",
+    "consequence": "Concentrate selected products while separation losses and energy costs remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_freezing"
+    ],
+    "requires_any": [
+      [
+        "phase_change_heat_storage",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_freeze_concentration",
+      "local_demonstration": "Separate ice from suitable liquids to concentrate retained constituents",
+      "operating_requirements": "Qualified freezing and separation equipment, power and hygiene",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Empirical separation trials can establish a product-specific process before engineered latent-heat storage systems."
+  },
+  {
+    "field": "D01",
+    "id": "vacuum_food_evaporation",
+    "name": "Vacuum Food Evaporation",
+    "foundations": "vacuum_pumps,thermal_plant_heat_balances",
+    "mechanism": "Remove water from suitable foods under controlled reduced-pressure conditions",
+    "operating_requirement": "Qualified vessels, vacuum, heating, cooling and process monitoring",
+    "consequence": "Concentrate selected foods within thermal-damage and energy limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "vacuum_pumps",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vacuum_food_evaporation",
+      "local_demonstration": "Remove water from suitable foods under controlled reduced-pressure conditions",
+      "operating_requirements": "Qualified vessels, vacuum, heating, cooling and process monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "spray_food_drying",
+    "name": "Spray Food Drying",
+    "foundations": "food_drying",
+    "mechanism": "Dry dispersed food droplets through a qualified heat-and-mass-transfer process",
+    "operating_requirement": "Food-compatible atomization, air handling, energy and powder collection",
+    "consequence": "Produce suitable powders with finite throughput and contamination controls",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_drying"
+    ],
+    "requires_any": [
+      [
+        "compressed_air_systems",
+        "pressure_vessels"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "spray_food_drying",
+      "local_demonstration": "Dry dispersed food droplets through a qualified heat-and-mass-transfer process",
+      "operating_requirements": "Food-compatible atomization, air handling, energy and powder collection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Qualified air-assisted or pressure-driven food atomization can develop without industrial fuel burners; food-compatible hardware is mandatory."
+  },
+  {
+    "field": "D01",
+    "id": "food_extrusion_cooking",
+    "name": "Food Extrusion Cooking",
+    "foundations": "controlled_baking,precision_machinery",
+    "mechanism": "Combine mechanical working and controlled heat in a qualified continuous food-forming process",
+    "operating_requirement": "Food-compatible extruder, actual ingredients, power and process monitoring",
+    "consequence": "Produce selected textures and shapes with equipment and formulation limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_baking",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_extrusion_cooking",
+      "local_demonstration": "Combine mechanical working and controlled heat in a qualified continuous food-forming process",
+      "operating_requirements": "Food-compatible extruder, actual ingredients, power and process monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Continuous mechanical working and heat require a compatible food extruder; printing presses are not a necessary knowledge ancestor."
+  },
+  {
+    "field": "D01",
+    "id": "food_emulsion_stabilization",
+    "name": "Food Emulsion Stabilization",
+    "foundations": "edible_oil_clarification,experimental_controls",
+    "mechanism": "Maintain evaluated mixtures of otherwise separating food phases through suitable formulation and processing",
+    "operating_requirement": "Qualified ingredients, mixing equipment and stability testing",
+    "consequence": "Produce specified emulsified foods without unlimited shelf life",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_oil_clarification",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_emulsion_stabilization",
+      "local_demonstration": "Maintain evaluated mixtures of otherwise separating food phases through suitable formulation and processing",
+      "operating_requirements": "Qualified ingredients, mixing equipment and stability testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_package_barrier_testing",
+    "name": "Food Package Barrier Testing",
+    "foundations": "food_process_hazard_analysis",
+    "mechanism": "Measure package transmission and compatibility against a specified food-storage requirement",
+    "operating_requirement": "Representative packages, qualified tests and product evidence",
+    "consequence": "Select suitable packaging while real sealing and handling remain necessary",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [
+      [
+        "polymer_chain_models",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_package_barrier_testing",
+      "local_demonstration": "Measure package transmission and compatibility against a specified food-storage requirement",
+      "operating_requirements": "Representative packages, qualified tests and product evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Measured barrier performance may be established empirically and can cover non-polymer packages; actual compatibility and sealing remain necessary."
+  },
+  {
+    "field": "D01",
+    "id": "aseptic_food_filling",
+    "name": "Aseptic Food Filling",
+    "foundations": "thermal_process_validation,aseptic_laboratory_practice",
+    "mechanism": "Keep qualified processed food and packaging protected during a validated filling operation",
+    "operating_requirement": "Appropriate plant, validated processes, hygiene controls and trained operators",
+    "consequence": "Package specified foods with finite throughput and verified process limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermal_process_validation",
+      "aseptic_laboratory_practice"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aseptic_food_filling",
+      "local_demonstration": "Keep qualified processed food and packaging protected during a validated filling operation",
+      "operating_requirements": "Appropriate plant, validated processes, hygiene controls and trained operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_package_leak_detection",
+    "name": "Food Package Leak Detection",
+    "foundations": "food_package_barrier_testing",
+    "mechanism": "Test finished package integrity through a qualified non-destructive or sampling method",
+    "operating_requirement": "Suitable inspection equipment, samples and rejection controls",
+    "consequence": "Find supported seal defects without certifying every possible contamination hazard",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_package_barrier_testing"
+    ],
+    "requires_any": [
+      [
+        "pressure_vessels",
+        "electrical_measurement"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_package_leak_detection",
+      "local_demonstration": "Test finished package integrity through a qualified non-destructive or sampling method",
+      "operating_requirements": "Suitable inspection equipment, samples and rejection controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Different qualified pressure or sensing techniques can establish bounded package integrity evidence."
+  },
+  {
+    "field": "D01",
+    "id": "fresh_produce_ripening_control",
+    "name": "Fresh Produce Ripening Control",
+    "foundations": "controlled_atmosphere_food_storage,gas_composition_analysis",
+    "mechanism": "Manage measured storage atmosphere and conditions for a specific ripening behavior",
+    "operating_requirement": "Suitable produce, qualified rooms, sensors and operating staff",
+    "consequence": "Schedule selected quality changes while losses and species differences remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "controlled_atmosphere_food_storage",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fresh_produce_ripening_control",
+      "local_demonstration": "Manage measured storage atmosphere and conditions for a specific ripening behavior",
+      "operating_requirements": "Suitable produce, qualified rooms, sensors and operating staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_allergen_segregation",
+    "name": "Food Allergen Segregation",
+    "foundations": "food_batch_traceability,food_process_hazard_analysis",
+    "mechanism": "Separate and verify relevant allergen handling across a food-production process",
+    "operating_requirement": "Accurate ingredient information, dedicated or validated cleaned equipment and trained staff",
+    "consequence": "Reduce specified cross-contact risk without treating labels as physical separation",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_batch_traceability",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_allergen_segregation",
+      "local_demonstration": "Separate and verify relevant allergen handling across a food-production process",
+      "operating_requirements": "Accurate ingredient information, dedicated or validated cleaned equipment and trained staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_contaminant_sampling_plans",
+    "name": "Food Contaminant Sampling Plans",
+    "foundations": "food_process_hazard_analysis,statistical_sampling",
+    "mechanism": "Choose representative sampling and acceptance rules for specified contamination questions",
+    "operating_requirement": "Validated tests, representative samples and accountable release decisions",
+    "consequence": "Bound evidence on lots while acknowledging undetected hazards and sampling uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_process_hazard_analysis",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_contaminant_sampling_plans",
+      "local_demonstration": "Choose representative sampling and acceptance rules for specified contamination questions",
+      "operating_requirements": "Validated tests, representative samples and accountable release decisions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "food_recall_traceback",
+    "name": "Food Recall Traceback",
+    "foundations": "food_batch_traceability,public_correction_records",
+    "mechanism": "Identify affected product movements and coordinate removal or correction against verified evidence",
+    "operating_requirement": "Maintained lot records, reachable recipients and actual retrieval capacity",
+    "consequence": "Limit continued exposure while untraceable stock remains uncertain",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_batch_traceability",
+      "public_correction_records"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_recall_traceback",
+      "local_demonstration": "Identify affected product movements and coordinate removal or correction against verified evidence",
+      "operating_requirements": "Maintained lot records, reachable recipients and actual retrieval capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "postharvest_loss_measurement",
+    "name": "Postharvest Loss Measurement",
+    "foundations": "material_accounting,statistical_sampling",
+    "mechanism": "Measure quantity and quality losses across defined handling stages with explicit boundaries",
+    "operating_requirement": "Representative observation, scales, condition assessment and records",
+    "consequence": "Target avoidable losses without counting moisture change as all lost food",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "postharvest_loss_measurement",
+      "local_demonstration": "Measure quantity and quality losses across defined handling stages with explicit boundaries",
+      "operating_requirements": "Representative observation, scales, condition assessment and records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "crop_yield_mapping",
+    "name": "Crop Yield Mapping",
+    "foundations": "material_accounting",
+    "mechanism": "Associate calibrated harvest measurements with position and field conditions",
+    "operating_requirement": "Suitable harvest sensors, positioning, actual harvested crop and data review",
+    "consequence": "Reveal spatial yield variation without diagnosing its cause automatically",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting"
+    ],
+    "requires_any": [
+      [
+        "satellite_navigation",
+        "geometric_survey"
+      ]
+    ],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "crop_yield_mapping",
+      "local_demonstration": "Associate calibrated harvest measurements with position and field conditions",
+      "operating_requirements": "Suitable harvest sensors, positioning, actual harvested crop and data review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "branching_note": "Measured manual or mechanized harvests can be associated with surveyed locations; satellite positioning and combine harvesters are optional equipment routes."
+  },
+  {
+    "field": "D01",
+    "id": "variable_rate_crop_inputs",
+    "name": "Variable Rate Crop Inputs",
+    "foundations": "crop_yield_mapping,nutrient_response_trials",
+    "mechanism": "Apply qualified crop inputs at spatially differentiated rates based on measured evidence",
+    "operating_requirement": "Compatible application equipment, actual inputs and locally validated plans",
+    "consequence": "Adjust resource use while response uncertainty and soil constraints remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "crop_yield_mapping",
+      "nutrient_response_trials"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "variable_rate_crop_inputs",
+      "local_demonstration": "Apply qualified crop inputs at spatially differentiated rates based on measured evidence",
+      "operating_requirements": "Compatible application equipment, actual inputs and locally validated plans",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending."
+  },
+  {
+    "field": "D01",
+    "id": "microbial_food_protein_qualification",
+    "name": "Microbial Food Protein Qualification",
+    "foundations": "bioreactor_process_control,food_process_hazard_analysis",
+    "mechanism": "Evaluate harvested microbial biomass as a specified food ingredient",
+    "operating_requirement": "Qualified organism, feedstock, process containment, purification and food-safety evidence",
+    "consequence": "Supply evaluated protein-containing biomass with finite energy and substrate requirements",
+    "status": "authored_draft",
+    "requires_all": [
+      "bioreactor_process_control",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "microbial_food_protein_qualification",
+      "local_demonstration": "Evaluate harvested microbial biomass as a specified food ingredient",
+      "operating_requirements": "Qualified organism, feedstock, process containment, purification and food-safety evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Qualification is specific to the organism, inputs, process and intended product; economics, scale, nutritional adequacy and complete-diet replacement are not automatic outcomes."
+  },
+  {
+    "field": "D01",
+    "id": "precision_fermented_food_ingredients",
+    "name": "Precision Fermented Food Ingredients",
+    "foundations": "recombinant_bioproduction,food_process_hazard_analysis",
+    "mechanism": "Produce and qualify a specified food ingredient through a characterized fermentation process",
+    "operating_requirement": "Suitable production strain, feedstock, plant, purification and release testing",
+    "consequence": "Supply a defined ingredient without making a complete diet from a fermenter",
+    "status": "authored_draft",
+    "requires_all": [
+      "recombinant_bioproduction",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "precision_fermented_food_ingredients",
+      "local_demonstration": "Produce and qualify a specified food ingredient through a characterized fermentation process",
+      "operating_requirements": "Suitable production strain, feedstock, plant, purification and release testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Qualification is specific to the organism, inputs, process and intended product; economics, scale, nutritional adequacy and complete-diet replacement are not automatic outcomes."
+  },
+  {
+    "field": "D01",
+    "id": "cultured_food_cell_expansion",
+    "name": "Cultured Food Cell Expansion",
+    "foundations": "cell_culture_methods,food_process_hazard_analysis",
+    "mechanism": "Expand qualified food-production cells under evaluated culture and harvest conditions",
+    "operating_requirement": "Suitable cell source, culture inputs, controlled plant and food qualification",
+    "consequence": "Produce limited cell biomass without assuming low cost or complete meat equivalence",
+    "status": "authored_draft",
+    "requires_all": [
+      "cell_culture_methods",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cultured_food_cell_expansion",
+      "local_demonstration": "Expand qualified food-production cells under evaluated culture and harvest conditions",
+      "operating_requirements": "Suitable cell source, culture inputs, controlled plant and food qualification",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Qualification is specific to the organism, inputs, process and intended product; economics, scale, nutritional adequacy and complete-diet replacement are not automatic outcomes."
+  },
+  {
+    "field": "D01",
+    "id": "cultured_food_structure_formation",
+    "name": "Cultured Food Structure Formation",
+    "foundations": "cultured_food_cell_expansion,tissue_scaffold_engineering",
+    "mechanism": "Organize qualified food-cell biomass into an evaluated edible structure",
+    "operating_requirement": "Food-compatible supports, cells, nutrients, process equipment and product testing",
+    "consequence": "Investigate desired food texture and composition with uncertain scale and affordability",
+    "status": "authored_draft",
+    "requires_all": [
+      "cultured_food_cell_expansion",
+      "tissue_scaffold_engineering"
+    ],
+    "requires_any": [],
+    "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cultured_food_structure_formation",
+      "local_demonstration": "Organize qualified food-cell biomass into an evaluated edible structure",
+      "operating_requirements": "Food-compatible supports, cells, nutrients, process equipment and product testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or product delivery",
+        "finite local trials and practiced qualification",
+        "continuing feedstock, labor, utilities and maintenance"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+        "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+        "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+        "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+        "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+      }
+    },
+    "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Qualification is specific to the organism, inputs, process and intended product; economics, scale, nutritional adequacy and complete-diet replacement are not automatic outcomes."
+  }
+]

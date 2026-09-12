@@ -1,0 +1,26 @@
+{
+  "status": "semantic_reconciliation",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "civilization_material_loss_accounts",
+      "existing_id": "resource_circularity_accounts",
+      "reason": "Proposed mechanism is already covered; retain the existing identity rather than count an application label again."
+    },
+    {
+      "excluded_id": "civilization_reconstruction_exercises",
+      "existing_id": "knowledge_recovery_drills",
+      "reason": "Proposed mechanism is already covered; retain the existing identity rather than count an application label again."
+    },
+    {
+      "excluded_id": "long_delay_medical_autonomy",
+      "existing_id": "habitat_health_services",
+      "reason": "Proposed mechanism is already covered; retain the existing identity rather than count an application label again."
+    },
+    {
+      "excluded_id": "intergenerational_research_endowments",
+      "existing_id": "long_horizon_public_trusts",
+      "reason": "Proposed mechanism is already covered; retain the existing identity rather than count an application label again."
+    }
+  ]
+}

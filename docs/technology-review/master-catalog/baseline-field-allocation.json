@@ -1,0 +1,4364 @@
+{
+  "status": "editorial_assignment_for_review",
+  "scope": "One primary field per existing identity. Classification neither grants mastery nor changes runtime domains, prerequisites or historical maturity. Names are not added discoveries.",
+  "fields": [
+    {
+      "id": "D01",
+      "name": "Food and agriculture",
+      "target": 280
+    },
+    {
+      "id": "D02",
+      "name": "Water and sanitation",
+      "target": 180
+    },
+    {
+      "id": "D03",
+      "name": "Ecology and land stewardship",
+      "target": 180
+    },
+    {
+      "id": "D04",
+      "name": "Materials and chemical processes",
+      "target": 300
+    },
+    {
+      "id": "D05",
+      "name": "Energy",
+      "target": 260
+    },
+    {
+      "id": "D06",
+      "name": "Machinery and mechanical production",
+      "target": 240
+    },
+    {
+      "id": "D07",
+      "name": "Fibers and domestic technologies",
+      "target": 120
+    },
+    {
+      "id": "D08",
+      "name": "Buildings and settlements",
+      "target": 220
+    },
+    {
+      "id": "D09",
+      "name": "Overland transport",
+      "target": 180
+    },
+    {
+      "id": "D10",
+      "name": "Maritime technologies",
+      "target": 160
+    },
+    {
+      "id": "D11",
+      "name": "Flight",
+      "target": 160
+    },
+    {
+      "id": "D12",
+      "name": "Mathematics measurement and physical models",
+      "target": 180
+    },
+    {
+      "id": "D13",
+      "name": "Records and communications",
+      "target": 240
+    },
+    {
+      "id": "D14",
+      "name": "Medicine and care",
+      "target": 280
+    },
+    {
+      "id": "D15",
+      "name": "Biology",
+      "target": 200
+    },
+    {
+      "id": "D16",
+      "name": "Governance",
+      "target": 240
+    },
+    {
+      "id": "D17",
+      "name": "Economy and exchange",
+      "target": 200
+    },
+    {
+      "id": "D18",
+      "name": "Learning and organized work",
+      "target": 160
+    },
+    {
+      "id": "D19",
+      "name": "Culture",
+      "target": 180
+    },
+    {
+      "id": "D20",
+      "name": "Military systems",
+      "target": 280
+    },
+    {
+      "id": "D21",
+      "name": "Electronics and computation",
+      "target": 300
+    },
+    {
+      "id": "D22",
+      "name": "Earth systems and resources",
+      "target": 160
+    },
+    {
+      "id": "D23",
+      "name": "Space",
+      "target": 180
+    },
+    {
+      "id": "D24",
+      "name": "Human futures integration",
+      "target": 120
+    }
+  ],
+  "mappings": [
+    {
+      "id": "seasonal_patterns",
+      "name": "Seasonal Patterns",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D01"
+    },
+    {
+      "id": "seed_selection",
+      "name": "Selective Planting",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "food_drying",
+      "name": "Food Drying",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "smoking",
+      "name": "Smoke Preservation",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "cordage",
+      "name": "Twisted Cordage",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "basketry",
+      "name": "Basketry",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "charcoal",
+      "name": "Charcoal Production",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "clay_shaping",
+      "name": "Clay Vessels",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "pit_firing",
+      "name": "Pit Firing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "joinery",
+      "name": "Wood Joinery",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "drainage",
+      "name": "Ground Drainage",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D02"
+    },
+    {
+      "id": "well_siting",
+      "name": "Well Siting",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D02"
+    },
+    {
+      "id": "wound_cleaning",
+      "name": "Wound Cleaning",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "herbal_classification",
+      "name": "Medicinal Classification",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "clean_water",
+      "name": "Clean-Water Practice",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D02"
+    },
+    {
+      "id": "tallies",
+      "name": "Material Tallies",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "standard_measures",
+      "name": "Shared Measures",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "route_memory",
+      "name": "Encoded Routes",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D09"
+    },
+    {
+      "id": "labor_rotations",
+      "name": "Labor Rotations",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D16"
+    },
+    {
+      "id": "customary_law",
+      "name": "Customary Law",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D16"
+    },
+    {
+      "id": "public_stores",
+      "name": "Public Stores",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D17"
+    },
+    {
+      "id": "watch_rotation",
+      "name": "Organized Watch",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "formation_drill",
+      "name": "Formation Drill",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "supply_groups",
+      "name": "Organized Supply Parties",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "animal_taming",
+      "name": "Animal Taming",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D01"
+    },
+    {
+      "id": "pack_animals",
+      "name": "Pack Animal Husbandry",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D09"
+    },
+    {
+      "id": "domesticated_mounts",
+      "name": "Domesticated Mounts",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D09"
+    },
+    {
+      "id": "mounted_scouts",
+      "name": "Mounted Scouting",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D09"
+    },
+    {
+      "id": "hide_floats",
+      "name": "Hide Floats",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D10"
+    },
+    {
+      "id": "river_craft",
+      "name": "River Craft",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D10"
+    },
+    {
+      "id": "coastal_watercraft",
+      "name": "Coastal Watercraft",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D10"
+    },
+    {
+      "id": "stone_sorting",
+      "name": "Stone Selection",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "controlled_flaking",
+      "name": "Controlled Flaking",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "hafted_tools",
+      "name": "Hafted Tools",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "timber_grading",
+      "name": "Timber Grading",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D04"
+    },
+    {
+      "id": "timber_seasoning",
+      "name": "Timber Seasoning",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "framed_construction",
+      "name": "Framed Construction",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "fiber_grading",
+      "name": "Fiber Grading",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D07"
+    },
+    {
+      "id": "woven_carriers",
+      "name": "Woven Carriers",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "rope_rigging",
+      "name": "Rope Rigging",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D10"
+    },
+    {
+      "id": "clay_testing",
+      "name": "Clay Testing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "clay_tempering",
+      "name": "Tempered Clay",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "sealed_vessels",
+      "name": "Sealed Vessels",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "kiln_control",
+      "name": "Controlled Kilns",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "quarry_reading",
+      "name": "Reading the Quarry Face",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D04"
+    },
+    {
+      "id": "wedges_and_levers",
+      "name": "Wedges and Levers",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D06"
+    },
+    {
+      "id": "lime_burning",
+      "name": "Lime Burning",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "lime_mortar",
+      "name": "Lime Mortar",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "salt_working",
+      "name": "Salt Working",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "curing_regimens",
+      "name": "Curing Regimens",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "peat_drying",
+      "name": "Peat Drying",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "ore_assaying",
+      "name": "Comparative Ore Assay",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "copper_smelting",
+      "name": "Copper Smelting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "copper_casting",
+      "name": "Reusable Casting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "bronze_alloying",
+      "name": "Bronze Alloying",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "mine_shoring",
+      "name": "Timbered Mine Shoring",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "mine_airways",
+      "name": "Mine Airways",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "mine_drainage",
+      "name": "Mine Drainage",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "bitumen_sealing",
+      "name": "Bitumen Sealing",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "iron_assaying",
+      "name": "Iron Ore Assay",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "bloomery_smelting",
+      "name": "Bloomery Smelting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "forge_welding",
+      "name": "Forge Welding",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "hardened_edges",
+      "name": "Hardened Iron Edges",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "coal_grading",
+      "name": "Coal Grading",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D05"
+    },
+    {
+      "id": "coke_firing",
+      "name": "Coke Firing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "refractory_furnaces",
+      "name": "Refractory Furnaces",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "blast_furnace",
+      "name": "Continuous Blast Furnace",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "sulfur_purification",
+      "name": "Sulfur Purification",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "nitrate_cultivation",
+      "name": "Nitrate Beds",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D01"
+    },
+    {
+      "id": "black_powder",
+      "name": "Composite Propellant",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "phosphate_dressing",
+      "name": "Phosphate Dressing",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "graphite_marking",
+      "name": "Graphite Marking",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D13"
+    },
+    {
+      "id": "graphite_crucibles",
+      "name": "Graphite Crucibles",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "material_accounting",
+      "name": "Material Accounting",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D17"
+    },
+    {
+      "id": "workshop_standards",
+      "name": "Workshop Standards",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D18"
+    },
+    {
+      "id": "crop_calendars",
+      "name": "Crop Calendars",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "managed_fallow",
+      "name": "Managed Fallow",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "seed_reserves",
+      "name": "Protected Seed Reserves",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "irrigation_schedules",
+      "name": "Irrigation Schedules",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D02"
+    },
+    {
+      "id": "crop_rotation",
+      "name": "Crop Rotation",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "grain_milling",
+      "name": "Rotary Grain Milling",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "fermentation_control",
+      "name": "Controlled Fermentation",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "regional_granaries",
+      "name": "Regional Granaries",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "soil_assays",
+      "name": "Comparative Soil Assays",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D01"
+    },
+    {
+      "id": "intensive_gardens",
+      "name": "Intensive Market Gardens",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "birth_attendants",
+      "name": "Experienced Birth Attendants",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "latrine_siting",
+      "name": "Latrine Siting",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D02"
+    },
+    {
+      "id": "isolation_practice",
+      "name": "Isolation Practice",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "case_records",
+      "name": "Medical Case Records",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "trained_midwives",
+      "name": "Trained Midwives",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "public_baths",
+      "name": "Public Washing Facilities",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "surgical_anatomy",
+      "name": "Surgical Anatomy",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "civic_infirmaries",
+      "name": "Civic Infirmaries",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "contagion_mapping",
+      "name": "Contagion Mapping",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "preventive_inoculation",
+      "name": "Preventive Inoculation",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D14"
+    },
+    {
+      "id": "pictographic_records",
+      "name": "Pictographic Records",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D13"
+    },
+    {
+      "id": "place_value",
+      "name": "Place-Value Calculation",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "phonetic_notation",
+      "name": "Phonetic Notation",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D13"
+    },
+    {
+      "id": "formal_archives",
+      "name": "Formal Archives",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D13"
+    },
+    {
+      "id": "geometric_survey",
+      "name": "Geometric Survey",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "regional_maps",
+      "name": "Regional Maps",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D09"
+    },
+    {
+      "id": "public_schools",
+      "name": "Public Instruction",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D18"
+    },
+    {
+      "id": "paper_making",
+      "name": "Sheet Fiber Writing Material",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D13"
+    },
+    {
+      "id": "printing_process",
+      "name": "Repeatable Printing",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D13"
+    },
+    {
+      "id": "experimental_controls",
+      "name": "Experimental Controls",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D18"
+    },
+    {
+      "id": "statistical_inference",
+      "name": "Statistical Inference",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "household_councils",
+      "name": "Household Councils",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D16"
+    },
+    {
+      "id": "census_rolls",
+      "name": "Household Census Rolls",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D16"
+    },
+    {
+      "id": "public_levies",
+      "name": "Scheduled Public Levies",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D16"
+    },
+    {
+      "id": "specialized_courts",
+      "name": "Specialized Courts",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D16"
+    },
+    {
+      "id": "property_registers",
+      "name": "Property Registers",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D17"
+    },
+    {
+      "id": "craft_guilds",
+      "name": "Craft Guilds",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D18"
+    },
+    {
+      "id": "public_credit",
+      "name": "Public Credit",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D17"
+    },
+    {
+      "id": "risk_pools",
+      "name": "Mutual Risk Pools",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D17"
+    },
+    {
+      "id": "professional_service",
+      "name": "Professional Civil Service",
+      "source_status": "implemented_baseline",
+      "source_domain": "institutions",
+      "field": "D18"
+    },
+    {
+      "id": "graded_roads",
+      "name": "Graded Roads",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "timber_bridges",
+      "name": "Timber Bridges",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "canal_locks",
+      "name": "Canal Locks",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D10"
+    },
+    {
+      "id": "water_mills",
+      "name": "Water-Powered Mills",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D05"
+    },
+    {
+      "id": "urban_street_plans",
+      "name": "Urban Street Plans",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "covered_sewers",
+      "name": "Covered Sewers",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D02"
+    },
+    {
+      "id": "precision_machinery",
+      "name": "Precision Machinery",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D06"
+    },
+    {
+      "id": "hafted_weapons",
+      "name": "Hafted Weapons",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "bow_craft",
+      "name": "War Bow Craft",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "shield_wall",
+      "name": "Shield-Wall Discipline",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "field_fortifications",
+      "name": "Field Fortifications",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "fortified_stores",
+      "name": "Fortified Stores",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "siege_engineering",
+      "name": "Siege Engineering",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "bronze_weaponry",
+      "name": "Standardized Bronze Arms",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "professional_corps",
+      "name": "Professional Military Corps",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "military_staffs",
+      "name": "Military Staff Planning",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "battlefield_medicine",
+      "name": "Battlefield Medicine",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "powder_artillery",
+      "name": "Powder Artillery",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "structural_steel",
+      "name": "Structural Steel Frames",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D04"
+    },
+    {
+      "id": "reinforced_concrete",
+      "name": "Reinforced Concrete",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "safety_lifts",
+      "name": "Safety Lifts",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "curtain_wall_systems",
+      "name": "Glazed Curtain Walls",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "pike_drill",
+      "name": "Pike Formations",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "crossbow_mechanism",
+      "name": "Crossbow Mechanisms",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "war_chariots",
+      "name": "Military Chariots",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "armored_riding",
+      "name": "Armored Riding",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "elephant_training",
+      "name": "Working Elephant Training",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "counterweight_engines",
+      "name": "Counterweight Siege Engines",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "matchlock_drill",
+      "name": "Matchlock Arms and Drill",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "mounted_firearms",
+      "name": "Mounted Firearms",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "galley_navigation",
+      "name": "Galley Navigation",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D10"
+    },
+    {
+      "id": "naval_arsenals",
+      "name": "Naval Arsenals",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "ocean_sailing",
+      "name": "Ocean Sailing",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D10"
+    },
+    {
+      "id": "naval_gunnery",
+      "name": "Naval Gunnery",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "steam_propulsion",
+      "name": "Steam Propulsion",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D10"
+    },
+    {
+      "id": "armored_hulls",
+      "name": "Armored Hulls",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "naval_torpedoes",
+      "name": "Naval Torpedoes",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "naval_fire_control",
+      "name": "Naval Fire Control",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "submersible_hulls",
+      "name": "Submersible Hulls",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D10"
+    },
+    {
+      "id": "naval_logistics",
+      "name": "Fleet Replenishment",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "aerostat_observation",
+      "name": "Aerostat Observation",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "fuel_refining",
+      "name": "Liquid Fuel Refining",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "powered_flight",
+      "name": "Powered Flight",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D11"
+    },
+    {
+      "id": "fighter_tactics",
+      "name": "Fighter Tactics",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "aerial_bombardment",
+      "name": "Aerial Bombardment",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "advanced_airframes",
+      "name": "Advanced Airframes",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D11"
+    },
+    {
+      "id": "naval_aviation",
+      "name": "Naval Aviation",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "carrier_aviation",
+      "name": "Carrier Aviation",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "airborne_operations",
+      "name": "Airborne Operations",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "amphibious_operations",
+      "name": "Amphibious Operations",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "jet_propulsion",
+      "name": "Jet Propulsion",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D11"
+    },
+    {
+      "id": "rotary_wing",
+      "name": "Rotary-Wing Flight",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D11"
+    },
+    {
+      "id": "guided_weapons",
+      "name": "Guided Weapons",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "naval_missiles",
+      "name": "Naval Missiles",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "nuclear_propulsion",
+      "name": "Nuclear Propulsion",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D10"
+    },
+    {
+      "id": "remote_aircraft",
+      "name": "Remote Aircraft",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D11"
+    },
+    {
+      "id": "rifled_barrels",
+      "name": "Rifled Barrels",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "metallic_cartridges",
+      "name": "Metallic Cartridges",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "automatic_actions",
+      "name": "Automatic Firearms",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "internal_combustion",
+      "name": "Internal Combustion Engines",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "armored_vehicles",
+      "name": "Armored Fighting Vehicles",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "indirect_fire",
+      "name": "Indirect Artillery Fire",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "armor_piercing_weapons",
+      "name": "Armor-Piercing Weapons",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "atomic_physics",
+      "name": "Atomic Physics",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "reactor_engineering",
+      "name": "Controlled Nuclear Reactors",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "festival_calendar",
+      "name": "Festival Calendar",
+      "source_status": "implemented_baseline",
+      "source_domain": "culture",
+      "field": "D19"
+    },
+    {
+      "id": "oral_epics",
+      "name": "Oral Epics",
+      "source_status": "implemented_baseline",
+      "source_domain": "culture",
+      "field": "D19"
+    },
+    {
+      "id": "public_theatre",
+      "name": "Public Theatre",
+      "source_status": "implemented_baseline",
+      "source_domain": "culture",
+      "field": "D19"
+    },
+    {
+      "id": "civic_games",
+      "name": "Civic Games",
+      "source_status": "implemented_baseline",
+      "source_domain": "culture",
+      "field": "D19"
+    },
+    {
+      "id": "comparative_chronicles",
+      "name": "Comparative Chronicles",
+      "source_status": "implemented_baseline",
+      "source_domain": "culture",
+      "field": "D19"
+    },
+    {
+      "id": "public_libraries",
+      "name": "Public Libraries",
+      "source_status": "implemented_baseline",
+      "source_domain": "culture",
+      "field": "D13"
+    },
+    {
+      "id": "crew_handoffs",
+      "name": "Crew Handoffs",
+      "source_status": "implemented_baseline",
+      "source_domain": "labor",
+      "field": "D18"
+    },
+    {
+      "id": "apprentice_contracts",
+      "name": "Apprentice Contracts",
+      "source_status": "implemented_baseline",
+      "source_domain": "labor",
+      "field": "D18"
+    },
+    {
+      "id": "work_rest_limits",
+      "name": "Work and Rest Limits",
+      "source_status": "implemented_baseline",
+      "source_domain": "labor",
+      "field": "D18"
+    },
+    {
+      "id": "work_motion_studies",
+      "name": "Work Motion Studies",
+      "source_status": "implemented_baseline",
+      "source_domain": "labor",
+      "field": "D06"
+    },
+    {
+      "id": "shared_childcare",
+      "name": "Shared Childcare",
+      "source_status": "implemented_baseline",
+      "source_domain": "demography",
+      "field": "D18"
+    },
+    {
+      "id": "maternal_recovery",
+      "name": "Maternal Recovery Care",
+      "source_status": "implemented_baseline",
+      "source_domain": "demography",
+      "field": "D14"
+    },
+    {
+      "id": "child_growth_records",
+      "name": "Child Growth Records",
+      "source_status": "implemented_baseline",
+      "source_domain": "demography",
+      "field": "D14"
+    },
+    {
+      "id": "household_space_planning",
+      "name": "Household Space Planning",
+      "source_status": "implemented_baseline",
+      "source_domain": "demography",
+      "field": "D08"
+    },
+    {
+      "id": "wayfinding_stars",
+      "name": "Celestial Wayfinding",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D10"
+    },
+    {
+      "id": "caravanserais",
+      "name": "Caravanserais",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D09"
+    },
+    {
+      "id": "counterweight_cranes",
+      "name": "Counterweight Cranes",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D06"
+    },
+    {
+      "id": "cargo_seals",
+      "name": "Cargo Seals",
+      "source_status": "implemented_baseline",
+      "source_domain": "logistics",
+      "field": "D17"
+    },
+    {
+      "id": "root_cellars",
+      "name": "Root Cellars",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "raised_granaries",
+      "name": "Raised Granaries",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "hermetic_grain_storage",
+      "name": "Hermetic Grain Storage",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "brine_fermentation",
+      "name": "Brine Fermentation",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "vinegar_pickling",
+      "name": "Vinegar Pickling",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "stock_rotation",
+      "name": "Dated Stock Rotation",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D17"
+    },
+    {
+      "id": "protected_wellheads",
+      "name": "Protected Wellheads",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D02"
+    },
+    {
+      "id": "rainwater_cisterns",
+      "name": "Rainwater Cisterns",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D02"
+    },
+    {
+      "id": "water_settling_basins",
+      "name": "Water Settling Basins",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D02"
+    },
+    {
+      "id": "slow_sand_filtration",
+      "name": "Slow Sand Filtration",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D02"
+    },
+    {
+      "id": "water_service_inspections",
+      "name": "Water Service Inspections",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D02"
+    },
+    {
+      "id": "separate_clean_water_storage",
+      "name": "Separate Clean-Water Storage",
+      "source_status": "implemented_baseline",
+      "source_domain": "health",
+      "field": "D02"
+    },
+    {
+      "id": "skirmish_pair_drill",
+      "name": "Skirmish Pair Drill",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "mounted_remount_school",
+      "name": "Mounted Remount School",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "siege_crew_rehearsals",
+      "name": "Siege Crew Rehearsals",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "mountain_field_school",
+      "name": "Mountain Field School",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "range_estimation_drill",
+      "name": "Range Estimation Drill",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "gun_detachment_school",
+      "name": "Gun Detachment School",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "engineer_demonstration_ranges",
+      "name": "Engineer Demonstration Ranges",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "mechanized_crew_school",
+      "name": "Mechanized Crew School",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "glassmaking",
+      "name": "Glassmaking",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "optical_lenses",
+      "name": "Optical Lenses",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "experimental_optics",
+      "name": "Experimental Optics",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "vacuum_pumps",
+      "name": "Vacuum Pumps",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "vacuum_experiments",
+      "name": "Vacuum Experiments",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "precision_thermometry",
+      "name": "Precision Thermometry",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "calorimetry",
+      "name": "Calorimetry",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "heat_engine_cycles",
+      "name": "Heat Engine Cycles",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D05"
+    },
+    {
+      "id": "pressure_vessels",
+      "name": "Pressure Vessels",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "chemical_distillation",
+      "name": "Chemical Distillation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "fractional_distillation",
+      "name": "Fractional Distillation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "electrochemical_cells",
+      "name": "Electrochemical Cells",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D05"
+    },
+    {
+      "id": "electrical_measurement",
+      "name": "Electrical Measurement",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "electromagnetic_induction",
+      "name": "Electromagnetic Induction",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D05"
+    },
+    {
+      "id": "electrical_generators",
+      "name": "Electrical Generators",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "electric_motors",
+      "name": "Electric Motors",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "spectroscopy",
+      "name": "Spectroscopy",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "electron_physics",
+      "name": "Electron Physics",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "radiation_measurement",
+      "name": "Radiation Measurement",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "nuclear_fission",
+      "name": "Nuclear Fission",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D05"
+    },
+    {
+      "id": "neutron_moderation",
+      "name": "Neutron Moderation",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D05"
+    },
+    {
+      "id": "structural_load_testing",
+      "name": "Structural Load Testing",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "aerodynamics",
+      "name": "Aerodynamics",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D11"
+    },
+    {
+      "id": "wind_tunnel_testing",
+      "name": "Wind Tunnel Testing",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D11"
+    },
+    {
+      "id": "electric_arc_furnaces",
+      "name": "Electric Arc Furnaces",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "mechanical_refrigeration",
+      "name": "Mechanical Refrigeration",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D08"
+    },
+    {
+      "id": "steel_refining",
+      "name": "Steel Refining",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "wire_drawing",
+      "name": "Wire Drawing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "cable_insulation",
+      "name": "Cable Insulation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "crystallography",
+      "name": "Crystallography",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D04"
+    },
+    {
+      "id": "solid_state_physics",
+      "name": "Solid-State Physics",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "band_theory",
+      "name": "Electronic Band Theory",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "photoconductivity",
+      "name": "Photoconductivity",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "semiconductor_doping",
+      "name": "Semiconductor Doping",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "pn_junctions",
+      "name": "P\u2013N Junctions",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "silicon_smelting",
+      "name": "Silicon Smelting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "chlorosilane_purification",
+      "name": "Chlorosilane Purification",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "single_crystal_growth",
+      "name": "Single-Crystal Growth",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "wafer_sawing",
+      "name": "Semiconductor Wafer Sawing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "photovoltaic_conversion",
+      "name": "Photovoltaic Conversion",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D05"
+    },
+    {
+      "id": "solar_cell_fabrication",
+      "name": "Solar Cell Fabrication",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "module_encapsulation",
+      "name": "Photovoltaic Module Encapsulation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "photovoltaic_power",
+      "name": "Photovoltaic Power",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D05"
+    },
+    {
+      "id": "skirmisher_infantry_screens",
+      "name": "Skirmisher\u2013Infantry Screens",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "engineer_infantry_security",
+      "name": "Engineer\u2013Infantry Security",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "infantry_antitank_coordination",
+      "name": "Infantry\u2013Antitank Coordination",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "cavalry_infantry_liaison",
+      "name": "Cavalry\u2013Infantry Liaison",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "gun_line_security",
+      "name": "Gun-Line Security",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "infantry_tank_cooperation",
+      "name": "Infantry\u2013Tank Cooperation",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "fractional_quantities",
+      "name": "Fractional Quantities",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "ratio_proportion",
+      "name": "Ratios and Proportions",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "straightedge_compass",
+      "name": "Straightedge and Compass Construction",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "similar_triangles",
+      "name": "Similar Triangles",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "trigonometry",
+      "name": "Trigonometric Methods",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "symbolic_algebra",
+      "name": "Symbolic Algebra",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "polynomial_equations",
+      "name": "Polynomial Equations",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "logarithms",
+      "name": "Logarithms",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "coordinate_geometry",
+      "name": "Coordinate Geometry",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "differential_calculus",
+      "name": "Differential Calculus",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "integral_calculus",
+      "name": "Integral Calculus",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "differential_equations",
+      "name": "Differential Equations",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "complex_numbers",
+      "name": "Complex Numbers",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "vector_analysis",
+      "name": "Vector Analysis",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "matrix_algebra",
+      "name": "Matrix Algebra",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "combinatorics",
+      "name": "Combinatorial Counting",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "probability_theory",
+      "name": "Probability Theory",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "statistical_sampling",
+      "name": "Statistical Sampling",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "least_squares_estimation",
+      "name": "Least-Squares Estimation",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "measurement_uncertainty",
+      "name": "Measurement Uncertainty",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "dimensional_analysis",
+      "name": "Dimensional Analysis",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "numerical_root_finding",
+      "name": "Numerical Root Finding",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "numerical_integration",
+      "name": "Numerical Integration",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "constrained_optimization",
+      "name": "Constrained Optimization",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "harmonic_analysis",
+      "name": "Harmonic Analysis",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "dimensional_metrology",
+      "name": "Precision Dimensional Metrology",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "brine_purification",
+      "name": "Brine Purification",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "chloralkali_cells",
+      "name": "Chlor-Alkali Cells",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "hydrogen_chloride_synthesis",
+      "name": "Hydrogen Chloride Synthesis",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "lever_moments",
+      "name": "Lever Moments",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "centers_of_mass",
+      "name": "Centers of Mass",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "compound_pulleys",
+      "name": "Compound Pulleys",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "gear_ratios",
+      "name": "Gear Ratios",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "crank_linkages",
+      "name": "Crank Linkages",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "flywheel_smoothing",
+      "name": "Flywheel Smoothing",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "bearing_surfaces",
+      "name": "Bearing Surfaces",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "friction_measurement",
+      "name": "Friction Measurement",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "lubrication_regimes",
+      "name": "Lubrication Regimes",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "displacement_buoyancy",
+      "name": "Displacement and Buoyancy",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "hydrostatic_pressure",
+      "name": "Hydrostatic Pressure",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "flow_continuity",
+      "name": "Flow Continuity",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "viscous_resistance",
+      "name": "Viscous Resistance",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "elastic_deformation",
+      "name": "Elastic Deformation",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "stress_strain_relations",
+      "name": "Stress\u2013Strain Relations",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "column_buckling",
+      "name": "Column Buckling",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "cyclic_fatigue",
+      "name": "Cyclic Fatigue",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "measured_kinematics",
+      "name": "Measured Kinematics",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "inertial_motion",
+      "name": "Inertial Motion",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "momentum_balance",
+      "name": "Momentum Balance",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "mechanical_work_energy",
+      "name": "Mechanical Work and Energy",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "rotational_dynamics",
+      "name": "Rotational Dynamics",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "mechanical_oscillation",
+      "name": "Mechanical Oscillation",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "feedback_governors",
+      "name": "Feedback Governors",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D06"
+    },
+    {
+      "id": "mineral_streak_tests",
+      "name": "Mineral Streak Tests",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "mineral_cleavage",
+      "name": "Cleavage and Fracture Classification",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "comparative_mineral_hardness",
+      "name": "Comparative Mineral Hardness",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "mineral_specific_gravity",
+      "name": "Mineral Specific Gravity",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "relative_stratigraphy",
+      "name": "Relative Stratigraphy",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "lithologic_correlation",
+      "name": "Lithologic Correlation",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "geologic_cross_sections",
+      "name": "Geologic Cross Sections",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "structural_geologic_mapping",
+      "name": "Structural Geologic Mapping",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "sediment_provenance",
+      "name": "Sediment Provenance",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "systematic_channel_sampling",
+      "name": "Systematic Channel Sampling",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "geochemical_baselines",
+      "name": "Geochemical Baselines",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "geochemical_anomaly_mapping",
+      "name": "Geochemical Anomaly Mapping",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "grade_tonnage_models",
+      "name": "Grade\u2013Tonnage Models",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "spatial_variograms",
+      "name": "Spatial Variograms",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "resource_kriging",
+      "name": "Resource Kriging",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "orebody_block_models",
+      "name": "Orebody Block Models",
+      "source_status": "implemented_baseline",
+      "source_domain": "ecology",
+      "field": "D22"
+    },
+    {
+      "id": "litter_bearer_drill",
+      "name": "Litter Bearer Drill",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "casualty_collection_posts",
+      "name": "Casualty Collection Posts",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "casualty_transfer_records",
+      "name": "Casualty Transfer Records",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "evacuation_relays",
+      "name": "Casualty Evacuation Relays",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "field_aid_stations",
+      "name": "Field Aid Stations",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "triage_registers",
+      "name": "Triage Registers",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "medical_resupply_packing",
+      "name": "Medical Resupply Packing",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "convalescent_duty_reviews",
+      "name": "Convalescent Duty Reviews",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "field_armorer_teams",
+      "name": "Field Armorer Teams",
+      "source_status": "implemented_baseline",
+      "source_domain": "security",
+      "field": "D20"
+    },
+    {
+      "id": "germination_trials",
+      "name": "Germination Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "seed_cleaning",
+      "name": "Seed Cleaning",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "sowing_depth_trials",
+      "name": "Sowing Depth Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "row_spacing_trials",
+      "name": "Row Spacing Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "seedbed_firming",
+      "name": "Seedbed Firming",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "mass_seed_selection",
+      "name": "Mass Seed Selection",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "progeny_rows",
+      "name": "Progeny Rows",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "controlled_pollination",
+      "name": "Controlled Pollination",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "field_variety_trials",
+      "name": "Field Variety Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "regional_seed_trials",
+      "name": "Regional Seed Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "crop_residue_cover",
+      "name": "Crop Residue Cover",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D03"
+    },
+    {
+      "id": "green_manure_crops",
+      "name": "Green Manure Crops",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D03"
+    },
+    {
+      "id": "cover_crop_mixtures",
+      "name": "Cover Crop Mixtures",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D03"
+    },
+    {
+      "id": "contour_cultivation",
+      "name": "Contour Cultivation",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D03"
+    },
+    {
+      "id": "strip_cropping",
+      "name": "Strip Cropping",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D03"
+    },
+    {
+      "id": "reduced_tillage",
+      "name": "Reduced Tillage",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D03"
+    },
+    {
+      "id": "soil_infiltration_trials",
+      "name": "Soil Infiltration Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D02"
+    },
+    {
+      "id": "mulch_water_management",
+      "name": "Mulch Water Management",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D03"
+    },
+    {
+      "id": "irrigation_loss_accounts",
+      "name": "Irrigation Loss Accounts",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D02"
+    },
+    {
+      "id": "soil_moisture_scheduling",
+      "name": "Soil Moisture Scheduling",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D02"
+    },
+    {
+      "id": "nutrient_response_trials",
+      "name": "Nutrient Response Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "mineral_nitrate_dressing",
+      "name": "Mineral Nitrate Dressing",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "sulfur_dioxide_recovery",
+      "name": "Sulfur Dioxide Recovery",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "sulfuric_acid_production",
+      "name": "Sulfuric Acid Production",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "phosphate_solubilization",
+      "name": "Phosphate Solubilization",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "compressed_air_systems",
+      "name": "Compressed Air Systems",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "cryogenic_air_separation",
+      "name": "Cryogenic Air Separation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "water_electrolysis",
+      "name": "Water Electrolysis",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "iron_ammonia_catalysts",
+      "name": "Iron Ammonia Catalysts",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "catalytic_ammonia_synthesis",
+      "name": "Catalytic Ammonia Synthesis",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "ammonium_sulfate_fertilizer",
+      "name": "Ammonium Sulfate Fertilizer",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "lead_smelting",
+      "name": "Lead Smelting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "lead_sheet_rolling",
+      "name": "Lead Sheet Rolling",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "porous_battery_separators",
+      "name": "Porous Battery Separators",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "lead_oxide_preparation",
+      "name": "Lead Oxide Preparation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "lead_acid_cells",
+      "name": "Lead-Acid Cells",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "battery_bank_wiring",
+      "name": "Battery Bank Wiring",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "charge_regulation",
+      "name": "Charge Regulation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "pressure_pipe_jointing",
+      "name": "Pressure Pipe Jointing",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D02"
+    },
+    {
+      "id": "cylinder_boring",
+      "name": "Cylinder Boring",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D06"
+    },
+    {
+      "id": "packed_piston_seals",
+      "name": "Packed Piston Seals",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D06"
+    },
+    {
+      "id": "directional_air_valves",
+      "name": "Directional Air Valves",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D06"
+    },
+    {
+      "id": "pneumatic_cylinders",
+      "name": "Pneumatic Cylinders",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D06"
+    },
+    {
+      "id": "pneumatic_pressing",
+      "name": "Pneumatic Pressing",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D06"
+    },
+    {
+      "id": "lens_centering",
+      "name": "Lens Centering",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "eyepiece_design",
+      "name": "Eyepiece Design",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "fine_focus_stages",
+      "name": "Fine-Focus Stages",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "illumination_apertures",
+      "name": "Illumination Apertures",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "specimen_slide_mounting",
+      "name": "Specimen Slide Mounting",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "compound_microscopy",
+      "name": "Compound Microscopy",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D12"
+    },
+    {
+      "id": "clay_levigation",
+      "name": "Clay Levigation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "grog_preparation",
+      "name": "Grog Preparation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "refractory_body_trials",
+      "name": "Refractory Body Trials",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "refractory_brick_firing",
+      "name": "Refractory Brick Firing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "ceramic_crucibles",
+      "name": "Ceramic Crucibles",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "crucible_glass_melting",
+      "name": "Crucible Glass Melting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "finery_forges",
+      "name": "Finery Forges",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "charcoal_retorts",
+      "name": "Charcoal Retorts",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D05"
+    },
+    {
+      "id": "bloomery_charge_control",
+      "name": "Bloomery Charge Control",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "tin_smelting",
+      "name": "Tin Smelting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "sheet_steel_rolling",
+      "name": "Sheet Steel Rolling",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "tinplate_coating",
+      "name": "Tinplate Coating",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "can_body_forming",
+      "name": "Can Body Forming",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "double_seaming",
+      "name": "Double Seaming",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "food_retorts",
+      "name": "Food Retorts",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "thermal_process_validation",
+      "name": "Thermal Process Validation",
+      "source_status": "implemented_baseline",
+      "source_domain": "nutrition",
+      "field": "D01"
+    },
+    {
+      "id": "rope_laying",
+      "name": "Rope Laying",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "sail_panel_cutting",
+      "name": "Sail Panel Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "sail_seaming",
+      "name": "Sail Seaming",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "wooden_sheave_blocks",
+      "name": "Wooden Sheave Blocks",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "standing_running_rigging",
+      "name": "Standing and Running Rigging",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "keel_scarfing",
+      "name": "Keel Scarfing",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "grown_frame_selection",
+      "name": "Grown Frame Selection",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "frame_moulding",
+      "name": "Frame Moulding",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "plank_spiling",
+      "name": "Plank Spiling",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "caulking_fiber_preparation",
+      "name": "Caulking Fiber Preparation",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "treenail_fastening",
+      "name": "Treenail Fastening",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "hull_seam_caulking",
+      "name": "Hull Seam Caulking",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "carvel_frame_construction",
+      "name": "Carvel Frame Construction",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "clinker_shell_construction",
+      "name": "Clinker Shell Construction",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "mast_making",
+      "name": "Mast Making",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "launching_cradles",
+      "name": "Launching Cradles",
+      "source_status": "implemented_baseline",
+      "source_domain": "movement",
+      "field": "D10"
+    },
+    {
+      "id": "wheel_blank_jointing",
+      "name": "Wheel Blank Jointing",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "wheel_hub_boring",
+      "name": "Wheel Hub Boring",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "spoke_tenon_cutting",
+      "name": "Spoke Tenon Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "felloe_jointing",
+      "name": "Felloe Jointing",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "solid_wheel_assembly",
+      "name": "Solid Wheel Assembly",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "spoked_wheel_assembly",
+      "name": "Spoked Wheel Assembly",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "iron_tyre_fitting",
+      "name": "Iron Tyre Fitting",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "wooden_axle_shaping",
+      "name": "Wooden Axle Shaping",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "wooden_axle_boxes",
+      "name": "Wooden Axle Boxes",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "axle_sleeve_fitting",
+      "name": "Axle Sleeve Fitting",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "linchpin_retention",
+      "name": "Linchpin Retention",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "cart_bed_framing",
+      "name": "Cart Bed Framing",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "drawbar_fitting",
+      "name": "Drawbar Fitting",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "haul_harness_weaving",
+      "name": "Haul Harness Weaving",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "cart_running_gear",
+      "name": "Cart Running Gear",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "sleeved_cart_assembly",
+      "name": "Sleeved Cart Assembly",
+      "source_status": "implemented_baseline",
+      "source_domain": "infrastructure",
+      "field": "D09"
+    },
+    {
+      "id": "three_plate_lapping",
+      "name": "Three-Plate Lapping",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "straightedge_scraping",
+      "name": "Straightedge Scraping",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "machine_way_scraping",
+      "name": "Machine-Way Scraping",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "lead_screw_cutting",
+      "name": "Lead-Screw Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "split_feed_nuts",
+      "name": "Split Feed Nuts",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "cross_slide_assembly",
+      "name": "Cross-Slide Assembly",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "four_jaw_chucks",
+      "name": "Four-Jaw Chucks",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "tailstock_fitting",
+      "name": "Tailstock Fitting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "toolbit_heat_treatment",
+      "name": "Tool-Bit Heat Treatment",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "centre_lathe_assembly",
+      "name": "Centre-Lathe Assembly",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "drill_bit_fluting",
+      "name": "Drill-Bit Fluting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "quill_feed_mechanisms",
+      "name": "Quill Feed Mechanisms",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "column_drilling_machines",
+      "name": "Column Drilling Machines",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "milling_cutter_relief",
+      "name": "Milling Cutter Relief",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "milling_table_feeds",
+      "name": "Milling Table Feeds",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "milling_spindle_heads",
+      "name": "Milling Spindle Heads",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "horizontal_milling_machines",
+      "name": "Horizontal Milling Machines",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "worm_dividing_heads",
+      "name": "Worm Dividing Heads",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "drill_jig_bushings",
+      "name": "Drill Jig Bushings",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "drill_jig_layout",
+      "name": "Drill Jig Layout",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "gauge_block_lapping",
+      "name": "Gauge-Block Lapping",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "bench_vise_screws",
+      "name": "Bench-Vise Screws",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "basic_machine_shops",
+      "name": "Basic Machine Shops",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "precision_toolrooms",
+      "name": "Precision Toolrooms",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "bolt_blank_forging",
+      "name": "Bolt Blank Forging",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "nut_blank_forging",
+      "name": "Nut Blank Forging",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "nut_bore_drilling",
+      "name": "Nut Bore Drilling",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "thread_tap_cutting",
+      "name": "Thread Tap Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "thread_die_cutting",
+      "name": "Thread Die Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "external_thread_cutting",
+      "name": "External Thread Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "internal_thread_tapping",
+      "name": "Internal Thread Tapping",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "thread_pitch_gauging",
+      "name": "Thread Pitch Gauging",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "matched_thread_inspection",
+      "name": "Matched Thread Inspection",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "washer_punching",
+      "name": "Washer Punching",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "cotter_pin_forming",
+      "name": "Cotter Pin Forming",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "castellated_nut_slotting",
+      "name": "Castellated Nut Slotting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "split_pin_locking",
+      "name": "Split-Pin Locking",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "steel_wire_drawing",
+      "name": "Steel Wire Drawing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "spring_wire_coiling",
+      "name": "Spring Wire Coiling",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "coil_spring_tempering",
+      "name": "Coil Spring Tempering",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "split_washer_cutting",
+      "name": "Split Washer Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "rivet_blank_heading",
+      "name": "Rivet Blank Heading",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "rivet_hole_alignment",
+      "name": "Rivet Hole Alignment",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "hot_rivet_setting",
+      "name": "Hot Rivet Setting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "cold_rivet_setting",
+      "name": "Cold Rivet Setting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "thread_rolling_die_making",
+      "name": "Thread-Rolling Die Making",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "bolt_thread_rolling",
+      "name": "Bolt Thread Rolling",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "standard_fastener_kitting",
+      "name": "Standard Fastener Kitting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D06"
+    },
+    {
+      "id": "fiber_retting",
+      "name": "Fiber Retting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "fiber_combing",
+      "name": "Fiber Combing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "drop_spindles",
+      "name": "Drop Spindles",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "warp_weighted_looms",
+      "name": "Warp-Weighted Looms",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "plain_weaving",
+      "name": "Plain Weaving",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "woven_dressings",
+      "name": "Woven Dressings",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "spinning_wheels",
+      "name": "Spinning Wheels",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "flyer_spinning",
+      "name": "Flyer Spinning",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "multi_spindle_spinning",
+      "name": "Multi-Spindle Spinning",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "mule_spinning",
+      "name": "Mule Spinning",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "flying_shuttles",
+      "name": "Flying Shuttles",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "electric_power_looms",
+      "name": "Electric Power Looms",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D07"
+    },
+    {
+      "id": "fiber_pulp_beating",
+      "name": "Fiber Pulp Beating",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "textile_rag_pulping",
+      "name": "Textile Rag Pulping",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "paper_sheet_pressing",
+      "name": "Paper Sheet Pressing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "electric_pulp_beating",
+      "name": "Electric Pulp Beating",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "core_formed_glass",
+      "name": "Core-Formed Glass",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "glass_blowing",
+      "name": "Glass Blowing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "mold_blown_glass",
+      "name": "Mold-Blown Glass",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "plunger_pressed_glass",
+      "name": "Plunger-Pressed Glass",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "glass_tube_drawing",
+      "name": "Glass Tube Drawing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "hydrogen_flame_glassworking",
+      "name": "Hydrogen-Flame Glassworking",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D04"
+    },
+    {
+      "id": "carbon_resistors",
+      "name": "Carbon Resistors",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "foil_capacitors",
+      "name": "Foil Capacitors",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "electromagnetic_relays",
+      "name": "Electromagnetic Relays",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "wound_transformers",
+      "name": "Wound Transformers",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "silicon_rectifiers",
+      "name": "Silicon Rectifiers",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "bipolar_junction_transistors",
+      "name": "Bipolar Junction Transistors",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "transistor_amplifiers",
+      "name": "Transistor Amplifiers",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "resistive_sensing",
+      "name": "Resistive Sensing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "electronic_machine_control",
+      "name": "Electronic Machine Control",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "relay_logic",
+      "name": "Relay Logic",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "diode_logic",
+      "name": "Diode Logic",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "transistor_inverters",
+      "name": "Transistor Inverters",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "bistable_multivibrators",
+      "name": "Bistable Multivibrators",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "binary_counters",
+      "name": "Binary Counters",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "shift_registers",
+      "name": "Shift Registers",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "binary_adders",
+      "name": "Binary Adders",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "hardwired_sequence_control",
+      "name": "Hardwired Sequence Control",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "relay_registers",
+      "name": "Relay Registers",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "parallel_register_banks",
+      "name": "Parallel Register Banks",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "memory_address_decoding",
+      "name": "Memory Address Decoding",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "read_write_memory",
+      "name": "Addressable Read/Write Memory",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "instruction_registers",
+      "name": "Instruction Registers",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "program_counters",
+      "name": "Program Counters",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "conditional_branch_circuits",
+      "name": "Conditional Branch Circuits",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "stored_program_control",
+      "name": "Stored-Program Control",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D21"
+    },
+    {
+      "id": "diode_control_stores",
+      "name": "Diode Control Stores",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "microinstruction_sequencing",
+      "name": "Microinstruction Sequencing",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "arithmetic_logic_units",
+      "name": "Arithmetic-Logic Units",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "microprogrammed_machine_control",
+      "name": "Microprogrammed Machine Control",
+      "source_status": "implemented_baseline",
+      "source_domain": "knowledge",
+      "field": "D21"
+    },
+    {
+      "id": "seed_oil_pressing",
+      "name": "Seed Oil Pressing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D01"
+    },
+    {
+      "id": "lampblack_capture",
+      "name": "Lampblack Capture",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "oil_based_printing_inks",
+      "name": "Oil-Based Printing Inks",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "relief_block_cutting",
+      "name": "Relief Block Cutting",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "wooden_movable_type",
+      "name": "Wooden Movable Type",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "hand_relief_printing",
+      "name": "Hand Relief Printing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "screw_press_printing",
+      "name": "Screw-Press Printing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "cylinder_press_printing",
+      "name": "Cylinder-Press Printing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "copperplate_preparation",
+      "name": "Copperplate Preparation",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "burin_engraving",
+      "name": "Burin Engraving",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D19"
+    },
+    {
+      "id": "drypoint_printmaking",
+      "name": "Drypoint Printmaking",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D19"
+    },
+    {
+      "id": "mezzotint_printmaking",
+      "name": "Mezzotint Printmaking",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D19"
+    },
+    {
+      "id": "steelplate_engraving",
+      "name": "Steelplate Engraving",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D19"
+    },
+    {
+      "id": "rolling_intaglio_printing",
+      "name": "Rolling Intaglio Printing",
+      "source_status": "implemented_baseline",
+      "source_domain": "production",
+      "field": "D13"
+    },
+    {
+      "id": "agreed_signal_codes",
+      "name": "Agreed Signal Codes",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "relay_observation_posts",
+      "name": "Relay Observation Posts",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "timed_signal_sequences",
+      "name": "Timed Signal Sequences",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "shutter_signal_frames",
+      "name": "Shutter Signal Frames",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "optical_telegraphy",
+      "name": "Optical Telegraphy",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "telegraph_keys",
+      "name": "Telegraph Keys",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "electromagnet_sounders",
+      "name": "Electromagnet Sounders",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "line_insulators",
+      "name": "Line Insulators",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "telegraph_return_circuits",
+      "name": "Telegraph Return Circuits",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "electrical_telegraphy",
+      "name": "Electrical Telegraphy",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "polarized_telegraph_relays",
+      "name": "Polarized Telegraph Relays",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "duplex_telegraphy",
+      "name": "Duplex Telegraphy",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "punched_message_tape",
+      "name": "Punched Message Tape",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "teleprinter_mechanisms",
+      "name": "Teleprinter Mechanisms",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "automatic_telegraphy",
+      "name": "Automatic Telegraphy",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "acoustic_diaphragms",
+      "name": "Acoustic Diaphragms",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "carbon_microphones",
+      "name": "Carbon Microphones",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "electromagnetic_earpieces",
+      "name": "Electromagnetic Earpieces",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "telephone_circuits",
+      "name": "Telephone Circuits",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "manual_switchboards",
+      "name": "Manual Switchboards",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "balanced_conductor_pairs",
+      "name": "Balanced Conductor Pairs",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "inductive_line_loading",
+      "name": "Inductive Line Loading",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "telephone_repeaters",
+      "name": "Telephone Repeaters",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "electromagnetic_wave_theory",
+      "name": "Electromagnetic Wave Theory",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "resonant_tuned_circuits",
+      "name": "Resonant Tuned Circuits",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "variable_air_capacitors",
+      "name": "Variable Air Capacitors",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "aerial_matching",
+      "name": "Aerial Matching",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "crystal_radio_detection",
+      "name": "Crystal Radio Detection",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "tuned_radio_reception",
+      "name": "Tuned Radio Reception",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "thermionic_emission",
+      "name": "Thermionic Emission",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "vacuum_diodes",
+      "name": "Vacuum Diodes",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "triode_valves",
+      "name": "Triode Valves",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "feedback_radio_oscillators",
+      "name": "Feedback Radio Oscillators",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "frequency_stabilization",
+      "name": "Frequency Stabilization",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "radio_telegraphy",
+      "name": "Radio Telegraphy",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "amplitude_modulation",
+      "name": "Amplitude Modulation",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "frequency_modulation",
+      "name": "Frequency Modulation",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "frequency_conversion",
+      "name": "Frequency Conversion",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D21"
+    },
+    {
+      "id": "superheterodyne_reception",
+      "name": "Superheterodyne Reception",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "signal_sampling",
+      "name": "Signal Sampling",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "pulse_code_modulation",
+      "name": "Pulse-Code Modulation",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "message_framing",
+      "name": "Message Framing",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "error_detection_codes",
+      "name": "Error-Detection Codes",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "automatic_repeat_request",
+      "name": "Automatic Repeat Request",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "data_modems",
+      "name": "Data Modems",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "packet_switching",
+      "name": "Packet Switching",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "packet_routers",
+      "name": "Packet Routers",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    },
+    {
+      "id": "store_forward_archives",
+      "name": "Store-and-Forward Archives",
+      "source_status": "pending_communications",
+      "source_domain": "communications",
+      "field": "D13"
+    }
+  ],
+  "classification_notes": [
+    "A primary field reflects the main taught mechanism or operating application, not every system that consumes its output. Cross-field dependencies retain their existing edges.",
+    "Military-specific care and logistics remain D20; broadly usable ships and flight mechanisms belong to D10/D11 even when runtime domains call them security.",
+    "Component electronics belong to D21; communications coding and network practice belong to D13. Optical measurement instruments and general physical models belong to D12.",
+    "Wood, minerals and feedstock preparation belong to D04; producing fuels belongs to D05; mechanisms and machine tooling belong to D06. Application-specific running gear remains D09.",
+    "Existing broad discoveries remain counted once. If later expansion splits a broad mechanism, explicitly retire or narrow the earlier identity and reconcile saves rather than count an umbrella plus equivalent children.",
+    "Assignments are editorial proposals for review. A runtime signal domain is not an era, field quota or universal civilization level. Historical horizon allocation remains outstanding."
+  ]
+}

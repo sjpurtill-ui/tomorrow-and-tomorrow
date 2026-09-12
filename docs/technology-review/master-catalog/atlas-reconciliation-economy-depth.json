@@ -1,0 +1,235 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "review_id": "D17-01",
+      "candidate_name": "Reciprocal gift accounting",
+      "mapped_ids": [
+        "reciprocal_gift_accounts"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-02",
+      "candidate_name": "Barter equivalence practices",
+      "mapped_ids": [
+        "barter_equivalence_tables"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-03",
+      "candidate_name": "Market gatherings",
+      "mapped_ids": [
+        "market_gathering_schedules"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-04",
+      "candidate_name": "Cargo seals",
+      "mapped_ids": [
+        "cargo_seals"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-05",
+      "candidate_name": "Debt witnesses",
+      "mapped_ids": [
+        "witnessed_obligations"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-06",
+      "candidate_name": "Standard coin assay",
+      "mapped_ids": [
+        "ore_assaying",
+        "merchant_weight_verification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Coin inspection combines existing calibrated assay and weight verification. The proposed duplicate monetary assay identity was excluded."
+    },
+    {
+      "review_id": "D17-07",
+      "candidate_name": "Merchant credit",
+      "mapped_ids": [
+        "merchant_credit_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-08",
+      "candidate_name": "Bills of exchange",
+      "mapped_ids": [
+        "bills_of_exchange"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-09",
+      "candidate_name": "Mutual risk pools",
+      "mapped_ids": [
+        "insurance_risk_pooling"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "General finite mutual pooling is now authored separately from shipping-specific insured exposure. It can precede formal actuarial models."
+    },
+    {
+      "review_id": "D17-10",
+      "candidate_name": "Partnership accounting",
+      "mapped_ids": [
+        "partnership_capital_accounts"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-11",
+      "candidate_name": "Double entry bookkeeping",
+      "mapped_ids": [
+        "double_entry_bookkeeping"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-12",
+      "candidate_name": "Joint stock organization",
+      "mapped_ids": [
+        "joint_stock_organization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-13",
+      "candidate_name": "Central clearing",
+      "mapped_ids": [
+        "payment_clearing_houses",
+        "net_settlement"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-14",
+      "candidate_name": "Public bond markets",
+      "mapped_ids": [
+        "public_bond_issuance",
+        "bond_yield_comparison"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-15",
+      "candidate_name": "Industrial cost accounting",
+      "mapped_ids": [
+        "industrial_job_costing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-16",
+      "candidate_name": "Electronic settlement",
+      "mapped_ids": [
+        "gross_real_time_settlement",
+        "electronic_payment_authentication"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-17",
+      "candidate_name": "Deposit protection systems",
+      "mapped_ids": [
+        "deposit_protection_pools"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-18",
+      "candidate_name": "Project finance",
+      "mapped_ids": [
+        "project_finance_accounts"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-19",
+      "candidate_name": "Supply chain credit",
+      "mapped_ids": [
+        "supply_chain_credit"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-20",
+      "candidate_name": "Payment fraud detection",
+      "mapped_ids": [
+        "payment_fraud_detection"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-21",
+      "candidate_name": "Programmable settlement agreements",
+      "mapped_ids": [
+        "programmable_settlement_agreements"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-22",
+      "candidate_name": "Resource circularity accounting",
+      "mapped_ids": [
+        "resource_circularity_accounts"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-23",
+      "candidate_name": "Interplanetary clearing",
+      "mapped_ids": [
+        "interplanetary_clearing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-24",
+      "candidate_name": "Automated market oversight",
+      "mapped_ids": [
+        "automated_market_oversight"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    },
+    {
+      "review_id": "D17-25",
+      "candidate_name": "Long duration liability finance",
+      "mapped_ids": [
+        "long_duration_liability_funds"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable authored or baseline mechanisms; the candidate label adds no discovery identity."
+    }
+  ]
+}

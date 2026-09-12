@@ -563,7 +563,7 @@ func retool_production_line(job_id:int,item:String)->Dictionary:
 func set_production_labor_share(value:float)->Dictionary:
 	if not is_finite(value) or value<0 or value>1: return {"error":"Production share must be between 0 and 100%."}
 	production_labor_share=value
-	return {"ok":true,"message":"Military workshops receive up to %d%% of crafting labor; unused capacity remains civilian." % roundi(value*100)}
+	return {"ok":true,"message":"Workshop lines receive up to %d%% of crafting labor; unused capacity remains available for other civilian work." % roundi(value*100)}
 
 
 func production_line_capacity()->int:
@@ -573,7 +573,7 @@ func production_line_capacity()->int:
 func _production_line_gate()->Dictionary:
 	var capacity:=production_line_capacity()
 	if equipment_queue.size()>=capacity:
-		return {"error":"All %d military production lines are assigned. Complete or cancel a line, or develop broader production, logistics, institutions, and security capacity." % capacity,"capacity":capacity}
+		return {"error":"All %d workshop production lines are assigned. Complete or cancel a line, or develop broader production, logistics, institutions, and security capacity." % capacity,"capacity":capacity}
 	return {}
 
 
@@ -741,13 +741,14 @@ func _detach_field_army_formations(army_id:int,requested:int)->Array[Dictionary]
 	return detached
 
 
-func _detach_occupation_formations(requested:int)->Array[Dictionary]:
+func _detach_occupation_formations(requested:int,unit_filter:String="")->Array[Dictionary]:
 	var detached:Array[Dictionary]=[]
 	var remaining:=maxi(0,requested)
 	var formations:Array=home_army.get("formations",[])
 	for index in range(formations.size()-1,-1,-1):
 		if remaining<=0: break
 		var formation:Dictionary=formations[index]
+		if not unit_filter.is_empty() and String(formation.get("unit",""))!=unit_filter:continue
 		var original_count:=maxi(0,int(formation.get("count",0)))
 		if original_count<=0: continue
 		var take:=mini(remaining,original_count)
@@ -1626,7 +1627,7 @@ func military_capabilities()->Dictionary:
 	var equipment:Dictionary={}
 	for item in EQUIPMENT_KNOWLEDGE: equipment[item]=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE[item]),0.08)
 	var queued_trainees:=_queued_trainees()
-	return {"development":military_development_snapshot(),"organization":formation_organization_snapshot(),"production_lines":production_lines_snapshot(),"field_armies":field_armies_snapshot(),"fronts":WorldSimulation.world.military_fronts_snapshot() if CivilizationSystem!=null and WorldSimulation.world.has_method("military_fronts_snapshot") else {"fronts":[]},"units":units,"equipment":equipment,"unit_equipment":_unit_equipment_view(),"training_programs":training_program_catalog(),"training_program":training_program_snapshot(),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"delivery_load_capacity":_daily_delivery_capacity(),"equipment_delivery_load":EQUIPMENT_DELIVERY_LOAD.duplicate(true),"ammunition_delivery_load":AMMUNITION_DELIVERY_LOAD.duplicate(true),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
+	return {"development":military_development_snapshot(),"organization":formation_organization_snapshot(),"production_lines":production_lines_snapshot(),"field_armies":field_armies_snapshot(),"fronts":WorldSimulation.world.military_fronts_snapshot() if CivilizationSystem!=null and WorldSimulation.world.has_method("military_fronts_snapshot") else {"fronts":[]},"units":units,"equipment":equipment,"unit_equipment":_unit_equipment_view(),"training_programs":training_program_catalog(),"training_program":training_program_snapshot(),"transport_carts":_knowledge_gate("joinery",0.10),"progression_errors":validate_military_progression(),"recruitment_capacity":recruitment_capacity(),"training_rate":_effective_training_rate(queued_trainees),"base_training_rate":_training_rate(),"training_capacity":training_capacity(),"training_load":queued_trainees,"training_bottleneck":maxi(0,queued_trainees-training_capacity()),"training_injury_multiplier":_training_injury_risk_multiplier(),"production_rate":_production_rate(),"base_production_rate":_base_production_rate(),"workshop_utilization":workshop_utilization(),"civilian_crafting_fraction":civilian_crafting_fraction(),"equipment_backlog_work":_equipment_backlog_work(),"medical_recovery":_adoption("battlefield_medicine"),"medical_support":preload("res://scripts/field_medicine.gd").quote(home_army,float(home_army.get("supply_level",1.0))),"logistics_practice":_adoption("supply_groups"),"staff_planning":_adoption("military_staffs"),"delivery_load_capacity":_daily_delivery_capacity(),"equipment_delivery_load":EQUIPMENT_DELIVERY_LOAD.duplicate(true),"ammunition_delivery_load":AMMUNITION_DELIVERY_LOAD.duplicate(true),"veteran_experience":_army_experience(),"doctrine_transfer":_army_experience()*_adoption("professional_corps")}
 
 
 func military_development_snapshot()->Dictionary:
@@ -2572,6 +2573,7 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	if not preload("res://scripts/combined_arms_doctrine.gd").valid_tree(payload):return {"error":"Invalid practiced military doctrine."}
 	var command_error:=String(command_hierarchy.validate(payload.get("command_hierarchy",{})))
 	if command_error!="":return {"error":command_error}
 	var strategy:Variant=payload.get("training_strategy",{})
@@ -2994,7 +2996,8 @@ func _normalize_equipment_jobs()->void:
 			var job_type:=String(job.get("job_type","production"))
 			var recipe:Dictionary
 			if job_type=="consumable": recipe=_consumable_recipe(String(job.get("item","arrows")))
-			elif job_type=="transport": recipe=_transport_recipe()
+			# Only legacy batches lack a reservation; preserve their historical input refund basis.
+			elif job_type=="transport": recipe={"materials":{"Timber":8.0,"Fiber Plants":1.5},"days":5.0}
 			else: recipe=_equipment_recipe(String(job.get("item","improvised")))
 			var factor:=0.18 if String(job.job_type)=="repair" else 1.0
 			var reserved:Dictionary={}
@@ -3513,7 +3516,8 @@ func _process_military_day()->void:
 	home_army["delivery_load_capacity_today"]=daily_delivery_capacity
 	home_army["delivery_load_used_today"]=equipment_load_used+ammunition_load_used
 	var recovery_multiplier:=0.35+supply*0.55+_adoption("battlefield_medicine")*0.55
-	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier})
+	var medical:Dictionary=preload("res://scripts/field_medicine.gd").provide(home_army,supply)
+	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"medical_recovery":medical.recovery,"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier,"doctrine_levels":preload("res://scripts/combined_arms_doctrine.gd").levels(),"doctrine_supply":supply})
 	home_army=prepared.force
 	_rejoin_recovered_population("scattered_pool",int(prepared.scattered_returned))
 	_rejoin_recovered_population("wounded_pool",int(prepared.wounded_returned))
@@ -3751,6 +3755,7 @@ func _rejoin_recovered_population(_pool_name:String,_count:int)->void:
 
 
 func _process_equipment_production_day()->void:
+	var repair_work:=preload("res://scripts/field_repair.gd").prepare(self)
 	if equipment_queue.is_empty(): return
 	var crafting:=_production_rate()
 	var weight_total:=0.0
@@ -3766,8 +3771,14 @@ func _process_equipment_production_day()->void:
 		if bool(job.get("persistent",false)):continue
 		var allocation:=maxf(0.05,float(job.get("allocation",1.0)))
 		var efficiency:=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
-		if not PersistentProduction.eligible(self,job) or crafting<=0: continue
-		job["progress_days"]=float(job.get("progress_days",0.0))+crafting*allocation/maxf(0.05,weight_total)*efficiency
+		if not PersistentProduction.eligible(self,job): continue
+		var work:=maxf(0,crafting)*allocation/maxf(0.05,weight_total)*efficiency
+		if String(job.get("job_type",""))=="repair" and preload("res://scripts/field_repair.gd").understood(self,String(job.item)):
+			var support:=minf(repair_work,maxf(0,float(job.required_days)-float(job.get("progress_days",0))-work))
+			work+=support
+			repair_work-=support
+		if work<=0:continue
+		job["progress_days"]=float(job.get("progress_days",0.0))+work
 		job["efficiency"]=move_toward(efficiency,1.0,0.0025*(0.65+_adoption("workshop_standards")))
 		var work_per_item:=maxf(0.01,float(job.get("work_per_item",float(job.get("required_days",1.0))/maxf(1.0,float(job.get("count",1))))))
 		var previously_completed:=int(job.get("completed",0))
@@ -4146,7 +4157,7 @@ func _consumable_recipe(item:String)->Dictionary:
 
 
 func _transport_recipe()->Dictionary:
-	return {"materials":{"Timber":8.0,"Fiber Plants":1.5},"days":5.0}
+	return {"materials":{"Cart Assembly Kits":1.0},"days":1.0}
 
 
 func _unit_equipment_view()->Dictionary:

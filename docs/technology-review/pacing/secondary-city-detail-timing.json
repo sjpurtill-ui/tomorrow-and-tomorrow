@@ -1,0 +1,3454 @@
+{
+  "base_commit": "59f80af",
+  "candidate": "schema 9 secondary-city timing breakdown",
+  "compared_gameplay_fields": [
+    "annual_snapshots",
+    "bottlenecks",
+    "discoveries",
+    "final",
+    "full_campaign_verified",
+    "initial",
+    "limitations",
+    "live_catalog",
+    "scenario",
+    "seed",
+    "simulated_days",
+    "stop_reason",
+    "target_days",
+    "target_reached"
+  ],
+  "all_three_match": true,
+  "interval_sums_match": true,
+  "secondary_detail_shares_percent": {
+    "consequences": 53.69777866149118,
+    "construction": 3.3604066618542707,
+    "economy": 13.787427543905908,
+    "morphology": 0.618897154490873,
+    "resources": 23.77424388472727,
+    "scope_entry": 1.9235174867190843,
+    "scope_exit": 2.8377286068114134
+  },
+  "limitations": [
+    "400-day diagnostic, not mature-city or millennial scaling evidence",
+    "Secondary detail intervals are nested inside the outer secondary_settlements interval; do not add the two",
+    "Construction includes resource-metric snapshot copying; scope_entry/exit measure resource scope only, while population scopes remain inside their respective stages",
+    "Home-unavailable recovery path remains outside the normal profiling flow"
+  ],
+  "baseline": {
+    "annual_snapshots": [
+      {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1,
+        "army_provisions_delivered": 0,
+        "army_provisions_required": 0,
+        "completed_buildings": 0,
+        "day": 0,
+        "food_consumption": 0,
+        "food_days": 30.0,
+        "food_demand_breakdown": {},
+        "food_eaten": 0,
+        "food_intake_ratio": 1,
+        "food_security": 0.82,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 10.0,
+          "Stone": 0.0,
+          "Timber": 12.0
+        },
+        "plot_history_records": 0,
+        "population": 120,
+        "resource_deposits": 0,
+        "settled": false,
+        "settlement_count": 0,
+        "settlement_plots": 0,
+        "year": 0.0
+      },
+      {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1.0,
+        "army_provisions_delivered": 0.0,
+        "army_provisions_required": 0.0,
+        "completed_buildings": 0,
+        "day": 1,
+        "food_consumption": 114.2184,
+        "food_days": 31.5185644344519,
+        "food_demand_breakdown": {
+          "adults": 72.0,
+          "army_field": 0.0,
+          "base": 103.296,
+          "children": 23.04,
+          "climate": 0.0,
+          "elders": 8.256,
+          "labor": 10.5,
+          "lactation": 0.3024,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.12,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 114.2184,
+          "travel": 0.0
+        },
+        "food_eaten": 114.2184,
+        "food_intake_ratio": 1.0,
+        "food_security": 0.824757128260138,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 9.965,
+          "Stone": 0.0,
+          "Timber": 11.8767111111111
+        },
+        "plot_history_records": 0,
+        "population": 120,
+        "resource_deposits": 52,
+        "settled": true,
+        "settlement_count": 0,
+        "settlement_plots": 0,
+        "year": 0.00273972602739726
+      },
+      {
+        "active_inquiries": 4,
+        "army_provision_delivery_ratio": 0.611960738935358,
+        "army_provisions_delivered": 2.0561880828228,
+        "army_provisions_required": 3.36,
+        "completed_buildings": 5,
+        "day": 365,
+        "food_consumption": 77.397843853428,
+        "food_days": 71.8901634154747,
+        "food_demand_breakdown": {
+          "adults": 48.5941734906475,
+          "army_field": 3.36,
+          "base": 69.6942901602865,
+          "children": 15.1745323307912,
+          "climate": 0.0,
+          "elders": 5.92558433884774,
+          "labor": 7.26,
+          "lactation": 0.203553693141448,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.24,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 77.397843853428,
+          "travel": 0.0
+        },
+        "food_eaten": 76.0940319362508,
+        "food_intake_ratio": 0.98315441552033,
+        "food_security": 0.979999999586374,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 65.3064539717247,
+          "Stone": 47.400943998499,
+          "Timber": 63.4347368779254
+        },
+        "plot_history_records": 41,
+        "population": 121,
+        "resource_deposits": 52,
+        "settled": true,
+        "settlement_count": 2,
+        "settlement_plots": 19,
+        "year": 1.0
+      }
+    ],
+    "bottlenecks": {
+      "active_investigations": {
+        "ecology::Land health": "seasonal_patterns",
+        "infrastructure::Housing": "drainage",
+        "production::Material supply": "charcoal",
+        "security::Public safety": "watch_rotation"
+      },
+      "allocations": {
+        "Administration": 3,
+        "Construction": 8,
+        "Crafting": 4,
+        "Defense": 2,
+        "Extraction": 6,
+        "Food": 33,
+        "Knowledge": 4,
+        "Logistics": 8,
+        "Survey": 5
+      },
+      "causally_ready_questions": [
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "seasonal_patterns",
+          "missing_materials": [],
+          "progress": 0.256310842908945,
+          "score": 90.4772503560886,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "nutrition",
+          "eligible": true,
+          "id": "food_drying",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 144.024868584471,
+          "subcategory": "Daily supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "cordage",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 42.5233304551271,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "charcoal",
+          "missing_materials": [],
+          "progress": 0.140220883423412,
+          "score": 136.273335986461,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "clay_shaping",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 77.1574457254644,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "infrastructure",
+          "eligible": true,
+          "id": "drainage",
+          "missing_materials": [],
+          "progress": 0.223347977876737,
+          "score": 134.051854225967,
+          "subcategory": "Housing"
+        },
+        {
+          "domain": "health",
+          "eligible": true,
+          "id": "wound_cleaning",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 104.059725965452,
+          "subcategory": "Injury safety"
+        },
+        {
+          "domain": "health",
+          "eligible": true,
+          "id": "herbal_classification",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 77.3769849918999,
+          "subcategory": "General health"
+        },
+        {
+          "domain": "knowledge",
+          "eligible": true,
+          "id": "tallies",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 39.8807803733099,
+          "subcategory": "Preserved knowledge"
+        },
+        {
+          "domain": "knowledge",
+          "eligible": true,
+          "id": "route_memory",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 81.4948253491068,
+          "subcategory": "Observers"
+        },
+        {
+          "domain": "institutions",
+          "eligible": true,
+          "id": "labor_rotations",
+          "missing_materials": [],
+          "progress": 0.063932193194114,
+          "score": 59.5397708099405,
+          "subcategory": "Administration"
+        },
+        {
+          "domain": "security",
+          "eligible": true,
+          "id": "watch_rotation",
+          "missing_materials": [],
+          "progress": 0.265174476594703,
+          "score": 33.050455159382,
+          "subcategory": "Public safety"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "stone_sorting",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 33.4340428761646,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "timber_grading",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 138.965058533681,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "fiber_grading",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 103.472399896194,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "clay_testing",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 28.3038481024977,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "culture",
+          "eligible": true,
+          "id": "oral_epics",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 110.937108165478,
+          "subcategory": "Collective memory"
+        }
+      ],
+      "controller_plan": {
+        "ambition": "military",
+        "at_war": false,
+        "capacity_share": 0.810664078593254,
+        "delivery_shortage": false,
+        "deploy_share": 0.679773208498955,
+        "expansion_food": 48.9996595680714,
+        "food_shortage": false,
+        "goals": [
+          {
+            "accord": "routes",
+            "id": "growth",
+            "strategy": "growth",
+            "title": "Make room for the next generation"
+          },
+          {
+            "accord": "restraint",
+            "id": "security",
+            "strategy": "fortification",
+            "title": "Keep our homeland independent"
+          },
+          {
+            "accord": "exchange",
+            "id": "learning",
+            "strategy": "inquiry",
+            "title": "Bring useful knowledge home"
+          }
+        ],
+        "hungry": false,
+        "offensive": true,
+        "peace_food": 22.2371687293053,
+        "personality": {
+          "assertiveness": 0.686591804027557,
+          "discipline": 0.806791067123413,
+          "empathy": 0.429149121046066,
+          "openness": 0.466497719287872,
+          "risk_tolerance": 0.790626287460327
+        },
+        "recruit_share": 0.0982297798991203,
+        "research_weights": {
+          "culture": 0.644088560342789,
+          "demography": 1.63623420894146,
+          "ecology": 0.466397903859615,
+          "health": 0.593319296836853,
+          "infrastructure": 2.27441419363022,
+          "institutions": 0.724414193630219,
+          "knowledge": 0.709797263145447,
+          "labor": 0.684074640274048,
+          "logistics": 0.689226400852203,
+          "nutrition": 0.620301586389542,
+          "production": 1.33999462127686,
+          "security": 1.10266897678375
+        },
+        "scout_days": 30,
+        "scout_food": 28.2812113761902,
+        "settle_distance": 40.4625463485718,
+        "trade_opinion": 0.029823149740696,
+        "training": "intensive",
+        "war_food": 40.4686856269836,
+        "war_opinion": -0.515939979255199
+      },
+      "known_ids": [],
+      "material_states": {
+        "Bitumen": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.139072803695109
+          }
+        ],
+        "Clay": [
+          {
+            "access": 0.4760626218677,
+            "blockers": [],
+            "route": 0.235680856276753,
+            "stage": "surveyed",
+            "survey": 1.0039124793027
+          },
+          {
+            "access": 0.479460210812015,
+            "blockers": [],
+            "route": 0.243231053930786,
+            "stage": "surveyed",
+            "survey": 1.00271504626273
+          },
+          {
+            "access": 0.487102284298745,
+            "blockers": [],
+            "route": 0.260213439456852,
+            "stage": "surveyed",
+            "survey": 1.00285055596763
+          },
+          {
+            "access": 0.482007976975667,
+            "blockers": [],
+            "route": 0.248892756516678,
+            "stage": "surveyed",
+            "survey": 1.00387128578231
+          }
+        ],
+        "Coal": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Copper Ore": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.219235853988079
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.236421341522779
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.230682261904645
+          }
+        ],
+        "Deep Aquifer": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Fertile Soil": [
+          {
+            "access": 0.624024590658239,
+            "blockers": [],
+            "route": 0.580485231366839,
+            "stage": "surveyed",
+            "survey": 1.00649639276776
+          },
+          {
+            "access": 0.6222399040864,
+            "blockers": [],
+            "route": 0.576519261207197,
+            "stage": "surveyed",
+            "survey": 1.00314323473482
+          },
+          {
+            "access": 0.6222399040864,
+            "blockers": [],
+            "route": 0.576519261207197,
+            "stage": "surveyed",
+            "survey": 1.00640791923502
+          }
+        ],
+        "Fiber Plants": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ],
+        "Fine Sand": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.178274871685246
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.178621825799749
+          }
+        ],
+        "Flint": [
+          {
+            "access": 0.438714697608553,
+            "blockers": [],
+            "route": 0.184685469034204,
+            "stage": "surveyed",
+            "survey": 1.00023768541589
+          },
+          {
+            "access": 0.43616367647922,
+            "blockers": [],
+            "route": 0.179016533191241,
+            "stage": "surveyed",
+            "survey": 1.00024385770298
+          }
+        ],
+        "Freshwater": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "accessible",
+            "survey": 1.0
+          }
+        ],
+        "Game": [
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00375521794344
+          },
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00280078748388
+          },
+          {
+            "access": 0.638398568361688,
+            "blockers": [],
+            "route": 0.59642740404117,
+            "stage": "surveyed",
+            "survey": 1.00263761187291
+          },
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00415862932539
+          }
+        ],
+        "Graphite": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Iron Ore": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0134899749849114
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0189966308243982
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0146116579778169
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0148013064131724
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0152987530842631
+          }
+        ],
+        "Limestone": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.471782387674815
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.474634341286737
+          }
+        ],
+        "Medicinal Plants": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.984724435561091
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "surveyed",
+            "survey": 1.00045435171284
+          }
+        ],
+        "Phosphate Rock": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Refractory Clay": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Salt": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.801726713758103
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.783235067794246
+          }
+        ],
+        "Stone": [
+          {
+            "access": 0.613317920877362,
+            "blockers": [],
+            "route": 0.540692631853779,
+            "stage": "surveyed",
+            "survey": 1.00296038468424
+          },
+          {
+            "access": 0.607904328476946,
+            "blockers": [],
+            "route": 0.528662426519521,
+            "stage": "surveyed",
+            "survey": 1.0057535277617
+          },
+          {
+            "access": 0.613317920877362,
+            "blockers": [],
+            "route": 0.540692631853779,
+            "stage": "surveyed",
+            "survey": 1.00532503175548
+          },
+          {
+            "access": 0.609711208769621,
+            "blockers": [],
+            "route": 0.5326777160588,
+            "stage": "surveyed",
+            "survey": 1.00412173541781
+          },
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ],
+        "Sulfur": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Timber": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ]
+      },
+      "research_allocations": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 1,
+        "health": 0,
+        "infrastructure": 1,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 0,
+        "production": 1,
+        "security": 1
+      },
+      "research_subcategory_allocations": {
+        "culture": {
+          "Collective memory": 0,
+          "Inquiry breadth": 0,
+          "Shared legitimacy": 0,
+          "Social cohesion": 0
+        },
+        "demography": {
+          "Child survival": 0,
+          "Fertility conditions": 0,
+          "Maternal safety": 0,
+          "Shelter capacity": 0
+        },
+        "ecology": {
+          "Land health": 1,
+          "Natural recovery": 0,
+          "Pollution control": 0,
+          "Resource sustainability": 0
+        },
+        "health": {
+          "Disease control": 0,
+          "General health": 0,
+          "Injury safety": 0,
+          "Water & sanitation": 0
+        },
+        "infrastructure": {
+          "Construction": 0,
+          "Housing": 1,
+          "Public works": 0,
+          "Resilience": 0
+        },
+        "institutions": {
+          "Administration": 0,
+          "Institutional flexibility": 0,
+          "Legitimacy": 0,
+          "State capacity": 0
+        },
+        "knowledge": {
+          "Communication": 0,
+          "Directed attention": 0,
+          "Observers": 0,
+          "Preserved knowledge": 0
+        },
+        "labor": {
+          "Able workforce": 0,
+          "Coordination": 0,
+          "Work efficiency": 0,
+          "Workload balance": 0
+        },
+        "logistics": {
+          "Carrying capacity": 0,
+          "Route quality": 0,
+          "Storage system": 0,
+          "Trade reach": 0
+        },
+        "nutrition": {
+          "Daily supply": 0,
+          "Diet quality": 0,
+          "Land productivity": 0,
+          "Stored reserve": 0
+        },
+        "production": {
+          "Craft capacity": 0,
+          "Material supply": 1,
+          "Standardization": 0,
+          "Tool quality": 0
+        },
+        "security": {
+          "Crisis resilience": 0,
+          "Military readiness": 0,
+          "Organized defense": 0,
+          "Public safety": 1
+        }
+      },
+      "settlements": [
+        {
+          "id": "settlement_001",
+          "last_resource_day": -1,
+          "occupied": false,
+          "plots": 19,
+          "population": 81.0303220137833,
+          "primary": true
+        },
+        {
+          "id": "settlement_002",
+          "last_resource_day": 400,
+          "occupied": false,
+          "plots": 13,
+          "population": 40.7044383339863,
+          "primary": false
+        }
+      ]
+    },
+    "days_per_second": 63.441712926249,
+    "discoveries": [],
+    "final": {
+      "active_inquiries": 4,
+      "army_provision_delivery_ratio": 0.613088319815607,
+      "army_provisions_delivered": 2.05997675458044,
+      "army_provisions_required": 3.36,
+      "completed_buildings": 5,
+      "day": 400,
+      "food_consumption": 77.703270103225,
+      "food_days": 80.4889022876008,
+      "food_demand_breakdown": {
+        "adults": 48.6750628233993,
+        "army_field": 3.36,
+        "base": 69.8990919657649,
+        "children": 15.2198247491736,
+        "climate": 0.0,
+        "elders": 6.00420439319204,
+        "labor": 7.36,
+        "lactation": 0.204178137460151,
+        "mission_absent": 0.0,
+        "occupation_relief": 0.0,
+        "pregnancy": 0.24,
+        "prisoner_custody": 0.0,
+        "rationing": 0.0,
+        "total": 77.703270103225,
+        "travel": 0.0
+      },
+      "food_eaten": 76.4032468578054,
+      "food_intake_ratio": 0.983269388229189,
+      "food_security": 0.979999999942889,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 69.9237308312945,
+        "Stone": 53.0927402439937,
+        "Timber": 71.6756321619956
+      },
+      "plot_history_records": 41,
+      "population": 122,
+      "resource_deposits": 52,
+      "settled": true,
+      "settlement_count": 2,
+      "settlement_plots": 19,
+      "year": 1.0958904109589
+    },
+    "full_campaign_verified": false,
+    "initial": {
+      "active_inquiries": 3,
+      "army_provision_delivery_ratio": 1,
+      "army_provisions_delivered": 0,
+      "army_provisions_required": 0,
+      "completed_buildings": 0,
+      "day": 0,
+      "food_consumption": 0,
+      "food_days": 30.0,
+      "food_demand_breakdown": {},
+      "food_eaten": 0,
+      "food_intake_ratio": 1,
+      "food_security": 0.82,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 10.0,
+        "Stone": 0.0,
+        "Timber": 12.0
+      },
+      "plot_history_records": 0,
+      "population": 120,
+      "resource_deposits": 0,
+      "settled": false,
+      "settlement_count": 0,
+      "settlement_plots": 0,
+      "year": 0.0
+    },
+    "limitations": [
+      "One isolated seat, not a full world or a player campaign",
+      "Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling",
+      "No foreign acquisition, war or dependency-recovery scenario",
+      "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+      "Short or collapsed runs do not validate millennial pacing"
+    ],
+    "live_catalog": 408,
+    "profiling_enabled": true,
+    "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange",
+    "schema": 8,
+    "seed": 91420,
+    "simulated_days": 400,
+    "stop_reason": "target reached",
+    "target_days": 400,
+    "target_reached": true,
+    "timing_intervals": [
+      {
+        "from_day": 0,
+        "stages": {
+          "city_trade": {
+            "calls": 365,
+            "microseconds": 77360
+          },
+          "civics": {
+            "calls": 365,
+            "microseconds": 2828
+          },
+          "consequences": {
+            "calls": 365,
+            "microseconds": 1051138
+          },
+          "construction": {
+            "calls": 365,
+            "microseconds": 46930
+          },
+          "context": {
+            "calls": 365,
+            "microseconds": 22882
+          },
+          "controller": {
+            "calls": 365,
+            "microseconds": 316915
+          },
+          "convoy": {
+            "calls": 365,
+            "microseconds": 3098
+          },
+          "discovery": {
+            "calls": 365,
+            "microseconds": 1061951
+          },
+          "economy": {
+            "calls": 365,
+            "microseconds": 301183
+          },
+          "government": {
+            "calls": 365,
+            "microseconds": 271579
+          },
+          "military_and_travel": {
+            "calls": 365,
+            "microseconds": 327601
+          },
+          "operations": {
+            "calls": 365,
+            "microseconds": 22210
+          },
+          "progression": {
+            "calls": 365,
+            "microseconds": 366135
+          },
+          "resources": {
+            "calls": 365,
+            "microseconds": 475428
+          },
+          "secondary_settlements": {
+            "calls": 365,
+            "microseconds": 1129165
+          },
+          "settlement_morphology": {
+            "calls": 365,
+            "microseconds": 17182
+          }
+        },
+        "to_day": 365,
+        "wall_microseconds": 5601629
+      },
+      {
+        "from_day": 365,
+        "stages": {
+          "city_trade": {
+            "calls": 35,
+            "microseconds": 12723
+          },
+          "civics": {
+            "calls": 35,
+            "microseconds": 283
+          },
+          "consequences": {
+            "calls": 35,
+            "microseconds": 106353
+          },
+          "construction": {
+            "calls": 35,
+            "microseconds": 4114
+          },
+          "context": {
+            "calls": 35,
+            "microseconds": 3656
+          },
+          "controller": {
+            "calls": 35,
+            "microseconds": 18403
+          },
+          "convoy": {
+            "calls": 35,
+            "microseconds": 178
+          },
+          "discovery": {
+            "calls": 35,
+            "microseconds": 110339
+          },
+          "economy": {
+            "calls": 35,
+            "microseconds": 32760
+          },
+          "government": {
+            "calls": 35,
+            "microseconds": 38362
+          },
+          "military_and_travel": {
+            "calls": 35,
+            "microseconds": 50504
+          },
+          "operations": {
+            "calls": 35,
+            "microseconds": 4089
+          },
+          "progression": {
+            "calls": 35,
+            "microseconds": 44540
+          },
+          "resources": {
+            "calls": 35,
+            "microseconds": 52983
+          },
+          "secondary_settlements": {
+            "calls": 35,
+            "microseconds": 218066
+          },
+          "settlement_morphology": {
+            "calls": 35,
+            "microseconds": 2651
+          }
+        },
+        "to_day": 400,
+        "wall_microseconds": 702775
+      }
+    ],
+    "timings": {
+      "city_trade": {
+        "calls": 400,
+        "microseconds": 90083
+      },
+      "civics": {
+        "calls": 400,
+        "microseconds": 3111
+      },
+      "consequences": {
+        "calls": 400,
+        "microseconds": 1157491
+      },
+      "construction": {
+        "calls": 400,
+        "microseconds": 51044
+      },
+      "context": {
+        "calls": 400,
+        "microseconds": 26538
+      },
+      "controller": {
+        "calls": 400,
+        "microseconds": 335318
+      },
+      "convoy": {
+        "calls": 400,
+        "microseconds": 3276
+      },
+      "discovery": {
+        "calls": 400,
+        "microseconds": 1172290
+      },
+      "economy": {
+        "calls": 400,
+        "microseconds": 333943
+      },
+      "enabled": true,
+      "government": {
+        "calls": 400,
+        "microseconds": 309941
+      },
+      "military_and_travel": {
+        "calls": 400,
+        "microseconds": 378105
+      },
+      "operations": {
+        "calls": 400,
+        "microseconds": 26299
+      },
+      "progression": {
+        "calls": 400,
+        "microseconds": 410675
+      },
+      "resources": {
+        "calls": 400,
+        "microseconds": 528411
+      },
+      "secondary_settlements": {
+        "calls": 400,
+        "microseconds": 1347231
+      },
+      "settlement_morphology": {
+        "calls": 400,
+        "microseconds": 19833
+      }
+    },
+    "wall_seconds": 6.305
+  },
+  "profiled": {
+    "annual_snapshots": [
+      {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1,
+        "army_provisions_delivered": 0,
+        "army_provisions_required": 0,
+        "completed_buildings": 0,
+        "day": 0,
+        "food_consumption": 0,
+        "food_days": 30.0,
+        "food_demand_breakdown": {},
+        "food_eaten": 0,
+        "food_intake_ratio": 1,
+        "food_security": 0.82,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 10.0,
+          "Stone": 0.0,
+          "Timber": 12.0
+        },
+        "plot_history_records": 0,
+        "population": 120,
+        "resource_deposits": 0,
+        "settled": false,
+        "settlement_count": 0,
+        "settlement_plots": 0,
+        "year": 0.0
+      },
+      {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1.0,
+        "army_provisions_delivered": 0.0,
+        "army_provisions_required": 0.0,
+        "completed_buildings": 0,
+        "day": 1,
+        "food_consumption": 114.2184,
+        "food_days": 31.5185644344519,
+        "food_demand_breakdown": {
+          "adults": 72.0,
+          "army_field": 0.0,
+          "base": 103.296,
+          "children": 23.04,
+          "climate": 0.0,
+          "elders": 8.256,
+          "labor": 10.5,
+          "lactation": 0.3024,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.12,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 114.2184,
+          "travel": 0.0
+        },
+        "food_eaten": 114.2184,
+        "food_intake_ratio": 1.0,
+        "food_security": 0.824757128260138,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 9.965,
+          "Stone": 0.0,
+          "Timber": 11.8767111111111
+        },
+        "plot_history_records": 0,
+        "population": 120,
+        "resource_deposits": 52,
+        "settled": true,
+        "settlement_count": 0,
+        "settlement_plots": 0,
+        "year": 0.00273972602739726
+      },
+      {
+        "active_inquiries": 4,
+        "army_provision_delivery_ratio": 0.611960738935358,
+        "army_provisions_delivered": 2.0561880828228,
+        "army_provisions_required": 3.36,
+        "completed_buildings": 5,
+        "day": 365,
+        "food_consumption": 77.397843853428,
+        "food_days": 71.8901634154747,
+        "food_demand_breakdown": {
+          "adults": 48.5941734906475,
+          "army_field": 3.36,
+          "base": 69.6942901602865,
+          "children": 15.1745323307912,
+          "climate": 0.0,
+          "elders": 5.92558433884774,
+          "labor": 7.26,
+          "lactation": 0.203553693141448,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.24,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 77.397843853428,
+          "travel": 0.0
+        },
+        "food_eaten": 76.0940319362508,
+        "food_intake_ratio": 0.98315441552033,
+        "food_security": 0.979999999586374,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 65.3064539717247,
+          "Stone": 47.400943998499,
+          "Timber": 63.4347368779254
+        },
+        "plot_history_records": 41,
+        "population": 121,
+        "resource_deposits": 52,
+        "settled": true,
+        "settlement_count": 2,
+        "settlement_plots": 19,
+        "year": 1.0
+      }
+    ],
+    "bottlenecks": {
+      "active_investigations": {
+        "ecology::Land health": "seasonal_patterns",
+        "infrastructure::Housing": "drainage",
+        "production::Material supply": "charcoal",
+        "security::Public safety": "watch_rotation"
+      },
+      "allocations": {
+        "Administration": 3,
+        "Construction": 8,
+        "Crafting": 4,
+        "Defense": 2,
+        "Extraction": 6,
+        "Food": 33,
+        "Knowledge": 4,
+        "Logistics": 8,
+        "Survey": 5
+      },
+      "causally_ready_questions": [
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "seasonal_patterns",
+          "missing_materials": [],
+          "progress": 0.256310842908945,
+          "score": 90.4772503560886,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "nutrition",
+          "eligible": true,
+          "id": "food_drying",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 144.024868584471,
+          "subcategory": "Daily supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "cordage",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 42.5233304551271,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "charcoal",
+          "missing_materials": [],
+          "progress": 0.140220883423412,
+          "score": 136.273335986461,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "clay_shaping",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 77.1574457254644,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "infrastructure",
+          "eligible": true,
+          "id": "drainage",
+          "missing_materials": [],
+          "progress": 0.223347977876737,
+          "score": 134.051854225967,
+          "subcategory": "Housing"
+        },
+        {
+          "domain": "health",
+          "eligible": true,
+          "id": "wound_cleaning",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 104.059725965452,
+          "subcategory": "Injury safety"
+        },
+        {
+          "domain": "health",
+          "eligible": true,
+          "id": "herbal_classification",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 77.3769849918999,
+          "subcategory": "General health"
+        },
+        {
+          "domain": "knowledge",
+          "eligible": true,
+          "id": "tallies",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 39.8807803733099,
+          "subcategory": "Preserved knowledge"
+        },
+        {
+          "domain": "knowledge",
+          "eligible": true,
+          "id": "route_memory",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 81.4948253491068,
+          "subcategory": "Observers"
+        },
+        {
+          "domain": "institutions",
+          "eligible": true,
+          "id": "labor_rotations",
+          "missing_materials": [],
+          "progress": 0.063932193194114,
+          "score": 59.5397708099405,
+          "subcategory": "Administration"
+        },
+        {
+          "domain": "security",
+          "eligible": true,
+          "id": "watch_rotation",
+          "missing_materials": [],
+          "progress": 0.265174476594703,
+          "score": 33.050455159382,
+          "subcategory": "Public safety"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "stone_sorting",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 33.4340428761646,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "timber_grading",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 138.965058533681,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "fiber_grading",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 103.472399896194,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "clay_testing",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 28.3038481024977,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "culture",
+          "eligible": true,
+          "id": "oral_epics",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 110.937108165478,
+          "subcategory": "Collective memory"
+        }
+      ],
+      "controller_plan": {
+        "ambition": "military",
+        "at_war": false,
+        "capacity_share": 0.810664078593254,
+        "delivery_shortage": false,
+        "deploy_share": 0.679773208498955,
+        "expansion_food": 48.9996595680714,
+        "food_shortage": false,
+        "goals": [
+          {
+            "accord": "routes",
+            "id": "growth",
+            "strategy": "growth",
+            "title": "Make room for the next generation"
+          },
+          {
+            "accord": "restraint",
+            "id": "security",
+            "strategy": "fortification",
+            "title": "Keep our homeland independent"
+          },
+          {
+            "accord": "exchange",
+            "id": "learning",
+            "strategy": "inquiry",
+            "title": "Bring useful knowledge home"
+          }
+        ],
+        "hungry": false,
+        "offensive": true,
+        "peace_food": 22.2371687293053,
+        "personality": {
+          "assertiveness": 0.686591804027557,
+          "discipline": 0.806791067123413,
+          "empathy": 0.429149121046066,
+          "openness": 0.466497719287872,
+          "risk_tolerance": 0.790626287460327
+        },
+        "recruit_share": 0.0982297798991203,
+        "research_weights": {
+          "culture": 0.644088560342789,
+          "demography": 1.63623420894146,
+          "ecology": 0.466397903859615,
+          "health": 0.593319296836853,
+          "infrastructure": 2.27441419363022,
+          "institutions": 0.724414193630219,
+          "knowledge": 0.709797263145447,
+          "labor": 0.684074640274048,
+          "logistics": 0.689226400852203,
+          "nutrition": 0.620301586389542,
+          "production": 1.33999462127686,
+          "security": 1.10266897678375
+        },
+        "scout_days": 30,
+        "scout_food": 28.2812113761902,
+        "settle_distance": 40.4625463485718,
+        "trade_opinion": 0.029823149740696,
+        "training": "intensive",
+        "war_food": 40.4686856269836,
+        "war_opinion": -0.515939979255199
+      },
+      "known_ids": [],
+      "material_states": {
+        "Bitumen": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.139072803695109
+          }
+        ],
+        "Clay": [
+          {
+            "access": 0.4760626218677,
+            "blockers": [],
+            "route": 0.235680856276753,
+            "stage": "surveyed",
+            "survey": 1.0039124793027
+          },
+          {
+            "access": 0.479460210812015,
+            "blockers": [],
+            "route": 0.243231053930786,
+            "stage": "surveyed",
+            "survey": 1.00271504626273
+          },
+          {
+            "access": 0.487102284298745,
+            "blockers": [],
+            "route": 0.260213439456852,
+            "stage": "surveyed",
+            "survey": 1.00285055596763
+          },
+          {
+            "access": 0.482007976975667,
+            "blockers": [],
+            "route": 0.248892756516678,
+            "stage": "surveyed",
+            "survey": 1.00387128578231
+          }
+        ],
+        "Coal": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Copper Ore": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.219235853988079
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.236421341522779
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.230682261904645
+          }
+        ],
+        "Deep Aquifer": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Fertile Soil": [
+          {
+            "access": 0.624024590658239,
+            "blockers": [],
+            "route": 0.580485231366839,
+            "stage": "surveyed",
+            "survey": 1.00649639276776
+          },
+          {
+            "access": 0.6222399040864,
+            "blockers": [],
+            "route": 0.576519261207197,
+            "stage": "surveyed",
+            "survey": 1.00314323473482
+          },
+          {
+            "access": 0.6222399040864,
+            "blockers": [],
+            "route": 0.576519261207197,
+            "stage": "surveyed",
+            "survey": 1.00640791923502
+          }
+        ],
+        "Fiber Plants": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ],
+        "Fine Sand": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.178274871685246
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.178621825799749
+          }
+        ],
+        "Flint": [
+          {
+            "access": 0.438714697608553,
+            "blockers": [],
+            "route": 0.184685469034204,
+            "stage": "surveyed",
+            "survey": 1.00023768541589
+          },
+          {
+            "access": 0.43616367647922,
+            "blockers": [],
+            "route": 0.179016533191241,
+            "stage": "surveyed",
+            "survey": 1.00024385770298
+          }
+        ],
+        "Freshwater": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "accessible",
+            "survey": 1.0
+          }
+        ],
+        "Game": [
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00375521794344
+          },
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00280078748388
+          },
+          {
+            "access": 0.638398568361688,
+            "blockers": [],
+            "route": 0.59642740404117,
+            "stage": "surveyed",
+            "survey": 1.00263761187291
+          },
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00415862932539
+          }
+        ],
+        "Graphite": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Iron Ore": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0134899749849114
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0189966308243982
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0146116579778169
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0148013064131724
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0152987530842631
+          }
+        ],
+        "Limestone": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.471782387674815
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.474634341286737
+          }
+        ],
+        "Medicinal Plants": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.984724435561091
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "surveyed",
+            "survey": 1.00045435171284
+          }
+        ],
+        "Phosphate Rock": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Refractory Clay": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Salt": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.801726713758103
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.783235067794246
+          }
+        ],
+        "Stone": [
+          {
+            "access": 0.613317920877362,
+            "blockers": [],
+            "route": 0.540692631853779,
+            "stage": "surveyed",
+            "survey": 1.00296038468424
+          },
+          {
+            "access": 0.607904328476946,
+            "blockers": [],
+            "route": 0.528662426519521,
+            "stage": "surveyed",
+            "survey": 1.0057535277617
+          },
+          {
+            "access": 0.613317920877362,
+            "blockers": [],
+            "route": 0.540692631853779,
+            "stage": "surveyed",
+            "survey": 1.00532503175548
+          },
+          {
+            "access": 0.609711208769621,
+            "blockers": [],
+            "route": 0.5326777160588,
+            "stage": "surveyed",
+            "survey": 1.00412173541781
+          },
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ],
+        "Sulfur": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Timber": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ]
+      },
+      "research_allocations": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 1,
+        "health": 0,
+        "infrastructure": 1,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 0,
+        "production": 1,
+        "security": 1
+      },
+      "research_subcategory_allocations": {
+        "culture": {
+          "Collective memory": 0,
+          "Inquiry breadth": 0,
+          "Shared legitimacy": 0,
+          "Social cohesion": 0
+        },
+        "demography": {
+          "Child survival": 0,
+          "Fertility conditions": 0,
+          "Maternal safety": 0,
+          "Shelter capacity": 0
+        },
+        "ecology": {
+          "Land health": 1,
+          "Natural recovery": 0,
+          "Pollution control": 0,
+          "Resource sustainability": 0
+        },
+        "health": {
+          "Disease control": 0,
+          "General health": 0,
+          "Injury safety": 0,
+          "Water & sanitation": 0
+        },
+        "infrastructure": {
+          "Construction": 0,
+          "Housing": 1,
+          "Public works": 0,
+          "Resilience": 0
+        },
+        "institutions": {
+          "Administration": 0,
+          "Institutional flexibility": 0,
+          "Legitimacy": 0,
+          "State capacity": 0
+        },
+        "knowledge": {
+          "Communication": 0,
+          "Directed attention": 0,
+          "Observers": 0,
+          "Preserved knowledge": 0
+        },
+        "labor": {
+          "Able workforce": 0,
+          "Coordination": 0,
+          "Work efficiency": 0,
+          "Workload balance": 0
+        },
+        "logistics": {
+          "Carrying capacity": 0,
+          "Route quality": 0,
+          "Storage system": 0,
+          "Trade reach": 0
+        },
+        "nutrition": {
+          "Daily supply": 0,
+          "Diet quality": 0,
+          "Land productivity": 0,
+          "Stored reserve": 0
+        },
+        "production": {
+          "Craft capacity": 0,
+          "Material supply": 1,
+          "Standardization": 0,
+          "Tool quality": 0
+        },
+        "security": {
+          "Crisis resilience": 0,
+          "Military readiness": 0,
+          "Organized defense": 0,
+          "Public safety": 1
+        }
+      },
+      "settlements": [
+        {
+          "id": "settlement_001",
+          "last_resource_day": -1,
+          "occupied": false,
+          "plots": 19,
+          "population": 81.0303220137833,
+          "primary": true
+        },
+        {
+          "id": "settlement_002",
+          "last_resource_day": 400,
+          "occupied": false,
+          "plots": 13,
+          "population": 40.7044383339863,
+          "primary": false
+        }
+      ]
+    },
+    "days_per_second": 73.9781764379508,
+    "discoveries": [],
+    "final": {
+      "active_inquiries": 4,
+      "army_provision_delivery_ratio": 0.613088319815607,
+      "army_provisions_delivered": 2.05997675458044,
+      "army_provisions_required": 3.36,
+      "completed_buildings": 5,
+      "day": 400,
+      "food_consumption": 77.703270103225,
+      "food_days": 80.4889022876008,
+      "food_demand_breakdown": {
+        "adults": 48.6750628233993,
+        "army_field": 3.36,
+        "base": 69.8990919657649,
+        "children": 15.2198247491736,
+        "climate": 0.0,
+        "elders": 6.00420439319204,
+        "labor": 7.36,
+        "lactation": 0.204178137460151,
+        "mission_absent": 0.0,
+        "occupation_relief": 0.0,
+        "pregnancy": 0.24,
+        "prisoner_custody": 0.0,
+        "rationing": 0.0,
+        "total": 77.703270103225,
+        "travel": 0.0
+      },
+      "food_eaten": 76.4032468578054,
+      "food_intake_ratio": 0.983269388229189,
+      "food_security": 0.979999999942889,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 69.9237308312945,
+        "Stone": 53.0927402439937,
+        "Timber": 71.6756321619956
+      },
+      "plot_history_records": 41,
+      "population": 122,
+      "resource_deposits": 52,
+      "settled": true,
+      "settlement_count": 2,
+      "settlement_plots": 19,
+      "year": 1.0958904109589
+    },
+    "full_campaign_verified": false,
+    "initial": {
+      "active_inquiries": 3,
+      "army_provision_delivery_ratio": 1,
+      "army_provisions_delivered": 0,
+      "army_provisions_required": 0,
+      "completed_buildings": 0,
+      "day": 0,
+      "food_consumption": 0,
+      "food_days": 30.0,
+      "food_demand_breakdown": {},
+      "food_eaten": 0,
+      "food_intake_ratio": 1,
+      "food_security": 0.82,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 10.0,
+        "Stone": 0.0,
+        "Timber": 12.0
+      },
+      "plot_history_records": 0,
+      "population": 120,
+      "resource_deposits": 0,
+      "settled": false,
+      "settlement_count": 0,
+      "settlement_plots": 0,
+      "year": 0.0
+    },
+    "limitations": [
+      "One isolated seat, not a full world or a player campaign",
+      "Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling",
+      "No foreign acquisition, war or dependency-recovery scenario",
+      "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+      "Short or collapsed runs do not validate millennial pacing"
+    ],
+    "live_catalog": 408,
+    "profiling_enabled": true,
+    "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange",
+    "schema": 9,
+    "secondary_timings": {
+      "consequences": {
+        "calls": 280,
+        "microseconds": 621141
+      },
+      "construction": {
+        "calls": 280,
+        "microseconds": 38871
+      },
+      "economy": {
+        "calls": 280,
+        "microseconds": 159484
+      },
+      "enabled": true,
+      "morphology": {
+        "calls": 280,
+        "microseconds": 7159
+      },
+      "resources": {
+        "calls": 280,
+        "microseconds": 275005
+      },
+      "scope_entry": {
+        "calls": 280,
+        "microseconds": 22250
+      },
+      "scope_exit": {
+        "calls": 280,
+        "microseconds": 32825
+      }
+    },
+    "seed": 91420,
+    "simulated_days": 400,
+    "stop_reason": "target reached",
+    "target_days": 400,
+    "target_reached": true,
+    "timing_intervals": [
+      {
+        "from_day": 0,
+        "secondary_stages": {
+          "consequences": {
+            "calls": 245,
+            "microseconds": 534623
+          },
+          "construction": {
+            "calls": 245,
+            "microseconds": 32895
+          },
+          "economy": {
+            "calls": 245,
+            "microseconds": 136630
+          },
+          "morphology": {
+            "calls": 245,
+            "microseconds": 6390
+          },
+          "resources": {
+            "calls": 245,
+            "microseconds": 236402
+          },
+          "scope_entry": {
+            "calls": 245,
+            "microseconds": 19150
+          },
+          "scope_exit": {
+            "calls": 245,
+            "microseconds": 27457
+          }
+        },
+        "stages": {
+          "city_trade": {
+            "calls": 365,
+            "microseconds": 71181
+          },
+          "civics": {
+            "calls": 365,
+            "microseconds": 2633
+          },
+          "consequences": {
+            "calls": 365,
+            "microseconds": 921360
+          },
+          "construction": {
+            "calls": 365,
+            "microseconds": 38840
+          },
+          "context": {
+            "calls": 365,
+            "microseconds": 18582
+          },
+          "controller": {
+            "calls": 365,
+            "microseconds": 266730
+          },
+          "convoy": {
+            "calls": 365,
+            "microseconds": 2287
+          },
+          "discovery": {
+            "calls": 365,
+            "microseconds": 880468
+          },
+          "economy": {
+            "calls": 365,
+            "microseconds": 267101
+          },
+          "government": {
+            "calls": 365,
+            "microseconds": 239050
+          },
+          "military_and_travel": {
+            "calls": 365,
+            "microseconds": 279155
+          },
+          "operations": {
+            "calls": 365,
+            "microseconds": 19774
+          },
+          "progression": {
+            "calls": 365,
+            "microseconds": 323845
+          },
+          "resources": {
+            "calls": 365,
+            "microseconds": 433571
+          },
+          "secondary_settlements": {
+            "calls": 365,
+            "microseconds": 1009602
+          },
+          "settlement_morphology": {
+            "calls": 365,
+            "microseconds": 14465
+          }
+        },
+        "to_day": 365,
+        "wall_microseconds": 4820617
+      },
+      {
+        "from_day": 365,
+        "secondary_stages": {
+          "consequences": {
+            "calls": 35,
+            "microseconds": 86518
+          },
+          "construction": {
+            "calls": 35,
+            "microseconds": 5976
+          },
+          "economy": {
+            "calls": 35,
+            "microseconds": 22854
+          },
+          "morphology": {
+            "calls": 35,
+            "microseconds": 769
+          },
+          "resources": {
+            "calls": 35,
+            "microseconds": 38603
+          },
+          "scope_entry": {
+            "calls": 35,
+            "microseconds": 3100
+          },
+          "scope_exit": {
+            "calls": 35,
+            "microseconds": 5368
+          }
+        },
+        "stages": {
+          "city_trade": {
+            "calls": 35,
+            "microseconds": 11859
+          },
+          "civics": {
+            "calls": 35,
+            "microseconds": 249
+          },
+          "consequences": {
+            "calls": 35,
+            "microseconds": 101783
+          },
+          "construction": {
+            "calls": 35,
+            "microseconds": 3043
+          },
+          "context": {
+            "calls": 35,
+            "microseconds": 2048
+          },
+          "controller": {
+            "calls": 35,
+            "microseconds": 20934
+          },
+          "convoy": {
+            "calls": 35,
+            "microseconds": 182
+          },
+          "discovery": {
+            "calls": 35,
+            "microseconds": 101809
+          },
+          "economy": {
+            "calls": 35,
+            "microseconds": 26932
+          },
+          "government": {
+            "calls": 35,
+            "microseconds": 29833
+          },
+          "military_and_travel": {
+            "calls": 35,
+            "microseconds": 32143
+          },
+          "operations": {
+            "calls": 35,
+            "microseconds": 2399
+          },
+          "progression": {
+            "calls": 35,
+            "microseconds": 35804
+          },
+          "resources": {
+            "calls": 35,
+            "microseconds": 47655
+          },
+          "secondary_settlements": {
+            "calls": 35,
+            "microseconds": 166029
+          },
+          "settlement_morphology": {
+            "calls": 35,
+            "microseconds": 1131
+          }
+        },
+        "to_day": 400,
+        "wall_microseconds": 585730
+      }
+    ],
+    "timings": {
+      "city_trade": {
+        "calls": 400,
+        "microseconds": 83040
+      },
+      "civics": {
+        "calls": 400,
+        "microseconds": 2882
+      },
+      "consequences": {
+        "calls": 400,
+        "microseconds": 1023143
+      },
+      "construction": {
+        "calls": 400,
+        "microseconds": 41883
+      },
+      "context": {
+        "calls": 400,
+        "microseconds": 20630
+      },
+      "controller": {
+        "calls": 400,
+        "microseconds": 287664
+      },
+      "convoy": {
+        "calls": 400,
+        "microseconds": 2469
+      },
+      "discovery": {
+        "calls": 400,
+        "microseconds": 982277
+      },
+      "economy": {
+        "calls": 400,
+        "microseconds": 294033
+      },
+      "enabled": true,
+      "government": {
+        "calls": 400,
+        "microseconds": 268883
+      },
+      "military_and_travel": {
+        "calls": 400,
+        "microseconds": 311298
+      },
+      "operations": {
+        "calls": 400,
+        "microseconds": 22173
+      },
+      "progression": {
+        "calls": 400,
+        "microseconds": 359649
+      },
+      "resources": {
+        "calls": 400,
+        "microseconds": 481226
+      },
+      "secondary_settlements": {
+        "calls": 400,
+        "microseconds": 1175631
+      },
+      "settlement_morphology": {
+        "calls": 400,
+        "microseconds": 15596
+      }
+    },
+    "wall_seconds": 5.407
+  },
+  "control": {
+    "annual_snapshots": [
+      {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1,
+        "army_provisions_delivered": 0,
+        "army_provisions_required": 0,
+        "completed_buildings": 0,
+        "day": 0,
+        "food_consumption": 0,
+        "food_days": 30.0,
+        "food_demand_breakdown": {},
+        "food_eaten": 0,
+        "food_intake_ratio": 1,
+        "food_security": 0.82,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 10.0,
+          "Stone": 0.0,
+          "Timber": 12.0
+        },
+        "plot_history_records": 0,
+        "population": 120,
+        "resource_deposits": 0,
+        "settled": false,
+        "settlement_count": 0,
+        "settlement_plots": 0,
+        "year": 0.0
+      },
+      {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1.0,
+        "army_provisions_delivered": 0.0,
+        "army_provisions_required": 0.0,
+        "completed_buildings": 0,
+        "day": 1,
+        "food_consumption": 114.2184,
+        "food_days": 31.5185644344519,
+        "food_demand_breakdown": {
+          "adults": 72.0,
+          "army_field": 0.0,
+          "base": 103.296,
+          "children": 23.04,
+          "climate": 0.0,
+          "elders": 8.256,
+          "labor": 10.5,
+          "lactation": 0.3024,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.12,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 114.2184,
+          "travel": 0.0
+        },
+        "food_eaten": 114.2184,
+        "food_intake_ratio": 1.0,
+        "food_security": 0.824757128260138,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 9.965,
+          "Stone": 0.0,
+          "Timber": 11.8767111111111
+        },
+        "plot_history_records": 0,
+        "population": 120,
+        "resource_deposits": 52,
+        "settled": true,
+        "settlement_count": 0,
+        "settlement_plots": 0,
+        "year": 0.00273972602739726
+      },
+      {
+        "active_inquiries": 4,
+        "army_provision_delivery_ratio": 0.611960738935358,
+        "army_provisions_delivered": 2.0561880828228,
+        "army_provisions_required": 3.36,
+        "completed_buildings": 5,
+        "day": 365,
+        "food_consumption": 77.397843853428,
+        "food_days": 71.8901634154747,
+        "food_demand_breakdown": {
+          "adults": 48.5941734906475,
+          "army_field": 3.36,
+          "base": 69.6942901602865,
+          "children": 15.1745323307912,
+          "climate": 0.0,
+          "elders": 5.92558433884774,
+          "labor": 7.26,
+          "lactation": 0.203553693141448,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.24,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 77.397843853428,
+          "travel": 0.0
+        },
+        "food_eaten": 76.0940319362508,
+        "food_intake_ratio": 0.98315441552033,
+        "food_security": 0.979999999586374,
+        "knowledge_workers": 4,
+        "known": 0,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 65.3064539717247,
+          "Stone": 47.400943998499,
+          "Timber": 63.4347368779254
+        },
+        "plot_history_records": 41,
+        "population": 121,
+        "resource_deposits": 52,
+        "settled": true,
+        "settlement_count": 2,
+        "settlement_plots": 19,
+        "year": 1.0
+      }
+    ],
+    "bottlenecks": {
+      "active_investigations": {
+        "ecology::Land health": "seasonal_patterns",
+        "infrastructure::Housing": "drainage",
+        "production::Material supply": "charcoal",
+        "security::Public safety": "watch_rotation"
+      },
+      "allocations": {
+        "Administration": 3,
+        "Construction": 8,
+        "Crafting": 4,
+        "Defense": 2,
+        "Extraction": 6,
+        "Food": 33,
+        "Knowledge": 4,
+        "Logistics": 8,
+        "Survey": 5
+      },
+      "causally_ready_questions": [
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "seasonal_patterns",
+          "missing_materials": [],
+          "progress": 0.256310842908945,
+          "score": 90.4772503560886,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "nutrition",
+          "eligible": true,
+          "id": "food_drying",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 144.024868584471,
+          "subcategory": "Daily supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "cordage",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 42.5233304551271,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "charcoal",
+          "missing_materials": [],
+          "progress": 0.140220883423412,
+          "score": 136.273335986461,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "clay_shaping",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 77.1574457254644,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "infrastructure",
+          "eligible": true,
+          "id": "drainage",
+          "missing_materials": [],
+          "progress": 0.223347977876737,
+          "score": 134.051854225967,
+          "subcategory": "Housing"
+        },
+        {
+          "domain": "health",
+          "eligible": true,
+          "id": "wound_cleaning",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 104.059725965452,
+          "subcategory": "Injury safety"
+        },
+        {
+          "domain": "health",
+          "eligible": true,
+          "id": "herbal_classification",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 77.3769849918999,
+          "subcategory": "General health"
+        },
+        {
+          "domain": "knowledge",
+          "eligible": true,
+          "id": "tallies",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 39.8807803733099,
+          "subcategory": "Preserved knowledge"
+        },
+        {
+          "domain": "knowledge",
+          "eligible": true,
+          "id": "route_memory",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 81.4948253491068,
+          "subcategory": "Observers"
+        },
+        {
+          "domain": "institutions",
+          "eligible": true,
+          "id": "labor_rotations",
+          "missing_materials": [],
+          "progress": 0.063932193194114,
+          "score": 59.5397708099405,
+          "subcategory": "Administration"
+        },
+        {
+          "domain": "security",
+          "eligible": true,
+          "id": "watch_rotation",
+          "missing_materials": [],
+          "progress": 0.265174476594703,
+          "score": 33.050455159382,
+          "subcategory": "Public safety"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "stone_sorting",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 33.4340428761646,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "timber_grading",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 138.965058533681,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "ecology",
+          "eligible": true,
+          "id": "fiber_grading",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 103.472399896194,
+          "subcategory": "Land health"
+        },
+        {
+          "domain": "production",
+          "eligible": true,
+          "id": "clay_testing",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 28.3038481024977,
+          "subcategory": "Material supply"
+        },
+        {
+          "domain": "culture",
+          "eligible": true,
+          "id": "oral_epics",
+          "missing_materials": [],
+          "progress": 0,
+          "score": 110.937108165478,
+          "subcategory": "Collective memory"
+        }
+      ],
+      "controller_plan": {
+        "ambition": "military",
+        "at_war": false,
+        "capacity_share": 0.810664078593254,
+        "delivery_shortage": false,
+        "deploy_share": 0.679773208498955,
+        "expansion_food": 48.9996595680714,
+        "food_shortage": false,
+        "goals": [
+          {
+            "accord": "routes",
+            "id": "growth",
+            "strategy": "growth",
+            "title": "Make room for the next generation"
+          },
+          {
+            "accord": "restraint",
+            "id": "security",
+            "strategy": "fortification",
+            "title": "Keep our homeland independent"
+          },
+          {
+            "accord": "exchange",
+            "id": "learning",
+            "strategy": "inquiry",
+            "title": "Bring useful knowledge home"
+          }
+        ],
+        "hungry": false,
+        "offensive": true,
+        "peace_food": 22.2371687293053,
+        "personality": {
+          "assertiveness": 0.686591804027557,
+          "discipline": 0.806791067123413,
+          "empathy": 0.429149121046066,
+          "openness": 0.466497719287872,
+          "risk_tolerance": 0.790626287460327
+        },
+        "recruit_share": 0.0982297798991203,
+        "research_weights": {
+          "culture": 0.644088560342789,
+          "demography": 1.63623420894146,
+          "ecology": 0.466397903859615,
+          "health": 0.593319296836853,
+          "infrastructure": 2.27441419363022,
+          "institutions": 0.724414193630219,
+          "knowledge": 0.709797263145447,
+          "labor": 0.684074640274048,
+          "logistics": 0.689226400852203,
+          "nutrition": 0.620301586389542,
+          "production": 1.33999462127686,
+          "security": 1.10266897678375
+        },
+        "scout_days": 30,
+        "scout_food": 28.2812113761902,
+        "settle_distance": 40.4625463485718,
+        "trade_opinion": 0.029823149740696,
+        "training": "intensive",
+        "war_food": 40.4686856269836,
+        "war_opinion": -0.515939979255199
+      },
+      "known_ids": [],
+      "material_states": {
+        "Bitumen": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.139072803695109
+          }
+        ],
+        "Clay": [
+          {
+            "access": 0.4760626218677,
+            "blockers": [],
+            "route": 0.235680856276753,
+            "stage": "surveyed",
+            "survey": 1.0039124793027
+          },
+          {
+            "access": 0.479460210812015,
+            "blockers": [],
+            "route": 0.243231053930786,
+            "stage": "surveyed",
+            "survey": 1.00271504626273
+          },
+          {
+            "access": 0.487102284298745,
+            "blockers": [],
+            "route": 0.260213439456852,
+            "stage": "surveyed",
+            "survey": 1.00285055596763
+          },
+          {
+            "access": 0.482007976975667,
+            "blockers": [],
+            "route": 0.248892756516678,
+            "stage": "surveyed",
+            "survey": 1.00387128578231
+          }
+        ],
+        "Coal": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Copper Ore": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.219235853988079
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.236421341522779
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.230682261904645
+          }
+        ],
+        "Deep Aquifer": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Fertile Soil": [
+          {
+            "access": 0.624024590658239,
+            "blockers": [],
+            "route": 0.580485231366839,
+            "stage": "surveyed",
+            "survey": 1.00649639276776
+          },
+          {
+            "access": 0.6222399040864,
+            "blockers": [],
+            "route": 0.576519261207197,
+            "stage": "surveyed",
+            "survey": 1.00314323473482
+          },
+          {
+            "access": 0.6222399040864,
+            "blockers": [],
+            "route": 0.576519261207197,
+            "stage": "surveyed",
+            "survey": 1.00640791923502
+          }
+        ],
+        "Fiber Plants": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ],
+        "Fine Sand": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.178274871685246
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.178621825799749
+          }
+        ],
+        "Flint": [
+          {
+            "access": 0.438714697608553,
+            "blockers": [],
+            "route": 0.184685469034204,
+            "stage": "surveyed",
+            "survey": 1.00023768541589
+          },
+          {
+            "access": 0.43616367647922,
+            "blockers": [],
+            "route": 0.179016533191241,
+            "stage": "surveyed",
+            "survey": 1.00024385770298
+          }
+        ],
+        "Freshwater": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "accessible",
+            "survey": 1.0
+          }
+        ],
+        "Game": [
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00375521794344
+          },
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00280078748388
+          },
+          {
+            "access": 0.638398568361688,
+            "blockers": [],
+            "route": 0.59642740404117,
+            "stage": "surveyed",
+            "survey": 1.00263761187291
+          },
+          {
+            "access": 0.64198633156799,
+            "blockers": [],
+            "route": 0.604400211166287,
+            "stage": "surveyed",
+            "survey": 1.00415862932539
+          }
+        ],
+        "Graphite": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Iron Ore": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0134899749849114
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0189966308243982
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0146116579778169
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0148013064131724
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.0152987530842631
+          }
+        ],
+        "Limestone": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.471782387674815
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.474634341286737
+          }
+        ],
+        "Medicinal Plants": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.984724435561091
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "surveyed",
+            "survey": 1.00045435171284
+          }
+        ],
+        "Phosphate Rock": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Refractory Clay": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Salt": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.801726713758103
+          },
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "recognized",
+            "survey": 0.783235067794246
+          }
+        ],
+        "Stone": [
+          {
+            "access": 0.613317920877362,
+            "blockers": [],
+            "route": 0.540692631853779,
+            "stage": "surveyed",
+            "survey": 1.00296038468424
+          },
+          {
+            "access": 0.607904328476946,
+            "blockers": [],
+            "route": 0.528662426519521,
+            "stage": "surveyed",
+            "survey": 1.0057535277617
+          },
+          {
+            "access": 0.613317920877362,
+            "blockers": [],
+            "route": 0.540692631853779,
+            "stage": "surveyed",
+            "survey": 1.00532503175548
+          },
+          {
+            "access": 0.609711208769621,
+            "blockers": [],
+            "route": 0.5326777160588,
+            "stage": "surveyed",
+            "survey": 1.00412173541781
+          },
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ],
+        "Sulfur": [
+          {
+            "access": 0.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "unknown",
+            "survey": 0.0
+          }
+        ],
+        "Timber": [
+          {
+            "access": 1.0,
+            "blockers": [],
+            "route": 0.0,
+            "stage": "developed",
+            "survey": 0.0
+          }
+        ]
+      },
+      "research_allocations": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 1,
+        "health": 0,
+        "infrastructure": 1,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 0,
+        "production": 1,
+        "security": 1
+      },
+      "research_subcategory_allocations": {
+        "culture": {
+          "Collective memory": 0,
+          "Inquiry breadth": 0,
+          "Shared legitimacy": 0,
+          "Social cohesion": 0
+        },
+        "demography": {
+          "Child survival": 0,
+          "Fertility conditions": 0,
+          "Maternal safety": 0,
+          "Shelter capacity": 0
+        },
+        "ecology": {
+          "Land health": 1,
+          "Natural recovery": 0,
+          "Pollution control": 0,
+          "Resource sustainability": 0
+        },
+        "health": {
+          "Disease control": 0,
+          "General health": 0,
+          "Injury safety": 0,
+          "Water & sanitation": 0
+        },
+        "infrastructure": {
+          "Construction": 0,
+          "Housing": 1,
+          "Public works": 0,
+          "Resilience": 0
+        },
+        "institutions": {
+          "Administration": 0,
+          "Institutional flexibility": 0,
+          "Legitimacy": 0,
+          "State capacity": 0
+        },
+        "knowledge": {
+          "Communication": 0,
+          "Directed attention": 0,
+          "Observers": 0,
+          "Preserved knowledge": 0
+        },
+        "labor": {
+          "Able workforce": 0,
+          "Coordination": 0,
+          "Work efficiency": 0,
+          "Workload balance": 0
+        },
+        "logistics": {
+          "Carrying capacity": 0,
+          "Route quality": 0,
+          "Storage system": 0,
+          "Trade reach": 0
+        },
+        "nutrition": {
+          "Daily supply": 0,
+          "Diet quality": 0,
+          "Land productivity": 0,
+          "Stored reserve": 0
+        },
+        "production": {
+          "Craft capacity": 0,
+          "Material supply": 1,
+          "Standardization": 0,
+          "Tool quality": 0
+        },
+        "security": {
+          "Crisis resilience": 0,
+          "Military readiness": 0,
+          "Organized defense": 0,
+          "Public safety": 1
+        }
+      },
+      "settlements": [
+        {
+          "id": "settlement_001",
+          "last_resource_day": -1,
+          "occupied": false,
+          "plots": 19,
+          "population": 81.0303220137833,
+          "primary": true
+        },
+        {
+          "id": "settlement_002",
+          "last_resource_day": 400,
+          "occupied": false,
+          "plots": 13,
+          "population": 40.7044383339863,
+          "primary": false
+        }
+      ]
+    },
+    "days_per_second": 51.7129928894635,
+    "discoveries": [],
+    "final": {
+      "active_inquiries": 4,
+      "army_provision_delivery_ratio": 0.613088319815607,
+      "army_provisions_delivered": 2.05997675458044,
+      "army_provisions_required": 3.36,
+      "completed_buildings": 5,
+      "day": 400,
+      "food_consumption": 77.703270103225,
+      "food_days": 80.4889022876008,
+      "food_demand_breakdown": {
+        "adults": 48.6750628233993,
+        "army_field": 3.36,
+        "base": 69.8990919657649,
+        "children": 15.2198247491736,
+        "climate": 0.0,
+        "elders": 6.00420439319204,
+        "labor": 7.36,
+        "lactation": 0.204178137460151,
+        "mission_absent": 0.0,
+        "occupation_relief": 0.0,
+        "pregnancy": 0.24,
+        "prisoner_custody": 0.0,
+        "rationing": 0.0,
+        "total": 77.703270103225,
+        "travel": 0.0
+      },
+      "food_eaten": 76.4032468578054,
+      "food_intake_ratio": 0.983269388229189,
+      "food_security": 0.979999999942889,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 69.9237308312945,
+        "Stone": 53.0927402439937,
+        "Timber": 71.6756321619956
+      },
+      "plot_history_records": 41,
+      "population": 122,
+      "resource_deposits": 52,
+      "settled": true,
+      "settlement_count": 2,
+      "settlement_plots": 19,
+      "year": 1.0958904109589
+    },
+    "full_campaign_verified": false,
+    "initial": {
+      "active_inquiries": 3,
+      "army_provision_delivery_ratio": 1,
+      "army_provisions_delivered": 0,
+      "army_provisions_required": 0,
+      "completed_buildings": 0,
+      "day": 0,
+      "food_consumption": 0,
+      "food_days": 30.0,
+      "food_demand_breakdown": {},
+      "food_eaten": 0,
+      "food_intake_ratio": 1,
+      "food_security": 0.82,
+      "knowledge_workers": 4,
+      "known": 0,
+      "material_stocks": {
+        "Clay": 0.0,
+        "Fiber Plants": 10.0,
+        "Stone": 0.0,
+        "Timber": 12.0
+      },
+      "plot_history_records": 0,
+      "population": 120,
+      "resource_deposits": 0,
+      "settled": false,
+      "settlement_count": 0,
+      "settlement_plots": 0,
+      "year": 0.0
+    },
+    "limitations": [
+      "One isolated seat, not a full world or a player campaign",
+      "Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling",
+      "No foreign acquisition, war or dependency-recovery scenario",
+      "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+      "Short or collapsed runs do not validate millennial pacing"
+    ],
+    "live_catalog": 408,
+    "profiling_enabled": false,
+    "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange",
+    "schema": 9,
+    "secondary_timings": {},
+    "seed": 91420,
+    "simulated_days": 400,
+    "stop_reason": "target reached",
+    "target_days": 400,
+    "target_reached": true,
+    "timing_intervals": [],
+    "timings": {},
+    "wall_seconds": 7.735
+  }
+}

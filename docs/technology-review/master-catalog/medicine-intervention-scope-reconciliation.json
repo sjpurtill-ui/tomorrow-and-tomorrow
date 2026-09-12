@@ -1,0 +1,59 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "clinical_dose_response_design",
+      "retained_id": "clinical_trial_design",
+      "reason": "A dose-response study is a use of the existing controlled clinical-study method, informed by the separately authored exposure-response model."
+    },
+    {
+      "excluded_proposal": "clinical_contrast_agent_qualification",
+      "retained_id": "medicine_quality_assurance",
+      "reason": "Product identity and clinical qualification apply existing medicine quality and trial methods; a contrast use does not create a separate universal qualification mechanism."
+    },
+    {
+      "excluded_proposal": "multimodal_image_evidence_review",
+      "retained_id": "differential_diagnosis",
+      "reason": "Reconciling complementary and conflicting imaging evidence is an application of differential diagnosis with qualified registration, not a new reasoning method."
+    },
+    {
+      "excluded_proposal": "clinical_prediction_external_validation",
+      "retained_id": "mathematical_model_validation",
+      "reason": "External validation of a clinical predictor applies the shared model-validation mechanism with diagnostic performance and decision evidence; a clinical prefix does not add a distinct validation law."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "renal_replacement_services",
+        "hemodialysis_membrane_services",
+        "peritoneal_dialysis_services"
+      ],
+      "distinction": "Organizing renal care differs from the actual extracorporeal membrane and peritoneal exchange mechanisms; each route needs its own qualified supplies and staffing."
+    },
+    {
+      "ids": [
+        "cardiac_pacing_systems",
+        "cardiac_defibrillation_systems",
+        "ventricular_assist_devices"
+      ],
+      "distinction": "Timed stimulation, a therapeutic rhythm intervention and mechanical blood-flow support serve different physical functions; none substitutes for the others."
+    },
+    {
+      "ids": [
+        "extracorporeal_membrane_oxygenation",
+        "cardiopulmonary_bypass_services"
+      ],
+      "distinction": "Sustained intensive-care gas-exchange support and a qualified operative bypass service share components but differ in operating envelope, integration and staffing. Shared components should be manufactured once, not duplicated by service name."
+    },
+    {
+      "ids": [
+        "radiopharmaceutical_tracing",
+        "single_photon_emission_tomography",
+        "positron_emission_tomography"
+      ],
+      "distinction": "Tracer distribution and two physically distinct emission-detection/reconstruction systems are separate mechanisms, with shared tracer quality and clinical interpretation requirements."
+    }
+  ]
+}

@@ -1,0 +1,254 @@
+{
+  "mappings": [
+    {
+      "review_id": "D24-01",
+      "candidate_name": "Intergenerational knowledge trusts",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "long_horizon_public_trusts",
+        "distributed_skill_custodianship"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-02",
+      "candidate_name": "Disaster refuge planning",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "refuge_capacity_qualification",
+        "multi_hazard_refuge_siting"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-03",
+      "candidate_name": "Redundant skill preservation",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "distributed_skill_custodianship"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-04",
+      "candidate_name": "Long distance care coordination",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "remote_care_task_delegation",
+        "telemedicine_consultation"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-05",
+      "candidate_name": "Accessible civic participation",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "adaptive_access_interfaces",
+        "accessible_building_design"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-06",
+      "candidate_name": "Life course health records",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "longitudinal_health_record_linkage"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-07",
+      "candidate_name": "Integrated disaster recovery",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "cross_service_restoration_sequence",
+        "cross_region_recovery_compacts"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-08",
+      "candidate_name": "Critical infrastructure redundancy",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "critical_service_dependency_models",
+        "independent_service_reserve_design"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-09",
+      "candidate_name": "Global scientific agreements",
+      "note": "Broad agreement umbrella maps to existing replication and bounded transboundary research practices; no universal global-science institution is added.",
+      "mapped_ids": [
+        "independent_replication_networks",
+        "transboundary_environment_experiments"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-10",
+      "candidate_name": "Long term ecological trusteeship",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "long_duration_ecological_stewardship"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-11",
+      "candidate_name": "Advanced prosthetic control",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "prosthetic_intent_decoding",
+        "prosthetic_sensory_feedback"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-12",
+      "candidate_name": "Neural interface rehabilitation",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "neural_interface_rehabilitation"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-13",
+      "candidate_name": "Organ replacement coordination",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "organ_replacement_matching_networks",
+        "organ_transplant_services"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-14",
+      "candidate_name": "Distributed emergency manufacturing",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "distributed_emergency_fabrication"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-15",
+      "candidate_name": "Planetary resource stewardship",
+      "note": "Stewardship is a portfolio of accountable assessment and physical resource practices, not a global efficiency bonus.",
+      "mapped_ids": [
+        "planetary_intervention_comparison",
+        "resource_circularity_accounts"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-16",
+      "candidate_name": "Evidence based aging intervention",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "aging_intervention_endpoint_design",
+        "aging_intervention_programs"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-17",
+      "candidate_name": "Resilient food energy settlements",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "settlement_autonomy_trials",
+        "habitat_food_balance",
+        "islandable_microgrids"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-18",
+      "candidate_name": "Reproductive health in low gravity",
+      "note": "Maps to research on unresolved constraints, not proven human reproduction in low gravity.",
+      "mapped_ids": [
+        "low_gravity_reproductive_research"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-19",
+      "candidate_name": "Autonomous habitat repair",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "autonomous_habitat_repair"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-20",
+      "candidate_name": "Long duration crew governance",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "crew_conflict_mediation_under_delay",
+        "habitat_constitutional_compacts"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-21",
+      "candidate_name": "Multigenerational space habitation",
+      "note": "Maps to an uncertain viability program, not guaranteed multigenerational settlement.",
+      "mapped_ids": [
+        "habitat_multigenerational_viability"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-22",
+      "candidate_name": "Closed civilization material cycles",
+      "note": "Maps to accounting and selective recovery; physically perfect closure is not promised.",
+      "mapped_ids": [
+        "resource_circularity_accounts",
+        "closed_habitat_material_accounts",
+        "trace_element_cycle_recovery"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-23",
+      "candidate_name": "Deep time archive recovery",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "archive_bootstrap_interpreters",
+        "knowledge_recovery_drills"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-24",
+      "candidate_name": "Interstellar probe autonomy",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "long_baseline_probe_fault_recovery",
+        "autonomous_probe_science_selection",
+        "interstellar_probe_navigation"
+      ],
+      "scope_status": "subject_mapped"
+    },
+    {
+      "review_id": "D24-25",
+      "candidate_name": "Planetary defense coordination",
+      "note": "Candidate is represented by the listed stable mechanism identities; the candidate name adds no separate discovery.",
+      "mapped_ids": [
+        "planetary_defense_decision_protocols",
+        "planetary_threat_orbit_covariance",
+        "impact_deflection_mission_design",
+        "deflection_outcome_verification"
+      ],
+      "scope_status": "subject_mapped"
+    }
+  ],
+  "adds_discovery_identities": 0,
+  "partial_candidates": 0,
+  "scope": "Identity reconciliation only; uncertainty and operating implementation remain governed by each discovery record."
+}

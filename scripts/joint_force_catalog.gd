@@ -90,10 +90,8 @@ const UNITS:Dictionary={
 		"defense": 1.5,
 		"detection": 1.4,
 		"training_days": 60,
-		"materials": {
-			"Timber": 800.0,
-			"Fiber Plants": 200.0
-		},
+		"materials": {"Hull Sections": 16.0, "Sail Sets": 4.0, "Rigging Sets": 4.0, "Ship Masts": 4.0},
+		"tooling": {"Launch Cradles": 1.0},
 		"work_days": 48.0,
 		"carrier_capacity": 0,
 		"purpose": "Patrol",
@@ -115,10 +113,8 @@ const UNITS:Dictionary={
 		"defense": 2,
 		"detection": 2,
 		"training_days": 60,
-		"materials": {
-			"Timber": 1800.0,
-			"Fiber Plants": 450.0
-		},
+		"materials": {"Heavy Hull Sections": 36.0, "Sail Sets": 9.0, "Rigging Sets": 9.0, "Ship Masts": 9.0},
+		"tooling": {"Launch Cradles": 1.0},
 		"work_days": 108.0,
 		"carrier_capacity": 0,
 		"purpose": "Convoy escort",
@@ -140,10 +136,8 @@ const UNITS:Dictionary={
 		"defense": 5,
 		"detection": 0.6,
 		"training_days": 60,
-		"materials": {
-			"Timber": 5000.0,
-			"Fiber Plants": 1250.0
-		},
+		"materials": {"Heavy Hull Sections": 100.0, "Sail Sets": 25.0, "Rigging Sets": 25.0, "Ship Masts": 25.0},
+		"tooling": {"Launch Cradles": 1.0},
 		"work_days": 300.0,
 		"carrier_capacity": 0,
 		"purpose": "Strike force",
@@ -961,10 +955,8 @@ const UNITS:Dictionary={
 		"defense": 0.8,
 		"detection": 0.3,
 		"training_days": 60,
-		"materials": {
-			"Timber": 200.0,
-			"Fiber Plants": 40.0
-		},
+		"materials": {"Hull Sections": 4.0, "Sail Sets": 1.0, "Rigging Sets": 1.0, "Ship Masts": 1.0},
+		"tooling": {"Launch Cradles": 1.0},
 		"work_days": 60,
 		"carrier_capacity": 0,
 		"purpose": "Carry supplies and troops along escorted sea routes.",

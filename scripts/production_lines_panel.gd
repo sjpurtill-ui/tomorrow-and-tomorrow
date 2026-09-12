@@ -100,4 +100,9 @@ func refresh(editors:bool=false)->void:
 	for resource in line.inputs_per_day:inputs.append("%s: %.2f stored / %.2f per item / %.2f per day" % [WorldSimulation.resources.display_name(String(resource)),float(WorldSimulation.state.resource_stockpiles.get(resource,0)),float(line.materials[resource]),float(line.inputs_per_day[resource])])
 	var condition:=String(line.state)
 	if condition=="Working" and float(line.daily_work)<=0:condition="Waiting for labor or usable workplaces"
+	elif condition=="Working" and line.get("licensed",false):condition="Working under foreign license (65% throughput)"
 	details.text="%s · stock %d · %s\nEfficiency %.0f%% · forecast %.2f/day · last day %d completed\nInputs at this rate: %s\nWork in progress %.0f%% · %.0f%% of military workshop effort" % [condition,int(line.stock),"CONTINUOUS — NO LIMIT" if int(line.target_stock)==0 else "maintain %d" % int(line.target_stock),float(line.efficiency)*100,float(line.forecast_output_per_day),int(line.last_output),", ".join(inputs),float(line.progress_days)/float(line.work_per_item)*100,float(line.share)*100]
+
+	var coproducts:Array[String]=[]
+	for resource:String in line.get("co_products",{}):coproducts.append("%.2f %s" % [float(line.co_products[resource]),resource])
+	if not coproducts.is_empty():details.text+="\nAlso yields per completed batch: "+", ".join(coproducts)+". Target follows the primary product."

@@ -50,7 +50,7 @@ var catalog: Array[Dictionary] = [
 	{"id":"smoking","name":"Smoke Preservation","direction":"Sustenance","chance":0.005,"day":18,"requires":["food_drying"],"signals":["food","fire"],"observation":"Food kept above smoky fires changes texture and lasts longer."},
 	{"id":"cordage","name":"Twisted Cordage","direction":"Materials","chance":0.010,"day":3,"requires":[],"signals":["fiber","construction"],"observation":"Twisted plant fibers hold much more weight than loose strands."},
 	{"id":"basketry","name":"Basketry","direction":"Materials","chance":0.006,"day":12,"requires":["cordage"],"signals":["fiber","storage"],"observation":"Interlaced fibers form containers that remain light and strong."},
-	{"id":"charcoal","name":"Charcoal Production","direction":"Materials","chance":0.004,"day":35,"requires":[],"signals":["fire","timber"],"observation":"Wood heated beneath restricted air leaves an unusually hot-burning residue."},
+	{"id":"charcoal","name":"Charcoal Production","direction":"Materials","chance":0.004,"day":35,"requires":[],"signals":["fire","timber"],"observation":"Wood heated beneath restricted air leaves an unusually hot-burning residue.","effects":{},"production_items":["wood_charcoal"],"production_contract":"A finite workshop converts timber into physical charcoal with paid earth-and-stone tooling. No fuel stock is granted by discovery."},
 	{"id":"clay_shaping","name":"Clay Vessels","direction":"Materials","chance":0.006,"day":15,"requires":[],"signals":["clay","storage"],"observation":"Local wet earth can be shaped into containers before it dries."},
 	{"id":"pit_firing","name":"Pit Firing","direction":"Materials","chance":0.003,"day":50,"requires":["clay_shaping","charcoal"],"signals":["fire","clay"],"observation":"Clay exposed to sustained heat becomes permanently hard."},
 	{"id":"joinery","name":"Wood Joinery","direction":"Infrastructure","chance":0.005,"day":22,"requires":["cordage"],"signals":["timber","construction"],"observation":"Carefully cut wooden members can lock together without cord."},
@@ -93,10 +93,48 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/settlement_architecture_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/joint_force_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
+	catalog.append_array(preload("res://scripts/food_water_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/military_education_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/civilian_science_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/civilian_industry.gd").entries())
+	catalog.append_array(preload("res://scripts/semiconductor_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/combined_arms_doctrine.gd").entries())
+	catalog.append_array(preload("res://scripts/mathematics_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/chemical_process_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/mechanics_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/geoscience_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/field_medicine.gd").entries())
+	catalog.append_array(preload("res://scripts/field_repair.gd").entries())
+	catalog.append_array(preload("res://scripts/agronomy_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/crop_nutrition_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/electrical_storage_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/pneumatic_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/optical_instrument_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/refractory_ceramics_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/finery_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/charcoal_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/canning_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/shipbuilding_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/cartwright_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/machine_tool_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/fastener_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/textile_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/textile_mechanization.gd").entries())
+	catalog.append_array(preload("res://scripts/paper_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/glassworking_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/electronic_components.gd").entries())
+	catalog.append_array(preload("res://scripts/digital_logic_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/computing_memory_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/microprogramming_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/printing_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/intaglio_knowledge.gd").entries())
 	catalog.append_array(DiscoveryFrontierCatalog.entries())
 	for i in catalog.size():
 		catalog[i]=_classify_discovery(catalog[i])
 		catalog[i]=society_model.normalize_discovery(catalog[i])
+		catalog[i]=preload("res://scripts/technology_branch_rules.gd").apply(catalog[i])
+		catalog[i]=preload("res://scripts/mathematics_knowledge.gd").apply(catalog[i])
+		catalog[i]=preload("res://scripts/mechanics_knowledge.gd").apply(catalog[i])
 		var discovery:Dictionary=catalog[i]
 		catalog_by_id[String(discovery.get("id",""))]=discovery
 		if not bool(discovery.get("frontier",false)): technology_catalog.append(discovery)
@@ -162,7 +200,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 			WorldSimulation.state.known_discoveries.append(discovery.id)
 			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
-			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_effect_summary(discovery.get("effects",{})),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
+			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_discovery_effect_summary(discovery),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
 			WorldSimulation.state.discovery_log.push_front(event)
 			if WorldSimulation.state.discovery_log.size()>512: WorldSimulation.state.discovery_log.resize(512)
 			WorldSimulation.state.active_investigations.erase(channel)
@@ -250,7 +288,7 @@ func active_investigation_records()->Array[Dictionary]:
 		discovery["material_evidence"]=material_evidence
 		discovery["project_goal"]=_project_goal(discovery)
 		discovery["project_method"]=_project_method(discovery)
-		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_effect_summary(discovery.get("effects",{}))
+		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_discovery_effect_summary(discovery)
 		discovery["bottleneck"]=_investigation_bottleneck(discovery,allocation,leader_factor,material_evidence,progress,research_capacity)
 		discovery["estimated_days"]=ceili((1.0-progress)/maxf(0.000001,baseline_momentum))
 		records.append(discovery)
@@ -307,7 +345,7 @@ func _refresh_active_investigations()->void:
 		var channel:=String(channel_variant)
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(id)
-		if discovery.is_empty() or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
+		if discovery.is_empty() or channel!=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))) or _subcategory_allocation(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))<=0 or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
 			WorldSimulation.state.active_investigations.erase(channel)
 	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
 	# When a line completes or temporarily runs out of evidence, keep the same
@@ -361,7 +399,7 @@ func _redistribute_stranded_attention(current_day:int)->void:
 			live_channels.append({"dynamic":dynamic_id,"subcategory":subcategory,"channel":channel,"candidate":candidate})
 	if live_channels.is_empty():
 		# A genuine evidence drought should not erase the player's broad emphasis.
-		# Leave the allocation waiting quietly; a later encounter/day gate will wake it.
+		# Leave the allocation waiting quietly; new evidence or foundations will wake it.
 		for entry in stranded:
 			var restored:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(entry.dynamic),{})
 			restored[String(entry.subcategory)]=int(restored.get(String(entry.subcategory),0))+int(entry.count)
@@ -510,7 +548,7 @@ func player_facing_discovery_event(source:Dictionary)->Dictionary:
 	event["subcategory"]=String(definition.get("subcategory",event.get("subcategory","Established practice")))
 	event["description"]=String(definition.get("causal_mechanism",definition.get("observation",event.get("description",""))))
 	event["effects"]=(definition.get("effects",event.get("effects",{})) as Dictionary).duplicate(true)
-	event["effect_summary"]=_effect_summary(event["effects"])
+	event["effect_summary"]=_discovery_effect_summary(definition)
 	return event
 
 
@@ -657,13 +695,19 @@ func candidate_ids_for_channel(channel:String,civilization_seed:int,limit:int=16
 	for index in mini(limit,scored.size()): result.append(String(scored[index].id))
 	return result
 
+func _alternative_research_stock_met(requirement:Dictionary)->bool:
+	for resource:String in requirement.get("alternative_stocks",{}):
+		var amount:=float(requirement.alternative_stocks[resource])
+		if is_finite(amount) and amount>0.0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0.0))>=amount:return true
+	return false
+
 func _resource_requirements_met(requirements: Array) -> bool:
 	for requirement_variant in requirements:
 		var requirement:Dictionary=requirement_variant
 		var resource_name:=String(requirement.get("resource",""))
 		var needed_stage:=String(requirement.get("stage","recognized"))
 		var minimum_stock:=float(requirement.get("minimum_stock",0.0))
-		var found:=false
+		var found:=_alternative_research_stock_met(requirement)
 		for deposit in WorldSimulation.state.resource_deposits:
 			if String(deposit.get("resource",""))!=resource_name:
 				continue
@@ -672,6 +716,8 @@ func _resource_requirements_met(requirements: Array) -> bool:
 				break
 		if not found and float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>=minimum_stock and minimum_stock>0.0:
 			found=true
+		if not found and bool(requirement.get("sample_sufficient",false)) and needed_stage in ["recognized","surveyed"]:
+			found=preload("res://scripts/society_exchange.gd").studied_resource_sample(resource_name)
 		if not found:
 			return false
 	return true
@@ -689,6 +735,7 @@ func _resource_evidence(requirements:Array)->float:
 			var worked:=clampf(float(deposit.get("lifetime_extracted",0.0))/200.0,0.0,0.35)
 			best=maxf(best,0.65+stage_score*0.25+worked)
 		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>0.0: best=maxf(best,0.82)
+		if _alternative_research_stock_met(requirement):best=maxf(best,0.82)
 		evidence+=best
 	return clampf(evidence/maxf(1.0,float(requirements.size())),0.55,1.25)
 
@@ -855,7 +902,7 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 	var children:Dictionary={}
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)): continue
-		for requirement in entry.get("requires",[]):
+		for requirement in Pathways.definition_parents(entry):
 			if not children.has(String(requirement)): children[String(requirement)]=[]
 			(children[String(requirement)] as Array).append(String(entry.name))
 	for entry in technology_catalog:
@@ -863,14 +910,17 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		if dynamic_id!="" and String(entry.dynamic)!=dynamic_id: continue
 		var id:=String(entry.id)
 		var row:=entry.duplicate(true)
-		var missing:Array[String]=[]
+		var missing:Array[String]=Pathways.missing(entry,int(WorldSimulation.state.elapsed_days))
 		row["pathways"]=Pathways.routes(entry)
+		row["requires"]=entry.get("requires_all",entry.get("requires",[])).duplicate()
 		row["pathway_description"]=Pathways.describe(entry)
-		for requirement in entry.get("requires",[]):
-			if String(requirement) not in WorldSimulation.state.known_discoveries: missing.append(String(catalog_by_id.get(String(requirement),{}).get("name",requirement)))
-		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): missing.append("earliest day %d" % int(entry.day))
 		if not _resource_requirements_met(entry.get("resource_requirements",[])):
-			for requirement in entry.get("resource_requirements",[]): missing.append("%s: %s access" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized"))])
+			for requirement:Dictionary in entry.get("resource_requirements",[]):
+				if _resource_requirements_met([requirement]):continue
+				var alternative:=" or a returned, studied specimen" if bool(requirement.get("sample_sufficient",false)) and String(requirement.get("stage","recognized")) in ["recognized","surveyed"] else ""
+				if float(requirement.get("minimum_stock",0.0))>0:alternative+=" or %.1f in stores" % float(requirement.minimum_stock)
+				for resource:String in requirement.get("alternative_stocks",{}):alternative+=" or %.1f %s in stores" % [float(requirement.alternative_stocks[resource]),resource]
+				missing.append("%s: %s access%s" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized")),alternative])
 		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
 		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")
 		var known:=id in WorldSimulation.state.known_discoveries
@@ -929,10 +979,9 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 	var candidates:Array[Dictionary]=[]
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
-		if int(WorldSimulation.state.elapsed_days)<int(entry.get("day",0)): continue
-		var viable:=true
-		for requirement in entry.get("requires",[]):
-			if String(requirement) not in known: viable=false; break
+		var viable:=false
+		for route:Dictionary in Pathways.routes_for(entry,known,{}):
+			if route.ready:viable=true;break
 		if not viable: continue
 		for requirement in entry.get("resource_requirements",[]):
 			if float(resources.get(String(requirement.get("resource","")),0.0))<0.16: viable=false; break
@@ -951,7 +1000,7 @@ func technology_depth(id:String,visiting:Dictionary={})->int:
 	var path:=visiting.duplicate()
 	path[id]=true
 	var depth:=1
-	for parent in entry.get("requires",[]): depth=maxi(depth,1+technology_depth(String(parent),path))
+	for parent in Pathways.definition_parents(entry): depth=maxi(depth,1+technology_depth(String(parent),path))
 	entry["causal_depth"]=depth
 	return depth
 
@@ -974,3 +1023,54 @@ func _research_draw(id:String,seed_value:int,purpose:String)->float:
 	var random:=RandomNumberGenerator.new()
 	random.seed=hash(id+":"+purpose)^(seed_value*0x45d9f3b)
 	return random.randf()
+
+
+func food_storage_multiplier(food_type:String,traveling:bool)->float:
+	# These are settlement practices, not portable refrigerators. Knowledge
+	# persists when stores are abandoned; its storage benefit does not travel.
+	if traveling or not WorldSimulation.state.settlement_site_committed:return 1.0
+	if WorldSimulation.state.effective_workers("Logistics")+WorldSimulation.state.effective_workers("Crafting")<1:return 1.0
+	var result:=1.0
+	for id:String in WorldSimulation.state.known_discoveries:
+		var definition:Dictionary=catalog_by_id.get(id,{})
+		var reduction:=clampf(float(definition.get("preservation_profile",{}).get(food_type,0)),0,.5)
+		result*=1.0-reduction*adoption(id)
+	return maxf(.3,result)
+
+
+func _discovery_effect_summary(entry:Dictionary)->String:
+	if not entry.get("agronomy_profile",{}).is_empty():
+		var p:Dictionary=entry.agronomy_profile
+		return "At full adoption: cultivation performance +%.1f%%, labor cost %.1f%%, harvest-area cost %.1f%%, soil-wear reduction %.1f%% and adverse-weather loss reduction %.1f%%. Applies to staffed, settled cultivation; strongest adopted practice per family." % [float(p.yield_gain)*100,float(p.labor_cost)*100,float(p.land_cost)*100,float(p.soil_protection)*100,float(p.weather_buffer)*100]
+	var medical:=String(entry.get("medical_method",""))
+	if not medical.is_empty():return String(entry.get("production_contract",""))+" Care consumes Woven Dressings or Fiber Plants, plus Medicinal Plants, during supported recovery at home."
+	if not String(entry.get("doctrine","")).is_empty():return String(entry.get("production_contract",""))+" Requires rehearsal during supplied preparation; understanding alone does not improve the army."
+	var summary:=_effect_summary(entry.get("effects",{})) if not entry.get("effects",{}).is_empty() else ""
+	var profile:Dictionary=entry.get("preservation_profile",{})
+	if not profile.is_empty():
+		var parts:Array[String]=[]
+		for food:String in profile:parts.append("%s %.0f%%" % [food,float(profile[food])*100])
+		summary+="\nSettled storage spoilage reductions at full adoption: "+", ".join(parts)+". Requires Logistics or Crafting workers; unavailable during travel."
+	var training:Dictionary=entry.get("training_profile",{})
+	if not training.is_empty():
+		var parts:Array[String]=[]
+		for unit:String in training:parts.append("%s %.0f%%" % [unit.replace("_"," "),float(training[unit])*100])
+		summary+="\nShorter new training orders at full adoption: "+", ".join(parts)+". Requires normal staff, personnel, equipment and provisions. Existing orders retain their schedule."
+	var prospecting:Dictionary=entry.get("prospecting_profile",{})
+	if not prospecting.is_empty():
+		var targets:Array[String]=[]
+		for deposit:Dictionary in WorldSimulation.resources.visible_deposits():
+			var resource:=String(deposit.resource)
+			if resource in prospecting.resources and resource not in targets:targets.append(resource)
+		var target_text:=", ".join(PackedStringArray(targets)) if not targets.is_empty() else "matching geological materials"
+		summary+="\nSurvey workers at full adoption: +%.0f%% identification effort and +%.0f%% extent-survey effort for %s. Strongest method per family; combined improvement capped at 75%%. No deposits, stocks or extraction access are granted." % [float(prospecting.recognition)*100,float(prospecting.survey)*100,target_text]
+	return summary if not summary.is_empty() else "Unlocks a prerequisite used by later practical methods."
+
+
+func military_training_multiplier(unit:String)->float:
+	var result:=1.0
+	for id:String in WorldSimulation.state.known_discoveries:
+		var definition:Dictionary=catalog_by_id.get(id,{})
+		var reduction:=clampf(float(definition.get("training_profile",{}).get(unit,0)),0,.25)
+		result*=1.0-reduction*adoption(id)
+	return maxf(.7,result)

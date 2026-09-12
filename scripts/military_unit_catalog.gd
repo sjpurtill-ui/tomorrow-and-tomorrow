@@ -9,6 +9,8 @@
 # grows out of — a viable transformation when its gates exist, never an
 # automatic replacement; older forms persist wherever they stay rational.
 const ARCHETYPES:Dictionary={
+	"field_repair_company": {"label":"Field Repair Company","branch":"field_support","lineage":"","era":"organized equipment maintenance","gate":"field_armorer_teams","training_days":45,"equipment":["repair_kit"],"movement":"foot","pace_km_day":24,"purpose":"Supplies trained repair work at home workshops; contributes no offensive firepower.","sustainment":"Requires issued tools, provisions, repair materials and available workshop space.","politics":"Repair personnel remain mobilized people, subject to normal losses and demobilization."},
+	"medical_detachment": {"label": "Medical Detachment", "branch": "field_support", "lineage": "", "era": "organized casualty care", "gate": "litter_bearer_drill", "training_days": 35, "equipment": ["medical_kit"], "movement": "foot", "pace_km_day": 24, "purpose": "Provides staffed, equipped casualty recovery during supported preparation; contributes no offensive firepower.", "sustainment": "Requires issued care equipment and consumes local dressings and medicinal supplies when providing care.", "politics": "Care workers remain part of mobilized population, with the same losses and demobilization accounting."},
 	"levy": {
 		"label": "Levy",
 		"branch": "force_generation",
@@ -804,6 +806,8 @@ const ARCHETYPES:Dictionary={
 }
 
 const EQUIPMENT_GATES:Dictionary={
+	"repair_kit":"field_armorer_teams",
+	"medical_kit":"litter_bearer_drill",
 	"improvised": "",
 	"spear": "hafted_weapons",
 	"bow": "bow_craft",
@@ -914,7 +918,7 @@ static func equipment_for(unit:String)->Array:
 	return (archetype(unit).get("equipment",["improvised"]) as Array)
 
 static func training_days(unit:String)->float:
-	return maxf(45.0,float(archetype(unit).get("training_days",21))*3.0)
+	return maxf(45.0,float(archetype(unit).get("training_days",21))*3.0)*WorldSimulation.discovery.military_training_multiplier(unit)
 
 static func lineage_for(unit:String)->String:
 	return String(archetype(unit).get("lineage",""))

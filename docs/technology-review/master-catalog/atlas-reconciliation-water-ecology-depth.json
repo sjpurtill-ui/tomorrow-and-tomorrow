@@ -1,0 +1,479 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "review_id": "D02-01",
+      "candidate_name": "Water source comparison",
+      "mapped_ids": [
+        "raw_water_quality_sampling"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-02",
+      "candidate_name": "Lined wells",
+      "mapped_ids": [
+        "well_lining"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-03",
+      "candidate_name": "Rainwater cisterns",
+      "mapped_ids": [
+        "rainwater_cisterns"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-04",
+      "candidate_name": "Household boiling",
+      "mapped_ids": [
+        "clean_water"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-05",
+      "candidate_name": "Waste separation",
+      "mapped_ids": [
+        "latrine_siting"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-06",
+      "candidate_name": "Gravity aqueducts",
+      "mapped_ids": [
+        "gravity_aqueducts"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-07",
+      "candidate_name": "Infiltration galleries",
+      "mapped_ids": [
+        "qanat_gallery_construction",
+        "bank_filtration_intakes"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-08",
+      "candidate_name": "Ceramic water pipes",
+      "mapped_ids": [
+        "pressure_pipe_jointing"
+      ],
+      "scope_status": "partial",
+      "note": "Pressure-pipe joining is present; specific ceramic pipe forming, firing and dimensional qualification remain unauthored as a complete manufacturing chain."
+    },
+    {
+      "review_id": "D02-09",
+      "candidate_name": "Public washing facilities",
+      "mapped_ids": [
+        "public_baths"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-10",
+      "candidate_name": "Covered drains",
+      "mapped_ids": [
+        "covered_sewers"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-11",
+      "candidate_name": "Municipal filtration",
+      "mapped_ids": [
+        "rapid_granular_filtration"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-12",
+      "candidate_name": "Pressure water networks",
+      "mapped_ids": [
+        "water_pressure_zones",
+        "pressure_reducing_water_valves"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-13",
+      "candidate_name": "Sewer ventilation",
+      "mapped_ids": [
+        "sewer_gas_ventilation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-14",
+      "candidate_name": "Waterborne disease tracing",
+      "mapped_ids": [
+        "raw_water_quality_sampling",
+        "outbreak_investigation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-15",
+      "candidate_name": "Mechanical sewage pumping",
+      "mapped_ids": [
+        "sewage_lift_stations"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-16",
+      "candidate_name": "Drinking water disinfection",
+      "mapped_ids": [
+        "water_disinfection_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-17",
+      "candidate_name": "Activated sludge treatment",
+      "mapped_ids": [
+        "activated_sludge_treatment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-18",
+      "candidate_name": "Membrane desalination",
+      "mapped_ids": [
+        "reverse_osmosis_desalination"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-19",
+      "candidate_name": "Leak detection networks",
+      "mapped_ids": [
+        "water_network_telemetry",
+        "acoustic_leak_detection"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-20",
+      "candidate_name": "Wastewater nutrient recovery",
+      "mapped_ids": [
+        "struvite_nutrient_recovery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-21",
+      "candidate_name": "Energy recovering desalination",
+      "mapped_ids": [
+        "desalination_energy_recovery"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-22",
+      "candidate_name": "Selective contaminant membranes",
+      "mapped_ids": [
+        "water_nanofiltration",
+        "membrane_integrity_testing"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-23",
+      "candidate_name": "Autonomous water network control",
+      "mapped_ids": [
+        "water_network_telemetry",
+        "water_energy_joint_dispatch"
+      ],
+      "scope_status": "partial",
+      "note": "Telemetry and resource-aware dispatch are present; autonomous network control with validated actuation authority, failure handling and local fallback remains incomplete."
+    },
+    {
+      "review_id": "D02-24",
+      "candidate_name": "Closed habitat water recycling",
+      "mapped_ids": [
+        "space_water_recovery",
+        "habitat_water_quality_barriers"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D02-25",
+      "candidate_name": "Distributed potable reuse",
+      "mapped_ids": [
+        "potable_reuse_barriers",
+        "decentralized_sanitation_services"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-01",
+      "candidate_name": "Animal track interpretation",
+      "mapped_ids": [
+        "wildlife_track_surveys"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-02",
+      "candidate_name": "Seasonal burning practice",
+      "mapped_ids": [
+        "prescribed_fire_planning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-03",
+      "candidate_name": "Habitat refuges",
+      "mapped_ids": [
+        "habitat_corridor_planning",
+        "landscape_refugia_planning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-04",
+      "candidate_name": "Seed dispersal observation",
+      "mapped_ids": [
+        "seed_dispersal_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-05",
+      "candidate_name": "Woodland coppicing",
+      "mapped_ids": [
+        "coppice_woodland_management"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-06",
+      "candidate_name": "Community grazing rules",
+      "mapped_ids": [
+        "rangeland_residual_forage_management"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-07",
+      "candidate_name": "Contour erosion control",
+      "mapped_ids": [
+        "contour_cultivation"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-08",
+      "candidate_name": "Managed fisheries",
+      "mapped_ids": [
+        "fish_stock_catch_assessment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-09",
+      "candidate_name": "Mixed woodland cultivation",
+      "mapped_ids": [
+        "forest_seed_source_matching",
+        "selective_tree_harvesting"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-10",
+      "candidate_name": "Watershed protection",
+      "mapped_ids": [
+        "water_source_protection_zones",
+        "riparian_buffer_management"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-11",
+      "candidate_name": "Species inventories",
+      "mapped_ids": [
+        "biological_classification",
+        "habitat_observation_records"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-12",
+      "candidate_name": "Population ecology",
+      "mapped_ids": [
+        "population_resource_limit_models",
+        "metapopulation_connectivity_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-13",
+      "candidate_name": "Forest regeneration plans",
+      "mapped_ids": [
+        "assisted_natural_regeneration",
+        "seed_dispersal_models"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-14",
+      "candidate_name": "Pest predator management",
+      "mapped_ids": [
+        "biological_pest_control"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-15",
+      "candidate_name": "Wetland drainage assessment",
+      "mapped_ids": [
+        "wetland_hydrology_restoration",
+        "ecological_before_after_controls"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-16",
+      "candidate_name": "Habitat corridors",
+      "mapped_ids": [
+        "habitat_corridor_planning"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-17",
+      "candidate_name": "Ecosystem restoration",
+      "mapped_ids": [
+        "ecological_restoration_targets",
+        "restoration_sequence_dependency"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-18",
+      "candidate_name": "Catch limits from stock surveys",
+      "mapped_ids": [
+        "fish_stock_catch_assessment"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-19",
+      "candidate_name": "Biodiversity monitoring",
+      "mapped_ids": [
+        "ecological_detection_models",
+        "ecological_change_detection"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-20",
+      "candidate_name": "Invasive species control",
+      "mapped_ids": [
+        "invasive_species_response_plans"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-21",
+      "candidate_name": "Assisted ecosystem migration",
+      "mapped_ids": [
+        "assisted_species_movement_review"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-22",
+      "candidate_name": "Genomic conservation planning",
+      "mapped_ids": [
+        "restoration_genetic_diversity_design",
+        "population_genetics"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-23",
+      "candidate_name": "Automated habitat monitoring",
+      "mapped_ids": [
+        "bioacoustic_species_monitoring",
+        "landscape_remote_sensing"
+      ],
+      "scope_status": "partial",
+      "note": "Qualified acoustic and remote observation methods are present; integrated autonomous habitat monitoring, maintained sensors and reviewed intervention authority remain incomplete."
+    },
+    {
+      "review_id": "D03-24",
+      "candidate_name": "Marine habitat reconstruction",
+      "mapped_ids": [
+        "seagrass_establishment_methods",
+        "coral_recruitment_support",
+        "kelp_grazing_balance_management"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. Candidate wording adds no discovery identity or guarantee of implemented service."
+    },
+    {
+      "review_id": "D03-25",
+      "candidate_name": "Regional ecological recovery models",
+      "mapped_ids": [
+        "metapopulation_connectivity_models",
+        "ecological_succession_models",
+        "landscape_refugia_planning"
+      ],
+      "scope_status": "partial",
+      "note": "Connectivity, succession and refuge models contribute; validated regional recovery coupling across water, land use and species remains incomplete."
+    }
+  ]
+}

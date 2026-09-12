@@ -1,0 +1,36 @@
+{
+  "status": "scope_reconciliation_for_review",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "longitudinal_biobank_stewardship",
+      "existing_id": "long_term_biological_archives",
+      "reason": "Application of an existing stewardship or model-validation method; no additional identity counted."
+    },
+    {
+      "excluded_id": "biological_model_transfer_review",
+      "existing_id": "mathematical_model_validation",
+      "reason": "Application of an existing stewardship or model-validation method; no additional identity counted."
+    }
+  ],
+  "mappings": [
+    {
+      "existing_id": "gene_expression_measurement",
+      "scope": "General qualified expression measurement; RNA-sequence quantification is one distinct instrument/data method, and transcription or translation models explain different processes.",
+      "distinct_children": [
+        "rna_sequence_quantification",
+        "transcription_regulation_models",
+        "translation_control_models"
+      ]
+    },
+    {
+      "existing_id": "protein_separation",
+      "scope": "General separation according to measured molecular properties; electrical migration and stationary/mobile-phase interactions are distinct physical methods.",
+      "distinct_children": [
+        "biological_electrophoretic_separation",
+        "biological_chromatographic_separation"
+      ]
+    }
+  ],
+  "additional_shared_mechanism": "microfluidic_channel_design is one D06 identity serving biological and other small-volume instruments; it is not counted again per organ model."
+}

@@ -1,0 +1,9 @@
+# Charcoal Production
+
+Built-in image generation. apprentice_contracts.png supplied as style reference only. Reviewed for sealed charcoal mound, thin smoke, separate cooled charcoal collection, simplified human figures, matte earth pigment and broad fibrous ivory space. Copied unchanged to charcoal.png. This is an illustrative scene, not a technical operating diagram.
+
+Source: /Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-9a5d35ec-0f5a-4e53-9884-f45acaaf9283.png
+
+## Exact prompt
+
+Use case: historical-scene. Asset type: square technology-tree illustration for Tomorrow and Tomorrow. Subject: Charcoal Production. Input image is STYLE REFERENCE ONLY: match the matte gouache on fibrous warm ivory paper, dry-brush pigment, simplified human silhouettes, muted ochre, olive, terracotta and charcoal grey. Create a distinct quiet woodland clearing composition: a low rounded earth-covered charcoal mound in the lower third, almost entirely sealed with turf and soil, releasing just a thin pale ribbon of smoke from a small vent. One worker in a plain ochre tunic gently closes a small side opening with soil using a wooden paddle; a second crouching worker in ivory clothing sorts cooled black charcoal pieces into a shallow woven basket beside a separate small opened finished mound. A modest bundle of cut branches lies at the left. Make the distinction between earth-covered smoldering wood and cooled charcoal clear. No open bonfire or exposed flames. Two or three very faint olive woodland silhouettes along the low horizon only. Keep all essential activity within the lower half of the square; upper half broad mostly blank warm ivory paper. Restrained flat earthy pigment, rough natural brush edges, soft charcoal shadows, human scale, no photorealism, glossy 3D, industrial chimney, metal machinery, text, numbers, labels, logos, watermark or decorative border.

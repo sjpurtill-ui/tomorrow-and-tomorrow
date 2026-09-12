@@ -1,0 +1,2336 @@
+[
+  {
+    "field": "D13",
+    "id": "syllabic_script_encoding",
+    "name": "Syllabic Script Encoding",
+    "foundations": "phonetic_notation",
+    "mechanism": "Represent recurring spoken syllabic units with agreed written signs",
+    "operating_requirement": "A usable sign inventory, writing medium and trained readers",
+    "consequence": "Encode speech through a syllabic convention without requiring an alphabet",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [
+      [
+        "clay_record_tablets",
+        "wax_tablet_records",
+        "pictographic_records"
+      ]
+    ],
+    "branching_note": "Speech representation can develop on several existing media. These script routes are alternatives, not a ranked mandatory ladder.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "syllabic_script_encoding",
+      "local_demonstration": "Represent recurring spoken syllabic units with agreed written signs",
+      "operating_requirements": "A usable sign inventory, writing medium and trained readers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "consonantal_script_encoding",
+    "name": "Consonantal Script Encoding",
+    "foundations": "phonetic_notation",
+    "mechanism": "Represent a language primarily through agreed consonantal signs with context or auxiliary marks",
+    "operating_requirement": "A suitable language convention, medium and trained readers",
+    "consequence": "Support a consonantal writing route with its own ambiguity and teaching needs",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [
+      [
+        "clay_record_tablets",
+        "wax_tablet_records",
+        "pictographic_records"
+      ]
+    ],
+    "branching_note": "Speech representation can develop on several existing media. These script routes are alternatives, not a ranked mandatory ladder.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "consonantal_script_encoding",
+      "local_demonstration": "Represent a language primarily through agreed consonantal signs with context or auxiliary marks",
+      "operating_requirements": "A suitable language convention, medium and trained readers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "alphabetic_script_encoding",
+    "name": "Alphabetic Script Encoding",
+    "foundations": "phonetic_notation",
+    "mechanism": "Represent consonantal and vocalic distinctions through an agreed segmental sign system",
+    "operating_requirement": "Maintained sign-sound conventions and literacy instruction",
+    "consequence": "Support alphabetic recording without claiming universal superiority over other scripts",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [
+      [
+        "clay_record_tablets",
+        "wax_tablet_records",
+        "pictographic_records"
+      ]
+    ],
+    "branching_note": "Speech representation can develop on several existing media. These script routes are alternatives, not a ranked mandatory ladder.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "alphabetic_script_encoding",
+      "local_demonstration": "Represent consonantal and vocalic distinctions through an agreed segmental sign system",
+      "operating_requirements": "Maintained sign-sound conventions and literacy instruction",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "written_word_boundary_conventions",
+    "name": "Written Word-Boundary Conventions",
+    "foundations": "pictographic_records",
+    "mechanism": "Mark or infer conventional boundaries among written units under an agreed reading practice",
+    "operating_requirement": "A shared orthographic convention, actual texts and readers",
+    "consequence": "Reduce specified parsing ambiguity without imposing spaces on every script",
+    "status": "authored_draft",
+    "requires_all": [
+      "pictographic_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "written_word_boundary_conventions",
+      "local_demonstration": "Mark or infer conventional boundaries among written units under an agreed reading practice",
+      "operating_requirements": "A shared orthographic convention, actual texts and readers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "punctuation_scope_conventions",
+    "name": "Punctuation Scope Conventions",
+    "foundations": "pictographic_records",
+    "mechanism": "Use agreed marks or layout to signal grouping, pause and scope in written expression",
+    "operating_requirement": "Maintained conventions and interpretable text production",
+    "consequence": "Express selected structure without eliminating linguistic ambiguity",
+    "status": "authored_draft",
+    "requires_all": [
+      "pictographic_records"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "punctuation_scope_conventions",
+      "local_demonstration": "Use agreed marks or layout to signal grouping, pause and scope in written expression",
+      "operating_requirements": "Maintained conventions and interpretable text production",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "stable_document_locators",
+    "name": "Stable Document Locators",
+    "foundations": "",
+    "mechanism": "Assign references that locate passages consistently within a declared document version",
+    "operating_requirement": "Ordered records, maintained version identity and locator conventions",
+    "consequence": "Support precise citation while retaining edition and reordering differences",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "bookbinding_assemblies",
+        "clay_record_tablets"
+      ]
+    ],
+    "branching_note": "Stable section or item references can precede bound books; numbering needs a declared edition or record identity.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "stable_document_locators",
+      "local_demonstration": "Assign references that locate passages consistently within a declared document version",
+      "operating_requirements": "Ordered records, maintained version identity and locator conventions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "controlled_subject_vocabularies",
+    "name": "Controlled Subject Vocabularies",
+    "foundations": "library_cataloging",
+    "mechanism": "Maintain agreed subject terms and relationships for consistent record description",
+    "operating_requirement": "Curators, usable terminology and revision records",
+    "consequence": "Improve cross-record retrieval without enforcing one universal conceptual scheme",
+    "status": "authored_draft",
+    "requires_all": [
+      "library_cataloging"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "controlled_subject_vocabularies",
+      "local_demonstration": "Maintain agreed subject terms and relationships for consistent record description",
+      "operating_requirements": "Curators, usable terminology and revision records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "archival_appraisal_methods",
+    "name": "Archival Appraisal Methods",
+    "foundations": "archival_finding_aids",
+    "mechanism": "Assess records for evidentiary and anticipated use value against declared retention constraints",
+    "operating_requirement": "Actual records, accountable reviewers and documented appraisal criteria",
+    "consequence": "Choose preservation priorities without declaring discarded history unimportant",
+    "status": "authored_draft",
+    "requires_all": [
+      "archival_finding_aids"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "archival_appraisal_methods",
+      "local_demonstration": "Assess records for evidentiary and anticipated use value against declared retention constraints",
+      "operating_requirements": "Actual records, accountable reviewers and documented appraisal criteria",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "record_retention_schedules",
+    "name": "Record Retention Schedules",
+    "foundations": "archival_appraisal_methods",
+    "mechanism": "Assign review, retention and authorized disposition conditions to defined record classes",
+    "operating_requirement": "Recognized authority, inventories and preservation or disposal capacity",
+    "consequence": "Manage finite archives without automatic deletion merely because a method is learned",
+    "status": "authored_draft",
+    "requires_all": [
+      "archival_appraisal_methods"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "record_retention_schedules",
+      "local_demonstration": "Assign review, retention and authorized disposition conditions to defined record classes",
+      "operating_requirements": "Recognized authority, inventories and preservation or disposal capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "optical_character_recognition",
+    "name": "Optical Character Recognition",
+    "foundations": "computer_vision,multilingual_character_encoding",
+    "mechanism": "Infer encoded text from measured images of written or printed characters",
+    "operating_requirement": "Actual image capture, qualified character models and correction capacity",
+    "consequence": "Produce a provisional transcription with retained recognition errors",
+    "status": "authored_draft",
+    "requires_all": [
+      "computer_vision",
+      "multilingual_character_encoding"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_character_recognition",
+      "local_demonstration": "Infer encoded text from measured images of written or printed characters",
+      "operating_requirements": "Actual image capture, qualified character models and correction capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy. Includes qualified printed and handwritten recognition; different writer or script models need separate validation but do not each add a discovery.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "script_transliteration_rules",
+    "name": "Script Transliteration Rules",
+    "foundations": "phonetic_notation",
+    "mechanism": "Map a declared writing convention into another with recorded distinctions and losses",
+    "operating_requirement": "Defined source and target conventions, competent reviewers and examples",
+    "consequence": "Aid cross-script access without claiming translation or reversible mapping in every case",
+    "status": "authored_draft",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "script_transliteration_rules",
+      "local_demonstration": "Map a declared writing convention into another with recorded distinctions and losses",
+      "operating_requirements": "Defined source and target conventions, competent reviewers and examples",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "character_normalization_rules",
+    "name": "Character Normalization Rules",
+    "foundations": "multilingual_character_encoding",
+    "mechanism": "Transform encoded sequences according to declared equivalence rules while preserving required distinctions",
+    "operating_requirement": "A versioned equivalence specification and conforming implementations",
+    "consequence": "Compare qualified equivalent text without equating visually similar characters automatically",
+    "status": "authored_draft",
+    "requires_all": [
+      "multilingual_character_encoding"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "character_normalization_rules",
+      "local_demonstration": "Transform encoded sequences according to declared equivalence rules while preserving required distinctions",
+      "operating_requirements": "A versioned equivalence specification and conforming implementations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "multilingual_collation_rules",
+    "name": "Multilingual Collation Rules",
+    "foundations": "multilingual_character_encoding",
+    "mechanism": "Order encoded strings using declared language-sensitive comparison levels and tailoring",
+    "operating_requirement": "Maintained comparison rules and compatible implementations",
+    "consequence": "Sort records reproducibly while preserving language and version differences",
+    "status": "authored_draft",
+    "requires_all": [
+      "multilingual_character_encoding"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "multilingual_collation_rules",
+      "local_demonstration": "Order encoded strings using declared language-sensitive comparison levels and tailoring",
+      "operating_requirements": "Maintained comparison rules and compatible implementations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "tactile_character_codes",
+    "name": "Tactile Character Codes",
+    "foundations": "guided_practice_cycles",
+    "mechanism": "Encode readable symbols as a qualified tactile pattern system",
+    "operating_requirement": "Agreed code, suitable dimensions and reader instruction",
+    "consequence": "Provide nonvisual text access without assuming all raised marks are equally readable",
+    "status": "authored_draft",
+    "requires_all": [
+      "guided_practice_cycles"
+    ],
+    "requires_any": [
+      [
+        "pictographic_records",
+        "phonetic_notation"
+      ]
+    ],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tactile_character_codes",
+      "local_demonstration": "Encode readable symbols as a qualified tactile pattern system",
+      "operating_requirements": "Agreed code, suitable dimensions and reader instruction",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending.",
+    "branching_note": "Tactile symbolic conventions and trained reading can precede any digital schema. Pattern geometry, medium and actual reading skill remain necessary."
+  },
+  {
+    "field": "D13",
+    "id": "tactile_record_embossing",
+    "name": "Tactile Record Embossing",
+    "foundations": "tactile_character_codes",
+    "mechanism": "Form durable qualified tactile patterns in a suitable medium",
+    "operating_requirement": "Actual embossing tools, compatible material and legibility checks",
+    "consequence": "Produce readable tactile records while retaining wear and material costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "tactile_character_codes"
+    ],
+    "requires_any": [
+      [
+        "relief_block_cutting",
+        "clay_record_tablets"
+      ]
+    ],
+    "branching_note": "Relief-form or direct impression methods can produce tactile patterns before automated embossers; a liquid-writing nib is not a necessary prerequisite.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tactile_record_embossing",
+      "local_demonstration": "Form durable qualified tactile patterns in a suitable medium",
+      "operating_requirements": "Actual embossing tools, compatible material and legibility checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "magnetic_tape_data_recording",
+    "name": "Magnetic Tape Data Recording",
+    "foundations": "magnetic_audio_recording,message_framing",
+    "mechanism": "Encode and recover digital blocks on a moving magnetic medium with timing and integrity controls",
+    "operating_requirement": "Actual tape, heads, drive, encoding electronics and maintained alignment",
+    "consequence": "Store bounded digital records with sequential-access and degradation costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "magnetic_audio_recording",
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "magnetic_tape_data_recording",
+      "local_demonstration": "Encode and recover digital blocks on a moving magnetic medium with timing and integrity controls",
+      "operating_requirements": "Actual tape, heads, drive, encoding electronics and maintained alignment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "optical_disc_recording",
+    "name": "Optical Disc Recording",
+    "foundations": "laser_light_generation,message_framing",
+    "mechanism": "Encode and recover data through qualified optical changes along a tracked rotating medium",
+    "operating_requirement": "Compatible medium, optics, servo control and encoding equipment",
+    "consequence": "Store finite data with format and media-lifetime limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "laser_light_generation",
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_disc_recording",
+      "local_demonstration": "Encode and recover data through qualified optical changes along a tracked rotating medium",
+      "operating_requirements": "Compatible medium, optics, servo control and encoding equipment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "lossless_data_compression",
+    "name": "Lossless Data Compression",
+    "foundations": "information_entropy_models",
+    "mechanism": "Represent data with fewer symbols under a reversible coding scheme when its structure permits",
+    "operating_requirement": "Compatible encoder and decoder, actual computation and retained format knowledge",
+    "consequence": "Reduce some storage or traffic without reducing every possible input",
+    "status": "authored_draft",
+    "requires_all": [
+      "information_entropy_models"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lossless_data_compression",
+      "local_demonstration": "Represent data with fewer symbols under a reversible coding scheme when its structure permits",
+      "operating_requirements": "Compatible encoder and decoder, actual computation and retained format knowledge",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "lossy_media_coding",
+    "name": "Lossy Media Coding",
+    "foundations": "information_entropy_models",
+    "mechanism": "Discard or approximate declared signal information against an evaluated distortion criterion",
+    "operating_requirement": "Qualified encoder, decoder and explicit quality targets",
+    "consequence": "Reduce media traffic at an irreversible information-loss cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "information_entropy_models"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lossy_media_coding",
+      "local_demonstration": "Discard or approximate declared signal information against an evaluated distortion criterion",
+      "operating_requirements": "Qualified encoder, decoder and explicit quality targets",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "frequency_division_multiplexing",
+    "name": "Frequency-Division Multiplexing",
+    "foundations": "frequency_stabilization",
+    "mechanism": "Carry separate signals in allocated frequency bands with qualified filtering",
+    "operating_requirement": "Actual band capacity, compatible filters and transmit-receive equipment",
+    "consequence": "Share a link while retaining guard-band and interference limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "frequency_stabilization"
+    ],
+    "requires_any": [
+      [
+        "telephone_circuits",
+        "tuned_radio_reception"
+      ]
+    ],
+    "branching_note": "Wired or radio signals may share a path through suitable frequency separation; no broadcast-only prerequisite is imposed.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "frequency_division_multiplexing",
+      "local_demonstration": "Carry separate signals in allocated frequency bands with qualified filtering",
+      "operating_requirements": "Actual band capacity, compatible filters and transmit-receive equipment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "time_division_multiplexing",
+    "name": "Time-Division Multiplexing",
+    "foundations": "timed_signal_sequences",
+    "mechanism": "Share a transmission path through declared time slots and synchronization",
+    "operating_requirement": "Compatible timing, switching and finite slot capacity",
+    "consequence": "Carry several streams without multiplying total path capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "timed_signal_sequences"
+    ],
+    "requires_any": [
+      [
+        "automatic_telegraphy",
+        "signal_sampling"
+      ]
+    ],
+    "branching_note": "Mechanical or electronic timing and switching can support different qualified time-sharing systems; digital audio is not mandatory.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "time_division_multiplexing",
+      "local_demonstration": "Share a transmission path through declared time slots and synchronization",
+      "operating_requirements": "Compatible timing, switching and finite slot capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "wavelength_division_multiplexing",
+    "name": "Wavelength-Division Multiplexing",
+    "foundations": "optical_fiber_communication",
+    "mechanism": "Carry separable optical channels at qualified wavelengths in one physical fiber",
+    "operating_requirement": "Compatible sources, wavelength-selective elements and verified channel margins",
+    "consequence": "Increase supported aggregate traffic while retaining power and crosstalk limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_fiber_communication"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wavelength_division_multiplexing",
+      "local_demonstration": "Carry separable optical channels at qualified wavelengths in one physical fiber",
+      "operating_requirements": "Compatible sources, wavelength-selective elements and verified channel margins",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "phase_shift_keying",
+    "name": "Phase-Shift Keying",
+    "foundations": "frequency_stabilization,message_framing",
+    "mechanism": "Encode digital symbols through qualified carrier phase states",
+    "operating_requirement": "Stable reference, compatible modulation and detection and measured channel conditions",
+    "consequence": "Provide a digital signaling route with noise and synchronization limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "frequency_stabilization",
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "phase_shift_keying",
+      "local_demonstration": "Encode digital symbols through qualified carrier phase states",
+      "operating_requirements": "Stable reference, compatible modulation and detection and measured channel conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "quadrature_amplitude_modulation",
+    "name": "Quadrature Amplitude Modulation",
+    "foundations": "phase_shift_keying,amplitude_modulation",
+    "mechanism": "Encode symbols through qualified combinations of two quadrature signal components",
+    "operating_requirement": "Linear signal chain, compatible constellation decoding and adequate signal quality",
+    "consequence": "Trade symbol density against required channel quality",
+    "status": "authored_draft",
+    "requires_all": [
+      "phase_shift_keying",
+      "amplitude_modulation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "quadrature_amplitude_modulation",
+      "local_demonstration": "Encode symbols through qualified combinations of two quadrature signal components",
+      "operating_requirements": "Linear signal chain, compatible constellation decoding and adequate signal quality",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "orthogonal_multicarrier_modulation",
+    "name": "Orthogonal Multicarrier Modulation",
+    "foundations": "harmonic_analysis,message_framing",
+    "mechanism": "Distribute symbols over coordinated orthogonal subcarriers with qualified timing and channel handling",
+    "operating_requirement": "Actual processing, synchronization and suitable transmission hardware",
+    "consequence": "Support a multicarrier link while retaining overhead and channel sensitivity",
+    "status": "authored_draft",
+    "requires_all": [
+      "harmonic_analysis",
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orthogonal_multicarrier_modulation",
+      "local_demonstration": "Distribute symbols over coordinated orthogonal subcarriers with qualified timing and channel handling",
+      "operating_requirements": "Actual processing, synchronization and suitable transmission hardware",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "direct_sequence_spreading",
+    "name": "Direct-Sequence Spreading",
+    "foundations": "message_framing",
+    "mechanism": "Spread a signal with a declared code and recover it through matched correlation",
+    "operating_requirement": "Compatible spreading code, timing and receiver processing",
+    "consequence": "Trade occupied bandwidth for a qualified interference response without secrecy guarantees",
+    "status": "authored_draft",
+    "requires_all": [
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "direct_sequence_spreading",
+      "local_demonstration": "Spread a signal with a declared code and recover it through matched correlation",
+      "operating_requirements": "Compatible spreading code, timing and receiver processing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "frequency_hopping_links",
+    "name": "Frequency-Hopping Links",
+    "foundations": "frequency_stabilization,message_framing",
+    "mechanism": "Move a compatible link across a synchronized sequence of frequencies",
+    "operating_requirement": "Tunable terminals, timing and usable spectrum",
+    "consequence": "Provide a hopping signaling path with coordination and interference constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "frequency_stabilization",
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "frequency_hopping_links",
+      "local_demonstration": "Move a compatible link across a synchronized sequence of frequencies",
+      "operating_requirements": "Tunable terminals, timing and usable spectrum",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "adaptive_channel_equalization",
+    "name": "Adaptive Channel Equalization",
+    "foundations": "",
+    "mechanism": "Estimate and compensate a qualified transmission channel's distortion from observations",
+    "operating_requirement": "Actual training or decision evidence, processing and stable adaptation limits",
+    "consequence": "Recover symbols under specified distortion without correcting arbitrary loss",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "data_modems",
+        "telephone_repeaters"
+      ]
+    ],
+    "branching_note": "Qualified equalization can be analog or digital; automatic adaptation needs appropriate feedback and actual channel observations.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "adaptive_channel_equalization",
+      "local_demonstration": "Estimate and compensate a qualified transmission channel's distortion from observations",
+      "operating_requirements": "Actual training or decision evidence, processing and stable adaptation limits",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "carrier_timing_recovery",
+    "name": "Carrier and Timing Recovery",
+    "foundations": "data_modems",
+    "mechanism": "Estimate carrier and symbol timing references from a received signal",
+    "operating_requirement": "Qualified receiver, sufficient signal structure and loop stability",
+    "consequence": "Synchronize reception within an acquisition and tracking envelope",
+    "status": "authored_draft",
+    "requires_all": [
+      "data_modems"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "carrier_timing_recovery",
+      "local_demonstration": "Estimate carrier and symbol timing references from a received signal",
+      "operating_requirements": "Qualified receiver, sufficient signal structure and loop stability",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "antenna_array_beamforming",
+    "name": "Antenna Array Beamforming",
+    "foundations": "aerial_matching",
+    "mechanism": "Control relative signals across antenna elements to shape a qualified directional response",
+    "operating_requirement": "Actual array, phase or delay control and calibration",
+    "consequence": "Steer or shape coverage while retaining aperture, sidelobe and power limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "aerial_matching"
+    ],
+    "requires_any": [
+      [
+        "electromagnetic_wave_theory",
+        "electrical_measurement"
+      ]
+    ],
+    "branching_note": "Qualified measured electrical phase or delay control can develop alongside formal wave models; optical interferometer manufacture is not required.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "antenna_array_beamforming",
+      "local_demonstration": "Control relative signals across antenna elements to shape a qualified directional response",
+      "operating_requirements": "Actual array, phase or delay control and calibration",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "spatial_stream_multiplexing",
+    "name": "Spatial-Stream Multiplexing",
+    "foundations": "antenna_array_beamforming",
+    "mechanism": "Separate simultaneous streams through measured spatial channel structure",
+    "operating_requirement": "Multiple qualified signal paths, channel estimation and suitable propagation",
+    "consequence": "Increase supported streams only when channel conditions provide separable information",
+    "status": "authored_draft",
+    "requires_all": [
+      "antenna_array_beamforming"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "spatial_stream_multiplexing",
+      "local_demonstration": "Separate simultaneous streams through measured spatial channel structure",
+      "operating_requirements": "Multiple qualified signal paths, channel estimation and suitable propagation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "cellular_frequency_reuse",
+    "name": "Cellular Frequency Reuse",
+    "foundations": "communication_link_budgets",
+    "mechanism": "Plan separated service areas that reuse spectrum within interference limits",
+    "operating_requirement": "Actual sites, assessed propagation and coordinated frequencies",
+    "consequence": "Expand regional service without making neighboring cells interference-free",
+    "status": "authored_draft",
+    "requires_all": [
+      "communication_link_budgets"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cellular_frequency_reuse",
+      "local_demonstration": "Plan separated service areas that reuse spectrum within interference limits",
+      "operating_requirements": "Actual sites, assessed propagation and coordinated frequencies",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "mobile_link_handover",
+    "name": "Mobile Link Handover",
+    "foundations": "cellular_frequency_reuse",
+    "mechanism": "Transfer a moving terminal's service between qualified access sites with bounded interruption",
+    "operating_requirement": "Observed coverage, compatible control signaling and available destination capacity",
+    "consequence": "Maintain some sessions during movement while retaining handover failure and outage",
+    "status": "authored_draft",
+    "requires_all": [
+      "cellular_frequency_reuse"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mobile_link_handover",
+      "local_demonstration": "Transfer a moving terminal's service between qualified access sites with bounded interruption",
+      "operating_requirements": "Observed coverage, compatible control signaling and available destination capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "spectrum_occupancy_sensing",
+    "name": "Spectrum Occupancy Sensing",
+    "foundations": "tuned_radio_reception",
+    "mechanism": "Measure time-varying signal occupancy over a declared frequency range",
+    "operating_requirement": "Calibrated receiver, observation time and detection limits",
+    "consequence": "Inform access decisions without proving an undetected user is absent",
+    "status": "authored_draft",
+    "requires_all": [
+      "tuned_radio_reception"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "spectrum_occupancy_sensing",
+      "local_demonstration": "Measure time-varying signal occupancy over a declared frequency range",
+      "operating_requirements": "Calibrated receiver, observation time and detection limits",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "underwater_acoustic_communication",
+    "name": "Underwater Acoustic Communication",
+    "foundations": "mechanical_oscillation,message_framing",
+    "mechanism": "Encode and recover information through a qualified underwater sound channel",
+    "operating_requirement": "Actual transducers, power and measured propagation and noise",
+    "consequence": "Provide slow bounded submerged communication without radio-like latency or bandwidth",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_oscillation",
+      "message_framing"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "underwater_acoustic_communication",
+      "local_demonstration": "Encode and recover information through a qualified underwater sound channel",
+      "operating_requirements": "Actual transducers, power and measured propagation and noise",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "optical_amplifier_link_design",
+    "name": "Optical Amplifier Link Design",
+    "foundations": "optical_fiber_communication",
+    "mechanism": "Integrate optical gain while accounting for added noise, saturation and spectral effects",
+    "operating_requirement": "Actual compatible amplifier, pumping power and verified link margins",
+    "consequence": "Extend a supported optical span without restoring lost information perfectly",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_fiber_communication"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_amplifier_link_design",
+      "local_demonstration": "Integrate optical gain while accounting for added noise, saturation and spectral effects",
+      "operating_requirements": "Actual compatible amplifier, pumping power and verified link margins",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "coherent_optical_reception",
+    "name": "Coherent Optical Reception",
+    "foundations": "optical_signal_modulation,laser_frequency_control",
+    "mechanism": "Combine received light with a qualified local optical reference to recover encoded field information",
+    "operating_requirement": "Compatible optics, reference source, detectors and processing",
+    "consequence": "Recover supported optical modulation with phase and noise constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_signal_modulation",
+      "laser_frequency_control"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "coherent_optical_reception",
+      "local_demonstration": "Combine received light with a qualified local optical reference to recover encoded field information",
+      "operating_requirements": "Compatible optics, reference source, detectors and processing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "optical_dispersion_compensation",
+    "name": "Optical Dispersion Compensation",
+    "foundations": "optical_fiber_communication,harmonic_analysis",
+    "mechanism": "Measure and compensate pulse or phase spreading in a qualified optical link",
+    "operating_requirement": "Characterized fiber, compatible compensation hardware or processing",
+    "consequence": "Preserve usable signaling over a specified span without eliminating all nonlinear effects",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_fiber_communication",
+      "harmonic_analysis"
+    ],
+    "requires_any": [],
+    "branching_note": "Qualified compensation may be optical or performed in signal processing; measuring attenuation alone is not a necessary foundation for dispersion control.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_dispersion_compensation",
+      "local_demonstration": "Measure and compensate pulse or phase spreading in a qualified optical link",
+      "operating_requirements": "Characterized fiber, compatible compensation hardware or processing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "adaptive_link_rate_selection",
+    "name": "Adaptive Link-Rate Selection",
+    "foundations": "communication_link_budgets",
+    "mechanism": "Choose among qualified signaling rates using measured channel and loss conditions",
+    "operating_requirement": "Compatible rate options, feedback and actual link observations",
+    "consequence": "Trade throughput and delivery reliability without assuming the fastest rate always works",
+    "status": "authored_draft",
+    "requires_all": [
+      "communication_link_budgets"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "adaptive_link_rate_selection",
+      "local_demonstration": "Choose among qualified signaling rates using measured channel and loss conditions",
+      "operating_requirements": "Compatible rate options, feedback and actual link observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "distance_vector_routing",
+    "name": "Distance-Vector Routing",
+    "foundations": "packet_routers",
+    "mechanism": "Exchange neighbor reachability estimates and choose routes using a declared metric",
+    "operating_requirement": "Operating routers, actual neighbor links and bounded update handling",
+    "consequence": "Build routes from local exchanges while retaining convergence and loop risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "distance_vector_routing",
+      "local_demonstration": "Exchange neighbor reachability estimates and choose routes using a declared metric",
+      "operating_requirements": "Operating routers, actual neighbor links and bounded update handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "link_state_routing",
+    "name": "Link-State Routing",
+    "foundations": "packet_routers,network_flow_methods",
+    "mechanism": "Distribute observed link descriptions and calculate routes from a maintained topology view",
+    "operating_requirement": "Actual routers, control traffic, computation and stale-state handling",
+    "consequence": "Choose routes from a shared view without assuming instantaneous agreement",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers",
+      "network_flow_methods"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "link_state_routing",
+      "local_demonstration": "Distribute observed link descriptions and calculate routes from a maintained topology view",
+      "operating_requirements": "Actual routers, control traffic, computation and stale-state handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "path_vector_routing",
+    "name": "Path-Vector Routing",
+    "foundations": "packet_routers",
+    "mechanism": "Advertise reachability with path information and apply declared inter-network policy",
+    "operating_requirement": "Actual participating networks, usable paths and maintained policy",
+    "consequence": "Route across independently administered networks while retaining policy conflicts and misinformation risk",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "path_vector_routing",
+      "local_demonstration": "Advertise reachability with path information and apply declared inter-network policy",
+      "operating_requirements": "Actual participating networks, usable paths and maintained policy",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "multicast_distribution_trees",
+    "name": "Multicast Distribution Trees",
+    "foundations": "packet_routers,network_flow_methods",
+    "mechanism": "Replicate traffic along maintained distribution branches for an identified receiver group",
+    "operating_requirement": "Actual group membership, router support and branch capacity",
+    "consequence": "Reduce duplicated shared-path traffic without free delivery to absent receivers",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers",
+      "network_flow_methods"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "multicast_distribution_trees",
+      "local_demonstration": "Replicate traffic along maintained distribution branches for an identified receiver group",
+      "operating_requirements": "Actual group membership, router support and branch capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "packet_priority_scheduling",
+    "name": "Packet Priority Scheduling",
+    "foundations": "queueing_models",
+    "mechanism": "Select queued packets under an explicit service discipline and starvation limits",
+    "operating_requirement": "Actual queues, available output capacity and declared priorities",
+    "consequence": "Change delay distribution without creating bandwidth",
+    "status": "authored_draft",
+    "requires_all": [
+      "queueing_models"
+    ],
+    "requires_any": [
+      [
+        "packet_switching",
+        "telegraph_network_dispatch"
+      ]
+    ],
+    "branching_note": "Shared queue disciplines can develop in earlier message switching, then specialize to packets; declared priorities do not create extra capacity.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "packet_priority_scheduling",
+      "local_demonstration": "Select queued packets under an explicit service discipline and starvation limits",
+      "operating_requirements": "Actual queues, available output capacity and declared priorities",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "network_admission_control",
+    "name": "Network Admission Control",
+    "foundations": "communication_service_accounting",
+    "mechanism": "Admit a requested service only against declared and observed resource commitments",
+    "operating_requirement": "Actual capacity records, enforceable admission decisions and current reservations",
+    "consequence": "Limit overcommitment while retaining estimation error and rejected requests",
+    "status": "authored_draft",
+    "requires_all": [
+      "communication_service_accounting"
+    ],
+    "requires_any": [
+      [
+        "queueing_models",
+        "telephone_exchange_networks"
+      ]
+    ],
+    "branching_note": "Admission decisions can use qualified capacity estimates or maintained circuit availability before modern packet reservation.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "network_admission_control",
+      "local_demonstration": "Admit a requested service only against declared and observed resource commitments",
+      "operating_requirements": "Actual capacity records, enforceable admission decisions and current reservations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "packet_address_hierarchy",
+    "name": "Packet Address Hierarchy",
+    "foundations": "packet_routers",
+    "mechanism": "Allocate and aggregate destination identifiers according to a declared routing hierarchy",
+    "operating_requirement": "Maintained address authority and compatible routing tables",
+    "consequence": "Reduce some routing state without eliminating renumbering or topology changes",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "packet_address_hierarchy",
+      "local_demonstration": "Allocate and aggregate destination identifiers according to a declared routing hierarchy",
+      "operating_requirements": "Maintained address authority and compatible routing tables",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "maximum_packet_path_discovery",
+    "name": "Maximum Packet-Path Discovery",
+    "foundations": "packet_routers",
+    "mechanism": "Determine a qualified transmission size that can traverse a changing path",
+    "operating_requirement": "Actual feedback or observations and compatible endpoint behavior",
+    "consequence": "Avoid some oversized transmissions while retaining stale or blocked feedback",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "maximum_packet_path_discovery",
+      "local_demonstration": "Determine a qualified transmission size that can traverse a changing path",
+      "operating_requirements": "Actual feedback or observations and compatible endpoint behavior",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "transport_loss_recovery_timing",
+    "name": "Transport Loss-Recovery Timing",
+    "foundations": "reliable_stream_transport",
+    "mechanism": "Estimate retransmission timing from observed delays and uncertainty",
+    "operating_requirement": "Actual acknowledgments, timing observations and bounded backoff rules",
+    "consequence": "Reduce needless retransmission without distinguishing every delay from loss",
+    "status": "authored_draft",
+    "requires_all": [
+      "reliable_stream_transport"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "transport_loss_recovery_timing",
+      "local_demonstration": "Estimate retransmission timing from observed delays and uncertainty",
+      "operating_requirements": "Actual acknowledgments, timing observations and bounded backoff rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "explicit_congestion_feedback",
+    "name": "Explicit Congestion Feedback",
+    "foundations": "network_congestion_control",
+    "mechanism": "Signal congestion before or alongside loss using compatible network and endpoint behavior",
+    "operating_requirement": "Actual supporting routers, readable feedback and responsive senders",
+    "consequence": "Improve some load responses without guaranteeing cooperation or spare capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "network_congestion_control"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "explicit_congestion_feedback",
+      "local_demonstration": "Signal congestion before or alongside loss using compatible network and endpoint behavior",
+      "operating_requirements": "Actual supporting routers, readable feedback and responsive senders",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "network_measurement_probes",
+    "name": "Network Measurement Probes",
+    "foundations": "packet_routers,measurement_uncertainty",
+    "mechanism": "Infer selected path behavior from controlled observations with probe effects accounted for",
+    "operating_requirement": "Actual endpoints, timestamps and bounded measurement traffic",
+    "consequence": "Estimate latency or loss without revealing all internal network state",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "network_measurement_probes",
+      "local_demonstration": "Infer selected path behavior from controlled observations with probe effects accounted for",
+      "operating_requirements": "Actual endpoints, timestamps and bounded measurement traffic",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "software_defined_forwarding",
+    "name": "Software-Defined Forwarding",
+    "foundations": "packet_routers",
+    "mechanism": "Separate an authorized control decision process from rule execution in forwarding devices",
+    "operating_requirement": "Actual controller, compatible devices and maintained rules",
+    "consequence": "Reconfigure supported paths while retaining controller and rule-distribution failures",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_routers"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "software_defined_forwarding",
+      "local_demonstration": "Separate an authorized control decision process from rule execution in forwarding devices",
+      "operating_requirements": "Actual controller, compatible devices and maintained rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "network_configuration_transactions",
+    "name": "Network Configuration Transactions",
+    "foundations": "software_defined_forwarding",
+    "mechanism": "Stage and validate coordinated rule changes with explicit partial-failure behavior",
+    "operating_requirement": "Actual devices, verified configuration state and rollback resources",
+    "consequence": "Reduce inconsistent updates without assuming a whole network changes atomically",
+    "status": "authored_draft",
+    "requires_all": [
+      "software_defined_forwarding"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "network_configuration_transactions",
+      "local_demonstration": "Stage and validate coordinated rule changes with explicit partial-failure behavior",
+      "operating_requirements": "Actual devices, verified configuration state and rollback resources",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "anycast_service_routing",
+    "name": "Anycast Service Routing",
+    "foundations": "packet_address_hierarchy",
+    "mechanism": "Advertise a shared service destination from multiple qualified sites using routing policy",
+    "operating_requirement": "Actual service replicas, routes and consistent service behavior",
+    "consequence": "Reach a selected available site without guaranteeing the geographically nearest or session continuity",
+    "status": "authored_draft",
+    "requires_all": [
+      "packet_address_hierarchy"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "anycast_service_routing",
+      "local_demonstration": "Advertise a shared service destination from multiple qualified sites using routing policy",
+      "operating_requirements": "Actual service replicas, routes and consistent service behavior",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "content_delivery_caches",
+    "name": "Content Delivery Caches",
+    "foundations": "content_addressed_storage,network_name_resolution",
+    "mechanism": "Serve qualified retained content near demand while managing freshness and misses",
+    "operating_requirement": "Actual cache storage, reachable origin and valid reuse rules",
+    "consequence": "Reduce repeated transfer while retaining stale-data and cache-fill costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "content_addressed_storage",
+      "network_name_resolution"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "content_delivery_caches",
+      "local_demonstration": "Serve qualified retained content near demand while managing freshness and misses",
+      "operating_requirements": "Actual cache storage, reachable origin and valid reuse rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "intermittent_contact_scheduling",
+    "name": "Intermittent Contact Scheduling",
+    "foundations": "delay_tolerant_space_networks",
+    "mechanism": "Plan storage and transmission against known or uncertain future contact opportunities",
+    "operating_requirement": "Actual contact evidence, buffers, power and link capacity",
+    "consequence": "Deliver some delayed data without treating scheduled contact as completed transfer",
+    "status": "authored_draft",
+    "requires_all": [
+      "delay_tolerant_space_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "intermittent_contact_scheduling",
+      "local_demonstration": "Plan storage and transmission against known or uncertain future contact opportunities",
+      "operating_requirements": "Actual contact evidence, buffers, power and link capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "contact_graph_route_planning",
+    "name": "Contact-Graph Route Planning",
+    "foundations": "intermittent_contact_scheduling,network_flow_methods",
+    "mechanism": "Route bundles through time-bounded future contacts with capacity and expiry constraints",
+    "operating_requirement": "Qualified schedules, finite storage and updated route computation",
+    "consequence": "Use planned intermittent paths while retaining missed-contact uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "intermittent_contact_scheduling",
+      "network_flow_methods"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "contact_graph_route_planning",
+      "local_demonstration": "Route bundles through time-bounded future contacts with capacity and expiry constraints",
+      "operating_requirements": "Qualified schedules, finite storage and updated route computation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "network_fault_domain_design",
+    "name": "Network Fault-Domain Design",
+    "foundations": "resilient_decentralized_networks",
+    "mechanism": "Partition service dependencies so a defined failure need not disable every path",
+    "operating_requirement": "Actual physically and administratively assessed dependencies and maintained alternatives",
+    "consequence": "Reduce correlated outage exposure without assuming nominally distinct providers are independent",
+    "status": "authored_draft",
+    "requires_all": [
+      "resilient_decentralized_networks"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "network_fault_domain_design",
+      "local_demonstration": "Partition service dependencies so a defined failure need not disable every path",
+      "operating_requirements": "Actual physically and administratively assessed dependencies and maintained alternatives",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "semantic_message_schema_evolution",
+    "name": "Semantic Message-Schema Evolution",
+    "foundations": "machine_readable_record_schemas,communication_protocol_negotiation",
+    "mechanism": "Evolve message structure through declared compatibility and interpretation rules",
+    "operating_requirement": "Versioned schemas, capable endpoints and checked migration examples",
+    "consequence": "Retain selected interoperability without silently reinterpreting old records",
+    "status": "authored_draft",
+    "requires_all": [
+      "machine_readable_record_schemas",
+      "communication_protocol_negotiation"
+    ],
+    "requires_any": [],
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "semantic_message_schema_evolution",
+      "local_demonstration": "Evolve message structure through declared compatibility and interpretation rules",
+      "operating_requirements": "Versioned schemas, capable endpoints and checked migration examples",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  },
+  {
+    "field": "D13",
+    "id": "evidence_transfer_acceptance",
+    "name": "Evidence Transfer Acceptance",
+    "foundations": "",
+    "mechanism": "Verify that a delivered evidence package is complete and interpretable for its declared question",
+    "operating_requirement": "Actual received records, maintained metadata and local review capacity",
+    "consequence": "Separate physical receipt from usable research evidence and local mastery",
+    "status": "authored_draft",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "long_delay_correspondence_protocols",
+        "postal_delivery_receipts"
+      ]
+    ],
+    "branching_note": "Received evidence needs local interpretation whether carried physically or through a delayed digital link; delivery acknowledgment is not discovery mastery.",
+    "recovery": "Acquire competent instruction, partner records, commissioned analysis, a paid communication or archive service, or a delivered device or record for examination. Pay access, travel or transmission and local interpretation. Neither sending nor receiving bytes grants the underlying discoveries.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "evidence_transfer_acceptance",
+      "local_demonstration": "Verify that a delivered evidence package is complete and interpretable for its declared question",
+      "operating_requirements": "Actual received records, maintained metadata and local review capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or transmission delay",
+        "finite local reconstruction and interpretation",
+        "continuing media, links, equipment, power and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay actual travel, board and finite instruction; local readers or engineers demonstrate the target convention or operating method.",
+        "partnership": "Contribute usable records, staff, instrument time, routes or funds; actual delivery and local understanding remain bounded and partner infrastructure is not duplicated.",
+        "purchased_research": "Commission a defined information or engineering question from a known capable provider; pay for delivered evidence and local evaluation without a guaranteed useful result.",
+        "licensed_or_imported_service": "Pay for real archive access, equipment or communication capacity along reachable maintained paths; continued provider access, fees and compatibility remain dependencies.",
+        "reverse_engineering": "Examine a delivered device, interpretable record or authorized traffic sample with finite local analysis; missing conventions, source context or manufacturing knowledge remain gaps."
+      }
+    },
+    "scope_boundary": "A proposed representation, storage or delivery mechanism. It does not create literacy, bandwidth, hardware, reachable partners, hidden information or consent. Institutions choose conventions and access rules; existing civic authorities retain staffing and policy.",
+    "implementation_status": "Authored proposal; physical media and network state, finite delivery, interoperability, acquisition penalties, staffing and AI choices remain pending."
+  }
+]

@@ -1,0 +1,1482 @@
+# Full-history technology implementation
+
+The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
+
+Current branch state after the fastener batch: **556 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+
+Latest catalog expansion: 24 fastener, spring and riveting discoveries with 28 physical recipes, including alternative motor and pressure-vessel assemblies. See `FASTENER_PRODUCTION.md`. Four focused cases exercise the full chain, reconvergent routes, shortages and fractional production. Current totals: 556 discoveries, 240 recipes, 102 reviewed illustrations; 4,444 identities and 4,898 illustrations remain against the full target. The 24 fastener illustrations are recorded in `assets/ui/research/paper/FASTENER_ART_PROMPTS.md`; 454 live discoveries still await individual art.
+
+Delivery-recovery correction: production now distinguishes actual food scarcity from a transport-only ration shortfall, allowing paid carts and peacetime civilian goods to address the latter while training remains suspended. See `DELIVERY_PRODUCTION_RECOVERY.md`; 21 focused recovery, strategy and diagnostic cases pass. The live catalog-476 run's year-191 absence of industry prompted this inspection, but the running process does not load this fix and full-campaign recovery is not yet proven.
+
+Latest behavior addition: civilian machine-workshop investment now follows funded production demand, paid equipment, power and operator capacity. See `AI_MACHINE_WORKSHOP_INVESTMENT.md`. Six new investment cases and twelve existing power-investment cases pass. Counts remain 532 discoveries and 78 reviewed images; 4,468 discovery identities and 4,922 illustrations remain against the full target. This is worktree implementation, not canonical integration or full-history pacing acceptance.
+
+## First checkpoint: routes and purchased studies
+
+Implementation worktree: `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`
+Branch: `codex/technology-implementation`
+Base main: `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`
+Approved review brought into this branch as `b1d3406` (same content as design commit `a9562d7`).
+
+Implemented in this worktree:
+
+- Shared AND prerequisites and multiple OR groups; explicit learning routes retain common foundations.
+- Foreign evidence can support an alternative causal route, preserving a single discovery and adoption record.
+- Manuscript libraries offer a slower alternative to printing; public theatre can build on oral epics or festivals; apprenticeship can build on several crafts.
+- Route-specific missing foundations and pace are shown in the research inspector. Alternative links include routes named local; locked questions do not reveal route labels or suppliers.
+- After experimental controls and public schools, an exposed unresolved investigation offers research purchasing. The proposal uses ordinary envoys, physical payment goods, provisions and travel. Quotes do not inspect hidden supplier knowledge.
+- At the actual encounter, the supplier must know and have adopted the subject, have Knowledge staff, and permit open sharing. The returned study requires local examination before its research multiplier applies. Purchased evidence uses 2.5 times the route baseline; ordinary exchanged evidence uses 1.8. These are initial balance values, not calibrated campaign claims.
+- Payment settles through the ordinary counterpart resource ledger on the embassy's return. Refusal, missing delivery or insufficient collection capacity returns unused payment once. Travel provisions remain consumed. Existing studies are not purchased repeatedly and weaker later evidence does not overwrite a purchased study.
+- Headless graph audit reports live and proposed counts separately and detects missing prerequisites and unrecoverable causal cycles.
+
+Live count remains 197: this checkpoint changes the underlying rules and acquisition behavior. It does not claim the catalog expansion is complete.
+
+## Remaining approved work
+
+1. Author individual discovery contracts, prerequisites, operation requirements and grounded consequences for the full historical and future catalog. Preserve the approved 24-field and historical coverage targets.
+2. Calibrate visiting scholar duration, teaching effectiveness and price across campaign eras; add negotiated terms and opponent invitation strategy. The second checkpoint implements the initial physical visit below.
+3. Extend partnerships, research licensing and imported-service dependencies, including interruption and domestic substitution.
+4. Implement broader military role families, equipment, doctrine, training, support and general-led behavior. The 96 reviewed roles are not yet a production roster.
+5. Add the required civilian and future operating models, then run full-campaign reachability, pacing, conservation, parity and performance checks.
+6. Produce the approved paper-and-gouache art for finalized identities and verify its game presentation.
+7. Integrate tested checkpoints through the designated integrator and verify the combined canonical build.
+
+## Compatibility and limits
+
+Existing discovery IDs, effects and saves retain their authorities. New fields are optional within the existing exchange/mission records; old saves require no new top-level state. Origin validation accepts authored route IDs. Purchase metadata is validated for type and remains bounded by existing mission/collection limits. Historical records produced by this version are not promised compatible with an older executable.
+
+Rules run in the current WorldSimulation owner scope. The human interface can dispatch purchases; automatic opponent purchase strategy has not been added. Suppliers already use their actual owner state. New pricing uses the existing physical gift quotations; negotiated currency prices, licenses and original research contracts remain pending.
+
+No changes have been merged into main and no player build has been launched. Native visual inspection of the new purchase panel and whole-campaign balance remain outstanding. The headless UI test covers its real offer and dispatch action, not visual rendering.
+
+## Checkpoint verification
+
+Final individual-suite runs: **77 cases passed**, with zero errors, failures, skipped cases, orphan nodes or script errors:
+
+| Suite | Cases |
+| --- | ---: |
+| Technology requirements | 9 |
+| Research purchasing | 10 |
+| Society exchange | 26 |
+| Technology tree | 9 |
+| Discovery projects | 9 |
+| Research interface | 9 |
+| Diplomatic journeys | 5 |
+
+Command for each suite, using its filename: `/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/seanpurtill/Documents/Codex/tt-technology-implementation -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a res://tests/test_<suite>.gd`. Suites were run in separate engine processes; a combined invocation unexpectedly discovered only the first suite's count in later suites and was not used as final coverage evidence. Final logs: `/tmp/tt-tech-final-<suite>.log`; machine-readable summary: `artifacts/technology-implementation/test-results.json`.
+
+Graph audit: `/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/seanpurtill/Documents/Codex/tt-technology-implementation -s res://tools/audit_technology_graph.gd`. Result: 197 live discoveries, four explicit learning routes across the three revised subjects, all existing alternative routes included in causal validation, zero graph errors, 5,000 proposed target, complete_catalog=false.
+
+Shared integration files: `scripts/discovery_system.gd`, `scripts/civilization_system.gd`, `scripts/society_exchange.gd`, `scripts/knowledge_pathways.gd`, and the existing research interface files. No changes to terrain, project settings, civic labor ownership, military campaign control, top-level GameState or SaveSystem. No known conflicts against the unchanged base. Commit only the listed implementation, tests, audit and status record; generated UID files and captures are excluded. This checkpoint is ready for integrator review; remaining approved work above is unfinished.
+
+
+## Second checkpoint: visiting scholars
+
+Continues from `5b6908b227add8ad36c5734a141eb1dfff436c35` on the same isolated branch. READY for integrator review; not integrated or launched in the player build.
+
+Apprenticeship contracts or public schools enable invitations through the research inspector. The proposal carries a physical payment and prepays the visitor's travel and board. Quotes use known contact information without inspecting hidden supplier discoveries. At the actual encounter, an open-sharing supplier must know and have adopted the subject and retain at least one Knowledge worker after sending one specialist.
+
+The specialist travels with the returning envoys, teaches the selected investigation for 60 days, then travels home. One unit of effective Knowledge capacity is removed from the source throughout travel and teaching. The specialist remains in the source population; no new people or permanent researcher allocation are created. Available local Knowledge workers receive a 1.5 research multiplier during the delivered visit. This preserves prerequisites, local research work, and accumulated progress; it awards no instant discovery or permanent evidence. War suspends teaching, and the contractual return date still releases the source worker. Return travel is scheduled aggregate simulation, without a separate map figure or interception model.
+
+Payment settles through the ordinary embassy counterpart ledger. A refused visit returns payment and prepaid visitor rations once; envoy provisions remain spent. The inspector offers both studies and visitors once both capabilities exist. Registers are bounded to 32 active records per owner and expired records are pruned. Optional records serialize inside the existing society exchange authority; old saves without them remain valid. New executables are required to resume scholar records with their behavior.
+
+Verification: nine new scholar cases plus the previous 77 regression cases passed in separate headless processes, with zero errors, failures, skipped cases or orphan nodes. Tests cover arrival-gated teaching, subject specificity, departure/return boundaries, staffing and overbooking, real bilateral payment, refusal refunds, population conservation, serialized state and malformed metadata, war and host staff requirements, hidden supplier knowledge, and the panel's real invitation action. Logs: `/tmp/tt-scholar-<suite>.log`. Native visual inspection, full save-file loading, automatic opponent invitation strategy, whole-campaign balance, and map travel interception remain unverified or unimplemented.
+
+Additional shared integration hotspot: `scripts/game_state.gd`, limited to subtracting absent scholars from effective Knowledge capacity. Other changes: scholar contract helper and tests, existing embassy dispatch, purchase return/refund hooks, exchange validation/pruning, pathway multiplier and research inspector. Civic labor allocation remains under its existing authority. No terrain, project settings, military command or SaveSystem changes. The live discovery catalog is still 197; this checkpoint does not implement the 5,000-entry catalog, military expansion, or artwork.
+
+
+## Third checkpoint: first production catalog expansion
+
+Continues from `722b319a41a7cabea71a4e9f0dd8c640dae34b13`, same worktree and branch, original base `940d5a2`. READY for integrator review; no canonical merge or player launch.
+
+Twelve authored discoveries are now included in the live catalog: Root Cellars, Raised Granaries, Hermetic Grain Storage, Brine Fermentation, Vinegar Pickling, Dated Stock Rotation, Protected Wellheads, Rainwater Cisterns, Water Settling Basins, Slow Sand Filtration, Water Service Inspections, and Separate Clean-Water Storage. They retain separate mechanisms and individual production notes; existing drying, smoking, salting and general fermentation identities were preserved. Total live discoveries: **209**.
+
+Every addition uses explicit common foundations and an authored learning route. Cistern lining can follow vessels, lime mortar or bitumen; water inspections can build on protected wells or cisterns while still requiring records and measures. The full causal audit includes all existing alternatives and reports zero errors. This does not establish environmental feasibility or measured campaign completion times.
+
+Six storage methods have food-category preservation profiles, rather than applying the same spoilage reduction to every food. Root cellars protect plants; raised granaries and hermetic bins protect dry staples. Profiles scale with adoption, combine multiplicatively, require a settled community and Logistics or Crafting capacity, and do not apply while traveling. Current spoilage and forecasts both use the profiles; forecast factors are calculated once per forecast. The research inspector and discovery summaries describe the full-adoption values and limits. Rival owners read their own knowledge and adoption.
+
+A new production-contract audit rejects duplicate identities, missing descriptions/contract notes, unsupported aggregate effect keys, invalid magnitudes, unsupported food categories and additions with no implemented consequence. It complements the causal graph audit. It is an authoring check, not a historical or full simulation feasibility proof.
+
+**96 cases passed** in separate headless processes: 10 food/water production tests and all 86 preceding regression cases. New cases check global graph/contract validity, alternate cistern and inspection foundations, category-specific actual food losses, adoption and absent staffing, travel/settlement restrictions, matching forecasts without stock mutation, independent rival ownership, malformed authoring data and explanatory text. Logs: `/tmp/tt-food-<suite>.log`; graph result: `/tmp/tt-food-graph.log`; test summary: `artifacts/technology-implementation/food-water-test-results.json`. No script errors, failures, skipped cases or orphan nodes. `git diff --check` passes.
+
+Save compatibility: existing IDs and saved ownership remain unchanged; the catalog additions become available under the existing research rules when this executable loads a world. Preservation profiles are definition data, not a new save authority. Existing research and adoption dictionaries remain authoritative. The food system now applies these new known methods to actual stocks.
+
+Limits: water improvements use existing aggregate water-access/safety effects, not site-specific hydraulic structures or treatment plants. Food processes use the existing five broad food categories; their recipes, dedicated buildings, salt/acid inputs and process labor are not separately consumed or scheduled. Earliest dates and magnitudes are initial design values. Full 2,500–3,000-year pacing, modern/future infrastructure, military expansion, 5,000 authored identities, artwork and native visual review remain outstanding. This slice must not be described as the completed historical technology system.
+
+Shared integration files: DiscoverySystem, FoodSystem and the research inspector, plus the existing graph audit. New files: `scripts/food_water_knowledge.gd`, `scripts/technology_catalog_contract.gd`, and `tests/test_food_water_knowledge.gd`. No GameState, SaveSystem, terrain, project settings or military ownership changes in this checkpoint. No known conflicts against the branch's preceding checkpoint; integration with other branches has not been attempted.
+
+
+## Fourth checkpoint: military education by role
+
+Continues from `24fcf88` on the same isolated worktree/branch (original base `940d5a2`). READY for integrator review; not merged or launched in the canonical game.
+
+Eight production discoveries: Skirmish Pair Drill, Mounted Remount School, Siege Crew Rehearsals, Mountain Field School, Range Estimation Drill, Gun Detachment School, Engineer Demonstration Ranges, and Mechanized Crew School. They connect military roles to existing weapons, handling, surveying/measurement, craft, staff and teaching foundations. All eight pass the production contract and causal graph audits. The live catalog is **217**, with 24 explicit learning routes and zero graph errors.
+
+Each teaching practice specifies the land roles it helps. Full adoption reduces newly scheduled training time by 15% for those roles; partial adoption scales the benefit. Overlapping practices multiply, with a 30% total reduction ceiling. The existing training scheduler retains recruits, weapons, training places, provisions, prototype restrictions and day advancement. Existing queued orders retain their recorded duration; discovering a school does not instantaneously train soldiers or rewrite an underway commitment. Recruitment quotations use the same duration calculation, including their food estimate. The inspector explains the affected roles and new-order restriction. Each civilization reads its own knowledge/adoption.
+
+This strengthens the training dimension of the existing 50 land archetypes. It does not add unit archetypes or claim new tactical behavior. Naval and air crew education, distinct battlefield doctrine, richer maneuver/countermeasure behaviors, dedicated school facilities, instructor qualifications, full military content breadth and balance remain outstanding. The existing 21 naval and 16 air types remain unchanged. General-led operational control is untouched.
+
+Verification: **111 tests passed** across 11 separately executed headless suites. Seven new education cases cover valid graph/roles, role-specific adoption scaling, alternate foundations, actual training-order creation without rewriting older orders, recruit and equipment-knowledge gates, independent rival ownership and explanatory text. Regression suites cover training accounting (10), staff strategy (27), staffing actions (2), recruitment reconciliation (13), all land/naval/air equipment catalogs and production (6), food/water (10), technology requirements (9), technology tree (9), discovery projects (9), and research interface (9). No errors, failures, skips or orphan nodes. One pre-existing training-accounting assertion expected the obsolete phrase “Prototype intake”; it now checks the existing “Experimental units are limited” message, retaining its recruit-conservation and empty-queue assertions. Logs: `/tmp/tt-education-*.log`; summary: `artifacts/technology-implementation/military-education-test-results.json`. Graph log: `/tmp/tt-military-graph.log`. `git diff --check` passes.
+
+Compatibility: stable existing unit and discovery identities, no new save fields, no instant equipment or training upgrades. Old saves load new definitions through the existing discovery catalog. Existing training orders keep their saved schedules; newly scheduled orders can use adopted teaching. No guarantees for loading newly discovered IDs in an older executable.
+
+Shared integration files: `scripts/discovery_system.gd`, `scripts/military_unit_catalog.gd`, the research inspector, production validator and graph audit. New files: military education catalog and its test suite. The training-accounting test has the wording correction above. No MilitaryCampaign, combat simulator, GameState, SaveSystem, terrain or project settings edits. No known conflicts against the preceding branch checkpoint; cross-branch integration remains unverified. Whole-campaign pacing, the remaining 4,783 target discoveries, artwork and canonical integration are unfinished.
+
+
+## Fifth checkpoint: shared civilian science
+
+Continues from `0bee4c0`. Twenty-four individually named scientific/engineering foundations now connect optics, heat, electricity, instrumentation, chemistry and aerodynamics to existing practical capabilities. Each foundation has audited downstream consumers; these new theory nodes add no global production bonus or operating plant. Eight existing IDs were rewired and classified as civilian research: steam propulsion, fuel refining, internal combustion, powered flight, advanced airframes, atomic physics, reactor engineering and jet propulsion. Their existing aggregate effects and saved progress are retained. Atomic physics no longer requires naval fire control; advanced civilian airframes no longer require bombing or fighter tactics. The shared catalog has 241 live entries and zero graph/production-contract errors.
+
+Seven new tests verify all 24 contracts, actual downstream links, civilian reachability after removing every security-domain node, indispensable reactor foundations, stable IDs/progress, rejection of invented downstream uses and removal of stale research-channel assignments after reclassification. With seven relevant regression suites, 66 cases passed with no errors, failures, skips or orphans. Logs: `/tmp/tt-science-<suite>.log`; graph: `/tmp/tt-science-graph.log`. Reclassification now removes an old channel assignment before allocating the question in its new domain, preventing duplicate simultaneous work while retaining its progress.
+
+Changed shared files: DiscoverySystem, existing joint force knowledge definitions, production contract validator and graph audit. New civilian science definitions and tests. No new saved state, unit types, plant simulation, terrain, military command or project settings changes. Existing active questions may need their new civilian foundations before work resumes; previously earned knowledge is retained. Earliest dates are uncalibrated floors, not historical dates or full-campaign pacing evidence. This checkpoint is isolated, ready for integration review, and work continues toward the remaining scope.
+
+
+## Sixth checkpoint: scalable discovery announcements
+
+Routine discoveries now accumulate in a compact non-pausing digest that opens the existing research archive. By default, the first discoveries and a small authored milestone set retain individual pause popups. The research screen exposes Major milestones / Every discovery / Digest only. The per-campaign preference is captured by the existing reflected GameState save mechanism; old saves default to milestones and invalid preference values are rejected before world mutation. Unknown discoveries cannot enter the digest. The digest deduplicates up to 8,192 IDs and keeps only an unread count/latest pointer; archive data remains authoritative. Digest counts are session UI state and do not replay on loading a save.
+
+32 headless cases pass: eight notification tests, eight existing popup tests, nine research interface tests and seven civilian science tests. New coverage includes pause ownership, mixed milestone/routine batches, quiet and all modes, duplicate/unknown events, 360×640 containment, invalid save preference rejection and reflected preference round-trip. Logs: `/tmp/tt-notifications-tests.log` and `/tmp/tt-notifications-<suite>.log`. No native visual capture or full save-file load was performed for this slice.
+
+Shared hotspots changed: GameState adds/reset-defaults one preference string; SaveSystem validates it; LocalTerrain changes only the daily announcement call; the research inspector adds the selector. New notification helper/test. Gameplay time and completed discoveries are not modified by routine digest delivery. Default popup behavior intentionally changes from every discovery to milestones, as approved for the large catalog. Broader milestone selection, per-field subscriptions, campaign pacing, catalog authoring, operating models, artwork and integration remain in progress.
+
+
+## Seventh checkpoint: manufactured civilian inputs
+
+Ten civilian products now use the existing finite workshop line system: glass, refined copper, wrought iron, steel, copper wire, insulated cable, optical lenses, pressure vessels, electrical generators and electric motors. Three production discoveries were added: Steel Refining, Wire Drawing and Cable Insulation. The live catalog is 244. Recipe batches consume real input stocks and workshop work; opening or retooling a civilian line also consumes tooling. Outputs enter the owning settlement resource ledger, not military inventory. A generator in stores is equipment, not an automatically operating power station.
+
+Lines share the existing bounded production allocation, capacity, workforce, workplace condition, pause/target controls and saved queue. UI wording now calls this allocation workshop lines. Products appear in existing supply/workshop selectors only after their own research. No second workforce or production clock was introduced. The new civilian saved-job type validates its recipe and work requirement against the authored definition, rejecting forged free inputs. Existing job types and quantities remain supported.
+
+58 cases passed: seven new civilian manufacturing cases and persistent production (19), all joint-force equipment catalogs (6), civilian science (7), technology tree (9), food/water (10). Tests cover setup and fractional batch conservation, target stop, blocked starts with no mutation, copper-to-wire manufacturing, one-line retooling, failed retool preservation, save recipe validation, retained output/no tooling refunds on closure and research-gated product visibility. Logs: `/tmp/tt-industry-tests.log` and `/tmp/tt-industry-<suite>.log`; graph: `/tmp/tt-industry-graph.log`. No errors, failures, skipped cases or orphan nodes.
+
+Integration hotspots: existing PersistentProduction adapter, MilitaryCampaign wording, military supply/workshop UI wording, DiscoverySystem, production contract validator and graph audit. New civilian industry recipe/catalog module and tests. Finished intermediates are reflected through the existing resource stock dictionary; no new top-level save field. Older executables do not understand new civilian line jobs. Quantities are game batches, not calibrated industrial units. Plant commissioning, operating services, expanded modern resource extraction and automatic civilian industrial planning are next; no claim of a complete economy or future-tech catalog.
+
+
+## Eighth checkpoint: commissioning and operating services
+
+Steam-electric works, electric cold stores and motor-driven workshops now require actual equipment, commissioning work and available operators. Their aggregate ledger lives in the owning GameState. The daily civilization loop reserves operators from the existing Crafting capacity before other work; it does not create people or change GovernmentPeopleSystem's occupation assignment authority. Existing services take precedence over expansion. Completed installations first operate on a later daily review. Pausing affects subsequent daily operation, preserving services already delivered that day.
+
+Steam-electric output is dispatched against installed powered demand and consumes Coal/Freshwater. Cold stores require that daily power and maintenance input; cooling capacity applies only to a finite quantity of perishable food. Fuel or staffing interruption removes service while preserving the knowledge and installed machinery. Powered workshops improve real workshop output while requiring separate operator capacity and power. Daily delivery is idempotent. Food forecasts conservatively stop crediting cooling beyond the current input-stock horizon; future extraction or delivery is not assumed. Quantities are game batches and service units, not SI engineering claims.
+
+Mechanical Refrigeration was added as a production discovery, bringing the live total to 245. Known plant-related discoveries offer install/pause controls in the research inspector, showing commissioning state, running units and shortages. Installation consumes stored equipment immediately and completes through finite work. No automatic operating benefit is granted merely for knowing a principle or stocking a generator.
+
+88 cases passed across eight headless suites: operating services (14), civilian industry (7), persistent production (19), food/water (10), research interface (9), announcements (8), owned civilization simulation (19), player independence (2). Tests cover installation costs, commissioning delay, worker/fuel/power accounting, daily idempotency, interruption/resupply, finite actual cooling, idle generation, staffing limits, saved records and malformed services, conservative forecasts, travel shutdown, actual UI installation, real workshop output, protection of existing service during expansion, and rival isolation. All passed with zero errors, failures, skipped cases or orphan nodes. Logs: `/tmp/tt-operations-tests.log`, `/tmp/tt-operations-<suite>.log`; summary: `artifacts/technology-implementation/operations-test-results.json`; graph: `/tmp/tt-operations-graph.log`. `git diff --check` passes.
+
+New shared state is optional for old saves and validated for both the player and rival actors. Shared hotspots: GameState, SaveSystem, WorldSimulation validation, CivilizationDay ordering, FoodSystem, PersistentProduction, the research inspector and contract validator. New files: operating-service model, inspector component and tests. No terrain geometry, project settings or direct battlefield control changes. Production/operation is currently at the primary settlement only. Spatial grids, transmission, emissions, plant-specific failures, secondary-city installation, automatic industrial planning and additional modern/future operating models remain unfinished. The work remains isolated pending integrator review.
+
+
+## 9. Electrically constrained manufacturing
+
+Electric Arc Furnaces brings the verified live catalog to **246 / 5,000**. This is one distinct metallurgical process, with steel refining, electrical generation and electrical measurement as causal foundations. It produces the same useful Steel stock through a separate workshop recipe; the existing fuel-fired recipe remains available.
+
+An active supplied furnace line requests two abstract electricity units per day. Installed generators dispatch against that demand plus existing cold-store and motor-workshop demand. Manufacturing consumes the remaining shared daily electrical service, six units per batch, together with proportional iron, flux and electrode inputs. Multiple lines cannot each reuse the same electricity. No power means no material consumption or work; completed fractional work persists through blackouts. Power requirements come from the authored recipe after loading, rather than editable saved job costs. Forecasts show the current electrical constraint. Paused, input-starved, target-satisfied and unstaffed-share lines request no power.
+
+The underlying process is grounded in the [World Steel Association raw-materials account](https://worldsteel.org/about-steel/raw-materials/) and [electrode manufacturer GrafTech's process description](https://www.sec.gov/Archives/edgar/data/931148/000093114817000007/a201610-k.htm). Current game inputs use Wrought Iron as the available metallic feed and Graphite as an aggregate electrode input. Scrap collection, direct-reduced iron, electrode manufacture, furnace cooling, transmission and emissions are not represented by this recipe. Quantities are gameplay batches, not physical industrial coefficients. Dispatch is daily requested capacity; electricity unused because of later labor or material constraints is lost. Cold stores and commissioned motor workshops receive electricity before queued manufacturing; production queue order resolves competing furnace claims.
+
+Validation: 52 cases passed (12 civilian-industry, 14 operating-installation, 19 persistent-production, 7 civilian-science), zero errors, failures, skipped cases or orphans. New behavioral checks cover blackouts, fractional input conservation, shared power, generation suppression, and saved recipe authority. Graph audit reports 246 live discoveries, 48 explicit routes and no graph/contract errors. `git diff --check` passed. Logs: `/tmp/tt-electric-*.log`. One initial science invocation used a nonexistent test filename; the corrected `test_civilian_science.gd` ran all seven cases successfully.
+
+Handoff: owned changes are `civilian_industry.gd`, `persistent_production.gd`, `technology_operations.gd`, `test_civilian_industry.gd` and these progress records. No new save fields are required; older workshop recipes remain unchanged. This remains on `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; canonical integration and player launch have not occurred. The complete overhaul remains active and unfinished.
+
+
+## 10. Bilateral research partnerships
+
+Research support now offers joint investigations after public schools and experimental controls. A paid, provisioned ordinary delegation proposes a specific unresolved question. The partner must have its own foundations, Knowledge workers and an open sharing policy when the envoys actually arrive. Quotes do not inspect hidden partner readiness. Both sides receive a 180-work investigation in their own existing collection. A completed protocol grants no foreign evidence or discovery. Once local work is finished, a second ordinary delegation carries findings; the partner must also have completed its work before reciprocal findings are exchanged. Both recipients then spend 60 collection-study work validating results. Validated joint findings support the normal causal routes at 1.6 times baseline, below ordinary examined foreign examples (1.8) and purchased validated studies (2.5). All ordinary research and adoption requirements remain.
+
+Study shares the existing 15% Knowledge effort used for collections; there is no extra research workforce. No study can occur before its recorded arrival day. War prevents the physical exchange; completed local work remains. Refusal returns unused payment through existing embassy settlement. Independently discovering the subject does not prevent honoring an already-agreed exchange. The research inspector retains access for outstanding partnerships, and completed protocols explicitly request a findings exchange instead of claiming that evidence is ready. Evidence selection preserves stronger previously studied sources.
+
+No new top-level save state is introduced. Two optional boolean collection flags identify protocols and results; mission mode and phase identify each physical trip. Validation checks flags, expected study work, collection identity and phase, and rejects protocols referenced as usable evidence. Older collections and missions remain valid. Partner progress stays in its own civilization's collection. Repeated embassy processing does not repeat payment settlement.
+
+Validation: **64 cases passed**: 10 new partnership cases, 10 research-purchase, 9 scholar-visit, 26 society-exchange and 9 research-atlas. Zero errors, failures, skipped cases and orphans; no script errors. The new cases exercise both actual embassy trips, reciprocal study, transit delay, validation, refusal/refund, unfinished partner work, Knowledge shortages, save round-trip, actual panel dispatch, war, arrival chronology, stronger evidence preservation and delivery after independent discovery. Initial fixtures incorrectly retained the embassy's cleared return record and replayed a copied pre-return record; those fixtures were corrected to check the real completed-mission lifecycle. Graph audit remains 246 live discoveries, 48 explicit routes, no graph errors. Logs: `/tmp/tt-partnership-*.log`.
+
+Limitations: proposals and findings exchanges are player-selected through research support; no autonomous partner strategy or automatic follow-up courier scheduling is added. Joint work is represented by the existing aggregate collection-study effort, not individually simulated experiments or laboratories. Terms are a specified question and carried goods, not a negotiation over ownership, exclusivity or patents. Once shared, findings remain available even if later relations worsen. This checkpoint does not add catalog identities or complete the overhaul.
+
+Handoff scope: new `research_partnerships.gd` and its test suite; `civilization_system.gd`, `society_exchange.gd`, `research_purchase.gd`, `knowledge_pathways.gd`, the research atlas, research-support panel and collection panel; progress records. These are potential exchange/diplomacy/UI integration conflicts. Work remains in `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. No canonical merge or player launch occurred.
+
+
+## 11. Semiconductor foundations and photovoltaic production
+
+The live catalog now contains **260 / 5,000 distinct discoveries**, including 14 new identities: Crystallography, Solid-State Physics, Electronic Band Theory, Photoconductivity, Semiconductor Doping, P–N Junctions, Silicon Smelting, Chlorosilane Purification, Single-Crystal Growth, Semiconductor Wafer Sawing, Photovoltaic Conversion, Solar Cell Fabrication, Photovoltaic Module Encapsulation and Photovoltaic Power. These are separately authored scientific principles and manufacturing processes, not generated maturity variants. The six new explicit routes include slower empirical alternatives for doping and conversion and an abrasive-wire alternative for slicing; common foundations remain required. The new branch is reachable with every security discovery excluded.
+
+Six physical recipes connect metallurgical silicon, purified silicon, crystal boules, wafers, cells and modules. They consume real stocks, finite workshop work, setup tools and specified shared daily electricity. Modules must be installed and commissioned before providing a service. Photovoltaic arrays reserve actual Crafting operators and generate against finite demand before steam plants; steam supplies only the remaining demand. Surplus is not stored as electricity. Generator dispatch now handles multiple generation types instead of special-casing only steam. Installation UI shows nominal daily generation. Production recipes and operating plants now number 17 and four respectively.
+
+The process structure follows the US Department of Energy's [PV manufacturing overview](https://www.energy.gov/cmei/systems/solar-photovoltaic-manufacturing-basics) and [cell fundamentals](https://www.energy.gov/cmei/systems/solar-photovoltaic-cell-basics): silicon purification, crystal/wafer preparation, cell fabrication and module assembly lead to electrical conversion. Game recipe quantities are abstract batches. Salt, phosphate rock, graphite and glazing currently represent aggregate process inputs; detailed reagent manufacture, dopant purification, encapsulant chemistry and waste treatment are not fully modeled. The fabrication recipes do not constitute a real industrial process specification.
+
+**Operating limitations remain:** solar output uses a nominal daily-average supply in the existing aggregate electrical model. Weather, seasonal irradiance, geographical exposure, night-time balancing, batteries, inverter equipment, grid topology and degradation are not yet represented. Daily energy is not proof of continuous firm power. These remain required future operating work; this checkpoint does not claim a complete realistic power grid or completed 2,500–3,000-year pacing.
+
+Validation: **77 cases passed**: seven new semiconductor tests, 14 operating-installation, 12 civilian-industry, 19 persistent-production, seven civilian-science, nine technology-tree and nine research-atlas. New cases run the complete six-stage manufacturing chain and commission its actual output, check empirical reconvergence and peaceful reachability, verify solar displacement and residual steam demand, check operator/commissioning requirements, and validate saved limits. All final suites report zero errors, failures, skipped cases and orphans, with no script errors. One initial save-bound fixture inserted a StringName instead of the serialized string key; the corrected serialization-shaped case passes. Graph audit reports 260 identities, 54 explicit routes, no graph/contract errors. Logs: `/tmp/tt-solar-*.log`.
+
+Handoff scope: new `semiconductor_knowledge.gd` and its suite; discovery catalog registration, civilian recipes, technology operations and its panel, graph audit and progress records. Save schema is unchanged; existing plant and recipe identities retain their costs and semantics. New plant bounds account for the additional capacity. `discovery_system.gd` is a shared integration hotspot. Work remains on `codex/technology-implementation` in `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration and player launch have not occurred.
+
+
+## 12. Approved paper imagery enters the implementation
+
+Seven subject illustrations are explicitly connected in the research cards, inspector and discovery popup: Stone Selection, Apprentice Contracts, Oral Epics, Festival Calendar, Celestial Wayfinding, Public Schools and Photovoltaic Power. Five individually selected existing images were copied unchanged from the art worktree; public schools and photovoltaic power were newly generated with the built-in imagegen tool using the approved apprentice image as the style reference. All seven were visually inspected. Source images remain intact, including the original three user-provided style examples. Exact new prompts and provenance are in `assets/ui/research/paper/PROMPTS.md`.
+
+Paper images use whole-square framing with an ivory background instead of a center crop that would remove the low-positioned subjects. Hidden subjects cannot select their specific image. Subjects without reviewed images retain the explicitly captioned field illustration; those older field images are still awaiting style replacement and do not count as finished subject art. Runtime imports use a 768-pixel limit and mipmaps, retaining full-resolution square source PNGs (1024 or 1254 pixels). The shared subject texture cache holds at most 24 entries; controls still retain their own displayed textures, so this is not a full 5,000-node GPU-memory audit.
+
+`tools/update_technology_art_catalog.gd` exports the actual live discovery identities and checks reviewed bindings against files and catalog IDs. The committed manifest reports **260 live discoveries, seven verified subject images, 253 queued live images, and a 5,000-image objective**. It distinguishes completion of the current live art queue from completion of the full overhaul. Queued prompts and older generic field art are not counted as complete.
+
+Validation: 27 cases pass (11 research-atlas, eight discovery-popup, eight announcements), zero errors, failures, skipped cases or orphans, no script errors. Checks cover actual texture bindings in cards/inspector/popup, full-square display, absence of a fallback caption for specific art, explicit captions for missing art, hidden-subject behavior, and existing narrow-window constraints. All seven PNGs have equal width and height; imports and manifest counts were checked. Logs: `/tmp/tt-paper-*.log`. Headless tests establish layout properties and resource selection; native rendered presentation has not yet been visually verified. `git diff --check` passes.
+
+Handoff scope: seven PNGs and their import settings, prompt/provenance record and live manifest, `research_visuals.gd`, the art-queue exporter, three existing visual tests/probes and progress records. This is selective asset integration, not folder synchronization from the separate art worktree. Save behavior is unchanged. The canonical game remains untouched; these changes are in `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Full catalog, remaining art, pacing, operating models and canonical integration remain unfinished.
+
+
+## 13. Practiced combined-arms doctrines
+
+The catalog now contains **263 / 5,000 discoveries**. Three distinct doctrines connect research to formation-held practice: Cavalry–Infantry Liaison, Gun-Line Security and Infantry–Tank Cooperation. Knowledge enables rehearsals during the existing supplied preparation process, including the general's home recovery/resupply action. It does not immediately increase combat power or create troops. A formation learns gradually up to the owning civilization's adoption level, with equipment, ammunition, training, health and readiness limiting usable participation. Both target and supporting troop roles must be present. New arrivals dilute collective rehearsal and must integrate with the formation.
+
+Combat applies a bounded defense contribution only against the stated threat and while actual rehearsed support remains: infantry helps mounted troops against formed foot troops; infantry guards protect gun crews against close attackers; infantry supports tanks against antitank formations. A small supporting detachment protects only a fraction of the target force. Support losses and empty ammunition remove the benefit. Existing weapons, armor, penetration, matchups, morale, supplies and command remain authoritative. Normalization and battle results preserve practiced formation data. No player cohort-control surface was added.
+
+The design follows the general principle of complementary arms and repeated joint training discussed in the US Army's [combined-arms exercise account](https://www.army.mil/article/142967/infantrymen_tankers_work_together_for_combined_arms_exercise). All numeric coefficients and rehearsal rates here are game design values, not historical measurements. Current rules are aggregate force-composition interactions; spatial separation, communications failures, terrain-specific coordination and further doctrines still need implementation and balancing. The roster remains 87 existing land/naval/air types; these three discoveries do not inflate the unit count.
+
+Testing exposed and corrected an existing preparation bug: the manpower return calculation compared individual equipment items directly with soldier counts. It now derives equipped personnel capacity from the formation's authorized count and required-equipment coverage, allowing crew-served formations to receive replacement personnel without exceeding their equipment support. All arrivals remain drawn from existing recovery/reserve pools.
+
+Validation: **102 cases pass**: 13 new doctrine cases, 20 combat-simulator, 15 general-campaign, 10 military-training-accounting, nine technology-tree, 16 military-development and 19 civilization-owned-simulation. No errors, failures, skipped cases, orphans or script errors. New evidence covers each role/support/threat combination, learning versus knowing, missing supply and support, partial coverage, actual campaign preparation, replacement dilution, a full military save round-trip, malformed-value rejection, civilization ownership, and lower losses across 20 deterministic battle seeds. Initial test setup needed an explicit Dictionary type and valid unique formation IDs; the corrected tests pass without relaxing those engine requirements. Logs: `/tmp/tt-doctrine-*.log`. Graph audit reports 263 live identities, 54 explicit learning routes, no graph/contract errors. The refreshed art queue contains seven verified images and 256 pending live identities.
+
+Save compatibility: optional formation `doctrines` dictionaries default empty for older forces; existing save version is retained. Values are checked before military-state mutation, and full export/import preserves rehearsed levels. Normalization retains these dictionaries through combat and force reconstruction. Limits: no comprehensive all-era doctrine balance, no new unit types in this checkpoint, no spatial or communications simulation for these support contributions, and no new live-model or native UI validation.
+
+Handoff scope: new `combined_arms_doctrine.gd` and suite; combat normalization/evaluation/preparation, `military_campaign.gd`, `general_campaign.gd`, discovery registration and summary, authoring contract/audit, art manifest and progress records. MilitaryCampaign and DiscoverySystem are shared integration hotspots. Work remains in `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration and player launch remain outstanding; the full overhaul stays active.
+
+
+## 14. Mathematical foundations and optional engineering models
+
+The catalog contains **289 / 5,000 discoveries**. Twenty-six distinct mathematical capabilities connect fractions and ratios through geometry, algebra, calculus, probability, estimation, numerical methods and dimensional metrology. Fifteen existing investigations gain a model-assisted route at 1.2 times their original research rate. Existing empirical routes, common prerequisites and alternative practical approaches remain available. This is a subject-specific research advantage; it does not create equipment or increase industrial output automatically. Sampling accepts either census observations or case records. All 263 earlier discoveries remain reachable with the new mathematics identities excluded.
+
+Applications include similar-triangle surveying, coordinate maps, calibrated measurement, structural models, fluid-flow models, dimensional wind-tunnel experiments, thermal calculations, spectroscopy, reactor calculations, precision machining and semiconductor theory. The mechanism draws on NASA's [similarity-parameter explanation](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/similarity-parameters/) and NIST's [measurement uncertainty principles](https://www.nist.gov/publications/concepts-principles-and-methods-assessment-measurement-uncertainty). The 20% advantage and exact research dependencies are game design choices, not historical measurements or claims that practical discovery requires formal theory.
+
+Validation: **71 cases pass**, comprising eight mathematics, nine prerequisite, seven civilian-science, seven semiconductor, ten purchased-research, ten partnership, nine technology-tree and eleven atlas cases. Zero errors, failures, skipped cases or orphans. Tests check practical-route preservation, model advantage, physical prerequisites despite foreign evidence, reconvergence, idempotent overlays, and preservation of old progress and recorded origins. The initial test parse failure was corrected with an explicit Dictionary type before rerunning. Logs: `/tmp/tt-mathematics-tests.log` and `/tmp/tt-math-*.log`. Graph audit: 289 identities, 76 explicit learning routes, no contract or graph errors. Art manifest: seven verified images, 282 queued live subjects.
+
+Save compatibility: no new saved fields; existing discovery identifiers, progress and origins remain intact. Limitations: no calibrated full-history pacing or full-catalog performance evidence; mathematical models currently accelerate investigations rather than offering an interactive calculation system. The overhaul remains unfinished with 4,711 identities still to implement.
+
+Handoff scope: mathematics module and tests, discovery registration/route overlay, graph audit, art manifest and progress documents. DiscoverySystem is a shared integration hotspot. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration and player launch remain outstanding.
+
+
+## 15. Condition-led eligibility without calendar locks
+
+Removed the fixed-day exclusion from local route selection and legacy rival candidate selection. A society with the required knowledge and material access can now investigate immediately, including through a slower manuscript-library approach. A late campaign date cannot substitute for missing foundations. Foreign studies keep their paid, traveled and locally studied advantages; they no longer have the exclusive privilege of bypassing an arbitrary date. The legacy `day` field remains an ordering hint for existing catalog data and deterministic tie ordering, with no eligibility or research-rate effect.
+
+This corrects a conflict with the approved condition-led design; it does not establish the requested 2,500–3,000-year pacing. Research still accumulates through actual Knowledge labor, observations, support, seeded difficulty and material evidence. Removing date locks makes weak prerequisite chains visible and increases the importance of measuring and developing those chains rather than delaying them with an era timer. No global research-speed retuning or instant awards were introduced.
+
+Validation: **82 cases pass**, zero errors, failures, skipped cases or orphans: 12 requirements, 13 simulation-performance, nine tree, eight mathematics, ten purchase, ten partnership, nine scholar and eleven atlas cases. New checks cover day-one local and rival eligibility, absence of knowledge awards merely from eligibility, missing foundations even far in the future, and unchanged route assessment when the legacy ordering day is increased. Initial rival fixture used the wrong domain for public libraries (culture); corrected to the actual catalog domain. Logs: `/tmp/tt-no-date-technology_requirements.log`, `/tmp/tt-no-date-simulation_performance.log`, `/tmp/tt-no-date-technology_tree.log`, `/tmp/tt-no-date-mathematics_knowledge.log`, `/tmp/tt-no-date-research_purchase.log`, `/tmp/tt-no-date-research_partnerships.log`, `/tmp/tt-no-date-scholar_visits.log`, `/tmp/tt-no-date-research_visual_atlas.log`.
+
+Save compatibility: unchanged stored shapes, existing progress and origins retained. Previously date-blocked questions may become eligible on refresh if their real foundations are present. Catalog remains 289 / 5,000 and reviewed art remains seven images. Full-history balance and integration remain unfinished. Scope: knowledge pathways, DiscoverySystem (shared hotspot), catalog diagnostic wording and tests. Worktree and integration constraints are unchanged.
+
+
+## 16. Chemical feedstocks and coupled production
+
+Added Brine Purification, Chlor-Alkali Cells and Hydrogen Chloride Synthesis: **292 / 5,000 discoveries**. Four new workshop recipes prepare brine, electrolyze it into chlorine with caustic soda and hydrogen co-products, synthesize hydrogen chloride, and refine silicon from prepared reagents. Electrolysis consumes the shared daily electricity budget. The new silicon recipe requires existing chlorosilane knowledge and real manufactured reagents; it uses less work and local electricity than the old aggregate recipe, after upstream reagent costs. No additional discovery is counted for that recipe alternative.
+
+Persistent civilian lines now deliver authored co-products together with a completed primary batch. Fractional work consumes proportional feedstocks and power without prematurely yielding any product. The stock target tracks the primary output and stops all associated output together. Co-product yields come from recipe definitions, never saved job fields. Product descriptions and production-line details disclose the additional yields and target behavior. This supports a real connected industrial chain without independent free by-product awards.
+
+Physical process basis: [Euro Chlor describes hydrogen as a co-product of salt-and-water electrolysis](https://eurochlor.org/products/hydrogen/), alongside chlorine and caustic soda. [Wacker describes hydrogen chloride in its silicon processing loop](https://reports.wacker.com/2021/annual-report/sustainable-solutions/waste-nothing-use-everything.html). All quantities, labor and electrical costs here are abstract game batches, not chemical stoichiometry or industrial engineering instructions. Caustic soda is stored but its downstream consumption is not yet implemented. Gas containment is represented by paid pressure-vessel tooling; separate tanks, leakage, corrosion, process waste and closed-loop reagent recovery remain unfinished.
+
+Validation: **58 cases pass**: six new chemistry, twelve civilian-industry, nineteen persistent-production, seven semiconductor and fourteen operating-service cases. Zero errors, failures, skipped cases or orphans. The new suite demonstrates complete-batch co-delivery, primary-target stopping, no consumption without power, authoritative yields despite forged saved fields, serialized partial-work continuation, and actual brine-to-reagent-to-silicon production using one repeatedly retooled line. Fixture corrections supplied current-day electrical service and respected the existing workshop-line limit. Logs: `/tmp/tt-chem-*.log`. Graph audit: 292 identities, 76 explicit learning routes, zero graph or authoring-contract errors. Art queue: seven verified images and 285 pending live subjects.
+
+Save compatibility: old recipe definitions and stored job formats are unchanged. The old aggregate salt-fed silicon process remains available as an abstraction; the explicit reagent chain is an alternative. New co-product yields are derived from the current recipe, so no migration or saved output multipliers are required. Existing completion, cancellation and retooling semantics remain. Native presentation and full-campaign balance are not established by these headless tests.
+
+Handoff scope: chemical-process module and suite, civilian recipes, persistent-production output and description, production-line panel, DiscoverySystem registration (shared hotspot), graph audit, art manifest and progress records. Work remains in `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration remains outstanding and the full overhaul stays active.
+
+
+## 17. Chlor-alkali subject illustration
+
+Generated and visually inspected a square chlor-alkali workshop illustration with the built-in imagegen tool, using the approved apprentice image as the style reference. Two industrial workers, closed cells, collection vessels and a plain instrument panel occupy the lower portion; warm ivory paper, matte restrained pigments and broad negative space preserve the approved aesthetic. The scene is an illustration rather than an engineering diagram. Exact prompt and provenance are saved in `assets/ui/research/paper/CHLORALKALI_PROMPT.md`.
+
+The new `chloralkali_cells.png` source is saved in this worktree and explicitly bound to its production identity. Its import uses the established 768-pixel limit with mipmaps; the full-resolution 1254-pixel source remains available. The atlas suite passes all eleven cases, including this texture's binding and whole-square presentation. No errors, failures, skipped cases or orphans; import and diff checks pass. Logs: `/tmp/tt-chloralkali-*.log`. Native player rendering has not been launched or verified.
+
+Current count: 292 live discoveries, eight verified subject images, 284 queued live images. The 5,000-discovery and image objective remains unfinished. Save behavior is unchanged. Handoff scope: one PNG and import sidecar, provenance, explicit research-visual binding, atlas test list, regenerated manifest and status records. Canonical integration remains outstanding; branch and worktree discipline are unchanged.
+
+
+## 18. Destructive examination of manufactured examples
+
+Added a reverse-engineering recovery route for civilian products in the physical manufacturing catalog. Apprenticeship and workshop standards enable examination; the recipient must own at least one batch of the relevant manufactured output and have the selected discovery's causal foundations. Starting consumes exactly one owned batch and creates a 180-work artifact study in the existing collection ledger. It does not grant the discovery, supplier knowledge, adoption or replacement equipment. The existing Knowledge workforce completes examination through its shared study allocation. Finished evidence provides a 1.35× multiplier on any otherwise-valid local route, below ordinary shared studies and purchased research. Numeric costs and multipliers are provisional game balance values.
+
+The exposed unresolved research inspector offers the action, explicitly labeled as consuming one batch. Its tooltip explains work and consequences; unavailable specimens explain their missing condition. Repeated requests and equally strong or stronger existing evidence are rejected before consumption. No remote civilization's stock supplies a local examination. Products can be physically obtained through existing stock-transfer systems; this checkpoint adds neither a remote supplier browser nor automatic purchases. Knowing how to inspect an object does not reveal its supplier's research tree.
+
+Save validation checks the optional artifact marker, fixed work contract, stable subject key and matching manufactured item. The existing collection/progress/evidence fields carry the work; no separate queue or save version is introduced. Old collections remain valid. Evidence ranking is shared with route multipliers so a weaker specimen study cannot replace stronger purchased or partnership evidence. Missing local foundations continue to block research after examination.
+
+Validation: **50 cases pass**: seven reverse-engineering, ten purchase, ten partnership, twelve requirements and eleven atlas cases, no errors, failures, skipped cases or orphans. New cases cover read-only quotes, one-time consumption, absent local stock, missing foundations, actual study work, no immediate discovery, malformed saved contracts, stronger-evidence preservation and civilization-owned stock isolation. Logs: `/tmp/tt-reverse-*.log`. Headless graph audit remains clean at 292 live identities and 76 explicit learning routes. Art remains eight verified images.
+
+Limitations: coverage is civilian manufactured outputs; military hardware and operational-service examples still need separate authored mappings and behavior. Upstream physical procurement, embodied tacit expertise, repairable versus destructive examination, waste, richer specialist staffing, pricing and full-history balance remain incomplete. UI compilation and existing atlas behavior are tested; native user interaction has not been visually verified.
+
+Handoff scope: new reverse-engineering module and tests, SocietyExchange artifact validation/evidence ranking, KnowledgePathways multiplier selection and the research inspector action. Save shapes remain compatible with optional fields; older binaries will not provide the new action. The canonical checkout remains untouched. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. The full overhaul and canonical integration remain outstanding.
+
+
+## 19. Mechanics across practical engineering
+
+Added 24 distinct mechanical capabilities: lever moments, centers of mass, compound pulleys, gear ratios, crank linkages, flywheel smoothing, bearing surfaces, friction measurement, lubrication regimes, displacement/buoyancy, hydrostatic pressure, flow continuity, viscous resistance, elastic deformation, stress–strain relations, column buckling, cyclic fatigue, measured kinematics, inertial motion, momentum balance, work/energy, rotational dynamics, mechanical oscillation and feedback governors. The catalog now contains **316 / 5,000 discoveries**.
+
+Fourteen practical subjects gain optional mechanical-method routes: cranes, water mills, grain mills, precision machinery, coastal craft, canal locks, mine drainage, aerodynamics, structural load tests, advanced airframes, steam propulsion, motors, wind tunnels and safety lifts. Relevant mechanical knowledge provides 1.15× research throughput while preserving previous empirical routes and all their physical foundations. When both existing mathematics and mechanics apply, the combined route gives 1.2×1.15 rather than repeatedly stacking overlays. The original woven-hull route and its supporting-observation threshold survive both the base and model-assisted versions.
+
+The branch distinguishes mechanisms rather than adding repeatable maturity labels. Each identity has a checked downstream causal use; each model's foundations can be learned without first knowing the subject it accelerates. All 292 earlier discoveries remain reachable with the mechanics branch removed. The mathematics regression now explicitly checks the pre-mechanics empirical catalog, since later formal mechanical concepts intentionally depend on mathematical ideas.
+
+Physical basis includes NASA's [conservation-of-mass explanation](https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/conservation-of-mass/) and NIST's [cyclic-loading and damage-tolerance research](https://www.nist.gov/publications/damage-tolerant-design-additively-manufactured-metallic-components-subjected-cyclic). The exact research relationships and 15% benefit are game design choices, not historical or laboratory measurements. These ideas aid investigations; they do not automatically create machines or change operating output.
+
+Validation: **54 cases pass**: seven mechanics, eight mathematics, seven civilian science, twelve requirements, nine tree and eleven atlas cases. Zero errors, failures, skipped cases or orphans. Checks cover all model targets, prior-catalog reachability, non-circular model availability, physical prerequisites, idempotence, mathematical composition and woven-hull observation requirements. Graph audit: 316 identities, 105 explicit learning routes, no graph or authoring-contract errors. Logs: `/tmp/tt-mechanics-*.log`. Art queue: eight verified images and 308 pending live subjects.
+
+Save compatibility: unchanged stored shapes and stable existing identities. Newly possible model routes do not rewrite recorded origins or award previously unearned discoveries. Limitations: these mechanics currently affect investigation efficiency; explicit machine-component recipes, failure and maintenance models, and full-history pacing remain incomplete. No artificial calendar gates were added. Handoff scope: mechanics module and tests, mathematics regression, DiscoverySystem registration/overlay (shared hotspot), audit, art manifest and status records. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. The full overhaul and canonical integration remain unfinished.
+
+
+## 20. Manufactured mechanical components
+
+Connected five mechanics discoveries to physical products: metal gear sets, shaft bearings, crank assemblies, balanced flywheels and mechanical governors. The parts consume existing metal and other material stocks, require paid tooling and compete for the same finite workshop lines and Crafting labor. Crank assemblies consume bearings; governors consume gears and bearings. A governed generator assembly consumes the governor, crank, flywheel, conductors and remaining structural material to create the existing Electrical Generators stock item. The original direct generator recipe remains unchanged and available. These are six recipes, not six additional discovery identities; the catalog remains 316 / 5,000.
+
+This gives components an actual downstream use and allows specialized supply to replace work at the assembly stage. It does not claim a universal efficiency saving: component production itself consumes materials and time. Quantities are game batches, and the governed assembly represents a generator package with its mechanical drive and regulation. No separate maintenance or dynamic speed-control simulation is implied by the product name. A finished generator still needs steam-propulsion knowledge, plant installation materials, commissioning, operators, water and fuel under the existing operating rules.
+
+Validation: **63 cases pass**, zero errors, failures, skipped cases or orphans: four new component cases, seven mechanics, twelve civilian industry, nineteen persistent production, fourteen operating services and seven reverse engineering. The new evidence follows one repeatedly retooled workshop through every component to a generator; verifies consumed intermediate stocks, missing-component refusal before setup costs, steam knowledge required before installation, availability of the original direct recipe, no stocks from knowledge alone, and serialized fractional work completing exactly once. Logs: `/tmp/tt-components-*.log`. Graph/contract audit remains clean at 316 identities and 105 routes.
+
+Save compatibility: all earlier recipe costs and identities are retained; added recipes use the existing civilian job format and stock ledger. New component mappings also become available to the existing owned-specimen examination system. Art counts are unchanged at eight verified and 308 queued live subjects. Limitations: machine wear, spare-parts service, detailed tolerances, assembly quality differentiation, full-history balance and native presentation remain unfinished. Handoff scope: civilian recipe catalog, five mechanics production contracts, new suite and status records. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration and the full overhaul remain outstanding.
+
+
+## 21. Early pacing diagnostic and stalled AI research
+
+**Evidence correction:** version 1 omitted normal material-source initialization. See section 23; these results are historical diagnostic observations, not a representative resource-constrained campaign.
+
+Added `tools/audit_history_pacing.gd`, which runs one isolated AI seat through the actual ordered daily economy, population, research, government, construction and military simulation. It accepts `--days`, `--wall-seconds`, `--seed` and `--out`, stops at its target, wall-time budget or population collapse, and records discoveries and annual population/research/food snapshots. No stocks are refilled, no discoveries are granted, and no population rescue is applied. This scenario explicitly supplies synthetic recognized river access and land authority; it excludes foreign exchange and is not a full-world or millennial campaign proof.
+
+The first run, on the pre-fix controller at base `6e1b88d`, reached day 2,137 (5.85 years) with 129 people, three Knowledge workers, one discovery and **zero active investigations**. The AI repeatedly spent its small research-emphasis budget on favorite fields without available questions. The controller now filters its existing personality priorities by actual causal/material eligibility before issuing its ordinary research-emphasis orders. It keeps the same total budget, preserves deliberately zero emphasis, and retains preferences during a genuine absence of viable questions. Player emphasis is never redistributed by this AI behavior.
+
+At the same day and seed after the fix, population remained 129 and food security remained 0.98, with two discoveries and **three active investigations**. Repeated runs matched recorded initial/final metrics, annual snapshots and exact discovery IDs/dates. This is evidence that an early stall was removed; two discoveries in six years cannot establish a 3,000-year content curve. Measured execution rate is diagnostic and host-load dependent, not an optimized full-campaign performance guarantee. The initial probe call used an incorrect planet reset signature; the owned headless process was stopped, the call removed, and only clean corrected runs are recorded.
+
+Validation: **42 cases pass**: three new research-controller, eleven civilization-strategy, nineteen owned-simulation and nine technology-tree cases. No errors, failures, skipped cases or orphans. Tests prove reallocation from a blocked favorite field to an available foundation, unchanged total budget, zero-budget preservation, preferred allocation when all knowledge is exhausted, and no mutation of player emphasis. Logs: `/tmp/tt-pacing-*.log`; diagnostic logs: `/tmp/tt-history-pacing*.log`. Evidence is saved in `docs/technology-review/pacing/early-reference.json`.
+
+Example headless command from the implementation worktree: `/Applications/Godot.app/Contents/MacOS/Godot --headless --path /Users/seanpurtill/Documents/Codex/tt-technology-implementation -s res://tools/audit_history_pacing.gd -- --days=2137 --wall-seconds=60 --out=/tmp/tt-history-pacing.json`. The default requested horizon is 3,000 years but the default 25-second wall budget intentionally returns an incomplete diagnostic; `full_campaign_verified` stays false even if an isolated run reaches its target.
+
+Save compatibility: no stored shape changes; AI rulers may select different future questions at their next review. Shared simulation and player order rules remain intact. Catalog remains 316 / 5,000, art eight verified. Longer runs, multiple real environments, connected civilizations, wars and dependency recovery remain required. Scope: civilization controller, three-case regression suite, headless diagnostic, evidence and status records. Canonical integration remains outstanding in accordance with the existing worktree discipline.
+
+
+## 22. Fifty-year evidence and two mechanics illustrations
+
+**Evidence correction:** this fifty-year run used the version 1 harness with missing geological and surface-material sources. It is retained with that defect marked in its JSON. The illustrations and atlas checks are unaffected. See section 23.
+
+Extended the isolated AI reference to **18,250 days / 50 years**, using simulation commit `166a64c`. The run completed naturally in 138.06 seconds on this host, with no script errors. Population grew from 120 to 241; the ruler had seven Knowledge workers, 29 discoveries, two active investigations, food security 0.98 and about 103 food-days in stores. Recorded discoveries span drainage, watch organization, labor and household institutions, food preservation, oral memory, measures, celestial wayfinding, domestication and elementary kinematics. The early research fix continued to support active inquiry at year 50.
+
+Construction remained at two completed buildings throughout the sampled later years. That limited settlement development, the isolated controller, the synthetic water/land authority and the absence of connected societies prevent this run from establishing the full campaign target. It contains neither industrial/future progression nor war, foreign dependence or recovery. Do not extrapolate the 29 discoveries into a millennial completion claim. Full evidence: `docs/technology-review/pacing/fifty-year-reference.json`; log `/tmp/tt-history-fifty-years.log`. Command used `--days=18250 --wall-seconds=300 --out=/tmp/tt-history-fifty-years.json`. No player game was launched.
+
+Generated two new subject illustrations with the built-in imagegen tool, using the approved apprentice image as a style reference: **Gear Ratios** depicts unequal wooden cogwheels and a millwright demonstration; **Compound Pulleys** depicts fixed and moving wooden blocks lifting a low stone load. Both were visually inspected for their subject, preindustrial materials, matte gouache, fibrous ivory paper, restrained palette, negative space and absence of lettering. They are illustrative scenes, not technical construction diagrams. Exact prompts and sources are saved in `assets/ui/research/paper/GEAR_RATIOS_PROMPT.md` and `COMPOUND_PULLEYS_PROMPT.md`.
+
+Each 1254-pixel square source is saved in the worktree and explicitly bound to its discovery. Both imports retain the established 768-pixel limit and mipmaps. All eleven atlas tests pass, including both new resource bindings and full-square presentation, with zero errors, failures, skipped cases or orphans. Import and diff checks pass. Native player rendering is not established by those headless checks. The manifest now reports **316 discoveries, ten verified images and 306 queued live images**; the target remains 5,000 of each.
+
+Handoff scope: two PNGs/import sidecars, prompts/provenance, research-visual bindings, atlas test list, art manifest, fifty-year evidence and status records. No simulation behavior or save formats changed in this checkpoint. Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Canonical integration and the full overhaul remain outstanding.
+
+
+## 23. Correcting material sources in the pacing harness
+
+The version 1 isolated harness created an owned civilization but left `WorldSimulation.enabled` false. Normal resource days only initialize owned world geology when that flag is enabled. The provider also omitted surface-material catchments. Consequently the previous 50-year probe had no representative timber/stone/fiber supply and remained at two completed buildings. Those reports are preserved with an explicit defect annotation, and sections 21–22 now flag the limitation. Their results must not be used as a representative resource-constrained pacing baseline. The AI allocation unit tests remain valid independently of that flawed probe.
+
+Version 2 enables the ordinary owned-world resource path and supplies nine-square-kilometer surface catchments whose densities come from seeded macro resource potentials. This is still an approximation of geography: the river and land authority are synthetic, and catchments are not sampled from rendered terrain. It does not add manufactured stocks or bypass extraction, transportation, labor or construction costs. Annual snapshots now record occurrence counts and key material stocks, making missing-source failures visible. Annual progress records are printed during long runs.
+
+At day 2,137, the corrected run has 51 resource occurrences, five completed buildings, 130 people, four Knowledge workers and two active investigations. Timber is about 250, stone 100 and fibers 122 in stores; clay remains zero. Two discoveries occurred: drainage on day 1,389 and organized watch on day 1,424. These differing dates show why the missing-resource setup matters even to research. This six-year result does not establish full-history pacing, future content, connected-world behavior or actual rendered-geography correctness.
+
+Validation uses two clean runs of the corrected 2,137-day scenario, comparing recorded initial/final metrics, annual snapshots and exact discovery events. Both complete without script errors. The report and repeatability comparison are saved in `docs/technology-review/pacing/resource-enabled-reference.json`; logs `/tmp/tt-pacing-geology*.log`. Existing simulation behavior was not changed in this checkpoint. The initial/final resource snapshots prove the harness now exercises material-source initialization rather than merely having a flag in its configuration.
+
+Handoff scope: pacing harness version 2, annotated historical reports, corrected evidence and status documents. Save formats and player behavior are unchanged. Catalog remains 316 / 5,000 and artwork ten verified. Longer corrected runs and more representative geography remain necessary; the full overhaul and canonical integration remain unfinished.
+
+
+## 24. Resource identification without calendar locks
+
+Removed the resource-processing exclusion based on `recognition_year`. Ordinary materials can accumulate recognition clues whenever local occurrences and observation effort exist. Six less-direct identifications use causal method requirements: deep aquifers need well siting; refractory clay needs firing experience; phosphate rock accepts soil comparison or chemical investigation; uranium ore needs ore assay plus either chemical investigation or radiation measurement; nitrates need charcoal and either salt-working or chemical investigation; graphite accepts stone selection or recorded marks. All retain the existing gradual clue/survey process. The legacy year values remain unused metadata for compatibility, not unlock dates.
+
+Requirements apply only to unknown occurrences. Previously recognized deposits retain their saved status and can continue through survey/access even if the old campaign lacks a newly stated method. Recognition creates neither extracted stocks nor reactor capability. Extraction, processing, material access, transportation and workers continue under their existing requirements. The chemical route for uranium avoids requiring nuclear technology to find the material needed for nuclear research; the [Royal Society of Chemistry history](https://periodic-table.rsc.org/element/92/Uranium) describes chemical identification before the later discovery of radioactivity. The exact game prerequisites are abstractions rather than exhaustive mineral-assay procedures.
+
+Validation: **64 cases pass**: six new resource-recognition, eleven landscape-resource, twelve city-resource, nineteen civilization-owned-simulation, seven civilian-science and nine technology-tree cases. Zero errors, failures, skipped cases or orphans. New checks exercise day-zero ordinary recognition, failure of a far-future date to bypass absent methods, both uranium approaches without reactor knowledge, preservation of saved recognition, observation work before recognition, no free stock, and existing named foundations without direct self-resource prerequisites. Logs: `/tmp/tt-recognition-*.log`. These tests do not establish the absence of every possible longer combined resource/research dependency cycle; a full cross-system reachability audit remains desirable.
+
+Save compatibility: deposit shapes, resource IDs and saved recognition are unchanged. Newly eligible unknown occurrences may begin accumulating clues earlier; previously calendar-blocked survey and extraction no longer wait for a date. No discovery identities or images were added: totals remain 316 / 5,000 and ten verified images. Limitations: material-specific assay tools, reagent costs during recognition, fuller sensory evidence and whole-campaign pacing remain incomplete. Handoff scope: ResourceSystem identification rules/process gate, new suite and status documents. Canonical integration and the full overhaul remain outstanding.
+
+
+## 25. Resolve permanent underground access blockers
+
+The access audit found two unconditional blockers: every coal occurrence remained ventilation-blocked forever, and every deep aquifer remained lifting-blocked forever. Added the distinct Mine Airways discovery, grounded in mine shoring, controlled investigation and surveyed coal. It does not require coal extraction, coke, steam or electricity. Its learned knowledge clears the ventilation blocker. Existing Mine Drainage, which requires only recognized deep water, clears the aquifer lifting blocker. Neither change grants stock, routes, workers or automatic extraction. Processing knowledge remains an access-score contribution, not a hard prerequisite.
+
+Validation: 40 cases pass (eight resource-recognition/access, eleven landscape, twelve city-resource and nine technology-tree), with no errors, failures, skips or orphans. Coverage includes unresolved/resolved blockers, construction and specialist requirements after research, and surveyed coal as the new discovery's material requirement. Graph audit reports 317 identities, 105 explicit routes and no errors. The art manifest reports ten verified images and 307 queued subjects. These checks do not establish full campaign reachability or pacing. Ventilation and lifting remain aggregate capabilities; per-mine constructed airways, machinery, gas measurements and maintenance are unfinished.
+
+Save compatibility: no shape changes; existing surveyed occurrences can become accessible after their causal knowledge and operational requirements are met. Scope: ResourceSystem, resource discovery catalog, regression suite and manifests. This work remains on codex/technology-implementation, original base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9, in /Users/seanpurtill/Documents/Codex/tt-technology-implementation. ResourceSystem is the shared-file integration touchpoint. Canonical integration is outstanding; no player game was launched.
+
+
+The combined resource/technology fixed-point audit (`tools/audit_resource_technology_dependencies.gd`) reaches all 317 discoveries and all 27 resource types in seven passes. It evaluates actual recognition rules, access blockers, AND/OR learning routes and discovery material-stage requirements. This is a structural upper bound: every material is assumed locally present, with sufficient observations, tools, workers, route work and processing practice; production time, access-score accumulation, adoption and geographic scarcity are not simulated. It cannot certify a playable progression or foreign-material recovery. Report: `/tmp/tt-resource-dependencies.log`.
+
+
+Pacing diagnostic schema 3 additionally records the final resource stages/access scores/blockers, actual labor and research allocations, known IDs and causally ready questions with unsatisfied material requirements. A one-day headless smoke run completed and its 51 occurrence records, known-count consistency and new diagnostic shape were checked. This adds observability without changing the daily simulation. Longer schema-2 reports retain their original scope.
+
+
+## 26. Mine Airways subject art
+
+Added and visually inspected a square paper-and-gouache illustration: two miners observe a linen airflow indicator and adjust a timber partition outside an early mine. The low composition, warm ivory texture, olive/ochre earth and simplified figures follow the approved reference. It is explicitly bound to mine_airways and imported at a 768-pixel limit with mipmaps. Eleven atlas tests pass with no errors, failures, skips or orphans; headless import passes. Native player rendering remains unverified. The live manifest now has 317 subjects, eleven verified images and 306 queued images. Prompt and source asset are recorded in assets/ui/research/paper. No save behavior changes.
+
+
+## 27. Longer causal-resource pacing evidence
+
+The corrected resource-enabled scenario ran 14,426 days (39.52 years) before its 240-second wall limit, at 60.10 simulated days/second. It did not complete the requested fifty years. Population reached 247, with eight Knowledge workers, 26 discoveries, two active inquiries and five completed buildings. Stocks ended at approximately Timber 366.32, Fiber 272.80, Clay 209.75 and Stone zero; food reserves were 120.36 days. Clay Vessels appeared on day 12,649 (year 34.65), after which clay stocks grew. Stone exhaustion and the unchanged building count warrant further diagnosis. This is one isolated ruler under the explicitly synthetic geography assumptions, not whole-history acceptance.
+
+Machine-readable evidence: pacing/causal-resources-reference.json. Simulation base ce264d1; later changes during the run were separate harness/art changes. A follow-up using schema 3 includes material-stage and allocation diagnostics. Millennial pacing, geographic variety and foreign recovery remain unverified.
+
+
+## 28. Returned specimens support material identification
+
+Fixed a recovery gap: physically returned, fully studied exploration specimens previously supplied a research-route signal but could not satisfy the matching local-material gate. Explicit sample permissions now cover Clay Vessels, Stone Selection, Controlled Flaking, Fiber Grading, Timber Grading, Salt Working, Comparative Ore Assay, Iron Ore Assay and Coal Grading. Clay Testing can also use the studied clay specimen. The existing specimen collection/study flow supplies this evidence; no free knowledge, local deposits, stocks or extraction access are created. Requirements for accessible/developed materials cannot be bypassed even if a sample permission is present. Causal prerequisites remain mandatory. Quarry Reading and other location-dependent investigations retain their local requirements.
+
+Validation: 69 cases pass with zero errors, failures, skips or orphans: five new specimen cases, 26 society exchange, twelve technology requirements, nine tree, ten purchase and seven reverse engineering. Cases cover physical specimen kind, full study, return date, wrong material, missing foundations, extraction-stage rejection, explicit permission, normalized catalog gates and saved collection round-trip. Logs: /tmp/tt-specimen-*.log. No saved shape changes: legacy specimen identities map to their existing resource subjects. Aggregate economic import supply and industrial knowledge without local extraction remain unfinished. Catalog and art totals remain 317 and eleven. Shared integration scope includes DiscoverySystem, SocietyModel, SocietyExchange and the resource catalog; no canonical integration or player launch.
+
+
+Dependency-audit negative control: `--exclude=mine_airways` leaves coal surveyed and blocks 71 discoveries, including Coke Firing, while the normal audit reaches all 317. This verifies that the audit detects the repaired coal dependency rather than assuming every material gate passes. Optional exclusions affect only this disposable headless authoring audit. Logs: /tmp/tt-dependency-positive.log and /tmp/tt-dependency-negative.log.
+
+
+Schema-3 follow-up reached day 16,606 (45.50 years), with 285 people, ten Knowledge workers, 30 discoveries, four inquiries and five buildings before its 300-second limit. All overlapping annual snapshots and discovery events match the earlier run exactly. Its detailed report is pacing/causal-resources-diagnostic.json. However, the new diagnostics expose a second harness limitation: the synthetic river context supported drinking, but no water_provider was installed, so the ordinary hydrology deposit initializer could not supply the Freshwater record needed by water research. These reports are explicitly annotated and must not be used to judge water-research pacing. Schema 4 supplies the matching synthetic nearest-water provider; ordinary initialization then creates the occurrence without granting discovery or stock.
+
+The atlas now lists only unsatisfied material conditions and explicitly offers a returned, studied specimen when that investigation permits one. Nine existing technology-tree tests pass; no native UI interaction is claimed.
+
+Schema-4 one-year probe completed 365 days and verified 52 occurrences including one accessible Freshwater record. Population 121, five buildings, three inquiries, no completed discovery yet. Report: pacing/hydrology-enabled-reference.json. This confirms hydrology initialization, not longer progression.
+
+
+## 29. Flint access responds to learned processing
+
+The detailed resource probe exposed surveyed flint stuck below the access threshold with no listed blockers. Unlike the other minerals, Flint had no processing method contributing to its access score; a small number of surveyed occurrences could not accumulate enough survey practice to compensate. Controlled Flaking now supplies that processing contribution. Its investigation needs only recognized flint (or the explicitly permitted studied specimen), so extracting flint is not a prerequisite for learning how to work it. This adds no discovery identity or free material.
+
+All nine resource-recognition/access tests pass with no errors, failures, skips or orphans. The new regression verifies the score remains below threshold without adoption, crosses it with adopted flaking, still refuses access without extraction labor, and runs a normal resource day that extracts from the finite reserve and marks the occurrence developed. Existing recognition, coal ventilation and aquifer lifting cases remain green. Log: /tmp/tt-flint-access.log. No saved shape changes. Shared integration file: ResourceSystem; canonical integration remains pending.
+
+
+## 30. Controlled Flaking subject art
+
+Added and visually inspected the new flaking illustration: an early toolmaker strikes a flint core over a hide pad while another person observes; fresh flakes sit on the ground. It follows the approved square ivory-paper gouache style with low figures and extensive negative space. Explicit discovery binding, 768-pixel import limit and mipmaps are in place. Headless import and all eleven atlas tests pass with zero errors, failures, skipped cases or orphans. Native presentation remains unverified. Totals: 317 discoveries, twelve verified subject images, 305 queued live subjects; 5,000 remains the target. The prompt record is assets/ui/research/paper/CONTROLLED_FLAKING_PROMPT.md. No save or simulation changes.
+
+
+The hydrology-corrected long probe reached 16,645 days (45.60 years), 298 people, ten Knowledge workers and 31 discoveries before the old 300-second diagnostic limit. The 52 occurrences include accessible Freshwater. The report is pacing/hydrology-long-reference.json, based on 6480ec2 and therefore preceding the flint-processing correction. It remains a capped run, not fifty-year acceptance. The diagnostic now permits an explicitly requested wall budget up to 3,600 seconds, so longer requested horizons need not repeatedly stop at the former five-minute cap; normal default duration is unchanged. This affects only the headless diagnostic.
+
+
+The six-case specimen suite additionally verifies that a studied imported sample supplies weaker material evidence than a worked local deposit, and retains the specimen route's 1.0 evidence strength rather than purchased or partnership bonuses. This preserves the requested disadvantage of relying on limited external examples. All six pass; log /tmp/tt-specimen-disadvantage.log.
+
+## 31. Well Siting subject art
+
+Added and visually inspected the Well Siting illustration: villagers compare damp soil from a shallow trial pit with nearby reeds and stream terrain. The scene uses the established low composition, warm ivory paper, matte ochre/olive gouache and simple figures; it contains no dowsing device, text or modern drilling machinery. The explicit research binding and 768-pixel mipmapped import pass all eleven atlas tests with no errors, failures, skips or orphans. Native presentation remains unverified. The manifest now contains 317 discoveries, thirteen verified images and 304 queued live subjects. Prompt: assets/ui/research/paper/WELL_SITING_PROMPT.md. No save or simulation changes.
+
+Mine Airways now carries an explicit production contract and is included in the production authoring validator despite residing alongside legacy resource discoveries. The graph/contract audit passes at 317 identities and 105 explicit routes. This does not retrospectively claim the legacy catalog has full new-contract coverage. Log: /tmp/tt-airways-contract.log.
+
+
+## 32. Completed fifty-year hydrology-corrected diagnostic
+
+Schema 4 completed all 18,250 requested days in 356.156 seconds (51.24 days/second), with no horizon truncation. Simulation base: 2bf7046, including the hydrology and flint-access corrections. Final population 335, twelve Knowledge workers, 34 discoveries, four active inquiries, five completed buildings and 52 resource occurrences. Stocks: Timber 362.81, Fiber 272.35, Clay 208.98 and Stone 2.51. Food reserves: 121.84 days. Full report and final material/research diagnostics: pacing/fifty-year-hydrology-complete.json; log /tmp/tt-complete-fifty-year.log.
+
+Observed issues still worth investigating: four surveyed stone deposits remain below their access threshold; the small surface reserve has been depleted; Cordage and Stone Selection remain eligible but unchosen; five buildings are unchanged despite population growth. This does not establish a permanent deadlock: available causal routes remain, but selection, material access and construction deserve longer and varied scenarios. The report explicitly keeps full_campaign_verified=false. It is one isolated AI ruler with synthetic water/land authority and macro surface densities, no foreign exchange or war, and no rescue grants. No claim of 2,500–3,000-year pacing, full-world performance or player build verification follows from it.
+
+Current worktree handoff remains /Users/seanpurtill/Documents/Codex/tt-technology-implementation on codex/technology-implementation, original base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9. All task changes are committed selectively; unrelated UID files remain untouched. No canonical merge or player launch. Current totals: 317 authored live discoveries / 5,000, thirteen verified subject images, 304 queued live images. The full overhaul remains active and substantially unfinished.
+
+
+## 33. Sixteen field geology and prospecting capabilities
+
+Added Mineral Streak Tests, Cleavage and Fracture Classification, Comparative Mineral Hardness, Mineral Specific Gravity, Relative Stratigraphy, Lithologic Correlation, Geologic Cross Sections, Structural Geologic Mapping, Sediment Provenance, Systematic Channel Sampling, Geochemical Baselines, Geochemical Anomaly Mapping, Grade–Tonnage Models, Spatial Variograms, Resource Kriging and Orebody Block Models. Each has an individually authored observation, method, causal prerequisites, targeted resource profile and implemented production contract. See GEOSCIENCE_METHODS.md for the review table, source grounding and limits. The catalog is now 333 / 5,000.
+
+The resource day applies the methods only to assigned Survey effort. Adoption scales each contribution. The strongest applicable method in each of five families contributes, with combined improvement capped at 75%. Passive clues, special recognition requirements, material reserves, extraction access and stocks retain their existing rules. A per-local-day factor table avoids scanning the whole learned catalog for every occurrence and cannot leak cached adoption across civilizations. The inspector describes benefits and names only already visible target resources. Older empirical paths remain available; the mathematics/mechanics regression fixtures explicitly distinguish later geoscience dependencies from the earlier catalog they protect.
+
+Validation: 104 cases pass, zero errors, failures, skips or orphans: twelve geoscience, eight mathematics, seven mechanics, nine recognition/access, six specimens, nine technology-tree, eleven atlas, eleven landscape resources, twelve city resources and nineteen owned simulation. Tests include actual daily survey gain, zero-staff passive clues, adoption scaling, resource targeting, bounded family stacking, special-recognition preservation, no stock/reserve grants, owner isolation, hidden resource names, authoring rejection of empty/invalid effects and prior-catalog reachability. Logs: /tmp/tt-geoscience-*.log. The graph/production-contract audit passes at 333 identities and 105 explicit routes; the combined material/technology audit reaches all 333 under its stated ideal assumptions. Manifest: thirteen verified images, 320 queued live subjects.
+
+Save compatibility: no additional stored shapes; existing discovery/adoption records carry the methods. Material clue and survey work may advance faster after adoption. Limitations: no actual sample-assay database, geologic map, spatial block grid, computed uncertainty interval, field instrument supply or laboratory consumable model; the underlying aggregate survey allocation remains. The earlier completed fifty-year evidence covers its recorded 317-discovery base, not this expanded catalog. Whole-history pacing and canonical integration remain unfinished.
+
+Handoff scope: new GeoscienceKnowledge module and tests, ResourceSystem survey effort, DiscoverySystem catalog/summary, research inspector, production-contract validator, graph audit, empirical regression fixtures, art queue and review/ledger documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base a7a4d22 (original task base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9). Shared integration touchpoints include DiscoverySystem and ResourceSystem. No canonical merge or player launch.
+
+
+## 34. First geoscience subject illustrations
+
+Added Relative Stratigraphy and Mineral Streak Tests in the approved paper-and-gouache aesthetic. The stratigraphy image emphasizes continuous rock bands and small observers; the streak image shows a lone mineral worker comparing red and black powder traces on a pale ceramic surface. Both were visually inspected and installed as square subject assets with explicit discovery bindings, 768-pixel import limits and mipmaps. Prompts are recorded in assets/ui/research/paper/GEOSCIENCE_PROMPTS.md.
+
+Headless import and all eleven atlas tests pass with zero errors, failures, skipped cases or orphans; native player presentation remains unverified. The manifest now reports 333 live discoveries, fifteen verified subject images and 318 queued live images, against the unchanged 5,000 target. No simulation or save behavior changes. Scope: two assets/import records, bindings, atlas fixture, prompt records and status/manifest. Canonical integration remains outstanding.
+
+
+## 35. Paid experimental-material recovery route
+
+Added a fourth foreign research-support mode: Purchase Experimental Materials. Material Accounting and Standard Measures permit requests for the explicitly authored missing stock basis of fifteen unresolved investigations. The quote uses the existing physical gift, envoy, provisions and destination rules without exposing supplier inventory. Pickup checks actual owned stock and packing labor, debits every requested material atomically, and carries the cargo home. Return settles payment and delivers inventory exactly once; refusal refunds only unused payment. No knowledge, deposit, mine or operating line is granted. Existing general commerce can also supply the same stock alternatives. See EXPERIMENTAL_MATERIALS.md for the review table and limits.
+
+The fifteen supported stock bases cover lime, copper/bronze, iron, coke, refractory material, sulfur, phosphate and graphite investigations. Site-dependent mining gates remain local. Continuous Blast Furnace preserves the mining-supported route and adds a metallurgical route through Bloomery Smelting, with refractory practice, lifting organization and real supplies still common requirements. The tree displays the stored-quantity alternative. This changes no identity count: 333 discoveries and fifteen images remain live; explicit learning routes rise to 107.
+
+Validation: 134 cases pass, no errors, failures, skips or orphans: sixteen new consignments, ten purchased studies, nine scholar visits, ten partnerships, twelve requirements, twelve civilian industry, eleven atlas, 26 society exchange, nineteen owned simulation and nine tree. The consignment suite covers hidden supplier stocks, departure payment, arrival/return separation, missing foundations and destination, quantity/type validation, saved metadata round-trip, hostility, absent packing labor, atomic mixed-bundle refusal, live embassy payment settlement, actual panel dispatch, depletion of the research basis, and imported ore consumed into two Refined Copper batches only after learning the required process. Both furnace alternatives are tested. Logs: /tmp/tt-materials-*.log. Graph/contract audit is clean at 333/107; the combined resource graph reaches all 333 under its existing ideal assumptions.
+
+Save compatibility: optional materials_requested, material_cargo and materials_delivered fields are validated only in the new mission mode. Existing missions remain supported. Research eligibility may broaden when existing stored imports meet the new explicit thresholds. Limitations: no new recurring freight contract, market-price negotiation, per-commodity carrying model, sample-grade database or research-consumable ledger; the fifty-year pacing evidence predates this recovery extension. Existing general trade is retained. Native interaction, whole-history pacing, licensing and imported operating services remain unfinished.
+
+Scope: new ResearchMaterials module and sixteen-case suite; CivilizationSystem dispatch, ResearchPurchase routing, SocietyExchange return/validation, ResourceKnowledgeCatalog stock alternatives, DiscoverySystem material descriptions, foreign research panel, furnace contract audit and review/ledger. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base 094c894; original task base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9. Shared integration includes DiscoverySystem and CivilizationSystem; no canonical merge or player launch.
+
+
+## 36. Twisted Cordage subject illustration
+
+Added the cordage subject in the approved ivory-paper gouache style: an early fiber worker twists a continuous cord beside loose fibers and a finished coil. Built-in generation, visual inspection, explicit discovery binding, 768-pixel import and mipmaps are complete. Prompt: assets/ui/research/paper/CORDAGE_PROMPT.md. All eleven atlas cases pass with zero errors, failures, skips or orphans; log /tmp/tt-cordage-atlas.log. Manifest totals: 333 live discoveries, sixteen verified images, 317 queued subjects. Native player presentation and canonical integration remain unverified. No save or simulation changes. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base de5e4f5.
+
+
+## 37. Completed research-selection diagnostic
+
+The schema-5 isolated AI run completed 18,250 days in 321.192 seconds against simulation base de5e4f5 (333 discoveries). Final state repeats the earlier fifty-year endpoint: population 335, twelve Knowledge workers, 34 discoveries, five buildings, 52 occurrences and Stone 2.51. Full report: pacing/fifty-year-selection-diagnostic.json. Log: /tmp/tt-selection-fifty-year.log. The process exited successfully. This remains one synthetic-water isolated seat, without foreign exchange or war, and does not verify millennial or full-world pacing.
+
+New selection evidence distinguishes within-channel competition from a missing field allocation. Production has one emphasis point in Material supply. Pit Firing is active, progress 0.4384 and score 81.18; Stone Selection and Cordage are both eligible, zero progress, and score 59.03 and 44.17. Stone extraction currently gains processing access from Joinery, which has a Stone Selection learning alternative. Existing scores include material activity and affinity but no prerequisite-chain response to depleted stocks. The next implementation should address this causal selection gap while retaining actual prerequisites, ordinary effort and player emphasis. No correction is claimed by this diagnostic.
+
+Only the headless pacing tool and evidence/status documents change. Schema 5 adds candidate eligibility, scores, progress, subchannels, active investigations and ruler preferences to the final report. No saved game shape or production simulation behavior changes. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base 6bc4712; canonical integration remains pending.
+
+
+## 38. AI material-access research frontier
+
+Correction to earlier pacing commentary: completed_buildings counts the five founding projects in SettlementConstruction, so remaining at five does not establish stalled broader construction. The independently observed zero progress on eligible foundations and low stone stores remain valid. The schema-5 report now records this limit explicitly.
+
+ResearchSupplyPlanner advises AI rulers from surveyed, unexhausted, inaccessible sources with fewer than twenty units in actual stores and assigned extraction labor. It follows missing prerequisites across each authored route, respects satisfied OR groups, stops at currently eligible investigations, and terminates optional cycles through a visited set. Scarcity and distance rank the frontier, with a small continuity preference for accumulated research. The twenty-unit threshold is a gameplay reserve heuristic, not a commodity-specific demand forecast. The planner does not promise that a complete future route is materially feasible.
+
+The controller selects one recommended investigation through a validated research_target command. If its field has no attention, one point moves from the largest allocation; otherwise its existing allocation is used. The total budget, twelve-point domain limits, zero budgets and ordinary prerequisite/evidence gates remain. Saved discovery progress is retained when changing targets. Actual research, adoption, reserves, production and hauling are never granted. Player emphasis is untouched by the AI controller.
+
+Validation: 29 cases pass with no errors, failures, skips or orphans: seven planner, three existing research-controller viability, nineteen owned-simulation. Tests cover actual target dispatch and budget preservation, player-state isolation, zero budgets with a real shortage, experimental evidence, hidden/unsurveyed/exhausted/supplied sources, and a grounded optional cycle. Logs: /tmp/tt-supply-planner.log, /tmp/tt-supply-controller.log, /tmp/tt-supply-owned.log. A new long-run comparison is still needed; the pre-change fifty-year report does not prove improved pacing.
+
+No new save fields; existing research targets and allocations persist ordinary choices. Limits: source-access advice only, no input-demand forecasting, logistical recovery planning or complete future-route optimization. Art and discovery counts remain 16 and 333. Scope: new planner and tests, CivilizationController, CivilizationOrders, diagnostic correction and status. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base e2ee29d. Canonical integration remains pending.
+
+
+## 39. Clay Shaping and Pit Firing subject art
+
+Two new square illustrations distinguish hand-built coil pottery from pottery fired in an open earthen pit. Both were generated with the built-in image tool and visually reviewed against the approved matte gouache, fibrous ivory paper, muted palette and low composition. Each has an explicit discovery binding, 768-pixel import limit and mipmaps. Prompt records: assets/ui/research/paper/CLAY_SHAPING_PROMPT.md and PIT_FIRING_PROMPT.md.
+
+Headless import and all eleven atlas cases pass with zero errors, failures, skips or orphans; logs /tmp/tt-pottery-import.log and /tmp/tt-pottery-atlas.log. The manifest reports 333 live discoveries, eighteen verified images and 315 queued live subjects; the 5,000 target remains unchanged. Native player presentation is unverified. No save or simulation changes. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 4d9f5f7. Canonical integration remains pending.
+
+
+## 40. Completed fifty-year material-access comparison
+
+The post-planner diagnostic completed 18,250 days in 333.543 seconds against 4d9f5f7. Final population 334, twelve Knowledge workers, 37 discoveries, three active inquiries and 52 occurrences. Final stocks: Stone 10.54, Timber 366.02, Clay 200.81 and Fiber Plants 240.55; food reserves 121.80 days. Full report: pacing/fifty-year-supply-planner.json. Log: /tmp/tt-supply-fifty-year.log. The process exited successfully.
+
+The targeted causal improvement is visible: Stone Selection learned day 10,081, Joinery day 15,636, and all four non-surface Stone deposits reached developed with access 1.00381 and no blockers. The preceding run left these surveyed below access threshold and ended with Stone 2.51. No stock, knowledge or population rescue was injected.
+
+The result is not a universal acceleration: nine identities absent from the old endpoint were learned, while Route Memory, Household Councils, Graded Roads, Basketry, Root Cellars and Pack Animals were delayed beyond this endpoint. Twisted Cordage still was not learned by fifty years. Population is one lower and food reserves are similar. The planner restores a useful causal route in this scenario while consuming attention that could support other work.
+
+This remains one isolated ruler with synthetic nearby water and no foreign acquisition or war. It does not verify 2,500–3,000-year progression, diverse geography, military campaigns or aggregate world performance. The five founding-project counter is not a broader construction-stall indicator. No additional simulation or save changes in this report checkpoint. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 3ba7b56; canonical integration remains pending.
+
+
+## 41. Field medicine and a physical medical support role
+
+Added eight authored discoveries: Litter Bearer Drill, Casualty Collection Posts, Casualty Transfer Records, Casualty Evacuation Relays, Field Aid Stations, Triage Registers, Medical Resupply Packing and Convalescent Duty Reviews. The new Medical Detachment has no offensive combat power, requires learned bearer drill, consumes mobilized recruits and training time, and uses manufactured medical care equipment. Equipment costs Timber and Fiber Plants and requires actual shared workshop work. The live catalog is 341 / 5,000, with 115 explicit learning routes; the military roster is 88 types (51 land, 21 naval, 16 air).
+
+Care capacity is proportional to actual equipped personnel, training and condition. The eight adopted methods improve aggregate capacity up to a combined 150% increase. Supplied recovery consumes Fiber Plants and Medicinal Plants per serviced case, capped by available stores and recoverable wounded. Bonus recovery enters the existing fractional recovery accumulator; dead and permanently disabled people are excluded. Home-army preparation and the general-led campaign home recovery/resupply step invoke the service. No direct-cohort player controls are introduced. Existing broad battlefield-medicine effects remain. See FIELD_MEDICINE.md for coefficients, historical grounding and operational limits.
+
+Validation: 84 cases pass, zero errors, failures, skips or orphans: eight new field-medicine, nine battle-injury, seven military-education, fifteen general-campaign, six military-visual-roster, eleven atlas, nine technology-tree and nineteen owned-simulation. Direct tests cover real paid equipment production, recruit withdrawal, saved training, absent staff/equipment/training, supply exhaustion, owner isolation, permanent injury exclusion and zero offensive power. Graph/production-contract audit is clean at 341 identities / 115 routes. Logs /tmp/tt-medicine-*.log. New method requirements appear in the research inspector. Manifest: eighteen verified images, 323 queued live subjects.
+
+Save compatibility: no new stored record shape; new unit/equipment/technology IDs travel through existing military and discovery saves. Import of the new training order passes. Older builds do not know these new identities. The long-running century diagnostic uses its earlier 333-discovery simulation baseline, not this expansion. Native UI, forward treatment posts, evacuation journeys, case-level triage, clinical outcome modeling and specialized medical unit visuals remain unverified or unfinished. The aggregate capacity modifier does not claim those systems exist.
+
+Scope: FieldMedicine and tests, DiscoverySystem/catalog contract/graph audit, MilitaryUnitCatalog and equipment recipe, CombatSimulator recovery context, MilitaryCampaign and GeneralCampaign integration, research inspector, manifest and tracking documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 61fea2a. Shared integration hotspots include DiscoverySystem and MilitaryCampaign; no canonical merge or player launch.
+
+## 42. Read-only home medical support report
+
+The military supply view now shows equipped medical capacity, recoverable wounded, supply-limited service and the current limiting factor. FieldMedicine.quote provides the same calculation used by the paying provide operation, so viewing capabilities or opening the report cannot spend materials or advance recovery. The text specifies care during recovery at home. No forward-care capability is implied.
+
+All eleven focused medical tests pass with no errors, failures, skips or orphans, retaining the eight operating tests and adding quote/service equivalence, read-only capability inspection and supply-panel content. Log: /tmp/tt-medicine-report.log. Native rendering remains unverified. No save shape or research identity change. Scope: FieldMedicine quote/description, MilitaryCampaign capabilities, military supply content and tests. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base e82909e. Canonical integration remains pending.
+
+
+## 43. Bearer drill and casualty-record illustrations
+
+Added two subject illustrations in the approved square ivory-paper gouache style. Litter Bearer Drill shows two coordinated carriers supporting a resting person. Casualty Transfer Records shows a record handover beside a living patient; a targeted edit clarified the patient's visible face. Both final images were visually inspected and installed with explicit bindings, 768-pixel limits and mipmaps. Built-in prompt records: assets/ui/research/paper/LITTER_BEARER_PROMPT.md and CASUALTY_RECORDS_PROMPT.md.
+
+Headless import and all eleven atlas tests pass, zero errors, failures, skips or orphans. Logs /tmp/tt-medical-art-import.log and /tmp/tt-medical-art-atlas.log. Manifest: 341 live discoveries, twenty verified illustrations, 321 queued live subjects, unchanged 5,000 target. No simulation or save change. Native presentation remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 190cdcc; no canonical integration or player launch.
+
+
+## 44. Completed century diagnostic
+
+Schema 5 completed 36,500 days in 1,089.795 seconds against the 333-discovery simulation at 61fea2a. Final population 1,323, 47 Knowledge workers, 71 discoveries, four active inquiries and 52 material occurrences. Stores: Stone 48.31, Timber 358.37, Clay 233.07 and Fiber Plants 349.12. Food reserves: 98.44 days. Full report: pacing/century-supply-planner.json; log /tmp/tt-supply-century.log. The process exited successfully. No pacing process remains active from this run.
+
+The colony sustained the recovered stone access and reached Ore Assaying, Framed Construction, Chemical Distillation, Copper Smelting and Copper Casting by the endpoint. Cordage and Route Memory still have zero research progress despite eligibility. These are unresolved selection/breadth findings, not evidence of completed all-history progression. The simulation contains no foreign partners, acquisition journeys or wars, so it cannot establish disadvantaged recovery in a living world. Population growth and declining food-reserve days also need longer and varied scenarios.
+
+This is the longest completed corrected diagnostic so far, not 2,500–3,000-year acceptance. It predates the eight medical discoveries and uses synthetic nearby water and land authority. The five founding-project counter remains unsuitable for claims about broader construction. No simulation/save changes accompany this evidence record. Current production totals remain 341 discoveries and twenty subject images. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base bb41238. Canonical integration remains outstanding.
+
+
+## 45. Shared-foundation research fallback
+
+ResearchFoundations gives AI rulers a breadth option when no scarce-material intervention is recommended. It examines currently eligible foundations and counts distinct blocked inquiries that would become causally ready after that one foundation, only if their material requirements already hold. Satisfied alternatives and duplicate routes do not inflate the count; experimental observation requirements and other missing common foundations remain. At least two newly supported inquiries are required. The recommendation uses the existing target command and emphasis budget, with the material planner retaining priority. Player emphasis and discovery progress are not granted or overridden by this AI-only choice.
+
+Validation: 26 cases pass, zero errors, failures, skips or orphans: five new foundations, seven supply-planner, three controller-viability, eleven civilization-strategy. Tests include ordinary target dispatch, budget and player-state preservation, duplicate/OR routes, already open questions, absent materials and additional missing foundations. Logs /tmp/tt-research-foundations.log and /tmp/tt-foundations-test*.log. This does not guarantee every eligible question eventually receives attention and does not yet prove improved long-term pacing. The algorithm examines immediate authored prerequisite edges during normal monthly reviews rather than testing every catalog entry against every eligible candidate.
+
+The pacing snapshot now records actual food intake, food eaten and food demand. A completed one-year baseline before this rule found intake 0.983154 while composite food security was approximately 0.98. That distinction prevents treating the composite score as proof of a hunger-threshold bug. No hunger rule changed. Report: pacing/intake-reference.json, base db2bb76; log /tmp/tt-intake-reference.log. It does not explain the earlier century-end hunger flag.
+
+No new save shape or technology identity. Scope: ResearchFoundations and tests, CivilizationController fallback, pacing metrics/evidence and this handoff. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base db2bb76. Current totals remain 341 discoveries and twenty images. Canonical integration remains outstanding.
+
+
+## 46. Cultivation methods with operating costs
+
+Twenty authored agronomy discoveries bring the live catalog to 361 / 5,000 and 135 explicit learning routes. Adopted establishment, breeding, cover, tillage and water practices alter staffed settled cultivation, soil wear and adverse-weather losses. Labor and harvest-area costs reduce output; strongest adopted practice per family and explicit caps prevent unbounded stacking. See AGRONOMY_METHODS.md for identities, sources and limits. These are aggregate cultivation effects, not implemented genetics, individual fields or irrigation infrastructure.
+
+Validation: 57 cases pass with zero errors, failures, skips or orphans (8 agronomy, 10 food/water, 19 owned simulation, 11 atlas, 9 tree). Graph and production contracts are clean; all 361 identities are reachable under the ideal resource audit assumptions. Logs /tmp/tt-agronomy-*.log. Manifest: 20 verified images, 341 queued live subjects. No new save shape; existing discovery/adoption storage carries the new IDs. Native UI remains unverified.
+
+Scope: AgronomyKnowledge and tests, FoodSystem cultivation, DiscoverySystem, atlas details, catalog contracts, graph audit, art manifest and review documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 584e233. Shared integration conflicts include DiscoverySystem and FoodSystem. Canonical integration remains pending.
+
+
+## 47. Completed shared-foundation fifty-year diagnostic
+
+The run at simulation base 584e233 completed 18,250 days in 334.478 seconds, using 341 discoveries before the agronomy extension. Final population 336, Knowledge workers 12, learned discoveries 39 and four active inquiries. Cordage was learned on day 15,300 and Route Memory on day 16,261; these had been neglected in the previous century diagnostic. Stone Selection arrived on day 10,110 and Joinery on day 15,260. Stone stock finished at 10.57. Full evidence: pacing/fifty-year-shared-foundations.json; log /tmp/tt-foundations-fifty-year.log.
+
+Food reserves were 121.68 days, but actual intake was 0.969772 of demand (110.006 eaten / 113.435 demanded). Composite food security near 0.98 must not substitute for this intake metric. No hunger threshold was changed. The completed-building counter represents five founding projects, not total construction.
+
+This demonstrates shared foundations being learned in this scenario. The earlier supply-planner comparison used 333 discoveries, so the changed frontier prevents attributing all endpoint differences solely to the fallback. No foreign research, war, varied geography or millennial progression is tested. Current catalog remains 361 with twenty images. No simulation or save changes in this evidence commit. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base 8c56c76. Canonical integration remains outstanding.
+
+
+## 48. Destructive military specimen examination
+
+Seventeen explicit equipment-to-technology mappings extend the existing civilian examination flow. Spare serviceable owner inventory supplies one consumed example; damaged, foreign and assigned equipment do not. Local causal foundations, apprenticeship and workshop standards remain required. Researchers must complete 180 study-work before the existing 1.35× evidence multiplier applies. Repeated assignments and stronger existing evidence prevent wasted inventory. The atlas lists the new examples through its ordinary examination buttons. Tactics and organizational gates are deliberately absent from the physical specimen map. See MILITARY_SPECIMEN_RESEARCH.md.
+
+Validation: 48 cases passed, zero errors, failures, skips or orphans: 11 reverse-engineering (four new military cases), 26 society-exchange, 11 atlas. Logs /tmp/tt-military-specimens.log and /tmp/tt-specimens-test*.log. Cases verify physical payment, zero-work withholding, owner isolation, absent foundations, matching production gates and forged contract rejection. Native presentation remains unverified. No new discovery or art count: 361 discoveries, 20 images.
+
+Save compatibility: existing collection shape and civilian IDs retained; military specimen IDs use an explicit military: namespace validated against subject. Older builds cannot validate these new examples. Equipment units remain the existing aggregate abstraction; component salvage, variable sample quality, procurement extensions, licensing and imported operating services remain unfinished. No battlefield command behavior changes.
+
+Scope: ResearchSpecimens, ReverseEngineering, SocietyExchange save validation, atlas action labels, tests and review documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 88f429d. Shared-file conflicts: SocietyExchange and research atlas. Canonical integration remains pending.
+
+
+## 49. Germination-trial illustration
+
+Added and visually inspected a square paper-and-gouache illustration of a farmer comparing three seed samples with differing emergence. Explicit discovery binding preserves the whole square. Import uses a 768-pixel limit and mipmaps; the prompt is recorded in assets/ui/research/paper/GERMINATION_TRIALS_PROMPT.md.
+
+Headless imports and eleven atlas tests pass, zero errors, failures, skips or orphans. Logs /tmp/tt-germination-*.log. Manifest now has 361 live discoveries, 21 verified subject images and 340 queued live subjects toward the unchanged 5,000 target. No gameplay or save change. Native presentation remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 9ed23b9; scope is the new asset/import/prompt, ResearchVisuals binding, manifest and review tracking. Canonical integration remains outstanding.
+
+
+## 50. Provision-delivery pacing diagnosis
+
+Pacing snapshots now include existing food-demand breakdown and military required/delivered rations and delivery ratio. A completed 365-day run at 909be10 (361 discoveries) has total demand 77.397844 and intake 76.094032. Its 1.303812-ration shortfall equals military required 3.36 minus delivered 2.056188 within floating-point tolerance. Stored reserves are 71.89 days. Report: pacing/provision-diagnostic.json; log /tmp/tt-provision-diagnostic.log. The process exited successfully without script errors. This identifies delivery, not shortage of stored food, as the cause of this endpoint's intake gap. It does not establish every later hunger flag's cause.
+
+CivilizationStrategy and LeaderPersonality currently classify hunger from reserve days or overall intake, then emphasize nutrition and health. Distinguishing delivery constraints from food-production constraints is the next strategy investigation; no behavior or threshold changed here. Snapshot schema 5 gains additive diagnostic fields; no game save change.
+
+A separate 250-year-target diagnostic is running with the pre-instrumentation harness and 361-discovery simulation at 909be10: session 66487, /tmp/tt-agronomy-250-year.log, planned output /tmp/tt-agronomy-250-year.json, 3,600-second wall cap. A target request is not completed evidence; poll the live process before reporting its status. No millennial or full-world acceptance is implied.
+
+Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 909be10. Scope: pacing harness and review evidence only. Catalog 361, images 21, canonical integration outstanding.
+
+
+## 51. Research priorities distinguish food supply from ration delivery
+
+AI situation reports now pass measured total food demand, military demand and military delivery ratio into a shared food-constraint classifier. The classifier attributes at most the observed intake gap to transport exclusion (military demand × undeliverable fraction / total demand). Low reserves or a remaining intake deficit below 0.98 retain food-shortage priorities. Missing metrics retain the conservative prior response. Mixed shortages receive both nutrition and logistics emphasis.
+
+When transport exclusion explains hunger and reserves suffice, the ruler's care goal becomes delivery of available food, extra research emphasis goes to logistics, and commerce receives ambition weight. The plan still reports hunger and suspends training. No additional research points, food, workers or delivery capability are granted. General-led battlefield operation is unchanged. This fixes a response mismatch identified by the one-year provision diagnostic, not a proven millennial-pacing problem.
+
+Validation: 30 cases pass, zero errors, failures, skips or orphans: 15 strategy (four new delivery/mixed/missing-metric/owned-controller cases), five shared-foundation, seven material-planner, three research-viability. Logs /tmp/tt-provision-strategy.log and /tmp/tt-provision-test*.log. The new cases cover continued training suspension, correct extra research domain, preserved low-reserve response, absence of resource mutation and actual owner-metric propagation. The existing research-budget tests still pass.
+
+No save shape changes. Scope: CivilizationController metric propagation, CivilizationStrategy priorities, LeaderPersonality shared classification/agenda, tests and review tracking. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 3d8404f. The running 250-year-target diagnostic remains at earlier 909be10 and cannot validate this change. Longer/varied behavioral pacing remains outstanding. Counts remain 361 discoveries / 21 images; canonical integration pending.
+
+
+## 52. Seed-cleaning illustration and strategy comparison in progress
+
+Added a visually reviewed Seed Cleaning illustration: a seated farmer sieves grain beside separated kernels and chaff. The square matte gouache image is bound explicitly, imported with a 768-pixel limit and mipmaps, and recorded in SEED_CLEANING_PROMPT.md. Headless import and all eleven atlas tests pass without errors, failures, skips or orphans. Logs /tmp/tt-seed-cleaning-*.log. Manifest: 361 live discoveries, 22 verified images, 339 queued live subjects toward the unchanged 5,000 goal.
+
+Started a separate 18,250-day comparison at simulation base c53e6bd, 361 discoveries, corrected delivery priorities, 1,200-second wall cap. Session 70191; log /tmp/tt-delivery-priorities-fifty-year.log; planned report /tmp/tt-delivery-priorities-fifty-year.json. This run and the 250-year-target baseline session 66487 remain incomplete at this checkpoint. Poll their handles; do not infer completion or restart from a temporary observation timeout. Neither establishes millennial/full-world acceptance.
+
+Scope: Seed Cleaning art/import/prompt, ResearchVisuals binding, manifest and tracking; no simulation/save change. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base c53e6bd. Native presentation unverified; canonical integration outstanding.
+
+
+## 53. Collection capacity and paginated access
+
+Research collections, evidence references and origins now permit 32,768 records, allowing multiple acquisition records across the 5,000-discovery target. Contact and outbound-household caps remain 1,024. The collection view now pages through forty matching records at a time instead of hiding everything older than the newest forty. Filters reset the page, reduced results clamp it, and same-date records have deterministic ID ordering. Study stops scanning once available work is exhausted; no knowledge, materials or extra study work are granted. See COLLECTION_SCALE.md.
+
+Validation: 59 cases pass, zero errors, failures, skips or orphans: 28 exchange (two new scale/pagination cases), 11 reverse-engineering, 10 purchase, 10 partnership. The scale case serializes and validates 5,001 synthetic records and preserves the evidence reference beyond the old limit. These records are test data, not discoveries. The pagination case accesses the older page and checks empty filtered results. Its initial teardown counted deferred UI deletions; allowing a frame before teardown resolves the issue. Logs /tmp/tt-collection-*.log. Maximum-capacity simulation and native rendering remain unverified.
+
+Save shapes unchanged; older builds reject collections beyond their former cap. This is a finite larger capacity, not archive compaction or an unlimited history. Scope: SocietyExchange capacity/validation/study loop, collection panel navigation, tests and review tracking. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 5659be5. Shared conflicts include SocietyExchange and collection panel. Counts remain 361 discoveries / 22 images; canonical integration pending. Both pacing runs use their earlier loaded baselines.
+
+
+## 54. Textile manufacture reaches physical medical supplies
+
+Six authored discoveries and seven recipes create a fiber-to-yarn-to-cloth-to-dressings chain, with optional combing and manufactured loom weights consumed as weaving tooling. Equipped care uses finished dressings first and raw fibers for remaining cases, retaining medicine, staffing, provisions and recoverable-patient requirements. No new recovery bonus. Imported physical dressings can operate without domestic manufacturing knowledge. See TEXTILE_PRODUCTION.md for quantities, historical sources and limitations.
+
+Validation: 59 cases pass with zero errors, failures, skips or orphans: five new textile, eleven medicine, twelve civilian industry, eleven reverse-engineering, nine tree, eleven atlas. New tests cover actual production through multiple intermediates, consumed tooling, medical consumption, mixed raw/manufactured supplies, absent care requirements, read-only quotes and partial-job serialization with no duplicate output. Initial chain fixtures exhausted workshop slots; they now close completed persistent lines through the actual cancellation command and check its cancelled result. Logs /tmp/tt-textile-*.log. Graph/contracts: 367 discoveries, 141 routes, no errors; ideal resource audit reaches all 367. Neither audit proves operating costs or millennial progression. Manifest: 22 verified images, 345 queued subjects.
+
+No new save shape; product and discovery IDs use existing stock, job and adoption records. Native presentation, textile effluent, species, sterile processing, clinical infection outcomes, clothing/sails/dyes and mechanized textile production remain unfinished or unverified. Scope: TextileKnowledge, CivilianIndustry recipes, FieldMedicine supplies, DiscoverySystem and inspector, graph audit, tests, manifest and review documents. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base bbf5957. Shared conflicts include DiscoverySystem, CivilianIndustry and FieldMedicine. Canonical integration outstanding.
+
+
+## 55. Completed delivery-priority fifty-year comparison
+
+The 361-discovery simulation at c53e6bd completed 18,250 days in 365.991 seconds. Endpoint: population 318, eleven Knowledge workers, 42 discoveries, four active inquiries, Stone 20.83 and 122.91 food-reserve days. The matched old-priority year-50 snapshot at 909be10 has population 332, twelve Knowledge workers, 36 discoveries, three active inquiries and Stone 10.48. The old snapshot was emitted by the still-running 250-year-target baseline; it is not that run's final result. Report: pacing/fifty-year-delivery-priorities.json; log /tmp/tt-delivery-priorities-fifty-year.log. Session 70191 exited successfully.
+
+The revised run learned Route Memory, Basketry, Graded Roads, Public Stores, River Craft, Coastal Watercraft and Caravanserais by the endpoint. Its actual plan correctly describes delivery of available food and emphasizes logistics, with training suspended. However, intake remains 0.969247 versus old-priority 0.969415. Military ration delivery is 6.747616 of 10.08 required (0.669406 coverage). The priority response changes research breadth; it has not resolved inadequate ration delivery or proved better overall outcomes. Longer, varied and multi-civilization scenarios remain necessary.
+
+This evidence predates textiles, and neither result validates millennial pacing. Current totals remain 367 discoveries / 22 images. No simulation/save changes in this evidence record. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, checkpoint base ca39ca4. Canonical integration remains outstanding.
+
+
+## 56. Drop-spindle illustration
+
+Added a square paper-and-gouache image of a textile worker drafting fiber into a hanging spindle. A targeted edit placed the guiding hand on the single continuous thread and removed an unrelated dangling thread. The final image was visually inspected, explicitly bound to Drop Spindles and imported at a 768-pixel limit with mipmaps. Prompt and edit are recorded in DROP_SPINDLES_PROMPT.md.
+
+Headless imports and eleven atlas tests pass, zero errors, failures, skips or orphans; logs /tmp/tt-spindle-*.log. Manifest: 367 live discoveries, 23 verified images, 344 queued live subjects. No simulation or save change. Native rendering remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 6d58f23. Scope: image/import/prompt, ResearchVisuals binding, manifest and tracking. Canonical integration outstanding.
+
+
+## 57. Paid civilian production licenses
+
+A new foreign-support option negotiates a 365-day production contract through existing paid, provisioned envoys. The buyer needs Workshop Standards and Material Accounting. The source must know the supported civilian manufacturing process at 35% adoption, have effective crafting capacity, share openly and be at peace. Quotation hides supplier knowledge; refusal returns unused payment once. Accepted rights activate on return, separately from discoveries and evidence. Ordinary mission completion credits payment to the supplier. See PRODUCTION_LICENSES.md.
+
+Licensed work runs at 65% throughput and still consumes tooling, inputs, finite workshop capacity and real electricity. Power demand and production forecasts include the licensed operation. Expiry, war or interrupted supplier support pauses dependent work before consumption; existing goods and partial work remain. Normal domestic mastery at 10% adoption restores independent manufacture without a license. Renewal is another paid journey in the last ninety days or after support interruption. The atlas reports contract status; production lines identify licensed throughput.
+
+Validation: 130 cases pass, zero errors, failures, skips or orphans: 10 license, 10 purchase, 12 civilian industry, 14 operations, 11 atlas, 28 exchange, 19 owned simulation, 16 material consignments and 10 partnerships. Logs /tmp/tt-license-*.log. New cases cover actual dispatch reservation, arrival/return timing, once-only delivery/refund, supplier payment through normal mission processing, renewal, reduced work and input consumption, interruption, independent substitution, power withholding/demand, saved job/register validity and support-panel quotation. The payment test was corrected to inspect the existing completion-time settlement rather than assume supplier credit at arrival.
+
+Save compatibility: optional production_licenses under the existing exchange record, with strict source/subject/day/term validation; old saves without it remain accepted. New license mission flags are mode-restricted. Older builds do not support these contracts or mission mode. No discovery or art count change: 367 / 5,000 and 23 illustrations. Military licensing, royalties, automatic renewals, AI procurement, dedicated foreign experts, commissioned-service licensing and recurring imported services remain unfinished. Native presentation and long-term dependency campaigns remain unverified.
+
+Scope: ResearchLicenses and tests, CivilizationSystem dispatch, ResearchPurchase routing, SocietyExchange validation/delivery, PersistentProduction eligibility/work/forecast, TechnologyOperations electricity demand, research and production UI, and review tracking. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 03e6e62. Shared integration conflicts include CivilizationSystem, SocietyExchange, PersistentProduction and TechnologyOperations. Canonical integration outstanding. The running 250-year-target baseline uses its earlier loaded simulation and does not validate licensing.
+
+
+## 58. Plain-weaving illustration
+
+Added and visually inspected a paper-and-gouache scene of a weaver beside an upright timber loom, hanging warp weights and woven cloth. It is explicitly bound to Plain Weaving and imported with a 768-pixel limit and mipmaps, preserving the full square. Prompt: assets/ui/research/paper/PLAIN_WEAVING_PROMPT.md.
+
+Headless imports and all eleven atlas tests pass with zero errors, failures, skips or orphans; logs /tmp/tt-weaving-*.log. Manifest: 367 live discoveries, 24 verified illustrations, 343 queued live subjects toward the unchanged 5,000 target. No simulation/save change. Native presentation remains unverified. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 0de021a. Scope: image/import/prompt, ResearchVisuals binding, manifest and tracking. Canonical integration remains outstanding.
+
+
+## 59. Hand and electric textile mechanisms
+
+Six authored mechanisms and seven production alternatives extend yarn and cloth manufacture: wheel, flyer, multi-spindle, hand/electric mule, flying shuttle and electric loom routes. Tooling, input stock, ordinary crafting work and finite workshop slots remain required; electric routes draw actual shared power and preserve hand alternatives. Existing yarn/cloth uses, licensing and specimen examination apply through the civilian product catalog. See TEXTILE_MECHANIZATION.md for sources, costs and explicit quality/model limits.
+
+Validation: 40 cases pass, zero errors, failures, skips or orphans: four new mechanization, five basic textile, twelve civilian industry, ten licensing and nine tree. Tests cover hand production without electricity, powered withholding, a finite energy budget across successive lines, and serialized partial production without duplicate cloth. The initial shared-energy fixture hit workshop capacity and accidentally stocked the first line's target while preparing the second; it now closes the first completed line and checks the remaining daily energy through the actual next line. Logs /tmp/tt-textile-mechanization.log and /tmp/tt-mechanization-*.log. Graph/contracts: 373 discoveries / 147 explicit routes / no errors. Manifest: 24 verified illustrations / 349 queued subjects.
+
+No new save shape. Yarn quality, fiber compatibility, occupational hazards, water/steam line shafts and pattern weaving remain unmodeled. These are electrical implementations for powered routes, not the first historical power looms. Scope: TextileMechanization, CivilianIndustry, DiscoverySystem, graph audit, tests, manifest and review tracking. Worktree /Users/seanpurtill/Documents/Codex/tt-technology-implementation, branch codex/technology-implementation, base 5fc56f0. Shared conflicts include DiscoverySystem and CivilianIndustry. Native presentation, millennial pacing and canonical integration remain outstanding. Running pacing baseline predates these discoveries.
+
+
+## 60. License renewal during partial domestic adoption
+
+Base `4298b20`; implementation worktree only. The atlas now keeps foreign support visible for an exposed manufacturing discovery that is known but has less than 10% adoption, while a production license remains useful. Once domestic manufacture is independent, established knowledge again hides unnecessary support unless a partnership is pending. Unexposed subjects stay hidden. The shared visibility decision also recognizes available partnerships directly.
+
+Validation: 11 research-license tests and 11 research-visual-atlas tests passed, with zero errors, failures, skips or orphans. The new regression covers a license in its final 30 days, a known subject at 5% adoption, an enabled renewal proposal, hidden unexposed knowledge, and independence at 10%. The first fixture retained its manually completed diplomatic mission; clearing that completed fixture mission restored the ordinary available-envoy state. No production or payment rules changed.
+
+Save compatibility: no serialized changes. Integration conflicts: `scripts/hud/research_atlas.gd`, `scripts/hud/research_purchase_panel.gd`. Native player UI and canonical integration remain unverified. Catalog remains 373 authored technologies; this is a usability correction, not catalog expansion or completion of the overhaul.
+
+
+## 61. Spinning Wheels paper illustration
+
+Base `4743ba3`; generated through the built-in image tool using the established Apprentice Contracts style reference. Added `assets/ui/research/paper/spinning_wheels.png`, its recorded prompt and texture import, and its explicit discovery binding. The square scene depicts an artisan, hand-driven wheel and spindle in matte earth pigments on ivory paper; it is an illustrative scene, not a construction drawing. Import uses a 768-pixel limit and mipmaps; atlas presentation preserves the complete square.
+
+Validation: headless import exited successfully without script errors; all 11 research-visual-atlas cases passed with zero errors, failures, skips or orphans. Manifest confirms 373 live discoveries, 25 reviewed subject images and 348 queued live images. No save or gameplay state changes. Shared integration conflict: `scripts/hud/research_visuals.gd`. Native player presentation and canonical integration remain unverified.
+
+The existing 250-year-target pacing process was polled and remains live; its latest observed annual snapshot is year 141, population 4,365 and 125 discoveries. This is progress output, not completed 250-year or full-history acceptance, and the run predates recent textile and licensing changes.
+
+
+## 62. Physical paper supply for collection study
+
+Base `515f630`. Added four authored discoveries and five workshop recipes covering hand-beaten plant fibers, cloth pulping, hand sheets, pressed sheets and electric beating. Actual Paper stocks provide at most 20% additional collection-examination progress at 0.01 batch per supported work; ordinary study remains possible without paper. Consumption is capped by pending work and uses the existing Knowledge effort. No direct research unlock or evidence-strength bonus. See [PAPER_PRODUCTION.md](PAPER_PRODUCTION.md) for dependencies, quantities, sources and limits.
+
+Validation: 67 cases passed across paper (5), civilian industry (12), society exchange (28), licenses (11), and visual atlas (11), all with zero errors, failures, skips or orphans. Graph: 377 identities / 151 explicit routes / no errors. Idealized resource audit reaches all 377; campaign viability remains unproven. Manifest: 25 reviewed images and 352 queued live images.
+
+No new save fields; stock/job structures carry new goods and recipe IDs, which older builds cannot operate. Shared integration conflicts: DiscoverySystem, SocietyExchange, CivilianIndustry, collection panel, graph audit. No canonical integration or player launch. Outstanding 4,623 authored identities and the rest of the full overhaul remain active work.
+
+
+## 63. Optional daily-stage pacing profiling
+
+Base `1dbd445`. The harness now accepts `--profile` and records fourteen execution intervals as sample counts and accumulated microseconds in schema 6 reports. CivilizationDay accepts an optional timing dictionary; ordinary calls do not read the clock or add serialized state. Simulation order and rules are unchanged. See [PACING_PROFILING.md](PACING_PROFILING.md).
+
+Validation: matched 365-day profiled and unprofiled runs against 377 discoveries completed, with exactly equal initial/final/annual snapshots, discovery events and bottleneck dictionaries. All fourteen intervals contain 365 samples; control timings are empty. Archived comparison: `pacing/one-year-stage-timing.json`. All 19 owned-simulation tests passed with zero errors, failures, skips or orphans.
+
+First-year measured shares: settlements 24.2%, consequences 18.7%, discovery 18.0%, resources 9.6%. Groups include intervening bookkeeping and wrappers. Concurrent process scheduling and the small initial population limit interpretation; these are not late-game performance or full-history acceptance results. The previously launched 250-year-target process remains live and predates this instrumentation. No new long run was started.
+
+Save compatibility: unchanged. Integration conflicts: CivilizationDay and pacing harness. Catalog remains 377; no canonical integration or player launch. Goal remains active.
+
+
+## 64. Paper-production illustrations and terminal long-run evidence
+
+Base `fdb0cd8`. Added reviewed built-in-generated images for Fiber Pulp Beating and Sheet Fiber Writing Material (`paper_making`), with full prompt records, explicit subject bindings, 768-pixel import limits and mipmaps. Both depict their actual production step in the approved gouache/ivory-paper style. Import completed without script errors; all 11 visual-atlas tests passed with zero errors, failures, skips or orphans. Manifest: 377 discoveries, 27 reviewed subject images and 350 queued live images. No gameplay/save changes from imagery. Shared conflict: research_visuals.gd; native player rendering and canonical integration remain unverified.
+
+The 250-year-target process launched against `909be10` is now terminal: handle 66487 exited 0, stop reason wall-time budget, 3,600.128 seconds elapsed, 55,930 simulated days (153.2329 years). It did not reach 91,250 target days. Final population 6,346; 144 of its loaded 361 discoveries known; 216 Knowledge workers; three active inquiries. Food stock cover 92.51 days with intake ratio 0.979815; Stone 15.75, Timber 71.64, Clay 44.93. The founding-project count of five is not the full construction inventory.
+
+Archived report: [agronomy-wall-limited-153-years.json](pacing/agronomy-wall-limited-153-years.json). It predates delivery-priority changes, textiles, production licenses, paper and stage profiling. Concurrency affects wall-clock throughput; no isolated performance claim. This extends observed uninterrupted simulation beyond the completed century run, but proves neither a completed 250-year diagnostic nor millennial viability. No long-run process remains active on that handle. Next measurement should profile a current-code longer run, inspect costs at growing populations, and preserve the full 2,500–3,000-year acceptance requirement.
+
+
+## 65. Annual stage costs and actual settlement size
+
+Base `89b2823`. Pacing schema 7 adds non-overlapping annual/final-partial timing intervals and actual settlement plot/history counts. Annual progress logs expose each finished interval while cumulative totals remain in the final report. No gameplay, save or daily simulation-order changes.
+
+Validation: matched 400-day profiling-on/off runs completed with equal initial/final/annual snapshots, discovery events and bottlenecks. The two intervals cover 0–365 and 365–400 exactly; every stage's calls and microseconds sum to its cumulative total, with 400 calls per stage. Profiling-off intervals and totals are empty. Evidence archived in `pacing/stage-interval-verification.json`. No claim of late-game performance from this short comparison. Integration conflict: pacing harness only; canonical integration remains pending.
+
+
+### Current profiled long-run launch
+
+Launched against committed `49fe572`, catalog 377, seed 91420, target 91,250 days, wall cap 3,600 seconds, with `--profile`. Process handle 29066 was polled and confirmed live. Output paths: `/tmp/tt-current-250-profile.log` and final report `/tmp/tt-current-250-profile.json`. This is a new current-code diagnostic after the previous process terminated, not a restart of a live process. Its final outcome is pending; annual intervals are evidence of completed intervals only. Do not count this launch as 250-year acceptance. The older 361-discovery report remains archived separately.
+
+
+## 66. Glassworking and prepared chemical apparatus
+
+Base `26ed346`. Six authored methods and eight paid recipes distinguish core forming, free blowing, mold blowing, plunger pressing, tube drawing and hydrogen-flame apparatus work. Vessels support an alternative brine setup; laboratory apparatus supports an alternative silicon-refining setup. Both retain their chemical knowledge gates, inputs and any power costs. No free goods or research effects. Sources, numerical recipe table, physical limits and provenance abstraction are recorded in [GLASSWORKING_PRODUCTION.md](GLASSWORKING_PRODUCTION.md).
+
+Validation: all 61 relevant cases passed (4 glassworking, 12 civilian industry, 14 operations, 11 licenses, 11 reverse engineering, 9 technology tree), zero errors/failures/skips/orphans. Graph: 383 identities / 157 routes / no errors. Idealized resource audit reaches all 383. Art: 27 reviewed / 356 queued. No new save fields; older builds cannot operate new recipes. Shared conflicts: DiscoverySystem, CivilianIndustry, graph audit. Canonical integration and native player presentation remain unverified.
+
+Process 29066 remains live on its loaded 377-discovery build. Latest inspected interval was year 41: 256 people, 36 discoveries, 24 plots. Settlements accounted for 46% of that interval's measured stage time, consequences 13.1%, discovery 8.8%. These are partial diagnostic observations under concurrent load, not completed target evidence or an isolated performance benchmark. The glassworking changes are not loaded into that running process.
+
+
+## 67. Settlement timing attribution
+
+Base `2135d25`. Split the pacing settlement interval into secondary-city processing, city trade and primary morphology; schema 8 now reports sixteen groups. Snapshots count settlements; final diagnostics report each owned settlement's population, plot count, occupation and last resource day. No gameplay or save behavior changes.
+
+Validation: matched 400-day profiling-on/off runs completed with identical initial/final/annual snapshots, discovery events and bottlenecks. All sixteen groups have 400 samples; interval sums match cumulative calls and microseconds. Control timing collections are empty. Evidence: `pacing/secondary-settlement-stage-timing.json`.
+
+The measured secondary-city interval was 22.845% of total stage time, city trade 1.547%, primary morphology 0.699%. The endpoint has a primary settlement of 81.03 people/19 plots and a secondary of 40.70 people/13 plots. Secondary work includes its own economic and demographic simulation, so the prior broad settlement share did not establish that primary morphology was expensive. The next investigation should target repeated work within secondary-city processing while preserving its independent stocks and population. Concurrent load and the short horizon limit absolute timing conclusions.
+
+Shared conflicts: CivilizationDay and pacing harness. No canonical integration, player launch or performance-improvement claim. Catalog remains 383. The existing handle 29066 continues on its earlier loaded build; do not restart it or treat these finer timings as part of that run.
+
+
+## 68. Reuse invariant local survey inputs
+
+Base `d34336c`. Resource recognition/survey passes now lazily calculate effective survey workforce, policy factor, research focus and survey-speed effect once per local-city pass. No cross-city/day cache. Family literacy stays per-deposit because practice can change while iterating. Random draws, stage order, recognition gates and extraction remain intact. See [LOCAL_SURVEY_COST.md](LOCAL_SURVEY_COST.md).
+
+Validation: completed 400-day candidate exactly matches recorded initial/final/annual snapshots, discoveries and bottlenecks from the committed pre-change baseline, including both settlements. Archive: `pacing/survey-pass-comparison.json`. All 52 relevant tests pass (9 resource recognition, 12 geoscience, 12 city resources, 19 owned simulation), zero errors/failures/skips/orphans.
+
+This removes repeated workforce/modifier evaluation from the deposit loop. An overall wall-time speedup is not proven under concurrent load, and the short comparison does not prove all-state or millennial equivalence. The active handle 29066 was polled and remains live on older code; it does not incorporate this change. No save/interface changes or canonical integration. Shared conflict: ResourceSystem. Catalog remains 383; goal remains active.
+
+
+## 69. Glass blowing and core-forming illustrations
+
+Base `cd78a6a`. Added two reviewed paper/gouache illustrations, explicit discovery bindings and full built-in-tool prompt records: `glass_blowing` and `core_formed_glass`. The core-forming output received a targeted edit removing an ambiguous dangling strand and bowl; the retained trail connects the tool to the supported core. Images depict distinct processes while preserving the established palette, texture and broad ivory space.
+
+Both textures imported with a 768-pixel limit and mipmaps. Import completed successfully; all 11 visual-atlas tests passed with zero errors, failures, skips or orphans. Manifest: 383 live discoveries, 29 reviewed subject images, 354 queued live images. No save/gameplay changes. Shared conflict: research_visuals.gd. Native player presentation and canonical integration remain unverified.
+
+The existing profiled long-run handle 29066 was polled and remains live. Latest observed annual output: year 94, population 962, 83 discoveries, 35 primary settlement plots and 146 primary plot-history records. This is a completed interval, not the target's terminal result; the process loaded the earlier 377-discovery build.
+
+
+## 70. Electronic components and commissioned machine control
+
+Base `aa6c5da`. Added nine individually authored circuit-function discoveries and nine physical recipes: resistors, foil capacitors, relays, transformers, silicon rectifiers, bipolar transistors, amplifiers, resistive sensors and controllers. Their branches reconverge on Electronic Machine Control. A fifth installation consumes a controller, motor, cable and steel, then commissions through actual work; its mechanical-work service requires operators and shared power. The earlier motor-workshop alternative remains. Sources, costs and abstractions are detailed in [ELECTRONIC_COMPONENTS.md](ELECTRONIC_COMPONENTS.md).
+
+Validation: 73 cases passed (5 electronics, 12 civilian industry, 14 operations, 11 licenses, 11 reverse engineering, 9 tree, 11 visual atlas), zero errors/failures/skips/orphans. Tests traverse the full new component chain with manufactured intermediates, verify finite semiconductor energy, saved partial fabrication and once-only completion, and exercise paid commissioning, actual solar power, staffing and outages. Five-type maximum commissioning work is validated; save bounds now allow 10,000 workers and 7,500 mechanical-work service units while rejecting excess.
+
+Graph: 392 identities / 166 explicit routes / no errors. Resource audit reaches all 392 under idealized assumptions. Art: 29 reviewed / 363 queued. No new save fields; older builds cannot operate the new recipe/plant IDs or expanded service bounds. Shared conflicts: DiscoverySystem, CivilianIndustry, TechnologyOperations, graph audit. No canonical integration or player launch. The ongoing handle 29066 was polled live and retains its earlier 377-discovery build. Full computing, military/future scope and millennial acceptance remain unfinished.
+
+## 71. AI paper demand for returned research
+
+Base `71c1aa0`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Owned changes: CivilianProductionPlanner, CivilizationController monthly decision hook, dedicated tests and this handoff.
+
+AI monthly reviews now consider paper when Knowledge workers have arrived, unfinished collections to study. The bounded stock target is the remaining supported study demand, rounded to whole batches and capped at ten. The planner selects the fastest currently affordable paper recipe through the ordinary production adapter, pays tooling through the normal order, and reuses an existing paper line. It respects paused lines and suppresses new civilian orders while hungry or at war. Player decisions remain outside the AI controller.
+
+Validation: four planner cases plus five existing paper-production/study cases pass with zero errors, failures, skips or orphans. Coverage includes actual paid tooling, repeat-review reuse, stock sufficiency, absent materials, future/completed/unstaffed study, emergency suppression, target bounds and paused lines. No save fields changed; existing persistent lines retain standard save compatibility. Shared integration conflict: CivilizationController. Not integrated into the canonical game or visually verified there.
+
+This is the first civilian demand consumer, not a general industrial planner: it requires existing pulp and tooling materials, does not build upstream supply chains or operating plants, and does not acquire foreign inputs. Existing lines maintain their bounded targets after demand clears; no automatic decommissioning or wartime line shutdown is introduced. Catalog remains 392 authored identities, 29 reviewed images, five plant types. The existing long-run process reached year 121 on its earlier 377-discovery code; no terminal 250-year result or millennial acceptance is claimed. The full overhaul remains unfinished.
+
+## 72. Upstream civilian production and finite workshop reuse
+
+Base `712e130`, same implementation worktree and branch. CivilianProductionPlanner now follows missing manufactured inputs and setup goods through locally available or licensed recipes, with resource-path cycle rejection and a 24-resource depth limit. It compares work estimates among alternatives, makes one ordinary production decision per monthly review, and avoids selecting powered methods without current electricity. Stock targets remain replenishment goals: an affordable first batch may begin without reserving all future inputs.
+
+A returned-study demand can now cause raw plant fibers to be retted, beaten into pulp, and made into paper. When all workshop slots are assigned, the controller may retool a civilian line whose target is met and which has no partial or reserved work. Retooling uses the existing paid operation via the new ordinary `production_retool` order, then configures the stock target. Paused, military, unfinished and reserved-material lines are excluded. No capacity, staff, materials, discoveries or electricity are granted.
+
+Validation: 47 cases passed, zero errors/failures/skips/orphans (8 planner, 12 civilian industry, 27 training strategy). The chain test verifies a one-slot civilization manufactures two paper batches from actual raw fiber, consuming its manufactured intermediates and reusing the single slot. Other cases cover bounded demand, absence/future/completed/unstaffed studies, paid repeated reviews, missing raw materials, emergencies, protected line states and an unpowered machine alternative. `git diff --check` passed.
+
+Save compatibility: no state schema changes; retooled jobs use existing persistent production fields. Shared-file conflicts: CivilizationController and CivilizationOrders. Not integrated or launched as the player game. Planning is greedy, not a global inventory reservation or industrial optimizer; shared inputs may be contested, work estimates omit tooling labor and route power costs, and unsupported/deep paths remain unavailable. Military saturation can prevent civilian investment. Only paper study demand currently invokes this supply planner; installations, medicine, military inputs and foreign procurement are not yet demand drivers. Known locks remain ordinary research/resource/workforce limits rather than calendar gates.
+
+The prior-code profiled run was verified live through session 29066; latest observed annual snapshot is year 127, population 2,385, 123 known discoveries. No completed 250-year result is claimed. Full scope remains 392/5,000 authored discoveries, 29 reviewed images, five installation types and no verified millennial acceptance or canonical integration.
+
+## 73. Electronics workshop imagery
+
+Base `a45d958`, same implementation worktree/branch, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added three individually generated and visually inspected subject paintings: Foil Capacitors, Electromagnetic Relays and Wound Transformers. All use the approved apprentice-contracts style reference: fibrous ivory paper, matte muted pigment, anonymous workshop figures, low composition and broad negative space. Prompts and selected output provenance are stored beside the images. These are subject illustrations, not wiring diagrams or exact engineering reconstructions.
+
+Bound all three to their live discovery IDs. Imported each with a 768-pixel limit and mipmaps; headless imports exited successfully. All 11 visual-atlas cases passed with zero errors, failures, skips or orphans. Manifest reports 392 live subjects, 32 reviewed images, 360 queued live images; full-overhaul art remains incomplete. No gameplay or save changes. Shared conflict: research_visuals.gd. Native player presentation and canonical integration remain unverified. The existing long-run session 29066 was polled live; no terminal target completion is claimed.
+
+## 74. Skip idle monthly population copies
+
+Base `4315055`, implementation worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Owned systems: SettlementModel monthly dispatch and CivilizationDay invocation. Added `process_local_month`: with existing plots and summary, an already-processed month refreshes the primary registry and returns before constructing a local population scope. Due months, first founding and missing-summary repair use the original local-population path. Both secondary-city daily processing and the owned primary day use this helper. Resources, demographics, labor and daily construction retain their original order.
+
+Archived [pacing/monthly-scope-comparison.json](pacing/monthly-scope-comparison.json): same-seed 400-day before/after runs reach the target and match every report field except timing measurements. This includes initial/final/annual snapshots, discoveries and detailed bottlenecks. Primary morphology interval time was 34,862 versus 14,495 microseconds; combined secondary-city time 1,096,311 versus 1,087,743 microseconds. Whole-run times 4.950 versus 4.927 seconds. Concurrent load makes these observations insufficient for a broad performance claim.
+
+Two full reflected-state equivalence tests cover 61 days of primary/secondary processing, month boundaries, primary renaming and missing-summary repair. No save fields changed. Shared integration conflicts: SettlementModel, CivilizationDay. Native player integration remains unverified. This removes one repeated copy; it does not resolve the dominant late-run settlement scaling or prove millennial viability. The earlier long-run session 29066 remains live, last observed at year 133 (2,850 population, 131 discoveries); its combined settlement interval is about 84% of measured annual time, and it predates this change. Full scope remains 392 authored discoveries, 32 reviewed images and five plant types; no completion claim.
+
+Validation completed: 33 cases passed (2 monthly-scope equivalence, 12 city resources, 19 civilization-owned simulation), zero errors, failures, skips or orphans; no script errors. `git diff --check` passed. This checkpoint is ready for integrator review, not integrated into the canonical build.
+
+## 75. Digital logic and hardwired sequencing
+
+Base `97311e7`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added eight individually authored discoveries and nine paid recipes for relay/diode logic, inversion, bistable storage, counters, registers, arithmetic and sequence controllers. Binary Adders reconverges through relay or diode knowledge. A sixth installation consumes a manufactured sequence controller, motor, cable and steel; actual commissioning, operators and electricity govern mechanical-work output. See [DIGITAL_LOGIC.md](DIGITAL_LOGIC.md) for sources, quantities and explicit abstractions.
+
+Validation: 77 cases passed with zero errors/failures/skips/orphans (4 digital logic, 5 electronic components, 14 operations, 12 civilian industry, 11 licenses, 11 reverse engineering, 9 technology tree, 11 visual atlas). Tests manufacture the new intermediary chain and consume its outputs into a controller, produce relay arithmetic without semiconductor materials, commission the new plant, verify zero output without power/staff, round-trip its state, and validate the six-type workforce/service bounds. Graph: 400 authored identities, 174 explicit routes, no errors. Idealized resource audit reaches all 400; no campaign acceptance inferred. Art manifest: 32 reviewed, 368 queued live subjects.
+
+Save compatibility: no new fields; new IDs and expanded maxima require this build. Maximum commissioning workers 12,000; mechanical-work service bound 12,500. Shared conflicts: DiscoverySystem, CivilianIndustry, TechnologyOperations, graph audit. No canonical integration or player launch. The earlier 377-discovery profiled process 29066 was polled and remains live; it cannot validate this implementation. The full overhaul remains incomplete: 4,600 authored identities still needed, full imagery and future/general-purpose computing/military breadth unfinished, no verified 2,500–3,000-year campaign or canonical integration.
+
+## 76. Relay arithmetic and sequencing imagery
+
+Base `e0d964a`, same implementation worktree and branch, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added and visually inspected two subject illustrations: Binary Adders shows a relay arithmetic experiment, and Hardwired Sequence Control shows a wired cabinet connected to a motorized indexing machine. Both follow the approved warm paper, muted gouache palette and generous negative space. The depicted machines are illustrative, not exact wiring or fabrication plans. Prompt records and source-output provenance accompany the assets.
+
+Bound both images to their discovery IDs with the existing full-square presentation. No gameplay or save changes. Shared integration conflict: research_visuals.gd. Native player presentation and canonical integration remain unverified. The long-run process 29066 was confirmed live at the start of this work; latest observed year 142, population 3,740 and 141 discoveries on its earlier 377-discovery code. No terminal pacing result is claimed.
+
+Validation: imports exited successfully; both textures use mipmaps and a 768-pixel size limit. All 11 visual-atlas cases passed with zero errors/failures/skips/orphans and no script errors. Manifest: 400 live discoveries, 34 reviewed subject images, 366 queued live images. Full-overhaul imagery and the 5,000-discovery goal remain incomplete. `git diff --check` passed.
+
+## 77. AI commissions stronger returned research
+
+Base `95588a0`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added ResearchAcquisitionPlanner and an ordinary research-purchase order. AI foreign reviews can request a stronger study of an unresolved question from a source identified by already returned and examined evidence. They use ordinary assessment/foundation/route/payment checks, retain 90% of offered material stock, avoid food gifts and emergencies, and wait a year before repeating a source/subject research trip. No hidden supplier knowledge is consulted; arrival can still lead to refusal. See [AI_RESEARCH_ACQUISITION.md](AI_RESEARCH_ACQUISITION.md).
+
+Validation: 69 cases passed, zero errors/failures/skips/orphans and no script errors (14 research purchase including four planner/order cases, 27 strategy, 28 society exchange). New cases verify unchanged decisions when hidden supplier knowledge changes, returned/examined evidence requirements, real payment reservation without knowledge grants, busy-mission suppression, stock reserves, emergency suppression, retry delay and prevention of redundant purchases when strong evidence already exists. Existing cases retain physical travel, local study and once-only payment/refund checks. `git diff --check` passed.
+
+No new save fields. Existing diplomatic history supplies retry timing, existing collections supply leads. Shared conflicts: CivilizationController and CivilizationOrders. No canonical integration or player launch. This is the first AI acquisition mode; scholars, partnerships, licenses, material requests and broader sourcing remain unfinished. Catalog remains 400 authored discoveries, 34 reviewed images and six plant types. The previous-code long-run process 29066 was polled live at year 146, population 4,223 and 149 discoveries; no terminal pacing result or millennial acceptance is claimed.
+
+## 78. Terminal long-run evidence and replacement diagnostic
+
+Base `6bc29be`, same implementation worktree/branch. The existing session 29066 is now authoritatively terminal (exit 0). Its schema-7, 377-discovery build simulated 53,896 days / 147.6603 years in 3,600.133 seconds before the wall cap, short of its 250-year target. It ended with population 4,441, 150 known discoveries and 87 primary plots. Combined settlement processing consumed 74.94% of measured stage time; annual cost grew from 2.774 ms/day in year 1 to 142.036 ms/day in year 147. Archived the full report with provenance and explicit limitations in [pacing/profiled-wall-limited-147-years.json](pacing/profiled-wall-limited-147-years.json).
+
+Verification: all timing intervals are contiguous through day 53,896 and their call/time sums exactly reproduce each cumulative stage. The old build cannot separate city processing/trade/morphology, so no unmeasured attribution is claimed. Details and endpoint food/material balances are in [PACING_PROFILING.md](PACING_PROFILING.md). This evidence changes the next measurement target, not the completion criteria.
+
+Started replacement session **95746** from current code `6bc29be`: 400 discoveries, schema 8, sixteen stages and city counts; target 250 years, one-hour wall cap. Output `/tmp/tt-current-400catalog-250-profile.json` and `.log`. Do not restart while live or infer target completion from annual progress. Scholar-visit planning was inspected but not changed in this checkpoint; it remains a next acquisition task.
+
+Documentation/evidence only; no gameplay or save changes, no canonical integration or player launch. Shared documentation conflicts: implementation status, pacing profiling and execution ledger. Full goal remains active: 400/5,000 identities, 34 reviewed images, six plants, no verified millennial campaign.
+
+## 79. AI apprenticeship-era scholar invitations
+
+Base `6ca38fd`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Extended ResearchAcquisitionPlanner to choose paid scholar invitations when apprenticeship contracts or public schools exist but formal study purchasing is not yet available. Once Experimental Controls and Public Schools are both known, it prefers purchased studies. This institutional transition has no year gate. Renamed the controller helper to `research_acquisition_orders` and added the ordinary `research_scholar` command.
+
+Both modes retain examined/returned source evidence, local foundations, material reserves, emergency suppression and source/subject retry policy. Scholar dispatch uses the existing actual visiting-worker contract: paid gift, envoy rations, visitor travel and 60-day board, source refusal, source workforce absence, host staffing, teaching window and return. No specialist or knowledge is created by the planner. Existing active visits and insufficient board or local staff prevent another invitation. [AI_RESEARCH_ACQUISITION.md](AI_RESEARCH_ACQUISITION.md) describes the current mode-selection limits; dynamic comparison of scholars versus purchased studies later in the game remains unfinished.
+
+Validation: 52 cases passed, zero errors/failures/skips/orphans and no script errors (16 research-purchase/acquisition cases, 9 scholar visits, 27 strategy). Two new cases cover apprenticeship-only dispatch, exact gift and food reservation, no discovery grant, occupied scholar slots and missing board/staff. An incomplete synthetic contract fixture was corrected before the successful rerun. `git diff --check` passed. No save fields changed. Shared conflicts: CivilizationController, CivilizationOrders and acquisition planner. No canonical integration or player launch.
+
+Session 95746 was polled and remains live; latest annual snapshot year 33, population 215, 28 discoveries and three settlements. It loaded the earlier 400-discovery code at `6bc29be`; no claim that it tests this scholar addition or completes its 250-year target. Full scope remains unfinished: 400 identities, 34 reviewed images, six plants, no millennial acceptance or canonical integration.
+
+## 80. Printing materials, forms and presses
+
+Base `1d0d553`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added eight authored discoveries and nine recipes for seed oil, lampblack, printing ink, relief blocks, wooden type, hand impression, screw presses and hand/motor cylinder printing. The two form branches reconverge; the earlier broad Repeatable Printing identity remains. Manufactured Printed Sheets now support finite collection examination at 30% extra progress, as an alternative to Paper's 20%, with no double support of the same work. AI plans affordable printing and accounts for existing printed stock; the collection panel explains both options. Sources, physical quantities and deliberate abstractions are in [PRINTING_PRODUCTION.md](PRINTING_PRODUCTION.md).
+
+Validation: 88 cases passed with zero errors/failures/skips/orphans and no script errors (4 printing, 5 paper, 8 civilian planner, 28 society exchange, 12 civilian industry, 11 licenses, 9 tree, 11 visual atlas). Tests manufacture ink and forms from their new intermediates, consume forms as reusable line tooling, verify actual paper/ink use, test bounded mixed/finished/idle study, require finite electricity for motor printing, resume partial saved printing once, and verify AI stock targets with partial/already-sufficient printed inventory. Graph: 408 identities / 182 explicit routes / no errors. Resource audit reaches all 408 under idealized assumptions, not a campaign proof. Art: 34 reviewed / 374 queued live subjects. `git diff --check` passed.
+
+No new save fields or plant types; old builds cannot operate the new IDs/resources. Legacy broad printing effects are retained and explicitly not reconciled here. Shared conflicts: DiscoverySystem, CivilianIndustry, CivilianProductionPlanner, PaperStudy, collection panel and graph audit. No canonical integration or player launch. Long-run session 95746 was polled live; it retains its earlier 400-discovery code and does not test this addition. Full goal remains unfinished: 4,592 identities still required, substantial military/future/operating models and imagery missing, no verified millennial campaign or canonical integration.
+
+## 81. Measure the secondary-city day internally
+
+Base `59f80af`, same implementation worktree and branch, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added optional secondary-city timing collection through CivilizationDay and SettlementModel. Pacing schema 9 retains sixteen outer stages and records seven inner stages separately: scope entry, resources, consequences, economy, construction, morphology and scope exit. Inner counts measure processed city-days and must not be added again to the outer secondary-settlement total. Normal calls use empty dictionaries and do not read the clock for this detail.
+
+Validation: schema-8 baseline, schema-9 profiled and schema-9 unprofiled 400-day runs match every recorded gameplay field. Inner/outer interval deltas reconcile exactly; disabled timing output is empty, and inner measured time remains within the outer city interval. Each detail stage has 280 calls. Consequences account for 53.70% of the early detailed sample, resources 23.77%, economy 13.79%; scope and morphology are much smaller. Archive and caveats: [pacing/secondary-city-detail-timing.json](pacing/secondary-city-detail-timing.json), [PACING_PROFILING.md](PACING_PROFILING.md). All 31 regression cases passed (19 owned civilizations, 12 city resources), zero errors/failures/skips/orphans and no script errors. `git diff --check` passed.
+
+No gameplay/save fields changed; only the diagnostic report schema changes. Shared conflicts: SettlementModel, CivilizationDay and pacing audit. No canonical integration or player launch. Session 95746 was verified live, most recently observed at year 73 with six settlements. It loaded schema 8 and will not include the new inner measurements. The full overhaul remains unfinished at 408 authored identities, 34 reviewed images and six plant types, with no verified millennial campaign or canonical integration.
+
+## 82. Avoid recursive copying of unused consequence metrics
+
+Base `472d611`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. ConsequenceEngine snapshots previous-day scalar metrics with a shallow dictionary copy, preserving top-level values while avoiding recursive copies of unread nested forecasts and mortality breakdowns. No gameplay formulas or save fields changed. Shared conflict: ConsequenceEngine.
+
+Validation: same-seed before/after 400-day reports match every recorded gameplay field. All 49 tests passed (19 owned civilizations, 12 city resources, 18 demographics), zero errors/failures/skips/orphans and no script errors. No measured speedup is claimed; the candidate diagnostic overlapped tests. See [comparison archive](pacing/consequence-snapshot-comparison.json). `git diff --check` passed. No canonical integration or player launch.
+
+Session 95746 is no longer live: after interruption its handle is unknown, no matching OS process exists, and its temporary output is unavailable. Its earlier year-73 observation is not a terminal result or a completed 250-year test. Ledger corrected accordingly. Scope remains unfinished: 408 authored identities, 34 reviewed images, six plant types, 4,592 identities still needed, and no verified full-history campaign or integration.
+
+## 83. Late-game scholar choice based on local examination workload
+
+Base `729ef06`; same implementation worktree and branch, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Formal purchasing no longer automatically excludes a visiting scholar. For an active inquiry, the AI considers a scholar when a purchase is unavailable or its optimistic post-return examination delay is at least a full 60-day teaching window. Existing local study work may clear during travel; a purchased study still needs its own 120 work after delivery. The estimate uses current Knowledge capacity, food intake and maximum printed support, without inspecting supplier knowledge. The collection workload is summed once per recommendation, not once per offer. If the teacher's ordinary quote fails (including insufficient board), a valid purchase remains available. Inactive inquiries retain a durable-study preference.
+
+Validation: 28 cases passed (19 purchase/acquisition, 9 scholar visits), zero errors/failures/skips/orphans and no script errors. Three new cases cover active late-game teaching versus cleared queues, supplier ignorance, no active audience, insufficient board, work clearing during travel and exclusion of unreturned records. `git diff --check` passed. All payment, travel, source workforce absence and supplier acceptance still use the existing physical transactions.
+
+No new save fields or discovery identities. Shared conflicts: ResearchAcquisitionPlanner and ResearchPurchase. This is a workload heuristic; it does not forecast inquiry completion, staffing changes, incoming collections or diplomatic success. No canonical integration or player launch, and no full-history pacing claim. Catalog remains 408 / 5,000 with 34 reviewed images. Details: [AI_RESEARCH_ACQUISITION.md](AI_RESEARCH_ACQUISITION.md).
+
+## 84. Recessed-image printing with finite plate wear
+
+Base `d2aee36`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Six authored discoveries and nine civilian recipes add copper preparation, burin engraving, drypoint, mezzotint, steel engraving and rolling impressions. Four plate-making alternatives reconverge on the rolling press, independently of relief printing. Distinct plate stocks lose finite capacity per impression, with paper, ink, water, press tooling and ordinary workshop work also required. Finished sheets enter existing finite collection study support. See [INTAGLIO_PRODUCTION.md](INTAGLIO_PRODUCTION.md) for source, costs and limitations.
+
+Validation: 62 cases passed with zero errors/failures/skips/orphans and no script errors (4 intaglio, 4 printing, 12 civilian industry, 11 licenses, 11 reverse engineering, 9 tree, 11 visual atlas). New cases cover four reconvergent methods, physical copper-to-impression manufacture, relief/intaglio incompatibility, wear on all four plate stocks and saved production continuation without duplicate consumption. During development the route test was corrected to inspect the graph's learning route rather than its empty common wrapper; recipe numbers were normalized to floats for the existing strict JSON save validation, and each independent stock-target test reset its output stock. Final checks passed.
+
+Graph: 414 identities, 188 explicit learning routes, no errors. Idealized resource audit reaches all 414; it excludes real pacing and does not prove campaign completion. Art queue: 34 verified, 380 pending live subjects. No new save-schema fields, but older builds cannot operate the new IDs. Shared conflicts: DiscoverySystem, CivilianIndustry and graph audit. No canonical integration or player launch. Remaining full scope includes 4,586 authored identities, artwork, broader operating/military systems and verified 2,500–3,000-year progression. No live long-run diagnostic is claimed.
+
+## 85. Engraving and rolling-press subject artwork
+
+Base `8ff63bd`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added and bound Burin Engraving and Rolling Intaglio Printing artwork, generated with the built-in tool from the approved apprenticeship image as a style reference. Both use matte gouache, ivory fibrous paper, muted pigment, human craft and substantial empty space. Targeted edits corrected the long pencil-like burin and the initial press roller arrangement. Prompt histories and selected-output provenance are stored alongside the images.
+
+Assets are `assets/ui/research/paper/burin_engraving.png` and `rolling_intaglio_printing.png`. Source images remain intact; Godot imports use a 768-pixel limit with mipmaps. Existing full-square presentation and bounded image cache remain. These are reviewed illustrative depictions, not engineering diagrams. No native player visual audit or canonical integration is claimed.
+
+Validation: headless imports exited; eleven visual-atlas cases passed with zero errors/failures/skips/orphans and no script errors. Art manifest reports 36 verified subject images and 378 queued across 414 live identities. `git diff --check` passed. No gameplay or save fields changed. Shared conflict: research visual bindings and art manifest. The full 5,000-discovery overhaul, remaining imagery, operating systems and long-history campaign verification remain unfinished.
+
+## 86. AI commissions generation for existing machinery demand
+
+Base `76cc159`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added PowerInvestmentPlanner and the ordinary `plant_install` order. Monthly civilian decisions can pay for solar or steam generation when actual enabled workshop/plant demand exceeds existing conditioned capacity. The planner waits for commissioning, checks adopted foundations and total effective Crafting capacity, retains other-production labor, requires a month of steam inputs and preserves disabled equipment. Missing manufactured components use existing civilian supply planning and workshop limits. No free equipment, electricity, labor or discoveries are granted.
+
+Validation: 42 cases passed (5 power investment, 14 operations, 8 civilian planner, 15 strategy), zero errors/failures/skips/orphans and no script errors. End-to-end test pays components, performs commissioning, burns fuel and completes powered pulp over its actual electrical budget. Tests cover solar preference, disabled/adequate capacity, absent demand, paused/completed/unfed lines, adoption/staff/fuel constraints, emergency suppression and upstream manufacture without replacing an active full workshop. Initial tests were corrected for the real two-day electricity requirement and one-slot workshop constraint; implementation did not bypass either. `git diff --check` passed.
+
+No save-schema changes. Shared conflicts: CivilizationController and CivilizationOrders. Scope limits are explicit in [AI_POWER_INVESTMENT.md](AI_POWER_INVESTMENT.md): first powered-process selection, consumer-plant construction, raw-fuel procurement and one-slot dependency sequencing remain unfinished. No canonical integration, player launch or full-history pacing claim. Counts remain 414 authored discoveries and 36 reviewed images; the full objective remains active.
+
+## 87. Prepare generation before the first powered study-supply line
+
+Base `973b5ed`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Civilian supply planning can now consider an unstarted powered method while preserving its physical material and knowledge requirements. Controller decisions request generation for its proposed demand and start the method only when commissioned, enabled generation has current fuel and operators. This uses capacity instead of prior dispatch, avoiding the zero-demand/zero-electricity deadlock. Default supply calls still require power, including upstream generation-component planning. Affordable unpowered methods remain fallbacks.
+
+Validation: 49 cases passed (8 power investment, 8 civilian planner, 14 operations, 15 strategy, 4 printing), zero errors/failures/skips/orphans and no script errors. New end-to-end case starts with no production line or generator, pays for generation, commissions it, produces two pulp batches with finite electricity, then pays to retool the same slot into two finished Paper. Additional cases cover unpowered fallback and uncommissioned/unfueled/unstaffed capacity. The test calls decisions daily to exercise sequencing; real monthly review timing is unchanged and no campaign-speed claim follows. `git diff --check` passed.
+
+No new save fields. Shared conflicts: CivilizationController, CivilianProductionPlanner and PowerInvestmentPlanner. Lifetime investment cost optimization, consumer plants, fuel replenishment and already-blocked active one-slot workflows remain unfinished. Details: [AI_POWER_INVESTMENT.md](AI_POWER_INVESTMENT.md). No canonical integration or player launch. Full scope remains 414 authored discoveries, 36 reviewed images and substantial remaining history, military/operating models and long-run verification.
+
+## 88. Avoid refrigeration work in cities without cooling
+
+Base `acccfc6`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Food forecasts resolve current cooling once and skip repeated 90-day fuel/service/perishable checks when it is absent. The cooling-present path retains offset-specific fuel depletion and stock-based coverage. This does not remove food forecasting or change its horizon, formulas, shortages or consumption order.
+
+Sequential same-seed 400-day reports match every recorded gameplay field. Early measured secondary consequence time fell from 549,768 to 502,423 microseconds (280 calls); total wall time 4.686 to 4.526 seconds. This is limited diagnostic evidence, not a broad scaling claim. Archive: [no-cooling-forecast-comparison.json](pacing/no-cooling-forecast-comparison.json). All 45 regression cases passed (14 operations, 12 city resources, 19 owned civilizations), zero errors/failures/skips/orphans and no script errors. `git diff --check` passed.
+
+No save fields changed. Shared conflict: FoodSystem. No canonical integration or player launch. Full scope remains unfinished at 414 authored technologies and 36 reviewed images; long-history pacing remains unverified.
+
+## 89. Fresh 250-year diagnostic with persistent evidence
+
+Run base `577f366` includes the no-cooling forecast change `f17c51b`, 414 authored discoveries, the current AI power planning and schema-9 secondary-city detail. The diagnostic's explicit maximum wall limit was raised from one to four hours; its default is unchanged. Earlier one-hour results did not reach 250 years. This does not accelerate or bypass simulation rules.
+
+A new isolated headless run was launched with target 91,250 days and 14,400-second wall cap, session **57160**. The handle was polled and remains live. Outputs are persistent worktree paths `artifacts/technology-pacing/catalog-414-250-profile.json` and `.log`. No matching older pacing process was running before launch. This is a running diagnostic, not a completed 250-year result or millennial acceptance. Keep polling this handle; do not restart merely because an observation times out. No canonical integration or player launch.
+
+## 90. Memory access, stored instructions and programmable workshop control
+
+Base `4530af5`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. Added eight authored discoveries for relay registers, parallel banks, address decoding, read/write memory, instruction registers, program counters, conditional branching and stored-program control. Ten recipes assemble physical parts, including relay/electronic alternatives for decoders and memory. Relay memory does not require transistor components. Common control foundations reconverge on a manufactured Programmable Controller.
+
+The seventh plant, Programmable Machine Workshop, consumes that controller, motor, cable and steel plus twenty commissioning work. Full operation uses 1.5 Crafting workers and four electricity for six mechanical-work service, subject to the existing workforce/condition/power rules. Save bounds now accept 14,000 simultaneous commissioning workers and 18,500 mechanical service across all plant maxima. Earlier plants remain available. No new save-schema fields; older builds cannot operate the new IDs. Sources and explicit abstraction limits: [COMPUTING_MEMORY.md](COMPUTING_MEMORY.md). This does not claim simulated instruction execution or software authoring.
+
+Validation: 89 cases passed (4 computing memory, 5 electronics, 4 digital logic, 14 operations, 8 power planner, 12 civilian industry, 11 licenses, 11 reverse engineering, 9 tree, 11 visual atlas), zero errors/failures/skips/orphans and no script errors. New tests cover alternative foundations, relay-only component assembly, saved partial controller manufacture without duplicate consumption, paid commissioning, absent electricity, shared solar power and loss of operators. Maximum commissioning/save bounds are exercised. Graph: 422 identities / 196 explicit routes / no errors. Idealized resource audit reaches all 422, not a campaign proof. Art: 36 reviewed / 386 queued. `git diff --check` passed.
+
+Shared conflicts: DiscoverySystem, CivilianIndustry, TechnologyOperations, graph audit and aggregate-bound test. No canonical integration or player launch. Live session 57160 was polled; observed year 53, population 342, 43 discoveries and four settlements. It retains its earlier 414-discovery code and does not test this branch. Concurrent checks may affect diagnostic wall time. Full scope remains unfinished, including 4,578 identities, remaining artwork, substantial software/future/military and operating models, and long-history verification.
+
+## 91. AI acquires and renews manufacturing licenses
+
+Base `6fedb40`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`. LicenseAcquisitionPlanner prioritizes supplied unpaused dependent production and can license immediately supplied paper/printing for remaining study demand when existing production cannot satisfy it. Leads are examined returned reports or prior contracts. A normal `research_license` order pays for a physical embassy and leaves supplier acceptance, delivery, expiry and 65% licensed throughput to ResearchLicenses. Reserves, staffing, hunger/war suppression and a 30-day retry policy apply. No local mastery or research is granted.
+
+Validation: 57 cases passed (15 licenses, 19 study purchase/acquisition, 15 strategy, 8 civilian planner), zero errors/failures/skips/orphans and no script errors. Four added cases test supplier ignorance, examined/returned leads, actual dispatch payment without an instant contract, demand/input/staff/reserve requirements, independent production preference, renewal from prior contracts, retry delay and paused-line exclusion. A missing Freshwater input in the first test fixture was corrected; the planner properly refused an unsupplied paper line. `git diff --check` passed.
+
+No save-schema changes. Shared conflicts: CivilizationController and CivilizationOrders. Scope and limitations: [AI_MANUFACTURING_LICENSES.md](AI_MANUFACTURING_LICENSES.md). No canonical integration or player launch. Session 57160 was polled live; latest observed year 75, population 588, 68 discoveries and six settlements. It retains the earlier 414-discovery code and excludes this addition. Counts remain 422 authored identities and 36 reviewed images, with the full overhaul unfinished.
+
+
+## Checkpoint 92: trained repair companies with conserved equipment
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `93b9258`. No canonical integration or player launch.
+
+Field Armorer Teams adds one authored discovery, paid repair tools and a trained Field Repair Company. Home crews contribute a shared daily repair-work budget, constrained by actual equipped personnel, training, condition, supply, food and adoption. Existing damage and material reservations prevent free replacements. Unknown advanced equipment cannot receive company support. Travel, battle, unavailable home workshops, army exercises and paused jobs block the applicable work. See [Field repair companies](FIELD_REPAIR.md).
+
+Verification: 62 cases across field repair (6), field medicine (11), equipment quotes (6), persistent production (19), technology tree (9) and visual atlas (11), with zero errors, failures, skipped tests or orphans. Graph: 423 discoveries, 197 explicit learning routes, no graph errors. Ideal-resource audit reaches all 423; this is structural evidence, not natural campaign completion. Artwork: 36 reviewed images and 387 queued subjects. Roster: 89 total roles (52 land, 21 naval, 16 air), not a claim that the reviewed 96-role inventory is nearly complete.
+
+Save compatibility: existing military formation, equipment, training and repair-job fields; full military export/import and partial job serialization tested. Existing IDs preserved. New saves using this role require the updated catalog. Shared-file conflicts for integration: `discovery_system.gd`, `military_campaign.gd`, unit/equipment/combat catalogs, catalog validation, art manifest and audit tool. No terrain, government ownership, aggregate population authority or player controls changed.
+
+Limits: home repair only; forward recovery, component faults, spare-parts logistics, autonomous composition and general-selected repair priorities remain. Existing ordinary repair semantics are retained. The long diagnostic session 57160 is still running from its loaded 414-discovery revision; last inspected at year 109 with 103 known discoveries and 12 settlements. Its 250-year target and 2,500–3,000-year acceptance remain unverified. Catalog still needs 4,577 distinct identities, extensive operating behavior, imagery and canonical integration.
+
+
+## Checkpoint 93: crop inputs, finite nutrient reserves and industrial fertilizer
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `d82f92b`. No canonical integration or player launch.
+
+Eleven new authored discoveries connect mineral crop inputs, acid manufacture, compressed air, air separation, electrolysis, catalyst, ammonia and ammonium sulfate. Twelve physical recipes include ground phosphate under the existing Phosphate Dressing ID. Local fertilizer-derived nitrogen/phosphorus reserves are applied and consumed by real cultivation. The old automatic Phosphate Dressing bonuses are removed. Food forecasts use finite projected reserves and stocks, and ordinary AI production/power planning can commission fertilizer supply. See [Crop nutrients and industrial fertilizer](CROP_NUTRITION.md) for exact mechanisms, costs, sources and assumptions.
+
+Verification: 125 cases across crop nutrition (13), agronomy (8), food/water knowledge (10), city resources (12), civilian industry (12), civilian production planning (8), owned simulation (19), manufacturing licenses (15), power planning (8), technology tree (9) and visual atlas (11), zero errors/failures/skips/orphans. Tests include real mineral fertilizer manufacture and uptake, industrial nitrogen production with commissioned power and consumed intermediates, shared electrical exhaustion, saved partial batches, whole owned save restoration, city isolation, invalid-save rejection, legacy defaults, finite forecasts and an ordinary controller production order.
+
+Graph: 434 live discoveries, 208 explicit learning routes, no graph errors. Ideal-resource audit reaches all 434, which proves structural reachability only. A separate [400-day profiled run](pacing/crop-nutrition-400-days.json) completed its requested target in 4.852 seconds; no full-history conclusion follows from it. Artwork remains 36 reviewed subjects, with 398 queued. Military roster remains 89 roles; operating installation types remain seven.
+
+Save compatibility: new reflected `cultivation_nutrients` dictionary, also included in secondary-city resource scopes; missing old data defaults to zero. Human and owned preflight validation covers primary and secondary balances. New IDs require this catalog. Existing Phosphate Dressing saves intentionally change from automatic modifiers to physical fertilizer behavior. Shared integration conflicts: `game_state.gd`, `discovery_system.gd`, `save_system.gd`, `world_simulation.gd`, `food_system.gd`, `settlement_model.gd`, civilian recipes/planning, resource knowledge, catalog validation, art manifest and graph audit. GovernmentPeopleSystem retains labor authority; no terrain or direct military-control changes.
+
+Limits: fertilizer-derived N/P above the existing ambient soil baseline, not complete soil/crop chemistry. No potassium, crop-specific uptake, idle-field leaching, runoff pollution, industrial gas loss, catalyst wear or broad fertilizer procurement yet. The long diagnostic session 57160 remains active on its originally loaded 414-discovery revision; last inspected at year 126, 125 known discoveries, 13 settlements. It does not exercise these new systems. The full objective remains active: 4,566 authored identities, extensive operating depth, imagery, 2,500–3,000-year evidence and canonical integration remain.
+
+
+## Checkpoint 94: crop-trial and ammonia-synthesis artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `42cdaca`. No canonical integration or player launch.
+
+Two subject images were generated through the built-in tool using `apprentice_contracts.png` as the style reference. Nutrient Response Trials depicts comparable crop plots and growers observing samples. Catalytic Ammonia Synthesis carries the same matte gouache, warm ivory texture and muted palette into an industrial apparatus scene. Both were visually inspected and copied unchanged into `assets/ui/research/paper/`, with exact prompt/source records linked from `PROMPTS.md`. The apparatus is an illustrative subject, not an engineering diagram.
+
+Both images have explicit discovery bindings, full-square presentation and 768-pixel runtime import limits with mipmaps. Original generated files remain untouched. Headless imports completed and exited. The atlas test previously covered an older fixed subset of bindings; it now examines every explicit subject binding, checks square dimensions/import size/cache bounds and frees each temporary view. This verifies the new images and the existing reviewed catalog without retaining all image controls simultaneously.
+
+Verification: all 11 visual-atlas cases pass with zero errors/failures/skips/orphans; all 38 subject bindings are covered. Selected-source/workspace hashes match. Art manifest: 434 live identities, 38 reviewed images, 396 queued. No new discovery count or gameplay change. Save representation unchanged. Native player presentation and canonical integration remain unverified; no player or editor was interrupted.
+
+Shared integration files: research visual bindings, visual-atlas test, art manifest, prompt index and implementation records; new PNGs, prompt records and their texture import metadata are task-owned. The full-history goal remains active, including 4,566 remaining discovery identities, extensive operating depth, full-span pacing and the rest of the artwork. Diagnostic session 57160 is still tracked independently; this art pass does not establish its target completion.
+
+
+## Checkpoint 95: paid fertilizer licenses as a slower production route
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `49ab616`. No canonical integration or player launch.
+
+Fertilizer needs now inform the existing AI manufacturing-license planner. It uses the same observed cultivated output, nutrient reserves and prepared-stock accounting as domestic production. Both nutrients need a usable stock, domestic route or examined, immediately supplied license prospect. Domestic routes take precedence; two missing methods can use two successive paid envoy trips. No supplier's hidden discoveries are queried for new prospects. Existing contract support and on-arrival refusal remain ordinary license rules. Paper licensing now checks domestic study supply specifically, allowing unrelated fertilizer needs to coexist with study acquisition.
+
+Verification: 63 cases across manufacturing licenses (19, including four new fertilizer cases), crop nutrition (13), civilian production planning (8), power planning (8) and civilization strategy (15), zero errors/failures/skips/orphans. The end-to-end license case pays for both mineral fertilizer methods on separate journeys, produces both inputs at 65% throughput, and uses them for additional cultivated output without adding either discovery to local knowledge. Tests also cover future/unexamined leads, hidden supplier changes, domestic alternatives, missing complementary materials, absent farming and travel. See [AI manufacturing licenses](AI_MANUFACTURING_LICENSES.md).
+
+No save fields, catalog identities, unit counts or artwork were added: 434 live discoveries, 89 roles, seven installation types, 38 reviewed images, 396 queued images. The full objective still needs 4,566 authored identities and the broader operating, acquisition, art, pacing and integration work. Shared integration files are the license and civilian-production planners, crop-nutrition helper, license tests and review records. Existing government/labor ownership remains unchanged.
+
+Limits: currently supplied fertilizer manufacture, not raw-material procurement or upstream-license sequencing. Potential complementary contracts may be refused or arrive too far apart; this is not an optimal multi-provider contract scheduler. Hunger/war/new-embassy restrictions, 30-day retry history, payment reserves, one-year expiry and reduced throughput remain. No canonical or full-span campaign verification. Diagnostic session 57160 was re-polled live; last inspected at year 142, population 3,777, 149 known discoveries and 17 settlements on its loaded 414-discovery revision. Its 250-year target is still pending.
+
+
+## Checkpoint 96: finite electrical storage and manufactured batteries
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `84d05a6`. No canonical integration or player launch.
+
+Seven distinct discoveries and seven component recipes connect lead, paper separators, sulfuric acid and existing electrical control into manufactured cells, banks and charge controllers. Two commissioned installation types start empty, consume real surplus generation, lose energy, and cover power interruptions within finite capacity, discharge and operator limits. Existing consumers retain staff; powered workshop work retains a labor and electricity reservation. Generation capacity is shared across dispatch passes. See [Electrical storage](ELECTRICAL_STORAGE.md) for coefficients, sources and limits.
+
+Verification: 109 cases across storage (11), existing operations (14), electronic components (5), semiconductors (7), power planning (8), civilian industry (12), crop nutrition (13), technology tree (9), owned simulations (19), and visual atlas (11). Zero errors/failures/skips/orphans. New cases manufacture and commission a bank, confirm its empty initial state and real charging, exercise interrupted generation, finite cooling forecasts, operator shortages, workshop reservations, travel, missing consumables, capacity validation, and owned-save isolation/round-trip. An initial test fixture carried an earlier manufacturing line across tests; resetting its military state resolved that test isolation error.
+
+Graph audit: 441 discoveries, 215 explicit routes, no graph errors. Resource dependency audit structurally reaches all 441 under its abundant-resource assumptions; it is not campaign proof. Before/after 400-day runs both reach their targets and match initial/final gameplay, discoveries, snapshots and other non-timing fields, apart from catalog count. Timing differs under concurrent diagnostic load and is not a performance benchmark. Reports are archived as `artifacts/technology-pacing/battery-before-400-days.json` and `battery-after-400-days.json`.
+
+Save compatibility: storage values are optional fields in existing installation records, defaulting to zero. Validation bounds now cover nine installation types. New identities require this revision. Shared files: discovery registration, civilian recipe catalog, operating service dispatcher and panel, graph audit, existing bound tests, art queue and review records. New storage modules, tests and documentation are task-owned. No government or population ownership changes.
+
+Current totals: 441 authored discoveries, 89 military roles, nine installation types, 38 reviewed images and 403 queued live images. Another 4,559 discovery identities and extensive operating, acquisition, art, pacing and integration work remain. AI does not yet invest in batteries, solar has no day/night model, and storage lacks lifetime wear or mobile use. Session 57160 was re-polled live; last inspected year 156, population 5,798, 167 known discoveries, 17 settlements on its loaded 414-discovery revision. Its 250-year target remains pending. Full-history completion is not claimed.
+
+
+## Checkpoint 97: autonomous battery reserves
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `b37ab43`. Canonical integration remains pending.
+
+The power planner can buy or manufacture a limited battery reserve after commissioned generation has spare capacity, current demand exists, fuel stocks cover a nominal month and Crafting operators can support it. One unit per ordinary decision, no construction duplication, disabled-bank override or research/energy grants. An approximate three-day demand target uses installed usable capacity and discharge rate. Regulated banks are preferred when affordable and adopted; ordinary banks remain an alternative. A first powered line can use actual charged storage within next-day retention, rate and operator limits, while empty storage does not authorize it. See [AI power investment](AI_POWER_INVESTMENT.md).
+
+Verification: 35 cases, zero errors/failures/skips/orphans: power planning 12 (four new), civilian production planning 8 and civilization strategy 15. The controller test purchases, commissions, charges and then supplies a workshop after fuel is removed. Other tests cover finite stored-energy quotes, no quote mutations, empty/disabled/unstaffed banks, no surplus/demand/fuel, missing-bank manufacture and regulation adoption. Monthly strategic scheduling remains unchanged; tests exercise the sequence on shorter intervals.
+
+No new save fields, discoveries, roles or images: 441 discoveries, 89 military roles, nine installation types and 38 reviewed images. Shared file is the existing power investment planner; its tests and review records accompany the change. No player launch or merge. Limits include fuel replenishment, weather, battery lifetime valuation, one-slot workshop sequencing, consumer-plant investment and full-history pacing. Diagnostic session 57160 was confirmed live again; its target is not claimed complete.
+
+
+## Checkpoint 98: Battery Bank Wiring artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `c5054f9`. Built-in image generation used the approved apprentice image as style reference. The selected square illustration shows two workshop technicians, six accumulator jars and a small instrument, with matte muted gouache, fibrous ivory paper and broad upper negative space. It is illustrative, not a wiring schematic.
+
+Copied unchanged to `assets/ui/research/paper/battery_bank_wiring.png`, with source hash verified and exact prompt/provenance in `BATTERY_BANK_WIRING_PROMPT.md`. Explicit discovery binding, 768-pixel runtime texture limit and mipmaps. Both headless imports exited without errors. All 11 atlas cases pass with zero errors/failures/skips/orphans, covering every one of the 39 explicit images and square presentation/cache limits. Native player presentation remains unverified.
+
+Totals remain 441 discoveries, 89 roles and nine installation types; artwork is now 39 reviewed, 402 queued live images. No save change. Shared files: research visual bindings, art manifest and prompt index, implementation records. New image, import metadata and prompt record are task-owned. No canonical merge, player launch or completion claim. Diagnostic session 57160 was confirmed live; target completion remains pending.
+
+
+## Checkpoint 99: physical pneumatic engineering
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `0c0abed`. No canonical integration or player launch.
+
+Six authored discoveries and six component recipes connect pipe jointing, cylinder boring, piston packing, directional valves and actuators to a pneumatic pressing workshop. The commissioned workshop consumes finite manufactured Compressed Air and reserves Crafting operators for mechanical service. Electricity is paid upstream during air manufacture. Partial air scales service; depletion, travel or unavailable labor stops it. Existing bounded workshop productivity consumes this service. See [Pneumatic engineering](PNEUMATIC_ENGINEERING.md) for component grounding, game coefficients and limits.
+
+Verification: 67 cases across new pneumatic research (4), existing operations (14), electrical storage (11), electronic components (5), power planning (12), civilian industry (12) and technology tree (9), zero errors/failures/skips/orphans. The new chain test manufactures each component, commissions the press, produces air with real solar-generated electricity and observes service end after depletion. Partial supply, operator reservation, travel and owned-save round-trip are covered. Graph: 447 discoveries, 221 explicit learning routes, no errors. Resource dependency audit reaches all 447 under abundant-resource structural assumptions, not campaign proof. A 400-day natural pacing probe completes its requested target; local report `artifacts/technology-pacing/pneumatic-400-days.json`.
+
+Save compatibility: existing stock and installation ledgers carry new data; input validation accepts Compressed Air and upper bounds cover ten plant types. New identities require this revision. Shared files are discovery registration, civilian recipes, operating plant catalog/validation, graph audit, bounds tests, art queue and review records. New pneumatic catalog, tests and documentation are task-owned. Government and aggregate population ownership unchanged.
+
+Totals: 447 authored discoveries, 89 military roles, ten installation types, 39 reviewed images and 408 queued live images. Another 4,553 discovery identities and the wider operating, acquisition, art, pacing and integration objectives remain. No pipe network, leakage, pressure/temperature state, moisture treatment, seal wear or automatic consumer-plant investment yet. Diagnostic 57160 remains active on its loaded 414-discovery revision; latest inspected annual snapshot is year 169, population 8,671, 183 known discoveries and 17 settlements. The 250-year target remains pending.
+
+
+## Checkpoint 100: remove the seventeen-settlement forecast cache cliff
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `9d2334b`. No canonical integration or player launch.
+
+The live 414-discovery diagnostic reached 17 settlements, where its 16-location climate cache could evict every location before the next daily forecast. An isolated reproduction visits 17 fixed profiles across 30 days: before the change, all 510 forecasts missed their location entry; afterward, 493 visits reused it. The summaries have identical SHA-256 hashes. The climate cache now admits the supported 256 settlement profiles, still capped at 128 dates per profile. A new test checks its bound against the settlement limit, overlapping reuse, eviction and unchanged cold/warm results. Only deterministic climate factors are cached; stocks, consumption, nutrient depletion and shortage predictions remain live calculations.
+
+Verification: 27 cases, zero errors/failures/skips/orphans: simulation performance 14 and crop nutrition 13. A 400-day natural probe completes and matches every non-timing report field from checkpoint 99, including discoveries and annual/final gameplay snapshots. The focused 510-forecast sample measured 1,814,257 microseconds before and 992,185 afterward under concurrent host load; this is a local observation, not a guaranteed speedup or full-world benchmark. Reproduction: `tools/audit_food_forecast_sites.gd`; evidence: [forecast cache diagnostic](FORECAST_CACHE_DIAGNOSTIC.json). The full 400-day output stays in local `artifacts/technology-pacing/forecast-cache-400-days.json`.
+
+No gameplay balance, catalog, art or save fields changed. Cache remains excluded from save capture and cleared on reset. It can now retain up to 32,768 dated climate records per FoodSystem, increasing bounded memory in exchange for reuse across the supported settlement count. Shared implementation file is `scripts/food_system.gd`, plus the existing performance suite; the diagnostic tool and record are task-owned. This does not accelerate the already running process: session 57160 was confirmed live again on its original loaded revision and must not be restarted merely to obtain newer code. Its 250-year target remains pending. Current total remains 447 discoveries and 39 reviewed images; full-history completion is still far beyond this checkpoint.
+
+
+## Checkpoint 101: manufactured operating-input resupply
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `93e1426`. No canonical integration or player launch.
+
+Civilian planning now follows study and cultivation supply with manufactured consumables for commissioned, enabled primary-home machinery. It totals nominal inputs at current labor condition, aims for thirty days of stocks and prioritizes the least-covered producible input. Existing supply recursion and controller power/line orders pay tooling, manufacturing inputs and electricity. A pneumatic press can therefore prompt ordinary compressed-air manufacture. Disabled/unbuilt/traveling machinery, unavailable workers, absent methods/tooling, paused lines and controller emergency guards remain respected. See [Operating resupply](OPERATING_RESUPPLY.md).
+
+Verification: 52 cases across operating-input planning (4 new), civilian planning (8), power planning (12), civilization strategy (15) and crop nutrition (13), zero errors/failures/skips/orphans. The controller case starts a compressor line, consumes tooling, uses generation to manufacture air and supplies an actual commissioned press. Quotes leave stocks unchanged; target scaling, missing power/knowledge/tooling, depleted stores, paused lines and hunger/war guards are covered.
+
+No save fields or catalog/art additions. Current totals remain 447 authored discoveries, 89 roles, ten installation types and 39 reviewed images. Shared implementation file is the civilian production planner; new tests and resupply document accompany review-record changes. No new authority over government labor. Limits: raw fuel extraction/imports, new license negotiation, automatic consumer-plant investment and scheduling continuously needed inputs around other work remain unfinished. Active manufacturing licenses already pass through the ordinary recipe gate. Diagnostic session 57160 was re-polled live; no claim that its 250-year target or full-history pacing has completed.
+
+
+## Checkpoint 102: pneumatic engineering illustrations
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `9e21424`. No canonical integration or player launch.
+
+Cylinder Boring and Pneumatic Pressing now have distinct subject illustrations made with built-in image generation and the approved apprentice style reference. Both were visually inspected for matte gouache, fibrous warm ivory paper, restrained colors and negative space. The boring scene emphasizes the aligned shaft and open bore; the pressing scene shows an upright actuator and connected air receiver. Apparatus is illustrative, not an engineering schematic.
+
+Selected source files were copied unchanged into `assets/ui/research/paper/cylinder_boring.png` and `pneumatic_pressing.png`; SHA-256 matches verified. Exact prompts and source paths are recorded in `PNEUMATIC_ENGINEERING_PROMPTS.md` and linked from the prompt index. Explicit discovery bindings, 768-pixel texture import limits and mipmaps. Both headless import passes exited without errors. All 11 atlas cases pass with zero errors/failures/skips/orphans and exercise every one of the 41 explicit image bindings. Native player presentation remains unverified.
+
+Totals remain 447 discoveries, 89 roles and ten installation types. Artwork: 41 reviewed images, 406 queued live images. No save or gameplay change. Shared files are visual bindings, art manifest and prompt index, and implementation records; new images/import metadata/prompt record are task-owned. Full-history work remains active. Diagnostic session 57160 was confirmed live, with latest inspected snapshot at year 175, population 10,451, 193 known discoveries and 17 settlements on its loaded 414-discovery revision. Its 250-year target remains pending.
+
+
+## Checkpoint 103: paid operating-input manufacturing licenses
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `bd29175`. No canonical integration or player launch.
+
+The license planner can negotiate missing operating-input manufacture for established machinery, using the same stock-needs calculation as domestic resupply. A fully examined returned lead or existing contract must name the method. Local/active licensed production takes precedence; paused input lines suppress new negotiations. Material/tooling supply and commissioned usable power are required before seeking a powered method. The ordinary paid-envoy journey, on-arrival refusal, year-long term, support requirements, retry window and reduced throughput remain. See [Operating resupply](OPERATING_RESUPPLY.md) and [AI manufacturing licenses](AI_MANUFACTURING_LICENSES.md).
+
+Verification: 62 cases across research licenses (23, four new), operating resupply (4), civilian production planning (8), power planning (12) and civilization strategy (15), zero errors/failures/skips/orphans. The new end-to-end case pays for a compressor license, completes the physical envoy return, starts production at 65% work throughput and feeds a real pneumatic press without granting the compressor discovery. Additional cases verify examined/returned evidence, unchanged recommendations after hidden provider-method changes, power/tooling shortages, sufficient stocks, domestic methods and paused production. Supplier acceptance is still tested at actual arrival rather than inferred from the examined lead.
+
+No save, discovery, unit or image additions. Totals remain 447 discoveries, 89 roles, ten installation types and 41 reviewed images. Shared implementation files: civilian-production and license-acquisition planners; existing license tests and review records accompany them. Remaining limits include upstream license chains, raw consumable imports, future power investment tied to unknown methods, optimum supplier/term selection and workshop scheduling. Full-history goal remains active. Diagnostic session 57160 was confirmed live at the start of this pass; its 250-year target is still not claimed complete.
+
+
+## Checkpoint 104: manufactured optical instruments and specimen examination
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `074593a`. No canonical integration or player launch.
+
+Six authored discoveries and six component recipes connect lens centering, eyepiece design, fine-focus stages, illumination apertures and slide preparation to compound microscopy. A commissioned bench consumes slides and Crafting operators for finite daily specimen-observation assistance. Ordinary Knowledge work is still required; assistance is capped at 25% of that item's paid ordinary progress, remaining examination work and the shared service budget. It applies to physical specimens, not cultural/knowledge accounts, and does not change evidence strength or grant discoveries. The research installation panel describes its supply and study requirements. See [Optical instruments](OPTICAL_INSTRUMENTS.md).
+
+Verification: 101 cases across optical instruments (4), society exchange (28), specimen research (6), installations (14), electronic components/bounds (5), civilian industry (12), technology tree (9), operating resupply (4) and owned simulations (19), zero errors/failures/skips/orphans. New tests manufacture the full instrument chain, commission a supplied bench, examine a real returned specimen, exhaust slides, bound assistance across items, exclude non-specimen accounts and stop operation during travel or absent staffing. A detected recipe naming mistake was corrected to Refined Copper; the optical fixture now asserts defined sources for every material and tool before supplying them.
+
+Graph: 453 discoveries, 227 explicit routes, no errors. Resource dependency audit structurally reaches all 453 under abundant-resource assumptions; it does not prove campaign material availability or pace. The 400-day natural pacing probe reaches its requested target, with local report `artifacts/technology-pacing/optical-instruments-400-days.json`. Full-span acceptance remains absent.
+
+Save compatibility: existing stock and installation records carry instruments, slide inputs and specimen-observation service; bounds cover eleven installation types. Existing records need no new fields; new identities require this revision. Shared files: discovery registration, civilian recipes, installation catalog/validation and panel, society-exchange study loop, graph audit, bounds test, art queue and review records. New optical catalog, observation helper, tests and documentation are task-owned. Government retains labor ownership.
+
+Totals: 453 discoveries, 89 military roles, eleven installation types, 41 reviewed images and 412 queued live images. Another 4,547 discovery identities and the wider operating, acquisition, military, art, pacing and integration scope remain. Limits include optical resolution/quality, staining, sectioning, diagnosis, instrument wear and automatic bench installation. Enabled benches consume their daily preparation supplies even when assistance is unused. Session 57160 was confirmed live at the start; its 250-year target remains unverified on the older loaded 414-discovery revision.
+
+
+## Checkpoint 105: structural production-source and power-bootstrap audit
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `0d23af8`. No canonical integration or player launch.
+
+The common technology graph audit now includes civilian manufacturing and installation closure: named resource sources, tooling dependencies, alternative recipes, by-products and generator bootstrap. A recipe requiring power cannot bootstrap the only generator that could power it; stored-energy capacity is not treated as generation. The standalone tool reports blocked inputs and assumptions explicitly. See [Production dependencies](PRODUCTION_DEPENDENCIES.md).
+
+Verification: seven audit cases pass with zero errors/failures/skips/orphans. They cover nonexistent stocks, self-tooling cycles and alternatives, electricity circularity, dependent by-products, empty storage, invalid numeric requirements and all live recipes/installations. Both standalone and combined audits complete without script errors: 130 civilian recipes and eleven plant types reachable; 453 discovery identities, 227 explicit routes, no graph errors. An initial standalone script loaded an autoload-dependent plant script too early; runtime loading after autoload initialization corrected that harness issue before evidence was accepted.
+
+No gameplay, save, catalog count or artwork changes. Files are task-owned audit helper/entry point/tests/documentation plus the existing graph audit and review records. This does not prove finite production or full-history pacing: raw resources and methods are assumed available, and military recipes outside the civilian product catalog are excluded. Coupled research/material/energy and full-campaign evidence remain explicit unfinished work. The active long diagnostic was re-polled live at the start; its target completion is not claimed.
+
+
+## Checkpoint 106: Compound Microscopy illustration
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `ad3de8d`. No canonical integration or player launch.
+
+Compound Microscopy now has an individually generated and visually inspected subject illustration in the approved matte-gouache/fibrous-ivory aesthetic. An investigator uses a modest microscope while an assistant prepares a slide; the optical tube, stage and daylight mirror are readable. Built-in generation used the approved apprentice image as style reference only. The selected output was copied unchanged to `assets/ui/research/paper/compound_microscopy.png`; source hash matched. Exact prompt and provenance are recorded in `COMPOUND_MICROSCOPY_PROMPT.md` and linked from the prompt index.
+
+Both headless import passes exited without errors. The texture uses the shared 768-pixel runtime limit and mipmaps. All 11 atlas cases pass with zero errors/failures/skips/orphans, covering all 42 explicit image bindings and square/cache constraints. Native player presentation remains unverified. No gameplay or save change.
+
+Totals: 453 discoveries, 89 military roles, eleven installation types; 42 reviewed images and 411 queued live images. Shared files are visual bindings, art manifest, prompt index and review records; image/import metadata/prompt record are task-owned. Full-history work remains active. Diagnostic session 57160 was confirmed live at the start; latest inspected snapshot is year 184, population 13,848, 203 known discoveries and 17 settlements on the loaded 414-discovery revision. Its 250-year target remains pending.
+
+
+## Checkpoint 107: autonomous specimen laboratory investment
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `902ae0c`. No canonical integration or player launch.
+
+Civilian monthly decisions can now obtain slides, manufacture missing microscope components and commission microscopy benches against substantial returned specimen work. Installed capacity bounds further investment. The planner requires local adoption, settled primary-site access, actual Crafting and Knowledge workers, a month of slides and ordinary installation costs. Paused benches, existing construction, hunger and war are respected. Existing power investment retains priority. See [Optical instruments](OPTICAL_INSTRUMENTS.md) for policy assumptions and limitations.
+
+Files owned: scientific instrument planner, focused tests, optical documentation and this review record; shared existing controller gains one planner call. No save fields or catalog/art additions. Existing saves remain compatible; runtime behavior requires this revision. No shared integration hotspots changed. Full-history work remains incomplete: 453 authored discoveries and 42 reviewed images. The ongoing loaded 414-discovery diagnostic was confirmed live and most recently inspected at year 188, population 15,691, 207 known discoveries and 17 settlements; no 250-year completion is claimed.
+
+Verification: 29 cases pass with zero errors, failures, skips or orphans: laboratory investment 5, optical instruments 4, civilian supply 8 and power investment 12. The new checks cover paid controller-to-commissioning flow, manufactured instruments, bounded investment, real slide supply, returned-specimen demand and adoption/labor/pause/emergency guards. These are focused simulations, not full-campaign balance or native player verification.
+
+
+## Checkpoint 108: Specimen Slide Mounting illustration
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `514366a`. No canonical integration or player launch.
+
+A new individually generated illustration depicts botanical specimen preparation on glass slides in the approved matte gouache and fibrous ivory aesthetic. The selected built-in output was visually inspected and copied unchanged into the project with matching source/destination hashes. Its exact prompt and provenance are in `assets/ui/research/paper/SPECIMEN_SLIDE_MOUNTING_PROMPT.md`. The research view now explicitly binds the discovery to this subject image. Runtime import follows the shared 768-pixel limit and mipmap policy.
+
+No gameplay or save change. Task-owned files: subject PNG/import metadata and prompt; shared files: research artwork bindings, prompt index, manifest and this record. Native player presentation remains unverified. Full-history implementation remains active and incomplete. The ongoing historical diagnostic session 57160 was re-polled live at the start; its 250-year target completion is not claimed.
+
+Verification: both headless imports exited cleanly; all eleven atlas cases pass with zero errors/failures/skips/orphans, including all 43 explicit subject bindings. The updated manifest reports 453 live discoveries, 43 verified images and 410 queued live images; the 5,000-image objective remains incomplete.
+
+
+## Checkpoint 109: reject invalid production data before reachability claims
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `2b650b5`. No canonical integration or player launch.
+
+The production dependency audit now rejects malformed numeric values before traversing recipes or installations. Unknown discovery gates and other validation errors also prevent traversal. Reports explicitly distinguish an unperformed closure from a completed reachability calculation, avoiding false success counts on invalid input. See [Production dependencies](PRODUCTION_DEPENDENCIES.md). No gameplay, save or catalog/art count change. Task-owned audit helper, tests and review documentation only; no shared integration hotspots.
+
+The active diagnostic session 57160 was confirmed live; latest inspected snapshot year 190, population 16,704, 211 known discoveries and 17 settlements. Its loaded 414-discovery build is older than this worktree. No terminal report exists yet and the 250-year target remains pending. Full-history completion remains unproven and incomplete.
+
+Verification: nine focused cases pass with zero errors/failures/skips/orphans. The first run exposed an outdated assertion expecting traversal after an unknown source error; it was updated to assert the new explicit unperformed state and the suite rerun. The combined live graph audit completes cleanly: 453 identities, 227 routes, 130 reachable civilian recipes and eleven reachable installation types in six production rounds, with `closure_performed: true`. This remains structural evidence under ideal resource/knowledge assumptions, not campaign pacing proof.
+
+
+## Checkpoint 110: refractory ceramics production branch
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `ce16859`. No canonical integration or player launch.
+
+Six individually authored discoveries and six physical recipes connect clay levigation, grog preparation, refractory body trials, refractory brick firing, ceramic crucibles and crucible glass melting. All have causal prerequisites and day zero. Every intermediate feeds another real recipe. Bricks pay for tooling, pots are fractionally consumed per glass batch, and existing glassmaking stays usable without the new chain. See [Refractory ceramics](REFRACTORY_CERAMICS.md) for sources, batch assumptions and unimplemented mineral/firing detail.
+
+Verification: 33 cases pass with zero errors/failures/skips/orphans: refractory branch 3, civilian industry 12, technology tree 9 and production dependency audit 9. New tests manufacture the complete chain, check pot and brick consumption, validate individual contracts and demonstrate the original glass method under pot shortage. Common graph audit reports 459 discoveries, 233 routes and no errors; all 136 civilian recipes and eleven installation types are structurally reachable. Resource/research audit reaches all 459 under its explicit ideal-geography assumptions. These do not prove finite campaign pacing or globally optimal balance.
+
+Task-owned files: refractory discovery module, focused tests and branch documentation. Shared files: civilian product catalog, discovery_system.gd (one module registration; integration hotspot), art queue and this record. No save fields added; old records remain compatible, new IDs require this revision. Government continues to own assigned labor. Totals: 459 authored discoveries, 43 reviewed images, 416 live images queued, 89 military roles and eleven plant types. Full-history scope remains incomplete, including 4,541 further authored identities. The loaded 414-discovery historical diagnostic was confirmed live at the start; no target-completion claim.
+
+
+## Checkpoint 111: refractory ceramics illustrations
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `2226a24`. No canonical integration or player launch.
+
+Ceramic Crucibles and Refractory Brick Firing receive individually generated subject illustrations in the approved paper-and-gouache aesthetic. The first shows forming thick-walled refractory vessels; the second shows loading spaced bricks into an unlit kiln. Both were visually inspected, copied unchanged with matching hashes and explicitly bound to their own discoveries. Exact prompts and source provenance are in `assets/ui/research/paper/REFRACTORY_CERAMICS_PROMPTS.md`.
+
+No gameplay, save or discovery additions. Task-owned files: two subject PNGs/import metadata and prompt record. Shared files: research artwork bindings, prompt index, art manifest and this record. Native player presentation remains unverified. The active historical diagnostic session 57160 was confirmed live at the start; no target completion is claimed. Full-history work remains active and incomplete.
+
+Verification: both headless import passes exited cleanly. All eleven atlas cases pass with zero errors/failures/skips/orphans, covering all 45 explicit subject bindings, texture-size/mipmap requirements and cache limits. Manifest: 459 discoveries, 45 verified illustrations and 414 queued live illustrations. No full-history art-completion claim.
+
+
+## Checkpoint 112: microprogrammed machine control
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `d874a75`. No canonical integration or player launch.
+
+Four authored discoveries add diode control stores, microinstruction sequencing, arithmetic-logic units and microprogrammed machine control. Four real recipes consume existing electronics and converge on an alternative Programmable Controllers assembly. The original controller recipe remains available. Both feed the existing commissioned, staffed and powered programmable workshop. [Microprogramming](MICROPROGRAMMING.md) records the primary architectural source, manufacturing abstractions and limits; no instruction execution, clock model, modern chip fabrication or firmware patching is claimed.
+
+Verification: 33 cases pass with zero errors/failures/skips/orphans: new microprogramming branch 3, civilian industry 12, technology tree 9 and production dependency audit 9. The new manufacturing test checks physical component consumption, installs the resulting controller and demonstrates zero workshop output without electricity followed by actual powered service; it uses a fixture-installed generator. Local method and missing-component guards and the original recipe's continued identity are covered.
+
+Task-owned files: microprogramming module, tests and documentation. Shared files: civilian product catalog, discovery_system.gd (one registration; integration hotspot), art queue and this record. No save fields added; old records remain compatible, new IDs require this revision. Totals: 463 authored discoveries, 140 civilian recipes, eleven plant types, 89 military roles and 45 reviewed images. Modern/future coverage and full-history work remain incomplete, including 4,537 further authored identities. The loaded 414-discovery historical diagnostic was confirmed live at the start; its target completion is not claimed.
+
+Both graph and resource/research audits complete without errors: 463 reachable discovery identities and 237 explicit routes; all 140 civilian recipes and eleven installation types structurally reachable in seven production rounds. Manifest: 45 verified and 418 queued live illustrations. These are ideal-resource structural checks, not measured full-campaign pacing or integration evidence.
+
+
+## Checkpoint 113: physical-production evidence in pacing reports
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `696c650`. No canonical integration or player launch.
+
+Pacing report schema 10 adds compact production/installation summaries and detailed final bottleneck evidence. It distinguishes currently available recipes, retained lines, partial manufacturing work, stocks, commissioned/construction units and current remaining services. Read-only helper and focused tests are task-owned; the existing pacing tool and review documentation are shared. No gameplay or save schema change. See [Pacing production evidence](PACING_PRODUCTION_EVIDENCE.md).
+
+Two focused cases pass with zero errors/failures/skips/orphans, covering real partial/completed production without stock/queue/operation mutation and suppression of stale operating services. A current 463-discovery run reaches its requested 400-day target under the ordinary daily simulation, with no script errors. Its zero civilian production and installation counters are early-run observations, not proof of later capability adoption. All counts remain 463 discoveries and 45 images.
+
+The existing schema-9 diagnostic session 57160 was confirmed live at the start; latest inspected year 202, population 24,320, known discoveries 226, settlements 17. It remains on its loaded 414-discovery revision and does not inherit this reporting change. Its 250-year target and full-history completion are not claimed.
+
+The previous reporting script at 696c650 also completed 400 days on the same current game code. Entire reports match after excluding new production fields, schema and timing/rate values. Compact comparison evidence is in PACING_PRODUCTION_PARITY.json; full local reports remain under artifacts/technology-pacing. This establishes unchanged behavior for this short seeded run, not all possible actors or later production states.
+
+
+## Checkpoint 114: Diode Control Stores illustration
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `080fe65`. No canonical integration or player launch.
+
+Diode Control Stores receives a separately generated subject illustration of technicians assembling discrete components on a wire grid. The built-in output was visually inspected for readable hardware and the approved matte pigment/fibrous ivory aesthetic, then copied unchanged with matching source and destination hashes. It is an illustrative assembly scene, not a circuit schematic. Exact prompt and provenance are in `assets/ui/research/paper/DIODE_CONTROL_STORES_PROMPT.md`.
+
+No gameplay or save change. Task-owned PNG/import metadata and prompt; shared research binding, art manifest, prompt index and review record. Native player presentation remains unverified. Full-history work remains active and incomplete. Historical diagnostic session 57160 was confirmed live at the start; no terminal result is claimed.
+
+Verification: both headless imports exit cleanly; all eleven atlas cases pass with zero errors/failures/skips/orphans, covering 46 explicit bindings and the shared texture/cache constraints. Runtime image uses the 768-pixel limit and mipmaps. Manifest: 463 live discoveries, 46 verified illustrations and 417 queued live images. Latest inspected historical snapshot: year 208, population 29,343, 234 known discoveries, 17 settlements.
+
+
+## Checkpoint 115: three additional combined-arms research practices
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `2208ffc`. General campaign design read before military work. No canonical integration or player launch.
+
+Three authored discoveries add Skirmisher–Infantry Screens, Engineer–Infantry Security and Infantry–Antitank Coordination. Each enables formation-held rehearsal with actual supporting troops, and a bounded defense effect only against specified threats. Research alone has no immediate effect; removing support removes protection. Existing gradual preparation, ammunition/equipment/condition dependence, replacement dilution and aggregate combat resolution remain in use. No direct cohort controls, free troops, extra unit archetypes or automatic breaches. See [Expanded combined arms](EXPANDED_COMBINED_ARMS.md).
+
+Verification: 48 cases pass with zero errors/failures/skips/orphans: combined-arms doctrine 13, military development 16, military training accounting 10 and technology tree 9. The all-doctrines scenario table now covers all six rules and asserts its size matches the rule set. Each case checks no immediate effect, actual rehearsed effect, an unrelated enemy receiving no benefit and support removal. Existing combat-loss, replacement dilution, current-civilization adoption, preparation integration and save round-trip tests also pass.
+
+Both graph/resource audits complete cleanly: 466 authored discoveries, 240 explicit routes, all 140 civilian recipes and eleven installation types structurally reachable. Manifest: 46 reviewed images, 420 queued live images. These audits are ideal-resource checks, not full-campaign acceptance. Shared files: doctrine rules/catalog and its test suite, art queue and review record; branch documentation is task-owned. No integration-hotspot edits or save fields added. New doctrine IDs require this revision; older saves remain compatible. Role count remains 89. Full-history scope remains incomplete, including 4,534 additional authored identities. Diagnostic session 57160 was confirmed live at the start; no target-completion claim.
+
+
+## Checkpoint 116: autonomous supporting-arm recruitment
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `abb4c00`. No canonical integration or player launch.
+
+The land controller can now choose a bounded supporting contingent for an adopted combined-arms doctrine instead of always sending every recruit to its preferred unit. Existing home-preparation forces and queued trainees count toward the support ratio. Actual recruits, local training gates and supplied/feasible equipment constrain the order. The combat and recruitment calculations share the same support ratio constant. No troops, equipment or tactics are granted; all changes go through ordinary production and training submissions. See [AI combined-arms recruitment](AI_COMBINED_ARMS_RECRUITMENT.md).
+
+Task-owned helper, focused tests and documentation. Shared existing controller, doctrine ratio constant and review record; no integration hotspots or save fields changed. Prior saves remain compatible. Catalog counts remain 466 discoveries, 89 roles and 46 reviewed images. Full-history completion remains unproven and incomplete. Historical diagnostic session 57160 was confirmed live at the start; it retains its older controller code and no target completion is claimed.
+
+Verification: 42 cases pass with zero errors/failures/skips/orphans: supporting-arm recruitment 4, doctrine 13, civilization strategy 15 and military training accounting 10. The new controller test queues 30 skirmishers for 60 spearmen, leaves the other 70 recruits unassigned, preserves total mobilized population and inventory, and suppresses a duplicate support order once trainees are committed. Further checks cover existing/pending support, recruit caps, knowledge/adoption, supply, training policy and unrelated or absent target forces. These do not establish full-campaign composition quality or remote reinforcement delivery.
+
+
+## Checkpoint 117: physical home reinforcement for combined-arms armies
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `8d364f2`. No canonical integration or player launch.
+
+Trained home supporting troops can now join a field army stationed at home through an ordinary validated order. The monthly controller requests a bounded doctrinal shortfall. The existing proportional detachment path now accepts an optional unit filter, preserving its default behavior. Personnel, issued equipment and ammunition move together; commander, location, army identity, casualty pools and formation doctrine remain accounted for. No remote teleportation, provisions, recruits or battlefield orders are generated. See [Home army reinforcement](HOME_ARMY_REINFORCEMENT.md).
+
+Task-owned helper, focused tests and documentation. Shared controller and ordinary order adapter; military_campaign.gd is an integration hotspot with only the optional detachment filter added. No save fields added and old records remain compatible. Existing occupation/army detachment callers retain the empty-filter default. Counts remain 466 discoveries, 89 roles and 46 reviewed images. Full-history completion remains unverified and incomplete. The historical diagnostic session 57160 was confirmed live at the start and retains its older loaded code; no target-completion claim.
+
+Verification: 114 cases pass with zero errors/failures/skips/orphans: home reinforcement 6, support recruitment 4, doctrine 13, civilization strategy 15, command hierarchy 61, occupation governance 5 and city force capacity 10. New checks cover the real order and monthly-controller paths, partial support transfer with personnel/equipment/ammunition conservation, unchanged commanders/casualty pools, unique destination IDs, movement/transport/battle rejection, invalid counts, actual post-attachment doctrine benefit and owned-save round trip. The first save assertion exposed a fixture-created home force missing the normal zero exercise-bonus field; the fixture was normalized and rerun cleanly. No player campaign or remote convoy behavior is claimed.
+
+
+## Checkpoint 118: physical coke, pig iron and finery production
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `76ce41b`. No canonical integration or player launch.
+
+Existing Coke Firing and Continuous Blast Furnace discoveries now unlock material-consuming production recipes instead of unpaid global modifiers. One new authored Finery Forges discovery reconverges pig iron on existing wrought-iron uses. The ordinary bloomery route remains viable. See [Coke and finery](COKE_AND_FINERY.md) for quantities, process sources and simulation limits.
+
+Counts: 467 live authored discoveries, 143 civilian recipes, 11 plant types, 89 military roles and 46 reviewed images. 4,533 discovery identities and 4,954 images remain against the 5,000 target; 421 live images are queued. The full overhaul remains incomplete. Historical diagnostic session 57160 was again confirmed live and retains its older loaded code; no new target completion claimed.
+
+Verification: 49 cases pass with zero errors/failures/skips/orphans: finery 3, civilian industry 12, technology tree 9, production dependency audit 9 and research materials 16. Graph audit reports 467 discoveries, 241 explicit learning routes and no errors; all 143 recipes and 11 plants structurally reachable in seven rounds. Resource/research audit reaches all 467 under its documented ideal-resource assumptions. The first new chain test used target stock 1 despite an existing wrought-iron stock; it was corrected to request an actual additional batch and all tests rerun cleanly. Production logic was not changed to accommodate the fixture.
+
+Task-owned authored knowledge, tests and document. Shared civilian recipes, resource knowledge catalog, graph audit, art manifest and status record; discovery_system.gd hotspot has a single catalog append. No save fields changed; normal generic stocks/queues carry new materials. Existing known coke/furnace discoveries lose their former global modifiers, an intentional balance change for integration review. No retroactive stocks granted. Continuous furnace operation, charcoal manufacture, fuel chemistry/byproducts, long-term balance and native visual acceptance remain unimplemented or unverified.
+
+
+## Checkpoint 119: prepared charcoal and coal-independent furnace branching
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `b9540ba`. No canonical integration or player launch.
+
+Two authored discoveries and five recipes make charcoal a separately manufactured fuel, introduce retort investment and measured bloomery charges, and offer charcoal alternatives for pig iron and finery production. The existing charcoal discovery gains a physical recipe. A third blast-furnace learning route removes the accidental coal dependency while preserving refractory, lifting, ironworking and actual material requirements. The shared material-evidence predicate now accepts an authored alternative stock, with matching evidence scoring and player explanations. See [Prepared charcoal](CHARCOAL_SUPPLY.md).
+
+Verification: 53 cases pass with zero errors/failures/skips/orphans: charcoal supply 4, finery 3, civilian industry 12, technology tree 9, research materials 16 and production dependency audit 9. Tests include real charcoal-to-iron production, retort tooling payment, absent-input guards, coal-free furnace eligibility only at the actual charcoal threshold, missing-material disclosure, consignment suppression, production without coal, and unchanged legacy research routes. Graph audit finds no errors across 469 discoveries and 244 explicit routes; all 148 recipes and 11 plants structurally reachable in seven rounds. Ideal-resource research audit reaches all 469. Neither structural audit proves campaign throughput or full-history balance.
+
+Counts: 469 discoveries, 148 civilian recipes, 11 plant types, 89 military roles and 46 reviewed images. 4,531 identities remain against the 5,000 discovery target; 423 live images are queued and 4,954 total images remain. Full overhaul incomplete. Historical session 57160 was revalidated live at the start; its older code does not inherit these changes and no terminal result is claimed.
+
+Task-owned knowledge, tests and documentation. Shared civilian recipes, resource/finery definitions, graph audit, art manifest and status; discovery_system.gd hotspot includes the catalog append, charcoal contract and alternative-stock checks/disclosure. No save fields changed. Existing known discoveries remain valid; no stock grants. Research materials remain an evidence basis rather than consumed experimental batches. Fuel quality, emissions, byproducts, sustained furnace operation and campaign economic balance remain unimplemented or unverified.
+
+
+## Checkpoint 120: charcoal and coke production artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `527cd48`. No canonical integration or player launch.
+
+Generated two subject-specific illustrations through the built-in image tool using apprentice_contracts.png as the inspected style reference. Charcoal Production shows a covered mound and separate cooled fuel collection; Coke Firing shows closed/open brick ovens, a rake and coal cart. Both were visually reviewed for subject and the approved matte paper-and-gouache aesthetic, then copied unchanged into the project and bound to their existing technology identities. Coke porosity is exaggerated for illustration; neither image is an operating diagram. Exact prompts and source paths are recorded in assets/ui/research/paper/CHARCOAL_PROMPT.md and COKE_FIRING_PROMPT.md.
+
+Original PNGs are 1254 square. Runtime imports use size limit 768 and mipmaps, preserving the existing full-frame presentation and bounded cache. Source/workspace byte equality verified: charcoal SHA256 a3dbf605f08b14c760c8481a3c10d6b70c067771f9ffac20a3dd05990bcad7ea; coke SHA256 8082943a2e29f770716a4eb85f42e6e23142cd457562aee56b38189e198ce3e0. All owned headless import processes exited successfully. No native player presentation is claimed.
+
+Manifest: 469 discoveries, 48 reviewed images, 421 queued live images. Full target still lacks 4,531 authored identities and 4,952 images. Recipe, plant and role counts unchanged at 148, 11 and 89. Full overhaul incomplete. Historical session 57160 was revalidated live at the start; latest inspected snapshot year 227, population 53,197, 264 known discoveries and 17 settlements. It retains its older code and has not produced a terminal target-completion report.
+
+Task-owned images, import metadata and prompt records. Shared research visual bindings, prompt index, art manifest and status. No simulation or save fields changed.
+
+Verification: all 11 research-visual atlas cases pass with zero errors/failures/skips/orphans, including all bound textures, square runtime limits, mipmaps, full-frame presentation, cache bounds and hidden-information behavior. Manifest export reports 48 verified bindings with no missing assets. These headless checks do not establish native player visual acceptance.
+
+
+## Checkpoint 121: physical container manufacture and thermal canning
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `5c25f57`. No canonical integration or player launch.
+
+Seven authored discoveries and six manufacturing recipes connect refined tin, steel sheet, tinplate, can sets, seaming heads and retorts to a commissioned cannery. The operating plant consumes actual cans, coal and water and reserves Crafting operators. Its finite daily capacity converts surplus perishables to existing preserved food with loss, retaining a conservative three-day demand reserve. Ordinary daily food processing consumes the capacity; learning alone adds neither food nor a global storage bonus. See [Thermal canning](THERMAL_CANNING.md).
+
+Verification: 49 cases pass with zero errors/failures/skips/orphans: canning 5, civilian industry 12, technology tree 9, technology operations 14 and production dependency audit 9. New tests cover real component manufacture, paid commissioning, finite food/input/worker accounting, interruption and scope guards, ordinary food-day conversion and owned save round trip. Initial authoring validation caught the missing explicit operating_plants link; this metadata was added. The ordinary-day test initially assumed plants would be preserved first, but the actual harvest supplied meat and the intended priority selected it; the test now checks total converted input across types. Debug prints removed. The complete rerun passed.
+
+Graph audit: 476 discoveries, 251 explicit routes, no errors; 154 civilian recipes and 12 operating plant types structurally reachable in seven rounds. Ideal-resource research audit reaches all 476. Counts also include 89 military roles and 48 reviewed images; 4,524 discovery identities and 4,952 images remain, including 428 queued live images. Full overhaul incomplete. Historical session 57160 was revalidated live twice this turn and retains its older loaded code; no terminal result or full-history pacing claim.
+
+Task-owned canning knowledge/helper, tests and document. Shared civilian recipes, food processing, operation definitions/save bounds, graph audit, art manifest and status. discovery_system.gd hotspot has one catalog append. No new top-level save fields: stocks and plant/service records use existing structures; older saves remain compatible without stock grants. New service validation limit is 10,000 and conservative worker-record ceiling 24,000. Autonomous cannery investment, demand-sensitive preparation, detailed processing chemistry and full-campaign economic/provisioning acceptance remain outstanding.
+
+
+## Checkpoint 122: autonomous cannery investment
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `4a1755e`. No canonical integration or player launch.
+
+The monthly civilian controller now evaluates visible perishable surplus, current storage/spoilage conditions, assigned workers, adopted methods and a nominal month of operating supplies before commissioning one cannery. Missing manufactured cans or equipment use the ordinary recursive supply/production path. Raw operating shortages block the investment, as do insufficient surplus, poor adoption, inadequate labor, pending projects, a paused cannery and existing emergency guards. See [AI cannery investment](AI_CANNERY_INVESTMENT.md).
+
+Verification: 35 cases pass with zero errors/failures/skips/orphans: cannery investment 5, physical canning 5, scientific instrument investment 5, civilian production planning 8 and power investment 12. Tests cover actual controller payment/commissioning, duplicate suppression, manufactured can and retort orders, raw shortages, reserve/spoilage/refrigeration and labor/adoption constraints, pause/scope/emergency guards, plus physical canning and saved food/input continuity. These do not prove campaign profitability or future harvest availability.
+
+Task-owned planner, focused tests and document; shared controller and canning/status documentation. No integration hotspots or save fields changed. Existing records remain compatible. Counts unchanged: 476 discoveries, 154 recipes, 12 plant types, 89 roles and 48 reviewed images. The full 5,000-discovery/history/artwork overhaul remains incomplete. Historical diagnostic session 57160 was confirmed live at the start and retains its older loaded controller; no completed target claim. Demand-sensitive plant operation and campaign-level investment economics remain outstanding.
+
+
+## Checkpoint 123: cannery operation follows current food demand
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `4b8d36c`. No canonical integration or player launch.
+
+A shared read-only stock calculation now constrains cannery investment, operating capacity and conversion to perishable food above the three-day reserve. Daily operation scales cans, fuel, water and operators before spending; a zero-surplus cannery remains enabled but idle and reports its food shortage. Later stock replenishment resumes operation automatically. See [Cannery demand](CANNERY_DEMAND.md).
+
+Verification: 35 cases pass with zero errors/failures/skips/orphans: physical canning 8, investment 5, operations 14 and civilian production planning 8. New checks demonstrate no operating expenditure or workers while idle, resumption after food arrives, proportional supplies and 0.6 operators for three input units, 2.7 preserved output, and reserve protection before supplies are spent. Existing commissioning, interruption, scope, food-day and save-round-trip cases remain passing.
+
+Task-owned capacity helper, focused extensions and documentation. Shared canning helper/planner, operating service/status and review records. No integration hotspots, save fields, research identities or recipe changes. Counts remain 476 discoveries, 154 recipes, 12 plants, 89 roles and 48 reviewed images. Full overhaul incomplete. Historical session 57160 was confirmed live at the start and retains older loaded code; no terminal target completion claimed.
+
+Operation reviews pre-harvest stock. Later drying/smoking or stock changes can still leave prepared capacity unused, while newly harvested food cannot enlarge that day's prepared capacity. Aggregate fractional batches, future scheduling and long-campaign economics remain limitations; no native player presentation or canonical integration is claimed.
+
+
+## Checkpoint 124: tinplate and retort artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `722410e`. No canonical integration or player launch.
+
+Two built-in image-generation calls produced distinct Tinplate Coating and Food Retorts illustrations with apprentice_contracts.png as the inspected style reference. Visual review confirmed matte earth pigment, broad fibrous ivory, human manufacturing activity, coating bath/rack and an open retort being loaded. These are illustrative scenes rather than technical operating instructions. Source outputs were copied unchanged to project assets and bound to the matching discoveries. Exact prompts/source paths are recorded in assets/ui/research/paper/CANNING_ART_PROMPTS.md.
+
+Source/workspace byte identity verified. Both PNGs are 1254 square; imports use 768 size limit and mipmaps. SHA256: tinplate_coating 3429359ad82b7544156984abd4ff5717aafbbd3be8de3fca96ccb794c48da3de; food_retorts 3ca01915669e1b43dff1173972f27010a0f2cb74430bc9efd39fd67f23869b2d. Owned headless import processes exited successfully. No native player presentation claim.
+
+Task-owned assets, import metadata and prompt record. Shared visual bindings, prompt index, manifest and status. No simulation/save changes. Counts: 476 discoveries, 154 recipes, 12 plants, 89 roles, 50 reviewed images. 426 live images remain queued; full target lacks 4,524 discovery identities and 4,950 images. Full overhaul incomplete. Historical session 57160 was revalidated live; latest inspected snapshot year 233, population 64,309, 274 known discoveries, 17 settlements. No completed target or full-history claim.
+
+Verification: all 11 research-visual atlas cases pass with zero errors/failures/skips/orphans. The suite checks all current bindings, texture limits and full-frame presentation. Manifest export records 50 verified assets and 426 queued, with no missing bound assets. This is headless UI/import verification, not native player acceptance.
+
+
+## Checkpoint 125: terminal 234-year diagnostic and current-code follow-up
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `e1278e0`. No canonical integration or player launch.
+
+The existing session 57160 returned terminal exit 0. Its old 414-discovery/schema-9 run reached 85,572 days (234.44 years) and hit the four-hour wall budget before its 91,250-day target. Full target not reached; no crash or campaign completion claimed. Compact terminal evidence, original artifact hash and explanatory analysis are recorded in [Pacing profiling](PACING_PROFILING.md) and pacing/catalog-414-wall-limited-234-years.json. The raw report remains in artifacts. Secondary settlements account for 66.35% of measured outer-stage work; city trade another 15.49%. Nested timings must not be counted twice. Concurrent tests and intervening code changes prevent a controlled performance comparison.
+
+A new run was launched only after the old handle returned terminal. Session 52497, source e1278e0, current catalog 476/schema 10, seed 91420, target 91,250 days, wall cap 14,400 seconds. It uses the current cache correction and physical-production reporting. Its first annual snapshot emitted with production evidence and its handle was revalidated live. Launch metadata is saved in pacing/catalog-476-250-run.json. No completed target or improvement claim yet. Do not restart merely because an observation times out. The longest completed requested horizon remains the earlier 100-year test.
+
+This turn prioritized terminal evidence and the next current-code diagnostic over the initially announced shipbuilding investigation; no naval implementation edits were made. Task-owned evidence/launch record and shared profiling/status documents only. No game or save fields changed. Counts remain 476 discoveries, 154 recipes, 12 plants, 89 roles and 50 reviewed images; full overhaul incomplete, including 4,524 identities, 4,950 images and full-history/multi-civilization acceptance.
+
+
+## Shipbuilding batch: sixteen practices and an actual naval production chain
+
+Implementation worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `b4d9980`. This is isolated worker work, not an integrated player release.
+
+[Shipbuilding](SHIPBUILDING.md) adds sixteen authored discoveries and seventeen component recipes, connecting hulls, sailmaking, rope and rigging, masts and paid launch tooling to four sailing vessel roles. The controller follows feasible upstream production through ordinary orders. Heavy warships require the separate heavy frame-first hull output. Retooling now pays naval tooling instead of bypassing its material requirement.
+
+Validation: five connected shipbuilding cases and nineteen existing persistent-production cases pass, with zero errors/failures/skips/orphans. The graph audit reports 492 discoveries, 267 explicit route records, 171 civilian recipes, 12 plants, and zero graph or structural production errors. The transport test manufactures its components, produces its equipment and commissions twelve actual crew places. It uses an isolated harbor and supplied upstream materials; it is not a naturally played campaign. Testing was limited to this batch and its modified production adapter, without another broad regression sweep.
+
+No save schema change. Existing saved ship jobs retain their stored recipes and partial work; newly created or deliberately retooled lines use component costs. No changes to crew roles, general-led control or combat statistics. Shared integration conflicts: the catalog append in discovery_system.gd, civilian_industry.gd, civilization_controller.gd, joint_force_catalog.gd and persistent_production.gd; no canonical merge or player launch.
+
+Current totals: 492 of 5,000 discoveries; 171 civilian recipes; 12 plants; 89 military roles; 50 reviewed images. Remaining: 4,508 discovery identities, 442 images for currently live discoveries, and 4,950 images against the final target. Full 2,500–3,000-year progression and full-world military/economic acceptance remain unproved. Session 52497 was polled live during implementation; its loaded 476-discovery run had reached year 86 in the last inspected log and continues independently. It does not include this shipbuilding batch. The longest completed requested horizon remains 100 years.
+
+
+## Shipbuilding imagery: four distinct illustrations
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `a744aee`. No canonical integration or player launch.
+
+Added individually reviewed paper-and-gouache imagery for Rope Laying, Sail Seaming, Carvel Frame Construction and Clinker Shell Construction. The scenes distinguish twisted rope strands, stitched sail edges, exposed supporting frames and overlapping hull strakes. All use the inspected Apprentice Contracts style reference, warm fibrous ivory, muted pigment, simplified workers and open upper space. The built-in generator produced one asset per call. Original image files are copied unchanged and hash-verified; complete prompts and original source paths are in assets/ui/research/paper/SHIPBUILDING_ART_PROMPTS.md.
+
+The four cards have explicit individual bindings, full-frame presentation and 768px runtime texture limits with mipmaps. Discovery and production behavior are unchanged. Save compatibility is unchanged. Shared integration conflict is scripts/hud/research_visuals.gd plus the art manifest. This is headless asset verification and visual review of generated originals, not native player acceptance.
+
+The manifest now reports 492 live discoveries, 54 reviewed images and 438 live images queued. The full target still lacks 4,508 discovery identities and 4,946 images, plus multi-millennial progression, full-world acceptance and canonical integration.
+
+Verification: all 11 research visual atlas cases pass, with zero errors/failures/skips/orphans; all current bindings are checked. Both import processes exited without script errors. The manifest export reports no missing bound assets. No broad gameplay regression was repeated for these asset-only changes.
+
+
+## Cartwright batch: wheel and harness production feeding actual delivery
+
+Implementation worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `b2e840e`. No canonical integration or player launch.
+
+[Cartwright production](CARTWRIGHT_PRODUCTION.md) adds sixteen distinct discoveries and seventeen workshop recipes. Solid and spoked wheel branches reconverge on fitted carts; sleeves and iron tyres offer a separately costed assembly method. New cart lines and legacy batch orders require physical kits. The controller follows actual military cart demand through ordinary paid production, and finished carts improve the existing staffed delivery calculation. No vehicle, workforce or global delivery bonus is granted by discovery.
+
+Save schema unchanged. Already reserved batches and retained persistent recipes remain intact; very old unreserved batches reconstruct their historical timber/fiber basis instead of fabricating kit refunds. Shared integration conflicts: discovery_system.gd, military_campaign.gd, civilian_industry.gd and civilization_controller.gd. The general-led control model is unchanged.
+
+Graph and ideal-resource manufacturing audit: 508 discoveries, 284 explicit route records, 188 recipes and 12 plants, with no graph or structural manufacturing errors. All results are structural or isolated-fixture evidence, not proof of natural full-history progression. The focused production fixture starts with supplied upstream cloth, rope, iron and treenails.
+
+Current totals: 508/5,000 discoveries, 188 civilian recipes, 12 plants, 89 military roles, 54 reviewed images. Remaining: 4,492 discovery identities, 454 illustrations for live discoveries and 4,946 images against the full target, plus 2,500–3,000-year progression proof, full-world acceptance and canonical integration. The separate long diagnostic loads the earlier 476-discovery source and cannot verify this batch.
+
+Validation result: six cartwright cases and nineteen existing persistent-production cases pass with zero errors, failures, skips or orphans. Graph and manifest tools exited successfully. These focused checks cover the changed component chain, adapter and save normalization; they do not establish full-world pacing or integration.
+
+
+## Machine-tool batch: twenty-four practices and retained setup equipment
+
+Implementation worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `a0d3653`. No canonical integration or player launch.
+
+[Machine-tool production](MACHINE_TOOL_PRODUCTION.md) adds twenty-four discoveries and recipes for reference surfaces, screw feeds, workholding, turning, drilling, milling, indexing, jigs, gauges and complete tool sets. Basic tools are now paid motor-line equipment and a motor-driven workshop installation requirement. Three advanced workshop types require precision tools. Manual construction of the basic equipment avoids a circular electricity prerequisite.
+
+The constrained full-chain test exposed repeated loss of paid setup tooling when a single workshop changed products. Retooling now retains those tools on the same line, charges only missing quantities and never credits installed equipment as warehouse materials. The civilian planner accounts for the tools on its eligible completed line. An optional per-job installed_tooling ledger validates and preserves this state; old jobs can establish only their current recorded paid setup, not lost historical equipment. Existing installations and partial production remain intact.
+
+Validation: seven machine-tool, nineteen persistent-production and eight civilian supply-planner cases pass after the retention change. Fourteen operating-plant and three microprogramming cases passed the new installation costs earlier in the batch; they were not rerun for the subsequent retention-only change. All report zero errors/failures/skips/orphans. Full-chain fixtures manufacture all twenty-four new outputs, commission physical tools and require power/operators for service. They are supplied, isolated fixtures, not a natural industrial campaign.
+
+Graph/ideal-resource audit: 532 discoveries, 308 explicit route records, 212 recipes, 12 plants; zero structural errors. Current totals: 532/5,000 discoveries, 89 military roles and 54 reviewed images. Remaining: 4,468 discovery identities, 478 live illustrations and 4,946 target images, plus full-history/full-world acceptance and canonical integration. The separately running 476-discovery diagnostic was polled live this turn and its last inspected annual snapshot was year 153, 167 known discoveries, 6,183 population and 17 settlements; it had no active civilian production lines or installed plants in that snapshot. It cannot establish uptake of this new batch or completed 2,500–3,000-year progression.
+
+Shared integration conflicts: discovery_system.gd, civilian_industry.gd, technology_operations.gd, persistent_production.gd and civilian_production_planner.gd, plus the explicit precision-tool fixture in test_microprogramming.gd. No general, government, terrain or canonical player changes.
+
+
+## Machine-tool illustration batch — 24 subjects
+
+All 24 discoveries from machine-tool production commit d3712b0 now have individual paper-and-gouache artwork, from three-plate lapping and screw cutting to basic machine shops and precision toolrooms. Built-in generation used the established apprentice-contracts image as style reference; each output was visually reviewed and copied unchanged into assets/ui/research/paper. MACHINE_TOOL_ART_PROMPTS.md records every prompt, original path, final asset path and SHA-256. Imports use 768-pixel runtime limits and mipmaps; full-resolution originals remain in the project.
+
+Focused verification: both headless imports exited successfully without reported errors; the research visual atlas passed all 11 cases with zero errors, failures, skips or orphans. The regenerated live manifest reports 532 discoveries, 78 reviewed images and 454 queued live images. No broad gameplay regression was repeated for this artwork-only batch.
+
+Remaining against the full objective: 4,468 discovery identities and 4,922 illustrations; full 2,500–3,000-year progression and canonical integration remain unproven. The independent catalog-476 diagnostic was confirmed live and reached year 182 during this batch; it does not include subsequent machine-tool gameplay changes and is not a completed 250-year result.
+
+Handoff: codex/technology-implementation, original base 940d5a2ad848d9f45b8d98825cd5219a3eda83e9. Shared integration files are scripts/hud/research_visuals.gd and the art catalog. This batch changes no simulation or save format. Native combined-game presentation remains pending designated integration; no player/editor session was launched or interrupted.
+
+## Fastener subject-art batch
+
+All 24 fastener, spring and rivet subjects now have reviewed paper-and-gouache illustrations, bringing the live art catalog to 102 reviewed and 454 queued across 556 discoveries. Full prompts, generated source paths, final asset links and byte-preservation hashes are in `assets/ui/research/paper/FASTENER_ART_PROMPTS.md`. The nut-bore image was corrected to a single bore per blank; split-pin locking uses a replacement side view with a transverse pin.
+
+The 11 research-atlas cases pass with zero errors, failures, skipped cases or orphan nodes (`/tmp/tt-fastener-art-atlas.log`). Both headless import passes exit successfully; final runtime imports are limited to 768 pixels with mipmaps. The live manifest reports full-overhaul completion false. No gameplay regression suite was repeated for this asset batch.
+
+This batch changes subject assets, import metadata, explicit visual bindings and progress records only; no save fields change. Integration must resolve `scripts/hud/research_visuals.gd` alongside any other subject-art work and retain all approved bindings. Canonical integration and native player presentation remain unverified. The independent catalog-476 pacing diagnostic was confirmed live as session 52497; it loads older code and does not validate later production additions.

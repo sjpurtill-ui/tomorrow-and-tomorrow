@@ -563,7 +563,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	initialize()
 	if WorldSimulation.state.resource_settlement_id=="": refresh_policy_lifecycle()
 	WorldSimulation.state.synchronize_population_allocations()
-	var previous: Dictionary = WorldSimulation.state.simulation_metrics.duplicate(true)
+	# Previous-day calculations and trends read scalar metrics only. Keep their
+	# snapshot without recursively copying forecasts and demographic breakdowns.
+	var previous: Dictionary = WorldSimulation.state.simulation_metrics.duplicate()
 	var traveling:=bool(context.get("traveling",WorldSimulation.state.convoy_traveling))
 	WorldSimulation.state.convoy_traveling=traveling
 	var population := maxf(1.0,WorldSimulation.state.population_exact)

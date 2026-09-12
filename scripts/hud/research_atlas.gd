@@ -45,6 +45,7 @@ var detail_selected:=""
 var leader_options:Array=[]
 var detail_revision:=""
 var narrow_details:=false
+var announcements:OptionButton
 var detail_back:Button
 func _ready()->void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -56,6 +57,13 @@ func _ready()->void:
 	Art.label(header,"RESEARCH · PEOPLE & IDEAS",23,T.INK).size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	Art.button(header,"Research staffing",_staffing)
 	var close:=Art.button(header,"×",_close);close.custom_minimum_size.x=38;close.tooltip_text="Close · Escape or click outside"
+	var notification_row:=HBoxContainer.new();box.add_child(notification_row)
+	Art.label(notification_row,"Discovery pauses",12,T.TEXT_SOFT)
+	announcements=OptionButton.new();notification_row.add_child(announcements)
+	for spec:Array in [["milestones","Major milestones"],["all","Every discovery"],["quiet","Digest only"]]:
+		announcements.add_item(spec[1]);announcements.set_item_metadata(announcements.item_count-1,spec[0])
+		if GameState.research_notification_mode==spec[0]:announcements.select(announcements.item_count-1)
+	announcements.item_selected.connect(func(index:int)->void:GameState.research_notification_mode=String(announcements.get_item_metadata(index)))
 	var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",8);box.add_child(navigation)
 	for spec:Array in [["active","Being researched"],["tree","Knowledge tree"],["known","Established"]]:
 		var id:=String(spec[0]);tabs[id]=Art.button(navigation,spec[1],func()->void:set_view(id))
@@ -124,6 +132,9 @@ func refresh(refit:bool)->void:
 	var active:=0;var staffed:=0;var known:=0;var people:Dictionary={}
 	for item:Dictionary in all_records:
 		if item.known:known+=1
+		if item.known:
+			var operations:VBoxContainer=preload("res://scripts/hud/technology_operations_panel.gd").new()
+			operations.subject=String(item.id);detail_body.add_child(operations)
 		var assignment:Dictionary=item.assignment
 		if assignment.get("active",false):active+=1;staffed+=1 if Art.team(item)>0 else 0
 		var lead:=Art.lead(item)
@@ -218,6 +229,9 @@ func select(id:String,open_detail:bool=false)->void:
 		Art.label(detail_body,Art.name_for(item.domain).to_upper(),11,Art.color(item.domain))
 		Art.label(detail_body,item.name,21,T.INK,true)
 		Art.label(detail_body,Art.status(item),13,Art.color(item.domain))
+		if item.exposed:
+			var definition:Dictionary=WorldSimulation.discovery.discovery_definition(String(item.id))
+			if not definition.get("preservation_profile",{}).is_empty() or not definition.get("training_profile",{}).is_empty() or not definition.get("prospecting_profile",{}).is_empty() or not String(definition.get("medical_method","")).is_empty() or not definition.get("agronomy_profile",{}).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),11,T.TEXT_SOFT,true)
 		var assignment:Dictionary=item.assignment
 		if not assignment.is_empty():
 			var leader:Dictionary=assignment.leader
@@ -243,7 +257,31 @@ func select(id:String,open_detail:bool=false)->void:
 		Art.label(detail_body,String(item.get("pathway_description","")),13,T.TEAL,true)
 		for route:Dictionary in item.get("pathways",[]):
 			Art.label(detail_body,("● " if bool(route.ready) else "○ ")+String(route.label),12,T.GREEN if bool(route.ready) else T.MUTED,true)
+			var requirements:Array[String]=[]
+			for req:String in route.get("requires_all",route.requires):requirements.append(_foundation_name(req))
+			for group:Array in route.get("requires_any",[]):
+				var choices:Array[String]=[]
+				for req:String in group:choices.append(_foundation_name(req))
+				requirements.append("("+" or ".join(choices)+")")
+			if not requirements.is_empty():Art.label(detail_body,"Requires "+" + ".join(requirements),11,T.TEXT_SOFT,true)
+			if float(route.get("progress_multiplier",1.0))!=1.0:Art.label(detail_body,"Research pace: %.2f× local baseline" % float(route.progress_multiplier),11,T.TEXT_SOFT,true)
 		Art.button(detail_body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
+		if item.exposed and not item.known and preload("res://scripts/reverse_engineering.gd").available():
+			for specimen:String in preload("res://scripts/reverse_engineering.gd").specimens(String(item.id)):
+				var subject:=String(item.id)
+				var terms:Dictionary=preload("res://scripts/reverse_engineering.gd").quote(subject,specimen)
+				var examine:=Button.new();examine.clip_text=true;examine.text="Consume 1 example for study: "+String(preload("res://scripts/research_specimens.gd").definition(specimen).output)
+				examine.disabled=terms.has("error");examine.tooltip_text=String(terms.get("message",terms.get("error","")))
+				examine.pressed.connect(func()->void:
+					var result:Dictionary=preload("res://scripts/reverse_engineering.gd").begin(subject,specimen)
+					examine.tooltip_text=String(result.get("message",result.get("error","")));examine.disabled=true
+				)
+				detail_body.add_child(examine)
+		var license_note:=preload("res://scripts/research_licenses.gd").describe(String(item.id))
+		if not license_note.is_empty():Art.label(detail_body,license_note,12,T.TEXT_SOFT,true)
+		if preload("res://scripts/hud/research_purchase_panel.gd").visible_for(String(item.id), bool(item.exposed), bool(item.known)):
+			var purchase:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
+			purchase.subject=String(item.id);detail_body.add_child(purchase)
 		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",10,T.MUTED)
@@ -269,3 +307,8 @@ func step(direction:int)->void:
 	for i in records.size():
 		if records[i].id==selected_id:index=i;break
 	select(String(records[posmod(index+direction,records.size())].id));plot.center_selected()
+
+func _foundation_name(id:String)->String:
+	for previous:Dictionary in all_records:
+		if previous.id==id and previous.exposed:return String(previous.name)
+	return "unexplored foundation"

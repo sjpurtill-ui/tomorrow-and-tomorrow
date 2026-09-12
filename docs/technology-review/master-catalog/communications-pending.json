@@ -1,0 +1,1738 @@
+{
+  "status": "implementation_pending_behavioral_verification",
+  "entries": [
+    {
+      "id": "agreed_signal_codes",
+      "name": "Agreed Signal Codes",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "oral_epics",
+        "tallies"
+      ],
+      "requires_all": [
+        "oral_epics",
+        "tallies"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Agreed Signal Codes",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A community agrees which distinct visible or audible signs denote particular messages; the shared code must be learned at both ends.",
+      "effects": {},
+      "foundation_for": [
+        "timed_signal_sequences",
+        "shutter_signal_frames",
+        "punched_message_tape",
+        "message_framing"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "relay_observation_posts",
+      "name": "Relay Observation Posts",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "route_memory",
+        "watch_rotation"
+      ],
+      "requires_all": [
+        "route_memory",
+        "watch_rotation"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Relay Observation Posts",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Observers choose successive visible stations and repeat an acknowledged message instead of assuming a distant recipient has seen it.",
+      "effects": {},
+      "foundation_for": [
+        "optical_telegraphy"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "timed_signal_sequences",
+      "name": "Timed Signal Sequences",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "agreed_signal_codes",
+        "standard_measures"
+      ],
+      "requires_all": [
+        "agreed_signal_codes",
+        "standard_measures"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Timed Signal Sequences",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Separating marks, gaps and message boundaries by agreed durations lets a short set of signals encode longer messages.",
+      "effects": {},
+      "foundation_for": [
+        "optical_telegraphy",
+        "telegraph_keys",
+        "radio_telegraphy"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "shutter_signal_frames",
+      "name": "Shutter Signal Frames",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "joinery",
+        "agreed_signal_codes"
+      ],
+      "requires_all": [
+        "joinery",
+        "agreed_signal_codes"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Shutter Signal Frames",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Movable contrasting shutters present distinct states to a distant observer without requiring the observer to read small writing.",
+      "effects": {},
+      "production_items": [
+        "shutter_signal_frames"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "optical_telegraphy",
+      "name": "Optical Telegraphy",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "shutter_signal_frames",
+        "relay_observation_posts",
+        "timed_signal_sequences"
+      ],
+      "requires_all": [
+        "shutter_signal_frames",
+        "relay_observation_posts",
+        "timed_signal_sequences"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Optical Telegraphy",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Trained observers read, acknowledge and relay coded visual states; obscured sightlines interrupt the chain.",
+      "effects": {},
+      "production_items": [
+        "optical_telegraphy"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus.",
+      "operating_plants": [
+        "optical_signal_bench"
+      ]
+    },
+    {
+      "id": "telegraph_keys",
+      "name": "Telegraph Keys",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "timed_signal_sequences",
+        "electrical_measurement"
+      ],
+      "requires_all": [
+        "timed_signal_sequences",
+        "electrical_measurement"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Telegraph Keys",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A sprung contact deliberately opens and closes a circuit so an operator can send a timed electrical sequence.",
+      "effects": {},
+      "production_items": [
+        "telegraph_keys"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "electromagnet_sounders",
+      "name": "Electromagnet Sounders",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "electromagnetic_relays"
+      ],
+      "requires_all": [
+        "electromagnetic_relays"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Electromagnet Sounders",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A current-operated armature makes a reproducible click, turning the circuit state into a locally audible signal.",
+      "effects": {},
+      "production_items": [
+        "electromagnet_sounders"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "line_insulators",
+      "name": "Line Insulators",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "glassmaking",
+        "electrical_measurement"
+      ],
+      "requires_all": [
+        "glassmaking",
+        "electrical_measurement"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Line Insulators",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Shaped insulating supports keep a conductor apart from its support while providing a longer leakage path.",
+      "effects": {},
+      "production_items": [
+        "line_insulators"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "telegraph_return_circuits",
+      "name": "Telegraph Return Circuits",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "electrical_measurement",
+        "wire_drawing"
+      ],
+      "requires_all": [
+        "electrical_measurement",
+        "wire_drawing"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Telegraph Return Circuits",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A signal circuit requires a complete return path; paired conductors avoid relying on uncertain earth contact.",
+      "effects": {},
+      "production_items": [
+        "telegraph_return_circuits"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "electrical_telegraphy",
+      "name": "Electrical Telegraphy",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "telegraph_keys",
+        "electromagnet_sounders",
+        "line_insulators",
+        "telegraph_return_circuits"
+      ],
+      "requires_all": [
+        "telegraph_keys",
+        "electromagnet_sounders",
+        "line_insulators",
+        "telegraph_return_circuits"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Electrical Telegraphy",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Coded circuit interruptions operate a distant receiving instrument when conductors and an energy source form a complete circuit.",
+      "effects": {},
+      "production_items": [
+        "electrical_telegraphy"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus.",
+      "operating_plants": [
+        "electrical_signal_bench"
+      ]
+    },
+    {
+      "id": "polarized_telegraph_relays",
+      "name": "Polarized Telegraph Relays",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "electromagnetic_relays",
+        "electrical_measurement"
+      ],
+      "requires_all": [
+        "electromagnetic_relays",
+        "electrical_measurement"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Polarized Telegraph Relays",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A magnetically biased armature distinguishes current direction as well as current presence.",
+      "effects": {},
+      "production_items": [
+        "polarized_telegraph_relays"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "duplex_telegraphy",
+      "name": "Duplex Telegraphy",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "electrical_telegraphy",
+        "polarized_telegraph_relays",
+        "ratio_proportion"
+      ],
+      "requires_all": [
+        "electrical_telegraphy",
+        "polarized_telegraph_relays",
+        "ratio_proportion"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Duplex Telegraphy",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Balanced circuits distinguish locally sent current from the received signal, allowing opposite directions to share a line.",
+      "effects": {},
+      "production_items": [
+        "duplex_telegraphy"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "punched_message_tape",
+      "name": "Punched Message Tape",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "paper_making",
+        "agreed_signal_codes"
+      ],
+      "requires_all": [
+        "paper_making",
+        "agreed_signal_codes"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Punched Message Tape",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Rows of punched positions retain a sequence of coded characters that a mechanical reader can revisit.",
+      "effects": {},
+      "production_items": [
+        "punched_message_tape"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "teleprinter_mechanisms",
+      "name": "Teleprinter Mechanisms",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "precision_machinery",
+        "phonetic_notation",
+        "electromagnetic_relays"
+      ],
+      "requires_all": [
+        "precision_machinery",
+        "phonetic_notation",
+        "electromagnetic_relays"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Teleprinter Mechanisms",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A timed selector maps received character codes to a printing mechanism, retaining an intelligible local record.",
+      "effects": {},
+      "production_items": [
+        "teleprinter_mechanisms"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "automatic_telegraphy",
+      "name": "Automatic Telegraphy",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "punched_message_tape",
+        "teleprinter_mechanisms",
+        "electrical_telegraphy"
+      ],
+      "requires_all": [
+        "punched_message_tape",
+        "teleprinter_mechanisms",
+        "electrical_telegraphy"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Automatic Telegraphy",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A prepared tape drives timed transmission while a receiving selector records characters, leaving setup and error checking to operators.",
+      "effects": {},
+      "production_items": [
+        "automatic_telegraphy"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "acoustic_diaphragms",
+      "name": "Acoustic Diaphragms",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "elastic_deformation",
+        "sheet_steel_rolling"
+      ],
+      "requires_all": [
+        "elastic_deformation",
+        "sheet_steel_rolling"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Acoustic Diaphragms",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A thin supported membrane converts pressure variation into repeatable mechanical displacement.",
+      "effects": {},
+      "production_items": [
+        "acoustic_diaphragms"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "carbon_microphones",
+      "name": "Carbon Microphones",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "acoustic_diaphragms",
+        "carbon_resistors"
+      ],
+      "requires_all": [
+        "acoustic_diaphragms",
+        "carbon_resistors"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Carbon Microphones",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Changing contact pressure among carbon granules varies circuit resistance in response to sound.",
+      "effects": {},
+      "production_items": [
+        "carbon_microphones"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "electromagnetic_earpieces",
+      "name": "Electromagnetic Earpieces",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "acoustic_diaphragms",
+        "electromagnetic_induction"
+      ],
+      "requires_all": [
+        "acoustic_diaphragms",
+        "electromagnetic_induction"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Electromagnetic Earpieces",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A varying magnetic force moves a diaphragm and produces sound near the listener.",
+      "effects": {},
+      "production_items": [
+        "electromagnetic_earpieces"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "telephone_circuits",
+      "name": "Telephone Circuits",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "carbon_microphones",
+        "electromagnetic_earpieces",
+        "cable_insulation"
+      ],
+      "requires_all": [
+        "carbon_microphones",
+        "electromagnetic_earpieces",
+        "cable_insulation"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Telephone Circuits",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A powered circuit carries continuously varying speech signals between a microphone and an earpiece.",
+      "effects": {},
+      "production_items": [
+        "telephone_circuits"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "manual_switchboards",
+      "name": "Manual Switchboards",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "telephone_circuits",
+        "material_accounting"
+      ],
+      "requires_all": [
+        "telephone_circuits",
+        "material_accounting"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Manual Switchboards",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "An operator connects identified subscriber circuits through a panel rather than providing a separate permanent circuit for every pair.",
+      "effects": {},
+      "production_items": [
+        "manual_switchboards"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "balanced_conductor_pairs",
+      "name": "Balanced Conductor Pairs",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "cable_insulation",
+        "electromagnetic_induction"
+      ],
+      "requires_all": [
+        "cable_insulation",
+        "electromagnetic_induction"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Balanced Conductor Pairs",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A paired, regularly exchanged conductor geometry reduces unequal coupling from external electrical disturbances.",
+      "effects": {},
+      "production_items": [
+        "balanced_conductor_pairs"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "inductive_line_loading",
+      "name": "Inductive Line Loading",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "telephone_circuits",
+        "wound_transformers",
+        "harmonic_analysis"
+      ],
+      "requires_all": [
+        "telephone_circuits",
+        "wound_transformers",
+        "harmonic_analysis"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Inductive Line Loading",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Distributed loading coils change line behavior over a chosen voice-frequency band; they are not a universal improvement for broadband transmission.",
+      "effects": {},
+      "production_items": [
+        "inductive_line_loading"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "telephone_repeaters",
+      "name": "Telephone Repeaters",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "telephone_circuits",
+        "balanced_conductor_pairs",
+        "transistor_amplifiers"
+      ],
+      "requires_all": [
+        "telephone_circuits",
+        "balanced_conductor_pairs",
+        "transistor_amplifiers"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Telephone Repeaters",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A supplied amplifier restores a weakened voice signal at an intermediate point; noise and instability still constrain the chain.",
+      "effects": {},
+      "production_items": [
+        "telephone_repeaters"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "electromagnetic_wave_theory",
+      "name": "Electromagnetic Wave Theory",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "electromagnetic_induction",
+        "differential_equations"
+      ],
+      "requires_all": [
+        "electromagnetic_induction",
+        "differential_equations"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Electromagnetic Wave Theory",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Coupled changing electric and magnetic fields admit propagating disturbances, linking measured electrical behavior to wave transmission.",
+      "effects": {},
+      "foundation_for": [
+        "aerial_matching"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "resonant_tuned_circuits",
+      "name": "Resonant Tuned Circuits",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "foil_capacitors",
+        "electromagnetic_induction",
+        "mechanical_oscillation"
+      ],
+      "requires_all": [
+        "foil_capacitors",
+        "electromagnetic_induction",
+        "mechanical_oscillation"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Resonant Tuned Circuits",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "An inductive and capacitive circuit responds preferentially near a resonant frequency, with losses limiting selectivity.",
+      "effects": {},
+      "production_items": [
+        "resonant_tuned_circuits"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "variable_air_capacitors",
+      "name": "Variable Air Capacitors",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "foil_capacitors",
+        "precision_machinery"
+      ],
+      "requires_all": [
+        "foil_capacitors",
+        "precision_machinery"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Variable Air Capacitors",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Interleaved movable metal plates vary capacitance without touching, allowing an operator to tune a circuit.",
+      "effects": {},
+      "production_items": [
+        "variable_air_capacitors"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "aerial_matching",
+      "name": "Aerial Matching",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "resonant_tuned_circuits",
+        "cable_insulation"
+      ],
+      "requires_all": [
+        "resonant_tuned_circuits",
+        "cable_insulation"
+      ],
+      "requires_any": [
+        [
+          "electromagnetic_wave_theory",
+          "experimental_controls"
+        ]
+      ],
+      "learning_routes": [
+        {
+          "id": "local_theory",
+          "label": "Wave model and matching trials",
+          "requires_all": [
+            "electromagnetic_wave_theory"
+          ]
+        },
+        {
+          "id": "local_trials",
+          "label": "Controlled aerial and tuning trials",
+          "requires_all": [
+            "experimental_controls"
+          ]
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A conductor, feed and matching circuit couple a radio-frequency source or receiver to the surrounding electromagnetic field.",
+      "effects": {},
+      "production_items": [
+        "aerial_matching"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "crystal_radio_detection",
+      "name": "Crystal Radio Detection",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "ore_assaying",
+        "electrical_measurement",
+        "resonant_tuned_circuits"
+      ],
+      "requires_all": [
+        "ore_assaying",
+        "electrical_measurement",
+        "resonant_tuned_circuits"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Crystal Radio Detection",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A light contact on a selected rectifying mineral crystal extracts an amplitude envelope without supplying gain; many unselected mineral fragments do not work.",
+      "effects": {},
+      "production_items": [
+        "crystal_radio_detection"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "tuned_radio_reception",
+      "name": "Tuned Radio Reception",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "aerial_matching",
+        "crystal_radio_detection",
+        "variable_air_capacitors",
+        "electromagnetic_earpieces"
+      ],
+      "requires_all": [
+        "aerial_matching",
+        "crystal_radio_detection",
+        "variable_air_capacitors",
+        "electromagnetic_earpieces"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Tuned Radio Reception",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A tuned aerial circuit and detector recover a sufficiently strong amplitude-modulated signal for a sensitive earpiece.",
+      "effects": {},
+      "production_items": [
+        "tuned_radio_reception"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "thermionic_emission",
+      "name": "Thermionic Emission",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "vacuum_experiments",
+        "electron_physics",
+        "heat_engine_cycles"
+      ],
+      "requires_all": [
+        "vacuum_experiments",
+        "electron_physics",
+        "heat_engine_cycles"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Thermionic Emission",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Sufficiently heated material emits electrons; an evacuated enclosure permits their collection by a positively biased electrode.",
+      "effects": {},
+      "foundation_for": [
+        "vacuum_diodes"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "vacuum_diodes",
+      "name": "Vacuum Diodes",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "thermionic_emission",
+        "glass_blowing"
+      ],
+      "requires_all": [
+        "thermionic_emission",
+        "glass_blowing"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Vacuum Diodes",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A heated cathode and separate anode in an evacuated envelope preferentially conduct in one direction.",
+      "effects": {},
+      "production_items": [
+        "vacuum_diodes"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "triode_valves",
+      "name": "Triode Valves",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "vacuum_diodes"
+      ],
+      "requires_all": [
+        "vacuum_diodes"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Triode Valves",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "An intervening control grid varies the current from cathode to anode, enabling powered amplification.",
+      "effects": {},
+      "production_items": [
+        "triode_valves"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "feedback_radio_oscillators",
+      "name": "Feedback Radio Oscillators",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "triode_valves",
+        "resonant_tuned_circuits",
+        "feedback_governors"
+      ],
+      "requires_all": [
+        "triode_valves",
+        "resonant_tuned_circuits",
+        "feedback_governors"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Feedback Radio Oscillators",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A powered gain stage feeds a suitable fraction of its output back into a resonant circuit to sustain an electrical oscillation.",
+      "effects": {},
+      "production_items": [
+        "feedback_radio_oscillators"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "frequency_stabilization",
+      "name": "Frequency Stabilization",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "resonant_tuned_circuits",
+        "measurement_uncertainty",
+        "harmonic_analysis"
+      ],
+      "requires_all": [
+        "resonant_tuned_circuits",
+        "measurement_uncertainty",
+        "harmonic_analysis"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Frequency Stabilization",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Repeated comparison against a reference distinguishes frequency drift from intentional modulation and guides correction.",
+      "effects": {},
+      "foundation_for": [
+        "frequency_modulation"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "radio_telegraphy",
+      "name": "Radio Telegraphy",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "aerial_matching",
+        "timed_signal_sequences",
+        "feedback_radio_oscillators"
+      ],
+      "requires_all": [
+        "aerial_matching",
+        "timed_signal_sequences",
+        "feedback_radio_oscillators"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Radio Telegraphy",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Keying a supplied radio-frequency source transmits coded marks; a matched receiving system and trained operator are still required.",
+      "effects": {},
+      "production_items": [
+        "radio_telegraphy"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "amplitude_modulation",
+      "name": "Amplitude Modulation",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "feedback_radio_oscillators",
+        "carbon_microphones"
+      ],
+      "requires_all": [
+        "feedback_radio_oscillators",
+        "carbon_microphones"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Amplitude Modulation",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A message varies the amplitude of a carrier while the receiver recovers its envelope within the usable signal range.",
+      "effects": {},
+      "production_items": [
+        "amplitude_modulation"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "frequency_modulation",
+      "name": "Frequency Modulation",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "feedback_radio_oscillators",
+        "frequency_stabilization",
+        "variable_air_capacitors"
+      ],
+      "requires_all": [
+        "feedback_radio_oscillators",
+        "frequency_stabilization",
+        "variable_air_capacitors"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Frequency Modulation",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A message varies the instantaneous carrier frequency; a matching discriminator recovers that variation at reception.",
+      "effects": {},
+      "production_items": [
+        "frequency_modulation"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "frequency_conversion",
+      "name": "Frequency Conversion",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "feedback_radio_oscillators",
+        "crystal_radio_detection"
+      ],
+      "requires_all": [
+        "feedback_radio_oscillators",
+        "crystal_radio_detection"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Frequency Conversion",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A nonlinear stage combines input and local oscillator signals to produce sum and difference frequencies.",
+      "effects": {},
+      "production_items": [
+        "frequency_conversion"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "superheterodyne_reception",
+      "name": "Superheterodyne Reception",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "frequency_conversion",
+        "tuned_radio_reception"
+      ],
+      "requires_all": [
+        "frequency_conversion",
+        "tuned_radio_reception"
+      ],
+      "requires_any": [
+        [
+          "triode_valves",
+          "transistor_amplifiers"
+        ]
+      ],
+      "learning_routes": [
+        {
+          "id": "local_valves",
+          "label": "Valve intermediate-frequency stages",
+          "requires_all": [
+            "triode_valves"
+          ]
+        },
+        {
+          "id": "local_transistors",
+          "label": "Transistor intermediate-frequency stages",
+          "requires_all": [
+            "transistor_amplifiers"
+          ]
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A mixer shifts selected received signals to a common intermediate frequency for repeatable filtering and gain.",
+      "effects": {},
+      "production_items": [
+        "superheterodyne_reception",
+        "transistor_superheterodyne"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus.",
+      "operating_plants": [
+        "radio_signal_bench"
+      ]
+    },
+    {
+      "id": "signal_sampling",
+      "name": "Signal Sampling",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "harmonic_analysis",
+        "statistical_sampling"
+      ],
+      "requires_all": [
+        "harmonic_analysis",
+        "statistical_sampling"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Signal Sampling",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A time-varying signal is measured at specified intervals; a bandwidth bound and suitable sampling rate are necessary for reconstruction.",
+      "effects": {},
+      "foundation_for": [
+        "pulse_code_modulation"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "pulse_code_modulation",
+      "name": "Pulse-Code Modulation",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "signal_sampling",
+        "binary_adders",
+        "binary_counters"
+      ],
+      "requires_all": [
+        "signal_sampling",
+        "binary_adders",
+        "binary_counters"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Pulse-Code Modulation",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Measured signal levels are quantized and represented as binary words, with precision and sample rate determining data demand.",
+      "effects": {},
+      "production_items": [
+        "pulse_code_modulation"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "message_framing",
+      "name": "Message Framing",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "agreed_signal_codes",
+        "binary_adders"
+      ],
+      "requires_all": [
+        "agreed_signal_codes",
+        "binary_adders"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Message Framing",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Start boundaries, lengths or reserved symbols separate a continuous bit stream into messages a receiver can parse.",
+      "effects": {},
+      "foundation_for": [
+        "error_detection_codes",
+        "automatic_repeat_request",
+        "data_modems",
+        "packet_switching"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "error_detection_codes",
+      "name": "Error-Detection Codes",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "message_framing",
+        "combinatorics"
+      ],
+      "requires_all": [
+        "message_framing",
+        "combinatorics"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Error-Detection Codes",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Redundant check bits expose specified classes of corruption; detection alone cannot repair an arbitrary damaged message.",
+      "effects": {},
+      "foundation_for": [
+        "automatic_repeat_request"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "automatic_repeat_request",
+      "name": "Automatic Repeat Request",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "error_detection_codes",
+        "message_framing"
+      ],
+      "requires_all": [
+        "error_detection_codes",
+        "message_framing"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Automatic Repeat Request",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Acknowledgements, sequence identifiers and timeouts request a retransmission instead of accepting a missing or corrupted frame.",
+      "effects": {},
+      "foundation_for": [
+        "packet_switching"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "data_modems",
+      "name": "Data Modems",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "message_framing",
+        "pulse_code_modulation"
+      ],
+      "requires_all": [
+        "message_framing",
+        "pulse_code_modulation"
+      ],
+      "requires_any": [
+        [
+          "telephone_repeaters",
+          "superheterodyne_reception"
+        ]
+      ],
+      "learning_routes": [
+        {
+          "id": "local_telephone_repeaters",
+          "label": "Telephone repeaters",
+          "requires_all": [
+            "telephone_repeaters"
+          ]
+        },
+        {
+          "id": "local_superheterodyne_reception",
+          "label": "Superheterodyne reception",
+          "requires_all": [
+            "superheterodyne_reception"
+          ]
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Modulation maps data symbols onto a physical signal and demodulation recovers them; the line and receiver still limit reliable rate.",
+      "effects": {},
+      "production_items": [
+        "data_modems"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "packet_switching",
+      "name": "Packet Switching",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "message_framing",
+        "automatic_repeat_request",
+        "stored_program_control"
+      ],
+      "requires_all": [
+        "message_framing",
+        "automatic_repeat_request",
+        "stored_program_control"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Packet Switching",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "Addressed packets share transmission resources through buffering and forwarding instead of reserving one complete circuit for a conversation.",
+      "effects": {},
+      "foundation_for": [
+        "packet_routers"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "packet_routers",
+      "name": "Packet Routers",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "packet_switching",
+        "data_modems",
+        "read_write_memory"
+      ],
+      "requires_all": [
+        "packet_switching",
+        "data_modems",
+        "read_write_memory"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Packet Routers",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A processor consults a forwarding table, buffers received packets and sends them toward an available next interface.",
+      "effects": {},
+      "production_items": [
+        "packet_routers"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus."
+    },
+    {
+      "id": "store_forward_archives",
+      "name": "Store-and-Forward Archives",
+      "direction": "Information",
+      "day": 0,
+      "chance": 0.002,
+      "requires": [
+        "packet_routers",
+        "formal_archives"
+      ],
+      "requires_all": [
+        "packet_routers",
+        "formal_archives"
+      ],
+      "requires_any": [],
+      "learning_routes": [
+        {
+          "id": "local",
+          "label": "Store-and-Forward Archives",
+          "requires_all": []
+        }
+      ],
+      "signals": [
+        "research",
+        "crafting",
+        "exchange"
+      ],
+      "observation": "A local store retains addressed messages across unavailable links and releases them when forwarding becomes possible; custody and expiry must be tracked.",
+      "effects": {},
+      "production_items": [
+        "store_forward_archives"
+      ],
+      "production_contract": "Enables the listed paid communications equipment and/or causal successors. Equipment is produced from actual stocks using finite workshop work; commissioned test benches consume operators, supplies and power to examine returned communications specimens. No discovery creates a network link, remote contact, free equipment or military coordination bonus.",
+      "operating_plants": [
+        "digital_signal_bench"
+      ]
+    }
+  ]
+}

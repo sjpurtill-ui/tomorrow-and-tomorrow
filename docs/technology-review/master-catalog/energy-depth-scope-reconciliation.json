@@ -1,0 +1,34 @@
+{
+  "status": "scope_reconciliation_for_review",
+  "adds_discovery_identities": 0,
+  "excluded_proposals": [
+    {
+      "excluded_id": "fuel_heat_value_testing",
+      "existing_id": "calorimetry",
+      "reason": "Application or verification of an existing mechanism; preserve the existing identity rather than add a separate count."
+    },
+    {
+      "excluded_id": "fusion_net_electric_demonstration",
+      "existing_id": "fusion_power_integration",
+      "reason": "Application or verification of an existing mechanism; preserve the existing identity rather than add a separate count."
+    }
+  ],
+  "fusion_acceptance_requirement": "Fusion Power Integration must demonstrate measured net electrical delivery after all declared plant consumption over a stated interval before any net-generation capability is claimed. Plasma performance alone is insufficient. This is a required evidence boundary, not an additional discovery.",
+  "mappings": [
+    {
+      "existing_id": "compressed_air_systems",
+      "scope": "Compressed-air production and delivery; storing work and recovering electricity adds a distinct expansion and thermal-accounting cycle.",
+      "distinct_children": [
+        "compressed_air_energy_storage"
+      ]
+    },
+    {
+      "existing_id": "thermal_storage_tanks",
+      "scope": "Finite sensible-heat storage; seasonal siting/loss management and reversible reaction storage are distinct mechanisms.",
+      "distinct_children": [
+        "seasonal_heat_storage",
+        "thermochemical_heat_storage"
+      ]
+    }
+  ]
+}

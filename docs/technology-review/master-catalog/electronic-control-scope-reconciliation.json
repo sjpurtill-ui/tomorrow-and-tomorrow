@@ -1,0 +1,50 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "servo_loop_tuning",
+      "retained_id": "feedback_stability_analysis",
+      "reason": "Adjusting a qualified loop against measured response applies the existing feedback-analysis mechanism; analog and digital implementations retain actual plant and controller constraints."
+    },
+    {
+      "excluded_proposal": "distributed_control_clocking",
+      "retained_id": "distributed_precision_timing",
+      "reason": "Maintaining timing relationships for a control application uses the shared distributed-timing mechanism; task-specific tolerances do not create a separate clock technology."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "differential_amplifier_circuits",
+        "operational_amplifier_blocks",
+        "instrumentation_amplifier_circuits"
+      ],
+      "distinction": "A differential gain stage, reusable high-gain feedback block and qualified high-input-impedance measurement interface have distinct circuit roles; common components should not be duplicated in production."
+    },
+    {
+      "ids": [
+        "tracing_heap_collection",
+        "reference_counted_reclamation",
+        "borrow_checked_memory_access"
+      ],
+      "distinction": "Tracing reachability, tracking references and checking ownership/lifetimes handle memory differently, with different resource and correctness limits."
+    },
+    {
+      "ids": [
+        "superconducting_logic_circuits",
+        "superconducting_qubit_devices",
+        "trapped_ion_qubit_devices"
+      ],
+      "distinction": "Classical superconducting logic is not a universal prerequisite for quantum devices. Different qubit implementations require distinct physical operating environments."
+    },
+    {
+      "ids": [
+        "counting_board_operations",
+        "mechanical_digit_carry",
+        "stack_machine_execution"
+      ],
+      "distinction": "Manual spatial counters, mechanical positional carrying and stored-program operand stacks are different computation mechanisms, not mandatory consecutive eras."
+    }
+  ]
+}

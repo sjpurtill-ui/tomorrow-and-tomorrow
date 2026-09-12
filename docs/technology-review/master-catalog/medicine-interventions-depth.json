@@ -1,0 +1,2589 @@
+[
+  {
+    "field": "D14",
+    "id": "ophthalmoscopic_examination",
+    "name": "Ophthalmoscopic Examination",
+    "foundations": "optical_lenses",
+    "mechanism": "Use aligned illumination and viewing optics to examine qualified internal eye structures",
+    "operating_requirement": "Suitable instrument, trained examiner and interpretable examination conditions",
+    "consequence": "Add observed ocular findings without guaranteeing a diagnosis",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_lenses"
+    ],
+    "requires_any": [
+      [
+        "clinical_observation_rounds",
+        "structured_clinical_history"
+      ]
+    ],
+    "branching_note": "Qualified instrument findings can enter an established clinical assessment through examination or history-led inquiry; ordinary eye assessment remains available before the instrument.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ophthalmoscopic_examination",
+      "local_demonstration": "Use aligned illumination and viewing optics to examine qualified internal eye structures",
+      "operating_requirements": "Suitable instrument, trained examiner and interpretable examination conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "ocular_tonometry",
+    "name": "Ocular Tonometry",
+    "foundations": "clinical_observation_rounds",
+    "mechanism": "Estimate intraocular pressure from a calibrated mechanical or optical response",
+    "operating_requirement": "Qualified instrument, calibration and clinically appropriate examination",
+    "consequence": "Measure a bounded pressure estimate while retaining method and tissue effects",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_observation_rounds"
+    ],
+    "requires_any": [
+      [
+        "hydrostatic_pressure",
+        "optical_lenses"
+      ]
+    ],
+    "branching_note": "Qualified contact-response or optical measurement lineages can support pressure estimation; actual clinical validation is method-specific.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ocular_tonometry",
+      "local_demonstration": "Estimate intraocular pressure from a calibrated mechanical or optical response",
+      "operating_requirements": "Qualified instrument, calibration and clinically appropriate examination",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "visual_field_perimetry",
+    "name": "Visual-Field Perimetry",
+    "foundations": "clinical_visual_acuity_testing",
+    "mechanism": "Map response to controlled visual stimuli across the field of vision",
+    "operating_requirement": "Qualified stimulus presentation, response recording and interpretation",
+    "consequence": "Measure spatial visual function beyond central acuity",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_visual_acuity_testing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "visual_field_perimetry",
+      "local_demonstration": "Map response to controlled visual stimuli across the field of vision",
+      "operating_requirements": "Qualified stimulus presentation, response recording and interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "optical_coherence_tomography",
+    "name": "Optical Coherence Tomography",
+    "foundations": "optical_interferometry",
+    "mechanism": "Reconstruct depth-resolved tissue reflectivity using qualified low-coherence optical measurements",
+    "operating_requirement": "Compatible source and detector, scanning optics and clinical interpretation",
+    "consequence": "Image selected superficial structures within penetration and artifact limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_interferometry"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_coherence_tomography",
+      "local_demonstration": "Reconstruct depth-resolved tissue reflectivity using qualified low-coherence optical measurements",
+      "operating_requirements": "Compatible source and detector, scanning optics and clinical interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "electromyographic_recording",
+    "name": "Electromyographic Recording",
+    "foundations": "electrical_measurement,neurological_function_examination",
+    "mechanism": "Record qualified electrical activity associated with muscle function and distinguish artifacts",
+    "operating_requirement": "Suitable electrodes, amplifiers, trained clinicians and clinical context",
+    "consequence": "Add neuromuscular evidence without treating every waveform as disease",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "neurological_function_examination"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electromyographic_recording",
+      "local_demonstration": "Record qualified electrical activity associated with muscle function and distinguish artifacts",
+      "operating_requirements": "Suitable electrodes, amplifiers, trained clinicians and clinical context",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "nerve_conduction_testing",
+    "name": "Nerve-Conduction Testing",
+    "foundations": "electromyographic_recording",
+    "mechanism": "Compare evoked nerve responses across known recording geometry and timing",
+    "operating_requirement": "Qualified stimulation and recording equipment, trained staff and interpretation",
+    "consequence": "Estimate selected peripheral nerve conduction properties",
+    "status": "authored_draft",
+    "requires_all": [
+      "electromyographic_recording"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nerve_conduction_testing",
+      "local_demonstration": "Compare evoked nerve responses across known recording geometry and timing",
+      "operating_requirements": "Qualified stimulation and recording equipment, trained staff and interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "vestibular_response_testing",
+    "name": "Vestibular Response Testing",
+    "foundations": "neurological_function_examination",
+    "mechanism": "Measure qualified eye or balance responses to assess selected vestibular functions",
+    "operating_requirement": "Appropriate instruments, patient assessment and trained interpretation",
+    "consequence": "Distinguish some balance-system findings without a universal vertigo diagnosis",
+    "status": "authored_draft",
+    "requires_all": [
+      "neurological_function_examination"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vestibular_response_testing",
+      "local_demonstration": "Measure qualified eye or balance responses to assess selected vestibular functions",
+      "operating_requirements": "Appropriate instruments, patient assessment and trained interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "clinical_coagulation_assays",
+    "name": "Clinical Coagulation Assays",
+    "foundations": "clinical_laboratory_quality",
+    "mechanism": "Measure defined clotting responses against calibrated assay conditions",
+    "operating_requirement": "Correctly handled specimens, qualified reagents and instruments",
+    "consequence": "Provide test-specific coagulation evidence without measuring every bleeding risk",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_laboratory_quality"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_coagulation_assays",
+      "local_demonstration": "Measure defined clotting responses against calibrated assay conditions",
+      "operating_requirements": "Correctly handled specimens, qualified reagents and instruments",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "therapeutic_drug_monitoring",
+    "name": "Therapeutic Drug Monitoring",
+    "foundations": "pharmacokinetic_analysis,clinical_laboratory_quality",
+    "mechanism": "Interpret measured medicine exposure alongside timing, indication and patient condition",
+    "operating_requirement": "Validated concentration assay, accurate sampling history and clinical review",
+    "consequence": "Support qualified treatment adjustment without assuming concentration alone predicts benefit",
+    "status": "authored_draft",
+    "requires_all": [
+      "pharmacokinetic_analysis",
+      "clinical_laboratory_quality"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "therapeutic_drug_monitoring",
+      "local_demonstration": "Interpret measured medicine exposure alongside timing, indication and patient condition",
+      "operating_requirements": "Validated concentration assay, accurate sampling history and clinical review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "histocompatibility_typing",
+    "name": "Histocompatibility Typing",
+    "foundations": "immune_response_models,clinical_laboratory_quality",
+    "mechanism": "Characterize clinically relevant donor-recipient immune compatibility beyond ordinary blood grouping",
+    "operating_requirement": "Validated typing evidence, identified samples and qualified interpretation",
+    "consequence": "Inform matching while retaining rejection and other transplant risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "immune_response_models",
+      "clinical_laboratory_quality"
+    ],
+    "requires_any": [
+      [
+        "clinical_immunoassays",
+        "molecular_diagnostics"
+      ]
+    ],
+    "branching_note": "Serological or molecular typing can provide qualified compatibility evidence; molecular sequencing is not a universal early gate.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "histocompatibility_typing",
+      "local_demonstration": "Characterize clinically relevant donor-recipient immune compatibility beyond ordinary blood grouping",
+      "operating_requirements": "Validated typing evidence, identified samples and qualified interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "radiopharmaceutical_tracing",
+    "name": "Radiopharmaceutical Tracing",
+    "foundations": "radiation_measurement,pharmacokinetic_analysis",
+    "mechanism": "Follow the measured distribution of a qualified radiolabeled agent under an evaluated clinical indication",
+    "operating_requirement": "Actual qualified tracer, time-sensitive handling, detectors and clinical oversight",
+    "consequence": "Observe selected physiological distribution with exposure and interpretation limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiation_measurement",
+      "pharmacokinetic_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radiopharmaceutical_tracing",
+      "local_demonstration": "Follow the measured distribution of a qualified radiolabeled agent under an evaluated clinical indication",
+      "operating_requirements": "Actual qualified tracer, time-sensitive handling, detectors and clinical oversight",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "single_photon_emission_tomography",
+    "name": "Single-Photon Emission Tomography",
+    "foundations": "radiopharmaceutical_tracing",
+    "mechanism": "Reconstruct tracer distribution from detected single-photon emission projections",
+    "operating_requirement": "Qualified emission camera, reconstruction and actual tracer supply",
+    "consequence": "Form a bounded functional image while retaining resolution and attenuation errors",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiopharmaceutical_tracing"
+    ],
+    "requires_any": [
+      [
+        "computed_tomography",
+        "numerical_integration"
+      ]
+    ],
+    "branching_note": "Emission reconstruction may use shared reconstruction knowledge or independently developed qualified numerical methods; an X-ray CT scanner need not already exist.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "single_photon_emission_tomography",
+      "local_demonstration": "Reconstruct tracer distribution from detected single-photon emission projections",
+      "operating_requirements": "Qualified emission camera, reconstruction and actual tracer supply",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "positron_emission_tomography",
+    "name": "Positron Emission Tomography",
+    "foundations": "radiopharmaceutical_tracing",
+    "mechanism": "Reconstruct tracer distribution from qualified coincidence detection of annihilation photons",
+    "operating_requirement": "Suitable tracer, coincidence detectors, reconstruction and calibrated timing",
+    "consequence": "Form a functional image without equating uptake with a unique diagnosis",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiopharmaceutical_tracing"
+    ],
+    "requires_any": [
+      [
+        "computed_tomography",
+        "numerical_integration"
+      ]
+    ],
+    "branching_note": "Coincidence-emission reconstruction does not require prior construction of an X-ray CT scanner when an independent reconstruction method is demonstrated.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "positron_emission_tomography",
+      "local_demonstration": "Reconstruct tracer distribution from qualified coincidence detection of annihilation photons",
+      "operating_requirements": "Suitable tracer, coincidence detectors, reconstruction and calibrated timing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "ultrasound_elastography",
+    "name": "Ultrasound Elastography",
+    "foundations": "ultrasound_imaging",
+    "mechanism": "Infer selected mechanical tissue properties from measured deformation or wave response",
+    "operating_requirement": "Qualified excitation and imaging, calibration and clinical interpretation",
+    "consequence": "Add stiffness-related evidence with method- and tissue-specific limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "ultrasound_imaging"
+    ],
+    "requires_any": [
+      [
+        "structural_load_testing",
+        "mechanical_work_energy"
+      ]
+    ],
+    "branching_note": "Measured deformation or wave-response models can ground the method; actual tissue calibration and clinical performance remain required.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ultrasound_elastography",
+      "local_demonstration": "Infer selected mechanical tissue properties from measured deformation or wave response",
+      "operating_requirements": "Qualified excitation and imaging, calibration and clinical interpretation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "photoacoustic_clinical_imaging",
+    "name": "Photoacoustic Clinical Imaging",
+    "foundations": "ultrasound_imaging,laser_light_generation",
+    "mechanism": "Detect qualified acoustic responses to absorbed optical energy to infer tissue features",
+    "operating_requirement": "Compatible optical source, acoustic detection, exposure control and validation",
+    "consequence": "Combine absorption contrast with bounded depth and resolution",
+    "status": "authored_draft",
+    "requires_all": [
+      "ultrasound_imaging",
+      "laser_light_generation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "photoacoustic_clinical_imaging",
+      "local_demonstration": "Detect qualified acoustic responses to absorbed optical energy to infer tissue features",
+      "operating_requirements": "Compatible optical source, acoustic detection, exposure control and validation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "fluoroscopic_motion_imaging",
+    "name": "Fluoroscopic Motion Imaging",
+    "foundations": "radiographic_imaging",
+    "mechanism": "Acquire and interpret sequential radiation images for a qualified dynamic clinical task",
+    "operating_requirement": "Suitable imaging system, exposure management and trained staff",
+    "consequence": "Observe motion or instrument position while retaining radiation and projection limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiographic_imaging"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fluoroscopic_motion_imaging",
+      "local_demonstration": "Acquire and interpret sequential radiation images for a qualified dynamic clinical task",
+      "operating_requirements": "Suitable imaging system, exposure management and trained staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "digital_subtraction_angiography",
+    "name": "Digital Subtraction Angiography",
+    "foundations": "fluoroscopic_motion_imaging,clinical_image_registration",
+    "mechanism": "Compare aligned contrast and reference images to emphasize selected vascular structures",
+    "operating_requirement": "Qualified contrast agent, imaging, alignment and clinical monitoring",
+    "consequence": "Improve specified vessel visualization while retaining motion and contrast-related risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "fluoroscopic_motion_imaging",
+      "clinical_image_registration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "digital_subtraction_angiography",
+      "local_demonstration": "Compare aligned contrast and reference images to emphasize selected vascular structures",
+      "operating_requirements": "Qualified contrast agent, imaging, alignment and clinical monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "radiology_diagnostic_display_calibration",
+    "name": "Radiology Diagnostic Display Calibration",
+    "foundations": "radiographic_imaging,measurement_uncertainty",
+    "mechanism": "Qualify display luminance, contrast and viewing conditions for diagnostic interpretation",
+    "operating_requirement": "Calibrated display, reference measurements and controlled viewing environment",
+    "consequence": "Preserve interpretable image presentation without improving the acquired signal",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiographic_imaging",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radiology_diagnostic_display_calibration",
+      "local_demonstration": "Qualify display luminance, contrast and viewing conditions for diagnostic interpretation",
+      "operating_requirements": "Calibrated display, reference measurements and controlled viewing environment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    },
+    "branching_note": "Qualified film-viewing illumination or electronic display can be calibrated. Computerized image registration is not required before a radiograph can be viewed under measured conditions."
+  },
+  {
+    "field": "D14",
+    "id": "laparoscopic_access_systems",
+    "name": "Laparoscopic Access Systems",
+    "foundations": "clinical_endoscopy,aseptic_operating_practice",
+    "mechanism": "Provide qualified viewing and instrument access through limited surgical entry points",
+    "operating_requirement": "Actual access instruments, trained surgical team and anesthesia support",
+    "consequence": "Enable selected minimally invasive procedures without granting every surgical technique",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_endoscopy",
+      "aseptic_operating_practice"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "laparoscopic_access_systems",
+      "local_demonstration": "Provide qualified viewing and instrument access through limited surgical entry points",
+      "operating_requirements": "Actual access instruments, trained surgical team and anesthesia support",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "robot_assisted_surgical_manipulation",
+    "name": "Robot-Assisted Surgical Manipulation",
+    "foundations": "remote_manipulation",
+    "mechanism": "Map authorized surgeon motion into constrained instrument movement with evaluated feedback and failure handling",
+    "operating_requirement": "Qualified robot, trained surgical team, maintenance and fallback capability",
+    "consequence": "Support specified assisted procedures without autonomous clinical authority",
+    "status": "authored_draft",
+    "requires_all": [
+      "remote_manipulation"
+    ],
+    "requires_any": [
+      [
+        "image_guided_intervention_planning",
+        "clinical_endoscopy"
+      ]
+    ],
+    "branching_note": "Qualified direct endoscopic guidance can support surgeon-controlled systems without precomputed image-guided path planning.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "robot_assisted_surgical_manipulation",
+      "local_demonstration": "Map authorized surgeon motion into constrained instrument movement with evaluated feedback and failure handling",
+      "operating_requirements": "Qualified robot, trained surgical team, maintenance and fallback capability",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "surgical_stapling_systems",
+    "name": "Surgical Stapling Systems",
+    "foundations": "wound_closure_practice",
+    "mechanism": "Apply a qualified mechanical fastening pattern to suitable tissue with controlled formation",
+    "operating_requirement": "Compatible device and consumables, assessed tissue and trained surgical staff",
+    "consequence": "Provide one closure method while retaining misformation and tissue suitability risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "wound_closure_practice"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surgical_stapling_systems",
+      "local_demonstration": "Apply a qualified mechanical fastening pattern to suitable tissue with controlled formation",
+      "operating_requirements": "Compatible device and consumables, assessed tissue and trained surgical staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "electrosurgical_tissue_control",
+    "name": "Electrosurgical Tissue Control",
+    "foundations": "electrical_measurement,surgical_anatomy",
+    "mechanism": "Use qualified electrical energy delivery to produce an evaluated local tissue effect",
+    "operating_requirement": "Compatible generator and instruments, trained team and energy-path monitoring",
+    "consequence": "Support selected tissue cutting or hemostatic tasks with collateral-effect limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "surgical_anatomy"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electrosurgical_tissue_control",
+      "local_demonstration": "Use qualified electrical energy delivery to produce an evaluated local tissue effect",
+      "operating_requirements": "Compatible generator and instruments, trained team and energy-path monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "ultrasonic_surgical_instruments",
+    "name": "Ultrasonic Surgical Instruments",
+    "foundations": "surgical_anatomy",
+    "mechanism": "Use qualified mechanical vibration at an instrument tip to produce a controlled tissue effect",
+    "operating_requirement": "Actual instrument, power source, qualified consumables and trained operators",
+    "consequence": "Support selected surgical tasks without assuming diagnostic ultrasound proves surgical performance",
+    "status": "authored_draft",
+    "requires_all": [
+      "surgical_anatomy"
+    ],
+    "requires_any": [
+      [
+        "piezoelectric_ceramic_qualification",
+        "ultrasonic_flaw_mapping"
+      ]
+    ],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ultrasonic_surgical_instruments",
+      "local_demonstration": "Use qualified mechanical vibration at an instrument tip to produce a controlled tissue effect",
+      "operating_requirements": "Actual instrument, power source, qualified consumables and trained operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    },
+    "branching_note": "Qualified acoustic transducer or ultrasonic-instrument knowledge can support surgical-device development; a diagnostic imaging service is not mandatory. Clinical performance remains separately evaluated."
+  },
+  {
+    "field": "D14",
+    "id": "cryoablation_planning",
+    "name": "Cryoablation Planning",
+    "foundations": "surgical_anatomy",
+    "mechanism": "Plan and monitor a qualified localized tissue-freezing intervention against target and surrounding tissue constraints",
+    "operating_requirement": "Actual cryogenic system, imaging, trained team and evaluated indication",
+    "consequence": "Provide a bounded treatment option without guaranteed complete target destruction",
+    "status": "authored_draft",
+    "requires_all": [
+      "surgical_anatomy"
+    ],
+    "requires_any": [
+      [
+        "mechanical_refrigeration",
+        "cryogenic_air_separation"
+      ],
+      [
+        "image_guided_intervention_planning",
+        "clinical_endoscopy"
+      ]
+    ],
+    "branching_note": "Qualified image guidance or direct endoscopic guidance can support a defined localized intervention. Actual cooling, trained staff and evaluated clinical use remain required; diagnostic tomography is not universal.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryoablation_planning",
+      "local_demonstration": "Plan and monitor a qualified localized tissue-freezing intervention against target and surrounding tissue constraints",
+      "operating_requirements": "Actual cryogenic system, imaging, trained team and evaluated indication",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "thermal_ablation_planning",
+    "name": "Thermal Ablation Planning",
+    "foundations": "image_guided_intervention_planning",
+    "mechanism": "Plan a qualified localized heat treatment using measured or bounded tissue response",
+    "operating_requirement": "Compatible energy delivery, temperature or effect assessment and clinical oversight",
+    "consequence": "Treat a selected target while retaining incomplete treatment and adjacent injury risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "image_guided_intervention_planning"
+    ],
+    "requires_any": [
+      [
+        "electrosurgical_tissue_control",
+        "laser_light_generation"
+      ]
+    ],
+    "branching_note": "Qualified electrical or optical energy systems provide alternative heating architectures; method-specific dosimetry remains necessary.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "thermal_ablation_planning",
+      "local_demonstration": "Plan a qualified localized heat treatment using measured or bounded tissue response",
+      "operating_requirements": "Compatible energy delivery, temperature or effect assessment and clinical oversight",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "focused_ultrasound_intervention",
+    "name": "Focused Ultrasound Intervention",
+    "foundations": "ultrasound_imaging,image_guided_intervention_planning",
+    "mechanism": "Concentrate qualified acoustic energy in a clinically evaluated target volume",
+    "operating_requirement": "Actual compatible system, targeting evidence and monitored treatment conditions",
+    "consequence": "Support specified nonincisional intervention within tissue and acoustic-access limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "ultrasound_imaging",
+      "image_guided_intervention_planning"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "focused_ultrasound_intervention",
+      "local_demonstration": "Concentrate qualified acoustic energy in a clinically evaluated target volume",
+      "operating_requirements": "Actual compatible system, targeting evidence and monitored treatment conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "vascular_catheter_systems",
+    "name": "Vascular Catheter Systems",
+    "foundations": "surgical_anatomy,aseptic_operating_practice",
+    "mechanism": "Qualify a flexible access system for a defined vascular route and clinical function",
+    "operating_requirement": "Compatible materials, sterile supply, placement verification and trained team",
+    "consequence": "Enable selected vascular access while retaining vessel injury and infection risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "surgical_anatomy",
+      "aseptic_operating_practice"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vascular_catheter_systems",
+      "local_demonstration": "Qualify a flexible access system for a defined vascular route and clinical function",
+      "operating_requirements": "Compatible materials, sterile supply, placement verification and trained team",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "endovascular_scaffold_design",
+    "name": "Endovascular Scaffold Design",
+    "foundations": "vascular_catheter_systems,long_term_implant_integration",
+    "mechanism": "Qualify a delivered scaffold against vessel geometry, fatigue and biological response",
+    "operating_requirement": "Actual scaffold, suitable delivery system and longitudinal clinical evaluation",
+    "consequence": "Support a specified vessel application without universal patency or compatibility",
+    "status": "authored_draft",
+    "requires_all": [
+      "vascular_catheter_systems",
+      "long_term_implant_integration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "endovascular_scaffold_design",
+      "local_demonstration": "Qualify a delivered scaffold against vessel geometry, fatigue and biological response",
+      "operating_requirements": "Actual scaffold, suitable delivery system and longitudinal clinical evaluation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "hemodialysis_membrane_services",
+    "name": "Hemodialysis Membrane Services",
+    "foundations": "renal_replacement_services",
+    "mechanism": "Exchange selected solutes and fluid across a qualified extracorporeal membrane system",
+    "operating_requirement": "Actual dialyzer, qualified water and fluids, access, power and trained staff",
+    "consequence": "Replace selected renal functions while retaining supply, monitoring and complication limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "renal_replacement_services"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hemodialysis_membrane_services",
+      "local_demonstration": "Exchange selected solutes and fluid across a qualified extracorporeal membrane system",
+      "operating_requirements": "Actual dialyzer, qualified water and fluids, access, power and trained staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "peritoneal_dialysis_services",
+    "name": "Peritoneal Dialysis Services",
+    "foundations": "renal_replacement_services",
+    "mechanism": "Use a qualified peritoneal exchange process to remove selected solutes and fluid",
+    "operating_requirement": "Actual compatible supplies, access care, training and follow-up",
+    "consequence": "Provide a distinct renal-support route without requiring an extracorporeal blood circuit",
+    "status": "authored_draft",
+    "requires_all": [
+      "renal_replacement_services"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "peritoneal_dialysis_services",
+      "local_demonstration": "Use a qualified peritoneal exchange process to remove selected solutes and fluid",
+      "operating_requirements": "Actual compatible supplies, access care, training and follow-up",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "cardiac_pacing_systems",
+    "name": "Cardiac Pacing Systems",
+    "foundations": "electrocardiographic_recording",
+    "mechanism": "Deliver qualified timed electrical stimulation to support an indicated cardiac rhythm function",
+    "operating_requirement": "Suitable device, electrodes, power and continuing clinical checks",
+    "consequence": "Support selected rhythm needs without treating all cardiac disease",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrocardiographic_recording"
+    ],
+    "requires_any": [
+      [
+        "triode_valves",
+        "bipolar_junction_transistors"
+      ]
+    ],
+    "branching_note": "A qualified external electronic pacing route can precede compact implanted semiconductor devices; power, electrodes and clinical limits remain real.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cardiac_pacing_systems",
+      "local_demonstration": "Deliver qualified timed electrical stimulation to support an indicated cardiac rhythm function",
+      "operating_requirements": "Suitable device, electrodes, power and continuing clinical checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "cardiac_defibrillation_systems",
+    "name": "Cardiac Defibrillation Systems",
+    "foundations": "electrocardiographic_recording",
+    "mechanism": "Deliver an assessed therapeutic electrical intervention for a qualified rhythm indication",
+    "operating_requirement": "Actual evaluated device, capable responders and monitored clinical context",
+    "consequence": "Provide a defined rhythm intervention without guaranteed resuscitation",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrocardiographic_recording"
+    ],
+    "requires_any": [
+      [
+        "foil_capacitors",
+        "wound_transformers"
+      ]
+    ],
+    "branching_note": "Different qualified energy-delivery architectures can be evaluated; a specific modern capacitor design is not a universal discovery gate.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cardiac_defibrillation_systems",
+      "local_demonstration": "Deliver an assessed therapeutic electrical intervention for a qualified rhythm indication",
+      "operating_requirements": "Actual evaluated device, capable responders and monitored clinical context",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "extracorporeal_membrane_oxygenation",
+    "name": "Extracorporeal Membrane Oxygenation",
+    "foundations": "blood_gas_analysis,intensive_care_services",
+    "mechanism": "Exchange respiratory gases through a qualified extracorporeal circuit supporting an indicated patient",
+    "operating_requirement": "Actual circuit, oxygenator, power, consumables and continuously capable staff",
+    "consequence": "Provide temporary selected organ support while retaining major resource and complication burdens",
+    "status": "authored_draft",
+    "requires_all": [
+      "blood_gas_analysis",
+      "intensive_care_services"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "extracorporeal_membrane_oxygenation",
+      "local_demonstration": "Exchange respiratory gases through a qualified extracorporeal circuit supporting an indicated patient",
+      "operating_requirements": "Actual circuit, oxygenator, power, consumables and continuously capable staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "ventricular_assist_devices",
+    "name": "Ventricular Assist Devices",
+    "foundations": "long_term_implant_integration",
+    "mechanism": "Provide qualified mechanical blood-flow support for a defined ventricular function deficit",
+    "operating_requirement": "Actual pump system, power, compatible implantation service and long-term follow-up",
+    "consequence": "Support circulation without repairing every underlying cause or eliminating maintenance",
+    "status": "authored_draft",
+    "requires_all": [
+      "long_term_implant_integration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ventricular_assist_devices",
+      "local_demonstration": "Provide qualified mechanical blood-flow support for a defined ventricular function deficit",
+      "operating_requirements": "Actual pump system, power, compatible implantation service and long-term follow-up",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "cardiopulmonary_bypass_services",
+    "name": "Cardiopulmonary Bypass Services",
+    "foundations": "clinical_anesthesia,anesthesia_monitoring",
+    "mechanism": "Temporarily support circulation and gas exchange through a qualified operative bypass circuit",
+    "operating_requirement": "Actual perfusion equipment, consumables, trained team and surgical readiness",
+    "consequence": "Enable selected operative conditions with limited duration and complication risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_anesthesia",
+      "anesthesia_monitoring"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cardiopulmonary_bypass_services",
+      "local_demonstration": "Temporarily support circulation and gas exchange through a qualified operative bypass circuit",
+      "operating_requirements": "Actual perfusion equipment, consumables, trained team and surgical readiness",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "autologous_blood_salvage",
+    "name": "Autologous Blood Salvage",
+    "foundations": "blood_transfusion_services",
+    "mechanism": "Recover and process a patient's suitable lost blood for qualified reinfusion",
+    "operating_requirement": "Actual collection and processing equipment, trained staff and suitability checks",
+    "consequence": "Recover a limited usable fraction without replacing all lost components",
+    "status": "authored_draft",
+    "requires_all": [
+      "blood_transfusion_services"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "autologous_blood_salvage",
+      "local_demonstration": "Recover and process a patient's suitable lost blood for qualified reinfusion",
+      "operating_requirements": "Actual collection and processing equipment, trained staff and suitability checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "blood_product_pathogen_reduction",
+    "name": "Blood-Product Pathogen Reduction",
+    "foundations": "blood_component_separation",
+    "mechanism": "Apply a product-compatible validated process that reduces specified infectious hazards while preserving required function",
+    "operating_requirement": "Qualified equipment, consumables, testing and component-specific acceptance",
+    "consequence": "Lower specified hazards without claiming universal sterility or unchanged product performance",
+    "status": "authored_draft",
+    "requires_all": [
+      "blood_component_separation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "blood_product_pathogen_reduction",
+      "local_demonstration": "Apply a product-compatible validated process that reduces specified infectious hazards while preserving required function",
+      "operating_requirements": "Qualified equipment, consumables, testing and component-specific acceptance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "organ_perfusion_preservation",
+    "name": "Organ Perfusion Preservation",
+    "foundations": "tissue_perfusion_models",
+    "mechanism": "Maintain and assess a recovered organ under a qualified perfusion-preservation process",
+    "operating_requirement": "Actual device, compatible fluids, monitoring and time-sensitive transport",
+    "consequence": "Extend or assess selected organ usability without creating donor supply",
+    "status": "authored_draft",
+    "requires_all": [
+      "tissue_perfusion_models"
+    ],
+    "requires_any": [
+      [
+        "organ_transplant_services",
+        "surgical_anatomy"
+      ]
+    ],
+    "branching_note": "Qualified organ-preservation research can precede an operating transplant service; actual recovery access, clinical indication and downstream services remain separate requirements.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "organ_perfusion_preservation",
+      "local_demonstration": "Maintain and assess a recovered organ under a qualified perfusion-preservation process",
+      "operating_requirements": "Actual device, compatible fluids, monitoring and time-sensitive transport",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "pharmacodynamic_response_models",
+    "name": "Pharmacodynamic Response Models",
+    "foundations": "pharmacokinetic_analysis",
+    "mechanism": "Relate measured drug exposure to specified biological or clinical responses with uncertainty",
+    "operating_requirement": "Qualified exposure-response observations and defined outcome measures",
+    "consequence": "Distinguish exposure from effect without predicting every patient's response",
+    "status": "authored_draft",
+    "requires_all": [
+      "pharmacokinetic_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pharmacodynamic_response_models",
+      "local_demonstration": "Relate measured drug exposure to specified biological or clinical responses with uncertainty",
+      "operating_requirements": "Qualified exposure-response observations and defined outcome measures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "medicine_bioequivalence_evaluation",
+    "name": "Medicine Bioequivalence Evaluation",
+    "foundations": "pharmacokinetic_analysis,medicine_quality_assurance",
+    "mechanism": "Compare qualified exposure measures between specified medicine formulations under an appropriate study design",
+    "operating_requirement": "Characterized products, validated assays and justified comparison conditions",
+    "consequence": "Support a defined equivalence conclusion without assuming all formulations are interchangeable",
+    "status": "authored_draft",
+    "requires_all": [
+      "pharmacokinetic_analysis",
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "medicine_bioequivalence_evaluation",
+      "local_demonstration": "Compare qualified exposure measures between specified medicine formulations under an appropriate study design",
+      "operating_requirements": "Characterized products, validated assays and justified comparison conditions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "medicinal_solubility_formulation",
+    "name": "Medicinal Solubility Formulation",
+    "foundations": "medicine_quality_assurance",
+    "mechanism": "Alter and qualify a formulation's dissolution or dispersion behavior while retaining product stability",
+    "operating_requirement": "Actual active ingredient, compatible excipients and measured product performance",
+    "consequence": "Address a specified delivery limitation without guaranteeing greater clinical benefit",
+    "status": "authored_draft",
+    "requires_all": [
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "medicinal_solubility_formulation",
+      "local_demonstration": "Alter and qualify a formulation's dissolution or dispersion behavior while retaining product stability",
+      "operating_requirements": "Actual active ingredient, compatible excipients and measured product performance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "prodrug_activation_design",
+    "name": "Prodrug Activation Design",
+    "foundations": "pharmacokinetic_analysis",
+    "mechanism": "Evaluate conversion of a qualified precursor into an active medicinal species in a defined biological context",
+    "operating_requirement": "Characterized candidate, metabolic evidence and clinical evaluation",
+    "consequence": "Offer a conditional exposure-control strategy while retaining conversion variability",
+    "status": "authored_draft",
+    "requires_all": [
+      "pharmacokinetic_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "prodrug_activation_design",
+      "local_demonstration": "Evaluate conversion of a qualified precursor into an active medicinal species in a defined biological context",
+      "operating_requirements": "Characterized candidate, metabolic evidence and clinical evaluation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "inhaled_medicine_delivery",
+    "name": "Inhaled Medicine Delivery",
+    "foundations": "medicine_quality_assurance,respiratory_support_interfaces",
+    "mechanism": "Qualify an inhaled formulation and device against actual emitted and deposited dose performance",
+    "operating_requirement": "Compatible product and device, training and clinically evaluated use",
+    "consequence": "Provide a defined delivery route with technique and airway-dependent limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "medicine_quality_assurance",
+      "respiratory_support_interfaces"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "inhaled_medicine_delivery",
+      "local_demonstration": "Qualify an inhaled formulation and device against actual emitted and deposited dose performance",
+      "operating_requirements": "Compatible product and device, training and clinically evaluated use",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "transdermal_medicine_delivery",
+    "name": "Transdermal Medicine Delivery",
+    "foundations": "medicine_quality_assurance",
+    "mechanism": "Qualify controlled medicinal transport across intact skin using a compatible formulation and delivery system",
+    "operating_requirement": "Actual product, adhesion and transport evidence and clinical evaluation",
+    "consequence": "Provide a bounded delivery profile without assuming all medicines cross skin suitably",
+    "status": "authored_draft",
+    "requires_all": [
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "transdermal_medicine_delivery",
+      "local_demonstration": "Qualify controlled medicinal transport across intact skin using a compatible formulation and delivery system",
+      "operating_requirements": "Actual product, adhesion and transport evidence and clinical evaluation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "therapeutic_monoclonal_antibodies",
+    "name": "Therapeutic Monoclonal Antibodies",
+    "foundations": "immune_response_models,medicine_quality_assurance",
+    "mechanism": "Evaluate a defined monoclonal binding product for a specified therapeutic mechanism and indication",
+    "operating_requirement": "Qualified product supply, binding and functional evidence and clinical monitoring",
+    "consequence": "Provide a specific biological treatment option without universal target selectivity or efficacy",
+    "status": "authored_draft",
+    "requires_all": [
+      "immune_response_models",
+      "medicine_quality_assurance"
+    ],
+    "requires_any": [
+      [
+        "recombinant_bioproduction",
+        "clinical_trial_design"
+      ]
+    ],
+    "branching_note": "Locally manufactured or externally supplied qualified products can enter clinical evaluation; domestic biological manufacturing is not mandatory.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "therapeutic_monoclonal_antibodies",
+      "local_demonstration": "Evaluate a defined monoclonal binding product for a specified therapeutic mechanism and indication",
+      "operating_requirements": "Qualified product supply, binding and functional evidence and clinical monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "antibody_drug_conjugate_qualification",
+    "name": "Antibody-Drug Conjugate Qualification",
+    "foundations": "therapeutic_monoclonal_antibodies,targeted_drug_delivery",
+    "mechanism": "Qualify linked targeting and payload behavior as one therapeutic product",
+    "operating_requirement": "Characterized conjugate, stability and release evidence and clinical evaluation",
+    "consequence": "Test a specified targeting strategy while retaining off-target exposure and toxicity risks",
+    "status": "authored_draft",
+    "requires_all": [
+      "therapeutic_monoclonal_antibodies",
+      "targeted_drug_delivery"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "antibody_drug_conjugate_qualification",
+      "local_demonstration": "Qualify linked targeting and payload behavior as one therapeutic product",
+      "operating_requirements": "Characterized conjugate, stability and release evidence and clinical evaluation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "radioligand_therapy_qualification",
+    "name": "Radioligand Therapy Qualification",
+    "foundations": "radiopharmaceutical_tracing,radiotherapy_dose_planning",
+    "mechanism": "Evaluate a targeted radiolabeled therapeutic product with measured distribution and dosimetric constraints",
+    "operating_requirement": "Actual qualified product, handling infrastructure and clinical follow-up",
+    "consequence": "Provide a defined treatment option without assuming diagnostic uptake establishes therapeutic safety",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiopharmaceutical_tracing",
+      "radiotherapy_dose_planning"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radioligand_therapy_qualification",
+      "local_demonstration": "Evaluate a targeted radiolabeled therapeutic product with measured distribution and dosimetric constraints",
+      "operating_requirements": "Actual qualified product, handling infrastructure and clinical follow-up",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "clinical_time_to_event_analysis",
+    "name": "Clinical Time-to-Event Analysis",
+    "foundations": "clinical_trial_design,probability_theory",
+    "mechanism": "Estimate event timing while accounting for incomplete follow-up and declared event definitions",
+    "operating_requirement": "Accurate follow-up, event records and justified statistical assumptions",
+    "consequence": "Compare time-dependent outcomes without treating lost follow-up as event-free survival",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_trial_design",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "clinical_time_to_event_analysis",
+      "local_demonstration": "Estimate event timing while accounting for incomplete follow-up and declared event definitions",
+      "operating_requirements": "Accurate follow-up, event records and justified statistical assumptions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "adaptive_clinical_trial_rules",
+    "name": "Adaptive Clinical Trial Rules",
+    "foundations": "clinical_trial_design",
+    "mechanism": "Prespecify and evaluate evidence-dependent study changes while controlling their inferential consequences",
+    "operating_requirement": "Actual trial infrastructure, independent review and valid operating characteristics",
+    "consequence": "Adapt selected study decisions without unrestricted outcome-driven redesign",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_trial_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "adaptive_clinical_trial_rules",
+      "local_demonstration": "Prespecify and evaluate evidence-dependent study changes while controlling their inferential consequences",
+      "operating_requirements": "Actual trial infrastructure, independent review and valid operating characteristics",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "pragmatic_treatment_comparison",
+    "name": "Pragmatic Treatment Comparison",
+    "foundations": "clinical_trial_design",
+    "mechanism": "Compare treatment strategies under declared routine-care conditions and relevant patient outcomes",
+    "operating_requirement": "Capable care services, representative enrollment and reliable outcome follow-up",
+    "consequence": "Assess practical effectiveness without assuming one setting generalizes everywhere",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_trial_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pragmatic_treatment_comparison",
+      "local_demonstration": "Compare treatment strategies under declared routine-care conditions and relevant patient outcomes",
+      "operating_requirements": "Capable care services, representative enrollment and reliable outcome follow-up",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "competing_risk_clinical_models",
+    "name": "Competing-Risk Clinical Models",
+    "foundations": "clinical_time_to_event_analysis",
+    "mechanism": "Account for events that prevent the outcome of interest from occurring as originally defined",
+    "operating_requirement": "Reliable event classification and justified statistical modeling",
+    "consequence": "Avoid treating competing events as ordinary noninformative censoring",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_time_to_event_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "competing_risk_clinical_models",
+      "local_demonstration": "Account for events that prevent the outcome of interest from occurring as originally defined",
+      "operating_requirements": "Reliable event classification and justified statistical modeling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "transplant_immune_suppression_services",
+    "name": "Transplant Immune-Suppression Services",
+    "foundations": "organ_transplant_services,immune_response_models",
+    "mechanism": "Coordinate qualified suppression of unwanted immune responses with infection and toxicity monitoring",
+    "operating_requirement": "Actual evaluated medicines, assays, trained staff and continuing follow-up",
+    "consequence": "Support a specified transplant pathway without permanent tolerance or freedom from infection",
+    "status": "authored_draft",
+    "requires_all": [
+      "organ_transplant_services",
+      "immune_response_models"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "transplant_immune_suppression_services",
+      "local_demonstration": "Coordinate qualified suppression of unwanted immune responses with infection and toxicity monitoring",
+      "operating_requirements": "Actual evaluated medicines, assays, trained staff and continuing follow-up",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "transplant_tolerance_induction_trials",
+    "name": "Transplant Tolerance-Induction Trials",
+    "foundations": "histocompatibility_typing,clinical_trial_design",
+    "mechanism": "Evaluate a defined strategy for sustained donor-specific tolerance against qualified clinical endpoints",
+    "operating_requirement": "Characterized intervention, capable clinical service and long-term monitored evidence",
+    "consequence": "Investigate reduced treatment dependence without assuming tolerance can be achieved",
+    "status": "authored_draft",
+    "requires_all": [
+      "histocompatibility_typing",
+      "clinical_trial_design"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "transplant_tolerance_induction_trials",
+      "local_demonstration": "Evaluate a defined strategy for sustained donor-specific tolerance against qualified clinical endpoints",
+      "operating_requirements": "Characterized intervention, capable clinical service and long-term monitored evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    },
+    "confidence_class": "conditional_clinical_research_program",
+    "uncertainty_limit": "A proposed mechanism does not establish effective, durable or scalable clinical service; unsuccessful or adverse outcomes remain possible."
+  },
+  {
+    "field": "D14",
+    "id": "cell_therapy_potency_assays",
+    "name": "Cell-Therapy Potency Assays",
+    "foundations": "clinical_laboratory_quality",
+    "mechanism": "Relate a qualified product assay to a defined cell-therapy functional mechanism",
+    "operating_requirement": "Representative product samples, reference measures and validated assay performance",
+    "consequence": "Support bounded release decisions without assuming viable cell count proves therapeutic activity",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_laboratory_quality"
+    ],
+    "requires_any": [
+      [
+        "personalized_cell_therapy",
+        "cell_culture_methods"
+      ]
+    ],
+    "branching_note": "Product-function assays can be developed before an operating personalized therapy service; testing alone does not authorize clinical use.",
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cell_therapy_potency_assays",
+      "local_demonstration": "Relate a qualified product assay to a defined cell-therapy functional mechanism",
+      "operating_requirements": "Representative product samples, reference measures and validated assay performance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  },
+  {
+    "field": "D14",
+    "id": "bioartificial_organ_service_qualification",
+    "name": "Bioartificial Organ Service Qualification",
+    "foundations": "regenerative_tissue_treatment,long_term_implant_integration",
+    "mechanism": "Evaluate an integrated living and engineered support system against a defined organ-service need",
+    "operating_requirement": "Qualified biological stock, device support, supplies and longitudinal clinical evidence",
+    "consequence": "Test a conditional organ-support capability without promising complete replacement",
+    "status": "authored_draft",
+    "requires_all": [
+      "regenerative_tissue_treatment",
+      "long_term_implant_integration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bioartificial_organ_service_qualification",
+      "local_demonstration": "Evaluate an integrated living and engineered support system against a defined organ-service need",
+      "operating_requirements": "Qualified biological stock, device support, supplies and longitudinal clinical evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    },
+    "confidence_class": "conditional_clinical_research_program",
+    "uncertainty_limit": "A proposed mechanism does not establish effective, durable or scalable clinical service; unsuccessful or adverse outcomes remain possible."
+  },
+  {
+    "field": "D14",
+    "id": "patient_specific_implant_planning",
+    "name": "Patient-Specific Implant Planning",
+    "foundations": "clinical_image_registration,long_term_implant_integration",
+    "mechanism": "Translate qualified patient geometry and loads into an evaluated implant plan",
+    "operating_requirement": "Actual imaging, validated design process, manufacture and clinical review",
+    "consequence": "Improve fit for a defined case while retaining manufacturing and biological uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "clinical_image_registration",
+      "long_term_implant_integration"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain qualified instruction, collaborative evidence, commissioned evaluation, a supplied clinical or laboratory service, or interpretable delivered records and devices. Pay access, transport and local qualification. Acquiring knowledge never substitutes for an indicated treatment, qualified clinician, actual product or staffed service.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "patient_specific_implant_planning",
+      "local_demonstration": "Translate qualified patient geometry and loads into an evaluated implant plan",
+      "operating_requirements": "Actual imaging, validated design process, manufacture and clinical review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available provider",
+        "payment or reciprocal contribution",
+        "real travel, product delivery or transmission",
+        "finite local qualification and interpretation",
+        "continuing clinical staff, product, equipment and follow-up"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a qualified practitioner; local staff demonstrate the relevant assessment or technical capability within their trained scope.",
+        "partnership": "Contribute actual staff, qualified evidence, equipment time or funds; governance, patient consent, access and local interpretation remain required.",
+        "purchased_research": "Commission a defined clinical or engineering question from a competent source; pay for evidence and local evaluation without guaranteed benefit or a successful product.",
+        "licensed_or_imported_service": "Pay for actual qualified devices, medicines, laboratory analysis or staffed care within provider capacity; continuing supply, maintenance and referral remain dependencies.",
+        "reverse_engineering": "Study delivered instruments or authorized interpretable records with finite engineering and validation work; copying form does not establish sterility, performance, clinical safety or manufacturing quality."
+      }
+    },
+    "scope_boundary": "High-level game design, not a clinical procedure or patient-specific instruction. Learning does not authorize treatment or guarantee benefit. Qualified indications, consent, competent staff, actual supplies and monitored outcomes remain requirements.",
+    "implementation_status": "Authored proposal; physical supply and clinical-service capacity, training, acquisition penalties, AI use and patient outcomes remain pending.",
+    "clinical_outcome_contract": {
+      "guarantees_benefit": false,
+      "learning_authorizes_treatment": false,
+      "requires_evaluated_indication": true,
+      "requires_actual_staff_and_supply": true
+    }
+  }
+]

@@ -1,0 +1,17 @@
+# Tinplate Coating and Food Retorts
+
+Built-in image generation, one call per asset. The inspected apprentice_contracts.png was the style reference only. Both images were visually reviewed for distinct manufacturing activity, simplified workers, fibrous ivory and matte earth colors. They are illustrations, not technical operating diagrams. Selected originals copied unchanged into the workspace.
+
+## Tinplate Coating
+
+Asset: tinplate_coating.png
+Source: /Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-113062f6-0014-4ad4-813b-2130ddb44ecf.png
+
+Use case: historical-scene. Asset type: square technology-tree illustration for Tomorrow and Tomorrow. Subject: Tinplate Coating. Input image is STYLE REFERENCE ONLY. Match its matte gouache on warm ivory fibrous paper, sparse dry-brush texture, muted ochre terracotta olive slate, simplified workers and low composition with broad empty paper above. A distinct early industrial tinning workshop scene: an adult worker in a plain ochre shirt and dark apron, wearing heavy work gloves, holds long metal tongs suspending one thin rectangular grey steel sheet vertically above a low rectangular coating bath set into a small brick hearth. A pale satin silvery surface across the sheet indicates tin coating, with no mirror reflections. Another adult in ivory work clothes stands farther back beside a wooden rack holding three similar thin coated sheets, separated and hanging vertically. Keep the bath, sheet, hands and both figures legible within the lower half; minimal workshop surroundings, no roof or dense interior. Small modest warm pigment beneath the hearth, no dramatic sparks or glowing molten waterfall. Quiet skilled labor, flat paint, broken brush edges, soft charcoal shadows. No modern electrical machines, chrome render, photorealism, glossy 3D, text, labels, numbers, logos, watermark or decorative border.
+
+## Food Retorts
+
+Asset: food_retorts.png
+Source: /Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-f32f10da-8ac3-4fc8-97b6-b9402d663bee.png
+
+Use case: historical-scene. Asset type: square technology-tree illustration for Tomorrow and Tomorrow. Subject: Food Retorts. Input image is STYLE REFERENCE ONLY. Match matte gouache on fibrous warm ivory paper, restrained ochre olive terracotta slate, simplified human forms, dry-brush texture, soft charcoal shadows, and a low composition with broad blank paper above. Distinct early industrial food-preservation workshop: a squat horizontal cylindrical dull slate iron retort on short legs, its circular front door swung open on a visible side hinge, showing an unpressurized dark chamber. A worker in a simple ochre shirt and ivory apron guides a shallow metal basket containing an orderly small group of plain unlabeled metal food cans toward the open chamber. A second worker in faded ivory clothing stands beside the vessel holding a folded blank record sheet. A small round analog gauge on top has no legible markings. A compact brick firebox and short pipe suggest the heat supply, but no open flame or steam escaping the open door. Show the loading stage while the vessel is cool and open, not active pressurized processing. Keep the complete vessel, door, basket and people within the lower half, upper half mostly empty ivory with no detailed factory interior. Human-scale equipment, gentle flat pigment, no gleaming chrome, modern touchscreens, oversized industrial hall, photorealism, glossy 3D, text, labels, numbers, logos, watermark or border.
