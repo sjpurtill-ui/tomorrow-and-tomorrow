@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 95: **434 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 96: **441 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1043,3 +1043,18 @@ Verification: 63 cases across manufacturing licenses (19, including four new fer
 No save fields, catalog identities, unit counts or artwork were added: 434 live discoveries, 89 roles, seven installation types, 38 reviewed images, 396 queued images. The full objective still needs 4,566 authored identities and the broader operating, acquisition, art, pacing and integration work. Shared integration files are the license and civilian-production planners, crop-nutrition helper, license tests and review records. Existing government/labor ownership remains unchanged.
 
 Limits: currently supplied fertilizer manufacture, not raw-material procurement or upstream-license sequencing. Potential complementary contracts may be refused or arrive too far apart; this is not an optimal multi-provider contract scheduler. Hunger/war/new-embassy restrictions, 30-day retry history, payment reserves, one-year expiry and reduced throughput remain. No canonical or full-span campaign verification. Diagnostic session 57160 was re-polled live; last inspected at year 142, population 3,777, 149 known discoveries and 17 settlements on its loaded 414-discovery revision. Its 250-year target is still pending.
+
+
+## Checkpoint 96: finite electrical storage and manufactured batteries
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `84d05a6`. No canonical integration or player launch.
+
+Seven distinct discoveries and seven component recipes connect lead, paper separators, sulfuric acid and existing electrical control into manufactured cells, banks and charge controllers. Two commissioned installation types start empty, consume real surplus generation, lose energy, and cover power interruptions within finite capacity, discharge and operator limits. Existing consumers retain staff; powered workshop work retains a labor and electricity reservation. Generation capacity is shared across dispatch passes. See [Electrical storage](ELECTRICAL_STORAGE.md) for coefficients, sources and limits.
+
+Verification: 109 cases across storage (11), existing operations (14), electronic components (5), semiconductors (7), power planning (8), civilian industry (12), crop nutrition (13), technology tree (9), owned simulations (19), and visual atlas (11). Zero errors/failures/skips/orphans. New cases manufacture and commission a bank, confirm its empty initial state and real charging, exercise interrupted generation, finite cooling forecasts, operator shortages, workshop reservations, travel, missing consumables, capacity validation, and owned-save isolation/round-trip. An initial test fixture carried an earlier manufacturing line across tests; resetting its military state resolved that test isolation error.
+
+Graph audit: 441 discoveries, 215 explicit routes, no graph errors. Resource dependency audit structurally reaches all 441 under its abundant-resource assumptions; it is not campaign proof. Before/after 400-day runs both reach their targets and match initial/final gameplay, discoveries, snapshots and other non-timing fields, apart from catalog count. Timing differs under concurrent diagnostic load and is not a performance benchmark. Reports are archived as `artifacts/technology-pacing/battery-before-400-days.json` and `battery-after-400-days.json`.
+
+Save compatibility: storage values are optional fields in existing installation records, defaulting to zero. Validation bounds now cover nine installation types. New identities require this revision. Shared files: discovery registration, civilian recipe catalog, operating service dispatcher and panel, graph audit, existing bound tests, art queue and review records. New storage modules, tests and documentation are task-owned. No government or population ownership changes.
+
+Current totals: 441 authored discoveries, 89 military roles, nine installation types, 38 reviewed images and 403 queued live images. Another 4,559 discovery identities and extensive operating, acquisition, art, pacing and integration work remain. AI does not yet invest in batteries, solar has no day/night model, and storage lacks lifetime wear or mobile use. Session 57160 was re-polled live; last inspected year 156, population 5,798, 167 known discoveries, 17 settlements on its loaded 414-discovery revision. Its 250-year target remains pending. Full-history completion is not claimed.

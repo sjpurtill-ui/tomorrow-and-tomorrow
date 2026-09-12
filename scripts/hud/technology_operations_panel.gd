@@ -27,6 +27,8 @@ func refresh()->void:
 		var row:Dictionary=rows[id];var spec:Dictionary=Ops.PLANTS[id]
 		var record:Dictionary=Ops.data().plants.get(id,{})
 		row.label.text="%s · %d installed · %d being commissioned. Requires %.1f Crafting operators per unit and %.1f power units per day." % [spec.name,int(record.get("installed",0)),int(record.get("building",0)),float(spec.workers),float(spec.power)]
+		if spec.has("storage"):
+			row.label.text="%s · %d installed · %d being commissioned. Up to %.2f Crafting operators per active unit. Each stores %.1f energy units, charges up to %.1f and supplies up to %.1f per day; charging and discharge incur losses." % [spec.name,int(record.get("installed",0)),int(record.get("building",0)),float(spec.workers),float(spec.storage.capacity),float(spec.storage.charge_rate),float(spec.storage.discharge_rate)]
 		if float(spec.services.get("electricity",0))>0:row.label.text+=" Nominal generation: %.1f power units per day." % float(spec.services.electricity)
 		row.label.text+="\n"+Ops.status(id)
 		var terms:=Ops.quote(id)

@@ -97,7 +97,7 @@ func test_new_array_save_round_trip_and_scaled_service_bounds()->void:
 	factory();Ops.data().plants.solar_array={"installed":1000,"building":0,"work":0.0,"enabled":true}
 	var saved:Dictionary=JSON.parse_string(JSON.stringify(Ops.data()))
 	assert_bool(Ops.valid(saved)).is_true()
-	saved.services["electricity"]=14000.0
+	saved.services["electricity"]=23000.0
 	assert_bool(Ops.valid(saved)).is_true()
-	saved.services["electricity"]=14001.0
+	saved.services["electricity"]=23001.0
 	assert_bool(Ops.valid(saved)).is_false()

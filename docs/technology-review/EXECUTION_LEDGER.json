@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 434,
+    "live": 441,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -69,13 +69,14 @@
     "Field armorer teams unlock paid repair tools and mobilized field repair companies; supplied, trained crews at home share a finite repair-work budget and reserve real damaged equipment and materials through existing workshop jobs",
     "Eleven authored crop-nutrition/industrial-feedstock discoveries and twelve recipes; fertilizer-derived N/P reserves are local, saved and consumed by cultivation; forecasts exhaust finite supplies; ordinary AI invests in complementary fertilizer production",
     "Reviewed paper-and-gouache subject art for Nutrient Response Trials and Catalytic Ammonia Synthesis; atlas verification now checks every explicit binding rather than an older fixed subset",
-    "AI can acquire complementary fertilizer manufacturing methods through separate paid license trips from examined prospects; local nutrient needs are shared with production planning, and reduced-throughput manufacture feeds actual crops without discovery grants"
+    "AI can acquire complementary fertilizer manufacturing methods through separate paid license trips from examined prospects; local nutrient needs are shared with production planning, and reduced-throughput manufacture feeds actual crops without discovery grants",
+    "Seven electrical-storage discoveries and manufactured components; two commissioned finite-energy bank types with real charging, losses, discharge, operators and conservative forecasts"
   ],
   "unfinished": [
-    "Remaining 4566 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4559 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
-    "Civilian and future operating models beyond seven primary-settlement plants; solar weather, storage and night-time balancing",
+    "Civilian and future operating models beyond nine primary-settlement plants; solar weather, battery wear and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 89 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline",
@@ -96,9 +97,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 434,
+    "live_subjects": 441,
     "verified_subject_images": 38,
-    "queued_live_images": 396,
+    "queued_live_images": 403,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

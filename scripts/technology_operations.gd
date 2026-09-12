@@ -2,6 +2,7 @@ extends RefCounted
 ## Aggregate primary-settlement installations. Government still assigns roles;
 ## operators reserve capacity within Crafting rather than creating workers.
 const LIMIT:=1000
+const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
 	"solar_array":{"name":"Photovoltaic array","gate":"photovoltaic_power","requires":["cable_insulation"],"cost":{"Photovoltaic Modules":1.0,"Insulated Cable":2.0,"Steel":1.0},"work":12.0,"workers":.2,"inputs":{},"power":0.0,"services":{"electricity":4.0}},
 	"steam_generator":{"name":"Steam-electric works","gate":"electrical_generators","requires":["steam_propulsion"],"cost":{"Electrical Generators":1.0,"Pressure Vessels":1.0,"Wrought Iron":5.0},"work":20.0,"workers":2.0,"inputs":{"Coal":.5,"Freshwater":1.0},"power":0.0,"services":{"electricity":10.0}},
@@ -9,7 +10,9 @@ const PLANTS={
 	"powered_workshop":{"name":"Motor-driven workshop","gate":"electric_motors","requires":["electrical_generators"],"cost":{"Electric Motors":1.0,"Insulated Cable":2.0,"Wrought Iron":2.0},"work":10.0,"workers":1.0,"inputs":{},"power":2.0,"services":{"mechanical_work":3.0}},
 	"controlled_workshop":{"name":"Electronically controlled workshop","gate":"electronic_machine_control","requires":["electric_motors"],"cost":{"Electronic Controllers":1.0,"Electric Motors":1.0,"Insulated Cable":2.0,"Steel":2.0},"work":15.0,"workers":1.5,"inputs":{},"power":2.5,"services":{"mechanical_work":4.5}},
 	"sequenced_workshop":{"name":"Hardwired sequencing workshop","gate":"hardwired_sequence_control","requires":["electric_motors"],"cost":{"Sequence Controllers":1.0,"Electric Motors":1.0,"Insulated Cable":2.0,"Steel":3.0},"work":18.0,"workers":1.5,"inputs":{},"power":3.0,"services":{"mechanical_work":5.0}},
-	"programmable_workshop":{"name": "Programmable machine workshop", "gate": "stored_program_control", "requires": ["electric_motors"], "cost": {"Programmable Controllers": 1.0, "Electric Motors": 1.0, "Insulated Cable": 2.0, "Steel": 3.0}, "work": 20.0, "workers": 1.5, "inputs": {}, "power": 4.0, "services": {"mechanical_work": 6.0}}
+	"programmable_workshop":{"name": "Programmable machine workshop", "gate": "stored_program_control", "requires": ["electric_motors"], "cost": {"Programmable Controllers": 1.0, "Electric Motors": 1.0, "Insulated Cable": 2.0, "Steel": 3.0}, "work": 20.0, "workers": 1.5, "inputs": {}, "power": 4.0, "services": {"mechanical_work": 6.0}},
+	"battery_store":{"name": "Supervised battery store", "gate": "battery_bank_wiring", "requires": ["cable_insulation"], "cost": {"Battery Banks": 1.0, "Insulated Cable": 1.0}, "work": 12.0, "workers": 1.0, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 3.0, "discharge_rate": 3.0, "charge_efficiency": 0.8, "discharge_efficiency": 0.8, "self_discharge": 0.001}},
+	"regulated_battery_store":{"name": "Regulated battery store", "gate": "charge_regulation", "requires": ["battery_bank_wiring"], "cost": {"Battery Banks": 1.0, "Charge Controllers": 1.0, "Insulated Cable": 1.0}, "work": 16.0, "workers": 0.25, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 6.0, "discharge_rate": 6.0, "charge_efficiency": 0.9, "discharge_efficiency": 0.9, "self_discharge": 0.0005}}
 }
 static func empty_state()->Dictionary:return {"last_day":-1,"plants":{},"services":{},"workers":0.0,"inputs":{}}
 static func data()->Dictionary:return WorldSimulation.state.technology_operations
@@ -66,37 +69,41 @@ static func consume_electricity(amount:float)->float:
 static func advance(day:int)->void:
 	var ledger:=data()
 	if day<=int(ledger.last_day):return
+	var elapsed:=maxi(1,day-int(ledger.last_day)) if int(ledger.last_day)>=0 else 1
 	ledger.last_day=day;ledger.services={};ledger.inputs={};ledger.workers=0.0
+	Storage.retain(ledger,PLANTS,elapsed)
 	for record:Dictionary in ledger.plants.values():record["running_units"]=0.0
 	var state:=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling:return
 	var available:float=state.effective_workers("Crafting")
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1.0)
 	if condition<=0 or available<=0:return
-	var demand:=workshop_power_demand()
+	var workshop_demand:=workshop_power_demand()
+	var demand:=workshop_demand
 	for id:String in PLANTS:
 		var record:Dictionary=ledger.plants.get(id,{})
-		if not record.is_empty() and record.enabled:demand+=int(record.installed)*float(PLANTS[id].power)*condition
-	# Generation is dispatched against actual installed demand, not an infinite
-	# stockpile of electricity. Consumers share the resulting daily service.
+		if record.is_empty() or not record.enabled or float(PLANTS[id].power)<=0:continue
+		var spec:Dictionary=PLANTS[id]
+		var units:=float(record.installed)*condition
+		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		demand+=units*float(spec.power)
+	# Serve current demand first; storage covers a generation shortfall.
+	available=_generate(ledger,available,condition,demand)
+	var discharge_workshop_workers:=maxf(0,available-_consumer_staff(float(ledger.services.get("electricity",0)),condition))*clampf(WorldSimulation.military.production_labor_share,0,1) if workshop_demand>0 else 0.0
+	available=discharge_workshop_workers+Storage.discharge(ledger,PLANTS,available-discharge_workshop_workers,condition,demand,func(power:float)->float:return _consumer_staff(power,condition))
 	for id:String in PLANTS:
 		var record:Dictionary=ledger.plants.get(id,{})
 		if record.is_empty() or not record.enabled or int(record.installed)<=0:continue
 		var spec:Dictionary=PLANTS[id]
+		if float(spec.services.get("electricity",0))>0 or spec.has("storage"):continue
 		var units:=minf(float(record.installed),available/float(spec.workers))*condition
-		if float(spec.services.get("electricity",0))>0:units=minf(units,maxf(0,demand-float(ledger.services.get("electricity",0)))/float(spec.services.electricity))
 		if float(spec.power)>0:units=minf(units,float(ledger.services.get("electricity",0))/float(spec.power))
 		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
-		if units<=0:continue
-		record["running_units"]=units
-		var staff:=units/condition*float(spec.workers)
-		available-=staff;ledger.workers+=staff
-		for item:String in spec.inputs:
-			var amount:=units*float(spec.inputs[item])
-			state.resource_stockpiles[item]=maxf(0,float(state.resource_stockpiles.get(item,0))-amount)
-			ledger.inputs[item]=float(ledger.inputs.get(item,0))+amount
-		if float(spec.power)>0:ledger.services.electricity=maxf(0,float(ledger.services.get("electricity",0))-units*float(spec.power))
-		for name:String in spec.services:ledger.services[name]=float(ledger.services.get(name,0))+units*float(spec.services[name])
+		if units>0:available=_operate(ledger,record,spec,units,available,condition)
+	# Charging can use spare generation, after consumer operators and the
+	# electricity budget for pending workshop production have been protected.
+	var protected_workers:=available*clampf(WorldSimulation.military.production_labor_share,0,1) if workshop_demand>0 else 0.0
+	available=protected_workers+Storage.charge(ledger,PLANTS,available-protected_workers,condition,workshop_demand,func(target:float,workers:float)->float:return _generate(ledger,workers,condition,target))
 	# Existing services take priority over expansion; spent machinery stays
 	# in the installation record through suspension and saving.
 	for id:String in PLANTS:
@@ -108,12 +115,46 @@ static func advance(day:int)->void:
 		record.work+=staff*condition;available-=staff;ledger.workers+=staff
 		var completed:=mini(int(record.building),floori((float(record.work)+.00000001)/float(spec.work)))
 		record.installed+=completed;record.building-=completed;record.work=maxf(0,float(record.work)-completed*float(spec.work))
+static func _consumer_staff(power:float,condition:float)->float:
+	var staff:=0.0
+	for id:String in PLANTS:
+		var spec:Dictionary=PLANTS[id];var record:Dictionary=data().plants.get(id,{})
+		if record.is_empty() or not record.enabled or float(spec.power)<=0:continue
+		var units:=minf(float(record.installed)*condition,power/float(spec.power))
+		for item:String in spec.inputs:units=minf(units,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		staff+=units/condition*float(spec.workers)
+		power=maxf(0,power-units*float(spec.power))
+	return staff
+static func _generate(ledger:Dictionary,available:float,condition:float,target:float)->float:
+	for id:String in PLANTS:
+		var spec:Dictionary=PLANTS[id]
+		var output:=float(spec.services.get("electricity",0))
+		var record:Dictionary=ledger.plants.get(id,{})
+		if output<=0 or record.is_empty() or not record.enabled or int(record.installed)<=0:continue
+		var remaining:=maxf(0,float(record.installed)*condition-float(record.get("running_units",0)))
+		var units:=minf(remaining,available/float(spec.workers)*condition)
+		units=minf(units,maxf(0,target-float(ledger.services.get("electricity",0)))/output)
+		for item:String in spec.inputs:units=minf(units,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		if units>0:available=_operate(ledger,record,spec,units,available,condition)
+	return available
+static func _operate(ledger:Dictionary,record:Dictionary,spec:Dictionary,units:float,available:float,condition:float)->float:
+	record["running_units"]=float(record.get("running_units",0))+units
+	var staff:=units/condition*float(spec.workers)
+	available-=staff;ledger.workers+=staff
+	for item:String in spec.inputs:
+		var amount:=units*float(spec.inputs[item])
+		WorldSimulation.state.resource_stockpiles[item]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0))-amount)
+		ledger.inputs[item]=float(ledger.inputs.get(item,0))+amount
+	if float(spec.power)>0:ledger.services.electricity=maxf(0,float(ledger.services.get("electricity",0))-units*float(spec.power))
+	for name:String in spec.services:ledger.services[name]=float(ledger.services.get(name,0))+units*float(spec.services[name])
+	return available
 static func status(id:String)->String:
 	var record:Dictionary=data().plants.get(id,{})
 	if record.is_empty():return "Not installed"
 	if WorldSimulation.state.convoy_traveling:return "Inactive while traveling"
 	if not record.enabled:return "Pause scheduled; today's service is already delivered" if float(record.get("running_units",0))>0 else "Paused"
 	if int(data().last_day)!=int(WorldSimulation.state.elapsed_days):return "Awaiting daily review"
+	if PLANTS[id].has("storage") and int(record.installed)>0:return "Stored %.2f / %.1f energy units; today charged %.2f and supplied %.2f." % [float(record.get("stored_energy",0)),float(PLANTS[id].storage.capacity)*int(record.installed),float(record.get("charge_input",0)),float(record.get("discharge_output",0))]
 	if float(record.get("running_units",0))>0:return "Operating %.2f of %d installed units" % [float(record.running_units),int(record.installed)]
 	if int(record.installed)<=0:return "Commissioning: %.1f work completed toward the next unit" % float(record.work)
 	var spec:Dictionary=PLANTS[id]
@@ -122,6 +163,7 @@ static func status(id:String)->String:
 	if float(spec.power)>0:return "Waiting for power or available Crafting operators"
 	return "Waiting for powered demand or available Crafting operators"
 static func forecast_service(name:String,days_ahead:int)->float:
+	if not Storage.forecast_available(data(),PLANTS,days_ahead):return 0.0
 	# Conservative fixed-stock forecast: future extraction and deliveries are
 	# not promised. Real daily operation recalculates after actual resupply.
 	for item:String in data().inputs:
@@ -137,15 +179,15 @@ static func valid(value:Variant)->bool:
 	if not value.plants is Dictionary or value.plants.size()>PLANTS.size():return false
 	for field:String in ["last_day","workers"]:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
-	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>14000:return false
+	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>18000:return false
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
 			if field=="services" and key not in ["electricity","cold_storage","mechanical_work"]:return false
 			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":18500.0}:
-		if float(value.services.get(name,0))>float({"electricity":14000.0,"cold_storage":200000.0,"mechanical_work":18500.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":18500.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":18500.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]
@@ -153,6 +195,7 @@ static func valid(value:Variant)->bool:
 		for field:String in ["installed","building","work"]:
 			if not number(record[field]) or record[field]<0:return false
 		if not number(record.get("running_units",0)) or float(record.get("running_units",0))<0 or float(record.get("running_units",0))>float(record.installed)+.000001:return false
+		if not Storage.valid(record,PLANTS[id]):return false
 		if record.installed!=floorf(record.installed) or record.building!=floorf(record.building) or record.installed+record.building>LIMIT or record.work>=float(PLANTS[id].work):return false
 	return true
 static func number(value:Variant)->bool:return (value is float or value is int) and is_finite(float(value))

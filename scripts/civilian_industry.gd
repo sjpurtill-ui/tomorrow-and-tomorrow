@@ -2,6 +2,14 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"refined_lead":{"name": "Refined lead", "output": "Refined Lead", "gate": "lead_smelting", "materials": {"Lead Ore": 2.0, "Timber": 2.0}, "days": 3.0, "tooling": {"Clay": 5.0, "Stone": 5.0}},
+	"lead_electrode_sheets":{"name": "Rolled lead electrode sheets", "output": "Lead Sheets", "gate": "lead_sheet_rolling", "materials": {"Refined Lead": 1.0}, "days": 3.0, "tooling": {"Wrought Iron": 3.0, "Shaft Bearings": 1.0}},
+	"battery_separators":{"name": "Porous cell separators", "output": "Battery Separators", "gate": "porous_battery_separators", "materials": {"Paper Pulp": 1.0, "Freshwater": 1.0}, "days": 3.0, "tooling": {"Timber": 2.0, "Clay": 2.0}},
+	"lead_oxide":{"name": "Lead oxide electrode feed", "output": "Lead Oxide", "gate": "lead_oxide_preparation", "materials": {"Refined Lead": 1.0, "Timber": 1.0}, "days": 3.0, "tooling": {"Clay": 3.0, "Glass": 2.0}},
+	"lead_acid_cell":{"name": "Formed lead-acid cells", "output": "Lead-Acid Cells", "gate": "lead_acid_cells", "materials": {"Lead Sheets": 1.0, "Lead Oxide": 1.0, "Battery Separators": 1.0, "Sulfuric Acid": 1.0, "Glass Vessels": 1.0}, "days": 5.0, "power": 2.0, "daily_power": 1.0, "tooling": {"Insulated Cable": 2.0, "Glass": 2.0}},
+	"battery_bank":{"name": "Stationary battery bank", "output": "Battery Banks", "gate": "battery_bank_wiring", "materials": {"Lead-Acid Cells": 2.0, "Insulated Cable": 1.0, "Timber": 2.0}, "days": 5.0, "tooling": {"Wrought Iron": 2.0, "Stone": 2.0}},
+	"battery_charge_controller":{"name": "Battery charge controllers", "output": "Charge Controllers", "gate": "charge_regulation", "materials": {"Sensor Assemblies": 1.0, "Relays": 2.0, "Insulated Cable": 1.0}, "days": 4.0, "tooling": {"Wrought Iron": 2.0, "Glass": 1.0}},
+
 	"nitrate_fertilizer":{"name": "Prepared nitrate fertilizer", "output": "Nitrate Fertilizer", "gate": "mineral_nitrate_dressing", "materials": {"Nitrates": 1.0, "Freshwater": 1.0}, "days": 2.0, "tooling": {"Clay": 3.0, "Stone": 2.0}},
 	"ground_phosphate_fertilizer":{"name": "Ground phosphate dressing", "output": "Ground Phosphate", "gate": "phosphate_dressing", "materials": {"Phosphate Rock": 1.0}, "days": 3.0, "tooling": {"Stone": 5.0, "Timber": 2.0}},
 	"recovered_sulfur_dioxide":{"name": "Recovered sulfur gas", "output": "Sulfur Dioxide", "gate": "sulfur_dioxide_recovery", "materials": {"Sulfur": 1.0, "Timber": 1.0}, "days": 3.0, "tooling": {"Glass": 3.0, "Clay": 3.0}},

@@ -2986,6 +2986,62 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/lead_smelting.png",
+      "description": "Lead-bearing feed is processed into a workable metal stock rather than treated as finished electrical material.",
+      "domain": "production",
+      "id": "lead_smelting",
+      "name": "Lead Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_sheet_rolling.png",
+      "description": "Rollers produce repeatable lead sheets for electrode assemblies.",
+      "domain": "production",
+      "id": "lead_sheet_rolling",
+      "name": "Lead Sheet Rolling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/porous_battery_separators.png",
+      "description": "Prepared porous separators keep opposing electrodes apart while allowing the electrolyte to work between them.",
+      "domain": "production",
+      "id": "porous_battery_separators",
+      "name": "Porous Battery Separators",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_oxide_preparation.png",
+      "description": "A controlled preparation produces lead-oxide feed for rechargeable electrode manufacture.",
+      "domain": "production",
+      "id": "lead_oxide_preparation",
+      "name": "Lead Oxide Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_acid_cells.png",
+      "description": "Lead electrodes, separators and electrolyte are assembled and formed into rechargeable cells.",
+      "domain": "production",
+      "id": "lead_acid_cells",
+      "name": "Lead-Acid Cells",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/battery_bank_wiring.png",
+      "description": "Cell assemblies are connected and housed as a stationary energy store with supervised charging and discharge.",
+      "domain": "production",
+      "id": "battery_bank_wiring",
+      "name": "Battery Bank Wiring",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/charge_regulation.png",
+      "description": "Sensing and switching regulate a battery bank with less continuous operator effort.",
+      "domain": "production",
+      "id": "charge_regulation",
+      "name": "Charge Regulation",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3475,9 +3531,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 434,
+  "live_count": 441,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 396,
+  "queued_count": 403,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
