@@ -1,0 +1,2293 @@
+[
+  {
+    "field": "D05",
+    "id": "fuel_moisture_assessment",
+    "name": "Fuel Moisture Assessment",
+    "foundations": "standard_measures",
+    "mechanism": "Relate measured fuel moisture to usable heating performance and storage behavior",
+    "operating_requirement": "Representative samples, suitable measurement tools and recorded combustion evidence",
+    "consequence": "Distinguish dry fuel energy from mass of wet stock",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures"
+    ],
+    "requires_any": [
+      [
+        "calorimetry",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fuel_moisture_assessment",
+      "local_demonstration": "Relate measured fuel moisture to usable heating performance and storage behavior",
+      "operating_requirements": "Representative samples, suitable measurement tools and recorded combustion evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Repeated drying and comparative fuel trials can precede calorimetry; measurements remain method-limited."
+  },
+  {
+    "field": "D05",
+    "id": "combustion_air_regulation",
+    "name": "Combustion Air Regulation",
+    "foundations": "kiln_control",
+    "mechanism": "Adjust combustion air delivery against observed fuel behavior and required heat",
+    "operating_requirement": "Controllable air paths, suitable fuel, operator attention and ventilation",
+    "consequence": "Improve evaluated heat delivery while excess air and incomplete burning remain losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "kiln_control"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "combustion_air_regulation",
+      "local_demonstration": "Adjust combustion air delivery against observed fuel behavior and required heat",
+      "operating_requirements": "Controllable air paths, suitable fuel, operator attention and ventilation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "furnace_draft_design",
+    "name": "Furnace Draft Design",
+    "foundations": "combustion_air_regulation",
+    "mechanism": "Arrange pressure and flow paths to sustain qualified combustion exhaust movement",
+    "operating_requirement": "Suitable flues, construction materials, inspection and trained operation",
+    "consequence": "Support predictable draft without treating enclosed fire as automatically safe",
+    "status": "authored_draft",
+    "requires_all": [
+      "combustion_air_regulation"
+    ],
+    "requires_any": [
+      [
+        "flow_continuity",
+        "kiln_control"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "furnace_draft_design",
+      "local_demonstration": "Arrange pressure and flow paths to sustain qualified combustion exhaust movement",
+      "operating_requirements": "Suitable flues, construction materials, inspection and trained operation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Empirical kiln observations can guide draft before formal flow analysis; actual ventilation and inspected construction remain required."
+  },
+  {
+    "field": "D05",
+    "id": "industrial_burner_atomization",
+    "name": "Industrial Burner Atomization",
+    "foundations": "fuel_refining",
+    "mechanism": "Disperse qualified liquid fuel into an evaluated burner flow for controlled combustion",
+    "operating_requirement": "Compatible burner, pumps or atomizing service, fuel and maintained controls",
+    "consequence": "Use selected liquid fuels within measured combustion limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "fuel_refining"
+    ],
+    "requires_any": [
+      [
+        "compressed_air_systems",
+        "pressure_vessels"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "industrial_burner_atomization",
+      "local_demonstration": "Disperse qualified liquid fuel into an evaluated burner flow for controlled combustion",
+      "operating_requirements": "Compatible burner, pumps or atomizing service, fuel and maintained controls",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Qualified pressure-driven and air-assisted delivery are alternative atomization traditions; compatible controlled burner hardware remains necessary."
+  },
+  {
+    "field": "D05",
+    "id": "biomass_gasification",
+    "name": "Biomass Gasification",
+    "foundations": "charcoal,gas_composition_analysis",
+    "mechanism": "Convert biomass into a characterized combustible gas through controlled partial conversion",
+    "operating_requirement": "Prepared feedstock, qualified reactor, gas cleaning and operators",
+    "consequence": "Supply variable fuel gas while consuming biomass and producing residues",
+    "status": "authored_draft",
+    "requires_all": [
+      "charcoal",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biomass_gasification",
+      "local_demonstration": "Convert biomass into a characterized combustible gas through controlled partial conversion",
+      "operating_requirements": "Prepared feedstock, qualified reactor, gas cleaning and operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "producer_gas_cleanup",
+    "name": "Producer Gas Cleanup",
+    "foundations": "biomass_gasification",
+    "mechanism": "Remove specified particulates and condensable contaminants from fuel gas",
+    "operating_requirement": "Qualified separation equipment, expendable media, monitoring and residue handling",
+    "consequence": "Protect compatible downstream equipment while gas quality limits use",
+    "status": "authored_draft",
+    "requires_all": [
+      "biomass_gasification"
+    ],
+    "requires_any": [
+      [
+        "textile_filtration_media",
+        "gas_composition_analysis"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "producer_gas_cleanup",
+      "local_demonstration": "Remove specified particulates and condensable contaminants from fuel gas",
+      "operating_requirements": "Qualified separation equipment, expendable media, monitoring and residue handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Qualified gas cleanup may use different separation media and analytical traditions; water-filter backwashing is not a universal foundation."
+  },
+  {
+    "field": "D05",
+    "id": "anaerobic_biogas_generation",
+    "name": "Anaerobic Biogas Generation",
+    "foundations": "gas_composition_analysis",
+    "mechanism": "Capture gas from controlled oxygen-limited decomposition of suitable organic feedstock",
+    "operating_requirement": "Qualified digestion vessel, feedstock handling, temperature control and operators",
+    "consequence": "Supply finite biogas and residual material without treating waste as unlimited fuel",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis"
+    ],
+    "requires_any": [
+      [
+        "microbial_growth_measurement",
+        "fermentation_control"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "anaerobic_biogas_generation",
+      "local_demonstration": "Capture gas from controlled oxygen-limited decomposition of suitable organic feedstock",
+      "operating_requirements": "Qualified digestion vessel, feedstock handling, temperature control and operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Empirical controlled decomposition can precede microbial growth theory; containment, feedstock and measured gas quality remain required."
+  },
+  {
+    "field": "D05",
+    "id": "biogas_upgrading",
+    "name": "Biogas Upgrading",
+    "foundations": "anaerobic_biogas_generation,gas_composition_analysis",
+    "mechanism": "Adjust raw biogas composition to a specified fuel-use requirement",
+    "operating_requirement": "Qualified separation plant, energy, consumables and gas-quality testing",
+    "consequence": "Produce compatible fuel at measured recovery and processing cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "anaerobic_biogas_generation",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biogas_upgrading",
+      "local_demonstration": "Adjust raw biogas composition to a specified fuel-use requirement",
+      "operating_requirements": "Qualified separation plant, energy, consumables and gas-quality testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "ethanol_fuel_qualification",
+    "name": "Ethanol Fuel Qualification",
+    "foundations": "fermentation_control,fractional_distillation",
+    "mechanism": "Qualify produced ethanol and blends against a specified engine or burner application",
+    "operating_requirement": "Suitable product, composition testing, compatible storage and actual end-use equipment",
+    "consequence": "Permit selected fuel use without assuming universal engine compatibility",
+    "status": "authored_draft",
+    "requires_all": [
+      "fermentation_control",
+      "fractional_distillation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ethanol_fuel_qualification",
+      "local_demonstration": "Qualify produced ethanol and blends against a specified engine or burner application",
+      "operating_requirements": "Suitable product, composition testing, compatible storage and actual end-use equipment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "biodiesel_conversion",
+    "name": "Biodiesel Conversion",
+    "foundations": "seed_oil_pressing",
+    "mechanism": "Convert characterized oils or fats into a qualified fuel product through a controlled process",
+    "operating_requirement": "Suitable feedstocks, process chemicals, plant, quality testing and residue handling",
+    "consequence": "Supply evaluated fuel while preserving feedstock and land-use costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "seed_oil_pressing"
+    ],
+    "requires_any": [
+      [
+        "industrial_catalyst_design",
+        "experimental_controls"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "biodiesel_conversion",
+      "local_demonstration": "Convert characterized oils or fats into a qualified fuel product through a controlled process",
+      "operating_requirements": "Suitable feedstocks, process chemicals, plant, quality testing and residue handling",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Empirical qualified conversion can precede generalized catalyst design; process materials and product qualification are still necessary."
+  },
+  {
+    "field": "D05",
+    "id": "fuel_supply_chain_balancing",
+    "name": "Fuel Supply Chain Balancing",
+    "foundations": "calorimetry,freight_route_optimization",
+    "mechanism": "Match scheduled fuel delivery and reserve stocks to measured plant consumption",
+    "operating_requirement": "Real suppliers, transport capacity, storage and accountable inventory",
+    "consequence": "Reduce avoidable fuel starvation without inventing reserves",
+    "status": "authored_draft",
+    "requires_all": [
+      "calorimetry",
+      "freight_route_optimization"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fuel_supply_chain_balancing",
+      "local_demonstration": "Match scheduled fuel delivery and reserve stocks to measured plant consumption",
+      "operating_requirements": "Real suppliers, transport capacity, storage and accountable inventory",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "steam_engine_valve_timing",
+    "name": "Steam Engine Valve Timing",
+    "foundations": "heat_engine_cycles,crank_linkages",
+    "mechanism": "Coordinate steam admission and exhaust with mechanical motion in a qualified engine",
+    "operating_requirement": "Compatible engine components, steam supply, lubrication and fitting skill",
+    "consequence": "Control usable shaft output with measured timing and loss tradeoffs",
+    "status": "authored_draft",
+    "requires_all": [
+      "heat_engine_cycles",
+      "crank_linkages"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "steam_engine_valve_timing",
+      "local_demonstration": "Coordinate steam admission and exhaust with mechanical motion in a qualified engine",
+      "operating_requirements": "Compatible engine components, steam supply, lubrication and fitting skill",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "compound_steam_expansion",
+    "name": "Compound Steam Expansion",
+    "foundations": "steam_engine_valve_timing,steam_condensers",
+    "mechanism": "Expand steam through successive compatible stages to recover additional useful work",
+    "operating_requirement": "Qualified cylinders or stages, pressure boundaries and maintained steam plant",
+    "consequence": "Improve selected cycle performance at added equipment and maintenance cost",
+    "status": "authored_draft",
+    "requires_all": [
+      "steam_engine_valve_timing",
+      "steam_condensers"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "compound_steam_expansion",
+      "local_demonstration": "Expand steam through successive compatible stages to recover additional useful work",
+      "operating_requirements": "Qualified cylinders or stages, pressure boundaries and maintained steam plant",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "steam_turbine_blading",
+    "name": "Steam Turbine Blading",
+    "foundations": "heat_engine_cycles",
+    "mechanism": "Transfer steam momentum through evaluated rotating and stationary blade rows",
+    "operating_requirement": "Qualified alloys, precise rotors, steam supply and inspection",
+    "consequence": "Produce shaft power within speed, moisture and thermal limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "heat_engine_cycles"
+    ],
+    "requires_any": [
+      [
+        "impulse_turbines",
+        "reaction_turbines",
+        "airfoil_wind_rotors"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "steam_turbine_blading",
+      "local_demonstration": "Transfer steam momentum through evaluated rotating and stationary blade rows",
+      "operating_requirements": "Qualified alloys, precise rotors, steam supply and inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Different momentum-transfer traditions support blade design; a specific wind-rotor lineage is not mandatory."
+  },
+  {
+    "field": "D05",
+    "id": "steam_turbine_governing",
+    "name": "Steam Turbine Governing",
+    "foundations": "steam_turbine_blading,feedback_governors",
+    "mechanism": "Regulate turbine admission against measured speed and load changes",
+    "operating_requirement": "Maintained valves, speed sensing, qualified control and independent protection",
+    "consequence": "Match bounded shaft demand without exceeding tested operating limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "steam_turbine_blading",
+      "feedback_governors"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "steam_turbine_governing",
+      "local_demonstration": "Regulate turbine admission against measured speed and load changes",
+      "operating_requirements": "Maintained valves, speed sensing, qualified control and independent protection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "heat_recovery_steam_generators",
+    "name": "Heat Recovery Steam Generators",
+    "foundations": "boiler_feedwater_treatment",
+    "mechanism": "Recover exhaust heat into controlled steam production through qualified exchanger surfaces",
+    "operating_requirement": "Suitable exhaust source, feedwater, pressure equipment and operators",
+    "consequence": "Reuse available waste heat with pressure-drop and thermal limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "boiler_feedwater_treatment"
+    ],
+    "requires_any": [
+      [
+        "combined_cycle_generation",
+        "thermal_plant_heat_balances"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "heat_recovery_steam_generators",
+      "local_demonstration": "Recover exhaust heat into controlled steam production through qualified exchanger surfaces",
+      "operating_requirements": "Suitable exhaust source, feedwater, pressure equipment and operators",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Waste-heat steam production can serve process heat before a combined-cycle electricity plant exists."
+  },
+  {
+    "field": "D05",
+    "id": "thermal_plant_heat_balances",
+    "name": "Thermal Plant Heat Balances",
+    "foundations": "calorimetry,flow_continuity",
+    "mechanism": "Account for fuel input, useful work, rejected heat and inventory changes across a plant",
+    "operating_requirement": "Calibrated measurements, defined boundaries and operating records",
+    "consequence": "Expose losses and prevent counting recovered heat twice",
+    "status": "authored_draft",
+    "requires_all": [
+      "calorimetry",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "thermal_plant_heat_balances",
+      "local_demonstration": "Account for fuel input, useful work, rejected heat and inventory changes across a plant",
+      "operating_requirements": "Calibrated measurements, defined boundaries and operating records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "cooling_tower_operation",
+    "name": "Cooling Tower Operation",
+    "foundations": "thermal_plant_heat_balances,raw_water_quality_sampling",
+    "mechanism": "Reject heat through controlled air-water contact with water-quality management",
+    "operating_requirement": "Qualified tower, fans or natural draft, makeup water, treatment and maintenance",
+    "consequence": "Remove bounded heat loads with actual evaporation and weather constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermal_plant_heat_balances",
+      "raw_water_quality_sampling"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cooling_tower_operation",
+      "local_demonstration": "Reject heat through controlled air-water contact with water-quality management",
+      "operating_requirements": "Qualified tower, fans or natural draft, makeup water, treatment and maintenance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "air_cooled_heat_rejection",
+    "name": "Air Cooled Heat Rejection",
+    "foundations": "thermal_plant_heat_balances,mechanical_building_ventilation",
+    "mechanism": "Reject process heat to ambient air through qualified exchanger and airflow paths",
+    "operating_requirement": "Suitable surfaces, airflow equipment, power and maintenance",
+    "consequence": "Reduce direct cooling-water use while ambient conditions constrain output",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermal_plant_heat_balances",
+      "mechanical_building_ventilation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "air_cooled_heat_rejection",
+      "local_demonstration": "Reject process heat to ambient air through qualified exchanger and airflow paths",
+      "operating_requirements": "Suitable surfaces, airflow equipment, power and maintenance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "condensate_return_networks",
+    "name": "Condensate Return Networks",
+    "foundations": "steam_condensers,pressure_pipe_jointing",
+    "mechanism": "Return suitable recovered condensate while controlling pressure and contamination",
+    "operating_requirement": "Maintained piping, traps, pumps where needed and quality checks",
+    "consequence": "Recover some heat and feedwater without assuming all condensate is reusable",
+    "status": "authored_draft",
+    "requires_all": [
+      "steam_condensers",
+      "pressure_pipe_jointing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "condensate_return_networks",
+      "local_demonstration": "Return suitable recovered condensate while controlling pressure and contamination",
+      "operating_requirements": "Maintained piping, traps, pumps where needed and quality checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "insulated_process_heat_piping",
+    "name": "Insulated Process Heat Piping",
+    "foundations": "thermal_storage_tanks,pressure_pipe_jointing",
+    "mechanism": "Limit heat loss along qualified process-heat distribution paths",
+    "operating_requirement": "Compatible insulation, pipe supports, inspection and maintained seals",
+    "consequence": "Deliver more of the actual available heat over bounded distances",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermal_storage_tanks",
+      "pressure_pipe_jointing"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "insulated_process_heat_piping",
+      "local_demonstration": "Limit heat loss along qualified process-heat distribution paths",
+      "operating_requirements": "Compatible insulation, pipe supports, inspection and maintained seals",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "solar_resource_measurement",
+    "name": "Solar Resource Measurement",
+    "foundations": "weather_observation_logs,electrical_measurement",
+    "mechanism": "Measure incident solar energy under characterized orientation and weather conditions",
+    "operating_requirement": "Calibrated sensors, maintained observations and site context",
+    "consequence": "Estimate local solar supply without assuming nameplate output day and night",
+    "status": "authored_draft",
+    "requires_all": [
+      "weather_observation_logs",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "solar_resource_measurement",
+      "local_demonstration": "Measure incident solar energy under characterized orientation and weather conditions",
+      "operating_requirements": "Calibrated sensors, maintained observations and site context",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "photovoltaic_array_matching",
+    "name": "Photovoltaic Array Matching",
+    "foundations": "photovoltaic_power,electrical_measurement",
+    "mechanism": "Arrange compatible modules and electrical paths against measured current-voltage behavior",
+    "operating_requirement": "Qualified modules, interconnects, protection and test equipment",
+    "consequence": "Reduce selected mismatch losses while shading and defects remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "photovoltaic_power",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "photovoltaic_array_matching",
+      "local_demonstration": "Arrange compatible modules and electrical paths against measured current-voltage behavior",
+      "operating_requirements": "Qualified modules, interconnects, protection and test equipment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "maximum_power_point_control",
+    "name": "Maximum Power Point Control",
+    "foundations": "photovoltaic_array_matching,feedback_governors",
+    "mechanism": "Adjust converter operating point using measured source behavior",
+    "operating_requirement": "Compatible power converter, sensors, control and actual solar input",
+    "consequence": "Recover a larger share of available electrical power within converter limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "photovoltaic_array_matching",
+      "feedback_governors"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "maximum_power_point_control",
+      "local_demonstration": "Adjust converter operating point using measured source behavior",
+      "operating_requirements": "Compatible power converter, sensors, control and actual solar input",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "solar_tracking_mounts",
+    "name": "Solar Tracking Mounts",
+    "foundations": "solar_resource_measurement,gear_ratios",
+    "mechanism": "Orient a qualified solar collector through a measured motion schedule or feedback",
+    "operating_requirement": "Maintained mount, drive, controls and wind-compatible structure",
+    "consequence": "Increase suitable collection while consuming drive work and maintenance",
+    "status": "authored_draft",
+    "requires_all": [
+      "solar_resource_measurement",
+      "gear_ratios"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "solar_tracking_mounts",
+      "local_demonstration": "Orient a qualified solar collector through a measured motion schedule or feedback",
+      "operating_requirements": "Maintained mount, drive, controls and wind-compatible structure",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "photovoltaic_degradation_diagnosis",
+    "name": "Photovoltaic Degradation Diagnosis",
+    "foundations": "photovoltaic_array_matching",
+    "mechanism": "Distinguish selected module degradation from environmental variation through measured evidence",
+    "operating_requirement": "Inspection access, qualified testing and retained baseline records",
+    "consequence": "Target repair or replacement without restoring lost material performance by knowledge alone",
+    "status": "authored_draft",
+    "requires_all": [
+      "photovoltaic_array_matching"
+    ],
+    "requires_any": [
+      [
+        "semiconductor_reliability_stress_tests",
+        "electrical_measurement"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "photovoltaic_degradation_diagnosis",
+      "local_demonstration": "Distinguish selected module degradation from environmental variation through measured evidence",
+      "operating_requirements": "Inspection access, qualified testing and retained baseline records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Field electrical comparisons can reveal degradation before accelerated semiconductor lifetime facilities; causal diagnosis retains limits."
+  },
+  {
+    "field": "D05",
+    "id": "wind_farm_wake_planning",
+    "name": "Wind Farm Wake Planning",
+    "foundations": "wind_resource_assessment,flow_continuity",
+    "mechanism": "Assess interacting rotor wakes and site layout against energy and load evidence",
+    "operating_requirement": "Measured wind field, suitable models, land or sea access and turbine data",
+    "consequence": "Reduce some wake losses with site and uncertainty constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "wind_resource_assessment",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wind_farm_wake_planning",
+      "local_demonstration": "Assess interacting rotor wakes and site layout against energy and load evidence",
+      "operating_requirements": "Measured wind field, suitable models, land or sea access and turbine data",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "wind_rotor_load_monitoring",
+    "name": "Wind Rotor Load Monitoring",
+    "foundations": "airfoil_wind_rotors,cyclic_fatigue",
+    "mechanism": "Measure and interpret operational loads against qualified rotor lifetime limits",
+    "operating_requirement": "Suitable sensors, structural records, access and inspection crews",
+    "consequence": "Identify damaging operation and schedule actual maintenance",
+    "status": "authored_draft",
+    "requires_all": [
+      "airfoil_wind_rotors",
+      "cyclic_fatigue"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wind_rotor_load_monitoring",
+      "local_demonstration": "Measure and interpret operational loads against qualified rotor lifetime limits",
+      "operating_requirements": "Suitable sensors, structural records, access and inspection crews",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "wind_turbine_drivetrain_services",
+    "name": "Wind Turbine Drivetrain Services",
+    "foundations": "wind_generator_conversion,lubrication_regimes",
+    "mechanism": "Maintain qualified torque-transfer components using condition evidence and repair plans",
+    "operating_requirement": "Compatible parts, lubrication, lifting access and trained crews",
+    "consequence": "Restore available turbine service with real downtime and parts costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "wind_generator_conversion",
+      "lubrication_regimes"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wind_turbine_drivetrain_services",
+      "local_demonstration": "Maintain qualified torque-transfer components using condition evidence and repair plans",
+      "operating_requirements": "Compatible parts, lubrication, lifting access and trained crews",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "floating_wind_platform_integration",
+    "name": "Floating Wind Platform Integration",
+    "foundations": "wind_generator_conversion,marine_anchor_systems",
+    "mechanism": "Couple an offshore rotor to a qualified floating support and power-export system",
+    "operating_requirement": "Site-qualified platform, moorings, cable, installation vessels and maintenance access",
+    "consequence": "Use suitable deep-water wind resources within motion and weather limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "wind_generator_conversion",
+      "marine_anchor_systems"
+    ],
+    "requires_any": [
+      [
+        "ship_stability_assessment",
+        "ocean_settlement_mooring_integration"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "floating_wind_platform_integration",
+      "local_demonstration": "Couple an offshore rotor to a qualified floating support and power-export system",
+      "operating_requirements": "Site-qualified platform, moorings, cable, installation vessels and maintenance access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Occupied ocean settlements are not required before floating turbines; marine motion and station-keeping evidence remain essential."
+  },
+  {
+    "field": "D05",
+    "id": "hydropower_sediment_management",
+    "name": "Hydropower Sediment Management",
+    "foundations": "hydroelectric_generation,sediment_budget_accounts",
+    "mechanism": "Manage reservoir and intake sediment against measured capacity and downstream effects",
+    "operating_requirement": "Monitoring, suitable release or removal facilities and operating crews",
+    "consequence": "Preserve selected hydraulic service while handling real sediment consequences",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydroelectric_generation",
+      "sediment_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hydropower_sediment_management",
+      "local_demonstration": "Manage reservoir and intake sediment against measured capacity and downstream effects",
+      "operating_requirements": "Monitoring, suitable release or removal facilities and operating crews",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "hydropower_environmental_dispatch",
+    "name": "Hydropower Environmental Dispatch",
+    "foundations": "hydroelectric_generation,stream_environmental_flows",
+    "mechanism": "Schedule generation under measured river-flow and ecological obligations",
+    "operating_requirement": "Actual inflows, controllable plant, agreed constraints and observations",
+    "consequence": "Trade dispatch timing against downstream needs rather than creating extra water",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydroelectric_generation",
+      "stream_environmental_flows"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hydropower_environmental_dispatch",
+      "local_demonstration": "Schedule generation under measured river-flow and ecological obligations",
+      "operating_requirements": "Actual inflows, controllable plant, agreed constraints and observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "hydraulic_penstock_transients",
+    "name": "Hydraulic Penstock Transients",
+    "foundations": "hydroelectric_generation,elastic_deformation",
+    "mechanism": "Analyze pressure changes caused by changing flow in a qualified water conduit",
+    "operating_requirement": "Measured pipe and valve properties, analysis and inspected pressure-control equipment",
+    "consequence": "Bound damaging transients while control actions retain operating constraints",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydroelectric_generation",
+      "elastic_deformation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hydraulic_penstock_transients",
+      "local_demonstration": "Analyze pressure changes caused by changing flow in a qualified water conduit",
+      "operating_requirements": "Measured pipe and valve properties, analysis and inspected pressure-control equipment",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "geothermal_scaling_control",
+    "name": "Geothermal Scaling Control",
+    "foundations": "geothermal_heat_exchange,corrosion_rate_measurement",
+    "mechanism": "Manage measured deposition and corrosion in geothermal fluid-contact systems",
+    "operating_requirement": "Fluid analysis, compatible treatment or cleaning, parts and crews",
+    "consequence": "Preserve selected heat-transfer capacity with continuing chemical and downtime costs",
+    "status": "authored_draft",
+    "requires_all": [
+      "geothermal_heat_exchange",
+      "corrosion_rate_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "geothermal_scaling_control",
+      "local_demonstration": "Manage measured deposition and corrosion in geothermal fluid-contact systems",
+      "operating_requirements": "Fluid analysis, compatible treatment or cleaning, parts and crews",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "geothermal_reinjection_management",
+    "name": "Geothermal Reinjection Management",
+    "foundations": "geothermal_resource_testing,hydrogeologic_models",
+    "mechanism": "Return suitable geothermal fluids while monitoring reservoir and environmental response",
+    "operating_requirement": "Qualified wells, pumps, fluid controls and observations",
+    "consequence": "Support evaluated reservoir operation without guaranteeing indefinite heat or permeability",
+    "status": "authored_draft",
+    "requires_all": [
+      "geothermal_resource_testing",
+      "hydrogeologic_models"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "geothermal_reinjection_management",
+      "local_demonstration": "Return suitable geothermal fluids while monitoring reservoir and environmental response",
+      "operating_requirements": "Qualified wells, pumps, fluid controls and observations",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "engineered_geothermal_reservoirs",
+    "name": "Engineered Geothermal Reservoirs",
+    "foundations": "geothermal_reinjection_management,structural_geologic_mapping",
+    "mechanism": "Evaluate engineered subsurface flow paths for recoverable geothermal heat",
+    "operating_requirement": "Site-specific wells, monitored field trials, power, water and specialist crews",
+    "consequence": "Investigate usable heat flow within measured geological limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "geothermal_reinjection_management",
+      "structural_geologic_mapping"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "engineered_geothermal_reservoirs",
+      "local_demonstration": "Evaluate engineered subsurface flow paths for recoverable geothermal heat",
+      "operating_requirements": "Site-specific wells, monitored field trials, power, water and specialist crews",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Measured component or site performance must qualify the intended integrated duty; scale, lifetime, cost and sustained delivery are not guaranteed by research completion."
+  },
+  {
+    "field": "D05",
+    "id": "geothermal_seismic_response",
+    "name": "Geothermal Seismic Response",
+    "foundations": "seismic_source_location",
+    "mechanism": "Relate induced seismic observations to operational changes and defined response criteria",
+    "operating_requirement": "Monitoring network, accountable operators and feasible curtailment measures",
+    "consequence": "Revise or stop operation when evidence crosses agreed limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "seismic_source_location"
+    ],
+    "requires_any": [
+      [
+        "engineered_geothermal_reservoirs",
+        "geothermal_reinjection_management"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "geothermal_seismic_response",
+      "local_demonstration": "Relate induced seismic observations to operational changes and defined response criteria",
+      "operating_requirements": "Monitoring network, accountable operators and feasible curtailment measures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Induced-seismic response also applies to conventional geothermal fluid operations; engineered reservoirs are not the only relevant source."
+  },
+  {
+    "field": "D05",
+    "id": "closed_loop_deep_geothermal",
+    "name": "Closed Loop Deep Geothermal",
+    "foundations": "geothermal_resource_testing,geothermal_heat_exchange",
+    "mechanism": "Evaluate heat recovery through sealed subsurface circulation rather than relying on produced formation fluids",
+    "operating_requirement": "Qualified deep wells, compatible loop materials, pumps and thermal monitoring",
+    "consequence": "Access bounded conductive heat where drilling and heat-transfer economics permit",
+    "status": "authored_draft",
+    "requires_all": [
+      "geothermal_resource_testing",
+      "geothermal_heat_exchange"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "closed_loop_deep_geothermal",
+      "local_demonstration": "Evaluate heat recovery through sealed subsurface circulation rather than relying on produced formation fluids",
+      "operating_requirements": "Qualified deep wells, compatible loop materials, pumps and thermal monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "confidence_class": "demonstrated_components",
+    "uncertainty_limit": "Measured component or site performance must qualify the intended integrated duty; scale, lifetime, cost and sustained delivery are not guaranteed by research completion."
+  },
+  {
+    "field": "D05",
+    "id": "battery_cycle_life_characterization",
+    "name": "Battery Cycle Life Characterization",
+    "foundations": "battery_state_estimation,statistical_inference",
+    "mechanism": "Measure capacity and resistance changes under specified cycling and storage conditions",
+    "operating_requirement": "Representative cells, controlled equipment, time and quality measurements",
+    "consequence": "Estimate supported lifetime envelopes without treating all cycles as equal",
+    "status": "authored_draft",
+    "requires_all": [
+      "battery_state_estimation",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "battery_cycle_life_characterization",
+      "local_demonstration": "Measure capacity and resistance changes under specified cycling and storage conditions",
+      "operating_requirements": "Representative cells, controlled equipment, time and quality measurements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "battery_cell_balancing",
+    "name": "Battery Cell Balancing",
+    "foundations": "battery_bank_wiring,battery_state_estimation",
+    "mechanism": "Redistribute or limit charge differences among connected cells using qualified control",
+    "operating_requirement": "Compatible balancing hardware, sensing, power and maintained cell data",
+    "consequence": "Reduce mismatch constraints while usable energy remains finite",
+    "status": "authored_draft",
+    "requires_all": [
+      "battery_bank_wiring",
+      "battery_state_estimation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "battery_cell_balancing",
+      "local_demonstration": "Redistribute or limit charge differences among connected cells using qualified control",
+      "operating_requirements": "Compatible balancing hardware, sensing, power and maintained cell data",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "battery_pack_fault_isolation",
+    "name": "Battery Pack Fault Isolation",
+    "foundations": "battery_thermal_management,protective_circuit_breakers",
+    "mechanism": "Detect and isolate supported electrical or thermal faults within a qualified pack",
+    "operating_requirement": "Sensors, compatible protection, trained maintenance and recovery procedures",
+    "consequence": "Limit some fault propagation without guaranteeing zero fire or lost capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "battery_thermal_management",
+      "protective_circuit_breakers"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "battery_pack_fault_isolation",
+      "local_demonstration": "Detect and isolate supported electrical or thermal faults within a qualified pack",
+      "operating_requirements": "Sensors, compatible protection, trained maintenance and recovery procedures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "second_life_battery_qualification",
+    "name": "Second Life Battery Qualification",
+    "foundations": "battery_cycle_life_characterization",
+    "mechanism": "Assess used cells or packs for a specified less-demanding service",
+    "operating_requirement": "Traceable used equipment, diagnostic capacity, compatible protection and inspections",
+    "consequence": "Recover bounded usable storage while rejecting unsuitable units",
+    "status": "authored_draft",
+    "requires_all": [
+      "battery_cycle_life_characterization"
+    ],
+    "requires_any": [
+      [
+        "component_reuse_certification",
+        "electrical_measurement"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "second_life_battery_qualification",
+      "local_demonstration": "Assess used cells or packs for a specified less-demanding service",
+      "operating_requirements": "Traceable used equipment, diagnostic capacity, compatible protection and inspections",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Qualified electrical assessment can establish a bounded reuse envelope before a general reused-component certification regime."
+  },
+  {
+    "field": "D05",
+    "id": "compressed_air_energy_storage",
+    "name": "Compressed Air Energy Storage",
+    "foundations": "compressed_air_systems,heat_engine_cycles",
+    "mechanism": "Store mechanical work in compressed air and recover part through qualified expansion",
+    "operating_requirement": "Suitable storage volume, compressors, expanders and thermal management",
+    "consequence": "Shift finite energy through a pressure store with actual losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "compressed_air_systems",
+      "heat_engine_cycles"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "compressed_air_energy_storage",
+      "local_demonstration": "Store mechanical work in compressed air and recover part through qualified expansion",
+      "operating_requirements": "Suitable storage volume, compressors, expanders and thermal management",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "flywheel_energy_storage",
+    "name": "Flywheel Energy Storage",
+    "foundations": "rotational_dynamics,friction_measurement",
+    "mechanism": "Store work as controlled rotor motion and recover it through a qualified coupling",
+    "operating_requirement": "Qualified rotor, containment, bearings, drive and monitoring",
+    "consequence": "Provide bounded power and stored energy with standby and conversion losses",
+    "status": "authored_draft",
+    "requires_all": [
+      "rotational_dynamics",
+      "friction_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "flywheel_energy_storage",
+      "local_demonstration": "Store work as controlled rotor motion and recover it through a qualified coupling",
+      "operating_requirements": "Qualified rotor, containment, bearings, drive and monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "thermochemical_heat_storage",
+    "name": "Thermochemical Heat Storage",
+    "foundations": "industrial_catalyst_design,thermal_plant_heat_balances",
+    "mechanism": "Store and release heat through evaluated reversible material reactions",
+    "operating_requirement": "Qualified reactants, reaction vessels, heat exchangers and cycle testing",
+    "consequence": "Shift heat supply while reaction kinetics and degradation limit performance",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "thermochemical_heat_storage",
+      "local_demonstration": "Store and release heat through evaluated reversible material reactions",
+      "operating_requirements": "Qualified reactants, reaction vessels, heat exchangers and cycle testing",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "seasonal_heat_storage",
+    "name": "Seasonal Heat Storage",
+    "foundations": "thermal_storage_tanks",
+    "mechanism": "Retain useful heat across long demand cycles in a site-qualified storage system",
+    "operating_requirement": "Suitable reservoir or structure, insulation or geology, pumps and monitoring",
+    "consequence": "Recover part of stored heat while seasonal losses and access constrain service",
+    "status": "authored_draft",
+    "requires_all": [
+      "thermal_storage_tanks"
+    ],
+    "requires_any": [
+      [
+        "hydrogeologic_models",
+        "building_insulation_assemblies"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "seasonal_heat_storage",
+      "local_demonstration": "Retain useful heat across long demand cycles in a site-qualified storage system",
+      "operating_requirements": "Suitable reservoir or structure, insulation or geology, pumps and monitoring",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Qualified built storage and subsurface storage follow different thermal-loss paths; subsurface geology is not mandatory for every seasonal store."
+  },
+  {
+    "field": "D05",
+    "id": "storage_dispatch_duration_models",
+    "name": "Storage Dispatch Duration Models",
+    "foundations": "load_dispatch",
+    "mechanism": "Separate maximum charge/discharge power from stored-energy duration across time-varying demand",
+    "operating_requirement": "Measured storage state, losses, available power and demand evidence",
+    "consequence": "Prevent a high-power but nearly empty store from covering an arbitrarily long shortfall",
+    "status": "authored_draft",
+    "requires_all": [
+      "load_dispatch"
+    ],
+    "requires_any": [
+      [
+        "battery_state_estimation",
+        "thermal_plant_heat_balances",
+        "pumped_hydro_storage"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "storage_dispatch_duration_models",
+      "local_demonstration": "Separate maximum charge/discharge power from stored-energy duration across time-varying demand",
+      "operating_requirements": "Measured storage state, losses, available power and demand evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Power-duration accounting applies to several storage media; battery chemistry is not a universal prerequisite."
+  },
+  {
+    "field": "D05",
+    "id": "grid_frequency_reserve_control",
+    "name": "Grid Frequency Reserve Control",
+    "foundations": "grid_synchronization,load_dispatch",
+    "mechanism": "Maintain qualified responsive generation or storage for measured frequency deviations",
+    "operating_requirement": "Available reserve capacity, control links and actual energy or fuel",
+    "consequence": "Respond to supported disturbances while reserve exhaustion remains possible",
+    "status": "authored_draft",
+    "requires_all": [
+      "grid_synchronization",
+      "load_dispatch"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "grid_frequency_reserve_control",
+      "local_demonstration": "Maintain qualified responsive generation or storage for measured frequency deviations",
+      "operating_requirements": "Available reserve capacity, control links and actual energy or fuel",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "reactive_power_compensation",
+    "name": "Reactive Power Compensation",
+    "foundations": "alternating_current_distribution,electrical_measurement",
+    "mechanism": "Control evaluated reactive exchanges to support voltage under network constraints",
+    "operating_requirement": "Compatible compensating equipment, measurements and operating staff",
+    "consequence": "Improve bounded voltage conditions without creating real energy",
+    "status": "authored_draft",
+    "requires_all": [
+      "alternating_current_distribution",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reactive_power_compensation",
+      "local_demonstration": "Control evaluated reactive exchanges to support voltage under network constraints",
+      "operating_requirements": "Compatible compensating equipment, measurements and operating staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "protection_relay_coordination",
+    "name": "Protection Relay Coordination",
+    "foundations": "protective_circuit_breakers,electromagnetic_relays",
+    "mechanism": "Coordinate fault detection and interruption zones against measured network behavior",
+    "operating_requirement": "Qualified relays, breakers, settings evidence and maintenance",
+    "consequence": "Isolate supported faults while limiting unnecessary service loss",
+    "status": "authored_draft",
+    "requires_all": [
+      "protective_circuit_breakers",
+      "electromagnetic_relays"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "protection_relay_coordination",
+      "local_demonstration": "Coordinate fault detection and interruption zones against measured network behavior",
+      "operating_requirements": "Qualified relays, breakers, settings evidence and maintenance",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "power_flow_state_estimation",
+    "name": "Power Flow State Estimation",
+    "foundations": "transmission_stability,least_squares_estimation",
+    "mechanism": "Infer network operating state from incomplete and uncertain measurements",
+    "operating_requirement": "Metered topology, qualified computation and data-quality checks",
+    "consequence": "Support dispatch decisions while unobserved or bad data retain uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "transmission_stability",
+      "least_squares_estimation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "power_flow_state_estimation",
+      "local_demonstration": "Infer network operating state from incomplete and uncertain measurements",
+      "operating_requirements": "Metered topology, qualified computation and data-quality checks",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "demand_response_contracts",
+    "name": "Demand Response Contracts",
+    "foundations": "load_dispatch,contingent_supply_contracts",
+    "mechanism": "Coordinate compensated or agreed load changes with actual consumer constraints",
+    "operating_requirement": "Participating loads, metering, delivery verification and enforceable terms",
+    "consequence": "Reduce or shift eligible demand without counting curtailed service as generated energy",
+    "status": "authored_draft",
+    "requires_all": [
+      "load_dispatch",
+      "contingent_supply_contracts"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "demand_response_contracts",
+      "local_demonstration": "Coordinate compensated or agreed load changes with actual consumer constraints",
+      "operating_requirements": "Participating loads, metering, delivery verification and enforceable terms",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "interconnector_capacity_allocation",
+    "name": "Interconnector Capacity Allocation",
+    "foundations": "load_dispatch,material_accounting",
+    "mechanism": "Allocate scarce cross-network transfer capacity with measured delivery and accounting",
+    "operating_requirement": "Working interconnector, participating operators, metering and payment arrangements",
+    "consequence": "Import finite electrical service while retaining congestion and supplier dependence",
+    "status": "authored_draft",
+    "requires_all": [
+      "load_dispatch",
+      "material_accounting"
+    ],
+    "requires_any": [
+      [
+        "high_voltage_direct_current",
+        "alternating_current_distribution"
+      ]
+    ],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "interconnector_capacity_allocation",
+      "local_demonstration": "Allocate scarce cross-network transfer capacity with measured delivery and accounting",
+      "operating_requirements": "Working interconnector, participating operators, metering and payment arrangements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "branching_note": "Cross-network exchange may use AC or DC links and accountable energy records; modern payment-finality systems are not necessary to learn capacity allocation."
+  },
+  {
+    "field": "D05",
+    "id": "renewable_firm_capacity_assessment",
+    "name": "Renewable Firm Capacity Assessment",
+    "foundations": "solar_resource_measurement,wind_resource_assessment,statistical_inference",
+    "mechanism": "Assess joint supply shortfalls against demand, storage and correlated weather",
+    "operating_requirement": "Representative long records, network constraints and evaluated reliability methods",
+    "consequence": "Estimate dependable contribution without equating annual energy with firm capacity",
+    "status": "authored_draft",
+    "requires_all": [
+      "solar_resource_measurement",
+      "wind_resource_assessment",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "renewable_firm_capacity_assessment",
+      "local_demonstration": "Assess joint supply shortfalls against demand, storage and correlated weather",
+      "operating_requirements": "Representative long records, network constraints and evaluated reliability methods",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "reactor_outage_work_planning",
+    "name": "Reactor Outage Work Planning",
+    "foundations": "reactor_shutdown_systems,decay_heat_management",
+    "mechanism": "Coordinate qualified inspection and maintenance while preserving required cooling and protection",
+    "operating_requirement": "Competent crews, approved procedures, parts and maintained auxiliary services",
+    "consequence": "Return evaluated reactor capability after real downtime without bypassing residual heat duties",
+    "status": "authored_draft",
+    "requires_all": [
+      "reactor_shutdown_systems",
+      "decay_heat_management"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "reactor_outage_work_planning",
+      "local_demonstration": "Coordinate qualified inspection and maintenance while preserving required cooling and protection",
+      "operating_requirements": "Competent crews, approved procedures, parts and maintained auxiliary services",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "radioactive_waste_package_qualification",
+    "name": "Radioactive Waste Package Qualification",
+    "foundations": "nuclear_waste_characterization,corrosion_rate_measurement",
+    "mechanism": "Evaluate waste containment packages against characterized contents and storage conditions",
+    "operating_requirement": "Qualified materials, packaging facilities, inspection and accountable custody",
+    "consequence": "Support bounded storage claims with monitoring and retained liabilities",
+    "status": "authored_draft",
+    "requires_all": [
+      "nuclear_waste_characterization",
+      "corrosion_rate_measurement"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radioactive_waste_package_qualification",
+      "local_demonstration": "Evaluate waste containment packages against characterized contents and storage conditions",
+      "operating_requirements": "Qualified materials, packaging facilities, inspection and accountable custody",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_component_lifetime_trials",
+    "name": "Fusion Component Lifetime Trials",
+    "foundations": "fusion_plasma_confinement,radiation_tolerant_materials",
+    "mechanism": "Measure candidate component damage and performance under relevant evaluated exposure",
+    "operating_requirement": "Suitable test facilities, representative materials, specialists and long-duration evidence",
+    "consequence": "Bound replacement needs without inferring full plant life from a short plasma experiment",
+    "status": "authored_draft",
+    "requires_all": [
+      "fusion_plasma_confinement",
+      "radiation_tolerant_materials"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fusion_component_lifetime_trials",
+      "local_demonstration": "Measure candidate component damage and performance under relevant evaluated exposure",
+      "operating_requirements": "Suitable test facilities, representative materials, specialists and long-duration evidence",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "confidence_class": "plausible_extrapolation",
+    "uncertainty_limit": "Measured component or site performance must qualify the intended integrated duty; scale, lifetime, cost and sustained delivery are not guaranteed by research completion."
+  },
+  {
+    "field": "D05",
+    "id": "fusion_remote_maintenance_integration",
+    "name": "Fusion Remote Maintenance Integration",
+    "foundations": "fusion_component_lifetime_trials,remote_manipulation",
+    "mechanism": "Qualify access and replacement of selected fusion-plant components under expected service conditions",
+    "operating_requirement": "Representative geometry, remote tooling, replacement parts and independent inspection",
+    "consequence": "Investigate maintainable plant layouts with measured downtime and handling limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "fusion_component_lifetime_trials",
+      "remote_manipulation"
+    ],
+    "requires_any": [],
+    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fusion_remote_maintenance_integration",
+      "local_demonstration": "Qualify access and replacement of selected fusion-plant components under expected service conditions",
+      "operating_requirements": "Representative geometry, remote tooling, replacement parts and independent inspection",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "negotiated payment or reciprocal contribution",
+        "physical delivery or information transmission",
+        "finite local qualification and commissioning",
+        "continuing fuel, utilities, spares and staff"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
+        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
+        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
+        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
+        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
+      }
+    },
+    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending.",
+    "confidence_class": "plausible_extrapolation",
+    "uncertainty_limit": "Measured component or site performance must qualify the intended integrated duty; scale, lifetime, cost and sustained delivery are not guaranteed by research completion."
+  }
+]
