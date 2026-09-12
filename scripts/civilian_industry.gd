@@ -2,6 +2,12 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"centered_lens_mount":{"name": "Lens Centering", "output": "Centered Lens Mounts", "gate": "lens_centering", "materials": {"Optical Lenses": 1.0, "Refined Copper": 1.0}, "days": 3.0, "tooling": {"Wrought Iron": 2.0, "Stone": 2.0}},
+	"microscope_eyepiece":{"name": "Eyepiece Design", "output": "Microscope Eyepieces", "gate": "eyepiece_design", "materials": {"Optical Lenses": 1.0, "Centered Lens Mounts": 1.0}, "days": 3.0, "tooling": {"Timber": 2.0, "Wrought Iron": 1.0}},
+	"focus_stage":{"name": "Fine-Focus Stages", "output": "Focus Stages", "gate": "fine_focus_stages", "materials": {"Wrought Iron": 1.0, "Shaft Bearings": 1.0}, "days": 4.0, "tooling": {"Steel": 1.0, "Stone": 2.0}},
+	"microscope_illuminator":{"name": "Illumination Apertures", "output": "Microscope Illuminators", "gate": "illumination_apertures", "materials": {"Optical Lenses": 1.0, "Refined Copper": 1.0}, "days": 3.0, "tooling": {"Wrought Iron": 2.0, "Glass": 1.0}},
+	"specimen_slides":{"name": "Specimen Slide Mounting", "output": "Specimen Slides", "gate": "specimen_slide_mounting", "materials": {"Glass": 1.0, "Freshwater": 1.0}, "days": 2.0, "tooling": {"Stone": 2.0, "Timber": 2.0}},
+	"compound_microscope":{"name": "Compound Microscopy", "output": "Compound Microscopes", "gate": "compound_microscopy", "materials": {"Centered Lens Mounts": 1.0, "Microscope Eyepieces": 1.0, "Focus Stages": 1.0, "Microscope Illuminators": 1.0, "Timber": 1.0}, "days": 5.0, "tooling": {"Wrought Iron": 2.0, "Glass": 1.0}},
 	"pressure_pipe_fittings":{"name": "Pressure Pipe Jointing", "output": "Pressure Pipe Fittings", "gate": "pressure_pipe_jointing", "materials": {"Wrought Iron": 2.0}, "days": 3.0, "tooling": {"Wrought Iron": 3.0, "Stone": 3.0}},
 	"bored_cylinders":{"name": "Cylinder Boring", "output": "Bored Cylinders", "gate": "cylinder_boring", "materials": {"Wrought Iron": 2.0}, "days": 4.0, "tooling": {"Steel": 2.0, "Shaft Bearings": 1.0}},
 	"piston_packings":{"name": "Packed Piston Seals", "output": "Piston Packings", "gate": "packed_piston_seals", "materials": {"Woven Cloth": 1.0, "Graphite": 1.0}, "days": 2.0, "tooling": {"Timber": 2.0, "Wrought Iron": 1.0}},

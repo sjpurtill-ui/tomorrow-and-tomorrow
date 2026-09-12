@@ -3090,6 +3090,54 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/lens_centering.png",
+      "description": "Lenses are seated around a common optical axis so an assembled instrument can retain its intended image.",
+      "domain": "knowledge",
+      "id": "lens_centering",
+      "name": "Lens Centering",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/eyepiece_design.png",
+      "description": "A second lens assembly presents the image formed by an objective to an observer.",
+      "domain": "knowledge",
+      "id": "eyepiece_design",
+      "name": "Eyepiece Design",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fine_focus_stages.png",
+      "description": "A guided specimen platform can move through small controlled focus adjustments.",
+      "domain": "knowledge",
+      "id": "fine_focus_stages",
+      "name": "Fine-Focus Stages",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/illumination_apertures.png",
+      "description": "Controlled openings and collecting optics regulate illumination reaching a specimen.",
+      "domain": "knowledge",
+      "id": "illumination_apertures",
+      "name": "Illumination Apertures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/specimen_slide_mounting.png",
+      "description": "Flat transparent mounts support small samples in a repeatable viewing position.",
+      "domain": "knowledge",
+      "id": "specimen_slide_mounting",
+      "name": "Specimen Slide Mounting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/compound_microscopy.png",
+      "description": "An aligned objective, eyepiece, stage and illumination system reveal structure in prepared small specimens.",
+      "domain": "knowledge",
+      "id": "compound_microscopy",
+      "name": "Compound Microscopy",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3579,9 +3627,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 447,
+  "live_count": 453,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 406,
+  "queued_count": 412,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

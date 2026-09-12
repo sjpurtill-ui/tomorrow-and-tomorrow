@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 103: **447 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 104: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1135,3 +1135,18 @@ The license planner can negotiate missing operating-input manufacture for establ
 Verification: 62 cases across research licenses (23, four new), operating resupply (4), civilian production planning (8), power planning (12) and civilization strategy (15), zero errors/failures/skips/orphans. The new end-to-end case pays for a compressor license, completes the physical envoy return, starts production at 65% work throughput and feeds a real pneumatic press without granting the compressor discovery. Additional cases verify examined/returned evidence, unchanged recommendations after hidden provider-method changes, power/tooling shortages, sufficient stocks, domestic methods and paused production. Supplier acceptance is still tested at actual arrival rather than inferred from the examined lead.
 
 No save, discovery, unit or image additions. Totals remain 447 discoveries, 89 roles, ten installation types and 41 reviewed images. Shared implementation files: civilian-production and license-acquisition planners; existing license tests and review records accompany them. Remaining limits include upstream license chains, raw consumable imports, future power investment tied to unknown methods, optimum supplier/term selection and workshop scheduling. Full-history goal remains active. Diagnostic session 57160 was confirmed live at the start of this pass; its 250-year target is still not claimed complete.
+
+
+## Checkpoint 104: manufactured optical instruments and specimen examination
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `074593a`. No canonical integration or player launch.
+
+Six authored discoveries and six component recipes connect lens centering, eyepiece design, fine-focus stages, illumination apertures and slide preparation to compound microscopy. A commissioned bench consumes slides and Crafting operators for finite daily specimen-observation assistance. Ordinary Knowledge work is still required; assistance is capped at 25% of that item's paid ordinary progress, remaining examination work and the shared service budget. It applies to physical specimens, not cultural/knowledge accounts, and does not change evidence strength or grant discoveries. The research installation panel describes its supply and study requirements. See [Optical instruments](OPTICAL_INSTRUMENTS.md).
+
+Verification: 101 cases across optical instruments (4), society exchange (28), specimen research (6), installations (14), electronic components/bounds (5), civilian industry (12), technology tree (9), operating resupply (4) and owned simulations (19), zero errors/failures/skips/orphans. New tests manufacture the full instrument chain, commission a supplied bench, examine a real returned specimen, exhaust slides, bound assistance across items, exclude non-specimen accounts and stop operation during travel or absent staffing. A detected recipe naming mistake was corrected to Refined Copper; the optical fixture now asserts defined sources for every material and tool before supplying them.
+
+Graph: 453 discoveries, 227 explicit routes, no errors. Resource dependency audit structurally reaches all 453 under abundant-resource assumptions; it does not prove campaign material availability or pace. The 400-day natural pacing probe reaches its requested target, with local report `artifacts/technology-pacing/optical-instruments-400-days.json`. Full-span acceptance remains absent.
+
+Save compatibility: existing stock and installation records carry instruments, slide inputs and specimen-observation service; bounds cover eleven installation types. Existing records need no new fields; new identities require this revision. Shared files: discovery registration, civilian recipes, installation catalog/validation and panel, society-exchange study loop, graph audit, bounds test, art queue and review records. New optical catalog, observation helper, tests and documentation are task-owned. Government retains labor ownership.
+
+Totals: 453 discoveries, 89 military roles, eleven installation types, 41 reviewed images and 412 queued live images. Another 4,547 discovery identities and the wider operating, acquisition, military, art, pacing and integration scope remain. Limits include optical resolution/quality, staining, sectioning, diagnosis, instrument wear and automatic bench installation. Enabled benches consume their daily preparation supplies even when assistance is unused. Session 57160 was confirmed live at the start; its 250-year target remains unverified on the older loaded 414-discovery revision.

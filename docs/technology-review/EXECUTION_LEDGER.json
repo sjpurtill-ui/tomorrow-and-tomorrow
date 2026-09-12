@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 447,
+    "live": 453,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -77,13 +77,14 @@
     "Forecast climate cache covers the supported 256-settlement bound; 17-site repeated-forecast reproduction eliminates cyclic eviction with identical outputs, and 400-day gameplay parity holds",
     "Civilian planner replenishes manufactured inputs for enabled commissioned machinery through paid ordinary workshops; compressed-air supply feeds actual pneumatic service",
     "Cylinder Boring and Pneumatic Pressing receive reviewed paper-and-gouache subject art; 41 explicit subject images total",
-    "Paid operating-input licenses use examined foreign leads and shared stock needs; compressor-license envoy journey feeds a real press at reduced manufacturing throughput without local discovery"
+    "Paid operating-input licenses use examined foreign leads and shared stock needs; compressor-license envoy journey feeds a real press at reduced manufacturing throughput without local discovery",
+    "Six optical instrument-making discoveries and manufactured components; a staffed slide-consuming microscopy bench provides finite help to returned physical specimen examination"
   ],
   "unfinished": [
-    "Remaining 4553 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4547 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
-    "Civilian and future operating models beyond ten primary-settlement plants; solar weather, battery wear and night-time balancing",
+    "Civilian and future operating models beyond eleven primary-settlement plants; solar weather, battery wear and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 89 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
     "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline",
@@ -104,9 +105,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 447,
+    "live_subjects": 453,
     "verified_subject_images": 41,
-    "queued_live_images": 406,
+    "queued_live_images": 412,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"
