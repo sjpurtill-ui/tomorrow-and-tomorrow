@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 92: **423 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 93: **434 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1002,3 +1002,18 @@ Verification: 62 cases across field repair (6), field medicine (11), equipment q
 Save compatibility: existing military formation, equipment, training and repair-job fields; full military export/import and partial job serialization tested. Existing IDs preserved. New saves using this role require the updated catalog. Shared-file conflicts for integration: `discovery_system.gd`, `military_campaign.gd`, unit/equipment/combat catalogs, catalog validation, art manifest and audit tool. No terrain, government ownership, aggregate population authority or player controls changed.
 
 Limits: home repair only; forward recovery, component faults, spare-parts logistics, autonomous composition and general-selected repair priorities remain. Existing ordinary repair semantics are retained. The long diagnostic session 57160 is still running from its loaded 414-discovery revision; last inspected at year 109 with 103 known discoveries and 12 settlements. Its 250-year target and 2,500–3,000-year acceptance remain unverified. Catalog still needs 4,577 distinct identities, extensive operating behavior, imagery and canonical integration.
+
+
+## Checkpoint 93: crop inputs, finite nutrient reserves and industrial fertilizer
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `d82f92b`. No canonical integration or player launch.
+
+Eleven new authored discoveries connect mineral crop inputs, acid manufacture, compressed air, air separation, electrolysis, catalyst, ammonia and ammonium sulfate. Twelve physical recipes include ground phosphate under the existing Phosphate Dressing ID. Local fertilizer-derived nitrogen/phosphorus reserves are applied and consumed by real cultivation. The old automatic Phosphate Dressing bonuses are removed. Food forecasts use finite projected reserves and stocks, and ordinary AI production/power planning can commission fertilizer supply. See [Crop nutrients and industrial fertilizer](CROP_NUTRITION.md) for exact mechanisms, costs, sources and assumptions.
+
+Verification: 125 cases across crop nutrition (13), agronomy (8), food/water knowledge (10), city resources (12), civilian industry (12), civilian production planning (8), owned simulation (19), manufacturing licenses (15), power planning (8), technology tree (9) and visual atlas (11), zero errors/failures/skips/orphans. Tests include real mineral fertilizer manufacture and uptake, industrial nitrogen production with commissioned power and consumed intermediates, shared electrical exhaustion, saved partial batches, whole owned save restoration, city isolation, invalid-save rejection, legacy defaults, finite forecasts and an ordinary controller production order.
+
+Graph: 434 live discoveries, 208 explicit learning routes, no graph errors. Ideal-resource audit reaches all 434, which proves structural reachability only. A separate [400-day profiled run](pacing/crop-nutrition-400-days.json) completed its requested target in 4.852 seconds; no full-history conclusion follows from it. Artwork remains 36 reviewed subjects, with 398 queued. Military roster remains 89 roles; operating installation types remain seven.
+
+Save compatibility: new reflected `cultivation_nutrients` dictionary, also included in secondary-city resource scopes; missing old data defaults to zero. Human and owned preflight validation covers primary and secondary balances. New IDs require this catalog. Existing Phosphate Dressing saves intentionally change from automatic modifiers to physical fertilizer behavior. Shared integration conflicts: `game_state.gd`, `discovery_system.gd`, `save_system.gd`, `world_simulation.gd`, `food_system.gd`, `settlement_model.gd`, civilian recipes/planning, resource knowledge, catalog validation, art manifest and graph audit. GovernmentPeopleSystem retains labor authority; no terrain or direct military-control changes.
+
+Limits: fertilizer-derived N/P above the existing ambient soil baseline, not complete soil/crop chemistry. No potassium, crop-specific uptake, idle-field leaching, runoff pollution, industrial gas loss, catalyst wear or broad fertilizer procurement yet. The long diagnostic session 57160 remains active on its originally loaded 414-discovery revision; last inspected at year 126, 125 known discoveries, 13 settlements. It does not exercise these new systems. The full objective remains active: 4,566 authored identities, extensive operating depth, imagery, 2,500–3,000-year evidence and canonical integration remain.

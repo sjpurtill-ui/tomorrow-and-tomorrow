@@ -4,7 +4,7 @@
   "branch": "codex/technology-implementation",
   "original_base": "940d5a2ad848d9f45b8d98825cd5219a3eda83e9",
   "catalog": {
-    "live": 423,
+    "live": 434,
     "target": 5000,
     "review_candidates": 600,
     "complete": false,
@@ -66,16 +66,18 @@
     "AI can commission generation before its first powered study-supply line, verify fueled/staffed installed capacity without requiring prior dispatch, retain an unpowered fallback and retool completed pulp into paper in one slot",
     "Eight authored memory/control capabilities, ten physical assembly recipes and a seventh programmable workshop plant with shared power, operator labor and bounded save validation",
     "AI seeks paid manufacturing licenses for immediately supplied paper/printing needs and renews existing dependent civilian lines from examined leads or prior contracts, with reserves and normal acceptance/expiry/throughput rules",
-    "Field armorer teams unlock paid repair tools and mobilized field repair companies; supplied, trained crews at home share a finite repair-work budget and reserve real damaged equipment and materials through existing workshop jobs"
+    "Field armorer teams unlock paid repair tools and mobilized field repair companies; supplied, trained crews at home share a finite repair-work budget and reserve real damaged equipment and materials through existing workshop jobs",
+    "Eleven authored crop-nutrition/industrial-feedstock discoveries and twelve recipes; fertilizer-derived N/P reserves are local, saved and consumed by cultivation; forecasts exhaust finite supplies; ordinary AI invests in complementary fertilizer production"
   ],
   "unfinished": [
-    "Remaining 4577 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
+    "Remaining 4566 distinct production discovery identities, individually grounded mechanisms and cross-field dependencies",
     "Full 2500\u20133000-year natural pacing and performance evidence; no arbitrary era locks",
     "Broader licensing terms and military manufacture, imported-service dependence, equipment/component reverse engineering, partnership automation and AI acquisition strategy",
     "Civilian and future operating models beyond seven primary-settlement plants; solar weather, storage and night-time balancing",
     "Broader military behaviors, countermeasures and general-led doctrine; current 89 total unit types are not the proposed 96-role inventory",
     "All approved paper-and-gouache imagery, native presentation verification",
-    "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline"
+    "Canonical integration by the designated integrator; do not merge or launch without that handoff discipline",
+    "Crop-specific nutrient balances, potassium/micronutrients, organic cycles, soil chemistry, idle-field losses, pollution and broader fertilizer acquisition; current model adds finite fertilizer-derived N/P above ambient fertility"
   ],
   "next_work": [
     "Poll live diagnostic session 57160, launched from 577f366 with 414 discoveries and schema 9: target 91250 days (250 years), explicit 14400-second wall cap. Persistent worktree outputs: artifacts/technology-pacing/catalog-414-250-profile.json and .log. Inspect annual secondary-city detail and eventual terminal result; no completion claimed. Old session 95746 is missing and must not be described as running.",
@@ -92,9 +94,9 @@
     "Continue until objective is achieved or a genuine external blocker prevents meaningful progress"
   ],
   "art": {
-    "live_subjects": 423,
+    "live_subjects": 434,
     "verified_subject_images": 36,
-    "queued_live_images": 387,
+    "queued_live_images": 398,
     "target_subject_images": 5000,
     "complete": false,
     "manifest": "assets/ui/research/paper/catalog.json"

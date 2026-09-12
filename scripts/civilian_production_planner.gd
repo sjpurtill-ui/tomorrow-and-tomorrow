@@ -1,11 +1,15 @@
 extends RefCounted
-## Follow manufactured inputs for bounded paper demand from returned studies.
+## Follow manufactured inputs for returned studies and operating cultivation.
 ## Recommendations grant no materials, knowledge, labor, or workshop capacity.
 const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const E=preload("res://scripts/society_exchange.gd")
 const S=preload("res://scripts/paper_study.gd")
 static func recommendation(plan_power:bool=false)->Dictionary:
+	var research:=study_recommendation(plan_power)
+	return research if not research.is_empty() else nutrient_recommendation(plan_power)
+
+static func study_recommendation(plan_power:bool=false)->Dictionary:
 	var state=WorldSimulation.state
 	if state.effective_workers("Knowledge")<=0:return {}
 	var remaining:=0.0
@@ -75,3 +79,32 @@ static func finished_line()->int:
 		if not (job.get("reserved_materials",{}) as Dictionary).is_empty():continue
 		if P.state(WorldSimulation.military,job)=="Target met":return int(job.id)
 	return -1
+
+static func nutrient_recommendation(plan_power:bool=false)->Dictionary:
+	var state=WorldSimulation.state
+	var nutrition=preload("res://scripts/crop_nutrition.gd")
+	if state.convoy_traveling or not state.settlement_site_committed or state.effective_workers("Food")<=0:return {}
+	var adopted:float=nutrition.adoption()
+	var harvest:=maxf(0,float(state.simulation_metrics.get("cultivation_base_harvest",0)))
+	if adopted<=0 or harvest<=0:return {}
+	var demands:={"nitrogen":harvest*.01,"phosphorus":harvest*.006}
+	var choices:Array[Dictionary]=[]
+	for nutrient:String in nutrition.NUTRIENTS:
+		var available:=float(state.cultivation_nutrients.get(nutrient,0))
+		for resource:String in nutrition.INPUTS:
+			available+=maxf(0,float(state.resource_stockpiles.get(resource,0)))*float(nutrition.INPUTS[resource].get(nutrient,0))
+		var deficit:=maxf(0,float(demands[nutrient])*7.0*adopted-available)
+		if deficit<=.000001:continue
+		var best:Dictionary={};var work:=INF
+		for resource:String in nutrition.INPUTS:
+			var concentration:=float(nutrition.INPUTS[resource].get(nutrient,0))
+			if concentration<=0:continue
+			var target:=ceili(maxf(0,float(state.resource_stockpiles.get(resource,0)))+minf(10.0,deficit/concentration))
+			var candidate:=supply(resource,target,{},plan_power)
+			if not candidate.is_empty() and float(candidate.get("work",INF))<work:
+				best=candidate;work=float(candidate.work)
+		# Avoid making an unusable nutrient when its complement has no supply route.
+		if best.is_empty() and available<float(demands[nutrient])*.1:return {}
+		if not best.is_empty():choices.append({"order":best,"coverage":available/float(demands[nutrient])})
+	choices.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.coverage)<float(b.coverage))
+	return {} if choices.is_empty() else choices[0].order

@@ -2898,6 +2898,94 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/nutrient_response_trials.png",
+      "description": "Comparable plots separate the response to supplied plant nutrients from differences in soil, water and seed.",
+      "domain": "nutrition",
+      "id": "nutrient_response_trials",
+      "name": "Nutrient Response Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_nitrate_dressing.png",
+      "description": "Prepared mineral nitrate is accounted for as a crop input instead of treating a nearby deposit as an automatic harvest gain.",
+      "domain": "nutrition",
+      "id": "mineral_nitrate_dressing",
+      "name": "Mineral Nitrate Dressing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sulfur_dioxide_recovery.png",
+      "description": "Contained processing recovers a sulfur-bearing gas stream as a chemical feedstock.",
+      "domain": "production",
+      "id": "sulfur_dioxide_recovery",
+      "name": "Sulfur Dioxide Recovery",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sulfuric_acid_production.png",
+      "description": "A controlled chemical process turns a recovered sulfur feed into an acid used to transform mineral materials.",
+      "domain": "production",
+      "id": "sulfuric_acid_production",
+      "name": "Sulfuric Acid Production",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/phosphate_solubilization.png",
+      "description": "Chemical treatment makes more of a phosphate feed available to crops, at the cost of another manufactured input.",
+      "domain": "nutrition",
+      "id": "phosphate_solubilization",
+      "name": "Phosphate Solubilization",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/compressed_air_systems.png",
+      "description": "Powered compressors and sealed receivers deliver an air feed for industrial separation.",
+      "domain": "production",
+      "id": "compressed_air_systems",
+      "name": "Compressed Air Systems",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cryogenic_air_separation.png",
+      "description": "Cooling and separation recover distinct nitrogen and oxygen streams from processed air.",
+      "domain": "production",
+      "id": "cryogenic_air_separation",
+      "name": "Cryogenic Air Separation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_electrolysis.png",
+      "description": "Powered separated cells split a water feed into recoverable hydrogen and oxygen streams.",
+      "domain": "production",
+      "id": "water_electrolysis",
+      "name": "Water Electrolysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/iron_ammonia_catalysts.png",
+      "description": "Prepared iron catalyst material supports ammonia synthesis without becoming the main chemical feedstock.",
+      "domain": "production",
+      "id": "iron_ammonia_catalysts",
+      "name": "Iron Ammonia Catalysts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/catalytic_ammonia_synthesis.png",
+      "description": "An energy-consuming catalytic process combines nitrogen and hydrogen into ammonia for further manufacture.",
+      "domain": "production",
+      "id": "catalytic_ammonia_synthesis",
+      "name": "Catalytic Ammonia Synthesis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ammonium_sulfate_fertilizer.png",
+      "description": "Manufactured ammonia and acid supply a storable nitrogen fertilizer independently of a local nitrate deposit.",
+      "domain": "nutrition",
+      "id": "ammonium_sulfate_fertilizer",
+      "name": "Ammonium Sulfate Fertilizer",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3387,9 +3475,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 423,
+  "live_count": 434,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 387,
+  "queued_count": 398,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

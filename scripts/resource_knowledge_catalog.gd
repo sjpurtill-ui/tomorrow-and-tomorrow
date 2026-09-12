@@ -118,6 +118,10 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 	for requirement:Dictionary in resource_requirements:
 		if imported_basis.has(requirement.resource):requirement.minimum_stock=imported_basis[requirement.resource]
 	var result:={"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}
+	if id=="phosphate_dressing":
+		result.effects={}
+		result["production_items"]=["ground_phosphate_fertilizer"]
+		result["production_contract"]="Enables physical ground phosphate dressing. Field uptake requires nutrient response trials and complementary nitrogen inputs; the deposit itself supplies no manufactured fertilizer."
 	if id=="blast_furnace":
 		result.requires=["refractory_furnaces","rope_rigging"]
 		result["requires_all"]=result.requires.duplicate()

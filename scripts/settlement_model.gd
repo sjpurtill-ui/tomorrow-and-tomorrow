@@ -21,6 +21,7 @@ const SETTLEMENT_NAME_ROOTS:=["Alder","Ash","Bright","Cairn","Dawn","Deep","Elm"
 const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","haven","hearth","holm","landing","march","meadow","rest","ridge","stead","vale","watch","wick"]
 
 const CITY_RESOURCE_DEFAULTS:={
+	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
 	"resource_events":[],"resource_practice":{},"resource_priorities":{},
 	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],

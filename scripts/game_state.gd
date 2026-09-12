@@ -229,6 +229,7 @@ var material_history: Array[Dictionary] = []
 var water_metrics: Dictionary = {"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 var water_history: Array[Dictionary] = []
 var food_stocks: Dictionary = {}
+var cultivation_nutrients:Dictionary={"nitrogen":0.0,"phosphorus":0.0}
 var food_source_health := {"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
 var food_history: Array[Dictionary] = []
 ## Bounded aggregate audit trail for food removed outside the daily meal cycle
@@ -534,6 +535,7 @@ func reset_for_new_world(new_seed:int)->void:
 	water_metrics={"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 	water_history=[]
 	food_stocks={}
+	cultivation_nutrients={"nitrogen":0.0,"phosphorus":0.0}
 	food_source_health={"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
 	food_history=[]
 	food_issue_history=[]
