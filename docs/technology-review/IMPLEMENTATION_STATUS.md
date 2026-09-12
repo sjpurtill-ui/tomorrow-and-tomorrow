@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 113: **463 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 114: **463 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1253,3 +1253,14 @@ Two focused cases pass with zero errors/failures/skips/orphans, covering real pa
 The existing schema-9 diagnostic session 57160 was confirmed live at the start; latest inspected year 202, population 24,320, known discoveries 226, settlements 17. It remains on its loaded 414-discovery revision and does not inherit this reporting change. Its 250-year target and full-history completion are not claimed.
 
 The previous reporting script at 696c650 also completed 400 days on the same current game code. Entire reports match after excluding new production fields, schema and timing/rate values. Compact comparison evidence is in PACING_PRODUCTION_PARITY.json; full local reports remain under artifacts/technology-pacing. This establishes unchanged behavior for this short seeded run, not all possible actors or later production states.
+
+
+## Checkpoint 114: Diode Control Stores illustration
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `080fe65`. No canonical integration or player launch.
+
+Diode Control Stores receives a separately generated subject illustration of technicians assembling discrete components on a wire grid. The built-in output was visually inspected for readable hardware and the approved matte pigment/fibrous ivory aesthetic, then copied unchanged with matching source and destination hashes. It is an illustrative assembly scene, not a circuit schematic. Exact prompt and provenance are in `assets/ui/research/paper/DIODE_CONTROL_STORES_PROMPT.md`.
+
+No gameplay or save change. Task-owned PNG/import metadata and prompt; shared research binding, art manifest, prompt index and review record. Native player presentation remains unverified. Full-history work remains active and incomplete. Historical diagnostic session 57160 was confirmed live at the start; no terminal result is claimed.
+
+Verification: both headless imports exit cleanly; all eleven atlas cases pass with zero errors/failures/skips/orphans, covering 46 explicit bindings and the shared texture/cache constraints. Runtime image uses the 768-pixel limit and mipmaps. Manifest: 463 live discoveries, 46 verified illustrations and 417 queued live images. Latest inspected historical snapshot: year 208, population 29,343, 234 known discoveries, 17 settlements.

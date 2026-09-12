@@ -3567,7 +3567,7 @@
       "domain": "knowledge",
       "id": "diode_control_stores",
       "name": "Diode Control Stores",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/microinstruction_sequencing.png",
@@ -3709,9 +3709,9 @@
   "live_art_complete": false,
   "live_count": 463,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 418,
+  "queued_count": 417,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 45
+  "verified_count": 46
 }

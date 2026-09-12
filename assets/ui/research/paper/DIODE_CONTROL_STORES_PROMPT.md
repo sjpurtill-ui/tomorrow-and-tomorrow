@@ -1,0 +1,9 @@
+# Diode Control Stores
+
+Built-in image generation. apprentice_contracts.png was supplied as style reference only. Selected after visual inspection of the discrete diode grid, human assembly activity, matte earth palette and fibrous ivory. Illustrative hardware, not an electrically executable wiring diagram. Copied unchanged to diode_control_stores.png.
+
+Source: /Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-7bae8de5-414a-4839-8d19-a1954f55b4e0.png
+
+## Exact prompt
+
+Use case: historical-scene. Asset type: square technology-tree illustration for Tomorrow and Tomorrow. Subject: Diode Control Stores. Input image is STYLE REFERENCE ONLY: match its matte gouache, fibrous warm ivory paper, muted ochre olive terracotta slate, simplified figures and sparse dry-brush texture. Make a distinct mid-twentieth-century electronics workshop composition. One seated technician in an ivory short-sleeved work shirt uses a small hand tool to fit a tiny dark axial diode across parallel wires on a rectangular upright circuit panel. The panel contains an orderly grid of crossing wires with many small dark diode bodies, representing a fixed diode-matrix control store, not a modern microchip. A second technician in a faded slate coat stands to one side holding another small panel. A modest low workbench supports the assembly and a shallow parts tray. Keep figures, panel and bench within the lower half of the square, all essential activity in frame; upper half largely blank warm ivory with no detailed room. The grid panel and attentive hands are the focus. Restrained earthy pigment, soft charcoal shadows, no glowing screen, futuristic hologram, giant chip, text, labels, numbers, logos, watermark, borders, photographic finish or glossy 3D. A quiet human illustration of making computing hardware, not a wiring schematic.
