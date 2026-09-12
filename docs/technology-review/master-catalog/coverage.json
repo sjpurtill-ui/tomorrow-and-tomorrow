@@ -1,20 +1,20 @@
 {
   "verified_baseline_discoveries": 556,
   "pending_communications": 48,
-  "new_authored_drafts": 1727,
-  "distinct_accounted_identities": 2331,
-  "remaining_identities_to_author": 2669,
+  "new_authored_drafts": 1786,
+  "distinct_accounted_identities": 2390,
+  "remaining_identities_to_author": 2610,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
   "review_candidates_not_added_to_count": 600,
-  "branch_alternatives": 235,
+  "branch_alternatives": 255,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 118,
     "D02": 59,
     "D03": 60,
-    "D04": 60,
+    "D04": 119,
     "D05": 118,
     "D06": 60,
     "D07": 60,
@@ -73,9 +73,9 @@
       "target": 300,
       "implemented_baseline": 67,
       "pending_communications": 0,
-      "authored_drafts": 60,
-      "accounted": 127,
-      "remaining_to_target": 173
+      "authored_drafts": 119,
+      "accounted": 186,
+      "remaining_to_target": 114
     },
     {
       "id": "D05",

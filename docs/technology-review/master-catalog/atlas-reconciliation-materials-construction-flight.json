@@ -2,7 +2,7 @@
   "status": "editorial_reconciliation",
   "adds_discovery_identities": 0,
   "mapped_candidates": 75,
-  "partial_candidates": 4,
+  "partial_candidates": 3,
   "mappings": [
     {
       "review_id": "D04-01",
@@ -148,10 +148,17 @@
         "polymer_chain_models",
         "thermoplastic_processing",
         "thermoset_resin_processing",
-        "synthetic_elastomers"
+        "synthetic_elastomers",
+        "polymer_monomer_purification",
+        "radical_chain_polymerization",
+        "ionic_chain_polymerization",
+        "coordination_polymerization",
+        "condensative_step_polymerization",
+        "additive_step_polymerization",
+        "ring_opening_polymerization"
       ],
-      "scope_status": "partial",
-      "note": "Processing, material models and synthetic elastomers are represented; broader monomer and polymer-synthesis families remain to be authored."
+      "scope_status": "subject_mapped",
+      "note": "Processing, models, elastomers and distinct synthesis families now have authored identities. This reconciles the candidate scope, not implementation or full industrial chemistry coverage."
     },
     {
       "review_id": "D04-17",
