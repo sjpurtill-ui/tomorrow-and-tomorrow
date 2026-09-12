@@ -89,6 +89,7 @@ static func valid_item(item:Variant)->bool:
 		if not number(item[field]) or item[field]<0:return false
 	return item.study<=1 and item.work>=1 and item.work<=100000 and item.position is Dictionary and number(item.position.get("x")) and number(item.position.get("z")) and text_list(item.signals,30)
 static func valid_mission(mission:Dictionary)->bool:
+	if not preload("res://scripts/communications_links.gd").valid_receipts(mission):return false
 	if (mission.has("research_mode") or mission.has("scholar_contract") or mission.has("scholar_provisions")) and not mission.has("research_subject"):return false
 	if mission.has("scholar_contract") and mission.get("research_mode","")!="scholar":return false
 	if mission.has("scholar_provisions") and mission.get("research_mode","")!="scholar":return false
@@ -308,6 +309,7 @@ static func envoy_arrived(system:Node,mission:Dictionary,day:int)->void:
 	mission["encountered_societies"]=[id]
 	encounter(mission,id,String(system.civilizations[index].name),location,day)
 	preload("res://scripts/research_purchase.gd").negotiate(mission,id,String(system.civilizations[index].name),location,day)
+	preload("res://scripts/communications_links.gd").transmit(mission,day)
 
 static func recruitment_targets(system:Node)->Array[String]:
 	# Receiving households is a separate decision at the actual encounter.
@@ -482,6 +484,7 @@ static func advance(day:int)->void:
 		if float(item.study)>=1 or day<int(item.returned_day):continue
 		var supplies:=preload("res://scripts/paper_study.gd").use(study_work,(1-float(item.study))*float(item.work))
 		supplies.progress+=preload("res://scripts/microscope_observation.gd").use(item,float(supplies.progress),(1-float(item.study))*float(item.work))
+		supplies.progress+=preload("res://scripts/communications_analysis.gd").use(item,float(supplies.progress),(1-float(item.study))*float(item.work))
 		item.study=minf(1,float(item.study)+float(supplies.progress)/float(item.work));study_work-=float(supplies.work)
 		if item.study>=1:
 			if item.get("partnership_protocol",false):

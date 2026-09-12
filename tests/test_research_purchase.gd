@@ -256,3 +256,33 @@ func test_ai_examination_estimate_clears_existing_work_during_travel()->void:
 	assert_float(long_trip).is_greater(0.0)
 	E.data().collections.backlog.returned_day=100001
 	assert_float(Planner._study_delay(0)).is_equal_approx(long_trip,.000001)
+
+func test_dispatched_paid_research_uses_operating_radio_at_actual_arrival()->void:
+	prepare()
+	var ops=preload("res://scripts/technology_operations.gd")
+	var before:float=GameState.resource_stockpiles.Stone
+	assert_bool(Purchase.dispatch("neighbor","clay_shaping","Stone").get("ok",false)).is_true()
+	var m:Dictionary=CivilizationSystem.diplomatic_mission
+	var arrival:=int(m.arrival_day)
+	for owner:String in ["player","neighbor"]:
+		WorldSimulation.scoped(owner,func()->void:
+			var state=WorldSimulation.state
+			state.convoy_traveling=false;state.settlement_site_committed=true
+			state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
+			state.population_allocations.Crafting=10
+			for gate:String in ["radio_telegraphy","agreed_signal_codes"]:
+				state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
+			state.resource_stockpiles["Radio Telegraph Sets"]=1.0
+			state.resource_stockpiles["Timber"]=2.0;state.resource_stockpiles["Paper"]=5.0
+			assert_bool(ops.install("research_radio_station").get("ok",false)).is_true()
+			ops.data().plants.solar_array={"installed":1,"building":0,"work":0.0,"enabled":true}
+			for day in range(arrival-10,arrival+1):state.elapsed_days=day;ops.advance(day)
+		)
+	E.envoy_arrived(CivilizationSystem,m,arrival)
+	assert_bool(m.research_refused).is_false()
+	assert_bool(E.data().collections.has("purchase:neighbor:clay_shaping")).is_true()
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(before-float(m.gift_amount))
+	assert_dict(P.evidence("clay_shaping")).is_empty()
+	assert_bool(E.valid_mission(JSON.parse_string(JSON.stringify(m)))).is_true()
+	Purchase.prepare_return(m);E.returned(m,int(m.return_day))
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(before-float(m.gift_amount))

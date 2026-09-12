@@ -84,13 +84,14 @@ func test_controlled_workshop_needs_commissioning_operators_and_actual_power()->
 func test_all_installation_types_can_save_their_maximum_commissioning_workforce()->void:
 	WorldSimulation.scoped("electronics",func()->void:
 		var state=WorldSimulation.state;state.settlement_site_committed=true;state.convoy_traveling=false
-		state.ensure_population_total(30000);state.population_allocations.Crafting=24000
+		var maximum:=Ops.PLANTS.size()*2*Ops.LIMIT
+		state.ensure_population_total(maximum+6000);state.population_allocations.Crafting=maximum
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
 		for id:String in Ops.PLANTS:Ops.data().plants[id]={"installed":0,"building":1000,"work":0.0,"enabled":true}
 		day(1)
-		assert_float(float(Ops.data().workers)).is_equal(24000.0)
+		assert_float(float(Ops.data().workers)).is_equal(float(maximum))
 		assert_bool(Ops.valid(JSON.parse_string(JSON.stringify(Ops.data())))).is_true()
-		var invalid:Dictionary=Ops.data().duplicate(true);invalid.workers=24001.0
+		var invalid:Dictionary=Ops.data().duplicate(true);invalid.workers=float(maximum+1)
 		assert_bool(Ops.valid(invalid)).is_false()
 		invalid=Ops.data().duplicate(true);invalid.services.mechanical_work=21501.0
 		assert_bool(Ops.valid(invalid)).is_false()

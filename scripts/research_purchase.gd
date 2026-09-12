@@ -21,6 +21,7 @@ static func quote(source:String,subject:String,resource:String)->Dictionary:
 	result["subject"]=subject
 	result["purpose_label"]="PURCHASE VALIDATED RESEARCH"
 	result["message"]="Offer %s for a validated study of %s. Travel provisions: %.1f Food; expected round trip: %d days. The supplier may refuse; unused payment returns with the envoys. Returned studies require local examination." % [result.gift.label,entry.name,float(result.provisions),int(result.total_days)]
+	result["message"]+=" Paired operating radio stations within 120 km can send agreed records home at arrival; local examination and envoy return travel still apply."
 	return result
 
 static func dispatch(source:String,subject:String,resource:String)->Dictionary:
@@ -75,6 +76,7 @@ static func prepare_return(mission:Dictionary)->void:
 	if mission.get("research_mode","purchase")=="partnership":
 		preload("res://scripts/research_partnerships.gd").prepare_return(mission);return
 	var report_key:=key(String(mission.civ_id),String(mission.research_subject))
+	if preload("res://scripts/communications_links.gd").delivered(mission,report_key):return
 	var carried:=false
 	var incoming:=0
 	for item:Dictionary in mission.get("carried_collections",[]):
