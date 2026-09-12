@@ -974,6 +974,2356 @@
       "classification_status": "editorial_review",
       "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
       "scope_digest": "973fb778b805ac17a5af5ec01f4ad32194963a1d31be6ae2db30945782cbdf22"
+    },
+    {
+      "id": "waterwheel_head_surveys",
+      "name": "Waterwheel Head Surveys",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "260e58e80a7bcc99cf91d7e61917642a04f5a82fd1a5b1c8ae4d31ef2a16302a"
+    },
+    {
+      "id": "overshot_waterwheels",
+      "name": "Overshot Waterwheels",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "df5a29a135b6703df5e40e5801a313d946d7e6986644da4cac0555aed64c4a2b"
+    },
+    {
+      "id": "undershot_waterwheels",
+      "name": "Undershot Waterwheels",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "58e9d31f3a8e954a8e52d0fde5097fb7dc952366982f4e630830869a29149829"
+    },
+    {
+      "id": "breastshot_waterwheels",
+      "name": "Breastshot Waterwheels",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "dbee7e277cb92df903a422d77ffc1f7669f05404049d084033186985daacb382"
+    },
+    {
+      "id": "waterwheel_gate_control",
+      "name": "Waterwheel Gate Control",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "eed10874f9607a60c3e48f6c743c7e5fdabed9df89737c4cd2c1e6e485f97697"
+    },
+    {
+      "id": "millpond_storage",
+      "name": "Millpond Storage",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "a5f97aac7a7cab15b6ccd7288ffa1d93f04d4a7dcb79eb97a92be481e723fc31"
+    },
+    {
+      "id": "impulse_turbines",
+      "name": "Impulse Turbines",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "7dd47994696c6425f6674346af3a94635758922b64ede78f14b523f82f70a0e8"
+    },
+    {
+      "id": "reaction_turbines",
+      "name": "Reaction Turbines",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "0f68be75e62bae50dbdff0a4878c654722da14b67ecb9fd622483d7d4a008f1d"
+    },
+    {
+      "id": "adjustable_blade_turbines",
+      "name": "Adjustable-Blade Turbines",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "50facf862136c77138afae6c1f39e6408047d8915ea83659e00931b23b76e439"
+    },
+    {
+      "id": "turbine_cavitation_control",
+      "name": "Turbine Cavitation Control",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "151fef8b33662fc3dfbdaee8ad47dfc6f0845891372a978c4577f8bbc27c24b9"
+    },
+    {
+      "id": "hydroelectric_generation",
+      "name": "Hydroelectric Generation",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The defined coupling of hydraulic shaft power to a generator fits the industrial electrification horizon; later grid controls remain distinct modern discoveries.",
+      "scope_digest": "152881fdb9474bcdc4d034a6c70cab40ac53d72a7592a5679a5a4d1acda57c8e"
+    },
+    {
+      "id": "pumped_hydro_storage",
+      "name": "Pumped Hydro Storage",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "1905c3a6856cf28d229ce1437492255c62ed650ed1da9594729c1a3429ffeb24"
+    },
+    {
+      "id": "windmill_sail_control",
+      "name": "Windmill Sail Control",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "3e01951438c01aaac8fe71d01c52c5f57ef572ffb49a1d443c09566beb0acf32"
+    },
+    {
+      "id": "windmill_yaw_control",
+      "name": "Windmill Yaw Control",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "0c91731fa593e3e70f9e61dba316d22a4b04f58244acf872ffd587d6ab8ec9c4"
+    },
+    {
+      "id": "airfoil_wind_rotors",
+      "name": "Airfoil Wind Rotors",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "575425fa55961b1195dce39087015169aa276b49817a4af43fc7e955a426067d"
+    },
+    {
+      "id": "wind_turbine_pitch_control",
+      "name": "Wind Turbine Pitch Control",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "3ba2d74dd35cd6813bead7dcc419837af48cf7bb8c643c66274042b49b594953"
+    },
+    {
+      "id": "wind_generator_conversion",
+      "name": "Wind Generator Conversion",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "4e9b5b58a73a0f95d321683fc23dee6435bdbe92dd5d89bd891a4b0fb489e446"
+    },
+    {
+      "id": "wind_resource_assessment",
+      "name": "Wind Resource Assessment",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "a1a04d045163483d4457d3c8e5db89fb0da26787fba61c49e4a3889f6de136e6"
+    },
+    {
+      "id": "solar_thermal_collectors",
+      "name": "Solar Thermal Collectors",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "30087bb55f95427d2aafa73520a8d00706a1ae14704a77ffa84e9b1ac6e373e7"
+    },
+    {
+      "id": "solar_concentrators",
+      "name": "Solar Concentrators",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "d6ae89a56510c72571f241bc5ff993ab4f21ecbce163c1cc6901aa9c2868ce3d"
+    },
+    {
+      "id": "thermal_storage_tanks",
+      "name": "Thermal Storage Tanks",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "41b37867092130bfa1071e507560d68190474bfbe426ebe6bbc5a9190fe89fc4"
+    },
+    {
+      "id": "phase_change_heat_storage",
+      "name": "Phase-Change Heat Storage",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "1012fe579323f41d93316dfc65110773d09b2eb13ade4f836d21d6c267f74d39"
+    },
+    {
+      "id": "concentrated_solar_power",
+      "name": "Concentrated Solar Power",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "8488acb8c7e9c4dc5f41345e7cf2803e3742ffaa7e011d3522b483a2dde54680"
+    },
+    {
+      "id": "geothermal_resource_testing",
+      "name": "Geothermal Resource Testing",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "b0a0102efcce28ac36512053159ea23e3fb2ed0f7b517c48e5f879033e8deda8"
+    },
+    {
+      "id": "geothermal_heat_exchange",
+      "name": "Geothermal Heat Exchange",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "8203b6fb9a0996c90d5cb28b958442cf226669c60ef639be934c8044da4b49f6"
+    },
+    {
+      "id": "binary_geothermal_cycles",
+      "name": "Binary Geothermal Cycles",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "cb81a33984daca120f47108327c77b0d367572672758a3a20c39cf26706c90ff"
+    },
+    {
+      "id": "combined_heat_and_power",
+      "name": "Combined Heat and Power",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "0b4a5d44cc3427e2b441767d0319fbbf3e413142276f41cb9fb5f715ebedc3d7"
+    },
+    {
+      "id": "district_heating_loops",
+      "name": "District Heating Loops",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "2723db5d9bdb15a973fd31a90393a411cdadfafb58ce14781a29d0b1d444d2cb"
+    },
+    {
+      "id": "heat_pump_cycles",
+      "name": "Heat Pump Cycles",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "98417b9f6fe3f99c189f03cb27419f0dd911d53b10db13f45b09e8dabc488e5e"
+    },
+    {
+      "id": "ground_source_heat_pumps",
+      "name": "Ground-Source Heat Pumps",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a4bbe3b4c96501da851de4394ae7371c0932cc4217400c1ea3e710a2ff530bc3"
+    },
+    {
+      "id": "boiler_feedwater_treatment",
+      "name": "Boiler Feedwater Treatment",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "dc489757a81db73fa0c1f0ca1c4c20201a2d1b3e3a2eb830b5b6ae9dfd13dbff"
+    },
+    {
+      "id": "steam_condensers",
+      "name": "Steam Condensers",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "99b6067216864aa0e25f2d83f3226539f2bdd2c03c4139dabcdeeeca3265943f"
+    },
+    {
+      "id": "steam_superheating",
+      "name": "Steam Superheating",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "36d32811e81d4ecb0f2d0e02aeee1980859ec4de26bce6a7faebe37e2eab8a8b"
+    },
+    {
+      "id": "regenerative_feed_heating",
+      "name": "Regenerative Feed Heating",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "830aeee45453e636a23394bc3dfd13f6ed7b21558ef7a6d9cae57e66e552d2b3"
+    },
+    {
+      "id": "gas_turbine_cycles",
+      "name": "Gas Turbine Cycles",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "d780465595114b0ae9b091ad9ad0f0a732f932c881417e7de429f0482bab5a72"
+    },
+    {
+      "id": "combined_cycle_generation",
+      "name": "Combined-Cycle Generation",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a051b6eb680e4b79b69b0e5281c88e6e6da1c262627c483633a57c00f99c47b0"
+    },
+    {
+      "id": "generator_excitation_control",
+      "name": "Generator Excitation Control",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Excitation regulation belongs alongside industrial electric-machine operation; later electronic control may implement the same mechanism.",
+      "scope_digest": "bceae772248291805bb1100bb37b0e26501ed87457f1018a25e8a86b27139246"
+    },
+    {
+      "id": "alternating_current_distribution",
+      "name": "Alternating-Current Distribution",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "e3c789d1d01ac10d5970ae637059428cff45451e1dc59230e892435e2953282b"
+    },
+    {
+      "id": "three_phase_power",
+      "name": "Three-Phase Power",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "8b3457b3b092e7f65c6e455f686d65f341c9aeaa19f6eb50a138eedc047220d8"
+    },
+    {
+      "id": "protective_circuit_breakers",
+      "name": "Protective Circuit Breakers",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Rated interruption of fault current belongs to industrial electrical infrastructure; modern electronics refine detection without creating the basic interruption mechanism.",
+      "scope_digest": "66a5f8c71ec2580b8ab530715d80ed3b88266139665103aaed5ee1d2d66020ee"
+    },
+    {
+      "id": "grid_synchronization",
+      "name": "Grid Synchronization",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Phase/frequency/voltage matching for connecting generators belongs to industrial AC system operation; later automatic controls remain implementations of this practice.",
+      "scope_digest": "ad791dc490b807f3d5814d6f89c8746791d754db4e69c87b94c6bdd94981ed66"
+    },
+    {
+      "id": "load_dispatch",
+      "name": "Load Dispatch",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "281ff42798300820ae13553e160c6c5b7c643dbba312d8ead3f0f56b89bdf9d7"
+    },
+    {
+      "id": "transmission_stability",
+      "name": "Transmission Stability",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "b76a0d90cc1de5a4cb283fe0323a43b4a7e0f123e4ef0b560f685a3b784e3783"
+    },
+    {
+      "id": "high_voltage_direct_current",
+      "name": "High-Voltage Direct Current",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "e70f9aa9fb44aa949b94ced5d7dfdcf8618bb98bd85b3650d2f8972d7aec7590"
+    },
+    {
+      "id": "grid_forming_inverters",
+      "name": "Grid-Forming Inverters",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0c468cdeb616322ab97845d95052b5f5e8fd9519eede4925935f2481eac20e44"
+    },
+    {
+      "id": "islandable_microgrids",
+      "name": "Islandable Microgrids",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "579fcbee2f49324a726131f2c6e558908908cbcbe21c1eac313d1c45b4d049e2"
+    },
+    {
+      "id": "black_start_planning",
+      "name": "Black-Start Planning",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "f15c23d26d97ea9cd5a243530f6fb505241e764b936cbed87d0cb55ac9b4d846"
+    },
+    {
+      "id": "battery_state_estimation",
+      "name": "Battery State Estimation",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "2c7735fd767a03d10626711069a8fe5a60140b4608f34743dabe40aec674592d"
+    },
+    {
+      "id": "battery_thermal_management",
+      "name": "Battery Thermal Management",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "85890193806dd654ab8755ca1eec369c42ad0ab921d878640e32c316acc2f926"
+    },
+    {
+      "id": "flow_battery_storage",
+      "name": "Flow Battery Storage",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "7b7e32fe4a8a2808b036133a101154eb950d5964c541ea4f8db7303e673ec8bc"
+    },
+    {
+      "id": "hydrogen_storage_systems",
+      "name": "Hydrogen Storage Systems",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "e2bc18ffdf6d6bd6cf07b9da0aa784bf967b56f3213816093224c175c55f93b9"
+    },
+    {
+      "id": "fuel_cell_stacks",
+      "name": "Fuel Cell Stacks",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "e3941ac7ee5e6b15bc8e3a3e43449de46a628ef21a2889bbc04c42fb16d53804"
+    },
+    {
+      "id": "electrolyzer_load_control",
+      "name": "Electrolyzer Load Control",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "bf867a43770874d5195a3a4c159d2b736ffa3801b787b07a90bd60280682459e"
+    },
+    {
+      "id": "nuclear_fuel_fabrication",
+      "name": "Nuclear Fuel Fabrication",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "3596949a403575c1caf81f6d95624ea826c9518eca96af70ec0c45135c51791d"
+    },
+    {
+      "id": "reactor_heat_removal",
+      "name": "Reactor Heat Removal",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0d4308b16b2bbe3258015d1be0099661b7ef6e99f144c524eae9e9d37d0ab5c6"
+    },
+    {
+      "id": "reactor_shutdown_systems",
+      "name": "Reactor Shutdown Systems",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "073cabcfd8e0a3fb41772b4628d91157b94f9a49319b4755b8a715d53c87ea5b"
+    },
+    {
+      "id": "decay_heat_management",
+      "name": "Decay Heat Management",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "cc971f8c7f7d2b7f4a2d0ad7d70886876761f7f69e5b6a557cd7fa74019746b0"
+    },
+    {
+      "id": "nuclear_waste_characterization",
+      "name": "Nuclear Waste Characterization",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "c815ffe97fdba301fe035ec7cb1b421f34d09d16c95f8bd92ceb53bd0ee00dac"
+    },
+    {
+      "id": "fusion_plasma_confinement",
+      "name": "Fusion Plasma Confinement",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Confinement experiments belong to modern plasma research. Net electricity is reserved for the distinct advanced integration identity.",
+      "scope_digest": "e360a40673cef28c0df695e98b199ee9d4af878c19451b0eebfa25f801691454"
+    },
+    {
+      "id": "fusion_power_integration",
+      "name": "Fusion Power Integration",
+      "horizon": "H06",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored acceptance condition is actual positive net plant energy with a qualified fuel cycle, materials and auxiliary demand. A confinement result alone cannot satisfy this advanced integration.",
+      "scope_digest": "bfb4722cb5d1d49487e96c9ee0d1bb752fad405590fcdc22242b92098cf16cfd"
+    },
+    {
+      "id": "angular_sky_catalogs",
+      "name": "Angular Sky Catalogs",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "1634cbd671e087edfc857e1ba7e78685b9cead2c26c0e825af528f86a5a2bb1e"
+    },
+    {
+      "id": "planetary_motion_tables",
+      "name": "Planetary Motion Tables",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "d953bf209cc0ccb7246244640c6bd855051631807171ce5a0b5d7b39c2acd6da"
+    },
+    {
+      "id": "celestial_reference_frames",
+      "name": "Celestial Reference Frames",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "ae5b6ff6420806e77372dab2a6be072a14d3ed5562d716e422bed3e642a3aa30"
+    },
+    {
+      "id": "orbital_dynamics",
+      "name": "Orbital Dynamics",
+      "horizon": "H03",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "fc9320b5c8e6fc4b438c7e9636019c69832781a2304d5997b1c75e50dca0e5ff"
+    },
+    {
+      "id": "orbit_determination",
+      "name": "Orbit Determination",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "b4cf683c3f96b338bbbb04972f5d390ffafbb2f374613c221bf454f3036168ee"
+    },
+    {
+      "id": "launch_window_planning",
+      "name": "Launch Window Planning",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "58fc0f1a8a6a52c1221362e90464ead0a12f363067fd9df2283da986bf8c86d5"
+    },
+    {
+      "id": "rocket_nozzle_expansion",
+      "name": "Rocket Nozzle Expansion",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "30d390a6bae5ad897f82e24421baf723382ea1af161194b9e1f78a266d44d5c1"
+    },
+    {
+      "id": "rocket_propellant_feed",
+      "name": "Rocket Propellant Feed",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "1dfb4a6e48df35219c2fca7c2c3b0e824f7d55e29b3ebde3644a585a0812e168"
+    },
+    {
+      "id": "liquid_rocket_engines",
+      "name": "Liquid Rocket Engines",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "d75d2150d15398908c3c479a9d5c6fc5dc6bd7c8a104e57c5da117963378ca7e"
+    },
+    {
+      "id": "solid_rocket_motors",
+      "name": "Solid Rocket Motors",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned to modern qualified shaped-grain motors in the rocket-engineering scope; early incendiary and simple rocket practices require their own earlier identities rather than retroactive modern capability.",
+      "scope_digest": "b162472a622a30610134aaf2e198c4dcc5098b34a0cd1cc81ce5499c3818f158"
+    },
+    {
+      "id": "rocket_staging",
+      "name": "Rocket Staging",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "93010c191e98c3a11539c1c57afe5a57beff4d9be1266a531918adbc6bdfbd08"
+    },
+    {
+      "id": "launch_vehicle_guidance",
+      "name": "Launch Vehicle Guidance",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "1f094811a3b269d005713d7d547891d0913467f002add1fe78d6d5a35ecff4b4"
+    },
+    {
+      "id": "inertial_navigation_platforms",
+      "name": "Inertial Navigation Platforms",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "72c896e47539308b5eb648ca18b4d73560cbdb887f74253375b25bc4996daa73"
+    },
+    {
+      "id": "launch_range_tracking",
+      "name": "Launch Range Tracking",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "6c3e750c81d4fa3f3deb7443a4e09585959c52a7d72ff1d665ec612343a022d3"
+    },
+    {
+      "id": "cryogenic_propellant_storage",
+      "name": "Cryogenic Propellant Storage",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "4afb15f0f132ba30f57f973e0c52fa9dae6cfd29f460f945071e406306d6db10"
+    },
+    {
+      "id": "rocket_engine_turbopumps",
+      "name": "Rocket Engine Turbopumps",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "f488758c4a458a2434b1a4f0bcb30eeb3e16290d9f699007246168e07afe3632"
+    },
+    {
+      "id": "regenerative_rocket_cooling",
+      "name": "Regenerative Rocket Cooling",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "08bf62009f275e320463e70f9f4eb01ce3e63e2426660abac869831cea831f97"
+    },
+    {
+      "id": "spacecraft_structural_testing",
+      "name": "Spacecraft Structural Testing",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "680bfe21452ed981f722f9c8c66ee6da9adf9b291c8e57003003e5b716582fea"
+    },
+    {
+      "id": "spacecraft_attitude_sensing",
+      "name": "Spacecraft Attitude Sensing",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "19be4ee8e004cda5c1bdd7d36f8b70e36eb35780f90cd089f6f9bb3073af55ed"
+    },
+    {
+      "id": "reaction_wheel_control",
+      "name": "Reaction-Wheel Control",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "08bd1b303c9fffb6ef5d5d2fbbf7ce8317efb98a95e9075cd5175d4bc0e96997"
+    },
+    {
+      "id": "spacecraft_thruster_control",
+      "name": "Spacecraft Thruster Control",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "307787f41abf7ecae6f48e97be085674b785f0c0eae25fbe4532725954ea47f0"
+    },
+    {
+      "id": "orbital_rendezvous",
+      "name": "Orbital Rendezvous",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "6366a62ca9e61b6876d81428a66c0528f2741560c44930f30ed3397e3378fad5"
+    },
+    {
+      "id": "spacecraft_docking",
+      "name": "Spacecraft Docking",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "b9f5a12bb803c4974d6d74afb136d5d43344f9dad50ef0132a79491d7dc697cd"
+    },
+    {
+      "id": "orbital_transfer_planning",
+      "name": "Orbital Transfer Planning",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a125d7063b4ae9353a1d3513c74b80f2bdd4f3bec6a9ad75d4129e1636bc2134"
+    },
+    {
+      "id": "gravity_assist_navigation",
+      "name": "Gravity-Assist Navigation",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "6c88daa1239ccd7416297e22275ec6aaff83d2bfa76991615a935392c046d576"
+    },
+    {
+      "id": "electric_space_propulsion",
+      "name": "Electric Space Propulsion",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "6a94aeb1457df299df050fa6320be5868f71956458f446baae1ef2449b40e613"
+    },
+    {
+      "id": "plasma_physics",
+      "name": "Plasma Physics",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "7753f4a7be7f1eff73376c41cacab685a71f5a9eaa5a015935c3798827f84574"
+    },
+    {
+      "id": "spacecraft_thermal_balance",
+      "name": "Spacecraft Thermal Balance",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "073094dabc1a2fccd88788fddd14c87e235f7282f6ed23b7709e66f4947c4da7"
+    },
+    {
+      "id": "space_radiators",
+      "name": "Space Radiators",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "9409684ea95c00244fefcdf69578b13bff5e8d3fe830d9cf83ff11379c72048d"
+    },
+    {
+      "id": "multilayer_space_insulation",
+      "name": "Multilayer Space Insulation",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "19603b5acb42e016cbaa6065aeb6f8bcdc7a7c85c19c9d775701f475000f6878"
+    },
+    {
+      "id": "space_power_arrays",
+      "name": "Space Power Arrays",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "23e992c80aba2371ca31f74364890bb27dd7de5099bd5d57f869d11f6db8024a"
+    },
+    {
+      "id": "space_power_eclipse_reserves",
+      "name": "Space Power Eclipse Reserves",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "7fe442405cfdaf721ed1a8e9017ea766cc2af8e3d740c9d745a0f7b0bf91a317"
+    },
+    {
+      "id": "space_radiation_shielding",
+      "name": "Space Radiation Shielding",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "d21548090609e8cdcf16db3fc86179dbe0b9792ba2306142e03bf76e5f93455a"
+    },
+    {
+      "id": "orbital_environment_monitoring",
+      "name": "Orbital Environment Monitoring",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "f4577ad1d7e5b9b208333519d5d6e24a37eae005a50bc3427e7f6c4483fc02ac"
+    },
+    {
+      "id": "collision_avoidance_maneuvers",
+      "name": "Collision-Avoidance Maneuvers",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "227e478e115e21a2988f9344d3b41de0bf62091ad6b7216973b662391b2d3b37"
+    },
+    {
+      "id": "controlled_reentry",
+      "name": "Controlled Reentry",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "6f303ef999ed4cda20bb34ebac5e561a4ac6f75b132ac31b71c7e4ea0cfc0205"
+    },
+    {
+      "id": "ablative_heat_shields",
+      "name": "Ablative Heat Shields",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "ce8c146b89b6a1bb38b9322240db3b18890e37a26515dd0bf0868320930144bf"
+    },
+    {
+      "id": "reusable_thermal_protection",
+      "name": "Reusable Thermal Protection",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0da281a48eea182fe69a051472b78d4a35744ab2db9676af086b07bec2d12558"
+    },
+    {
+      "id": "surface_descent_navigation",
+      "name": "Surface Descent Navigation",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "7328cea1bca799ad1c8d0d9e399809ecb1ef93b5ef2d152e5e717963f9880868"
+    },
+    {
+      "id": "planetary_rover_mobility",
+      "name": "Planetary Rover Mobility",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "e0e7f4210b0b64c3904ce2eacdaf5d81e700631170e52627eaeeed582caf2b5f"
+    },
+    {
+      "id": "remote_manipulation",
+      "name": "Remote Manipulation",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "9b7d60c21203ca5d17ad2d6596bbc2cc28f5a74c17d8e371be93f357cb7f008f"
+    },
+    {
+      "id": "space_suit_pressure_systems",
+      "name": "Space-Suit Pressure Systems",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "99562e3b9744439b2564cc03f9d4d497fbe6f53f0f38d5ad77c626c066df87b9"
+    },
+    {
+      "id": "spacecraft_atmosphere_control",
+      "name": "Spacecraft Atmosphere Control",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "fde35048e622f050bc3ec1e6c015d9321f64925169f865a92c51fcf48595aa1e"
+    },
+    {
+      "id": "gas_composition_analysis",
+      "name": "Gas Composition Analysis",
+      "horizon": "H04",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "13c1d35889d7dedfd727dfc5861341c8f8c9e41baa483bb11627240734555cea"
+    },
+    {
+      "id": "carbon_dioxide_removal",
+      "name": "Carbon-Dioxide Removal",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "da3734c6bc62c456b4e06ca6929885dd26d2ab11a53ea8438da838c970f7ddf1"
+    },
+    {
+      "id": "cabin_oxygen_regeneration",
+      "name": "Cabin Oxygen Regeneration",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "12110a6b14c609011a2732e42cdbee248f21b6ea1a19bb8cae4198d412003ffd"
+    },
+    {
+      "id": "space_water_recovery",
+      "name": "Space Water Recovery",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "ea1b3834bcca248b5558f299ad9da781054f9cddf52ca13bdfd3660a473004fb"
+    },
+    {
+      "id": "closed_habitat_material_accounts",
+      "name": "Closed-Habitat Material Accounts",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "d58d666b158d595ff9b0b4ac35f3ce3f1c280e35a4789410b4f521044c0a75d7"
+    },
+    {
+      "id": "habitat_fire_control",
+      "name": "Habitat Fire Control",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "cc2ecd51a9f27965606f02de9feeca52ad572132ba52b97e8f5c12b3251041ff"
+    },
+    {
+      "id": "orbital_habitat_assembly",
+      "name": "Orbital Habitat Assembly",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Joining and commissioning habitation modules is already modern orbital engineering; a habitat name is not sufficient for future classification.",
+      "scope_digest": "f246c41af066868aa86cbf21dd89c38c156a0fc8bdedb7ee316af6ac408fe77c"
+    },
+    {
+      "id": "rotating_habitat_dynamics",
+      "name": "Rotating Habitat Dynamics",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Rotation and motion-coupling models are modern mechanics. The node does not itself require a completed occupied rotating settlement.",
+      "scope_digest": "7927b884b5b68149b382bdd4fca24fc684d4c61e22bcda14e75850677c96489e"
+    },
+    {
+      "id": "regolith_excavation",
+      "name": "Regolith Excavation",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "e40f706f7095756650c87d1d2e9025b62989bae88e1547370861371d4c72c020"
+    },
+    {
+      "id": "regolith_volatile_assays",
+      "name": "Regolith Volatile Assays",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0cab6ad7654c28fb1fd07677e696b2a02f6977fc6a448a8f2bc4879387509497"
+    },
+    {
+      "id": "lunar_oxygen_extraction",
+      "name": "Lunar Oxygen Extraction",
+      "horizon": "H06",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Advanced assignment refers to local lunar feedstock conversion as an operating supply capability. Ground simulant chemistry remains supporting research, not proof of this site service.",
+      "scope_digest": "4e17ac24c2821325ff7b425e4162fd28771a2802a564c2a2b7b6e06b40e2d0a5"
+    },
+    {
+      "id": "in_situ_construction_materials",
+      "name": "In-Situ Construction Materials",
+      "horizon": "H06",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Advanced assignment refers to qualified locally processed extraterrestrial structural/shielding output in this space-catalog scope; ordinary terrestrial material processing is represented elsewhere.",
+      "scope_digest": "6ac33c85a4f9ba637408e9fe5bc014f19c77b23c7828bf7a05a4d003af6522de"
+    },
+    {
+      "id": "planetary_surface_power",
+      "name": "Planetary Surface Power",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified robotic surface generation, storage and distribution are modern mission systems; this general node does not itself claim a city-scale extraterrestrial grid.",
+      "scope_digest": "b56fc503d4c1a9f241d766c48b9f340ad02b9f8a9acfa56adbee742d75be81b1"
+    },
+    {
+      "id": "deep_space_tracking",
+      "name": "Deep-Space Tracking",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "d72b6be3b01fd246be6da133230a9918fdf2129b2a3268ea6fd28094c70dd14f"
+    },
+    {
+      "id": "delay_tolerant_space_networks",
+      "name": "Delay-Tolerant Space Networks",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "ebb1422ded429d2adc97e972aeaba6497b929cfecd1368382d02e959fc868426"
+    },
+    {
+      "id": "optical_space_links",
+      "name": "Optical Space Links",
+      "horizon": "H05",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "8542562dc5f92ce4fd0d1705f5e13e3844625525d8edea2ca49433ac798ee8c2"
+    },
+    {
+      "id": "interstellar_probe_navigation",
+      "name": "Interstellar Probe Navigation",
+      "horizon": "H06",
+      "source_file": "space-and-energy.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified scope combines frontier operating hardware and sustained mission or settlement service beyond its earlier component methods. Assignment expresses a design horizon, not achieved performance.",
+      "scope_digest": "e3439d2498403f0ea420d936469be97de7d0324dcc9ff28f7fd9e8acb8fa970d"
+    },
+    {
+      "id": "fuel_moisture_assessment",
+      "name": "Fuel Moisture Assessment",
+      "horizon": "H03",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The existing branching note permits empirical comparative drying/fuel trials before calorimetry. This is classified as an earlier measured craft practice, not a compulsory modern assay.",
+      "scope_digest": "cb40c3ce4a63b526a46a733b5f1916aa6f1f0f690ad48dcc47c7a9b59a80f3fb"
+    },
+    {
+      "id": "combustion_air_regulation",
+      "name": "Combustion Air Regulation",
+      "horizon": "H02",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirically controlled combustion installation work belongs to settled craft development; this scope does not require modern analytical theory.",
+      "scope_digest": "a622deb1d19c8db85012986068f818096ed7a29a1b4c59f7c972a1de3322e3f8"
+    },
+    {
+      "id": "furnace_draft_design",
+      "name": "Furnace Draft Design",
+      "horizon": "H02",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Empirically controlled combustion installation work belongs to settled craft development; this scope does not require modern analytical theory.",
+      "scope_digest": "2de29a7f32706a766431132a25b047d1b37d7d1fc3daa78ebf79a7951de78650"
+    },
+    {
+      "id": "industrial_burner_atomization",
+      "name": "Industrial Burner Atomization",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "073d669c4c68af8330ece106172b8f075b2ad8554e0dcc60ecb50bbec6d3ddf1"
+    },
+    {
+      "id": "biomass_gasification",
+      "name": "Biomass Gasification",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "bf776f4ce10ac9226655df702b91da2247f553debfde536005c98a094e806e3a"
+    },
+    {
+      "id": "producer_gas_cleanup",
+      "name": "Producer Gas Cleanup",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "c2e4fed310291be3b115d8d9f6b73469491f096f324ae2591c2a69b7f4681428"
+    },
+    {
+      "id": "anaerobic_biogas_generation",
+      "name": "Anaerobic Biogas Generation",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "fbb6409839ac8612f0141f598b32cd7aecd08ca953ec634a110be3c1f60e9f37"
+    },
+    {
+      "id": "biogas_upgrading",
+      "name": "Biogas Upgrading",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "7106f4d49c4d96f2c65e3ee6170d4b0ba58c8cc06a69d336495c0eec314f5e0b"
+    },
+    {
+      "id": "ethanol_fuel_qualification",
+      "name": "Ethanol Fuel Qualification",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0caae03d88f3825e9f10b89a46eb2ba2db3980d600872c6d91622a121a080c10"
+    },
+    {
+      "id": "biodiesel_conversion",
+      "name": "Biodiesel Conversion",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "5b9f1923b8eddfec9b5d42b4a43153e5cae9f28a264ce5f1cd88832f9ed9c4bf"
+    },
+    {
+      "id": "fuel_supply_chain_balancing",
+      "name": "Fuel Supply Chain Balancing",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial classification follows the authored plant-consumption/reserve service scope. Earlier general trade and inventory methods remain prerequisites and alternatives.",
+      "scope_digest": "643a5861ef9814fd280017d81f958226d53d41840237837617e926001af2024d"
+    },
+    {
+      "id": "steam_engine_valve_timing",
+      "name": "Steam Engine Valve Timing",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "e383f78cffd85dcd7df04b7cf21c2711b33c64409d99618bc14412bf12666bc1"
+    },
+    {
+      "id": "compound_steam_expansion",
+      "name": "Compound Steam Expansion",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "488d04fd1622f5a78c5ccb266727fa36826a30915a0d55d0240847197ea45cba"
+    },
+    {
+      "id": "steam_turbine_blading",
+      "name": "Steam Turbine Blading",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "fb94f8ccba0b2d8014042e7fdb73dbfb46fd134ac9bf2198f83a40d2e7cc0298"
+    },
+    {
+      "id": "steam_turbine_governing",
+      "name": "Steam Turbine Governing",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "4623c2a42fffec21cb1c06f4250aa773387910151cd1d7af66e14901f8521731"
+    },
+    {
+      "id": "heat_recovery_steam_generators",
+      "name": "Heat Recovery Steam Generators",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "c45b2e5e2d85d068c3c124067b80733b8815e22e0c680986a1e081810e9beb0a"
+    },
+    {
+      "id": "thermal_plant_heat_balances",
+      "name": "Thermal Plant Heat Balances",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "710611a4132bbe0b5a8864a4962d107d7163bb05e4400971486cec6ec224e64e"
+    },
+    {
+      "id": "cooling_tower_operation",
+      "name": "Cooling Tower Operation",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "2a5d256891dc1ef69665f7092998213b13715e297ee9fe22a09e2498479cd824"
+    },
+    {
+      "id": "air_cooled_heat_rejection",
+      "name": "Air Cooled Heat Rejection",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "d692c60eac597fffc4031515d7ff27417cdbceeba29b45938d6bb622c2501c0d"
+    },
+    {
+      "id": "condensate_return_networks",
+      "name": "Condensate Return Networks",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "47f5fb7d987f0e55c3b7b3bb351e83b8d1fc75710646051cd63525ee3ac2145d"
+    },
+    {
+      "id": "insulated_process_heat_piping",
+      "name": "Insulated Process Heat Piping",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "1a81dfed424640cc26c50370f026b19d27d21c9af7aeecaa29223de4cf2a98b1"
+    },
+    {
+      "id": "solar_resource_measurement",
+      "name": "Solar Resource Measurement",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "af98d5f1a7d15586bde9e2aa341878d5d36a736ae80ce98347938dbdfef9569a"
+    },
+    {
+      "id": "photovoltaic_array_matching",
+      "name": "Photovoltaic Array Matching",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "3bd3e3c162e42c5ac268f626839ddf956a11d376257f60c52a8fd1be04ca0047"
+    },
+    {
+      "id": "maximum_power_point_control",
+      "name": "Maximum Power Point Control",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "cc13d97841d7df605314469974d2a1da2e71a06425e54b776559a0fb33fcb46f"
+    },
+    {
+      "id": "solar_tracking_mounts",
+      "name": "Solar Tracking Mounts",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a89dddd5db56dbee4a1933e5fb6b7e6d2c1894cb3a8cd29a1191ccb545aaf90c"
+    },
+    {
+      "id": "photovoltaic_degradation_diagnosis",
+      "name": "Photovoltaic Degradation Diagnosis",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "aaa2bd786ec71ffef03da4d0786800384ae1b2ddf4d933eadfa2b2cc05716aad"
+    },
+    {
+      "id": "wind_farm_wake_planning",
+      "name": "Wind Farm Wake Planning",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "150487bc959f907fe9278d1d12923d634762f823b2d466d5b1f1fde640665535"
+    },
+    {
+      "id": "wind_rotor_load_monitoring",
+      "name": "Wind Rotor Load Monitoring",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "399d1deabfb2523bdfc1b4d5bd60c618811a308e568b8414e7b40ece71997097"
+    },
+    {
+      "id": "wind_turbine_drivetrain_services",
+      "name": "Wind Turbine Drivetrain Services",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a15be042d331a2e399aa80602b9f64c090c1723db69e3a00c25bfe712051dca4"
+    },
+    {
+      "id": "floating_wind_platform_integration",
+      "name": "Floating Wind Platform Integration",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "01bf8f988c5729a9f33cacbb1ab921fcb9504a3be6a9c0736080f9f0a71704aa"
+    },
+    {
+      "id": "hydropower_sediment_management",
+      "name": "Hydropower Sediment Management",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0cc79e8f6c73d25e79ab83381134121d52531c0a92c25216fcd0aac1e808098c"
+    },
+    {
+      "id": "hydropower_environmental_dispatch",
+      "name": "Hydropower Environmental Dispatch",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "b978baeba541cbae623f9e874df4f7b0f58639bd103380f3969eaa4170862ebb"
+    },
+    {
+      "id": "hydraulic_penstock_transients",
+      "name": "Hydraulic Penstock Transients",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0dc2a2880c165b989989a2d822ba938b7fbd9f527a0a1b6013527c68c32c10f1"
+    },
+    {
+      "id": "geothermal_scaling_control",
+      "name": "Geothermal Scaling Control",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "59c0739f2af61b0fdcf5707bcd0d385160a7de34bbb892807ed2ddfd38bec2a5"
+    },
+    {
+      "id": "geothermal_reinjection_management",
+      "name": "Geothermal Reinjection Management",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a9d0705d088f848a01e2b704bea426b5da265c9692258267e1d446b55b586ce2"
+    },
+    {
+      "id": "engineered_geothermal_reservoirs",
+      "name": "Engineered Geothermal Reservoirs",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a5a718b0bc112bdc9a845eb7c644a5d96dbba1c0d2374924d2a813fdfbc86b53"
+    },
+    {
+      "id": "geothermal_seismic_response",
+      "name": "Geothermal Seismic Response",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "8aa137f3414aabefcca2eeb7acb868ae1b0ff5307c329fe756a044c56495ba9f"
+    },
+    {
+      "id": "closed_loop_deep_geothermal",
+      "name": "Closed Loop Deep Geothermal",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "4c17786ffc013391b809b6bbabf8f58f1722c8f4ed0a0d86ba24d68030ca1b63"
+    },
+    {
+      "id": "battery_cycle_life_characterization",
+      "name": "Battery Cycle Life Characterization",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "3e9ae88095b11d354ac4869f5d5111d4160702ec02df3afe34982d90332f5012"
+    },
+    {
+      "id": "battery_cell_balancing",
+      "name": "Battery Cell Balancing",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "9604632dcc24cf83c4acd507b84f17aec2ffa36b32922e92e7de0b42fcd6055f"
+    },
+    {
+      "id": "battery_pack_fault_isolation",
+      "name": "Battery Pack Fault Isolation",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "412a4fa97ec8e796a81176839dee2e7ad85c088c34ce3e222f9a396acc0b63ca"
+    },
+    {
+      "id": "second_life_battery_qualification",
+      "name": "Second Life Battery Qualification",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "42a2003f99d0e1fb71fb2089cbc397734de6954bcdf68aa2cf2623f6b641cb07"
+    },
+    {
+      "id": "compressed_air_energy_storage",
+      "name": "Compressed Air Energy Storage",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "3603946bfb110a1c1fa7bfa24c207f9f5ec8f3ace43a66db65154009bd1abcb3"
+    },
+    {
+      "id": "flywheel_energy_storage",
+      "name": "Flywheel Energy Storage",
+      "horizon": "H04",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "bb09f9ba1f6b9e99147690060223d5f9cf42c105fe3a93ebb060d4f07fc3d80b"
+    },
+    {
+      "id": "thermochemical_heat_storage",
+      "name": "Thermochemical Heat Storage",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "8a22908b06c636849d708714116d933a212a97423b141f3f5cb240ea613ca0b7"
+    },
+    {
+      "id": "seasonal_heat_storage",
+      "name": "Seasonal Heat Storage",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "f46733a0dc7f9c9e161924b834566a18afd2422a2d496709f5d6911a8f25bda1"
+    },
+    {
+      "id": "storage_dispatch_duration_models",
+      "name": "Storage Dispatch Duration Models",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "6d128257c2de600639ccaa3b0099033314f6e9fcbd3a46805fecfa7a43b67bed"
+    },
+    {
+      "id": "grid_frequency_reserve_control",
+      "name": "Grid Frequency Reserve Control",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "58c8e0bec2fd94832353c012584ab10d26c3e6a5d44e3d013d70f5c59d2e38e4"
+    },
+    {
+      "id": "reactive_power_compensation",
+      "name": "Reactive Power Compensation",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "d55dbe1cb1942250d4653c8251c276bc96452efb8d7efd15e6d5b8e733c116f2"
+    },
+    {
+      "id": "protection_relay_coordination",
+      "name": "Protection Relay Coordination",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "e6f882c8ab370fcd258f6fdfb7cb02eb7d4888d3f3a1fc8d7132ce66df2cf032"
+    },
+    {
+      "id": "power_flow_state_estimation",
+      "name": "Power Flow State Estimation",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "584c0f993e8cdaa4dded29bc1d505b0fd5b5fbe0cb8f7aff2e13cba5a8cc2097"
+    },
+    {
+      "id": "demand_response_contracts",
+      "name": "Demand Response Contracts",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "9069b2edf7a666909d68126b878df5299d9ad3132d1bb444662dbae764d8dad0"
+    },
+    {
+      "id": "interconnector_capacity_allocation",
+      "name": "Interconnector Capacity Allocation",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "bd9243c400e805650047936ca9dd7b6060871150422e475f45895e424e11dbad"
+    },
+    {
+      "id": "renewable_firm_capacity_assessment",
+      "name": "Renewable Firm Capacity Assessment",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "286752219463d7a906ba3b1b50b52a9aa249b05d026cc3f7439c607fdadc7418"
+    },
+    {
+      "id": "reactor_outage_work_planning",
+      "name": "Reactor Outage Work Planning",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "47bf796a84906d12c39f3e877ef481915763eb3c4aca60cfe7f1dc7d679bb395"
+    },
+    {
+      "id": "radioactive_waste_package_qualification",
+      "name": "Radioactive Waste Package Qualification",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "e596063643cb1c7909e45483fff2bfd5f20003519b4614c055488715d67a9df0"
+    },
+    {
+      "id": "fusion_component_lifetime_trials",
+      "name": "Fusion Component Lifetime Trials",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Representative irradiation and component damage trials are modern research; unknown lifetime and scaling do not automatically make the experiments a future invention.",
+      "scope_digest": "ebdbe5c8e0e9a61554e00475d2a84a2dc14e7b66910e0cc3a54f59fcd0ab7911"
+    },
+    {
+      "id": "fusion_remote_maintenance_integration",
+      "name": "Fusion Remote Maintenance Integration",
+      "horizon": "H05",
+      "source_file": "energy-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The stated operating requirement is representative geometry and tooling trials. That modern qualification activity does not assert a sustained commercial fusion plant.",
+      "scope_digest": "5abe6ad9229105be1fb36c7888240f127fbecc5a9cc84dcb44e1e8764aaaf03f"
+    },
+    {
+      "id": "refracting_telescopes",
+      "name": "Refracting Telescopes",
+      "horizon": "H03",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "54890bf590bfbae43d78227c76600a38363708fc6fda8b37e6b88f9f617df42f"
+    },
+    {
+      "id": "reflecting_telescopes",
+      "name": "Reflecting Telescopes",
+      "horizon": "H03",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "a972c8e881c7beef63e7757ac394a34d41f56d80a4b1af85e45b013264c8273d"
+    },
+    {
+      "id": "angular_image_calibration",
+      "name": "Angular Image Calibration",
+      "horizon": "H04",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "96897745cd11c022521ef3f951f6a337cd58e36ff266c5a30890f66ab7b41f6e"
+    },
+    {
+      "id": "stellar_parallax_distance",
+      "name": "Stellar Parallax Distance",
+      "horizon": "H04",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope centers on mechanical plant, precision measurement or industrial heat/chemical service, rather than a frontier integrated capability.",
+      "scope_digest": "750f8edf6cc8c8449d06c08f477f61326c975321989ad2d7711d5314717b24f9"
+    },
+    {
+      "id": "eclipse_geometry_models",
+      "name": "Eclipse Geometry Models",
+      "horizon": "H03",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified craft, hydraulic or positional-observation method can be developed in organized preindustrial practice; later instruments may refine it without creating a new mechanism.",
+      "scope_digest": "72f769861c2d43d11d9db5058e1a952ebfe8ad86e466baa3078c8a0fcd63505f"
+    },
+    {
+      "id": "variable_star_distance_models",
+      "name": "Variable-Star Distance Models",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "5c93c3bed94ca494b3036faeec4b70a64a9aee103dae0e08668f9f9ea1f4503b"
+    },
+    {
+      "id": "radio_aperture_synthesis",
+      "name": "Radio Aperture Synthesis",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "f144aea4f8fd1947653d6e7742f96feabc3f9071f672bc7e59d8910d3e001d9f"
+    },
+    {
+      "id": "coronagraphic_starlight_suppression",
+      "name": "Coronagraphic Starlight Suppression",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "264468432bc98ac742bf301796ccecf0d1f8a33f91a61dd2bd1226ffaaead7d8"
+    },
+    {
+      "id": "exoplanet_transit_inference",
+      "name": "Exoplanet Transit Inference",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "fcda60224548ecce86d6708b88be4795659521de4e46075998d25b4ba953939a"
+    },
+    {
+      "id": "asteroseismic_inference",
+      "name": "Asteroseismic Inference",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "aa299d0cae34cfb881635e620303642b2d080dbd589a34663d7bc26c0d461ce3"
+    },
+    {
+      "id": "launch_vehicle_mass_closure",
+      "name": "Launch Vehicle Mass Closure",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "19cb0dbae03479d6d56fc2535dfc30f4c153bb2c644e31176c95d211b465cf7a"
+    },
+    {
+      "id": "ascent_load_envelope_models",
+      "name": "Ascent Load Envelope Models",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "f8696e01ab82c951b8803b49107a617426c4ec3ed5b0fe588330a5eefce783f8"
+    },
+    {
+      "id": "stage_separation_dynamics",
+      "name": "Stage Separation Dynamics",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "27f67ba9be332bdb29abac484882e5a113846f5b8bfc58e3621fb3d0d00b1bae"
+    },
+    {
+      "id": "propellant_slosh_models",
+      "name": "Propellant Slosh Models",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "aa32dd29e4b2e1118bf9ec9e885de35f31921cb7e2f1e079da140cae552392d5"
+    },
+    {
+      "id": "engine_restart_qualification",
+      "name": "Engine Restart Qualification",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "596dd4e21236b04437972626abdf9ea8d62c2773ce257b22afc413c66750d2c4"
+    },
+    {
+      "id": "propulsive_booster_return",
+      "name": "Propulsive Booster Return",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "025cdcb2eadf9382b19513b5e4a5bb7abcbe35e2f08566840bea5b3534ecb191"
+    },
+    {
+      "id": "parachute_stage_recovery",
+      "name": "Parachute Stage Recovery",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "bb735d50056a442e02d593cfa537209109578c4aa2fafc6803a9775ebbb73838"
+    },
+    {
+      "id": "runway_return_stage_integration",
+      "name": "Runway-Return Stage Integration",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "356db90baa1a0b2b311e6e6b5c8c5853ae0aa5210572d7123cf6fa46839c49a2"
+    },
+    {
+      "id": "recovered_stage_requalification",
+      "name": "Recovered Stage Requalification",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "999e0ee0255e4f70290a907995edcd8820c5555d4d5c38cd91b8b28bf92b691a"
+    },
+    {
+      "id": "reusable_launch_system_integration",
+      "name": "Reusable Launch System Integration",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "0217ec135d0b7a5e0ce99e09f26fb56bff9de3c370859361da2a28c1d37dff12"
+    },
+    {
+      "id": "deployable_orbital_structures",
+      "name": "Deployable Orbital Structures",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "b18824185926e6104b0a16916ea690ab8dc7b28371bd001a31508a0fd360ab32"
+    },
+    {
+      "id": "orbital_module_interface_standards",
+      "name": "Orbital Module Interface Standards",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "3a1649f1cc9bcbab3685036d2ccfae39c0f31a68b52f3d035b1fa72de7aabda2"
+    },
+    {
+      "id": "free_flying_manipulator_dynamics",
+      "name": "Free-Flying Manipulator Dynamics",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "892082fd5db3427e9ca58fece2805b5db82db5f8d3b3afb0c27ea5dc94d1c75b"
+    },
+    {
+      "id": "noncooperative_capture_navigation",
+      "name": "Noncooperative Capture Navigation",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "b9c366df85fb98a163b78444333eb5acd63302d0f5b241238bf93ae977d41cf1"
+    },
+    {
+      "id": "orbital_component_exchange",
+      "name": "Orbital Component Exchange",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "aa108bfce296abb0f3e203860d39468668aff1366e47662fb72922737846df42"
+    },
+    {
+      "id": "spacecraft_passivation",
+      "name": "Spacecraft Passivation",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "9c12f44e9f13d8642b4691869ecc9436a73515ed713934b884185438b6f8ae9f"
+    },
+    {
+      "id": "orbit_disposal_design",
+      "name": "Orbit Disposal Design",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "276b0bdeaa806c4ab8ad0666bbf9624ad88ebbd0e71a2d32bcea8647ee268428"
+    },
+    {
+      "id": "electrodynamic_tether_exchange",
+      "name": "Electrodynamic Tether Exchange",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "cea034dadec90871c8868a4f14dc952cf83b851dbf1b1d916887d7d1b3dd4147"
+    },
+    {
+      "id": "orbital_transfer_stage_reuse",
+      "name": "Orbital Transfer Stage Reuse",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Repeated in-space transfer and servicing are assigned as modern orbital operations in the generic authored scope; cryogenic depot infrastructure is a separate frontier integration.",
+      "scope_digest": "8c2264870f4452574f9bb856f895fe43b67ebfec441dfdc0e8e505398c3f625c"
+    },
+    {
+      "id": "formation_flying_control",
+      "name": "Formation Flying Control",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "57a632ecbc0e29800c1faf227f4920e7183010d97e346435cbeac62f93d6ed2d"
+    },
+    {
+      "id": "capillary_propellant_acquisition",
+      "name": "Capillary Propellant Acquisition",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "2ab3b6bb654e030ea1690c85040180fcde3d941b1c1d660ff99607ac2baf6a5a"
+    },
+    {
+      "id": "low_gravity_propellant_gauging",
+      "name": "Low-Gravity Propellant Gauging",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "9b69ecd815b5e00a9349675a8bbaa058d2c479cfc3c5230ec6c912998067e9ab"
+    },
+    {
+      "id": "propellant_settling_maneuvers",
+      "name": "Propellant Settling Maneuvers",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "5b511ec1473b82a93f264a73577185cad3a49e5507e5a133b0cbf08db2ede13d"
+    },
+    {
+      "id": "cryogenic_active_heat_removal",
+      "name": "Cryogenic Active Heat Removal",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "1a6dab0940049503744bd6ffa609cfe4cb560fab5a1c7c5d534292e67bf7d58d"
+    },
+    {
+      "id": "cryogenic_tank_pressure_control",
+      "name": "Cryogenic Tank Pressure Control",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "170ef2310cb2b55fae0485652089ee181d211482b5bad9f71c914deddfe0f551"
+    },
+    {
+      "id": "orbital_fluid_connector_qualification",
+      "name": "Orbital Fluid Connector Qualification",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "05fc444221eeef6839dd4f261a9d808c6e802e2af1e0871d0f9af6ca9217621a"
+    },
+    {
+      "id": "orbital_propellant_transfer",
+      "name": "Orbital Propellant Transfer",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "c07ce06a3b77cdb6f5c3c81397fe8a96e4e1406a294cd9b9f66d91e0ff3bc753"
+    },
+    {
+      "id": "cryogenic_orbital_depot_integration",
+      "name": "Cryogenic Orbital Depot Integration",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Advanced scope requires an installed maintained orbital cryogenic inventory, actual replenishment and thermal support, not a ground tank or a transfer-only test.",
+      "scope_digest": "ab66e1e2258ae3cb6ac302c5dc1fd923c3df894897388ed893f1482bb6afa4f2"
+    },
+    {
+      "id": "cryogenic_line_chilldown",
+      "name": "Cryogenic Line Chilldown",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "c57e26ae6bae8144cb19023f1be54654c64618ee11d792a5c6c623018fbf1302"
+    },
+    {
+      "id": "propellant_transfer_contamination_control",
+      "name": "Propellant Transfer Contamination Control",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "a89f3ba9fb809da80e6be8d2c4ad41997628daf1efd3fb4b1e15b2433e7c7d44"
+    },
+    {
+      "id": "planetary_entry_aerodynamics",
+      "name": "Planetary Entry Aerodynamics",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "6438b921abf03234019fbb6ee69d67a4cb30f41051838e1ebdacc0e64ed37625"
+    },
+    {
+      "id": "terrain_relative_landing",
+      "name": "Terrain-Relative Landing",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "361b1525aea9db3b6bedd16ca6ef340c1a878da1a0982294cf7081458484e966"
+    },
+    {
+      "id": "plume_regolith_interaction_models",
+      "name": "Plume-Regolith Interaction Models",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "78aa30a5193db9e6524a5bbd1fed0a9b82de51324448b7ab39b17c9a41ccf32e"
+    },
+    {
+      "id": "low_gravity_surface_anchoring",
+      "name": "Low-Gravity Surface Anchoring",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "54cf74cbc2c736dd00ad64cbf03902d2090d4465922d8c9586177758ab458bb1"
+    },
+    {
+      "id": "regolith_electrostatic_dust_control",
+      "name": "Regolith Electrostatic Dust Control",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "7ee3f266686b9e5fc1a7ca10f1bd175c1cad3fa25717e36b375abf2d86f7ab9f"
+    },
+    {
+      "id": "planetary_sample_containment",
+      "name": "Planetary Sample Containment",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "4f7a79d72d3a9a3422d35054d0917d3c8ee073782517d709e6f10fd85dad20a9"
+    },
+    {
+      "id": "reusable_surface_lander_integration",
+      "name": "Reusable Surface Lander Integration",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The advanced scope is repeated extraterrestrial surface-to-orbit transport supported by actual fuel and maintained hardware, beyond one landing/ascent mission.",
+      "scope_digest": "abfff78c3aeff1ba00a4b879f254e36034a53c9d8e83a1ec282dc9f47bcc195b"
+    },
+    {
+      "id": "surface_launch_pad_stabilization",
+      "name": "Surface Launch Pad Stabilization",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned advanced for prepared extraterrestrial launch support under the planetary operating scope; terrestrial launch foundations remain earlier construction knowledge.",
+      "scope_digest": "6024770d97a07b8ccf1e1f263393df6534dedc2c0daabf9ca026c22b048938a6"
+    },
+    {
+      "id": "fission_electric_space_power",
+      "name": "Fission-Electric Space Power",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Space fission electric generation is an existing modern mechanism, distinct from a sustained nuclear-electric transport mission architecture.",
+      "scope_digest": "2b4177c80a2d5a5ad9b23246e26f2ebe1dff7249a671bd3d8808abbb7dfb0820"
+    },
+    {
+      "id": "nuclear_electric_transfer_integration",
+      "name": "Nuclear-Electric Transfer Integration",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Advanced assignment concerns closing an actual reactor-powered electric-thrust transfer mission, including heat rejection, propellant and mass budgets; component feasibility alone does not deliver it.",
+      "scope_digest": "714cacef5e7ba5d1a6b091f55b7bdf0a83f5d5620c49199be0ee3c1ad51f5de8"
+    },
+    {
+      "id": "solar_sail_navigation",
+      "name": "Solar Sail Navigation",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "c8848859be6414641db3f8f7ef8b83623f2aeca8e83e6c3358ce8273ac3d6d6f"
+    },
+    {
+      "id": "beamed_sail_acceleration",
+      "name": "Beamed-Sail Acceleration",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The node only evaluates a qualified sail against a real powered transmitter. It does not specify an interstellar launch system, so experimental feasibility belongs to modern research.",
+      "scope_digest": "98e0d72cb6891708592440510c084b95abe970fc4f3cdeb410e16e51e98656b5"
+    },
+    {
+      "id": "deep_space_clock_navigation",
+      "name": "Deep-Space Clock Navigation",
+      "horizon": "H05",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This specific spacecraft, scientific, power-system or operating method belongs to modern engineering or research. A possible future application does not itself move the identity to the advanced horizon.",
+      "scope_digest": "321a1349fcb25e160ea907a676ce6dd77d9535fd0e06ead409bb113038f8e3c6"
+    },
+    {
+      "id": "space_interferometer_baseline_control",
+      "name": "Space Interferometer Baseline Control",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Advanced scope is coherent distributed optical space-aperture operation with maintained paths, metrology and formation reserves. Formation flying alone or radio interferometry is not sufficient.",
+      "scope_digest": "2b8ef0f5757807e0755f9b5d9cc133c55a0725fd33f09c813346afc1c1df4156"
+    },
+    {
+      "id": "rotating_habitat_bearing_services",
+      "name": "Rotating Habitat Bearing Services",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified scope combines frontier operating hardware and sustained mission or settlement service beyond its earlier component methods. Assignment expresses a design horizon, not achieved performance.",
+      "scope_digest": "cdf21adbdf921ee0220dd99c8e0525f8de1b3f5860bc6232ac191951fbd0d368"
+    },
+    {
+      "id": "momentum_exchange_tether_capture",
+      "name": "Momentum-Exchange Tether Capture",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned advanced for transport-capable timed payload capture and momentum replenishment; a passive deployed tether or a calculation alone is not the qualified operating capability.",
+      "scope_digest": "afdc81e1ac976d439926af7411700cd14d73cabf9ac03058be6f89fed4c4192a"
+    },
+    {
+      "id": "asteroid_contact_processing",
+      "name": "Asteroid Contact Processing",
+      "horizon": "H06",
+      "source_file": "space-operations-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The frontier operating scope processes characterized asteroid material into collected output while controlling reaction motion and escaped material; sample acquisition alone is insufficient.",
+      "scope_digest": "b77c913d3fded254d3e6fffdd7ed5b30994bbe11c0d1afbdc37219a4b7b5fe8f"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
