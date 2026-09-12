@@ -2730,6 +2730,14 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/field_armorer_teams.png",
+      "description": "Trained crews inspect damaged equipment and organize tools and repair work before returning serviceable items to stores.",
+      "domain": "security",
+      "id": "field_armorer_teams",
+      "name": "Field Armorer Teams",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/germination_trials.png",
       "description": "Counted seed samples are sprouted before sowing so poor establishment can be distinguished from later crop losses.",
       "domain": "nutrition",
@@ -3379,9 +3387,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 422,
+  "live_count": 423,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 386,
+  "queued_count": 387,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

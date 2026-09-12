@@ -3753,6 +3753,7 @@ func _rejoin_recovered_population(_pool_name:String,_count:int)->void:
 
 
 func _process_equipment_production_day()->void:
+	var repair_work:=preload("res://scripts/field_repair.gd").prepare(self)
 	if equipment_queue.is_empty(): return
 	var crafting:=_production_rate()
 	var weight_total:=0.0
@@ -3768,8 +3769,14 @@ func _process_equipment_production_day()->void:
 		if bool(job.get("persistent",false)):continue
 		var allocation:=maxf(0.05,float(job.get("allocation",1.0)))
 		var efficiency:=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
-		if not PersistentProduction.eligible(self,job) or crafting<=0: continue
-		job["progress_days"]=float(job.get("progress_days",0.0))+crafting*allocation/maxf(0.05,weight_total)*efficiency
+		if not PersistentProduction.eligible(self,job): continue
+		var work:=maxf(0,crafting)*allocation/maxf(0.05,weight_total)*efficiency
+		if String(job.get("job_type",""))=="repair" and preload("res://scripts/field_repair.gd").understood(self,String(job.item)):
+			var support:=minf(repair_work,maxf(0,float(job.required_days)-float(job.get("progress_days",0))-work))
+			work+=support
+			repair_work-=support
+		if work<=0:continue
+		job["progress_days"]=float(job.get("progress_days",0.0))+work
 		job["efficiency"]=move_toward(efficiency,1.0,0.0025*(0.65+_adoption("workshop_standards")))
 		var work_per_item:=maxf(0.01,float(job.get("work_per_item",float(job.get("required_days",1.0))/maxf(1.0,float(job.get("count",1))))))
 		var previously_completed:=int(job.get("completed",0))

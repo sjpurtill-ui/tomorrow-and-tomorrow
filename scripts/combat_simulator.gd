@@ -11,6 +11,7 @@ const BASE_CASUALTY_RATE := 0.055
 const MIN_EFFECTIVE_STRENGTH := 0.05
 
 const UNIT_TYPES := {
+	"field_repair_company":{"name":"Field Repair Company","attack":0.0,"defense":0.5,"organization":1.0},
 	"medical_detachment":{"name":"Medical Detachment","attack":0.0,"defense":0.5,"organization":1.0},
 	"levy": {"name": "Levy", "attack": 0.65, "defense": 0.55, "organization": 0.65},
 	"line_infantry": {"name": "Line Infantry", "attack": 1.00, "defense": 1.00, "organization": 1.00},
@@ -65,6 +66,7 @@ const UNIT_TYPES := {
 }
 
 const WEAPONS := {
+	"repair_kit":{"name":"Armorer tools","attack":0.0,"defense":0.5,"armor":0.0,"penetration":0.0},
 	"medical_kit":{"name":"Medical care equipment","attack":0.0,"defense":0.6,"armor":0.0,"penetration":0.0},
 	"improvised": {"name": "Improvised Arms", "attack": 0.65, "defense": 0.70, "armor": 0.00, "penetration": 0.10},
 	"spear": {"name": "Spears", "attack": 1.00, "defense": 1.18, "armor": 0.05, "penetration": 0.55},

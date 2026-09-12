@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the geoscience checkpoint: **333 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 92: **423 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -989,3 +989,16 @@ Base `6fedb40`; worktree `/Users/seanpurtill/Documents/Codex/tt-technology-imple
 Validation: 57 cases passed (15 licenses, 19 study purchase/acquisition, 15 strategy, 8 civilian planner), zero errors/failures/skips/orphans and no script errors. Four added cases test supplier ignorance, examined/returned leads, actual dispatch payment without an instant contract, demand/input/staff/reserve requirements, independent production preference, renewal from prior contracts, retry delay and paused-line exclusion. A missing Freshwater input in the first test fixture was corrected; the planner properly refused an unsupplied paper line. `git diff --check` passed.
 
 No save-schema changes. Shared conflicts: CivilizationController and CivilizationOrders. Scope and limitations: [AI_MANUFACTURING_LICENSES.md](AI_MANUFACTURING_LICENSES.md). No canonical integration or player launch. Session 57160 was polled live; latest observed year 75, population 588, 68 discoveries and six settlements. It retains the earlier 414-discovery code and excludes this addition. Counts remain 422 authored identities and 36 reviewed images, with the full overhaul unfinished.
+
+
+## Checkpoint 92: trained repair companies with conserved equipment
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `93b9258`. No canonical integration or player launch.
+
+Field Armorer Teams adds one authored discovery, paid repair tools and a trained Field Repair Company. Home crews contribute a shared daily repair-work budget, constrained by actual equipped personnel, training, condition, supply, food and adoption. Existing damage and material reservations prevent free replacements. Unknown advanced equipment cannot receive company support. Travel, battle, unavailable home workshops, army exercises and paused jobs block the applicable work. See [Field repair companies](FIELD_REPAIR.md).
+
+Verification: 62 cases across field repair (6), field medicine (11), equipment quotes (6), persistent production (19), technology tree (9) and visual atlas (11), with zero errors, failures, skipped tests or orphans. Graph: 423 discoveries, 197 explicit learning routes, no graph errors. Ideal-resource audit reaches all 423; this is structural evidence, not natural campaign completion. Artwork: 36 reviewed images and 387 queued subjects. Roster: 89 total roles (52 land, 21 naval, 16 air), not a claim that the reviewed 96-role inventory is nearly complete.
+
+Save compatibility: existing military formation, equipment, training and repair-job fields; full military export/import and partial job serialization tested. Existing IDs preserved. New saves using this role require the updated catalog. Shared-file conflicts for integration: `discovery_system.gd`, `military_campaign.gd`, unit/equipment/combat catalogs, catalog validation, art manifest and audit tool. No terrain, government ownership, aggregate population authority or player controls changed.
+
+Limits: home repair only; forward recovery, component faults, spare-parts logistics, autonomous composition and general-selected repair priorities remain. Existing ordinary repair semantics are retained. The long diagnostic session 57160 is still running from its loaded 414-discovery revision; last inspected at year 109 with 103 known discoveries and 12 settlements. Its 250-year target and 2,500–3,000-year acceptance remain unverified. Catalog still needs 4,577 distinct identities, extensive operating behavior, imagery and canonical integration.
