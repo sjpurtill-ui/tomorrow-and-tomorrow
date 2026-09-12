@@ -8,11 +8,8 @@ static func preserve(daily_demand:float,traveling:bool)->Dictionary:
 	if traveling or not state.settlement_site_committed:return result
 	var capacity:=Ops.service("food_preservation")
 	if capacity<=0:return result
-	var total:=0.0
-	for value:Variant in state.food_stocks.values():total+=maxf(0,float(value))
-	# Keep three days of provisions after accounting for processing losses.
-	capacity=minf(capacity,maxf(0,total-maxf(0,daily_demand)*3.0))
-	for food:String in ["Fish","Fresh meat","Fresh plants"]:
+	capacity=minf(capacity,preload("res://scripts/canning_capacity.gd").available_input(state.food_stocks,daily_demand))
+	for food:String in preload("res://scripts/canning_capacity.gd").PERISHABLES:
 		var amount:=minf(capacity,maxf(0,float(state.food_stocks.get(food,0.0))))
 		if amount<=0:continue
 		state.food_stocks[food]-=amount

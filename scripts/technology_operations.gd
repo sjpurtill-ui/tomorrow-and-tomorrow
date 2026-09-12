@@ -102,6 +102,7 @@ static func advance(day:int)->void:
 		var units:=minf(float(record.installed),available/float(spec.workers))*condition
 		if float(spec.power)>0:units=minf(units,float(ledger.services.get("electricity",0))/float(spec.power))
 		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		if id=="cannery":units=minf(units,canning_demand()/float(spec.services.food_preservation))
 		if units>0:available=_operate(ledger,record,spec,units,available,condition)
 	# Charging can use spare generation, after consumer operators and the
 	# electricity budget for pending workshop production have been protected.
@@ -151,6 +152,8 @@ static func _operate(ledger:Dictionary,record:Dictionary,spec:Dictionary,units:f
 	if float(spec.power)>0:ledger.services.electricity=maxf(0,float(ledger.services.get("electricity",0))-units*float(spec.power))
 	for name:String in spec.services:ledger.services[name]=float(ledger.services.get(name,0))+units*float(spec.services[name])
 	return available
+static func canning_demand()->float:
+	return preload("res://scripts/canning_capacity.gd").available_input(WorldSimulation.state.food_stocks,float(WorldSimulation.food._calculate_demand(false).total))
 static func status(id:String)->String:
 	var record:Dictionary=data().plants.get(id,{})
 	if record.is_empty():return "Not installed"
@@ -161,9 +164,11 @@ static func status(id:String)->String:
 	if float(record.get("running_units",0))>0:return "Operating %.2f of %d installed units" % [float(record.running_units),int(record.installed)]
 	if int(record.installed)<=0:return "Commissioning: %.1f work completed toward the next unit" % float(record.work)
 	var spec:Dictionary=PLANTS[id]
+	if id=="cannery" and canning_demand()<=0:return "Waiting for surplus perishable food"
 	for item:String in spec.inputs:
 		if float(WorldSimulation.state.resource_stockpiles.get(item,0))<=0:return "Waiting for "+item
 	if float(spec.power)>0:return "Waiting for power or available Crafting operators"
+	if id=="cannery":return "Waiting for available Crafting operators"
 	return "Waiting for powered demand or available Crafting operators"
 static func forecast_service(name:String,days_ahead:int)->float:
 	if not Storage.forecast_available(data(),PLANTS,days_ahead):return 0.0

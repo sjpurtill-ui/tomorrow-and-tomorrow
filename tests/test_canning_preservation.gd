@@ -99,3 +99,41 @@ func test_owned_save_round_trip_preserves_cannery_food_and_inputs()->void:
 		assert_dict(WorldSimulation.state.food_stocks).is_equal(expected.food)
 		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(expected.stocks)
 	)
+func test_idle_cannery_preserves_supplies_and_releases_operators()->void:
+	WorldSimulation.scoped("canner",func()->void:
+		prepared_plant();var state=WorldSimulation.state
+		state.food_stocks={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":1000.0,"Preserved food":0.0}
+		var before:Dictionary=state.resource_stockpiles.duplicate(true)
+		tick(int(state.elapsed_days)+1)
+		assert_dict(state.resource_stockpiles).is_equal(before)
+		assert_float(float(Ops.data().workers)).is_equal(0.0)
+		assert_float(Ops.service("food_preservation")).is_equal(0.0)
+		assert_str(Ops.status("cannery")).is_equal("Waiting for surplus perishable food")
+		state.food_stocks["Fish"]=10.0;tick(int(state.elapsed_days)+1)
+		assert_float(Ops.service("food_preservation")).is_equal(10.0)
+		assert_float(float(Ops.data().workers)).is_equal(2.0)
+	)
+func test_partial_food_availability_scales_cans_fuel_water_and_labor()->void:
+	WorldSimulation.scoped("canner",func()->void:
+		prepared_plant();var state=WorldSimulation.state
+		state.food_stocks={"Fresh plants":3.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":1000.0,"Preserved food":0.0}
+		var before:Dictionary=state.resource_stockpiles.duplicate(true)
+		tick(int(state.elapsed_days)+1)
+		assert_float(Ops.service("food_preservation")).is_equal(3.0)
+		assert_float(float(Ops.data().workers)).is_equal_approx(.6,.000001)
+		for resource:String in ["Food Can Sets","Coal"]:assert_float(float(before[resource])-float(state.resource_stockpiles[resource])).is_equal_approx(.06,.000001)
+		assert_float(float(before.Freshwater)-float(state.resource_stockpiles.Freshwater)).is_equal_approx(.15,.000001)
+		C.preserve(float(WorldSimulation.food._calculate_demand(false).total),false)
+		assert_float(float(state.food_stocks["Preserved food"])).is_equal_approx(2.7,.000001)
+		assert_float(Ops.service("food_preservation")).is_equal(0.0)
+	)
+func test_food_reserve_blocks_operation_before_inputs_are_spent()->void:
+	WorldSimulation.scoped("canner",func()->void:
+		prepared_plant();var state=WorldSimulation.state
+		var need:=float(WorldSimulation.food._calculate_demand(false).total)
+		state.food_stocks={"Fresh plants":need*2.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}
+		var before:Dictionary=state.resource_stockpiles.duplicate(true)
+		tick(int(state.elapsed_days)+1)
+		assert_float(Ops.service("food_preservation")).is_equal(0.0)
+		assert_dict(state.resource_stockpiles).is_equal(before)
+	)

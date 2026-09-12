@@ -1362,3 +1362,16 @@ The monthly civilian controller now evaluates visible perishable surplus, curren
 Verification: 35 cases pass with zero errors/failures/skips/orphans: cannery investment 5, physical canning 5, scientific instrument investment 5, civilian production planning 8 and power investment 12. Tests cover actual controller payment/commissioning, duplicate suppression, manufactured can and retort orders, raw shortages, reserve/spoilage/refrigeration and labor/adoption constraints, pause/scope/emergency guards, plus physical canning and saved food/input continuity. These do not prove campaign profitability or future harvest availability.
 
 Task-owned planner, focused tests and document; shared controller and canning/status documentation. No integration hotspots or save fields changed. Existing records remain compatible. Counts unchanged: 476 discoveries, 154 recipes, 12 plant types, 89 roles and 48 reviewed images. The full 5,000-discovery/history/artwork overhaul remains incomplete. Historical diagnostic session 57160 was confirmed live at the start and retains its older loaded controller; no completed target claim. Demand-sensitive plant operation and campaign-level investment economics remain outstanding.
+
+
+## Checkpoint 123: cannery operation follows current food demand
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `4b8d36c`. No canonical integration or player launch.
+
+A shared read-only stock calculation now constrains cannery investment, operating capacity and conversion to perishable food above the three-day reserve. Daily operation scales cans, fuel, water and operators before spending; a zero-surplus cannery remains enabled but idle and reports its food shortage. Later stock replenishment resumes operation automatically. See [Cannery demand](CANNERY_DEMAND.md).
+
+Verification: 35 cases pass with zero errors/failures/skips/orphans: physical canning 8, investment 5, operations 14 and civilian production planning 8. New checks demonstrate no operating expenditure or workers while idle, resumption after food arrives, proportional supplies and 0.6 operators for three input units, 2.7 preserved output, and reserve protection before supplies are spent. Existing commissioning, interruption, scope, food-day and save-round-trip cases remain passing.
+
+Task-owned capacity helper, focused extensions and documentation. Shared canning helper/planner, operating service/status and review records. No integration hotspots, save fields, research identities or recipe changes. Counts remain 476 discoveries, 154 recipes, 12 plants, 89 roles and 48 reviewed images. Full overhaul incomplete. Historical session 57160 was confirmed live at the start and retains older loaded code; no terminal target completion claimed.
+
+Operation reviews pre-harvest stock. Later drying/smoking or stock changes can still leave prepared capacity unused, while newly harvested food cannot enlarge that day's prepared capacity. Aggregate fractional batches, future scheduling and long-campaign economics remain limitations; no native player presentation or canonical integration is claimed.

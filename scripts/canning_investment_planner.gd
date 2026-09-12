@@ -22,21 +22,18 @@ static func recommendation()->Dictionary:
 	var installed:=int(plant.get("installed",0))
 	if installed>=Ops.LIMIT:return {}
 	if state.effective_workers("Crafting")+Ops.reserved_workers(state)<operators+float(spec.workers)+1.0:return {}
-	var total:=0.0
-	var perishables:=0.0
 	var daily_loss:=0.0
 	var storage:=.72 if "Storage Pits" in state.settlement_completed else 1.0
 	storage*=maxf(.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
 	var cooling:=Ops.refrigeration_multiplier(Ops.service("cold_storage"),state.food_stocks)
 	for food:String in state.food_stocks:
-		var amount:=maxf(0,float(state.food_stocks[food]));total+=amount
+		var amount:=maxf(0,float(state.food_stocks[food]))
 		if food not in ["Fish","Fresh meat","Fresh plants"]:continue
-		perishables+=amount
 		daily_loss+=amount*float(WorldSimulation.food.SPOILAGE[food])*storage*WorldSimulation.discovery.food_storage_multiplier(food,false)*cooling
 	var demand:=maxf(0,float(WorldSimulation.food._calculate_demand(false).total))
 	var capacity:=float(spec.services.food_preservation)*condition
 	# A nominal month of current surplus justifies one additional installation.
-	if minf(perishables,maxf(0,total-demand*3.0))<capacity*(installed+1)*30.0:return {}
+	if preload("res://scripts/canning_capacity.gd").available_input(state.food_stocks,demand)<capacity*(installed+1)*30.0:return {}
 	if daily_loss<capacity*(1.0-Preservation.YIELD)*(installed+1):return {}
 	var first:Dictionary={}
 	# Check all consumables before committing an upstream line; raw shortages block.
