@@ -1,0 +1,61 @@
+{
+  "status": "editorial_scope_review",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "excluded_proposal": "percussion_membrane_tuning",
+      "retained_id": "resonant_percussion_instruments",
+      "reason": "Controlled membrane tension belongs to the existing qualified resonant-percussion construction mechanism."
+    },
+    {
+      "excluded_proposal": "contrapuntal_voice_leading",
+      "retained_id": "polyphonic_part_composition",
+      "reason": "Named rules for coordinating independent lines specialize the shared multi-part composition practice; each convention does not add a separate universal discovery."
+    },
+    {
+      "excluded_proposal": "pigment_binder_analysis",
+      "retained_id": "spectroscopy",
+      "reason": "Qualified compositional analysis uses existing analytical methods; a paint-specific sample does not create another spectroscopic mechanism."
+    },
+    {
+      "excluded_proposal": "conservation_reversibility_assessment",
+      "retained_id": "long_horizon_project_optioning",
+      "reason": "Testing reversal limits and preserving future choices applies the existing staged intervention method; conservation still needs material-specific trials."
+    }
+  ],
+  "prior_branch_corrections": [
+    {
+      "id": "musical_tuning_systems",
+      "change": "Permit empirical ensemble comparison before formal ratio theory."
+    },
+    {
+      "id": "instrument_craft_standards",
+      "change": "Permit qualified repeated craft practice before formal workshop standardization."
+    }
+  ],
+  "scope_distinctions": [
+    {
+      "ids": [
+        "flexible_chamber_air_pumping",
+        "pipe_organ_wind_distribution"
+      ],
+      "distinction": "A shared air-displacement mechanism differs from routing and regulating air among an actual instrument array."
+    },
+    {
+      "ids": [
+        "skill_progression_records",
+        "assessment_reliability_estimation",
+        "transfer_task_assessment"
+      ],
+      "distinction": "A record of demonstrated tasks, an estimate of measurement repeatability and evidence of performance on changed tasks are different mechanisms; no credential grants every competence."
+    },
+    {
+      "ids": [
+        "spaced_retrieval_practice",
+        "interleaved_problem_practice",
+        "worked_example_fading"
+      ],
+      "distinction": "Delayed recall, discrimination among mixed task types and progressive removal of supplied solution steps change different learning conditions; benefits require actual assessment."
+    }
+  ]
+}

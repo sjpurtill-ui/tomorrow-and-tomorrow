@@ -99,8 +99,8 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Expand the full master beyond 2864 accounted identities: 2136 remain to author. Largest gaps include electronics 132, energy 123, governance 120, food 119, materials 114 and culture 112. Records/communications now accounts for 173/240. Continue distinct mechanisms and disadvantaged recovery design; complete explicit historical-horizon allocation without era gates.",
-    "Continue semantic and atlas reconciliation: 400 candidates mapped, including five partial scopes (ceramic pipe manufacture, autonomous water-network control, autonomous habitat monitoring, regional ecological recovery coupling, rapid pathogen-platform response); 200 candidates remain unmapped. Mappings add zero discoveries and do not establish operating implementation. Earlier accessible-record, archive-replication, long-correspondence and decentralized-network prerequisite errors are corrected. The catalog checker now derives these counts and rejects duplicate mappings, unknown references and stale summary totals; use coverage.json rather than adding section counts manually.",
+    "Expand the full master beyond 2933 accounted identities: 2067 remain to author. Largest gaps include electronics 132, energy 123, governance 120, food 119 and materials 114. Culture now accounts for 104/180 and learning 101/160. Continue distinct mechanisms and disadvantaged recovery design; complete explicit historical-horizon allocation without era gates.",
+    "Continue semantic and atlas reconciliation using checker-derived coverage: 425 candidates mapped, including five partial scopes (ceramic pipe manufacture, autonomous water-network control, autonomous habitat monitoring, regional ecological recovery coupling, rapid pathogen-platform response); 175 candidates remain unmapped. Mappings add zero discoveries and do not establish operating implementation. D19 mappings were not duplicated; 25 D18 subjects are newly reconciled.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
@@ -125,15 +125,15 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 2260,
-    "distinct_ids_accounted": 2864,
-    "remaining_to_author": 2136,
+    "authored_drafts": 2329,
+    "distinct_ids_accounted": 2933,
+    "remaining_to_author": 2067,
     "complete": false,
-    "atlas_candidates_mapped": 400,
+    "atlas_candidates_mapped": 425,
     "atlas_partial_mappings": 5,
     "baseline_field_allocation": "master-catalog/baseline-field-allocation.json",
     "historical_horizon_allocation_complete": false,
     "atlas_coverage_source": "master-catalog/coverage.json: atlas_coverage",
-    "atlas_fully_mapped_subjects": 395
+    "atlas_fully_mapped_subjects": 420
   }
 }

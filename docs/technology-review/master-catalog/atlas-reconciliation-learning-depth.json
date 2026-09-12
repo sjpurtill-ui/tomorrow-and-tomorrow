@@ -1,0 +1,235 @@
+{
+  "status": "editorial_reconciliation",
+  "adds_discovery_ids": 0,
+  "mappings": [
+    {
+      "review_id": "D18-01",
+      "candidate_name": "Apprentice contracts",
+      "mapped_ids": [
+        "apprentice_contracts"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-02",
+      "candidate_name": "Labor rotations",
+      "mapped_ids": [
+        "labor_rotations"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-03",
+      "candidate_name": "Crew handoffs",
+      "mapped_ids": [
+        "closed_loop_team_communication",
+        "team_briefing_protocols"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-04",
+      "candidate_name": "Shared childcare",
+      "mapped_ids": [
+        "shared_childcare"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-05",
+      "candidate_name": "Work and rest limits",
+      "mapped_ids": [
+        "work_rest_limits"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-06",
+      "candidate_name": "Traveling scholar instruction",
+      "mapped_ids": [
+        "traveling_master_instruction"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-07",
+      "candidate_name": "Translation workshops",
+      "mapped_ids": [
+        "technical_translation_workshops"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-08",
+      "candidate_name": "Craft guild training",
+      "mapped_ids": [
+        "craft_guilds",
+        "guided_practice_cycles"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-09",
+      "candidate_name": "Public instruction",
+      "mapped_ids": [
+        "public_schools"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-10",
+      "candidate_name": "Scholarly correspondence",
+      "mapped_ids": [
+        "scholarly_correspondence"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-11",
+      "candidate_name": "Research universities",
+      "mapped_ids": [
+        "research_university_organization"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-12",
+      "candidate_name": "Technical institutes",
+      "mapped_ids": [
+        "technical_institutes"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-13",
+      "candidate_name": "Experimental replication networks",
+      "mapped_ids": [
+        "independent_replication_networks"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-14",
+      "candidate_name": "Occupational safety training",
+      "mapped_ids": [
+        "occupational_safety_training"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-15",
+      "candidate_name": "Work motion studies",
+      "mapped_ids": [
+        "work_motion_studies"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-16",
+      "candidate_name": "Professional certification",
+      "mapped_ids": [
+        "professional_certification"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-17",
+      "candidate_name": "Multidisciplinary laboratories",
+      "mapped_ids": [
+        "multidisciplinary_laboratories"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-18",
+      "candidate_name": "Open scientific repositories",
+      "mapped_ids": [
+        "research_data_catalogs",
+        "networked_learning_repositories"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-19",
+      "candidate_name": "Distance education",
+      "mapped_ids": [
+        "distance_education"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-20",
+      "candidate_name": "Research procurement offices",
+      "mapped_ids": [
+        "research_procurement_offices"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-21",
+      "candidate_name": "Immersive skill transfer",
+      "mapped_ids": [
+        "interactive_training_simulators",
+        "simulator_to_work_transfer"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-22",
+      "candidate_name": "Human machine team training",
+      "mapped_ids": [
+        "human_machine_team_training"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-23",
+      "candidate_name": "Automated experimental facilities",
+      "mapped_ids": [
+        "automated_experimental_facilities"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-24",
+      "candidate_name": "Continuous technical retraining",
+      "mapped_ids": [
+        "continuous_technical_retraining"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    },
+    {
+      "review_id": "D18-25",
+      "candidate_name": "Intergenerational mission education",
+      "mapped_ids": [
+        "intergenerational_mission_education"
+      ],
+      "scope_status": "subject_mapped",
+      "note": "Mapped to stable mechanisms. A lesson, credential or simulated performance does not grant instant competence; learning transfer still requires observed evidence."
+    }
+  ]
+}

@@ -4018,15 +4018,17 @@
     "field": "D19",
     "id": "musical_tuning_systems",
     "name": "Musical Tuning Systems",
-    "foundations": "ratio_proportion",
+    "foundations": "",
     "mechanism": "Define and teach relationships among intended pitches",
     "operating_requirement": "Instruments or voices, shared references and trained listeners",
     "consequence": "Coordinate musical relationships without imposing one universal scale",
     "status": "authored_draft",
-    "requires_all": [
-      "ratio_proportion"
-    ],
+    "requires_all": [],
     "requires_any": [
+      [
+        "ratio_proportion",
+        "rhythmic_ensemble_practice"
+      ],
       [
         "stringed_instrument_resonance",
         "wind_instrument_bores",
@@ -4048,7 +4050,8 @@
       ],
       "grants_instant_mastery": false,
       "qualification_focus": "Learn a practice through willing practitioners and locally meaningful participation. Buying a work does not transfer every creative skill, grant custodianship or ensure shared interpretation."
-    }
+    },
+    "branching_note": "Empirical comparison and ensemble practice can establish a tuning convention before formal ratio theory. Available instruments and skilled listening remain necessary."
   },
   {
     "field": "D19",
@@ -4151,15 +4154,17 @@
     "field": "D19",
     "id": "instrument_craft_standards",
     "name": "Instrument-Craft Standards",
-    "foundations": "workshop_standards",
+    "foundations": "",
     "mechanism": "Maintain comparable instrument dimensions and behavior for a declared musical purpose",
     "operating_requirement": "Skilled makers, references and inspection",
     "consequence": "Support replacement and ensemble use while allowing different traditions and designs",
     "status": "authored_draft",
-    "requires_all": [
-      "workshop_standards"
-    ],
+    "requires_all": [],
     "requires_any": [
+      [
+        "workshop_standards",
+        "guided_practice_cycles"
+      ],
       [
         "stringed_instrument_resonance",
         "wind_instrument_bores",
@@ -4181,7 +4186,8 @@
       ],
       "grants_instant_mastery": false,
       "qualification_focus": "Learn a practice through willing practitioners and locally meaningful participation. Buying a work does not transfer every creative skill, grant custodianship or ensure shared interpretation."
-    }
+    },
+    "branching_note": "Repeated guided craft practice can establish comparability before formal workshop standards; actual instrument response and workmanship must still be checked."
   },
   {
     "field": "D19",
