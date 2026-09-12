@@ -20,7 +20,8 @@ func run()->void:
 	var requirements:Script=load("res://scripts/technology_requirements.gd")
 	var entries:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:
-		var row:Dictionary=pathways.graph_entry(entry).duplicate(true)
+		var row:Dictionary=entry.duplicate(true)
+		row.merge(pathways.graph_entry(entry),true)
 		row["requires_all"]=row.get("requires_all",row.get("requires",[]))
 		row["requires_any"]=row.get("requires_any",[])
 		entries.append(row)
