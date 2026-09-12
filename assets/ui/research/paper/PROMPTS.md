@@ -60,3 +60,5 @@ Built-in image generation, using the approved apprentice image as a style refere
 
 - [Charcoal Production](CHARCOAL_PROMPT.md) — covered mound and cooled fuel collection.
 - [Coke Firing](COKE_FIRING_PROMPT.md) — brick ovens and coke handling.
+
+- [Tinplate Coating and Food Retorts](CANNING_ART_PROMPTS.md) — material coating and container processing.

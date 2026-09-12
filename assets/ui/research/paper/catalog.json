@@ -3255,7 +3255,7 @@
       "domain": "production",
       "id": "tinplate_coating",
       "name": "Tinplate Coating",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/can_body_forming.png",
@@ -3279,7 +3279,7 @@
       "domain": "nutrition",
       "id": "food_retorts",
       "name": "Food Retorts",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/thermal_process_validation.png",
@@ -3813,9 +3813,9 @@
   "live_art_complete": false,
   "live_count": 476,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 428,
+  "queued_count": 426,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 48
+  "verified_count": 50
 }

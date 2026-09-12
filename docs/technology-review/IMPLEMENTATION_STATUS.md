@@ -1375,3 +1375,16 @@ Verification: 35 cases pass with zero errors/failures/skips/orphans: physical ca
 Task-owned capacity helper, focused extensions and documentation. Shared canning helper/planner, operating service/status and review records. No integration hotspots, save fields, research identities or recipe changes. Counts remain 476 discoveries, 154 recipes, 12 plants, 89 roles and 48 reviewed images. Full overhaul incomplete. Historical session 57160 was confirmed live at the start and retains older loaded code; no terminal target completion claimed.
 
 Operation reviews pre-harvest stock. Later drying/smoking or stock changes can still leave prepared capacity unused, while newly harvested food cannot enlarge that day's prepared capacity. Aggregate fractional batches, future scheduling and long-campaign economics remain limitations; no native player presentation or canonical integration is claimed.
+
+
+## Checkpoint 124: tinplate and retort artwork
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `722410e`. No canonical integration or player launch.
+
+Two built-in image-generation calls produced distinct Tinplate Coating and Food Retorts illustrations with apprentice_contracts.png as the inspected style reference. Visual review confirmed matte earth pigment, broad fibrous ivory, human manufacturing activity, coating bath/rack and an open retort being loaded. These are illustrative scenes rather than technical operating instructions. Source outputs were copied unchanged to project assets and bound to the matching discoveries. Exact prompts/source paths are recorded in assets/ui/research/paper/CANNING_ART_PROMPTS.md.
+
+Source/workspace byte identity verified. Both PNGs are 1254 square; imports use 768 size limit and mipmaps. SHA256: tinplate_coating 3429359ad82b7544156984abd4ff5717aafbbd3be8de3fca96ccb794c48da3de; food_retorts 3ca01915669e1b43dff1173972f27010a0f2cb74430bc9efd39fd67f23869b2d. Owned headless import processes exited successfully. No native player presentation claim.
+
+Task-owned assets, import metadata and prompt record. Shared visual bindings, prompt index, manifest and status. No simulation/save changes. Counts: 476 discoveries, 154 recipes, 12 plants, 89 roles, 50 reviewed images. 426 live images remain queued; full target lacks 4,524 discovery identities and 4,950 images. Full overhaul incomplete. Historical session 57160 was revalidated live; latest inspected snapshot year 233, population 64,309, 274 known discoveries, 17 settlements. No completed target or full-history claim.
+
+Verification: all 11 research-visual atlas cases pass with zero errors/failures/skips/orphans. The suite checks all current bindings, texture limits and full-frame presentation. Manifest export records 50 verified assets and 426 queued, with no missing bound assets. This is headless UI/import verification, not native player acceptance.
