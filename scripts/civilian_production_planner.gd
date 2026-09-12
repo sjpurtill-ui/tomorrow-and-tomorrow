@@ -39,6 +39,11 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 	if existing.is_empty():
 		for item:String in I.PRODUCTS:
 			if String(I.PRODUCTS[item].output)==resource:candidates.append(item)
+	var installed:Dictionary={}
+	if existing.is_empty() and WorldSimulation.military.equipment_queue.size()>=WorldSimulation.military.production_line_capacity():
+		var reusable:=finished_line()
+		for job:Dictionary in WorldSimulation.military.equipment_queue:
+			if int(job.id)==reusable:installed=P.installed_tooling(job);break
 	var best:Dictionary={};var best_work:=INF
 	for item:String in candidates:
 		var recipe:=P.recipe(WorldSimulation.military,item)
@@ -50,7 +55,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		var ready:=true
 		for input:String in recipe.materials:
 			if float(WorldSimulation.state.resource_stockpiles.get(input,0.0))<float(recipe.materials[input]):ready=false;break
-		if existing.is_empty():ready=P.startup_blockers(WorldSimulation.military,item).is_empty()
+		if existing.is_empty():ready=P.startup_blockers(WorldSimulation.military,item,installed).is_empty()
 		if ready:
 			var direct_work:=float(recipe.work_per_item)*batches
 			if direct_work<best_work:best={"item":item,"target":target,"work":direct_work};best_work=direct_work
@@ -58,7 +63,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		var needed:Dictionary={}
 		for input:String in recipe.materials:needed[input]=float(recipe.materials[input])*batches
 		if existing.is_empty():
-			for input:String in recipe.tooling:needed[input]=float(needed.get(input,0.0))+float(recipe.tooling[input])
+			for input:String in P.missing_tooling(recipe.tooling,installed):needed[input]=float(needed.get(input,0.0))+maxf(0,float(recipe.tooling[input])-float(installed.get(input,0)))
 		var first:Dictionary={};var possible:=true
 		var work:=float(recipe.work_per_item)*batches
 		for input:String in needed:
@@ -69,7 +74,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 			if first.is_empty():first=upstream
 		if not possible:continue
 		if first.is_empty():
-			if existing.is_empty() and not P.startup_blockers(WorldSimulation.military,item).is_empty():continue
+			if existing.is_empty() and not P.startup_blockers(WorldSimulation.military,item,installed).is_empty():continue
 			first={"item":item,"target":target}
 		if work<best_work:best=first.duplicate();best["work"]=work;best_work=work
 	return best

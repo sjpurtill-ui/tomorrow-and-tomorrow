@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after the cartwright batch: **508 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after the machine-tool batch: **532 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1440,3 +1440,18 @@ Graph and ideal-resource manufacturing audit: 508 discoveries, 284 explicit rout
 Current totals: 508/5,000 discoveries, 188 civilian recipes, 12 plants, 89 military roles, 54 reviewed images. Remaining: 4,492 discovery identities, 454 illustrations for live discoveries and 4,946 images against the full target, plus 2,500–3,000-year progression proof, full-world acceptance and canonical integration. The separate long diagnostic loads the earlier 476-discovery source and cannot verify this batch.
 
 Validation result: six cartwright cases and nineteen existing persistent-production cases pass with zero errors, failures, skips or orphans. Graph and manifest tools exited successfully. These focused checks cover the changed component chain, adapter and save normalization; they do not establish full-world pacing or integration.
+
+
+## Machine-tool batch: twenty-four practices and retained setup equipment
+
+Implementation worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `a0d3653`. No canonical integration or player launch.
+
+[Machine-tool production](MACHINE_TOOL_PRODUCTION.md) adds twenty-four discoveries and recipes for reference surfaces, screw feeds, workholding, turning, drilling, milling, indexing, jigs, gauges and complete tool sets. Basic tools are now paid motor-line equipment and a motor-driven workshop installation requirement. Three advanced workshop types require precision tools. Manual construction of the basic equipment avoids a circular electricity prerequisite.
+
+The constrained full-chain test exposed repeated loss of paid setup tooling when a single workshop changed products. Retooling now retains those tools on the same line, charges only missing quantities and never credits installed equipment as warehouse materials. The civilian planner accounts for the tools on its eligible completed line. An optional per-job installed_tooling ledger validates and preserves this state; old jobs can establish only their current recorded paid setup, not lost historical equipment. Existing installations and partial production remain intact.
+
+Validation: seven machine-tool, nineteen persistent-production and eight civilian supply-planner cases pass after the retention change. Fourteen operating-plant and three microprogramming cases passed the new installation costs earlier in the batch; they were not rerun for the subsequent retention-only change. All report zero errors/failures/skips/orphans. Full-chain fixtures manufacture all twenty-four new outputs, commission physical tools and require power/operators for service. They are supplied, isolated fixtures, not a natural industrial campaign.
+
+Graph/ideal-resource audit: 532 discoveries, 308 explicit route records, 212 recipes, 12 plants; zero structural errors. Current totals: 532/5,000 discoveries, 89 military roles and 54 reviewed images. Remaining: 4,468 discovery identities, 478 live illustrations and 4,946 target images, plus full-history/full-world acceptance and canonical integration. The separately running 476-discovery diagnostic was polled live this turn and its last inspected annual snapshot was year 153, 167 known discoveries, 6,183 population and 17 settlements; it had no active civilian production lines or installed plants in that snapshot. It cannot establish uptake of this new batch or completed 2,500–3,000-year progression.
+
+Shared integration conflicts: discovery_system.gd, civilian_industry.gd, technology_operations.gd, persistent_production.gd and civilian_production_planner.gd, plus the explicit precision-tool fixture in test_microprogramming.gd. No general, government, terrain or canonical player changes.

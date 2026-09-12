@@ -56,10 +56,23 @@ static func available_products(host:Node)->Array[String]:
 		if not recipe(host,item).has("error"):result.append(item)
 	return result
 
-static func startup_blockers(host:Node,item:String)->Array[String]:
+static func installed_tooling(job:Dictionary)->Dictionary:
+	if job.has("installed_tooling"):return (job.installed_tooling as Dictionary).duplicate(true)
+	# Older lines can prove only their current paid setup, not past discarded tools.
+	return (job.get("tooling",{}) as Dictionary).duplicate(true) if bool(job.get("tooling_paid",false)) else {}
+
+static func missing_tooling(required:Dictionary,installed:Dictionary)->Dictionary:
+	var result:Dictionary={}
+	for resource:String in required:
+		var missing:=maxf(0,float(required[resource])-float(installed.get(resource,0)))
+		if missing>0:result[resource]=missing
+	return result
+
+static func startup_blockers(host:Node,item:String,installed:Dictionary={})->Array[String]:
 	var result:Array[String]=[]
 	var definition:=recipe(host,item)
 	if definition.has("error"):return [String(definition.error)]
+	var tooling:=missing_tooling(definition.tooling,installed)
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):result.append("Build an operational naval base or airfield for this production branch first.")
 	var staff:=workforce()
@@ -67,11 +80,11 @@ static func startup_blockers(host:Node,item:String)->Array[String]:
 	if float(staff.workers)<=0:result.append("No available craftspeople. Assign crafting work in your cities.")
 	elif float(staff.condition_factor)<=0:result.append("Workforce or workplaces cannot operate. Restore health and usable workshops.")
 	for resource:String in definition.materials:
-		var needed:=float(definition.materials[resource])+float(definition.get("tooling",{}).get(resource,0));var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
+		var needed:=float(definition.materials[resource])+float(tooling.get(resource,0));var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
 		if stored<needed:result.append("%s: %.2f in stores; %.2f needed for one item." % [WorldSimulation.resources.display_name(resource),stored,needed])
-	for resource:String in definition.get("tooling",{}):
+	for resource:String in tooling:
 		if definition.materials.has(resource):continue
-		if float(WorldSimulation.state.resource_stockpiles.get(resource,0))<float(definition.tooling[resource]):result.append("Line setup needs %.1f %s." % [float(definition.tooling[resource]),resource])
+		if float(WorldSimulation.state.resource_stockpiles.get(resource,0))<float(tooling[resource]):result.append("Line setup needs %.1f %s." % [float(tooling[resource]),resource])
 	return result
 
 static func start(host: Node, item: String, target: int) -> Dictionary:
@@ -85,7 +98,7 @@ static func start(host: Node, item: String, target: int) -> Dictionary:
 	for resource:String in definition.get("tooling",{}):WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))-float(definition.tooling[resource])
 	var id: int=host.next_equipment_job_id;host.next_equipment_job_id+=1
 	var job:=definition.duplicate(true)
-	job.merge({"id":id,"persistent":true,"target_stock":target,"paused":false,"allocation":1.0,"efficiency":.20,"progress_days":0.0,"completed":0,"count":1,"required_days":float(definition.work_per_item),"reserved_materials":{},"last_output":0,"last_consumed":{},"last_work":0.0,"tooling_paid":true})
+	job.merge({"id":id,"persistent":true,"target_stock":target,"paused":false,"allocation":1.0,"efficiency":.20,"progress_days":0.0,"completed":0,"count":1,"required_days":float(definition.work_per_item),"reserved_materials":{},"last_output":0,"last_consumed":{},"last_work":0.0,"tooling_paid":true,"installed_tooling":definition.tooling.duplicate(true)})
 	host.equipment_queue.append(job)
 	return {"ok":true,"job_id":id,"message":product_name(item)+(" — continuous production: no limit; runs until paused or supplies run out." if target==0 else " — maintain %d in stores; pauses at target and replenishes after issue." % target)}
 
@@ -103,15 +116,20 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 	for job in host.equipment_queue:
 		if int(job.id)!=id or not bool(job.get("persistent",false)): continue
 		if String(job.item)==item: return {"ok":true,"message":"This line already makes that item."}
+		var installed:=installed_tooling(job)
+		var additions:=missing_tooling(definition.tooling,installed)
 		if not Industry.product(item).is_empty() or not definition.tooling.is_empty():
-			var blockers:=startup_blockers(host,item)
+			var blockers:=startup_blockers(host,item,installed)
 			if not blockers.is_empty():return {"error":"Cannot retool: "+" ".join(blockers)}
-			for resource:String in definition.tooling:WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))-float(definition.tooling[resource])
+			for resource:String in additions:
+				WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))-float(additions[resource])
+				installed[resource]=float(installed.get(resource,0))+float(additions[resource])
+		job["installed_tooling"]=installed
 		var retention:=.65 if String(job.job_type)==String(definition.job_type) else .35
 		job.efficiency=maxf(.10,float(job.efficiency)*retention)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
 		job.required_days=job.work_per_item
-		return {"ok":true,"message":"Line retooled. Some efficiency is retained; unfinished work is discarded without refunding consumed materials."}
+		return {"ok":true,"message":"Line retooled. Existing setup tools remain assigned; missing tools are added. Some efficiency is retained; unfinished work is discarded without refunding consumed materials."}
 	return {"error":"Select a persistent production line."}
 
 static func stock(host: Node, job: Dictionary) -> int:
@@ -238,6 +256,17 @@ static func validate_saved(payload: Dictionary) -> String:
 		if String(job.job_type)=="civilian":
 			var definition:=Industry.product(String(job.item))
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
+		if job.has("installed_tooling"):
+			if not job.installed_tooling is Dictionary:return "Invalid installed tooling."
+			var allowed:Dictionary={}
+			for product:Dictionary in Industry.PRODUCTS.values():
+				for resource:String in product.get("tooling",{}):allowed[resource]=true
+			for unit:Dictionary in preload("res://scripts/joint_force_catalog.gd").UNITS.values():
+				for resource:String in unit.get("tooling",{}):allowed[resource]=true
+			for resource:Variant in job.installed_tooling:
+				if not resource is String or not allowed.has(resource):return "Unknown installed tool."
+				var value:Variant=job.installed_tooling[resource]
+				if not (value is int or value is float) or not is_finite(float(value)) or float(value)<=0 or float(value)>MAX_TARGET:return "Invalid installed tooling quantity."
 		for value in job.materials.values():
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid material cost."
 	return ""

@@ -3546,6 +3546,198 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/three_plate_lapping.png",
+      "description": "Three reference surfaces are compared and worked against one another so a matching curve does not masquerade as a plane.",
+      "domain": "production",
+      "id": "three_plate_lapping",
+      "name": "Three-Plate Lapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/straightedge_scraping.png",
+      "description": "High spots are removed from a metal straightedge against a reference surface, providing a portable guide for fitting longer ways.",
+      "domain": "production",
+      "id": "straightedge_scraping",
+      "name": "Straightedge Scraping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/machine_way_scraping.png",
+      "description": "Bearing contact is checked along a guideway and high spots are scraped away so a carriage can move without rocking or binding.",
+      "domain": "production",
+      "id": "machine_way_scraping",
+      "name": "Machine-Way Scraping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lead_screw_cutting.png",
+      "description": "A repeated helical thread converts controlled rotation into a reproducible length of carriage travel.",
+      "domain": "production",
+      "id": "lead_screw_cutting",
+      "name": "Lead-Screw Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/split_feed_nuts.png",
+      "description": "A matching split nut can engage a lead screw for a controlled feed and disengage it for repositioning.",
+      "domain": "production",
+      "id": "split_feed_nuts",
+      "name": "Split Feed Nuts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cross_slide_assembly.png",
+      "description": "Intersecting guided slides and screw feeds set a cutting tool across the work rather than relying on unsupported hand pressure.",
+      "domain": "production",
+      "id": "cross_slide_assembly",
+      "name": "Cross-Slide Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/four_jaw_chucks.png",
+      "description": "Four independently adjusted jaws grip a workpiece and allow its working surface to be centered even when its outer shape is irregular.",
+      "domain": "production",
+      "id": "four_jaw_chucks",
+      "name": "Four-Jaw Chucks",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tailstock_fitting.png",
+      "description": "An aligned sliding support steadies the far end of a rotating workpiece or advances a tool along its center line.",
+      "domain": "production",
+      "id": "tailstock_fitting",
+      "name": "Tailstock Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/toolbit_heat_treatment.png",
+      "description": "Heating, hardening and tempering prepare small steel cutting edges that retain useful hardness while resisting fracture.",
+      "domain": "production",
+      "id": "toolbit_heat_treatment",
+      "name": "Tool-Bit Heat Treatment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/centre_lathe_assembly.png",
+      "description": "Aligned ways, a controlled slide, a gripping spindle and an opposing support form a machine for turning work about a stable axis.",
+      "domain": "production",
+      "id": "centre_lathe_assembly",
+      "name": "Centre-Lathe Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drill_bit_fluting.png",
+      "description": "Cutting lips and flutes are formed together so a drill can cut a round hole and carry its chips away.",
+      "domain": "production",
+      "id": "drill_bit_fluting",
+      "name": "Drill-Bit Fluting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/quill_feed_mechanisms.png",
+      "description": "A guided quill advances a rotating spindle toward the work while supporting its bearings and preserving alignment.",
+      "domain": "production",
+      "id": "quill_feed_mechanisms",
+      "name": "Quill Feed Mechanisms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/column_drilling_machines.png",
+      "description": "A supported drilling head and fixed work table control the feed of a drill into a secured workpiece.",
+      "domain": "production",
+      "id": "column_drilling_machines",
+      "name": "Column Drilling Machines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/milling_cutter_relief.png",
+      "description": "Clearance behind successive cutting edges lets a rotating multi-tooth cutter remove material without rubbing its whole flank on the work.",
+      "domain": "production",
+      "id": "milling_cutter_relief",
+      "name": "Milling Cutter Relief",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/milling_table_feeds.png",
+      "description": "A rigid table moves a secured workpiece along controlled intersecting feeds beneath a rotating cutter.",
+      "domain": "production",
+      "id": "milling_table_feeds",
+      "name": "Milling Table Feeds",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/milling_spindle_heads.png",
+      "description": "A supported spindle and its gear drive carry the cutting loads of a milling arbor without depending on a loose hand-held shaft.",
+      "domain": "production",
+      "id": "milling_spindle_heads",
+      "name": "Milling Spindle Heads",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/horizontal_milling_machines.png",
+      "description": "A rigid bed joins controlled table movement to a supported horizontal cutting spindle, allowing repeated flat and shaped cuts.",
+      "domain": "production",
+      "id": "horizontal_milling_machines",
+      "name": "Horizontal Milling Machines",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/worm_dividing_heads.png",
+      "description": "A worm reduction and indexed spindle divide a full turn into repeatable positions for evenly spaced machining operations.",
+      "domain": "production",
+      "id": "worm_dividing_heads",
+      "name": "Worm Dividing Heads",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drill_jig_bushings.png",
+      "description": "Fitted guide sleeves locate a drill while providing a replaceable wearing surface inside a drilling fixture.",
+      "domain": "production",
+      "id": "drill_jig_bushings",
+      "name": "Drill Jig Bushings",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drill_jig_layout.png",
+      "description": "A measured fixture locates both the workpiece and its drill guides so a hole pattern can be repeated across multiple parts.",
+      "domain": "production",
+      "id": "drill_jig_layout",
+      "name": "Drill Jig Layout",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gauge_block_lapping.png",
+      "description": "Hardened measuring blocks are finished with flat parallel faces and compared under controlled conditions to transfer a reference length.",
+      "domain": "production",
+      "id": "gauge_block_lapping",
+      "name": "Gauge-Block Lapping",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bench_vise_screws.png",
+      "description": "A guided moving jaw and fitted screw hold a workpiece against a fixed jaw while leaving both hands free for the machining task.",
+      "domain": "production",
+      "id": "bench_vise_screws",
+      "name": "Bench-Vise Screws",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/basic_machine_shops.png",
+      "description": "Turning, drilling and secure bench work are fitted together as an accountable set of machines ready for workshop installation.",
+      "domain": "production",
+      "id": "basic_machine_shops",
+      "name": "Basic Machine Shops",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/precision_toolrooms.png",
+      "description": "Milling, indexed workholding, fixtures and dimensional references join the basic machines in a shop equipped for controlled repeat production.",
+      "domain": "production",
+      "id": "precision_toolrooms",
+      "name": "Precision Toolrooms",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -4067,9 +4259,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 508,
+  "live_count": 532,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 454,
+  "queued_count": 478,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

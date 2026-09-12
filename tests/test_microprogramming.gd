@@ -42,6 +42,7 @@ func test_components_manufacture_then_commission_into_real_powered_operation()->
 			assert_int(int(job.completed)).is_equal(1);WorldSimulation.military.cancel_equipment_job(int(job.id))
 		for resource:String in ["Control Stores","Microsequencers","Arithmetic-Logic Units"]:assert_float(float(state.resource_stockpiles[resource])).is_equal(0.0)
 		learn("stored_program_control");learn("electric_motors");state.resource_stockpiles["Electric Motors"]=1.0
+		state.resource_stockpiles["Precision Machine Tool Sets"]=1.0
 		assert_bool(Ops.install("programmable_workshop").get("ok",false)).is_true()
 		assert_float(float(state.resource_stockpiles["Programmable Controllers"])).is_equal(0.0)
 		for day in range(1,12):state.elapsed_days=day;Ops.advance(day)
