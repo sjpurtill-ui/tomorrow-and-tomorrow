@@ -3138,6 +3138,54 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/clay_levigation.png",
+      "description": "Settling suspended clay separates coarse debris and produces a more repeatable working body.",
+      "domain": "production",
+      "id": "clay_levigation",
+      "name": "Clay Levigation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/grog_preparation.png",
+      "description": "Crushed fired clay can temper a fresh body, reducing the proportion that shrinks during drying and firing.",
+      "domain": "production",
+      "id": "grog_preparation",
+      "name": "Grog Preparation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/refractory_body_trials.png",
+      "description": "Repeated firing trials select clay mixtures that retain useful shape under demanding furnace conditions.",
+      "domain": "production",
+      "id": "refractory_body_trials",
+      "name": "Refractory Body Trials",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/refractory_brick_firing.png",
+      "description": "Regular fired refractory blocks make furnace linings replaceable without rebuilding the entire structure.",
+      "domain": "production",
+      "id": "refractory_brick_firing",
+      "name": "Refractory Brick Firing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ceramic_crucibles.png",
+      "description": "Formed and fired refractory vessels hold molten batches apart from the surrounding fuel and masonry.",
+      "domain": "production",
+      "id": "ceramic_crucibles",
+      "name": "Ceramic Crucibles",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/crucible_glass_melting.png",
+      "description": "Prepared melting pots and furnace linings support repeatable glass batches while worn pots require replacement.",
+      "domain": "production",
+      "id": "crucible_glass_melting",
+      "name": "Crucible Glass Melting",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3627,9 +3675,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 453,
+  "live_count": 459,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 410,
+  "queued_count": 416,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

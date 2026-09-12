@@ -2,6 +2,13 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"prepared_clay":{"name": "Clay Levigation", "output": "Prepared Clay", "gate": "clay_levigation", "materials": {"Clay": 2.0, "Freshwater": 2.0}, "days": 2.0, "tooling": {"Timber": 2.0, "Stone": 2.0}},
+	"ceramic_grog":{"name": "Grog Preparation", "output": "Ceramic Grog", "gate": "grog_preparation", "materials": {"Clay": 1.0, "Timber": 1.0}, "days": 2.0, "tooling": {"Stone": 3.0}},
+	"refractory_clay":{"name": "Refractory Body Trials", "output": "Refractory Clay", "gate": "refractory_body_trials", "materials": {"Prepared Clay": 2.0, "Ceramic Grog": 0.5, "Fine Sand": 0.5}, "days": 3.0, "tooling": {"Stone": 3.0, "Clay": 3.0}},
+	"refractory_brick":{"name": "Refractory Brick Firing", "output": "Refractory Bricks", "gate": "refractory_brick_firing", "materials": {"Refractory Clay": 1.0, "Timber": 2.0}, "days": 3.0, "tooling": {"Stone": 4.0, "Timber": 2.0}},
+	"ceramic_crucible":{"name": "Ceramic Crucibles", "output": "Ceramic Crucibles", "gate": "ceramic_crucibles", "materials": {"Refractory Clay": 1.0, "Timber": 2.0}, "days": 4.0, "tooling": {"Stone": 3.0, "Clay": 2.0}},
+	"crucible_glass":{"name": "Crucible Glass Melting", "output": "Glass", "gate": "crucible_glass_melting", "materials": {"Fine Sand": 2.0, "Limestone": 0.3, "Timber": 2.5, "Ceramic Crucibles": 0.05}, "days": 2.0, "tooling": {"Refractory Bricks": 8.0, "Stone": 4.0}},
+
 	"centered_lens_mount":{"name": "Lens Centering", "output": "Centered Lens Mounts", "gate": "lens_centering", "materials": {"Optical Lenses": 1.0, "Refined Copper": 1.0}, "days": 3.0, "tooling": {"Wrought Iron": 2.0, "Stone": 2.0}},
 	"microscope_eyepiece":{"name": "Eyepiece Design", "output": "Microscope Eyepieces", "gate": "eyepiece_design", "materials": {"Optical Lenses": 1.0, "Centered Lens Mounts": 1.0}, "days": 3.0, "tooling": {"Timber": 2.0, "Wrought Iron": 1.0}},
 	"focus_stage":{"name": "Fine-Focus Stages", "output": "Focus Stages", "gate": "fine_focus_stages", "materials": {"Wrought Iron": 1.0, "Shaft Bearings": 1.0}, "days": 4.0, "tooling": {"Steel": 1.0, "Stone": 2.0}},

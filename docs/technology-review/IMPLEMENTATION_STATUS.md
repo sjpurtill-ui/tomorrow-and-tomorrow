@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 109: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 110: **459 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1205,3 +1205,14 @@ The production dependency audit now rejects malformed numeric values before trav
 The active diagnostic session 57160 was confirmed live; latest inspected snapshot year 190, population 16,704, 211 known discoveries and 17 settlements. Its loaded 414-discovery build is older than this worktree. No terminal report exists yet and the 250-year target remains pending. Full-history completion remains unproven and incomplete.
 
 Verification: nine focused cases pass with zero errors/failures/skips/orphans. The first run exposed an outdated assertion expecting traversal after an unknown source error; it was updated to assert the new explicit unperformed state and the suite rerun. The combined live graph audit completes cleanly: 453 identities, 227 routes, 130 reachable civilian recipes and eleven reachable installation types in six production rounds, with `closure_performed: true`. This remains structural evidence under ideal resource/knowledge assumptions, not campaign pacing proof.
+
+
+## Checkpoint 110: refractory ceramics production branch
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `ce16859`. No canonical integration or player launch.
+
+Six individually authored discoveries and six physical recipes connect clay levigation, grog preparation, refractory body trials, refractory brick firing, ceramic crucibles and crucible glass melting. All have causal prerequisites and day zero. Every intermediate feeds another real recipe. Bricks pay for tooling, pots are fractionally consumed per glass batch, and existing glassmaking stays usable without the new chain. See [Refractory ceramics](REFRACTORY_CERAMICS.md) for sources, batch assumptions and unimplemented mineral/firing detail.
+
+Verification: 33 cases pass with zero errors/failures/skips/orphans: refractory branch 3, civilian industry 12, technology tree 9 and production dependency audit 9. New tests manufacture the complete chain, check pot and brick consumption, validate individual contracts and demonstrate the original glass method under pot shortage. Common graph audit reports 459 discoveries, 233 routes and no errors; all 136 civilian recipes and eleven installation types are structurally reachable. Resource/research audit reaches all 459 under its explicit ideal-geography assumptions. These do not prove finite campaign pacing or globally optimal balance.
+
+Task-owned files: refractory discovery module, focused tests and branch documentation. Shared files: civilian product catalog, discovery_system.gd (one module registration; integration hotspot), art queue and this record. No save fields added; old records remain compatible, new IDs require this revision. Government continues to own assigned labor. Totals: 459 authored discoveries, 43 reviewed images, 416 live images queued, 89 military roles and eleven plant types. Full-history scope remains incomplete, including 4,541 further authored identities. The loaded 414-discovery historical diagnostic was confirmed live at the start; no target-completion claim.

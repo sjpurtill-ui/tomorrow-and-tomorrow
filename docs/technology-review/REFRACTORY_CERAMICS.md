@@ -1,0 +1,11 @@
+# Refractory ceramics and glass pots
+
+Six individually authored methods connect clay levigation, grog preparation, refractory body trials, refractory brick firing, ceramic crucibles and crucible glass melting. All use causal prerequisites with day zero and no calendar gate. Preparation and firing branches reconverge in the glass route; earlier glassmaking remains available.
+
+The corresponding products are Prepared Clay, Ceramic Grog, Refractory Clay, Refractory Bricks, Ceramic Crucibles and Glass. Every new intermediate has a downstream consumer. Ordinary workshop setup, assigned Crafting labor, material stocks, licensing and saved production lines apply. Refractory bricks furnish the new glass line as paid tooling. Each glass batch consumes 0.05 Ceramic Crucibles as an aggregate allowance for pot replacement. It requires two worker-days and 2.5 Timber versus the original recipe's three worker-days and three Timber, with the additional preparation and setup costs paid separately. These are provisional game batch values, not engineering quantities or a proven optimal balance.
+
+[Historic England's study of the Shinrone glasshouse](https://historicengland.org.uk/research/results/reports/5434/The17thCenturyGlasshouseatShinroneCoOffalyIreland) records refractory crucible clay containing grog and quartz temper. [Digitalfire's grog reference](https://www.digitalfire.com/material/grog) explains its use as a fired granular addition to clay bodies. These support distinct preparation and refractory vessel concepts; the branch does not assert a universal invention sequence or historical priority.
+
+The existing generic Clay stock represents access to selectable clay fractions. Mineral-specific fireclay deposits, alumina chemistry, thermal expansion, kiln atmosphere, firing temperature, cracks, furnace-lining wear and reject recovery are not yet simulated. Trials are a learned capability rather than per-batch material testing. Consumption fractions abstract wear; they do not model a particular pot's lifetime. Existing glass recipes and their simplified batch chemistry remain unchanged. No new plant type or save fields are introduced. New discovery and product IDs require this revision; old records remain compatible.
+
+This branch adds six production discoveries, not a claim that the full-history catalog or its campaign pacing is complete.
