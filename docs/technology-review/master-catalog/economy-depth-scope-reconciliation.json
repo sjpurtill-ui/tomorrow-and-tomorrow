@@ -21,6 +21,11 @@
       "excluded_proposal": "research_portfolio_option_review",
       "retained_id": "long_horizon_project_optioning",
       "reason": "Evidence-dependent continuation, redirection or stopping of research belongs to existing reversible project optioning, not an additional research-prefixed discovery."
+    },
+    {
+      "excluded_proposal": "employment_dispute_mediation",
+      "retained_id": "mediation_practice",
+      "reason": "Work/pay disputes apply the existing voluntary mediation mechanism; the authored proposal introduces no separate dispute-resolution method. Application evidence and paid mediator time remain requirements. Mediation does not require binding arbitration."
     }
   ],
   "scope_distinctions": [

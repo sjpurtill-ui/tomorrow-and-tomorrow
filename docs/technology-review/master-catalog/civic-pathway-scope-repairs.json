@@ -1,0 +1,228 @@
+{
+  "status": "authored_graph_review",
+  "adds_discovery_ids": 0,
+  "changes": [
+    {
+      "id": "public_service_case_routing",
+      "source_file": "governance-administration-depth.json",
+      "before_all": [
+        "administrative_service_standards",
+        "jurisdiction_boundaries"
+      ],
+      "before_any": [],
+      "after_all": [
+        "jurisdiction_boundaries"
+      ],
+      "after_any": [],
+      "reason": "Requests can be routed to the responsible office before measurable administrative service standards are adopted."
+    },
+    {
+      "id": "language_access_administration",
+      "source_file": "governance-administration-depth.json",
+      "before_all": [
+        "cultural_translation_practice",
+        "administrative_service_standards"
+      ],
+      "before_any": [],
+      "after_all": [
+        "cultural_translation_practice"
+      ],
+      "after_any": [],
+      "reason": "Qualified interpretation for public dealings does not require an adopted modern service-standard program."
+    },
+    {
+      "id": "mutual_aid_activation",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "intergovernmental_compacts",
+        "emergency_coordination_centers"
+      ],
+      "before_any": [],
+      "after_all": [
+        "intergovernmental_compacts"
+      ],
+      "after_any": [
+        [
+          "emergency_coordination_centers",
+          "team_briefing_protocols"
+        ]
+      ],
+      "reason": "A pre-agreed aid dispatch can be coordinated through practical briefings before a permanent emergency center exists."
+    },
+    {
+      "id": "delayed_governance_protocols",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "interhabitat_jurisdiction",
+        "delay_tolerant_space_networks"
+      ],
+      "before_any": [],
+      "after_all": [
+        "official_mandate_registers"
+      ],
+      "after_any": [
+        [
+          "intergovernmental_compacts",
+          "interhabitat_jurisdiction"
+        ]
+      ],
+      "reason": "Bounded delegated authority also applies to courier-era communication. Neither spaceflight nor a delay-tolerant space network is mandatory."
+    },
+    {
+      "id": "net_settlement",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "payment_clearing_houses",
+        "symbolic_algebra"
+      ],
+      "before_any": [],
+      "after_all": [
+        "debt_maturity_records",
+        "material_accounting"
+      ],
+      "after_any": [],
+      "reason": "Parties can offset quantified reciprocal claims before formal clearing houses or symbolic algebra; arithmetic and actual settlement resources remain required."
+    },
+    {
+      "id": "settlement_dispute_escrow",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "arbitration_procedures",
+        "settlement_finality_rules"
+      ],
+      "before_any": [],
+      "after_all": [
+        "witnessed_obligations"
+      ],
+      "after_any": [
+        [
+          "arbitration_procedures",
+          "mediation_practice"
+        ]
+      ],
+      "reason": "An agreed custodian can hold an asset under reviewed release/dispute terms without a modern payment-finality regime."
+    },
+    {
+      "id": "contingent_supply_contracts",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "procurement_specifications",
+        "performance_bonds"
+      ],
+      "before_any": [],
+      "after_all": [
+        "procurement_specifications",
+        "witnessed_obligations"
+      ],
+      "after_any": [],
+      "reason": "Conditional supply obligations do not require a third-party performance bond; enforceability and actual delivery remain separate operating conditions."
+    },
+    {
+      "id": "trade_disruption_reserves",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "critical_supplier_exposure_maps",
+        "liquidity_reserve_planning"
+      ],
+      "before_any": [],
+      "after_all": [
+        "material_accounting"
+      ],
+      "after_any": [
+        [
+          "critical_supplier_exposure_maps",
+          "market_gathering_schedules"
+        ]
+      ],
+      "reason": "Observed recurring trade and inventory allow interruption reserves before modern supplier-exposure maps or bank liquidity planning."
+    },
+    {
+      "id": "succession_mentoring",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "cross_training_rosters",
+        "public_office_handover"
+      ],
+      "before_any": [],
+      "after_all": [
+        "guided_practice_cycles"
+      ],
+      "after_any": [],
+      "reason": "An experienced practitioner can prepare a successor through supervised work before public-office records or formal cross-training rosters exist."
+    },
+    {
+      "id": "team_briefing_protocols",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "crew_handoffs",
+        "shared_technical_lexicons"
+      ],
+      "before_any": [],
+      "after_all": [
+        "crew_handoffs"
+      ],
+      "after_any": [
+        [
+          "shared_technical_lexicons",
+          "demonstration_teaching"
+        ]
+      ],
+      "reason": "A group can brief responsibilities through practical demonstrations before a formal technical lexicon is compiled."
+    },
+    {
+      "id": "organizational_memory_reviews",
+      "source_file": "civic-economic-learning.json",
+      "before_all": [
+        "negative_result_archives",
+        "succession_mentoring"
+      ],
+      "before_any": [],
+      "after_all": [
+        "succession_mentoring"
+      ],
+      "after_any": [
+        [
+          "negative_result_archives",
+          "craft_demonstration_collections"
+        ]
+      ],
+      "reason": "Review of retained work and instruction provides an earlier route than a formal negative-result archive."
+    },
+    {
+      "id": "intergenerational_fund_draw_rules",
+      "source_file": "economy-research-finance-depth.json",
+      "before_all": [
+        "long_duration_liability_funds"
+      ],
+      "before_any": [],
+      "after_all": [
+        "long_horizon_public_trusts"
+      ],
+      "after_any": [
+        [
+          "long_duration_liability_funds",
+          "public_budget_accounts"
+        ]
+      ],
+      "reason": "Purpose-bound assets and ordinary budget accounts can support bounded draw rules before specialized long-duration liability funds."
+    },
+    {
+      "id": "cultural_translation_practice",
+      "source_file": "mathematics-records-culture.json",
+      "before_all": [
+        "shared_technical_lexicons",
+        "comparative_chronicles"
+      ],
+      "before_any": [],
+      "after_all": [],
+      "after_any": [
+        [
+          "pictographic_records",
+          "phonetic_notation",
+          "oral_epics"
+        ]
+      ],
+      "reason": "Translation and contextual interpretation can work from oral or written source traditions before formal technical lexicons or comparative chronicles. Actual competent bilingual/contextual practitioners remain required."
+    }
+  ]
+}

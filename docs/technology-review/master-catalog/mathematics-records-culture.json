@@ -5151,16 +5151,19 @@
     "field": "D19",
     "id": "cultural_translation_practice",
     "name": "Cultural Translation Practice",
-    "foundations": "shared_technical_lexicons,comparative_chronicles",
+    "foundations": "",
     "mechanism": "Interpret works across languages or contexts while making choices and limits explicit",
     "operating_requirement": "Competent translators, context, sources and review",
     "consequence": "Extend access without claiming perfect equivalence between traditions",
     "status": "authored_draft",
-    "requires_all": [
-      "shared_technical_lexicons",
-      "comparative_chronicles"
+    "requires_all": [],
+    "requires_any": [
+      [
+        "pictographic_records",
+        "phonetic_notation",
+        "oral_epics"
+      ]
     ],
-    "requires_any": [],
     "recovery": "For Cultural Translation Practice: learn from a competent visiting teacher, delivered records or demonstrations, a reciprocal partnership or commissioned work. Outside access requires real travel or transmission, agreed payment or contribution and finite teaching time. Rebuild missing foundations and perform the local demonstration; purchasing results or a service does not award mastery. Route coefficients and runtime mappings remain pending.",
     "recovery_contract": {
       "status": "design_proposal",
@@ -5176,7 +5179,8 @@
       ],
       "grants_instant_mastery": false,
       "qualification_focus": "Learn a practice through willing practitioners and locally meaningful participation. Buying a work does not transfer every creative skill, grant custodianship or ensure shared interpretation."
-    }
+    },
+    "branching_note": "Translation and contextual interpretation can work from oral or written source traditions before formal technical lexicons or comparative chronicles. Actual competent bilingual/contextual practitioners remain required."
   },
   {
     "field": "D19",

@@ -6464,6 +6464,2896 @@
       "classification_status": "editorial_review",
       "rationale": "The specified analytical, controlled-process, monitoring or systems method is modern practice or research. A future habitat application is not itself a distinct advanced mechanism.",
       "scope_digest": "bedc28c19407e4934e8e913c9d45ea4fa510b06fcc6ab29f8c085881a80f049e"
+    },
+    {
+      "id": "witnessed_obligations",
+      "name": "Witnessed Obligations",
+      "horizon": "H01",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses directly witnessed commitments, remembered reciprocity or demonstrated learning; a written bureaucracy or industrial institution is not intrinsic to the mechanism.",
+      "scope_digest": "eac6224cee15fc394e9c6a390638cd0394c44fda60a0e7db3f61fdc4ec8c961f"
+    },
+    {
+      "id": "precedent_collections",
+      "name": "Precedent Collections",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "5540443c0fd5546788ab84a189b116ac7a9865b9c2f8c4461a0a76a9fd2901f3"
+    },
+    {
+      "id": "public_rule_proclamation",
+      "name": "Public Rule Proclamation",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "6340843db5388f1469c6dd91da78a9cae978219b269bd1c7254db1864db45481"
+    },
+    {
+      "id": "written_legal_codes",
+      "name": "Written Legal Codes",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "b5867dc5f47fe9937debc88ce383fab4d4653089b046c364145bdccd3c682351"
+    },
+    {
+      "id": "jurisdiction_boundaries",
+      "name": "Jurisdiction Boundaries",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d25be284ed585da2d4d490714328cc3388401b884ba7ba059952a52f8917ac6f"
+    },
+    {
+      "id": "court_case_dockets",
+      "name": "Court Case Dockets",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "a0ad76d61b2a2cd7269aaba9a6a507e9e8642c06db417f4f803f2561a5c5fce5"
+    },
+    {
+      "id": "evidentiary_hearings",
+      "name": "Evidentiary Hearings",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "905d4a0d5a355c54ea1a0c9ae13248aa02b8c34d55fdde7f7b8f11a805f0c021"
+    },
+    {
+      "id": "conflict_of_interest_recusal",
+      "name": "Conflict-of-Interest Recusal",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "577d72352d42ac2a047ba7d33c6a012b63c6c58b478da13ca497b74cad439462"
+    },
+    {
+      "id": "written_judgment_reasons",
+      "name": "Written Judgment Reasons",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "3efd306e2ae53ee1fdbc45af7cb4b0556a635bc4021665fecff6b2298a4232c6"
+    },
+    {
+      "id": "appellate_review",
+      "name": "Appellate Review",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "0fdb9d928a314f70ecf3eb848a0dd11fb8db366853fb45c966075456cf929042"
+    },
+    {
+      "id": "arbitration_procedures",
+      "name": "Arbitration Procedures",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "a484fbad31441b949cbff46bb241b0f7bd82ce4176c06e041dc6d7f48a2e7eec"
+    },
+    {
+      "id": "mediation_practice",
+      "name": "Mediation Practice",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Voluntary facilitated negotiation is distinct from binding arbitration. Employment disputes use the same method, with relevant work/pay evidence, rather than a second discovery identity.",
+      "scope_digest": "d1a15ec392a0e8aa651331f26b430d7035d156f87305c9457e632aadec830fd3"
+    },
+    {
+      "id": "legal_aid_organization",
+      "name": "Legal Aid Organization",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "5075a1ff445cb42909f1cbac118df5bd31e667f549404a816345c39f218bb7ad"
+    },
+    {
+      "id": "procedural_notice",
+      "name": "Procedural Notice",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "8ed0a5f050874bae0a774b3588770236c3acebf2e6dc4e57b668d9b97fe8dfc7"
+    },
+    {
+      "id": "administrative_appeals",
+      "name": "Administrative Appeals",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "53dd29db5570d037db759d12a33ae490b18cec36b3ab60448afdaf74dc6db0e2"
+    },
+    {
+      "id": "water_allocation_compacts",
+      "name": "Water Allocation Compacts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "f6bfcdabe2d26158508657390e3821617083572c0e1fa5d44a7a9588d4fb2d26"
+    },
+    {
+      "id": "common_land_boundaries",
+      "name": "Common-Land Boundaries",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "f82b7dd53fa1bf1b8c7b1dbe96c7ce5dc22a40f83306c6f669bc1ee377c1c9cc"
+    },
+    {
+      "id": "resource_use_permits",
+      "name": "Resource-Use Permits",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "188b94c7b5b1b7eff2a65918d781b42035f7822ee1da939c1028622cda9d6114"
+    },
+    {
+      "id": "municipal_service_charters",
+      "name": "Municipal Service Charters",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Specifying public-service responsibility is earlier institutional knowledge; government people and daily labor remain owned by the existing civic system.",
+      "scope_digest": "078dfeb4f0771ecf8d731f56d1d91277dd3ef26e6959c3eaaf375d097750d379"
+    },
+    {
+      "id": "intergovernmental_compacts",
+      "name": "Intergovernmental Compacts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "6875f658fbd2a9e112efdd514d1171b7f4c18c9e59a1764151c1ac2240a3e054"
+    },
+    {
+      "id": "public_budget_accounts",
+      "name": "Public Budget Accounts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "e8167c5f3fa3fc3859a958e906310d0e75dfc0e4ba350ae464f5d64cf1fa6ae3"
+    },
+    {
+      "id": "appropriation_procedures",
+      "name": "Appropriation Procedures",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "e46a06fee3d56da6c059fca748c71ac9cc4cec27d313a3c4a76d90aa68e239d4"
+    },
+    {
+      "id": "treasury_cash_forecasts",
+      "name": "Treasury Cash Forecasts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "15af5118d5385d7edc39815685a6db80013c66f96bb498c5f82ad75ef14e1d89"
+    },
+    {
+      "id": "public_asset_registers",
+      "name": "Public Asset Registers",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "1d360fdd6d8432f11edb59e360417f993938625d5c5173d324f709329cad6095"
+    },
+    {
+      "id": "procurement_specifications",
+      "name": "Procurement Specifications",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "0814ad9d3a7a1612c2df7a05025ee81121930206c4f80c66961abd8c6ac001a0"
+    },
+    {
+      "id": "competitive_public_tendering",
+      "name": "Competitive Public Tendering",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "906180c3f8b1db1b5fc9ebceb9398d0a8b7d12cf0fd7d48277b32e04de3f3a1b"
+    },
+    {
+      "id": "procurement_acceptance_checks",
+      "name": "Procurement Acceptance Checks",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "ba0728e6fae28491696ac72734eb2ea3129e5501cecd14f3565ff2ce1284682a"
+    },
+    {
+      "id": "public_procurement_audits",
+      "name": "Public Procurement Audits",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "a7c8df2aa9bed85d8b60dd2798ab66844a147fe89a9bc98c1ccdb31da388c4f1"
+    },
+    {
+      "id": "civil_service_examinations",
+      "name": "Civil-Service Examinations",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "9e86951a7f022508b71311887e31a266eb73fefd0fb5c0d5a064666b34016f1a"
+    },
+    {
+      "id": "public_office_handover",
+      "name": "Public Office Handover",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "19b84245ad92ab88dada4ef87b21b6026e69246b0dbbd77ed41ec45399f37501"
+    },
+    {
+      "id": "official_mandate_registers",
+      "name": "Official Mandate Registers",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "9662b199775994dbac02088907ee4c638c70437bd4777699ca436eef8c0c2e74"
+    },
+    {
+      "id": "ombuds_review",
+      "name": "Ombuds Review",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "199bd2600fb1d93218464a0c0a7b1012005792bf173c418a501880a8ed7d24d6"
+    },
+    {
+      "id": "petition_registers",
+      "name": "Petition Registers",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "cc9eab672f40f838fcd0dca16adcd1995d63b75fdb06bc6cb4e8afcf101d4f3e"
+    },
+    {
+      "id": "representative_agenda_rules",
+      "name": "Representative Agenda Rules",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "95b37ea489ae9e803f8234ddb6d78c328bd8de8acbb2837d7cdbc43eddd96cb3"
+    },
+    {
+      "id": "assembly_quorum_rules",
+      "name": "Assembly Quorum Rules",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "afb05f3a5549084bc3548fb7c6e72eb69181d603ece4dad2d90a87fd8f43cf1a"
+    },
+    {
+      "id": "roll_call_decision_records",
+      "name": "Roll-Call Decision Records",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "ffddef2ac7d7e7656ef1f472258ba1cf847459a35ce969eed80dc21d246fa379"
+    },
+    {
+      "id": "secret_ballot_procedures",
+      "name": "Secret-Ballot Procedures",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "8c3dd3d2aa19fb182a0bdbfe4630fc96c89fd2d1b23b1870cb7dcc5ec6cdafa1"
+    },
+    {
+      "id": "electoral_roll_maintenance",
+      "name": "Electoral Roll Maintenance",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "681cf49822950a93c2ab51c8004a4be1f65e24bb1334c96c1e2fd390ea3a9dca"
+    },
+    {
+      "id": "ballot_chain_of_custody",
+      "name": "Ballot Chain of Custody",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "83f7395f9b112da5f17aac937c79f8dd4cc54626c0a24da587b110ee08c0bf05"
+    },
+    {
+      "id": "election_result_audits",
+      "name": "Election Result Audits",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "e11b0ce6e6f33f88f20591f37b3e522f301e1789a0dbd5de55c1bd0dc6fe6aa1"
+    },
+    {
+      "id": "emergency_power_sunset_rules",
+      "name": "Emergency-Power Sunset Rules",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "49e604264f0da88371de2d193f42a7b3cc7ce70f5cd635992ef4bade7dc50f48"
+    },
+    {
+      "id": "emergency_coordination_centers",
+      "name": "Emergency Coordination Centers",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "a18164d32a511b8f0561fab8ae121c898fcf03a93244be6d47ea1e5df1faba54"
+    },
+    {
+      "id": "mutual_aid_activation",
+      "name": "Mutual-Aid Activation",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "a45e24b76c05aab156fe0fae7da174c5226b7261de77a96a76da70be6eecf4c2"
+    },
+    {
+      "id": "independent_statistical_offices",
+      "name": "Independent Statistical Offices",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "838d9b235d83a5951a1488e3ae4e2b10fee10b44bef75b04be52aef4de5a9606"
+    },
+    {
+      "id": "public_records_access",
+      "name": "Public Records Access",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "78129a217a9795fee7f1b77455afa442f240048e4ba2f3282bb8f10b8e298649"
+    },
+    {
+      "id": "personal_data_stewardship",
+      "name": "Personal Data Stewardship",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "f17ef396cf5db264e12c1523bb80f95f7838f46eac89c7476d1e17ada9999755"
+    },
+    {
+      "id": "data_access_auditing",
+      "name": "Data-Access Auditing",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "15d7d9122531c19adaed40d962f34f4c12dd76d16148645a1d19b935a538ccca"
+    },
+    {
+      "id": "algorithmic_decision_review",
+      "name": "Algorithmic Decision Review",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "1246180d24bd832842f261dbf420842f601eea4583d9d76f9fdb3ddaf232b3a1"
+    },
+    {
+      "id": "public_model_registers",
+      "name": "Public Model Registers",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "f77c29b11bbaaa4a6a6c19200af2e0f842e9524b09566ae83cd186916c45c395"
+    },
+    {
+      "id": "cross_border_resource_arbitration",
+      "name": "Cross-Border Resource Arbitration",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "17ad9e8afa0d127db6369b64b17716c0d072d075990cbc2c0a76351b36fd526b"
+    },
+    {
+      "id": "long_horizon_public_trusts",
+      "name": "Long-Horizon Public Trusts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Purpose-bound assets and duties extending beyond one officeholder have earlier institutional routes; the word long does not imply future technology.",
+      "scope_digest": "85b9a85bd2c5cc5a7db455231ca8c9deb33b3fc7aad3ba2af58e88899516ae60"
+    },
+    {
+      "id": "future_obligation_disclosure",
+      "name": "Future-Obligation Disclosure",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "91e99079160227e8a2faa48c0a1bf285be278be869ec99d6778d96a659d6fc38"
+    },
+    {
+      "id": "habitat_constitutional_compacts",
+      "name": "Habitat Constitutional Compacts",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored mechanism specifies authority and service obligations; it is modern institutional design, not proof of a viable inhabited frontier settlement.",
+      "scope_digest": "3e63a8d6a4401a28678b28692e6976de7bf73ed4294ea7eb78a44083504deda2"
+    },
+    {
+      "id": "life_support_priority_rules",
+      "name": "Life-Support Priority Rules",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "9da920ede9b7c62be3e0e6da3d11325d8f387b513a02611c4bcd3f5bc1f0b8d4"
+    },
+    {
+      "id": "interhabitat_jurisdiction",
+      "name": "Interhabitat Jurisdiction",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The source allocates responsibility between jurisdictions and vehicles. A habitat application does not itself require new advanced legal reasoning.",
+      "scope_digest": "f61fef650d761a6d3603ba0f650f173b6eaed45d77d07f88072bc132762bc8d0"
+    },
+    {
+      "id": "delayed_governance_protocols",
+      "name": "Delayed Governance Protocols",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Delegated authority during slow consultation can exist before electronic communication or spaceflight.",
+      "scope_digest": "14b403cb96ac3e124f9baf02daad69c6a9d165a94fee22c9d546f10381fc22ff"
+    },
+    {
+      "id": "machine_action_accountability",
+      "name": "Machine-Action Accountability",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "8aecac9a595da14150135c40b804c0fc6dace7cae4499bdd219428fd7eab409e"
+    },
+    {
+      "id": "distributed_civic_verification",
+      "name": "Distributed Civic Verification",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "39242cc5f8b85845df770bdfcaa5a31167d6cacc01e0713936606e9c1b65557b"
+    },
+    {
+      "id": "institutional_continuity_exercises",
+      "name": "Institutional Continuity Exercises",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "da65dad7bc8fee27e8118cc2b32367221415bd0c534b6fa8e7b1cd382cd6f898"
+    },
+    {
+      "id": "constitutional_revision_procedures",
+      "name": "Constitutional Revision Procedures",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "aa97df0bfdc547eeed557847a0de0fb8d8a6b796f31fdfa11d7e1046e7548787"
+    },
+    {
+      "id": "reciprocal_gift_accounts",
+      "name": "Reciprocal Gift Accounts",
+      "horizon": "H01",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses directly witnessed commitments, remembered reciprocity or demonstrated learning; a written bureaucracy or industrial institution is not intrinsic to the mechanism.",
+      "scope_digest": "d1a3868a0fbd53238872ffe5f123b7900c9b7054b0c5921eb4a8980916ba39bd"
+    },
+    {
+      "id": "barter_equivalence_tables",
+      "name": "Barter Equivalence Tables",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "6eb912885203b516b8c30fe4e1c4e85337a974060f5d7718657da06eb9e7da0e"
+    },
+    {
+      "id": "market_gathering_schedules",
+      "name": "Market Gathering Schedules",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "b96985691bcd68b997b91fdba19a5e9401382135b368fe6132d162e28c6e1c8d"
+    },
+    {
+      "id": "merchant_weight_verification",
+      "name": "Merchant Weight Verification",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "1725ea18109ec74205067784c6b8190fb765d17c9cb64e0ab6159b436bf89978"
+    },
+    {
+      "id": "commodity_quality_grading",
+      "name": "Commodity Quality Grading",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "e7853696032e7bb8a08c90c577b062f17818e7ec116cf5b12039c989d8e29e1e"
+    },
+    {
+      "id": "warehouse_receipts",
+      "name": "Warehouse Receipts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "323bb48a47da0c2a366ef927c86495e3ec57f52b6d5adba6e66817efc6c816b2"
+    },
+    {
+      "id": "debt_maturity_records",
+      "name": "Debt Maturity Records",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d3a9c6506885fb71657a3180364494a9091dd9da0de3ed2a92eaeeda544d65ee"
+    },
+    {
+      "id": "interest_accrual_accounts",
+      "name": "Interest Accrual Accounts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "b5b67014db7057facb5a7781981bec3d51b3ec6e801c390cae66a644c96f6fa8"
+    },
+    {
+      "id": "collateral_registration",
+      "name": "Collateral Registration",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "725e48f74a3154d7367fade3dc6e9a7b380e8bd58749682a68c4b11dc2f274dd"
+    },
+    {
+      "id": "merchant_credit_networks",
+      "name": "Merchant Credit Networks",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "98ae82dfcf51c4a06069f6fff014091b531b8c5a699661375e61ec289ad22193"
+    },
+    {
+      "id": "bills_of_exchange",
+      "name": "Bills of Exchange",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "69d587bda877371916a9169715c69e5bb6e4fc4c72ddb2cd75e7a4cf2ecf0719"
+    },
+    {
+      "id": "commercial_endorsement",
+      "name": "Commercial Endorsement",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "e27787c68c321b766ebe3f204c97360e0118b9c6344f7b70688eb8d1140184c0"
+    },
+    {
+      "id": "trade_draft_acceptance",
+      "name": "Trade-Draft Acceptance",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "6e6eab1efc0115abb18ec7bd4aee8b56c2a92064c7af173e9e344a1898cac328"
+    },
+    {
+      "id": "partnership_capital_accounts",
+      "name": "Partnership Capital Accounts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "2591b2151f4512a569002248e88c200afd76934db2d9233f672611b3b6afc13a"
+    },
+    {
+      "id": "profit_loss_allocation",
+      "name": "Profit-and-Loss Allocation",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "5b2b576e57e7669be29a679ad35ef2cfc9bf615e0a367f7ca4e423d5edac03a5"
+    },
+    {
+      "id": "double_entry_bookkeeping",
+      "name": "Double-Entry Bookkeeping",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "6db78285cbc44e6dd2325b39f309fadfa50e2b5823fb1bf5674a03a6d39b7309"
+    },
+    {
+      "id": "trial_balance_reconciliation",
+      "name": "Trial-Balance Reconciliation",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "5c8b3f6eddd61c21525d7df56a668e5e55b911276d742d514d094a4812e7665f"
+    },
+    {
+      "id": "inventory_cost_accounts",
+      "name": "Inventory Cost Accounts",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "e981bafdb4d7fbb4e54f2804480bdd563ed88ffa1454487313be1fa3944b7e52"
+    },
+    {
+      "id": "depreciation_accounts",
+      "name": "Depreciation Accounts",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "bb4af40b82d4b73467e6d488ad0fd9f50f3473669f26cd7a927e8da578174eb3"
+    },
+    {
+      "id": "industrial_job_costing",
+      "name": "Industrial Job Costing",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "dc89514a480f540f26b0b5342a8b81e393b6bd125ce1207ff8d074230b5fc7b7"
+    },
+    {
+      "id": "standard_cost_variance_analysis",
+      "name": "Standard-Cost Variance Analysis",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "af043456cb8c1c7efee3722aa873e729f7272362a3ba9e25bb26091473719e9a"
+    },
+    {
+      "id": "cash_flow_statements",
+      "name": "Cash-Flow Statements",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "466999e3ebca4bfaecb3c91a1d8a43c98a6636d1e66b82f9f81101228139745e"
+    },
+    {
+      "id": "joint_stock_organization",
+      "name": "Joint-Stock Organization",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "575f6cba0b8fdd0cfe488868f97261a6c0c0f25d31980661f36742f4912f7092"
+    },
+    {
+      "id": "limited_liability_rules",
+      "name": "Limited-Liability Rules",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "cf4a77cb0521cc642ebd554ffb99b55066eda43d797f874ddc47c0e29c4a0993"
+    },
+    {
+      "id": "shareholder_meeting_procedures",
+      "name": "Shareholder Meeting Procedures",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "e8dd92fea28aa06098bca4468b35618721fdedffb39903340ca799e2d5f64e3c"
+    },
+    {
+      "id": "commercial_disclosure",
+      "name": "Commercial Disclosure",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "f75cb3af3e5fc76b0cb5c9abc096121c16d6087830bf755afd40379a13fbc51c"
+    },
+    {
+      "id": "independent_financial_audits",
+      "name": "Independent Financial Audits",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "11324a913726952cca0fe503b790dd5f4382a42e74b2964423035349344e2ee3"
+    },
+    {
+      "id": "bank_deposit_accounts",
+      "name": "Bank Deposit Accounts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "7d35b98c7703881714c046107dd45c513fb7ba26099f15174e171833a9e3b59a"
+    },
+    {
+      "id": "payment_clearing_houses",
+      "name": "Payment Clearing Houses",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "445269a4debe73fbfd8a88294d8f49fccf0362753813820850959734e318b57a"
+    },
+    {
+      "id": "net_settlement",
+      "name": "Net Settlement",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "53f840f7a0245af2729a9fdbf1f012e54cd891d8745c995af5c4ff779bad9fd3"
+    },
+    {
+      "id": "gross_real_time_settlement",
+      "name": "Gross Real-Time Settlement",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "8075737a6260e7c8e41df1797d20653020b72b6d501d561892181a5b7e7b92e1"
+    },
+    {
+      "id": "liquidity_reserve_planning",
+      "name": "Liquidity Reserve Planning",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "e23b056b9a348397e4ee190a7cf2e17adb0a4576538ff0e6670498c8f8242bf6"
+    },
+    {
+      "id": "lender_of_last_resort_procedures",
+      "name": "Lender-of-Last-Resort Procedures",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "de4dbbc5343ed2643b6df8aab5430d36fbda6e922e44599793378682bad3ddc8"
+    },
+    {
+      "id": "deposit_protection_pools",
+      "name": "Deposit Protection Pools",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "95fc89731eb40c5a20d0d15938915d06f7c7f41d6c5ff0cf1b2653d60c49ea05"
+    },
+    {
+      "id": "bank_resolution_planning",
+      "name": "Bank Resolution Planning",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "a2a09dee9b558891260167022ae77a041e1490c1b6d014de6bebdd99c4fd1d8e"
+    },
+    {
+      "id": "public_bond_issuance",
+      "name": "Public Bond Issuance",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "7d0affb39a2447d161b57bc65a305ca3377b73e59dfbad6d9ec802b970edca33"
+    },
+    {
+      "id": "bond_yield_comparison",
+      "name": "Bond Yield Comparison",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "cdfcdf6cdb89847368eb7e55a50c37221cc1b18e632ec2a61fa67db6b86eaf0c"
+    },
+    {
+      "id": "project_finance_accounts",
+      "name": "Project Finance Accounts",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "a78d201bfdb06cb90f288c50392f9e40099c66354cf21730dff59fb66895d538"
+    },
+    {
+      "id": "performance_bonds",
+      "name": "Performance Bonds",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "8f9f2e5095039bebe031792441b03c927eea3c7ace2e1c0ef9eb21c226d94566"
+    },
+    {
+      "id": "marine_cargo_insurance",
+      "name": "Marine Cargo Insurance",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "83a286988bcd7722b31cdae06a30975c2ce1d3cdd3171c9e97cc5baa2b2920ef"
+    },
+    {
+      "id": "actuarial_loss_tables",
+      "name": "Actuarial Loss Tables",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "97fd429573fa83804051dda7a9c87d5b389826b12fe947bb2be4d1e56bc5d948"
+    },
+    {
+      "id": "reinsurance_treaties",
+      "name": "Reinsurance Treaties",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "5b22a6c289ebd5d1bbfd6ed65f719adaee2ba44e77acd9872957c96c88a969f5"
+    },
+    {
+      "id": "mutual_credit_associations",
+      "name": "Mutual Credit Associations",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "5823f8c20cb439e4aba984c37970db2af5ac8d507fc412f13c1c9e58b7d9da79"
+    },
+    {
+      "id": "cooperative_purchasing",
+      "name": "Cooperative Purchasing",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "524400b7b8ff54e31a9ff5a72295b9c2cda6a0c4226b599701a4dd3125d68822"
+    },
+    {
+      "id": "supply_chain_credit",
+      "name": "Supply-Chain Credit",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "e6724445e50c6fab7b6053592e77b0b1de1bdb5787ed29a817588b907ceb72b5"
+    },
+    {
+      "id": "invoice_verification",
+      "name": "Invoice Verification",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "6cd4c2484921ff691e9db2f9776d6423a30488931e1c6a9f60a546c9536bdb15"
+    },
+    {
+      "id": "payment_fraud_detection",
+      "name": "Payment Fraud Detection",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "c8c8262ab5b0d296d606949e5b5bca142d434c0dc6c6004f64aa4c5866b00884"
+    },
+    {
+      "id": "electronic_payment_authentication",
+      "name": "Electronic Payment Authentication",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "91594cdbc435377091cbeab0746e846ae5fb41612a509eaac7a1f28ae6f94d25"
+    },
+    {
+      "id": "settlement_finality_rules",
+      "name": "Settlement Finality Rules",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "e86a0530e494aeef710b8093de9dc4fc75f7adad2dd1c810a20079ce7729be92"
+    },
+    {
+      "id": "programmable_settlement_agreements",
+      "name": "Programmable Settlement Agreements",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "49dc22f19de5eef13e503e3f6207277f3247416e0252f68438ef9ff2333ac4af"
+    },
+    {
+      "id": "resource_circularity_accounts",
+      "name": "Resource Circularity Accounts",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "46ad2b5ce84a9d95778adaae98e5412d589d865c456310ccbc0a3188057cd8b9"
+    },
+    {
+      "id": "extended_producer_obligations",
+      "name": "Extended Producer Obligations",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "28e5b8d8bc68d4ad43462b217680610336fe55b1cc8a29f93e85589794d75b7b"
+    },
+    {
+      "id": "long_duration_liability_funds",
+      "name": "Long-Duration Liability Funds",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "21f9b3b41db89c11c015e3554b308ef21d94d1a647d2504f3095f46efdd4a4af"
+    },
+    {
+      "id": "interplanetary_clearing",
+      "name": "Interplanetary Clearing",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored method tracks distant unsettled claims under delay. That is a modern delayed-settlement mechanism, not proof of functioning interplanetary trade or a distinct future financial law.",
+      "scope_digest": "6ae9a7014d0f38c9ef3d31203553c42e5bc856614b4fd22dc27110a84e85af7e"
+    },
+    {
+      "id": "settlement_dispute_escrow",
+      "name": "Settlement Dispute Escrow",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d1ddc7751baca3fd0307517acd78ed0a77a2c804e37798a70cfb7abd0c8051a8"
+    },
+    {
+      "id": "automated_market_oversight",
+      "name": "Automated Market Oversight",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "d714a8d6591712d7cf76afd9c90ccfd11a2f39faeba65df25f28965ca57eb89b"
+    },
+    {
+      "id": "contingent_supply_contracts",
+      "name": "Contingent Supply Contracts",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "21396d42f79b4150b4542fce1cfe096ae7fd16606f625d2dfef6a6696bac2153"
+    },
+    {
+      "id": "critical_supplier_exposure_maps",
+      "name": "Critical-Supplier Exposure Maps",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "7ebf23ece3a2ee69d011ab933750ec1e3ac642bc50aa1194fccdf754f70e97c4"
+    },
+    {
+      "id": "trade_disruption_reserves",
+      "name": "Trade-Disruption Reserves",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "099ecff00dd8b27a3374bcaefd46b9d0ed326dad30d63da6150b6cd20a1f395b"
+    },
+    {
+      "id": "cross_currency_risk_accounts",
+      "name": "Cross-Currency Risk Accounts",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "833768a5afe003610febf5cee81ecd051f4fc1dd6de408014ab68237d587b408"
+    },
+    {
+      "id": "demonstration_teaching",
+      "name": "Demonstration Teaching",
+      "horizon": "H01",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses directly witnessed commitments, remembered reciprocity or demonstrated learning; a written bureaucracy or industrial institution is not intrinsic to the mechanism.",
+      "scope_digest": "d26b94041eb569c801fe1e9382d25c6547296cf273d4ece191aa4c5d6712a5c8"
+    },
+    {
+      "id": "guided_practice_cycles",
+      "name": "Guided Practice Cycles",
+      "horizon": "H01",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses directly witnessed commitments, remembered reciprocity or demonstrated learning; a written bureaucracy or industrial institution is not intrinsic to the mechanism.",
+      "scope_digest": "89289d3b7eb12cf21f5de6030ea5d92560c80a0906c8aeabeb6172446b5c10ee"
+    },
+    {
+      "id": "skill_progression_records",
+      "name": "Skill Progression Records",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "5ea2ae5dab959f7b7f6456f6c737afd5c1780786de42c170f2c31df6ca2ee695"
+    },
+    {
+      "id": "peer_instruction_groups",
+      "name": "Peer Instruction Groups",
+      "horizon": "H01",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope uses directly witnessed commitments, remembered reciprocity or demonstrated learning; a written bureaucracy or industrial institution is not intrinsic to the mechanism.",
+      "scope_digest": "76a74e6af39e7a7dde9d6d2e23b748047c26695507cc8e75a1f513631d53c246"
+    },
+    {
+      "id": "craft_demonstration_collections",
+      "name": "Craft Demonstration Collections",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "a2ec65f3c3c433e1e3eb7bd40c2cb5217f443cdcb6d5a46326bb856d70b15f97"
+    },
+    {
+      "id": "journeyman_skill_trials",
+      "name": "Journeyman Skill Trials",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "227ba9119284bd602f3cc0c3ba1a4659f8aafbaacc4729647f5772209221027e"
+    },
+    {
+      "id": "traveling_master_instruction",
+      "name": "Traveling Master Instruction",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "fe3f424ef8ff1a7abe441d209ffde24d58795201e47e0c82b416db61c3cbe6de"
+    },
+    {
+      "id": "technical_translation_workshops",
+      "name": "Technical Translation Workshops",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "b4594fbc9ab7d2638b5a79dfc9a3d9e22938217c5e2fe4f0b9d2f0e3dc58f62c"
+    },
+    {
+      "id": "shared_technical_lexicons",
+      "name": "Shared Technical Lexicons",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d0bb327fd26a2347b483e533bb2eb7b6f491b8841a5debcb03bb206a18be2ed6"
+    },
+    {
+      "id": "illustrated_instruction_manuals",
+      "name": "Illustrated Instruction Manuals",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "07fc55f776f08be839dfcf14d297f05cf4a99fb5b5f349d6210a08e395913935"
+    },
+    {
+      "id": "worked_example_teaching",
+      "name": "Worked-Example Teaching",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "67584d09be647e9fafd88c64d5d01367c6f372728c9452addf28156a74991b15"
+    },
+    {
+      "id": "question_driven_tutorials",
+      "name": "Question-Driven Tutorials",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "c162ce897f5ce8f36e5057a8c7cff875619367996ccca3996198ea1f11dd1bac"
+    },
+    {
+      "id": "curriculum_sequence_design",
+      "name": "Curriculum Sequence Design",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "3271104c6abed18400f6258622f5f80e158dec3de1b61b6381fcc34c99cc8b47"
+    },
+    {
+      "id": "practical_assessment_rubrics",
+      "name": "Practical Assessment Rubrics",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "0401b0969027c37a13f287f8d5e57d3ec3424c7a6a11f9bc0104f221056c41dd"
+    },
+    {
+      "id": "instructor_training",
+      "name": "Instructor Training",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "309800d70e517b9585728acb30e758cb81b52a1aea03a70874ff198e6d396541"
+    },
+    {
+      "id": "teacher_observation_review",
+      "name": "Teacher Observation Review",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "8c5ff3da3701e26889b1f777c6a9e00398384cf0f8227fa439d977f87b5f6a02"
+    },
+    {
+      "id": "accessible_learning_materials",
+      "name": "Accessible Learning Materials",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "303f9e4d9244ea72f26b29b1ea13289442f6f919e16bdbd49dae3c2ae31ce848"
+    },
+    {
+      "id": "adult_literacy_programs",
+      "name": "Adult Literacy Programs",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "53afe451061cf9f2284cd822be97d6a77efbe59c5e0369dc13305909a258c135"
+    },
+    {
+      "id": "mobile_instruction_teams",
+      "name": "Mobile Instruction Teams",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "28e57f1c9a1ba38ecb73572f9bd54bf52a294d3232e723ffdf1a69c03cb1d105"
+    },
+    {
+      "id": "technical_institutes",
+      "name": "Technical Institutes",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "db8e06d1885b80fe9cf192489d6161f7fd0aac12b60bcc6baccae3298b260f81"
+    },
+    {
+      "id": "research_university_organization",
+      "name": "Research University Organization",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "a214c5e8b8b37a8f41c1d5544e0c1f580c433a5d9648069d74485cbfe2dc1f27"
+    },
+    {
+      "id": "laboratory_notebooks",
+      "name": "Laboratory Notebooks",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "b584dbf444faa32d4f11e3caa07ccd723450a37de4a50537c2903afe9164e610"
+    },
+    {
+      "id": "instrument_training_protocols",
+      "name": "Instrument Training Protocols",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "a04bdfba9bc6bcadd826609ede263e574e4676c9660115eaa60bfc8b0462080f"
+    },
+    {
+      "id": "experimental_protocol_publication",
+      "name": "Experimental Protocol Publication",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "ca4cbbd7ab7c1acec0d8deab935a04dc74b942e18dadaf47174a2775a18a6e7f"
+    },
+    {
+      "id": "independent_replication_networks",
+      "name": "Independent Replication Networks",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "8376b0ee933bfe1a53a66ac10da53a7e0dc5a54d0b693f0fcd0bd1dae46e168b"
+    },
+    {
+      "id": "scholarly_correspondence",
+      "name": "Scholarly Correspondence",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "8cca35253e96f23facf1f9e60245963cd34256f3f8e1af6633b2750855a6961b"
+    },
+    {
+      "id": "peer_review_procedures",
+      "name": "Peer Review Procedures",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "4bf052e86efb01098f1c9df5646824f934e808a5877648e1d23873a53ae190f6"
+    },
+    {
+      "id": "research_priority_registers",
+      "name": "Research Priority Registers",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "4e7dc9099f8767c5ac8dce10c1c2984a76ec64723624b2e395e6beb7203ebd71"
+    },
+    {
+      "id": "negative_result_archives",
+      "name": "Negative-Result Archives",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "162f892a523e07a8e8fe1f82f792986b85587b07fbda3b16ccf4a1d37758f1bd"
+    },
+    {
+      "id": "research_data_catalogs",
+      "name": "Research Data Catalogs",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "cbc50cc7693d2755c324e18e28673eb9b3bcf2bc64319a57d767c0e95623fff3"
+    },
+    {
+      "id": "data_provenance_tracking",
+      "name": "Data Provenance Tracking",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "25eeab9976f1eee89fd95a1e41848b8be1939add540a7447ca5a6dbb82305041"
+    },
+    {
+      "id": "statistical_analysis_plans",
+      "name": "Statistical Analysis Plans",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "c1232a80376c6b80f3f605cbe4646249722f35cf506add2254de95452cd6f1cc"
+    },
+    {
+      "id": "research_ethics_review",
+      "name": "Research Ethics Review",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "c9d56cedfcb6e1384c9419f50d3f70f8230b35476764d55da0156a9e60e93240"
+    },
+    {
+      "id": "multidisciplinary_laboratories",
+      "name": "Multidisciplinary Laboratories",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "50eee31cf8c1733936a36a4e17cce09fc80a9858bca0e1fb1ea94424d2dc29fa"
+    },
+    {
+      "id": "research_equipment_sharing",
+      "name": "Research Equipment Sharing",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "4c5031a2c057064ba87cb90944470e6b4588a09ec05321a455709edbca88b3b5"
+    },
+    {
+      "id": "research_procurement_offices",
+      "name": "Research Procurement Offices",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "4bf9c76bebc85ce8571201f77c031319c7c7077293d6969800a497b461b59945"
+    },
+    {
+      "id": "laboratory_quality_systems",
+      "name": "Laboratory Quality Systems",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "0e1ecee181d75d5e13741bfeabc7787207a832e147a4d4610df6d8dda025a397"
+    },
+    {
+      "id": "professional_certification",
+      "name": "Professional Certification",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "6b92b4383349bdb36119f9039fbeb0c857277bade650bb4eb7dc339f16fac27e"
+    },
+    {
+      "id": "credential_reciprocity",
+      "name": "Credential Reciprocity",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "4d3aaa04bd2f0febd47c08ce46f06049629a535a5cb74eb8f28821e862482128"
+    },
+    {
+      "id": "occupational_hazard_identification",
+      "name": "Occupational Hazard Identification",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "b65a74f3fec30d8ac04825e6c2459a5b999c51b898765e1e1708823e2e8fb9d3"
+    },
+    {
+      "id": "occupational_safety_training",
+      "name": "Occupational Safety Training",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "c2e5f0dbafe0190d12b8f3e01d8e7a262ab46db82bf7f98b9cc85369f3d899ae"
+    },
+    {
+      "id": "incident_learning_reviews",
+      "name": "Incident Learning Reviews",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "fcb989f22a406a868691625169ce7e6ad624247e080af18ef282c295799e634f"
+    },
+    {
+      "id": "worker_stop_work_protocols",
+      "name": "Worker Stop-Work Protocols",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "7164086462134f7b3ef09ed454bc965ef08f3bfa9c20ccccc69fc4152ffda5d3"
+    },
+    {
+      "id": "fatigue_risk_scheduling",
+      "name": "Fatigue-Risk Scheduling",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "fbc8b1c9d0052d59a018aaa3388ff0f5bcac2e3c692f09619baa0e47b9b6fc0e"
+    },
+    {
+      "id": "cross_training_rosters",
+      "name": "Cross-Training Rosters",
+      "horizon": "H03",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "7b98ac150cdf3a7adede01f23b519d44442ed1a3432f76f4cfa1c333fdc4d4e2"
+    },
+    {
+      "id": "succession_mentoring",
+      "name": "Succession Mentoring",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "eb0091e85bc8b70b5dff1f7db5f67fab5553906d7637e79f5a7ac71a92440655"
+    },
+    {
+      "id": "team_briefing_protocols",
+      "name": "Team Briefing Protocols",
+      "horizon": "H02",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "5d3a767956b18ba068b330878cfef2df28a54571845e541a255862376d53a624"
+    },
+    {
+      "id": "closed_loop_team_communication",
+      "name": "Closed-Loop Team Communication",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "6d9d9fa7776dce6f97772ff86894bccc31d19d8822f3b59089cc5c45b10c67af"
+    },
+    {
+      "id": "organizational_memory_reviews",
+      "name": "Organizational Memory Reviews",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "70ddbf203cbd25cf1913574fcc8d9d563d21c47ead9ab50e17cf2e897771c50e"
+    },
+    {
+      "id": "distance_education",
+      "name": "Distance Education",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "a46a22412a29ef4678753a7beaa0babf7ef178446b7e02326cbf738349b8688d"
+    },
+    {
+      "id": "broadcast_instruction",
+      "name": "Broadcast Instruction",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "f682b464c8d67e918713d2b6c5cd66c300e7fa7fbb3cda95c7b26d966348d7d7"
+    },
+    {
+      "id": "networked_learning_repositories",
+      "name": "Networked Learning Repositories",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "1ccf98539f6ce6f21969e440d81c5b6f59682518d43659eda388cfc8aab9ea05"
+    },
+    {
+      "id": "interactive_training_simulators",
+      "name": "Interactive Training Simulators",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "1f132f9a6f30898975cb09705dd7dd054d7c302a670962ba213c2f5b412f3ed3"
+    },
+    {
+      "id": "remote_laboratory_instruction",
+      "name": "Remote Laboratory Instruction",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "d39d1220bc4bea5908d1535913e22dbbe80c876d0bcc910e1e96148511066f63"
+    },
+    {
+      "id": "continuous_technical_retraining",
+      "name": "Continuous Technical Retraining",
+      "horizon": "H04",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "331a822415dc5aeb06e5a2e98b03e6a0b3dac1fbf6e772617d6f6fffd70e5d22"
+    },
+    {
+      "id": "human_machine_team_training",
+      "name": "Human-Machine Team Training",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "d8a5012f91e3dd3a62bf333221a1a3042ed8724cf833003c99620aef78c4e5c6"
+    },
+    {
+      "id": "automated_experimental_facilities",
+      "name": "Automated Experimental Facilities",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "9f3c8ddaaa1e45d5734cc20c63b79a2630dbd94e4f7eca03467d3922f3891bd7"
+    },
+    {
+      "id": "remote_research_supervision",
+      "name": "Remote Research Supervision",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "70c6227a2784d099f05824a2063b631ec8dc72a49ef1b1ba7cf6c8804e3d85af"
+    },
+    {
+      "id": "intergenerational_mission_education",
+      "name": "Intergenerational Mission Education",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Transmitting operating and civic skills between cohorts is modern curriculum/continuity work in the stated scope. A successful multigenerational offworld society is not delivered by this node.",
+      "scope_digest": "c83727871b8e059de78f871d2e7bb3cb65aad49b3cdc6aad1848009c864b55f5"
+    },
+    {
+      "id": "knowledge_recovery_drills",
+      "name": "Knowledge Recovery Drills",
+      "horizon": "H05",
+      "source_file": "civic-economic-learning.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "f8ec6e8fd0385fdec9e0aa24c0368126dd7286315f9321bc389a29f42d3d0b81"
+    },
+    {
+      "id": "rotating_council_seats",
+      "name": "Rotating Council Seats",
+      "horizon": "H02",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "eb0cfc834a04a451e2ec7e9f981d3a95136c91babeafda415b902c907229fc8f"
+    },
+    {
+      "id": "customary_restitution_schedules",
+      "name": "Customary Restitution Schedules",
+      "horizon": "H02",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "3b10f7a61ed13e054e0c31f94a1cf4a39b8ad629c0751ed38bd6e45311105c4f"
+    },
+    {
+      "id": "intercommunity_oath_compacts",
+      "name": "Intercommunity Oath Compacts",
+      "horizon": "H02",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "a09bf2baf90addf37c5d5b33c13e8a67b5a759354e275a146f1f85925ac8ab0e"
+    },
+    {
+      "id": "lineage_succession_rules",
+      "name": "Lineage Succession Rules",
+      "horizon": "H02",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "16af0437c7778a11ab445b386d734474c00fa72c282b3560764f7d89dd69929a"
+    },
+    {
+      "id": "council_elected_succession",
+      "name": "Council Elected Succession",
+      "horizon": "H02",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "1655819a8669d063066a37d05288e612aa62a2cef47f3bd7f68555a2acc63b10"
+    },
+    {
+      "id": "succession_regency_arrangements",
+      "name": "Succession Regency Arrangements",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "4541691304699a8da56edc24a51ca025c4b771d472871a8f91e1c4af5eb205c6"
+    },
+    {
+      "id": "confederal_delegate_mandates",
+      "name": "Confederal Delegate Mandates",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "aad3b3308652ca6c2105f7683812d2b59fbdac628f5862ed690b96c2547ac70e"
+    },
+    {
+      "id": "subsidiarity_assignment_review",
+      "name": "Subsidiarity Assignment Review",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "8aefad07dd78d39914e7ed724cc0122e572edc45e26e5058105e7bb55cb8f9b1"
+    },
+    {
+      "id": "plurality_vote_counting",
+      "name": "Plurality Vote Counting",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "5bc9640e818d0f593dbc0cc3650dc893849ce5eb6774b792dfe9b4e9214ece30"
+    },
+    {
+      "id": "runoff_election_procedures",
+      "name": "Runoff Election Procedures",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "4c99614137ccd9158404ab3221385ed354e6b634164d4d3c0965676f3abd5c8e"
+    },
+    {
+      "id": "ranked_choice_transfer",
+      "name": "Ranked Choice Transfer",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "364704bae5009c1896539ea58f8122b27445f6f8f9df15bf880aaa3ff2dccda0"
+    },
+    {
+      "id": "proportional_seat_allocation",
+      "name": "Proportional Seat Allocation",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "8074580c70bca3071679807724c2f685b0db7f956ab9551d8d6bb0bdb755ce5d"
+    },
+    {
+      "id": "compensatory_mixed_representation",
+      "name": "Compensatory Mixed Representation",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "1a879d951ce1b8e100df128f283722d2e39eb17b31b26734e48c451afbbad14e"
+    },
+    {
+      "id": "public_office_sortition",
+      "name": "Public Office Sortition",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Auditable selection by draw is an earlier deliberative procedure; learning the method does not automatically adopt it.",
+      "scope_digest": "94b9ba239962af9be18704f7dbd18264ca74201cd1aab8e1981b2d54fa5f9885"
+    },
+    {
+      "id": "representative_recall_procedures",
+      "name": "Representative Recall Procedures",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "545e0facf7e77c3447998d7b7f4aa353d9db99edf0507bb4ea04333a5fe929bf"
+    },
+    {
+      "id": "constituency_boundary_review",
+      "name": "Constituency Boundary Review",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "0b88ded7ba6a90fe3150811cba290a744a64cf9fedd537cf1cd3364994af2c4d"
+    },
+    {
+      "id": "ballot_access_administration",
+      "name": "Ballot Access Administration",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "5e702c31f1a7a2a1c1865b8889d8c82fc11ada57d5ba1996c8d76664a4787b14"
+    },
+    {
+      "id": "accessible_voting_services",
+      "name": "Accessible Voting Services",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "bebef32e445aa6d82ed1796fcfc9267217378511788974cc3ee373f7c099fbc7"
+    },
+    {
+      "id": "legislative_amendment_tracking",
+      "name": "Legislative Amendment Tracking",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "fa2fe3c888c8951fffa84d676d1f23681a70b74b4531ccbf4ef840212e1aac06"
+    },
+    {
+      "id": "bicameral_reconciliation",
+      "name": "Bicameral Reconciliation",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d3eb79ce02660c240f52015d90c648aedffbd5714922e918660534b9b6c23a9b"
+    },
+    {
+      "id": "executive_veto_review",
+      "name": "Executive Veto Review",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "2e1307effbfbe4d251f9cd88fabf225a1d21d3e16aaeed6f69119f004c80a46a"
+    },
+    {
+      "id": "ministerial_responsibility_hearings",
+      "name": "Ministerial Responsibility Hearings",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "3d1469f0b91f9741af273bfa613c2989b117641e8506a62db5aec98b87d53acd"
+    },
+    {
+      "id": "participatory_budget_allocation",
+      "name": "Participatory Budget Allocation",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "eadffef12f86847954fa08dfe49f576a3ed7545289e64c7c960801ddd8434bb3"
+    },
+    {
+      "id": "citizen_deliberation_panels",
+      "name": "Citizen Deliberation Panels",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "97993e2d6c959cc27fa4ed516a03b8fdb5f91e090824ded40bafc9a0f4656333"
+    },
+    {
+      "id": "regulatory_impact_assessment",
+      "name": "Regulatory Impact Assessment",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "5d5f73c213363e47f0048571034cdf530ba3180fa9ebeec7af48ee9e86286bd1"
+    },
+    {
+      "id": "post_implementation_policy_review",
+      "name": "Post Implementation Policy Review",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "774b6f821a618f5b4a314225ca9f30c6dcbe209e6bba3389891d50cef2f91d03"
+    },
+    {
+      "id": "administrative_service_standards",
+      "name": "Administrative Service Standards",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "55afb607db41670a8d602c0c38242e84efe92ff3b9848009a27842bfdea386d3"
+    },
+    {
+      "id": "civil_birth_death_registration",
+      "name": "Civil Birth Death Registration",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "dfe607323555530887637d9a12e5aba70972ea61b9036e51a7554e99a22a9d98"
+    },
+    {
+      "id": "civil_status_record_correction",
+      "name": "Civil Status Record Correction",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "f99702ebfd807204a924f4b034a49242a0a190ebc4208e10c66c8564dc246eae"
+    },
+    {
+      "id": "residency_registration_services",
+      "name": "Residency Registration Services",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "73b7513213bdf820d508fc599560d8806ce565afe682012adf90e02cac7e34db"
+    },
+    {
+      "id": "portable_civic_credentials",
+      "name": "Portable Civic Credentials",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "0138a4e53ca85ad1f4277ede8ebaa8febbee795bc72b1213d0e481e65f5aa259"
+    },
+    {
+      "id": "identity_minimization_services",
+      "name": "Identity Minimization Services",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Selective eligibility disclosure is modern information governance in this scope; it is not an automatic advanced/future capability simply because privacy technology may improve.",
+      "scope_digest": "442f2a638d10cb697e63e677d24df323d276a79ee18bb0d120dbcea1d21a4852"
+    },
+    {
+      "id": "public_service_case_routing",
+      "name": "Public Service Case Routing",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "426d962cdfaa14dbd93321672236e80afcaaa533633cdea9f34fd9c694b64b0e"
+    },
+    {
+      "id": "interagency_record_matching",
+      "name": "Interagency Record Matching",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "5073091c60bdf41ac34a1d49d7adeb37b0ed9fe79abf7344aac18b4ec97ac687"
+    },
+    {
+      "id": "public_service_interoperability",
+      "name": "Public Service Interoperability",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "f0b974e086107ae1efcca9cbbb0d2cdb15b530500a436a515fb6074cd8dfd2bb"
+    },
+    {
+      "id": "language_access_administration",
+      "name": "Language Access Administration",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "8b9571b96604f41ffd5ff318dc0a70f10b124c19111035ad7539b376f8c637fa"
+    },
+    {
+      "id": "mobile_civic_registration",
+      "name": "Mobile Civic Registration",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "438eaf803705e8068cebde4e4837f4ae807f75c07e852f128ba470111438ab18"
+    },
+    {
+      "id": "land_tax_assessment",
+      "name": "Land Tax Assessment",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "dd4beef80f19e42193ff770ab0cad4a3c9f41c246f027a29ad24bd54baac9cf2"
+    },
+    {
+      "id": "harvest_levy_assessment",
+      "name": "Harvest Levy Assessment",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "10749b66c26eabb8d94a6a698ba53b58b3a527c296ddae7d8d63cbe8e89a37ec"
+    },
+    {
+      "id": "poll_tax_registers",
+      "name": "Poll Tax Registers",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "ce3f5a21e3e3a9f3b764e88b1c01e0dbed2b704f3640f68f1a252229ef1cabea"
+    },
+    {
+      "id": "customs_valuation_procedures",
+      "name": "Customs Valuation Procedures",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "6b30ed2e68a80c122177b298c0083a9e0b4539c73aab76df5a02f91fc962b38a"
+    },
+    {
+      "id": "excise_duty_accounts",
+      "name": "Excise Duty Accounts",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "3c4871f5c0c6b58f6a7d121b4881fc78271ed1b2e3c93f31070993da0965189d"
+    },
+    {
+      "id": "income_tax_assessment",
+      "name": "Income Tax Assessment",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "5247554f55ff79eae4c376ccc0324a4de94931c67e228483f1fcefa25dae268a"
+    },
+    {
+      "id": "progressive_tax_schedules",
+      "name": "Progressive Tax Schedules",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The discovery is a calculable adopted schedule. Research alone cannot impose taxes, authorize collection or grant capacity.",
+      "scope_digest": "1b943fcf9c6255a7dd374aeba444e37000c3d08385ac829b3ee6c5d5044d87d5"
+    },
+    {
+      "id": "withholding_collection",
+      "name": "Withholding Collection",
+      "horizon": "H04",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "6b2a4d3e565aa32fe942afad262329391fc6e9ccba1aebdb5c6204b3ce7c4b2f"
+    },
+    {
+      "id": "invoice_credit_taxation",
+      "name": "Invoice Credit Taxation",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "a414939bb03a74fac58ba60b742aba5b93f3dd2982429ea2345288621a3ec2ec"
+    },
+    {
+      "id": "tax_expenditure_disclosure",
+      "name": "Tax Expenditure Disclosure",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "59c6db4704bb0f63dd979a8570030c415106dee27554cbae5803029ed0406d12"
+    },
+    {
+      "id": "revenue_sharing_formulas",
+      "name": "Revenue Sharing Formulas",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "ae46fcced9727096d0575277037b741e1f3a3890a70244cc570ece1dace32ca6"
+    },
+    {
+      "id": "fiscal_equalization_transfers",
+      "name": "Fiscal Equalization Transfers",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "59e03851fce45a6bcf49220d836223ce11d91b3097f67949852c171ff243f474"
+    },
+    {
+      "id": "intergovernmental_fiscal_consolidation",
+      "name": "Intergovernmental Fiscal Consolidation",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "a0b52cb185745e6d4f26aa7afe7a33f346fa41adfd0a207428c659c3cebb2588"
+    },
+    {
+      "id": "public_debt_service_schedules",
+      "name": "Public Debt Service Schedules",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d160b3cdaf1a0263022b3cb624687e1fe32bcb51d8024325db4e5187de2ef4c0"
+    },
+    {
+      "id": "contingent_public_liability_registers",
+      "name": "Contingent Public Liability Registers",
+      "horizon": "H05",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "c0f29eaff23fb2f46db5e429220f43bb8f898c1c3fa2ec5cb507631f0ef129e0"
+    },
+    {
+      "id": "public_payroll_verification",
+      "name": "Public Payroll Verification",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "0aa8b9845f4bfdf14e9230880f342d13fbc65f7b10510ad3ff2f76697fa1086f"
+    },
+    {
+      "id": "public_asset_disposal_procedures",
+      "name": "Public Asset Disposal Procedures",
+      "horizon": "H03",
+      "source_file": "governance-administration-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "150c7c4ba1377e8dc5289438707b15d4a9c7416d151b0d2b73d574d50eb11929"
+    },
+    {
+      "id": "commodity_money_conventions",
+      "name": "Commodity Money Conventions",
+      "horizon": "H02",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "10ea2dc0c706e21d1f9b19a52995d59816397cd955a5f5f3da58dd4db0866366"
+    },
+    {
+      "id": "unit_of_account_conventions",
+      "name": "Unit of Account Conventions",
+      "horizon": "H02",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "50d78aa652b359c55739e5ed6ea2b1837903b4168a3908cd4cc944fd7a95be38"
+    },
+    {
+      "id": "monetary_piece_stamping",
+      "name": "Monetary Piece Stamping",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "ba8e406ad1f7a1f915afb595b71b52c31d2ae22e9ff72cbb1de9de215c1e8e45"
+    },
+    {
+      "id": "redeemable_payment_notes",
+      "name": "Redeemable Payment Notes",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "f9228c27584f2f7d3c20fc5911cd1ce13f9ee5d5c1e98dafcb7e0691f7cd2e76"
+    },
+    {
+      "id": "payment_token_authentication",
+      "name": "Payment Token Authentication",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "46c0a66744b2debf09abf368471140099bacfbbfbb678845a9b47027d397c218"
+    },
+    {
+      "id": "price_observation_registers",
+      "name": "Price Observation Registers",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "b469685efac274b959edffc714e50d4d6055c762aedc2f47fb9b308953a2d555"
+    },
+    {
+      "id": "commodity_price_indices",
+      "name": "Commodity Price Indices",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "a6ebc58ae4733e8f6ae75ac05bfcf06face6127c135a4f8dcb81a6ecaf31a3c8"
+    },
+    {
+      "id": "currency_conversion_quotations",
+      "name": "Currency Conversion Quotations",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "5850e21bcc010cdc1437ef8208bef4274fd037181a9d85f6c18794ed02e04c5d"
+    },
+    {
+      "id": "purchasing_power_comparison",
+      "name": "Purchasing Power Comparison",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "ef99a94d8f2d2ed09c785fd87d59f984625a4d0ac14b09508827e63706e86c07"
+    },
+    {
+      "id": "ascending_bid_auctions",
+      "name": "Ascending Bid Auctions",
+      "horizon": "H02",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified convention or coordination practice can develop within settled communities through witnessed agreement, practical teaching and recurring exchange.",
+      "scope_digest": "c7de1827bda53e50d90e1fe4fdeca6741fa62b940622118fd2854bce1478be94"
+    },
+    {
+      "id": "sealed_bid_auctions",
+      "name": "Sealed Bid Auctions",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "03341fa8deaae14cbb1f63e596b8bfbe1d640eda630be64692d95bd18d432304"
+    },
+    {
+      "id": "reverse_procurement_auctions",
+      "name": "Reverse Procurement Auctions",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "2dacc0fd09ea7f1f44a070bd26ecc7ebe46b04d3f9ddea86121201001d1878e5"
+    },
+    {
+      "id": "double_auction_matching",
+      "name": "Double Auction Matching",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "deac6a8df40a440c7fbb80f007f8436c74a593bd009c31edb3d5193e3c64a8a9"
+    },
+    {
+      "id": "package_bid_allocation",
+      "name": "Package Bid Allocation",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "b8e713711de9f399cd2c10ddfff35a7b49ada3856a54675bb2b57a0aa06e957e"
+    },
+    {
+      "id": "commodity_forward_delivery",
+      "name": "Commodity Forward Delivery",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "a6ca1940def34455220095f9624b06bb363a6b2d87906f441579b70339bc2536"
+    },
+    {
+      "id": "exchange_contract_standardization",
+      "name": "Exchange Contract Standardization",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "8fd5896fbabc5f6ef9f1c0558db196adae40b7b4d34c7084e6707541a9a88a66"
+    },
+    {
+      "id": "variation_margin_settlement",
+      "name": "Variation Margin Settlement",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "922fa4d12be2eb6516e2f91b1ddceb5848622f1a0cb0a2df392fef45dfe6f245"
+    },
+    {
+      "id": "option_exercise_contracts",
+      "name": "Option Exercise Contracts",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "19d7a58aa766c4257ed192abb03fcf9a56efd7a28509edea73a9c22561543444"
+    },
+    {
+      "id": "market_liquidity_measurement",
+      "name": "Market Liquidity Measurement",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "d972f8ed9b003a063832dd35ca3a8e9f5d34050a3f890b703fc8fdaaaa671d95"
+    },
+    {
+      "id": "loan_deposit_creation_accounts",
+      "name": "Loan and Deposit Creation Accounts",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "This is accounting for offsetting bank assets/liabilities, not creation of physical resources or a guarantee of solvency.",
+      "scope_digest": "08a0ce2daaf742fa961e418925e304a56a46e8e1b1986aea4420583bd7c2eace"
+    },
+    {
+      "id": "credit_underwriting",
+      "name": "Credit Underwriting",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "c204468411fb75d0daf28a2aad2288ff9b0b3250e6d90b55b7d9999deae3c2e4"
+    },
+    {
+      "id": "amortization_schedules",
+      "name": "Amortization Schedules",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "071effc1040bb0fe31fc3b561bce61d621fc6fbe434d986b98d3e459657a282f"
+    },
+    {
+      "id": "receivables_factoring",
+      "name": "Receivables Factoring",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "c9199c762cc568b9a70f0e692651b81e93c5f9cacb0a2a710be511a56a99a1cb"
+    },
+    {
+      "id": "asset_leasing_accounts",
+      "name": "Asset Leasing Accounts",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "ed573c23e9217a9d89ce0f16031272eade9da101691f9d1352a5fc353125116a"
+    },
+    {
+      "id": "insolvency_claim_resolution",
+      "name": "Insolvency Claim Resolution",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "449c11a33164f21f2b90d20225431a2c5b317dbdd6a1d3562197cb0390063d82"
+    },
+    {
+      "id": "insurance_risk_pooling",
+      "name": "Insurance Risk Pooling",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "bc6ef042dbf7dfe9b9ead1b1dbfc4715759d3110dc79bd5fdee2605ff5518b5f"
+    },
+    {
+      "id": "insurance_claim_adjustment",
+      "name": "Insurance Claim Adjustment",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d88e819d507701923ea62877d7ec97d69ba2bce31468b7353c911f5509e49fbc"
+    },
+    {
+      "id": "pension_contribution_accounts",
+      "name": "Pension Contribution Accounts",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "591afb048bd0a17dfe045d2f7af661df4dd343eeb58cb79383b97e36bb652b6c"
+    },
+    {
+      "id": "correlated_loss_stress_models",
+      "name": "Correlated Loss Stress Models",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "d051a7d830fe7318232da56acf11be09fdf17e8ef156ea14348767ae7754de2e"
+    },
+    {
+      "id": "wage_time_accounts",
+      "name": "Wage and Time Accounts",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "d78c0487f58f089e26903ddce2e9b402e2a183b388eb78a8ee597ff1b8be05a9"
+    },
+    {
+      "id": "piecework_compensation",
+      "name": "Piecework Compensation",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "121a8686d1910b2a1383a93e7fb7a81e165df27feb18c0af82482c45641d8b96"
+    },
+    {
+      "id": "collective_bargaining_procedures",
+      "name": "Collective Bargaining Procedures",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "751f5b11b6bd5f0bb98104c448132b804cb7eda50198be5d0cb4942b4be719a2"
+    },
+    {
+      "id": "worker_owned_enterprise_accounts",
+      "name": "Worker-Owned Enterprise Accounts",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "ac36471f4da6dd53609f223ae8c8dd98107c4c8b245f9f9f29158ad748b69247"
+    },
+    {
+      "id": "consumer_cooperative_rebates",
+      "name": "Consumer Cooperative Rebates",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "626e53d4c9058d6419569820a9d7db55b26de6ad9195c07eba7a8cfbe29b2d69"
+    },
+    {
+      "id": "household_budget_accounts",
+      "name": "Household Budget Accounts",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
+      "scope_digest": "18aae869acd81c3c487b821a8dbe235034fb8a13c11d4c9683e544459d65a877"
+    },
+    {
+      "id": "unpaid_work_time_surveys",
+      "name": "Unpaid Work Time Surveys",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "bb6ac7772dbcada1d58ae1879b305c08f7a6841d9fc91bcc80aafba5f22e9e67"
+    },
+    {
+      "id": "input_output_production_accounts",
+      "name": "Input-Output Production Accounts",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "12300a08e38af596eb06bad01e5a87867664f5901644edf09cf1a13e45f4b749"
+    },
+    {
+      "id": "national_income_reconciliation",
+      "name": "National Income Reconciliation",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "f8a68983eb4eccea48efc885e4cfd32aff0ea90491d97f6673ada64477cab12e"
+    },
+    {
+      "id": "research_patronage_agreements",
+      "name": "Research Patronage Agreements",
+      "horizon": "H02",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Negotiated subsistence, access and reporting can support a competent scholar before research universities, mass literacy or a modern grant agency.",
+      "scope_digest": "437e988179c494334a1f8a368a8e0505d39bdeb6f62cf4c71434972b78f79d27"
+    },
+    {
+      "id": "commissioned_research_scoping",
+      "name": "Commissioned Research Scoping",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "A patronage contract is an explicit alternative to formal priority registration. Buying a question and deliverable is not buying guaranteed knowledge.",
+      "scope_digest": "c6de3e49e3e57a13bdcba734e7852054ee1fa2865de81becbead11e101c26d4f"
+    },
+    {
+      "id": "research_milestone_payments",
+      "name": "Research Milestone Payments",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Staged payment against inspectable deliverables is a contract mechanism; a modern research bureaucracy is not intrinsic.",
+      "scope_digest": "d95041e102cb8624ffd6406e5715ef44abb0dc9dcda874b299782ded6ec937ab"
+    },
+    {
+      "id": "research_cost_sharing_accounts",
+      "name": "Research Cost-Sharing Accounts",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Contributed staff, supplies and equipment use can be accounted for by earlier partnership practice; participation does not reproduce missing local facilities.",
+      "scope_digest": "b268606c13186bdaff6c9ed78e15571f6b68965b4ae8767443307e38746b6add"
+    },
+    {
+      "id": "background_knowledge_access_terms",
+      "name": "Background Knowledge Access Terms",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The mechanism distinguishes pre-existing knowledge access from newly generated results; permission is not tacit competence.",
+      "scope_digest": "779f6270a60a4566ba05b80bb5ab4a68ff8a7108c1c4b87a0f419bcf70dcb464"
+    },
+    {
+      "id": "technology_use_licenses",
+      "name": "Technology Use Licenses",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Bounded permission, duration and fees concern lawful contracted use, not automatic mastery or free physical operating inputs.",
+      "scope_digest": "21a2627864b94070f480e1a84bf0f203dcb30bf189b4222e60646a78b2daab30"
+    },
+    {
+      "id": "know_how_transfer_packages",
+      "name": "Know-How Transfer Packages",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Practical demonstrations and process records can convey tacit know-how through earlier master instruction. A manual alone remains insufficient.",
+      "scope_digest": "97748c2e4cbcad6e6c00574e36071852aa8ecd5fafe08a0267ae7dc921431c91"
+    },
+    {
+      "id": "research_result_reproduction_acceptance",
+      "name": "Research Result Reproduction Acceptance",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The mechanism accepts reproduced evidence under contracted conditions. A favorable foreign result may fail local reproduction; paying does not remove that risk.",
+      "scope_digest": "bfc8735de23d528376e5f9d58fd462dae7f3ae21e807bee80f53d5f06c2fc5d8"
+    },
+    {
+      "id": "pooled_technology_access",
+      "name": "Pooled Technology Access",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "A pool combines complementary permissions; it does not remove local prerequisites or supplier capacity constraints.",
+      "scope_digest": "731ca3c65bbfce974629ae432cef18918fc060624b6e7e03ffe7a2221399b3de"
+    },
+    {
+      "id": "innovation_prize_commitments",
+      "name": "Innovation Prize Commitments",
+      "horizon": "H03",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "A funded prize pays for a judged demonstrated outcome; announcement or payment promise does not generate a discovery.",
+      "scope_digest": "948b0bab1e03438b613349afecb9b0d23829cf3e88e86d0457c0bc625c322366"
+    },
+    {
+      "id": "contingent_claim_exposure_nets",
+      "name": "Contingent Claim Exposure Nets",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "c7975e0cee252416d13f212656be3a48298e5cdbc1fb3f3ef143531f315774ce"
+    },
+    {
+      "id": "autonomous_procurement_budget_limits",
+      "name": "Autonomous Procurement Budget Limits",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Current software agents can be bounded by budgets and counterparties. The method does not authorize independent sovereign spending or guarantee adversarial robustness.",
+      "scope_digest": "2e4718363538c9e276e4cc90b3021d0e9f349445e5da745df8d743bcb8aace40"
+    },
+    {
+      "id": "long_delay_delivery_acceptance",
+      "name": "Long-Delay Delivery Acceptance",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "32fd8c8e073ab564f43b4b4a269ac5944edf60e817ce9abc5478fde614b7e22b"
+    },
+    {
+      "id": "habitat_life_support_cost_accounts",
+      "name": "Habitat Life-Support Cost Accounts",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "46c27bd5813203fb5febece22ac050a87ca2043aaf522f64c3a5c838c0ea2fff"
+    },
+    {
+      "id": "recovery_material_value_models",
+      "name": "Recovery Material Value Models",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored analytical, networked, automated or integrated institutional method belongs to modern practice or research. Frontier application alone does not create a new advanced mechanism.",
+      "scope_digest": "dc062a9f8cb7f40967fff7664909905abdff847b3a7dd7eaa088fe3515612839"
+    },
+    {
+      "id": "intergenerational_fund_draw_rules",
+      "name": "Intergenerational Fund Draw Rules",
+      "horizon": "H04",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
+      "scope_digest": "5bdb0609518c8c2732c21021e0050c4ccd6609996d017650c9dbe3468c9b3c72"
+    },
+    {
+      "id": "scarcity_allocation_mechanism_trials",
+      "name": "Scarcity Allocation Mechanism Trials",
+      "horizon": "H05",
+      "source_file": "economy-research-finance-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Comparative trials of allocation rules are modern research. Experimental results do not force a population to adopt a rule.",
+      "scope_digest": "9fe386e129ad3e8be96de54ad70a856b3dbd10a5a4da459f02a0c49cbc897aaf"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

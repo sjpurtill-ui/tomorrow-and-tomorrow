@@ -99,7 +99,7 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Continue 2387 unassigned existing horizon entries and semantic/causal review, then author genuine gaps. Current distinct total3030, unauthored1970. Twenty repaired prerequisite targets pass structural alternate-route probe; full physical bootstrapping remains unverified.",
+    "Continue2097 unclassified existing horizon entries and semantic/causal review;1971 identities remain unauthored toward5000. Current distinct total3029. Civic pass repaired13 routes and merged employment mediation into the shared method; targeted16-barrier probe passes, not physical bootstrapping proof.",
     "Continue semantic and atlas reconciliation using checker-derived coverage: 475 candidates mapped, eight partial subjects retained in coverage.json, and 125 unmapped. Mappings add zero discoveries and do not establish operating implementation.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Coordinate substantive 556-baseline integration with designated task. Bounded canonical release is200 discoveries; never conflate it with source556 baseline or master3030 identities. Preserve running player and canonical food prerequisites/report behavior.",
@@ -125,9 +125,9 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 2426,
-    "distinct_ids_accounted": 3030,
-    "remaining_to_author": 1970,
+    "authored_drafts": 2425,
+    "distinct_ids_accounted": 3029,
+    "remaining_to_author": 1971,
     "complete": false,
     "atlas_candidates_mapped": 475,
     "atlas_partial_mappings": 8,
@@ -135,8 +135,8 @@
     "historical_horizon_allocation_complete": false,
     "atlas_coverage_source": "master-catalog/coverage.json: atlas_coverage",
     "atlas_fully_mapped_subjects": 467,
-    "historical_horizon_assigned": 643,
-    "historical_horizon_unassigned": 2387,
+    "historical_horizon_assigned": 932,
+    "historical_horizon_unassigned": 2097,
     "historical_horizon_coverage_source": "master-catalog/coverage.json: historical_horizon_coverage"
   },
   "parallel_implementation": {
@@ -152,7 +152,20 @@
     "follow_on_scope": "Grain work paused until bounded food integration resolves.",
     "integrator_task_id": "01a0978a-39f5-7620-a77f-5918ccb1d8ba",
     "integration_scope": "Review substantive committed baseline 18b0cb7/82b574e against canonical food release; preserve source communications exclusion and running player until controlled release handling.",
-    "coordination_window": "Source remains design-only; canonical/runtime ownership reserved for designated integrator."
+    "coordination_window": "Source remains design-only; canonical/runtime ownership reserved for designated integrator.",
+    "integration_fixes_to_preserve": [
+      "Canonical three cooking identities, shared Logistics processing time and paid inputs",
+      "Movement direction aliases to supported logistics research domain",
+      "Saved origins preserve actual chosen OR foundation and common prerequisites",
+      "research_atlas creates operating panels only for selected known discovery; repeated refresh must not accumulate panels"
+    ],
+    "reported_integration_checkpoint": {
+      "live_discoveries": 559,
+      "explicit_learning_routes": 336,
+      "recipes": 240,
+      "plants": 12,
+      "status": "Integrator report under isolated review; not yet independently verified canonical release."
+    }
   },
   "canonical_food_delivery": {
     "status": "integrated_and_packaged_verified",

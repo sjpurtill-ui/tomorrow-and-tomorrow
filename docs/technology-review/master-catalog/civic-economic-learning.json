@@ -183,17 +183,43 @@
     "field": "D16",
     "id": "mediation_practice",
     "name": "Mediation Practice",
-    "foundations": "witnessed_obligations,household_councils",
+    "foundations": "witnessed_obligations",
     "mechanism": "An intermediary helps parties identify and negotiate compatible terms",
     "operating_requirement": "Trained intermediaries and voluntary participation",
     "consequence": "Resolve some disputes without an imposed decision",
     "status": "authored_draft",
     "requires_all": [
-      "witnessed_obligations",
-      "household_councils"
+      "witnessed_obligations"
     ],
     "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "recovery": "Acquire bounded instruction, shared inquiry, commissioned analysis, an external service or interpretable records. Pay source access and local practice; receiving a contract, balance or report does not create resources, counterparties, authority or mastery.",
+    "branching_note": "Voluntary mediation does not require binding arbitration or a particular household-council institution. Employment and pay disputes use this same mechanism with suitable evidence and representation.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mediation_practice",
+      "local_demonstration": "An intermediary helps parties identify and negotiate compatible terms",
+      "operating_requirements": "Trained intermediaries and voluntary participation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "competent available source",
+        "payment or reciprocal contribution",
+        "actual travel or information delivery",
+        "finite local interpretation and trial",
+        "continuing counterparties, staff, records and operating resources"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local staff demonstrate the accounting, allocation or contracting method on interpretable cases.",
+        "partnership": "Contribute actual staff, records, funds or evaluation effort; partner access and coordination take time and do not convey all partner knowledge.",
+        "purchased_research": "Commission the specified decision problem from a known capable source; pay for delivered evidence and local evaluation, with no guarantee of a favorable result.",
+        "licensed_or_imported_service": "Pay a provider to perform a bounded service under actual capacity, access and duration limits; continued use depends on the provider until local mastery is demonstrated.",
+        "reverse_engineering": "Examine lawfully acquired instruments, records or observed transactions; reconstruct and test the method locally, retaining missing context and inaccessible tacit-practice uncertainty."
+      }
+    },
+    "implementation_status": "Authored proposal; finite operating accounts, decisions, acquisition penalties, player/AI parity and campaign behavior remain pending.",
+    "application_constraints": {
+      "employment_disputes": "Actual participants, relevant work/pay evidence and mediator time; participation does not assure agreement or prevent work interruption.",
+      "learning_does_not_enact_policy": true
+    }
   },
   {
     "field": "D16",
@@ -694,17 +720,36 @@
     "field": "D16",
     "id": "mutual_aid_activation",
     "name": "Mutual-Aid Activation",
-    "foundations": "intergovernmental_compacts,emergency_coordination_centers",
+    "foundations": "intergovernmental_compacts",
     "mechanism": "Use pre-agreed triggers to request and dispatch assistance between authorities",
     "operating_requirement": "Available responders, travel capacity and cost agreements",
     "consequence": "Deliver help after actual mobilization and travel",
     "status": "authored_draft",
     "requires_all": [
-      "intergovernmental_compacts",
-      "emergency_coordination_centers"
+      "intergovernmental_compacts"
     ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "requires_any": [
+      [
+        "emergency_coordination_centers",
+        "team_briefing_protocols"
+      ]
+    ],
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "A pre-agreed aid dispatch can be coordinated through practical briefings before a permanent emergency center exists.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mutual_aid_activation",
+      "local_demonstration": "a jointly observed request, dispatch and receipt exercise with actual travel and reserve capacity",
+      "operating_requirements": "Available responders, travel capacity and cost agreements",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete a jointly observed request, dispatch and receipt exercise with actual travel and reserve capacity.",
+        "partnership": "Contribute staff, evidence or supplies to a jointly observed request, dispatch and receipt exercise with actual travel and reserve capacity; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing a jointly observed request, dispatch and receipt exercise with actual travel and reserve capacity; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for a jointly observed request, dispatch and receipt exercise with actual travel and reserve capacity; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to a jointly observed request, dispatch and receipt exercise with actual travel and reserve capacity; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D16",
@@ -902,17 +947,36 @@
     "field": "D16",
     "id": "delayed_governance_protocols",
     "name": "Delayed Governance Protocols",
-    "foundations": "interhabitat_jurisdiction,delay_tolerant_space_networks",
+    "foundations": "official_mandate_registers",
     "mechanism": "Delegate bounded local authority when consultation cannot be immediate",
     "operating_requirement": "Recorded limits, durable messages and later review",
     "consequence": "Allow decisions during communication delay without granting unlimited autonomy",
     "status": "authored_draft",
     "requires_all": [
-      "interhabitat_jurisdiction",
-      "delay_tolerant_space_networks"
+      "official_mandate_registers"
     ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "requires_any": [
+      [
+        "intergovernmental_compacts",
+        "interhabitat_jurisdiction"
+      ]
+    ],
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "Bounded delegated authority also applies to courier-era communication. Neither spaceflight nor a delay-tolerant space network is mandatory.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "delayed_governance_protocols",
+      "local_demonstration": "a delegated decision exercise with delayed messages, authority limits and later review",
+      "operating_requirements": "Recorded limits, durable messages and later review",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete a delegated decision exercise with delayed messages, authority limits and later review.",
+        "partnership": "Contribute staff, evidence or supplies to a delegated decision exercise with delayed messages, authority limits and later review; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing a delegated decision exercise with delayed messages, authority limits and later review; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for a delegated decision exercise with delayed messages, authority limits and later review; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to a delegated decision exercise with delayed messages, authority limits and later review; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D16",
@@ -1461,17 +1525,32 @@
     "field": "D17",
     "id": "net_settlement",
     "name": "Net Settlement",
-    "foundations": "payment_clearing_houses,symbolic_algebra",
+    "foundations": "debt_maturity_records,material_accounting",
     "mechanism": "Offset reciprocal claims and settle their residual balances",
     "operating_requirement": "Valid obligations and an agreed settlement asset",
     "consequence": "Lower required transfer volume without eliminating default exposure",
     "status": "authored_draft",
     "requires_all": [
-      "payment_clearing_houses",
-      "symbolic_algebra"
+      "debt_maturity_records",
+      "material_accounting"
     ],
     "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "Parties can offset quantified reciprocal claims before formal clearing houses or symbolic algebra; arithmetic and actual settlement resources remain required.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "net_settlement",
+      "local_demonstration": "reconciliation of a real or controlled reciprocal claim set against residual assets due",
+      "operating_requirements": "Valid obligations and an agreed settlement asset",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete reconciliation of a real or controlled reciprocal claim set against residual assets due.",
+        "partnership": "Contribute staff, evidence or supplies to reconciliation of a real or controlled reciprocal claim set against residual assets due; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing reconciliation of a real or controlled reciprocal claim set against residual assets due; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for reconciliation of a real or controlled reciprocal claim set against residual assets due; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to reconciliation of a real or controlled reciprocal claim set against residual assets due; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D17",
@@ -1866,17 +1945,36 @@
     "field": "D17",
     "id": "settlement_dispute_escrow",
     "name": "Settlement Dispute Escrow",
-    "foundations": "arbitration_procedures,settlement_finality_rules",
+    "foundations": "witnessed_obligations",
     "mechanism": "Hold an agreed asset until defined release or dispute conditions are resolved",
     "operating_requirement": "Independent custody and enforceable release terms",
     "consequence": "Reduce unilateral nonperformance while immobilizing resources",
     "status": "authored_draft",
     "requires_all": [
-      "arbitration_procedures",
-      "settlement_finality_rules"
+      "witnessed_obligations"
     ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "requires_any": [
+      [
+        "arbitration_procedures",
+        "mediation_practice"
+      ]
+    ],
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "An agreed custodian can hold an asset under reviewed release/dispute terms without a modern payment-finality regime.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "settlement_dispute_escrow",
+      "local_demonstration": "a custody-and-release exercise with competing claims and a finite held asset",
+      "operating_requirements": "Independent custody and enforceable release terms",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete a custody-and-release exercise with competing claims and a finite held asset.",
+        "partnership": "Contribute staff, evidence or supplies to a custody-and-release exercise with competing claims and a finite held asset; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing a custody-and-release exercise with competing claims and a finite held asset; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for a custody-and-release exercise with competing claims and a finite held asset; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to a custody-and-release exercise with competing claims and a finite held asset; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D17",
@@ -1898,17 +1996,32 @@
     "field": "D17",
     "id": "contingent_supply_contracts",
     "name": "Contingent Supply Contracts",
-    "foundations": "procurement_specifications,performance_bonds",
+    "foundations": "procurement_specifications,witnessed_obligations",
     "mechanism": "Specify deliveries that activate under observable future conditions",
     "operating_requirement": "Reserved capacity, verified triggers and contract administration",
     "consequence": "Prepare for uncertain demand while paying for availability",
     "status": "authored_draft",
     "requires_all": [
       "procurement_specifications",
-      "performance_bonds"
+      "witnessed_obligations"
     ],
     "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "Conditional supply obligations do not require a third-party performance bond; enforceability and actual delivery remain separate operating conditions.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "contingent_supply_contracts",
+      "local_demonstration": "an observable trigger and a supplier delivery case with acceptance evidence",
+      "operating_requirements": "Reserved capacity, verified triggers and contract administration",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete an observable trigger and a supplier delivery case with acceptance evidence.",
+        "partnership": "Contribute staff, evidence or supplies to an observable trigger and a supplier delivery case with acceptance evidence; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing an observable trigger and a supplier delivery case with acceptance evidence; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for an observable trigger and a supplier delivery case with acceptance evidence; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to an observable trigger and a supplier delivery case with acceptance evidence; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D17",
@@ -1930,17 +2043,36 @@
     "field": "D17",
     "id": "trade_disruption_reserves",
     "name": "Trade-Disruption Reserves",
-    "foundations": "critical_supplier_exposure_maps,liquidity_reserve_planning",
+    "foundations": "material_accounting",
     "mechanism": "Hold goods or liquid resources against specified interruption scenarios",
     "operating_requirement": "Storage, capital and periodic stock review",
     "consequence": "Buffer a finite disruption at ongoing holding cost",
     "status": "authored_draft",
     "requires_all": [
-      "critical_supplier_exposure_maps",
-      "liquidity_reserve_planning"
+      "material_accounting"
     ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "requires_any": [
+      [
+        "critical_supplier_exposure_maps",
+        "market_gathering_schedules"
+      ]
+    ],
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "Observed recurring trade and inventory allow interruption reserves before modern supplier-exposure maps or bank liquidity planning.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "trade_disruption_reserves",
+      "local_demonstration": "an interruption scenario reconciled with actual stocks, consumption and reachable resupply",
+      "operating_requirements": "Storage, capital and periodic stock review",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete an interruption scenario reconciled with actual stocks, consumption and reachable resupply.",
+        "partnership": "Contribute staff, evidence or supplies to an interruption scenario reconciled with actual stocks, consumption and reachable resupply; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing an interruption scenario reconciled with actual stocks, consumption and reachable resupply; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for an interruption scenario reconciled with actual stocks, consumption and reachable resupply; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to an interruption scenario reconciled with actual stocks, consumption and reachable resupply; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D17",
@@ -2703,33 +2835,66 @@
     "field": "D18",
     "id": "succession_mentoring",
     "name": "Succession Mentoring",
-    "foundations": "cross_training_rosters,public_office_handover",
+    "foundations": "guided_practice_cycles",
     "mechanism": "Pair successors with experienced practitioners before a role becomes vacant",
     "operating_requirement": "Overlapping appointments and protected teaching time",
     "consequence": "Transfer tacit knowledge that records alone may omit",
     "status": "authored_draft",
     "requires_all": [
-      "cross_training_rosters",
-      "public_office_handover"
+      "guided_practice_cycles"
     ],
     "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "An experienced practitioner can prepare a successor through supervised work before public-office records or formal cross-training rosters exist.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "succession_mentoring",
+      "local_demonstration": "supervised successor performance of a real task while the experienced practitioner is still available",
+      "operating_requirements": "Overlapping appointments and protected teaching time",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete supervised successor performance of a real task while the experienced practitioner is still available.",
+        "partnership": "Contribute staff, evidence or supplies to supervised successor performance of a real task while the experienced practitioner is still available; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing supervised successor performance of a real task while the experienced practitioner is still available; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for supervised successor performance of a real task while the experienced practitioner is still available; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to supervised successor performance of a real task while the experienced practitioner is still available; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D18",
     "id": "team_briefing_protocols",
     "name": "Team Briefing Protocols",
-    "foundations": "crew_handoffs,shared_technical_lexicons",
+    "foundations": "crew_handoffs",
     "mechanism": "Review objective, responsibilities and known constraints before coordinated work",
     "operating_requirement": "Team time and current operational information",
     "consequence": "Reduce mismatched assumptions without guaranteeing execution",
     "status": "authored_draft",
     "requires_all": [
-      "crew_handoffs",
-      "shared_technical_lexicons"
+      "crew_handoffs"
     ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "requires_any": [
+      [
+        "shared_technical_lexicons",
+        "demonstration_teaching"
+      ]
+    ],
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "A group can brief responsibilities through practical demonstrations before a formal technical lexicon is compiled.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "team_briefing_protocols",
+      "local_demonstration": "a team task with checked objectives, responsibilities and misunderstood-instruction recovery",
+      "operating_requirements": "Team time and current operational information",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete a team task with checked objectives, responsibilities and misunderstood-instruction recovery.",
+        "partnership": "Contribute staff, evidence or supplies to a team task with checked objectives, responsibilities and misunderstood-instruction recovery; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing a team task with checked objectives, responsibilities and misunderstood-instruction recovery; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for a team task with checked objectives, responsibilities and misunderstood-instruction recovery; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to a team task with checked objectives, responsibilities and misunderstood-instruction recovery; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D18",
@@ -2751,17 +2916,36 @@
     "field": "D18",
     "id": "organizational_memory_reviews",
     "name": "Organizational Memory Reviews",
-    "foundations": "negative_result_archives,succession_mentoring",
+    "foundations": "succession_mentoring",
     "mechanism": "Periodically identify obsolete procedures and undocumented critical knowledge",
     "operating_requirement": "Experienced staff and access to past decisions",
     "consequence": "Keep retained knowledge usable instead of merely accumulating records",
     "status": "authored_draft",
     "requires_all": [
-      "negative_result_archives",
       "succession_mentoring"
     ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
+    "requires_any": [
+      [
+        "negative_result_archives",
+        "craft_demonstration_collections"
+      ]
+    ],
+    "recovery": "Paid instruction, partnership evidence, commissioned work or a licensed service assists finite local learning. Payment cannot enact institutions, compel participation or create the physical capacity required to operate.",
+    "branching_note": "Review of retained work and instruction provides an earlier route than a formal negative-result archive.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "organizational_memory_reviews",
+      "local_demonstration": "a review of retained work against current practice and actual missing competence",
+      "operating_requirements": "Experienced staff and access to past decisions",
+      "grants_instant_mastery": false,
+      "route_terms": {
+        "scholar_envoy": "Pay travel, support and finite instruction by a competent practitioner; local staff complete a review of retained work against current practice and actual missing competence.",
+        "partnership": "Contribute staff, evidence or supplies to a review of retained work against current practice and actual missing competence; negotiated access, communication delays and reciprocal duties remain.",
+        "purchased_research": "Pay a qualified provider for bounded evidence addressing a review of retained work against current practice and actual missing competence; local acceptance work remains and results may be unfavorable.",
+        "licensed_or_imported_service": "Contract competent external staff or service capacity for a review of retained work against current practice and actual missing competence; continuing fees, reachable capacity and local authority remain separate from mastery.",
+        "reverse_engineering": "Inspect an accessible record or procedure relevant to a review of retained work against current practice and actual missing competence; reconstruct missing context through local trials. A document alone does not establish legitimacy, competence or enforceable authority."
+      }
+    }
   },
   {
     "field": "D18",
