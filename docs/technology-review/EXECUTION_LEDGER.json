@@ -99,7 +99,7 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Expand the full master beyond 3031 accounted identities: 1969 remain to author. Largest field gaps include governance 120, food 119, materials 114 and machinery 107. Energy now accounts for 175/260. Complete explicit historical-horizon allocation, including substantial future development across fields, without era gates.",
+    "Continue explicit historical-horizon review of 2937 unassigned existing identities, then author genuine coverage gaps. Current total remains 3031 accounted IDs, 1969 unauthored. Nine advanced/future assignments in the first 94 reviewed entries are a partial count, not the whole tree future total. Preserve causal learning without era gates.",
     "Continue semantic and atlas reconciliation using checker-derived coverage: 475 candidates mapped, eight partial subjects retained in coverage.json, and 125 unmapped. Mappings add zero discoveries and do not establish operating implementation.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Coordinate parallel operating implementation with task 01a0978a-39f5-7620-a77f-5918ccb1d8ba in its isolated worktree; assigned food processing and preservation. Design ownership remains here. Verify delivery and canonical integration before counting its changes as player content.",
@@ -134,14 +134,21 @@
     "baseline_field_allocation": "master-catalog/baseline-field-allocation.json",
     "historical_horizon_allocation_complete": false,
     "atlas_coverage_source": "master-catalog/coverage.json: atlas_coverage",
-    "atlas_fully_mapped_subjects": 467
+    "atlas_fully_mapped_subjects": 467,
+    "historical_horizon_assigned": 94,
+    "historical_horizon_unassigned": 2937,
+    "historical_horizon_coverage_source": "master-catalog/coverage.json: historical_horizon_coverage"
   },
   "parallel_implementation": {
     "task_id": "01a0978a-39f5-7620-a77f-5918ccb1d8ba",
     "originating_task_id": "01a09789-3d3c-71d1-b389-794d955f2135",
     "scope": "Early food cooking and physically constrained preservation; design documents read-only.",
-    "status": "Worker reports cooking and structural check; complete handoff and integration not yet verified.",
+    "status": "READY bounded food delivery; commit/handoff and graph/new food test logs inspected. Canonical integration remains pending. Follow-on grain processing assigned separately.",
     "reported_graph_count": 559,
-    "counting_note": "Worker-reported checkpoint excluded from this worktree verified baseline until delivery inspected."
+    "counting_note": "559 is a verified worker graph checkpoint, not this worktree baseline or canonical player count. Three IDs already exist among authored drafts, so they add zero to total identities.",
+    "ready_commit": "c247e8d",
+    "compatibility_parent": "bde683e55ec889a30607bd62e8ff915280b96e90",
+    "handoff": "/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow/docs/TECH_FOOD_PROCESSING_HANDOFF.md",
+    "follow_on_scope": "Physical grain handling/processing from settled food-water-ecology definitions with necessary commodity-model support, separate from READY food commit."
   }
 }

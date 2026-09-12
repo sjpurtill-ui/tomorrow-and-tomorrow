@@ -1,0 +1,980 @@
+{
+  "status": "partial_editorial_allocation",
+  "source_review": "../Technology Design Review.md: historical coverage allocation",
+  "is_unlock_gate": false,
+  "horizons": [
+    {
+      "id": "H01",
+      "name": "Survival and early practice",
+      "target": 600
+    },
+    {
+      "id": "H02",
+      "name": "Settlement and regional exchange",
+      "target": 700
+    },
+    {
+      "id": "H03",
+      "name": "Complex societies and learned traditions",
+      "target": 800
+    },
+    {
+      "id": "H04",
+      "name": "Mechanization and industrial systems",
+      "target": 700
+    },
+    {
+      "id": "H05",
+      "name": "Modern scientific and networked systems",
+      "target": 900
+    },
+    {
+      "id": "H06",
+      "name": "Advanced planetary and human futures",
+      "target": 1300
+    }
+  ],
+  "mappings": [
+    {
+      "id": "ember_tending",
+      "name": "Ember Tending",
+      "horizon": "H01",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Direct fire or fuel-handling practice can be learned empirically with naturally accessible materials; no settled industrial supply network is intrinsic to the mechanism.",
+      "scope_digest": "b8bb328f0ceba6a26ad4b6f576fea737832236af58d88727f014e11495ba502a"
+    },
+    {
+      "id": "friction_fire_ignition",
+      "name": "Friction Fire Ignition",
+      "horizon": "H01",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Direct fire or fuel-handling practice can be learned empirically with naturally accessible materials; no settled industrial supply network is intrinsic to the mechanism.",
+      "scope_digest": "6e7bb3eec026f418100ab9f2c5b074e2d5696396ee3f804409d8419cc3473b06"
+    },
+    {
+      "id": "percussion_fire_ignition",
+      "name": "Percussion Fire Ignition",
+      "horizon": "H01",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Direct fire or fuel-handling practice can be learned empirically with naturally accessible materials; no settled industrial supply network is intrinsic to the mechanism.",
+      "scope_digest": "d25c4ed1d49502444f4a17717e9801d90c045c5955c4912ce136cd75c18ae6ad"
+    },
+    {
+      "id": "hearth_heat_retention",
+      "name": "Hearth Heat Retention",
+      "horizon": "H01",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Direct fire or fuel-handling practice can be learned empirically with naturally accessible materials; no settled industrial supply network is intrinsic to the mechanism.",
+      "scope_digest": "302599047eaeba41bddd21022c3d78ae07ae86ff495aff5b70d29b417656655f"
+    },
+    {
+      "id": "fuel_air_drying",
+      "name": "Fuel Air Drying",
+      "horizon": "H01",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Direct fire or fuel-handling practice can be learned empirically with naturally accessible materials; no settled industrial supply network is intrinsic to the mechanism.",
+      "scope_digest": "01b87ac0c711593bf3ec2339e88df65b81abf710410caa9032ece6d65b365780"
+    },
+    {
+      "id": "hydrocarbon_catalytic_cracking",
+      "name": "Hydrocarbon Catalytic Cracking",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "4747910dc21ba4a710679cc0b0759487f341b31a919ef3253a43f92e64afd3d1"
+    },
+    {
+      "id": "hydrocarbon_hydrotreating",
+      "name": "Hydrocarbon Hydrotreating",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "9a745a7042e176e5e2f61190138c03f9c32777d86896debc7fcc13c9c673b28c"
+    },
+    {
+      "id": "steam_methane_reforming",
+      "name": "Steam Methane Reforming",
+      "horizon": "H04",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism uses organized mechanical or chemical plant work; frontier materials and integrated future habitat capability are not intrinsic requirements.",
+      "scope_digest": "cc9ba9395ec3dfd5cd5e98b161b3181a904d05c273c869e925f228e7c3868fbf"
+    },
+    {
+      "id": "water_gas_shift_conversion",
+      "name": "Water Gas Shift Conversion",
+      "horizon": "H04",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism uses organized mechanical or chemical plant work; frontier materials and integrated future habitat capability are not intrinsic requirements.",
+      "scope_digest": "8f8f9fadb5f770a07a5f3c0dd1738d30cc9bdb931386c51f884b9e4b14b7f46f"
+    },
+    {
+      "id": "synthetic_hydrocarbon_synthesis",
+      "name": "Synthetic Hydrocarbon Synthesis",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "c8ef5254488966df155890fe764b4d944a8ed0230b40d87d54f35b98ddc782aa"
+    },
+    {
+      "id": "catalytic_methanation",
+      "name": "Catalytic Methanation",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "1ae734794298bd2bd0efb28e5ac3e3a346a3964c501044eb62a5e454551fc66a"
+    },
+    {
+      "id": "ammonia_fuel_conversion",
+      "name": "Ammonia Fuel Conversion",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "b65257913e3dd34a5520f1abdc8d18e623529b653ec57e1f8e365272d9a02a51"
+    },
+    {
+      "id": "ammonia_hydrogen_release",
+      "name": "Ammonia Hydrogen Release",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "3bf64748c6fce7e1d5ef76a9263844ce24d2cf1493c75aa1b02f9f91b781b975"
+    },
+    {
+      "id": "alkaline_water_electrolysis",
+      "name": "Alkaline Water Electrolysis",
+      "horizon": "H04",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism uses organized mechanical or chemical plant work; frontier materials and integrated future habitat capability are not intrinsic requirements.",
+      "scope_digest": "a4ce4ca9970dfa581691b94587c99f17d402fa0bd7ea0f916d4c284ffa77cdfe"
+    },
+    {
+      "id": "polymer_electrolyte_water_splitting",
+      "name": "Polymer Electrolyte Water Splitting",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "a7d4d788e40ce35e37c2dade7854b08ed3b264f9814b367dda177d8a7e6b7bb7"
+    },
+    {
+      "id": "solid_oxide_water_splitting",
+      "name": "Solid Oxide Water Splitting",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "8375dc6eeea9e277071af4f127797f944dca35c5c9b38e195939e0c5853752b5"
+    },
+    {
+      "id": "thermochemical_water_splitting",
+      "name": "Thermochemical Water Splitting",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored node concerns demonstrated reaction-cycle investigation, which belongs to modern chemical research; it does not specify a separate sustained frontier production capability.",
+      "scope_digest": "39c98eb049b89a53fe05610bf0311468ed597a1f194e2333aded4ba45d9926b8"
+    },
+    {
+      "id": "lithium_intercalation_cells",
+      "name": "Lithium Intercalation Cells",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "dd3734743b7bf9b0a2aa0a56042570fe0ead235a38fa796a4e82e4199bb15b68"
+    },
+    {
+      "id": "sodium_intercalation_cells",
+      "name": "Sodium Intercalation Cells",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "A distinct modern electrochemical storage mechanism, not an advanced-future node merely because its adoption can grow later.",
+      "scope_digest": "abf5f6620a1d8fe95743204c4576977d5c22535d6bb387801f4b944e3b8b296d"
+    },
+    {
+      "id": "solid_electrolyte_cells",
+      "name": "Solid Electrolyte Cells",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Solid ion-conducting cell research and devices belong to modern electrochemistry; unknown commercial performance does not by itself reclassify the mechanism as future.",
+      "scope_digest": "90c8514f11948559cfd9ab2aad4ce3b8f57ac31de2df1efabd709f073d9e1d61"
+    },
+    {
+      "id": "metal_air_storage",
+      "name": "Metal Air Storage",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "9911da5b9ccf1b80e4d43ee7e26d1db5cd093039149a5857f90dae3c5feedd48"
+    },
+    {
+      "id": "electrochemical_double_layer_storage",
+      "name": "Electrochemical Double Layer Storage",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "c429a802f96fa724a05cea635355baf4bd104b5c4e058abb8082b20dd9b03a42"
+    },
+    {
+      "id": "liquid_air_energy_storage",
+      "name": "Liquid Air Energy Storage",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "622d09387427c7ffe6b16481904e8d3b673f3aadc6f2336fa6b83e885dcdeb68"
+    },
+    {
+      "id": "solid_mass_gravity_storage",
+      "name": "Solid Mass Gravity Storage",
+      "horizon": "H04",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism uses organized mechanical or chemical plant work; frontier materials and integrated future habitat capability are not intrinsic requirements.",
+      "scope_digest": "bf4b944d33cfa380cf7236355d1892a8ab75c5654d17fcf2f00fe7b7d2684547"
+    },
+    {
+      "id": "tidal_stream_generation",
+      "name": "Tidal Stream Generation",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "e4e9dab01b24407d7c56b2e93548e66a81eab9f80090308dea32defbb6e2a851"
+    },
+    {
+      "id": "wave_oscillating_water_columns",
+      "name": "Wave Oscillating Water Columns",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "3acb6a99aee39694240d8399a7fc215bfe977c18da2693ffa5bf1083332cd6a5"
+    },
+    {
+      "id": "wave_point_absorbers",
+      "name": "Wave Point Absorbers",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "295ec1fe66a860be640541c87f9fa011360e400c9097f58d35350b44687a752c"
+    },
+    {
+      "id": "ocean_thermal_energy_conversion",
+      "name": "Ocean Thermal Energy Conversion",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "af4acdf88ef59a0ccafba2bef0aede9cd5a8792256e1172079d004862a55db1e"
+    },
+    {
+      "id": "salinity_gradient_power",
+      "name": "Salinity Gradient Power",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "939e3093642a1e58b53a219f389553156308436ac1269525fd2613a00d9a9d16"
+    },
+    {
+      "id": "reactor_neutron_economy",
+      "name": "Reactor Neutron Economy",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "ae12d97a34f6418fda2af00b24c13dac4d8c7465181cec3e10428c407d50904c"
+    },
+    {
+      "id": "reactor_fuel_burnup_models",
+      "name": "Reactor Fuel Burnup Models",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "ecb7b56ecc8a0d6499e45f2574cba37599cec5dc5954468e19092e51b4a0af98"
+    },
+    {
+      "id": "reactor_containment_systems",
+      "name": "Reactor Containment Systems",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "aa179e5ac6588b968e8251ba218907ea16479c64038a61374944ec48cddc9fea"
+    },
+    {
+      "id": "passive_reactor_cooling",
+      "name": "Passive Reactor Cooling",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "c7e0ec48a4c7f3a0688dfe8ba24a681128e80e71c51727c5486dc8bd73032cad"
+    },
+    {
+      "id": "reactor_decommissioning_sequence",
+      "name": "Reactor Decommissioning Sequence",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "ebd8980b72d020b9db25d53ca51cb647e9ae1ba0f8c82d9bd01cbc55b945eac0"
+    },
+    {
+      "id": "fusion_blanket_fuel_breeding",
+      "name": "Fusion Blanket Fuel Breeding",
+      "horizon": "H06",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The advanced scope is a measured plant-relevant breeding/extraction balance, not merely the known nuclear reaction or an isolated material experiment.",
+      "scope_digest": "4a31a2cc805860c9270d9544e9ba174b739ea96b45b78453de916b4cf544fb05"
+    },
+    {
+      "id": "fusion_fuel_inventory_control",
+      "name": "Fusion Fuel Inventory Control",
+      "horizon": "H06",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned advanced for sustained integrated fusion-plant fuel availability; ordinary inventory accounting remains its separate earlier foundation.",
+      "scope_digest": "e876a6e02bef4bb9e4d22abfb3c35c5d69071aab0a65794d6ed064b082c1a605"
+    },
+    {
+      "id": "fusion_divertor_heat_management",
+      "name": "Fusion Divertor Heat Management",
+      "horizon": "H05",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored node concerns qualified plasma exhaust experiments and bounded operating envelopes, which are modern fusion research. A future sustained plant is not asserted by this mechanism.",
+      "scope_digest": "3e1c92a89483c93d73dfd9781008eb5a5949cfc711a748442c8099bb9ccf23b0"
+    },
+    {
+      "id": "fusion_blanket_heat_extraction",
+      "name": "Fusion Blanket Heat Extraction",
+      "horizon": "H06",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned advanced for qualified simultaneous blanket heat removal, structural lifetime and fuel functions, not ordinary heat-exchanger knowledge.",
+      "scope_digest": "15593dad83fef95b798613a81b78660e2d27acb7753acc1f8fe689d02e65856a"
+    },
+    {
+      "id": "critical_service_dependency_models",
+      "name": "Critical Service Dependency Models",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "fce4e51ffbe89f3a26a248b39d630bfa06f1c788f0c44aa669f331147aeb44e8"
+    },
+    {
+      "id": "independent_service_reserve_design",
+      "name": "Independent Service Reserve Design",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "5f39b9460d7a9171d71733d964b43e3a77a947c41429b0fedd05193524d7ec73"
+    },
+    {
+      "id": "cross_service_restoration_sequence",
+      "name": "Cross Service Restoration Sequence",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "ff7fa5e986567e82ea52d326b6bf3ff479e8ad7c6f2a9beaf0c9e3f4c76aa708"
+    },
+    {
+      "id": "refuge_capacity_qualification",
+      "name": "Refuge Capacity Qualification",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "084f5f1d0fa75160f0ca4c423c47efcf4407f47120c274dc4016042e6c61a4ae"
+    },
+    {
+      "id": "relocation_reception_networks",
+      "name": "Relocation Reception Networks",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "566f265498718de2841ab023296918dadfa5ec30b26bba7600671e20d680578c"
+    },
+    {
+      "id": "distributed_emergency_fabrication",
+      "name": "Distributed Emergency Fabrication",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "57bc6a8c4ad8f3a2dbb64c5614f928e52d084ea4bc165555fa3fa3dc426036fe"
+    },
+    {
+      "id": "cross_region_recovery_compacts",
+      "name": "Cross Region Recovery Compacts",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "70441cb2db45e37e9d3d0951c7aee7d5be1cd7c6a925b06199e3381797a8764a"
+    },
+    {
+      "id": "multi_hazard_refuge_siting",
+      "name": "Multi Hazard Refuge Siting",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "4f42fb0befa468fab42f5557854d82eceb1bad253256079ac9697cbd36544938"
+    },
+    {
+      "id": "prosthetic_intent_decoding",
+      "name": "Prosthetic Intent Decoding",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "d409796b3cb4a54c82b65be1c5a8bbe94b235794795881c69b08c2892b1bafb2"
+    },
+    {
+      "id": "prosthetic_sensory_feedback",
+      "name": "Prosthetic Sensory Feedback",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "a29a0e21c67b1794c88231567e0cf83c3df896907fe2d28b9622786842efd1f0"
+    },
+    {
+      "id": "neural_interface_rehabilitation",
+      "name": "Neural Interface Rehabilitation",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "61c7459d1460cb3c01a60edf2d246f4cd8f5760a786faf862015ef88cfa838b7"
+    },
+    {
+      "id": "assistive_device_continuity",
+      "name": "Assistive Device Continuity",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "55f2fccf9c66837e4a65c203788236db9d9de27642b7cfd7a75ec9d5d9a29654"
+    },
+    {
+      "id": "longitudinal_health_record_linkage",
+      "name": "Longitudinal Health Record Linkage",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "35305be2c9dc600bff6459e19ed563449910562c034658f9f2ed3c807da91246"
+    },
+    {
+      "id": "aging_intervention_endpoint_design",
+      "name": "Aging Intervention Endpoint Design",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "e21586acbe8630de4d1c6933bab75ebe9064d49c5f78d3683d59fee36caba6ff"
+    },
+    {
+      "id": "aging_intervention_programs",
+      "name": "Aging Intervention Programs",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Controlled investigation of proposed aging interventions exists as modern research; this identity does not itself confer rejuvenation, immortality or a verified future lifespan extension.",
+      "scope_digest": "7afdcbd624c2b774787788bdc57adde3f6bb26fef2a78e79a3c57816717ea8c3"
+    },
+    {
+      "id": "organ_replacement_matching_networks",
+      "name": "Organ Replacement Matching Networks",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "9bb2ef431840dca6725b9d5338e7a7e0d02a16479d9630c2dfaf9dc7f02abce0"
+    },
+    {
+      "id": "remote_care_task_delegation",
+      "name": "Remote Care Task Delegation",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "a312c6a416f6f4c35163b24750d1c3fbdf1a09d0d9169b2447df8963448a7e04"
+    },
+    {
+      "id": "care_continuity_during_displacement",
+      "name": "Care Continuity During Displacement",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "b780a53f9a5fd0a086d17c5debc71d5ed3388a52088574317ce740766e031985"
+    },
+    {
+      "id": "adaptive_access_interfaces",
+      "name": "Adaptive Access Interfaces",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "7b20aeaddf23dcc3ecbab68d1168c0b4a42cad3284fc289f095489554abf9750"
+    },
+    {
+      "id": "trace_element_cycle_recovery",
+      "name": "Trace Element Cycle Recovery",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "cbdef870adbc0662e458b958d9a909dff018aa07cd3f9f3dc3f99d4864d6fbef"
+    },
+    {
+      "id": "coupled_habitat_biogeochemistry",
+      "name": "Coupled Habitat Biogeochemistry",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented coupled habitat trials are modern experimental ecology; indefinite closed habitation is not promised by the authored scope.",
+      "scope_digest": "9f337fe956c4c6cec6c8d70fd8abbc8633cf4930ac772e2a445cb55ca08706e8"
+    },
+    {
+      "id": "ecological_life_support_stability",
+      "name": "Ecological Life Support Stability",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Detecting drift and testing bounded corrections is modern experimental life-support work; successful multigenerational closure would need additional evidence.",
+      "scope_digest": "91b857fb1b9e592b71a57db6aa303dd168862dd5b346bf3a3cc96649f53dc6a9"
+    },
+    {
+      "id": "habitat_makeup_supply_planning",
+      "name": "Habitat Makeup Supply Planning",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Scheduling make-up supplies from measured losses is modern logistics; frontier location does not create a different scheduling mechanism.",
+      "scope_digest": "95d1a4efeccd719e188deada5469bffd5f5a0865587531e2d0815f5c823b3229"
+    },
+    {
+      "id": "settlement_autonomy_trials",
+      "name": "Settlement Autonomy Trials",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Bounded external-service-loss trials are modern resilience experiments, not proof of indefinite future self-sufficiency.",
+      "scope_digest": "03667eb35932d426af8986c3ceab7074bc6b57464c879981a1c05c4f6ade1dc8"
+    },
+    {
+      "id": "ocean_settlement_mooring_integration",
+      "name": "Ocean Settlement Mooring Integration",
+      "horizon": "H06",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned advanced for durable occupied-settlement utility/station-keeping integration, not the earlier offshore mooring mechanism.",
+      "scope_digest": "71672c2c15065b4a78acdd3b90fadbe0d824791265823a98c4c2037b3df5f9ee"
+    },
+    {
+      "id": "submerged_habitat_pressure_integrity",
+      "name": "Submerged Habitat Pressure Integrity",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Occupied underwater enclosures and penetration qualification are modern capabilities; a submerged location is not inherently futuristic.",
+      "scope_digest": "c9479d076783cdd7f7d038fd99f627d45ef07495f158e1e22cc7fb21ca5f7bb0"
+    },
+    {
+      "id": "ocean_habitat_escape_systems",
+      "name": "Ocean Habitat Escape Systems",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "84b84c7b58e2f0ac8064b2f54fa23afd49a5710d385d56c721d27ed45aa4ca48"
+    },
+    {
+      "id": "planetary_intervention_comparison",
+      "name": "Planetary Intervention Comparison",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "905297fafed3d9c0b71971048d75832a629746543e05bb16188b4bfbdd6abb1f"
+    },
+    {
+      "id": "carbon_removal_durability_contracts",
+      "name": "Carbon Removal Durability Contracts",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "7005bb2bb3acb2a653d839f720234dfe71de7b20f6344d0eb44e3e8142936b5e"
+    },
+    {
+      "id": "restoration_termination_protocols",
+      "name": "Restoration Termination Protocols",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "5673fa1bcc922baa37188dc5e8137282ec54c90540144fc053b309ba818731ee"
+    },
+    {
+      "id": "transboundary_environment_experiments",
+      "name": "Transboundary Environment Experiments",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "f4efb13171a31091f1c1798caeaf205aeef178a421a825ee6883a4436ce78e5f"
+    },
+    {
+      "id": "rotating_habitat_human_factors",
+      "name": "Rotating Habitat Human Factors",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The operating contract explicitly permits ground analogs. These studies are modern research; an occupied rotating space settlement is not required.",
+      "scope_digest": "1d6a3704b825f4ddc2d6df00a9d6aa790e842c77aee0a3829abbd5f7c7cbb59b"
+    },
+    {
+      "id": "partial_gravity_health_studies",
+      "name": "Partial Gravity Health Studies",
+      "horizon": "H06",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The assigned scope is longitudinal sustained reduced-gravity exposure; brief parabolic-flight studies or simulated loading do not fulfill it.",
+      "scope_digest": "09e552cc01bcd826a43cdf833f947b7fd52edcec6a1d0e5942baef15ff93e008"
+    },
+    {
+      "id": "low_gravity_reproductive_research",
+      "name": "Low Gravity Reproductive Research",
+      "horizon": "H06",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The frontier scope concerns staged reproductive/developmental research under sustained altered gravity; no successful human reproduction is asserted.",
+      "scope_digest": "997f5446b185edeb98cb3377488aab478dc4b4c3bb0c050d64bd335c62ba7491"
+    },
+    {
+      "id": "space_radiation_dose_forecasting",
+      "name": "Space Radiation Dose Forecasting",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "8de2af9cca553634f11a70ca717210a219457f7b3915c8a961817609c37ce837"
+    },
+    {
+      "id": "habitat_storm_shelter_operations",
+      "name": "Habitat Storm Shelter Operations",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "cb1dc636f2d2baf6ffa8fd5e39a046ad98301cf03c60ef61b88ce4106cd86a7e"
+    },
+    {
+      "id": "habitat_dust_exclusion",
+      "name": "Habitat Dust Exclusion",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "76ccc0fb81092963a1619d6b76557cff8d2a4feebdae20c3fa0afceb26239999"
+    },
+    {
+      "id": "habitat_leak_localization",
+      "name": "Habitat Leak Localization",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "38632f7a5aa75f61357ffe3fe99a24022588761a894a84db420313ffbf92101b"
+    },
+    {
+      "id": "autonomous_habitat_repair",
+      "name": "Autonomous Habitat Repair",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "A qualified bounded subset of autonomous diagnosis, repair and checking is assigned to modern robotics research; the node does not establish indefinite general-purpose robotic maintenance.",
+      "scope_digest": "cf2fa790ff58728967dc5d60ee9e03d5265ee275b9f04dbeb7345984875d8d59"
+    },
+    {
+      "id": "habitat_multigenerational_viability",
+      "name": "Habitat Multigenerational Viability",
+      "horizon": "H06",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope targets sustained frontier operation or a performance-conditional integrated capability beyond the ordinary modern operating system; research does not guarantee that outcome.",
+      "scope_digest": "37d43aff17dd7b8afa090d737967a6bde8a89444fab973dfd8eef7fcd7d6a93b"
+    },
+    {
+      "id": "offworld_child_development_services",
+      "name": "Offworld Child Development Services",
+      "horizon": "H06",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The authored scope targets sustained frontier operation or a performance-conditional integrated capability beyond the ordinary modern operating system; research does not guarantee that outcome.",
+      "scope_digest": "40d276e461ab462bb77dc7774371f2d4032bbcc2f348a1bd1dd9cdcd5861680c"
+    },
+    {
+      "id": "crew_conflict_mediation_under_delay",
+      "name": "Crew Conflict Mediation Under Delay",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified local procedures and delayed review are modern remote-team governance. A habitat application alone does not move the mechanism into the future.",
+      "scope_digest": "5399a570f03f4a204f07c7fcf2865277f2a762ccf78eb8bb51e4aad17c028920"
+    },
+    {
+      "id": "habitat_demographic_capacity_models",
+      "name": "Habitat Demographic Capacity Models",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Age-structured demand and service models are modern planning tools. Neither an offworld population nor novel demographic mathematics is required.",
+      "scope_digest": "b0e428afc63f819e9fd7832236159062b0af148bc52166d4bc639baf49af1a96"
+    },
+    {
+      "id": "archive_bootstrap_interpreters",
+      "name": "Archive Bootstrap Interpreters",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "427c93894c3fb2ac11608b3192e52e93f318f6bd1108b8aa8759e012a960c9ed"
+    },
+    {
+      "id": "distributed_skill_custodianship",
+      "name": "Distributed Skill Custodianship",
+      "horizon": "H03",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified practice concerns intergenerational institutional continuity and can be organized through records and practiced custodianship without modern electronic infrastructure.",
+      "scope_digest": "9643e76277f35c5c703e9f3a3f34b13e5b3147938bd401cec0bd1c821bdc5684"
+    },
+    {
+      "id": "cross_generation_obligation_review",
+      "name": "Cross Generation Obligation Review",
+      "horizon": "H03",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified practice concerns intergenerational institutional continuity and can be organized through records and practiced custodianship without modern electronic infrastructure.",
+      "scope_digest": "2c6cb597bf38637b3f9b73cc65642e87c69df5eef4e45bc02a3abaad420993fd"
+    },
+    {
+      "id": "long_baseline_probe_fault_recovery",
+      "name": "Long Baseline Probe Fault Recovery",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Bounded autonomous fault recovery already belongs to modern probes; a long mission does not alone make the mechanism a future discovery.",
+      "scope_digest": "5591cc14b90dd93ba16619ec8a693f15f9dee099c45cb8bb2ede25a3ea6695a5"
+    },
+    {
+      "id": "autonomous_probe_science_selection",
+      "name": "Autonomous Probe Science Selection",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "0f645fcecafd8291038b940925403730030979cb533b58ded98eb2d166a4058a"
+    },
+    {
+      "id": "interstellar_message_recovery",
+      "name": "Interstellar Message Recovery",
+      "horizon": "H06",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Assigned advanced for the link geometry and signal recovery of an interstellar probe; weak-signal radio decoding by itself is earlier knowledge.",
+      "scope_digest": "e1bb13117f7d716fa13f2b48b2b02340d65d38e4cc419201bfb3b33673cee727"
+    },
+    {
+      "id": "planetary_threat_orbit_covariance",
+      "name": "Planetary Threat Orbit Covariance",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "030994aca7ee498f865042d755ba95b98bb8e88774558462cdfa7f93e3dd3420"
+    },
+    {
+      "id": "planetary_defense_decision_protocols",
+      "name": "Planetary Defense Decision Protocols",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "25ca34fd4f56db69299a1ea869120744cb16059b2c53c4c44c488a3e7360a20b"
+    },
+    {
+      "id": "impact_deflection_mission_design",
+      "name": "Impact Deflection Mission Design",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Momentum-transfer impact-deflection mission design and demonstration belong to modern planetary defense; future scale is not a separate invention here.",
+      "scope_digest": "1245e5c8aa6a94f10dd2da0679b1adf9c43ae67902756c142746b90e94554a6b"
+    },
+    {
+      "id": "deflection_outcome_verification",
+      "name": "Deflection Outcome Verification",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "3de1556fe071cc150c20f4a06d209bbc70ff150a9bc1ef5fbf25d13bba9a282c"
+    },
+    {
+      "id": "long_horizon_project_optioning",
+      "name": "Long Horizon Project Optioning",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "80d3f06f814a2f5849602cefdd7556e709ff000cb15380424c0613db6566ed55"
+    },
+    {
+      "id": "settlement_decommissioning_recovery",
+      "name": "Settlement Decommissioning Recovery",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "e4dee726e788673216721bd6fdab5d7785c712daf31af71717f012c94853610b"
+    },
+    {
+      "id": "frontier_capability_assurance_cases",
+      "name": "Frontier Capability Assurance Cases",
+      "horizon": "H05",
+      "source_file": "future-humanity.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified mechanism is a modern scientific, engineering or institutional practice. Inclusion in a future-facing field does not make its present-day method a new future invention.",
+      "scope_digest": "973fb778b805ac17a5af5ec01f4ad32194963a1d31be6ae2db30945782cbdf22"
+    }
+  ],
+  "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
+}
