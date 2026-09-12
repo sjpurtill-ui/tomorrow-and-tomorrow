@@ -99,7 +99,7 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Expand the full master beyond 2277 accounted identities: 2723 remain to author. Largest field gaps are governance 174, materials 173, military 152, medicine 147 and buildings 147. Continue cohesive authored mechanisms and disadvantaged recovery design. Historical-horizon allocation remains outstanding and must not create era gates.",
+    "Expand the full master beyond 2331 accounted identities: 2669 remain to author. Largest field gaps are materials 173, military 152, medicine 147, buildings 147 and biology 139. Continue cohesive authored mechanisms and disadvantaged recovery design. Historical-horizon allocation remains outstanding and must not create era gates.",
     "Continue semantic and atlas reconciliation: 250 candidate mappings, four earlier partial subjects and 350 unmapped candidates. Mappings add zero discoveries. Preserve all documented duplicate exclusions; complete historical-horizon allocation and substantive review.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
     "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
@@ -125,9 +125,9 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 1673,
-    "distinct_ids_accounted": 2277,
-    "remaining_to_author": 2723,
+    "authored_drafts": 1727,
+    "distinct_ids_accounted": 2331,
+    "remaining_to_author": 2669,
     "complete": false,
     "atlas_candidates_mapped": 250,
     "atlas_partial_mappings": 4,

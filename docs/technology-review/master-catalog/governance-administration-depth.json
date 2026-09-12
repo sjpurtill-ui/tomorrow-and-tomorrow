@@ -1,0 +1,2465 @@
+[
+  {
+    "field": "D16",
+    "id": "rotating_council_seats",
+    "name": "Rotating Council Seats",
+    "foundations": "household_councils",
+    "mechanism": "Distribute defined council duties through an agreed rotation among eligible participants",
+    "operating_requirement": "Participating households, agreed eligibility and actual time for service",
+    "consequence": "Share service obligations while turnover and exclusion rules have consequences",
+    "status": "authored_draft",
+    "requires_all": [
+      "household_councils"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rotating_council_seats",
+      "local_demonstration": "Distribute defined council duties through an agreed rotation among eligible participants",
+      "operating_requirements": "Participating households, agreed eligibility and actual time for service",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "customary_restitution_schedules",
+    "name": "Customary Restitution Schedules",
+    "foundations": "customary_law,witnessed_obligations",
+    "mechanism": "Compare assessed harms with publicly understood forms of restitution and negotiated exceptions",
+    "operating_requirement": "Recognized forum, evidence, affected parties and available compensation",
+    "consequence": "Structure dispute repair without creating compensation resources or guaranteeing agreement",
+    "status": "authored_draft",
+    "requires_all": [
+      "customary_law",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "customary_restitution_schedules",
+      "local_demonstration": "Compare assessed harms with publicly understood forms of restitution and negotiated exceptions",
+      "operating_requirements": "Recognized forum, evidence, affected parties and available compensation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "intercommunity_oath_compacts",
+    "name": "Intercommunity Oath Compacts",
+    "foundations": "witnessed_obligations,household_councils",
+    "mechanism": "Bind participating communities to publicly witnessed commitments and consequences for breach",
+    "operating_requirement": "Legitimate representatives, communication and continuing reciprocal interest",
+    "consequence": "Support cooperation while trust, enforcement and changed interests remain limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "witnessed_obligations",
+      "household_councils"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "intercommunity_oath_compacts",
+      "local_demonstration": "Bind participating communities to publicly witnessed commitments and consequences for breach",
+      "operating_requirements": "Legitimate representatives, communication and continuing reciprocal interest",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "lineage_succession_rules",
+    "name": "Lineage Succession Rules",
+    "foundations": "genealogical_cross_checking,customary_law",
+    "mechanism": "Specify how recognized kin relationships order claims to an office",
+    "operating_requirement": "Accepted kinship evidence, eligible claimants and a legitimate adjudication forum",
+    "consequence": "Make hereditary succession claims more predictable without requiring their adoption",
+    "status": "authored_draft",
+    "requires_all": [
+      "genealogical_cross_checking",
+      "customary_law"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lineage_succession_rules",
+      "local_demonstration": "Specify how recognized kin relationships order claims to an office",
+      "operating_requirements": "Accepted kinship evidence, eligible claimants and a legitimate adjudication forum",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "council_elected_succession",
+    "name": "Council Elected Succession",
+    "foundations": "household_councils,witnessed_obligations",
+    "mechanism": "Select an officeholder through a defined council decision and transfer procedure",
+    "operating_requirement": "Participating selectors, accepted eligibility and actual handover capacity",
+    "consequence": "Offer an elective succession route with selector interests and contested outcomes",
+    "status": "authored_draft",
+    "requires_all": [
+      "household_councils",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "council_elected_succession",
+      "local_demonstration": "Select an officeholder through a defined council decision and transfer procedure",
+      "operating_requirements": "Participating selectors, accepted eligibility and actual handover capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "succession_regency_arrangements",
+    "name": "Succession Regency Arrangements",
+    "foundations": "public_office_handover",
+    "mechanism": "Delegate limited temporary authority when an eligible officeholder cannot act",
+    "operating_requirement": "Recognized delegation rules, capable delegates and accountable records",
+    "consequence": "Maintain specified functions while limiting or contesting temporary authority",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_office_handover"
+    ],
+    "requires_any": [
+      [
+        "official_mandate_registers",
+        "customary_law"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "succession_regency_arrangements",
+      "local_demonstration": "Delegate limited temporary authority when an eligible officeholder cannot act",
+      "operating_requirements": "Recognized delegation rules, capable delegates and accountable records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Recognized customary delegation can precede formal mandate registers; temporary authority still needs legitimate limits."
+  },
+  {
+    "field": "D16",
+    "id": "confederal_delegate_mandates",
+    "name": "Confederal Delegate Mandates",
+    "foundations": "intercommunity_oath_compacts",
+    "mechanism": "Give community delegates bounded authority and duties to report back",
+    "operating_requirement": "Participating communities, accessible communication and maintained mandates",
+    "consequence": "Coordinate common decisions while retaining limits of delegated consent",
+    "status": "authored_draft",
+    "requires_all": [
+      "intercommunity_oath_compacts"
+    ],
+    "requires_any": [
+      [
+        "official_mandate_registers",
+        "witnessed_obligations"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "confederal_delegate_mandates",
+      "local_demonstration": "Give community delegates bounded authority and duties to report back",
+      "operating_requirements": "Participating communities, accessible communication and maintained mandates",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Publicly witnessed delegate instructions can precede a formal office register; authority remains bounded by the actual compact."
+  },
+  {
+    "field": "D16",
+    "id": "subsidiarity_assignment_review",
+    "name": "Subsidiarity Assignment Review",
+    "foundations": "jurisdiction_boundaries,intergovernmental_compacts",
+    "mechanism": "Compare which level can carry out a function against evidence of capacity and spillovers",
+    "operating_requirement": "Observed service responsibilities, participating authorities and review procedures",
+    "consequence": "Reassign specific responsibilities without assuming central or local control is always superior",
+    "status": "authored_draft",
+    "requires_all": [
+      "jurisdiction_boundaries",
+      "intergovernmental_compacts"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "subsidiarity_assignment_review",
+      "local_demonstration": "Compare which level can carry out a function against evidence of capacity and spillovers",
+      "operating_requirements": "Observed service responsibilities, participating authorities and review procedures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "plurality_vote_counting",
+    "name": "Plurality Vote Counting",
+    "foundations": "tallies,witnessed_obligations",
+    "mechanism": "Choose the eligible option with the greatest valid vote count under declared tie rules",
+    "operating_requirement": "Defined electorate, countable choices, observers and accepted counting procedures",
+    "consequence": "Resolve a vote without claiming that the winner has majority support",
+    "status": "authored_draft",
+    "requires_all": [
+      "tallies",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "plurality_vote_counting",
+      "local_demonstration": "Choose the eligible option with the greatest valid vote count under declared tie rules",
+      "operating_requirements": "Defined electorate, countable choices, observers and accepted counting procedures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "runoff_election_procedures",
+    "name": "Runoff Election Procedures",
+    "foundations": "plurality_vote_counting",
+    "mechanism": "Hold a subsequent restricted choice when a declared first-round condition is unmet",
+    "operating_requirement": "Repeated participation, additional counting resources and accepted rules",
+    "consequence": "Permit a later decisive contest at the cost of time and participation changes",
+    "status": "authored_draft",
+    "requires_all": [
+      "plurality_vote_counting"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "runoff_election_procedures",
+      "local_demonstration": "Hold a subsequent restricted choice when a declared first-round condition is unmet",
+      "operating_requirements": "Repeated participation, additional counting resources and accepted rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "ranked_choice_transfer",
+    "name": "Ranked Choice Transfer",
+    "foundations": "tallies,ratio_proportion",
+    "mechanism": "Transfer ranked ballots under a specified elimination or quota rule",
+    "operating_requirement": "Clearly expressed rankings, trained counters and reproducible count records",
+    "consequence": "Resolve a defined ranked contest while exhaustion and rule choice affect outcomes",
+    "status": "authored_draft",
+    "requires_all": [
+      "tallies",
+      "ratio_proportion"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ranked_choice_transfer",
+      "local_demonstration": "Transfer ranked ballots under a specified elimination or quota rule",
+      "operating_requirements": "Clearly expressed rankings, trained counters and reproducible count records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Expressed ordered preferences are input records, not a separate discovery invented to fill a prerequisite. Specific elimination or quota rules must be stated at adoption."
+  },
+  {
+    "field": "D16",
+    "id": "proportional_seat_allocation",
+    "name": "Proportional Seat Allocation",
+    "foundations": "ratio_proportion,tallies",
+    "mechanism": "Convert valid group vote totals into a fixed number of seats using a declared allocation rule",
+    "operating_requirement": "Defined districts, seat totals, reliable counts and transparent rounding rules",
+    "consequence": "Represent qualifying shares within finite seats without guaranteeing perfect proportionality",
+    "status": "authored_draft",
+    "requires_all": [
+      "ratio_proportion",
+      "tallies"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "proportional_seat_allocation",
+      "local_demonstration": "Convert valid group vote totals into a fixed number of seats using a declared allocation rule",
+      "operating_requirements": "Defined districts, seat totals, reliable counts and transparent rounding rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "compensatory_mixed_representation",
+    "name": "Compensatory Mixed Representation",
+    "foundations": "proportional_seat_allocation,plurality_vote_counting",
+    "mechanism": "Combine constituency selection with a specified compensatory allocation",
+    "operating_requirement": "Reliable component counts, declared compensation rules and eligible candidates",
+    "consequence": "Reduce defined disproportionality while retaining system-specific tradeoffs",
+    "status": "authored_draft",
+    "requires_all": [
+      "proportional_seat_allocation",
+      "plurality_vote_counting"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "compensatory_mixed_representation",
+      "local_demonstration": "Combine constituency selection with a specified compensatory allocation",
+      "operating_requirements": "Reliable component counts, declared compensation rules and eligible candidates",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "public_office_sortition",
+    "name": "Public Office Sortition",
+    "foundations": "household_councils",
+    "mechanism": "Select eligible participants through an auditable random draw with stated exclusions",
+    "operating_requirement": "Known eligible pool, credible draw mechanism and support for selected participants",
+    "consequence": "Distribute access to office without claiming the draw produces expertise or consent",
+    "status": "authored_draft",
+    "requires_all": [
+      "household_councils"
+    ],
+    "requires_any": [
+      [
+        "tallies",
+        "witnessed_obligations"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "public_office_sortition",
+      "local_demonstration": "Select eligible participants through an auditable random draw with stated exclusions",
+      "operating_requirements": "Known eligible pool, credible draw mechanism and support for selected participants",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "A witnessed physical draw can precede formal probability theory or standardized measurement. Eligibility exclusions and actual support remain adopted rules."
+  },
+  {
+    "field": "D16",
+    "id": "representative_recall_procedures",
+    "name": "Representative Recall Procedures",
+    "foundations": "petition_registers,official_mandate_registers",
+    "mechanism": "Trigger and resolve a defined challenge to a representative's continuing mandate",
+    "operating_requirement": "Eligible petitioners, verifiable thresholds, a decision process and replacement rules",
+    "consequence": "Allow removal under declared conditions while political conflict and disruption remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "petition_registers",
+      "official_mandate_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "representative_recall_procedures",
+      "local_demonstration": "Trigger and resolve a defined challenge to a representative's continuing mandate",
+      "operating_requirements": "Eligible petitioners, verifiable thresholds, a decision process and replacement rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "constituency_boundary_review",
+    "name": "Constituency Boundary Review",
+    "foundations": "geometric_survey",
+    "mechanism": "Assess proposed representative districts against declared criteria and population evidence",
+    "operating_requirement": "Accurate maps, population records, review capacity and public challenge",
+    "consequence": "Make boundary effects contestable without erasing competing representation goals",
+    "status": "authored_draft",
+    "requires_all": [
+      "geometric_survey"
+    ],
+    "requires_any": [
+      [
+        "census_rolls",
+        "statistical_sampling"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "constituency_boundary_review",
+      "local_demonstration": "Assess proposed representative districts against declared criteria and population evidence",
+      "operating_requirements": "Accurate maps, population records, review capacity and public challenge",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Qualified sampled population evidence can support review where a full census is unavailable; uncertainty in representation remains visible."
+  },
+  {
+    "field": "D16",
+    "id": "ballot_access_administration",
+    "name": "Ballot Access Administration",
+    "foundations": "electoral_roll_maintenance,procedural_notice",
+    "mechanism": "Apply declared candidate-entry conditions with notice and challenge procedures",
+    "operating_requirement": "Accessible applications, accountable officials and available review",
+    "consequence": "Administer candidate eligibility without treating restrictive rules as a research requirement",
+    "status": "authored_draft",
+    "requires_all": [
+      "electoral_roll_maintenance",
+      "procedural_notice"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ballot_access_administration",
+      "local_demonstration": "Apply declared candidate-entry conditions with notice and challenge procedures",
+      "operating_requirements": "Accessible applications, accountable officials and available review",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "accessible_voting_services",
+    "name": "Accessible Voting Services",
+    "foundations": "accessible_learning_materials",
+    "mechanism": "Provide evaluated voting access while preserving independent choice and ballot secrecy",
+    "operating_requirement": "Suitable materials, trained assistance, accessible locations and privacy arrangements",
+    "consequence": "Enable more eligible participants to vote without transferring their choices to helpers",
+    "status": "authored_draft",
+    "requires_all": [
+      "accessible_learning_materials"
+    ],
+    "requires_any": [
+      [
+        "secret_ballot_procedures",
+        "plurality_vote_counting"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "accessible_voting_services",
+      "local_demonstration": "Provide evaluated voting access while preserving independent choice and ballot secrecy",
+      "operating_requirements": "Suitable materials, trained assistance, accessible locations and privacy arrangements",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Access support is relevant to different voting practices. Where secrecy is adopted it must be preserved; assistants do not acquire another participant's choice."
+  },
+  {
+    "field": "D16",
+    "id": "legislative_amendment_tracking",
+    "name": "Legislative Amendment Tracking",
+    "foundations": "representative_agenda_rules",
+    "mechanism": "Track proposed text changes and their relation to the version being decided",
+    "operating_requirement": "Retained drafts, competent clerks and clear decision records",
+    "consequence": "Prevent disagreement over which text passed without guaranteeing wise policy",
+    "status": "authored_draft",
+    "requires_all": [
+      "representative_agenda_rules"
+    ],
+    "requires_any": [
+      [
+        "formal_archives",
+        "copyist_collation"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "legislative_amendment_tracking",
+      "local_demonstration": "Track proposed text changes and their relation to the version being decided",
+      "operating_requirements": "Retained drafts, competent clerks and clear decision records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Controlled comparison of drafts can precede a permanent formal archive; decision evidence must still identify the accepted text."
+  },
+  {
+    "field": "D16",
+    "id": "bicameral_reconciliation",
+    "name": "Bicameral Reconciliation",
+    "foundations": "representative_agenda_rules",
+    "mechanism": "Resolve differences between separately authorized deliberative bodies through declared procedures",
+    "operating_requirement": "Existing bodies, comparable texts, delegates and accepted reconciliation rules",
+    "consequence": "Reach or fail to reach a common measure with real negotiation and delay",
+    "status": "authored_draft",
+    "requires_all": [
+      "representative_agenda_rules"
+    ],
+    "requires_any": [
+      [
+        "intergovernmental_compacts",
+        "arbitration_procedures"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bicameral_reconciliation",
+      "local_demonstration": "Resolve differences between separately authorized deliberative bodies through declared procedures",
+      "operating_requirements": "Existing bodies, comparable texts, delegates and accepted reconciliation rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Reconciliation can arise from agreements among authorities or agreed arbitration. Learning it does not create a second chamber."
+  },
+  {
+    "field": "D16",
+    "id": "executive_veto_review",
+    "name": "Executive Veto Review",
+    "foundations": "official_mandate_registers,legislative_amendment_tracking",
+    "mechanism": "Define a bounded return or refusal of a measure and the process for reconsideration",
+    "operating_requirement": "Clearly assigned authority, public reasons and functioning review procedure",
+    "consequence": "Add a review step with potential deadlock rather than a universal quality bonus",
+    "status": "authored_draft",
+    "requires_all": [
+      "official_mandate_registers",
+      "legislative_amendment_tracking"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "executive_veto_review",
+      "local_demonstration": "Define a bounded return or refusal of a measure and the process for reconsideration",
+      "operating_requirements": "Clearly assigned authority, public reasons and functioning review procedure",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "ministerial_responsibility_hearings",
+    "name": "Ministerial Responsibility Hearings",
+    "foundations": "evidentiary_hearings,official_mandate_registers",
+    "mechanism": "Require an officeholder to explain actions and evidence to an authorized reviewing body",
+    "operating_requirement": "Accessible records, questioning capacity and consequences defined by adopted rules",
+    "consequence": "Expose administrative conduct without assuming testimony ensures accountability",
+    "status": "authored_draft",
+    "requires_all": [
+      "evidentiary_hearings",
+      "official_mandate_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ministerial_responsibility_hearings",
+      "local_demonstration": "Require an officeholder to explain actions and evidence to an authorized reviewing body",
+      "operating_requirements": "Accessible records, questioning capacity and consequences defined by adopted rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "participatory_budget_allocation",
+    "name": "Participatory Budget Allocation",
+    "foundations": "public_budget_accounts,witnessed_obligations",
+    "mechanism": "Assign a defined portion of available public resources through an adopted participant decision process",
+    "operating_requirement": "Real appropriated funds, eligible proposals, accessible participation and delivery staff",
+    "consequence": "Allow participants to choose bounded expenditure while unfunded wishes remain unfunded",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_budget_accounts",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "participatory_budget_allocation",
+      "local_demonstration": "Assign a defined portion of available public resources through an adopted participant decision process",
+      "operating_requirements": "Real appropriated funds, eligible proposals, accessible participation and delivery staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "citizen_deliberation_panels",
+    "name": "Citizen Deliberation Panels",
+    "foundations": "public_office_sortition,petition_registers",
+    "mechanism": "Support a selected group to examine evidence and produce a reasoned recommendation",
+    "operating_requirement": "Accessible balanced evidence, skilled facilitation and participant time",
+    "consequence": "Generate informed advice while mandate, representativeness and adoption remain distinct",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_office_sortition",
+      "petition_registers"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "citizen_deliberation_panels",
+      "local_demonstration": "Support a selected group to examine evidence and produce a reasoned recommendation",
+      "operating_requirements": "Accessible balanced evidence, skilled facilitation and participant time",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "regulatory_impact_assessment",
+    "name": "Regulatory Impact Assessment",
+    "foundations": "statistical_inference,public_budget_accounts",
+    "mechanism": "Compare proposed rules against stated alternatives, affected groups and uncertain consequences",
+    "operating_requirement": "Relevant evidence, analytical staff and transparent assumptions",
+    "consequence": "Inform a rule choice without treating a forecast as an achieved outcome",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_inference",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regulatory_impact_assessment",
+      "local_demonstration": "Compare proposed rules against stated alternatives, affected groups and uncertain consequences",
+      "operating_requirements": "Relevant evidence, analytical staff and transparent assumptions",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "post_implementation_policy_review",
+    "name": "Post Implementation Policy Review",
+    "foundations": "regulatory_impact_assessment,public_correction_records",
+    "mechanism": "Compare observed policy effects with declared aims and revise the original assessment",
+    "operating_requirement": "Consistent outcome evidence, review independence and authority to reconsider",
+    "consequence": "Support policy learning without assuming all effects are measurable or reversible",
+    "status": "authored_draft",
+    "requires_all": [
+      "regulatory_impact_assessment",
+      "public_correction_records"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "post_implementation_policy_review",
+      "local_demonstration": "Compare observed policy effects with declared aims and revise the original assessment",
+      "operating_requirements": "Consistent outcome evidence, review independence and authority to reconsider",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "administrative_service_standards",
+    "name": "Administrative Service Standards",
+    "foundations": "municipal_service_charters,standard_measures",
+    "mechanism": "Publish measurable response and delivery commitments for defined public services",
+    "operating_requirement": "Staffed service, suitable records and a feasible capacity estimate",
+    "consequence": "Make service performance visible without creating capacity by declaration",
+    "status": "authored_draft",
+    "requires_all": [
+      "municipal_service_charters",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "administrative_service_standards",
+      "local_demonstration": "Publish measurable response and delivery commitments for defined public services",
+      "operating_requirements": "Staffed service, suitable records and a feasible capacity estimate",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "civil_birth_death_registration",
+    "name": "Civil Birth Death Registration",
+    "foundations": "case_records",
+    "mechanism": "Record individual vital events continuously with evidence and correction procedures",
+    "operating_requirement": "Reachable registrars, accepted evidence, records and protection against exclusion",
+    "consequence": "Maintain event histories distinct from periodic population enumeration",
+    "status": "authored_draft",
+    "requires_all": [
+      "case_records"
+    ],
+    "requires_any": [
+      [
+        "census_rolls",
+        "witnessed_obligations"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "civil_birth_death_registration",
+      "local_demonstration": "Record individual vital events continuously with evidence and correction procedures",
+      "operating_requirements": "Reachable registrars, accepted evidence, records and protection against exclusion",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Continuous vital-event records can develop from witnessed events before a complete periodic census; population enumeration and event recording remain distinct."
+  },
+  {
+    "field": "D16",
+    "id": "civil_status_record_correction",
+    "name": "Civil Status Record Correction",
+    "foundations": "civil_birth_death_registration,administrative_appeals",
+    "mechanism": "Investigate and amend mistaken personal status records with retained provenance",
+    "operating_requirement": "Accessible challenges, competent reviewers and reliable linked records",
+    "consequence": "Repair administrative errors without silently changing another person's status",
+    "status": "authored_draft",
+    "requires_all": [
+      "civil_birth_death_registration",
+      "administrative_appeals"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "civil_status_record_correction",
+      "local_demonstration": "Investigate and amend mistaken personal status records with retained provenance",
+      "operating_requirements": "Accessible challenges, competent reviewers and reliable linked records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "residency_registration_services",
+    "name": "Residency Registration Services",
+    "foundations": "procedural_notice",
+    "mechanism": "Maintain declared residence records with accessible updating and challenge",
+    "operating_requirement": "Local registrars, actual resident information and feasible reporting channels",
+    "consequence": "Support territorial service planning while mobility and missing records retain uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "procedural_notice"
+    ],
+    "requires_any": [
+      [
+        "census_rolls",
+        "household_councils"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "residency_registration_services",
+      "local_demonstration": "Maintain declared residence records with accessible updating and challenge",
+      "operating_requirements": "Local registrars, actual resident information and feasible reporting channels",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Local household reporting can support residence records before a complete census. Registration does not create residents or exclude unrecorded people by default."
+  },
+  {
+    "field": "D16",
+    "id": "portable_civic_credentials",
+    "name": "Portable Civic Credentials",
+    "foundations": "civil_status_record_correction",
+    "mechanism": "Allow a verified civic record to be recognized by another participating authority",
+    "operating_requirement": "Accepted evidence, compatible recognition terms and actual delivery",
+    "consequence": "Reduce repeated verification while retaining correction and trust dependencies",
+    "status": "authored_draft",
+    "requires_all": [
+      "civil_status_record_correction"
+    ],
+    "requires_any": [
+      [
+        "credential_reciprocity",
+        "intergovernmental_compacts"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "portable_civic_credentials",
+      "local_demonstration": "Allow a verified civic record to be recognized by another participating authority",
+      "operating_requirements": "Accepted evidence, compatible recognition terms and actual delivery",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Authorities may agree civic recognition directly without first adopting occupational credential reciprocity."
+  },
+  {
+    "field": "D16",
+    "id": "identity_minimization_services",
+    "name": "Identity Minimization Services",
+    "foundations": "personal_data_stewardship",
+    "mechanism": "Verify a specified eligibility fact while limiting unnecessary retained identity data",
+    "operating_requirement": "Qualified verification method, accountable access and appropriate records",
+    "consequence": "Support service eligibility without collecting every personal detail by default",
+    "status": "authored_draft",
+    "requires_all": [
+      "personal_data_stewardship"
+    ],
+    "requires_any": [
+      [
+        "portable_civic_credentials",
+        "witnessed_obligations"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "identity_minimization_services",
+      "local_demonstration": "Verify a specified eligibility fact while limiting unnecessary retained identity data",
+      "operating_requirements": "Qualified verification method, accountable access and appropriate records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "A narrowly attested eligibility fact can precede portable comprehensive credentials; unnecessary identity information need not be collected."
+  },
+  {
+    "field": "D16",
+    "id": "public_service_case_routing",
+    "name": "Public Service Case Routing",
+    "foundations": "administrative_service_standards,jurisdiction_boundaries",
+    "mechanism": "Route a request to the office actually responsible and preserve unresolved obligations",
+    "operating_requirement": "Current responsibility map, staff and functioning handoff channels",
+    "consequence": "Reduce lost requests while real workload and capacity still cause delays",
+    "status": "authored_draft",
+    "requires_all": [
+      "administrative_service_standards",
+      "jurisdiction_boundaries"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "public_service_case_routing",
+      "local_demonstration": "Route a request to the office actually responsible and preserve unresolved obligations",
+      "operating_requirements": "Current responsibility map, staff and functioning handoff channels",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "interagency_record_matching",
+    "name": "Interagency Record Matching",
+    "foundations": "civil_birth_death_registration,machine_readable_record_schemas",
+    "mechanism": "Link authorized records across offices while measuring false matches and omissions",
+    "operating_requirement": "Compatible data, limited access, review staff and correction procedures",
+    "consequence": "Support coordinated service without treating every similarity as identity",
+    "status": "authored_draft",
+    "requires_all": [
+      "civil_birth_death_registration",
+      "machine_readable_record_schemas"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "interagency_record_matching",
+      "local_demonstration": "Link authorized records across offices while measuring false matches and omissions",
+      "operating_requirements": "Compatible data, limited access, review staff and correction procedures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "public_service_interoperability",
+    "name": "Public Service Interoperability",
+    "foundations": "interagency_record_matching,communication_protocol_negotiation",
+    "mechanism": "Specify compatible exchanges of authorized service requests and results",
+    "operating_requirement": "Participating offices, maintained interfaces and accountable access",
+    "consequence": "Coordinate actual service handoffs without merging all records or authorities",
+    "status": "authored_draft",
+    "requires_all": [
+      "interagency_record_matching",
+      "communication_protocol_negotiation"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "public_service_interoperability",
+      "local_demonstration": "Specify compatible exchanges of authorized service requests and results",
+      "operating_requirements": "Participating offices, maintained interfaces and accountable access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "language_access_administration",
+    "name": "Language Access Administration",
+    "foundations": "cultural_translation_practice,administrative_service_standards",
+    "mechanism": "Provide qualified language access for public interactions and consequential records",
+    "operating_requirement": "Competent interpreters or translators, appropriate materials and staff time",
+    "consequence": "Make services more accessible while translation quality and capacity remain limits",
+    "status": "authored_draft",
+    "requires_all": [
+      "cultural_translation_practice",
+      "administrative_service_standards"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "language_access_administration",
+      "local_demonstration": "Provide qualified language access for public interactions and consequential records",
+      "operating_requirements": "Competent interpreters or translators, appropriate materials and staff time",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "mobile_civic_registration",
+    "name": "Mobile Civic Registration",
+    "foundations": "civil_birth_death_registration",
+    "mechanism": "Bring authorized registration capability to otherwise poorly served locations",
+    "operating_requirement": "Qualified staff, transport, suitable records and verified local access",
+    "consequence": "Extend actual registration reach without inventing residents or events",
+    "status": "authored_draft",
+    "requires_all": [
+      "civil_birth_death_registration"
+    ],
+    "requires_any": [
+      [
+        "mobile_instruction_teams",
+        "postal_relay_services"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mobile_civic_registration",
+      "local_demonstration": "Bring authorized registration capability to otherwise poorly served locations",
+      "operating_requirements": "Qualified staff, transport, suitable records and verified local access",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Mobile public service can borrow traveling-team or relay practice; teachers are not required to operate a registrar service."
+  },
+  {
+    "field": "D16",
+    "id": "land_tax_assessment",
+    "name": "Land Tax Assessment",
+    "foundations": "property_registers",
+    "mechanism": "Assess adopted land-tax obligations against recorded parcels and declared valuation rules",
+    "operating_requirement": "Surveyed parcels, competent assessors, notice and appeal capacity",
+    "consequence": "Collect against an explicit base while valuation error and distributional effects remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "property_registers"
+    ],
+    "requires_any": [
+      [
+        "geometric_survey",
+        "standard_measures"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "land_tax_assessment",
+      "local_demonstration": "Assess adopted land-tax obligations against recorded parcels and declared valuation rules",
+      "operating_requirements": "Surveyed parcels, competent assessors, notice and appeal capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Measured parcel evidence may precede a complete geometric survey; valuation uncertainty and appeal remain operating concerns."
+  },
+  {
+    "field": "D16",
+    "id": "harvest_levy_assessment",
+    "name": "Harvest Levy Assessment",
+    "foundations": "crop_calendars,material_accounting",
+    "mechanism": "Assess an adopted levy against observed harvest under declared shares and exemptions",
+    "operating_requirement": "Measured actual harvest, storage, assessors and transport",
+    "consequence": "Transfer a bounded portion of existing produce with household and seed-reserve consequences",
+    "status": "authored_draft",
+    "requires_all": [
+      "crop_calendars",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "harvest_levy_assessment",
+      "local_demonstration": "Assess an adopted levy against observed harvest under declared shares and exemptions",
+      "operating_requirements": "Measured actual harvest, storage, assessors and transport",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "poll_tax_registers",
+    "name": "Poll Tax Registers",
+    "foundations": "census_rolls,public_levies",
+    "mechanism": "Assess a declared per-person obligation against an accountable eligibility register",
+    "operating_requirement": "Eligible population records, collection staff and challenge procedures",
+    "consequence": "Make a specific tax base administrable while fixed burdens affect households unequally",
+    "status": "authored_draft",
+    "requires_all": [
+      "census_rolls",
+      "public_levies"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "poll_tax_registers",
+      "local_demonstration": "Assess a declared per-person obligation against an accountable eligibility register",
+      "operating_requirements": "Eligible population records, collection staff and challenge procedures",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "customs_valuation_procedures",
+    "name": "Customs Valuation Procedures",
+    "foundations": "commodity_quality_grading,public_levies",
+    "mechanism": "Assess declared border charges against classified goods and a stated valuation rule",
+    "operating_requirement": "Actual trade goods, inspectors, records and review capacity",
+    "consequence": "Collect adopted trade charges while delay, evasion and trade effects remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "commodity_quality_grading",
+      "public_levies"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "customs_valuation_procedures",
+      "local_demonstration": "Assess declared border charges against classified goods and a stated valuation rule",
+      "operating_requirements": "Actual trade goods, inspectors, records and review capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "excise_duty_accounts",
+    "name": "Excise Duty Accounts",
+    "foundations": "material_accounting,public_levies",
+    "mechanism": "Track adopted product-specific duties through defined production or release events",
+    "operating_requirement": "Observed taxable output, accountable records and inspectors",
+    "consequence": "Collect only from actual liable transactions while administrative costs persist",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting",
+      "public_levies"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "excise_duty_accounts",
+      "local_demonstration": "Track adopted product-specific duties through defined production or release events",
+      "operating_requirements": "Observed taxable output, accountable records and inspectors",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "income_tax_assessment",
+    "name": "Income Tax Assessment",
+    "foundations": "public_levies",
+    "mechanism": "Assess adopted personal or organizational income obligations under declared recognition rules",
+    "operating_requirement": "Income evidence, competent staff, filing access and appeal processes",
+    "consequence": "Apply a measured income-based charge without assuming perfect reporting",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_levies"
+    ],
+    "requires_any": [
+      [
+        "profit_loss_allocation",
+        "material_accounting"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "income_tax_assessment",
+      "local_demonstration": "Assess adopted personal or organizational income obligations under declared recognition rules",
+      "operating_requirements": "Income evidence, competent staff, filing access and appeal processes",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Income evidence can arise from different accounting traditions; a partnership profit-sharing institution is not mandatory."
+  },
+  {
+    "field": "D16",
+    "id": "progressive_tax_schedules",
+    "name": "Progressive Tax Schedules",
+    "foundations": "income_tax_assessment,ratio_proportion",
+    "mechanism": "Calculate liabilities using declared marginal bands and allowances",
+    "operating_requirement": "Defined tax base, published schedules and competent calculation",
+    "consequence": "Apply chosen burden distribution while revenue and behavior depend on actual incomes",
+    "status": "authored_draft",
+    "requires_all": [
+      "income_tax_assessment",
+      "ratio_proportion"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "progressive_tax_schedules",
+      "local_demonstration": "Calculate liabilities using declared marginal bands and allowances",
+      "operating_requirements": "Defined tax base, published schedules and competent calculation",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "withholding_collection",
+    "name": "Withholding Collection",
+    "foundations": "income_tax_assessment,public_budget_accounts",
+    "mechanism": "Collect an adopted portion of liability at the payment source and reconcile later obligations",
+    "operating_requirement": "Participating payers, actual payments, records and refund or adjustment capacity",
+    "consequence": "Change collection timing without collecting more than the applicable final obligation by design",
+    "status": "authored_draft",
+    "requires_all": [
+      "income_tax_assessment",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "withholding_collection",
+      "local_demonstration": "Collect an adopted portion of liability at the payment source and reconcile later obligations",
+      "operating_requirements": "Participating payers, actual payments, records and refund or adjustment capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "invoice_credit_taxation",
+    "name": "Invoice Credit Taxation",
+    "foundations": "invoice_verification,public_levies",
+    "mechanism": "Calculate adopted value-added liability by reconciling taxable sales and eligible input credits",
+    "operating_requirement": "Verifiable invoices, filing systems, competent reviewers and refund capacity",
+    "consequence": "Tax defined value added while fraud, delays and compliance costs remain",
+    "status": "authored_draft",
+    "requires_all": [
+      "invoice_verification",
+      "public_levies"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "invoice_credit_taxation",
+      "local_demonstration": "Calculate adopted value-added liability by reconciling taxable sales and eligible input credits",
+      "operating_requirements": "Verifiable invoices, filing systems, competent reviewers and refund capacity",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "tax_expenditure_disclosure",
+    "name": "Tax Expenditure Disclosure",
+    "foundations": "public_budget_accounts",
+    "mechanism": "Estimate revenue implications of adopted exemptions and preferential rules against a declared reference",
+    "operating_requirement": "Tax evidence, explicit baseline and analytical staff",
+    "consequence": "Expose implicit fiscal choices while counterfactual estimates retain uncertainty",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_budget_accounts"
+    ],
+    "requires_any": [
+      [
+        "progressive_tax_schedules",
+        "land_tax_assessment",
+        "customs_valuation_procedures",
+        "excise_duty_accounts"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tax_expenditure_disclosure",
+      "local_demonstration": "Estimate revenue implications of adopted exemptions and preferential rules against a declared reference",
+      "operating_requirements": "Tax evidence, explicit baseline and analytical staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Exemptions can occur under different tax bases; progressive income bands are not universally required."
+  },
+  {
+    "field": "D16",
+    "id": "revenue_sharing_formulas",
+    "name": "Revenue Sharing Formulas",
+    "foundations": "intergovernmental_compacts,public_budget_accounts",
+    "mechanism": "Allocate actual shared receipts through a published rule among participating authorities",
+    "operating_requirement": "Measured collections, agreed shares and functioning transfers",
+    "consequence": "Distribute existing revenue without double-counting it as new resources",
+    "status": "authored_draft",
+    "requires_all": [
+      "intergovernmental_compacts",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "revenue_sharing_formulas",
+      "local_demonstration": "Allocate actual shared receipts through a published rule among participating authorities",
+      "operating_requirements": "Measured collections, agreed shares and functioning transfers",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "fiscal_equalization_transfers",
+    "name": "Fiscal Equalization Transfers",
+    "foundations": "revenue_sharing_formulas",
+    "mechanism": "Allocate funded transfers against measured differences in fiscal capacity or service need",
+    "operating_requirement": "Credible indicators, real funds and agreed calculation rules",
+    "consequence": "Reduce selected service-resource disparities subject to available revenue and incentives",
+    "status": "authored_draft",
+    "requires_all": [
+      "revenue_sharing_formulas"
+    ],
+    "requires_any": [
+      [
+        "independent_statistical_offices",
+        "statistical_sampling",
+        "census_rolls"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fiscal_equalization_transfers",
+      "local_demonstration": "Allocate funded transfers against measured differences in fiscal capacity or service need",
+      "operating_requirements": "Credible indicators, real funds and agreed calculation rules",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Qualified fiscal-need indicators can be produced through several statistical traditions; creating an independent national office is not mandatory."
+  },
+  {
+    "field": "D16",
+    "id": "intergovernmental_fiscal_consolidation",
+    "name": "Intergovernmental Fiscal Consolidation",
+    "foundations": "public_budget_accounts,revenue_sharing_formulas",
+    "mechanism": "Remove internal transfers when reporting combined public receipts and expenditure",
+    "operating_requirement": "Comparable accounts, transfer identifiers and reconciliation staff",
+    "consequence": "Prevent the same transferred resources from appearing as multiple new expenditures",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_budget_accounts",
+      "revenue_sharing_formulas"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "intergovernmental_fiscal_consolidation",
+      "local_demonstration": "Remove internal transfers when reporting combined public receipts and expenditure",
+      "operating_requirements": "Comparable accounts, transfer identifiers and reconciliation staff",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "public_debt_service_schedules",
+    "name": "Public Debt Service Schedules",
+    "foundations": "public_bond_issuance,treasury_cash_forecasts",
+    "mechanism": "Record actual future principal and financing obligations against due dates and terms",
+    "operating_requirement": "Accurate contracts, payment capacity and accountable treasury work",
+    "consequence": "Expose financing commitments without treating borrowing as permanent income",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_bond_issuance",
+      "treasury_cash_forecasts"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "public_debt_service_schedules",
+      "local_demonstration": "Record actual future principal and financing obligations against due dates and terms",
+      "operating_requirements": "Accurate contracts, payment capacity and accountable treasury work",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "contingent_public_liability_registers",
+    "name": "Contingent Public Liability Registers",
+    "foundations": "future_obligation_disclosure,performance_bonds",
+    "mechanism": "Record conditional public commitments and plausible payment triggers",
+    "operating_requirement": "Complete agreements, competent assessment and maintained exposure records",
+    "consequence": "Make guarantees and contingent claims visible without assuming all will be paid",
+    "status": "authored_draft",
+    "requires_all": [
+      "future_obligation_disclosure",
+      "performance_bonds"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "contingent_public_liability_registers",
+      "local_demonstration": "Record conditional public commitments and plausible payment triggers",
+      "operating_requirements": "Complete agreements, competent assessment and maintained exposure records",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "public_payroll_verification",
+    "name": "Public Payroll Verification",
+    "foundations": "official_mandate_registers,material_accounting",
+    "mechanism": "Match authorized paid roles and actual service evidence before disbursement",
+    "operating_requirement": "Staff records, independent checks and actual treasury funds",
+    "consequence": "Reduce unsupported payments without creating workers or proving quality from attendance",
+    "status": "authored_draft",
+    "requires_all": [
+      "official_mandate_registers",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "public_payroll_verification",
+      "local_demonstration": "Match authorized paid roles and actual service evidence before disbursement",
+      "operating_requirements": "Staff records, independent checks and actual treasury funds",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    }
+  },
+  {
+    "field": "D16",
+    "id": "public_asset_disposal_procedures",
+    "name": "Public Asset Disposal Procedures",
+    "foundations": "public_asset_registers",
+    "mechanism": "Authorize and record transfer or retirement of public assets against declared conditions",
+    "operating_requirement": "Known assets, qualified valuation, custody and accountable proceeds",
+    "consequence": "Dispose of actual assets while revealing losses and conflicts of interest",
+    "status": "authored_draft",
+    "requires_all": [
+      "public_asset_registers"
+    ],
+    "requires_any": [
+      [
+        "competitive_public_tendering",
+        "procurement_acceptance_checks"
+      ]
+    ],
+    "recovery": "Learn through competent visiting scholars or administrators, reciprocal institutional study, purchased research or accountable outside assistance. Pay real travel, access and local adaptation costs. Learning the method does not enact its rules or supply officials, legitimacy, revenue or consent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "public_asset_disposal_procedures",
+      "local_demonstration": "Authorize and record transfer or retirement of public assets against declared conditions",
+      "operating_requirements": "Known assets, qualified valuation, custody and accountable proceeds",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "real travel or record delivery",
+        "finite local adaptation and practiced administration",
+        "continuing staff, public resources and enforceable adopted terms"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; local officials practice the mechanism with accountable records.",
+        "partnership": "Exchange actual institutional evidence and staff effort under agreed access; differences in local authority and legitimacy require adaptation.",
+        "purchased_research": "Commission a specified administrative or comparative question; delivered analysis does not enact policy or guarantee acceptance.",
+        "licensed_or_imported_service": "Pay qualified external clerical, analytical or technical assistance within its capacity; public decision authority remains with the existing responsible institutions.",
+        "reverse_engineering": "Study delivered records or an observable procedure with finite analytical work; documents alone do not transfer tacit skill, consent, legitimacy or enforcement."
+      }
+    },
+    "adoption_contract": {
+      "status": "design_proposal",
+      "learning_enacts_policy": false,
+      "required_for_all_civilizations": false,
+      "operating_rule": "The player or competent existing authority chooses an adopted rule through the current governance system. Knowledge alone changes no office, tax, franchise or right.",
+      "authority_owner": "GovernmentPeopleSystem retains civic officials and daily settlement labor; these definitions introduce no separate government or population authority."
+    },
+    "branching_note": "Accountable retirement or transfer does not require a competitive sale in every case; custody and disposition evidence remain necessary."
+  }
+]
