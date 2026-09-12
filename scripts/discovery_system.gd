@@ -50,7 +50,7 @@ var catalog: Array[Dictionary] = [
 	{"id":"smoking","name":"Smoke Preservation","direction":"Sustenance","chance":0.005,"day":18,"requires":["food_drying"],"signals":["food","fire"],"observation":"Food kept above smoky fires changes texture and lasts longer."},
 	{"id":"cordage","name":"Twisted Cordage","direction":"Materials","chance":0.010,"day":3,"requires":[],"signals":["fiber","construction"],"observation":"Twisted plant fibers hold much more weight than loose strands."},
 	{"id":"basketry","name":"Basketry","direction":"Materials","chance":0.006,"day":12,"requires":["cordage"],"signals":["fiber","storage"],"observation":"Interlaced fibers form containers that remain light and strong."},
-	{"id":"charcoal","name":"Charcoal Production","direction":"Materials","chance":0.004,"day":35,"requires":[],"signals":["fire","timber"],"observation":"Wood heated beneath restricted air leaves an unusually hot-burning residue."},
+	{"id":"charcoal","name":"Charcoal Production","direction":"Materials","chance":0.004,"day":35,"requires":[],"signals":["fire","timber"],"observation":"Wood heated beneath restricted air leaves an unusually hot-burning residue.","effects":{},"production_items":["wood_charcoal"],"production_contract":"A finite workshop converts timber into physical charcoal with paid earth-and-stone tooling. No fuel stock is granted by discovery."},
 	{"id":"clay_shaping","name":"Clay Vessels","direction":"Materials","chance":0.006,"day":15,"requires":[],"signals":["clay","storage"],"observation":"Local wet earth can be shaped into containers before it dries."},
 	{"id":"pit_firing","name":"Pit Firing","direction":"Materials","chance":0.003,"day":50,"requires":["clay_shaping","charcoal"],"signals":["fire","clay"],"observation":"Clay exposed to sustained heat becomes permanently hard."},
 	{"id":"joinery","name":"Wood Joinery","direction":"Infrastructure","chance":0.005,"day":22,"requires":["cordage"],"signals":["timber","construction"],"observation":"Carefully cut wooden members can lock together without cord."},
@@ -112,6 +112,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/optical_instrument_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/refractory_ceramics_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/finery_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/charcoal_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/textile_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/textile_mechanization.gd").entries())
 	catalog.append_array(preload("res://scripts/paper_knowledge.gd").entries())
@@ -684,13 +685,19 @@ func candidate_ids_for_channel(channel:String,civilization_seed:int,limit:int=16
 	for index in mini(limit,scored.size()): result.append(String(scored[index].id))
 	return result
 
+func _alternative_research_stock_met(requirement:Dictionary)->bool:
+	for resource:String in requirement.get("alternative_stocks",{}):
+		var amount:=float(requirement.alternative_stocks[resource])
+		if is_finite(amount) and amount>0.0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0.0))>=amount:return true
+	return false
+
 func _resource_requirements_met(requirements: Array) -> bool:
 	for requirement_variant in requirements:
 		var requirement:Dictionary=requirement_variant
 		var resource_name:=String(requirement.get("resource",""))
 		var needed_stage:=String(requirement.get("stage","recognized"))
 		var minimum_stock:=float(requirement.get("minimum_stock",0.0))
-		var found:=false
+		var found:=_alternative_research_stock_met(requirement)
 		for deposit in WorldSimulation.state.resource_deposits:
 			if String(deposit.get("resource",""))!=resource_name:
 				continue
@@ -718,6 +725,7 @@ func _resource_evidence(requirements:Array)->float:
 			var worked:=clampf(float(deposit.get("lifetime_extracted",0.0))/200.0,0.0,0.35)
 			best=maxf(best,0.65+stage_score*0.25+worked)
 		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>0.0: best=maxf(best,0.82)
+		if _alternative_research_stock_met(requirement):best=maxf(best,0.82)
 		evidence+=best
 	return clampf(evidence/maxf(1.0,float(requirements.size())),0.55,1.25)
 
@@ -901,6 +909,7 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 				if _resource_requirements_met([requirement]):continue
 				var alternative:=" or a returned, studied specimen" if bool(requirement.get("sample_sufficient",false)) and String(requirement.get("stage","recognized")) in ["recognized","surveyed"] else ""
 				if float(requirement.get("minimum_stock",0.0))>0:alternative+=" or %.1f in stores" % float(requirement.minimum_stock)
+				for resource:String in requirement.get("alternative_stocks",{}):alternative+=" or %.1f %s in stores" % [float(requirement.alternative_stocks[resource]),resource]
 				missing.append("%s: %s access%s" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized")),alternative])
 		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days)) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
 		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")

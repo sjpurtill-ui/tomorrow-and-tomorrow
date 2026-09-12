@@ -32,7 +32,8 @@ static func entries()->Array[Dictionary]:
     "observation": "Oxidizing and hammering pig iron removes excess carbon and consolidates workable wrought iron.",
     "effects": {},
     "production_items": [
-      "finery_iron"
+      "finery_iron",
+      "charcoal_finery_iron"
     ],
     "production_contract": "Consumes pig iron, wood-derived fuel and assigned workshop labor to supply wrought iron. Bloomery production remains available; discovery grants no metal or global yield bonus."
   }

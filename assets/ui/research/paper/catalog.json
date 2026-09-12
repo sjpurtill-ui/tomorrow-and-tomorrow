@@ -3218,6 +3218,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/charcoal_retorts.png",
+      "description": "An enclosed vessel separates the wood charge from its heating fire, allowing more controlled carbonization.",
+      "domain": "production",
+      "id": "charcoal_retorts",
+      "name": "Charcoal Retorts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bloomery_charge_control.png",
+      "description": "Measured ore and prepared charcoal charges make the fuel supply and reduction work explicit at the bloomery.",
+      "domain": "production",
+      "id": "bloomery_charge_control",
+      "name": "Bloomery Charge Control",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3739,9 +3755,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 467,
+  "live_count": 469,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 421,
+  "queued_count": 423,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

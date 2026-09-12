@@ -2,6 +2,12 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"wood_charcoal":{"name": "Mound-fired charcoal", "output": "Charcoal", "gate": "charcoal", "materials": {"Timber": 4.0}, "days": 3.0, "tooling": {"Clay": 2.0, "Stone": 2.0}},
+	"retort_charcoal":{"name": "Retort charcoal", "output": "Charcoal", "gate": "charcoal_retorts", "materials": {"Timber": 3.0}, "days": 2.0, "tooling": {"Pressure Vessels": 2.0, "Refractory Bricks": 6.0, "Wrought Iron": 2.0}},
+	"charged_bloomery_iron":{"name": "Measured charcoal bloomery charges", "output": "Wrought Iron", "gate": "bloomery_charge_control", "materials": {"Iron Ore": 3.0, "Charcoal": 1.0}, "days": 3.0, "tooling": {"Stone": 18.0, "Clay": 12.0}},
+	"charcoal_finery_iron":{"name": "Charcoal finery iron", "output": "Wrought Iron", "gate": "finery_forges", "materials": {"Pig Iron": 1.2, "Charcoal": 0.5}, "days": 2.0, "tooling": {"Stone": 8.0, "Clay": 6.0, "Wrought Iron": 2.0}},
+	"charcoal_pig_iron":{"name": "Charcoal-smelted pig iron", "output": "Pig Iron", "gate": "blast_furnace", "materials": {"Iron Ore": 3.0, "Charcoal": 1.0, "Limestone": 0.3}, "days": 3.0, "tooling": {"Refractory Bricks": 12.0, "Wrought Iron": 4.0, "Timber": 4.0}},
+
 	"metallurgical_coke":{"name": "Metallurgical coke", "output": "Coke", "gate": "coke_firing", "materials": {"Coal": 2.0}, "days": 3.0, "tooling": {"Stone": 8.0, "Clay": 6.0}},
 	"blast_pig_iron":{"name": "Coke-smelted pig iron", "output": "Pig Iron", "gate": "blast_furnace", "materials": {"Iron Ore": 3.0, "Coke": 1.0, "Limestone": 0.3}, "days": 2.0, "tooling": {"Refractory Bricks": 12.0, "Wrought Iron": 4.0, "Timber": 4.0}},
 	"finery_iron":{"name": "Fined wrought iron", "output": "Wrought Iron", "gate": "finery_forges", "materials": {"Pig Iron": 1.2, "Timber": 2.0}, "days": 2.0, "tooling": {"Stone": 8.0, "Clay": 6.0, "Wrought Iron": 2.0}},

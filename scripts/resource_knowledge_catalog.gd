@@ -128,10 +128,12 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 		result["production_contract"]="Converts actual coal into coke through finite workshop labor and paid kiln tooling. Coke is a stock consumed by ironmaking, not a global fuel or metal bonus."
 	if id=="blast_furnace":
 		result.effects={}
-		result["production_items"]=["blast_pig_iron"]
-		result.requires=["refractory_furnaces","rope_rigging"]
+		result["production_items"]=["blast_pig_iron","charcoal_pig_iron"]
+		result.requires=["rope_rigging"]
 		result["requires_all"]=result.requires.duplicate()
-		result["learning_routes"]=[{"id":"mine_supported","label":"Mine-supported furnace scale-up","requires_all":["mine_drainage"]},{"id":"metallurgical","label":"Scaling forced-air iron reduction","requires_all":["bloomery_smelting"]}]
-		result["production_contract"]="Preserves the mining-supported approach while allowing established forced-air iron reduction to support furnace scale-up. Refractory practice, lifting organization and actual iron, coal and limestone supplies remain necessary. Imported experimental stocks grant no discovery or operating furnace. Finite workshop batches consume coke, ore and flux after brick and iron tooling is paid, producing pig iron that still needs refining."
+		result["learning_routes"]=[{"id":"mine_supported","label":"Mine-supported furnace scale-up","requires_all":["refractory_furnaces","mine_drainage"]},{"id":"metallurgical","label":"Scaling forced-air iron reduction","requires_all":["refractory_furnaces","bloomery_smelting"]},{"id":"charcoal_furnace","label":"Charcoal and prepared furnace linings","requires_all":["charcoal","refractory_brick_firing","bloomery_smelting"]}]
+		for requirement:Dictionary in result.resource_requirements:
+			if requirement.resource=="Coal":requirement["alternative_stocks"]={"Charcoal":10.0}
+		result["production_contract"]="Preserves the mining-supported approach while allowing established forced-air iron reduction to support furnace scale-up. Refractory practice, lifting organization and actual iron and limestone supplies remain necessary; a prepared-charcoal route replaces the coal and coke foundation. Imported experimental stocks grant no discovery or operating furnace. Finite workshop batches consume coke or charcoal, ore and flux after brick and iron tooling is paid, producing pig iron that still needs refining."
 	if id=="mine_airways":result["production_contract"]="Clears the coal ventilation access blocker after mine-airway knowledge is learned. Routes, construction staffing, logistics, access preparation and extraction labor remain required; no coal stock is granted. Adopted practice also contributes bounded mine safety."
 	return result
