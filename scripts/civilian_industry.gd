@@ -2,6 +2,13 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"refined_tin":{"name": "Tin Smelting", "output": "Refined Tin", "gate": "tin_smelting", "materials": {"Tin Ore": 2.0, "Charcoal": 1.0}, "days": 3.0, "tooling": {"Clay": 5.0, "Stone": 5.0}},
+	"steel_sheet":{"name": "Sheet Steel Rolling", "output": "Steel Sheets", "gate": "sheet_steel_rolling", "materials": {"Steel": 1.0}, "days": 3.0, "tooling": {"Steel": 4.0, "Shaft Bearings": 2.0}},
+	"tinplate":{"name": "Tinplate Coating", "output": "Tinplate", "gate": "tinplate_coating", "materials": {"Steel Sheets": 1.0, "Refined Tin": 0.1}, "days": 3.0, "tooling": {"Wrought Iron": 3.0, "Clay": 3.0}},
+	"food_can_sets":{"name": "Can Body Forming", "output": "Food Can Sets", "gate": "can_body_forming", "materials": {"Tinplate": 1.0}, "days": 2.0, "tooling": {"Steel": 3.0, "Shaft Bearings": 1.0}},
+	"seaming_head":{"name": "Double Seaming", "output": "Seaming Heads", "gate": "double_seaming", "materials": {"Steel": 2.0, "Shaft Bearings": 1.0}, "days": 4.0, "tooling": {"Steel": 3.0, "Stone": 3.0}},
+	"food_retort":{"name": "Food Retorts", "output": "Food Retorts", "gate": "food_retorts", "materials": {"Pressure Vessels": 2.0, "Wrought Iron": 2.0}, "days": 5.0, "tooling": {"Steel": 2.0, "Glass": 1.0}},
+
 	"wood_charcoal":{"name": "Mound-fired charcoal", "output": "Charcoal", "gate": "charcoal", "materials": {"Timber": 4.0}, "days": 3.0, "tooling": {"Clay": 2.0, "Stone": 2.0}},
 	"retort_charcoal":{"name": "Retort charcoal", "output": "Charcoal", "gate": "charcoal_retorts", "materials": {"Timber": 3.0}, "days": 2.0, "tooling": {"Pressure Vessels": 2.0, "Refractory Bricks": 6.0, "Wrought Iron": 2.0}},
 	"charged_bloomery_iron":{"name": "Measured charcoal bloomery charges", "output": "Wrought Iron", "gate": "bloomery_charge_control", "materials": {"Iron Ore": 3.0, "Charcoal": 1.0}, "days": 3.0, "tooling": {"Stone": 18.0, "Clay": 12.0}},

@@ -3234,6 +3234,62 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/tin_smelting.png",
+      "description": "Selected tin ore is reduced and separated into workable tin for controlled coating and alloying.",
+      "domain": "production",
+      "id": "tin_smelting",
+      "name": "Tin Smelting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sheet_steel_rolling.png",
+      "description": "Repeated roller passes form steel into sheet that can be cut and folded consistently.",
+      "domain": "production",
+      "id": "sheet_steel_rolling",
+      "name": "Sheet Steel Rolling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tinplate_coating.png",
+      "description": "A controlled tin coating protects prepared steel sheet and supplies a useful container material.",
+      "domain": "production",
+      "id": "tinplate_coating",
+      "name": "Tinplate Coating",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/can_body_forming.png",
+      "description": "Sheet blanks become matching can bodies and ends that can be filled and closed at a packing line.",
+      "domain": "nutrition",
+      "id": "can_body_forming",
+      "name": "Can Body Forming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/double_seaming.png",
+      "description": "Controlled rolling joins a filled container body to its end, with seam checks detecting faulty closure.",
+      "domain": "nutrition",
+      "id": "double_seaming",
+      "name": "Double Seaming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_retorts.png",
+      "description": "A controlled heated vessel processes closed food containers in repeatable batches.",
+      "domain": "nutrition",
+      "id": "food_retorts",
+      "name": "Food Retorts",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thermal_process_validation.png",
+      "description": "Measured trials establish processing and closure controls for repeatable preserved food batches.",
+      "domain": "nutrition",
+      "id": "thermal_process_validation",
+      "name": "Thermal Process Validation",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -3755,9 +3811,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 469,
+  "live_count": 476,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 421,
+  "queued_count": 428,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

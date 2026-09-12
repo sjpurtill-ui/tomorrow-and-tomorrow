@@ -1338,3 +1338,16 @@ Manifest: 469 discoveries, 48 reviewed images, 421 queued live images. Full targ
 Task-owned images, import metadata and prompt records. Shared research visual bindings, prompt index, art manifest and status. No simulation or save fields changed.
 
 Verification: all 11 research-visual atlas cases pass with zero errors/failures/skips/orphans, including all bound textures, square runtime limits, mipmaps, full-frame presentation, cache bounds and hidden-information behavior. Manifest export reports 48 verified bindings with no missing assets. These headless checks do not establish native player visual acceptance.
+
+
+## Checkpoint 121: physical container manufacture and thermal canning
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `5c25f57`. No canonical integration or player launch.
+
+Seven authored discoveries and six manufacturing recipes connect refined tin, steel sheet, tinplate, can sets, seaming heads and retorts to a commissioned cannery. The operating plant consumes actual cans, coal and water and reserves Crafting operators. Its finite daily capacity converts surplus perishables to existing preserved food with loss, retaining a conservative three-day demand reserve. Ordinary daily food processing consumes the capacity; learning alone adds neither food nor a global storage bonus. See [Thermal canning](THERMAL_CANNING.md).
+
+Verification: 49 cases pass with zero errors/failures/skips/orphans: canning 5, civilian industry 12, technology tree 9, technology operations 14 and production dependency audit 9. New tests cover real component manufacture, paid commissioning, finite food/input/worker accounting, interruption and scope guards, ordinary food-day conversion and owned save round trip. Initial authoring validation caught the missing explicit operating_plants link; this metadata was added. The ordinary-day test initially assumed plants would be preserved first, but the actual harvest supplied meat and the intended priority selected it; the test now checks total converted input across types. Debug prints removed. The complete rerun passed.
+
+Graph audit: 476 discoveries, 251 explicit routes, no errors; 154 civilian recipes and 12 operating plant types structurally reachable in seven rounds. Ideal-resource research audit reaches all 476. Counts also include 89 military roles and 48 reviewed images; 4,524 discovery identities and 4,952 images remain, including 428 queued live images. Full overhaul incomplete. Historical session 57160 was revalidated live twice this turn and retains its older loaded code; no terminal result or full-history pacing claim.
+
+Task-owned canning knowledge/helper, tests and document. Shared civilian recipes, food processing, operation definitions/save bounds, graph audit, art manifest and status. discovery_system.gd hotspot has one catalog append. No new top-level save fields: stocks and plant/service records use existing structures; older saves remain compatible without stock grants. New service validation limit is 10,000 and conservative worker-record ceiling 24,000. Autonomous cannery investment, demand-sensitive preparation, detailed processing chemistry and full-campaign economic/provisioning acceptance remain outstanding.

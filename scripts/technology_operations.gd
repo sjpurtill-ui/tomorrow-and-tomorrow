@@ -4,6 +4,7 @@ extends RefCounted
 const LIMIT:=1000
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"cannery":{"name":"Thermal food cannery","gate":"thermal_process_validation","requires":["food_retorts","double_seaming"],"cost":{"Food Retorts":1.0,"Seaming Heads":1.0,"Wrought Iron":2.0},"work":16.0,"workers":2.0,"inputs":{"Food Can Sets":0.2,"Coal":0.2,"Freshwater":0.5},"power":0.0,"services":{"food_preservation":10.0}},
 	"microscopy_bench":{"name":"Microscopy bench","gate":"compound_microscopy","requires":["specimen_slide_mounting"],"cost":{"Compound Microscopes":1.0,"Timber":2.0},"work":10.0,"workers":0.5,"inputs":{"Specimen Slides":0.1},"power":0.0,"services":{"specimen_observation":2.0}},
 	"pneumatic_workshop":{"name":"Pneumatic pressing workshop","gate":"pneumatic_pressing","requires":["compressed_air_systems"],"cost":{"Pneumatic Presses":1.0,"Pressure Pipe Fittings":1.0},"work":12.0,"workers":1.0,"inputs":{"Compressed Air":0.5},"power":0.0,"services":{"mechanical_work":3.0}},
 	"solar_array":{"name":"Photovoltaic array","gate":"photovoltaic_power","requires":["cable_insulation"],"cost":{"Photovoltaic Modules":1.0,"Insulated Cable":2.0,"Steel":1.0},"work":12.0,"workers":.2,"inputs":{},"power":0.0,"services":{"electricity":4.0}},
@@ -181,15 +182,15 @@ static func valid(value:Variant)->bool:
 	if not value.plants is Dictionary or value.plants.size()>PLANTS.size():return false
 	for field:String in ["last_day","workers"]:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
-	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>22000:return false
+	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>24000:return false
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
-			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation"]:return false
-			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides"]:return false
+			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation","food_preservation"]:return false
+			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0}:
-		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]

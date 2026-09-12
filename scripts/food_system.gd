@@ -71,6 +71,8 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	for food_type in harvest:
 		WorldSimulation.state.food_stocks[food_type]=float(WorldSimulation.state.food_stocks.get(food_type,0.0))+float(harvest[food_type])
 	var preserved:=_preserve(logistics,makers,traveling)
+	var canned:Dictionary=preload("res://scripts/canning_preservation.gd").preserve(float(demand_breakdown.total),traveling)
+	for food_type:String in canned:preserved[food_type]=float(preserved.get(food_type,0.0))+float(canned[food_type])
 	var spoilage:=_spoil(traveling)
 	var demand:=float(demand_breakdown.total)
 	var army_original:=float(demand_breakdown.get("army_field",0.0))
