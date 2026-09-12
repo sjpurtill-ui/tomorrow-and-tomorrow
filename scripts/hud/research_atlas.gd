@@ -229,6 +229,9 @@ func select(id:String,open_detail:bool=false)->void:
 		if item.known:
 			var operations:VBoxContainer=preload("res://scripts/hud/technology_operations_panel.gd").new()
 			operations.subject=String(item.id);detail_body.add_child(operations)
+			if preload("res://scripts/food_batch_knowledge.gd").METHODS.has(String(item.id)):
+				var food_panel:VBoxContainer=preload("res://scripts/hud/food_batches_panel.gd").new()
+				food_panel.subject=String(item.id);detail_body.add_child(food_panel)
 			if not preload("res://scripts/grain_processing.gd").definition(String(item.id)).is_empty():
 				var grain_panel:VBoxContainer=preload("res://scripts/hud/grain_processing_panel.gd").new()
 				grain_panel.subject=String(item.id);detail_body.add_child(grain_panel)

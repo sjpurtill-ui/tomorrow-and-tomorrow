@@ -1666,6 +1666,126 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/food_pounding_mortars.png",
+      "description": "Break or separate suitable food material through controlled impact in a fitted receptacle. Compatible pounding tools, actual food and labor.",
+      "domain": "nutrition",
+      "id": "food_pounding_mortars",
+      "name": "Food Pounding Mortars",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hand_dough_forming.png",
+      "description": "Shape a prepared dough through repeated hand or simple-tool work. Suitable ingredients, working surface and skilled labor.",
+      "domain": "nutrition",
+      "id": "hand_dough_forming",
+      "name": "Hand Dough Forming",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/dough_leavening.png",
+      "description": "Retain fermentation gases within a prepared dough structure. Flour, water, a maintained ferment and suitable conditions.",
+      "domain": "nutrition",
+      "id": "dough_leavening",
+      "name": "Dough Leavening",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/controlled_baking.png",
+      "description": "Apply a repeatable heating schedule to prepared food. Oven, fuel, monitoring and trained operators.",
+      "domain": "nutrition",
+      "id": "controlled_baking",
+      "name": "Controlled Baking",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fermentation_starter_cultures.png",
+      "description": "Maintain and use characterized cultures for a specified food fermentation. Qualified cultures, suitable substrate, hygiene and controlled process conditions.",
+      "domain": "nutrition",
+      "id": "fermentation_starter_cultures",
+      "name": "Fermentation Starter Cultures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cereal_dehulling.png",
+      "description": "Separate protective grain coverings while limiting loss of edible material. Suitable grain, mechanical tools and practiced separation.",
+      "domain": "nutrition",
+      "id": "cereal_dehulling",
+      "name": "Cereal Dehulling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/starch_washing_separation.png",
+      "description": "Separate suitable starch-rich fractions by controlled washing and settling. Recognized feedstock, suitable water, vessels and labor.",
+      "domain": "nutrition",
+      "id": "starch_washing_separation",
+      "name": "Starch Washing Separation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/postharvest_loss_measurement.png",
+      "description": "Measure quantity and quality losses across defined handling stages with explicit boundaries. Representative observation, scales, condition assessment and records.",
+      "domain": "nutrition",
+      "id": "postharvest_loss_measurement",
+      "name": "Postharvest Loss Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_batch_traceability.png",
+      "description": "Record ingredient sources, processing batches and destinations. Identified lots and reliable handling records.",
+      "domain": "nutrition",
+      "id": "food_batch_traceability",
+      "name": "Food-Batch Traceability",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_process_hazard_analysis.png",
+      "description": "Identify process stages where failure can create a food hazard and define monitored controls. Qualified analysis, validated controls and operating records.",
+      "domain": "nutrition",
+      "id": "food_process_hazard_analysis",
+      "name": "Food-Process Hazard Analysis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_acidity_measurement.png",
+      "description": "Measure a specified acidity property with calibrated food-analysis methods. Qualified testing, representative samples and retained process context.",
+      "domain": "nutrition",
+      "id": "food_acidity_measurement",
+      "name": "Food Acidity Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_water_activity_measurement.png",
+      "description": "Measure available water in a defined food matrix against a validated method. Qualified instrument, representative samples and competent interpretation.",
+      "domain": "nutrition",
+      "id": "food_water_activity_measurement",
+      "name": "Food Water Activity Measurement",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_package_leak_detection.png",
+      "description": "Test finished package integrity through a qualified non-destructive or sampling method. Suitable inspection equipment, samples and rejection controls.",
+      "domain": "nutrition",
+      "id": "food_package_leak_detection",
+      "name": "Food Package Leak Detection",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/food_package_barrier_testing.png",
+      "description": "Measure package transmission and compatibility against a specified food-storage requirement. Representative packages, qualified tests and product evidence.",
+      "domain": "nutrition",
+      "id": "food_package_barrier_testing",
+      "name": "Food Package Barrier Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/humidity_measurement.png",
+      "description": "Measure atmospheric moisture through a qualified method. Suitable instruments, calibration and exposure.",
+      "domain": "nutrition",
+      "id": "humidity_measurement",
+      "name": "Humidity Measurement",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/root_cellars.png",
       "description": "Below-ground stores buffer temperature swings while drainage keeps stored roots away from standing water.",
       "domain": "nutrition",
@@ -4915,9 +5035,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 614,
+  "live_count": 629,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 511,
+  "queued_count": 526,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

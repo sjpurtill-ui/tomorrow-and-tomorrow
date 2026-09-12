@@ -9,6 +9,7 @@ var _forecast_climate_cache:Dictionary={}
 # displayed as roughly 2,400 kcal. Demand is calculated from numeric age,
 # labor, pregnancy, lactation, travel, military, and climate cohorts.
 
+const Batches=preload("res://scripts/food_batches.gd")
 const Grain=preload("res://scripts/grain_processing.gd")
 const Operations=preload("res://scripts/technology_operations.gd")
 const KCAL_PER_RATION := 2400.0
@@ -75,8 +76,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var meal_plan:=preload("res://scripts/food_preparation.gd").plan(logistics,float(demand_breakdown.total),traveling)
 	var grain:=Grain.advance(float(nutrient_report.get("cultivated_harvest",0)),maxf(0,logistics-float(meal_plan.workers)),float(demand_breakdown.total),traveling)
 	WorldSimulation.state.food_stocks["Dry staples"]=maxf(0,float(WorldSimulation.state.food_stocks.get("Dry staples",0))-float(grain.routed))
+	var batches:=Batches.advance(maxf(0,logistics-float(meal_plan.workers)-float(grain.workers)),float(demand_breakdown.total),traveling)
 	var preservation_inputs:Dictionary={}
-	var preserved:=_preserve(maxf(0.0,logistics-float(meal_plan.workers)-float(grain.workers)),makers,traveling,preservation_inputs)
+	var preserved:=_preserve(maxf(0.0,logistics-float(meal_plan.workers)-float(grain.workers)-float(batches.workers)),makers,traveling,preservation_inputs)
 	var canned:Dictionary=preload("res://scripts/canning_preservation.gd").preserve(float(demand_breakdown.total),traveling)
 	for food_type:String in canned:preserved[food_type]=float(preserved.get(food_type,0.0))+float(canned[food_type])
 	var spoilage:=_spoil(traveling)
@@ -140,6 +142,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_forecast_90":forecast_90,
 		"food_diet_quality":diet_quality,
 		"food_preparation":prepared,
+		"food_batches":batches,
+		"food_batch_stock":Batches.available_total(),
+		"food_batch_work":Batches.in_process(),
 		"grain_processing":grain,
 		"grain_stocks":Grain.data().stocks.duplicate(true),
 		"grain_in_process":Grain.in_process(),
@@ -370,6 +375,7 @@ func _spoil(traveling: bool) -> Dictionary:
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
 	if traveling: storage_multiplier*=1.28
+	result["Food batches"]=Batches.spoil(traveling,storage_multiplier)
 	result["Grain processing"]=Grain.spoil(false,storage_multiplier*WorldSimulation.discovery.food_storage_multiplier("Dry staples",traveling))
 	var cooling:=Operations.refrigeration_multiplier(Operations.service("cold_storage") if not traveling else 0.0,WorldSimulation.state.food_stocks)
 	for food_type in FOOD_TYPES:
@@ -383,7 +389,9 @@ func _apply_storage_capacity() -> Dictionary:
 	var losses:={}
 	var capacity:=float(WorldSimulation.state.founding_manifest.get("food_storage_rations",0.0))
 	if "Storage Pits" in WorldSimulation.state.settlement_completed: capacity+=WorldSimulation.state.population_exact*84.0
-	var excess:=maxf(0.0,_stock_total()+Grain.in_process()-capacity)
+	var excess:=maxf(0.0,_stock_total()+Grain.in_process()+Batches.in_process()-capacity)
+	var batch_loss:=Batches.discard(excess)
+	if batch_loss>0:losses["Food batches"]=batch_loss;excess-=batch_loss
 	var grain_loss:=Grain.discard(excess)
 	if grain_loss>0:losses["Grain processing"]=grain_loss;excess-=grain_loss
 	for food_type in ["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"]:
@@ -400,6 +408,10 @@ func _consume(required: float,grain_report:Dictionary={}) -> Dictionary:
 	# Perishables are used first. A small preserved share is deliberately opened
 	# each day so a stocked convoy does not report a nutritionally empty diet.
 	for food_type in ["Fish","Fresh meat","Fresh plants","Dry staples","Preserved food"]:
+		if food_type=="Dry staples":
+			var batch_issue:=Batches.issue(remaining)
+			grain_report["processed"]=float(grain_report.get("processed",0))+float(batch_issue.processed)
+			result["Dry staples"]+=float(batch_issue.amount);remaining-=float(batch_issue.amount)
 		if food_type in ["Dry staples","Preserved food"]:
 			var issued:=Grain.issue(remaining,food_type=="Dry staples")
 			grain_report["amount"]=float(grain_report.get("amount",0))+float(issued.amount)
@@ -458,7 +470,7 @@ func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array
 
 func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictionary,traveling: bool,provision_delivery_ratio:=1.0,milestones:Dictionary={},nutrient_report:Dictionary={}) -> Dictionary:
 	var projected_stocks:Dictionary=WorldSimulation.state.food_stocks.duplicate(true)
-	projected_stocks["Dry staples"]=float(projected_stocks.get("Dry staples",0))+Grain.available_total()
+	projected_stocks["Dry staples"]=float(projected_stocks.get("Dry staples",0))+Grain.available_total()+Batches.available_total()
 	var current_day:=WorldSimulation.state.elapsed_days
 	var environment:=_environment_mix()
 	var climate_key:=[WorldSimulation.state.world_seed,environment.get("position",Vector2.ZERO),environment.get("seasonality_c",12.0),environment.get("growing_season",0.5),environment.get("precipitation",0.5),environment.get("game",0.4),environment.get("water_access",0.0),environment.get("rainfall_variability",0.35)]
@@ -598,7 +610,7 @@ func _food_type_weather_multiplier(food_type:String,weather_factor:float)->float
 func _stock_total() -> float:
 	var total:=0.0
 	for amount in WorldSimulation.state.food_stocks.values(): total+=float(amount)
-	total+=Grain.available_total()
+	total+=Grain.available_total()+Batches.available_total()
 	return total
 
 

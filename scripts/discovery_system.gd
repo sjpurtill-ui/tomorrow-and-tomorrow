@@ -95,6 +95,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/technology_branch_catalog.gd").entries())
 	catalog.append_array(preload("res://scripts/food_preparation.gd").entries())
 	catalog.append_array(preload("res://scripts/grain_processing.gd").entries())
+	catalog.append_array(preload("res://scripts/food_batch_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/food_water_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/military_education_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/civilian_science_knowledge.gd").entries())
@@ -1047,6 +1048,7 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 func _discovery_effect_summary(entry:Dictionary)->String:
 	if not String(entry.get("grain_method","")).is_empty():return String(entry.production_contract)
+	if not String(entry.get("food_batch_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("meal_preparation","")).is_empty():return String(entry.production_contract)
 	if String(entry.get("id",""))=="smoking":return "Adopted smoking converts meat and fish to preserved rations at 82% yield using shared Logistics/Crafting capacity and 0.04 Timber per input ration. Fuel shortages limit output; unavailable during travel."
 	if String(entry.get("id",""))=="food_drying":return "Adopted air drying converts fresh plants to dry staples at 88% yield using shared Logistics/Crafting capacity, without fuel. Unavailable during travel."
