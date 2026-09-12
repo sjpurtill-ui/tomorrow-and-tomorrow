@@ -147,8 +147,7 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 			if not can_supply_equipment(campaign,String(item)):continue
 			var value:=STRATEGY.unit_score(definition,plan)
 			if value>score:chosen=unit;weapon=String(item);score=value
-	if chosen!="":ensure_line(id,weapon,maxi(4,target))
-	if chosen!="" and campaign.aggregate_recruits>0:WorldSimulation.submit(id,{"kind":"train","unit":chosen,"weapon":weapon,"count":campaign.aggregate_recruits})
+	land_training_orders(id,chosen,weapon,target,plan)
 	if campaign.field_armies.is_empty() and int(campaign.home_army.get("troops",0))>=4:
 		WorldSimulation.submit(id,{"kind":"deploy","count":maxi(4,roundi(float(campaign.home_army.troops)*float(plan.deploy_share)))})
 	campaign.command_hierarchy.sync()
@@ -176,6 +175,17 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 			ensure_line(id,equipment,1)
 			WorldSimulation.submit(id,{"kind":"commission","base":int(base.id),"unit":candidate,"count":1})
 	service_orders(id,plan)
+
+static func land_training_orders(id:String,chosen:String,weapon:String,target:int,plan:Dictionary)->void:
+	if chosen.is_empty():return
+	var campaign=WorldSimulation.military
+	var count:=int(campaign.aggregate_recruits)
+	var equipment_target:=maxi(4,target)
+	var support:=preload("res://scripts/combined_arms_recruitment.gd").recommendation(chosen,plan,func(item:String)->bool:return can_supply_equipment(campaign,item))
+	if not support.is_empty():
+		chosen=String(support.unit);weapon=String(support.weapon);count=int(support.count);equipment_target=maxi(4,count)
+	ensure_line(id,weapon,equipment_target)
+	if count>0:WorldSimulation.submit(id,{"kind":"train","unit":chosen,"weapon":weapon,"count":count})
 
 static func can_supply_equipment(campaign:Node,item:String)->bool:
 	if int(campaign.military_inventory.get(item,0))>0:return true

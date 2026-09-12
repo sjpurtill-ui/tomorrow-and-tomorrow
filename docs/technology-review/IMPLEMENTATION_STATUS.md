@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 115: **466 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 116: **466 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1275,3 +1275,14 @@ Three authored discoveries add Skirmisher–Infantry Screens, Engineer–Infantr
 Verification: 48 cases pass with zero errors/failures/skips/orphans: combined-arms doctrine 13, military development 16, military training accounting 10 and technology tree 9. The all-doctrines scenario table now covers all six rules and asserts its size matches the rule set. Each case checks no immediate effect, actual rehearsed effect, an unrelated enemy receiving no benefit and support removal. Existing combat-loss, replacement dilution, current-civilization adoption, preparation integration and save round-trip tests also pass.
 
 Both graph/resource audits complete cleanly: 466 authored discoveries, 240 explicit routes, all 140 civilian recipes and eleven installation types structurally reachable. Manifest: 46 reviewed images, 420 queued live images. These audits are ideal-resource checks, not full-campaign acceptance. Shared files: doctrine rules/catalog and its test suite, art queue and review record; branch documentation is task-owned. No integration-hotspot edits or save fields added. New doctrine IDs require this revision; older saves remain compatible. Role count remains 89. Full-history scope remains incomplete, including 4,534 additional authored identities. Diagnostic session 57160 was confirmed live at the start; no target-completion claim.
+
+
+## Checkpoint 116: autonomous supporting-arm recruitment
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `abb4c00`. No canonical integration or player launch.
+
+The land controller can now choose a bounded supporting contingent for an adopted combined-arms doctrine instead of always sending every recruit to its preferred unit. Existing home-preparation forces and queued trainees count toward the support ratio. Actual recruits, local training gates and supplied/feasible equipment constrain the order. The combat and recruitment calculations share the same support ratio constant. No troops, equipment or tactics are granted; all changes go through ordinary production and training submissions. See [AI combined-arms recruitment](AI_COMBINED_ARMS_RECRUITMENT.md).
+
+Task-owned helper, focused tests and documentation. Shared existing controller, doctrine ratio constant and review record; no integration hotspots or save fields changed. Prior saves remain compatible. Catalog counts remain 466 discoveries, 89 roles and 46 reviewed images. Full-history completion remains unproven and incomplete. Historical diagnostic session 57160 was confirmed live at the start; it retains its older controller code and no target completion is claimed.
+
+Verification: 42 cases pass with zero errors/failures/skips/orphans: supporting-arm recruitment 4, doctrine 13, civilization strategy 15 and military training accounting 10. The new controller test queues 30 skirmishers for 60 spearmen, leaves the other 70 recruits unassigned, preserves total mobilized population and inventory, and suppresses a duplicate support order once trainees are committed. Further checks cover existing/pending support, recruit caps, knowledge/adoption, supply, training policy and unrelated or absent target forces. These do not establish full-campaign composition quality or remote reinforcement delivery.

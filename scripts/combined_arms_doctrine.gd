@@ -1,5 +1,6 @@
 extends RefCounted
 ## Formation-held rehearsal, not a global combat bonus or a player tactic order.
+const SUPPORT_PER_TARGET:=.5
 const RULES={
 	"skirmisher_infantry_screens":{"targets": ["spearman", "line_infantry", "pikeman"], "support": ["skirmisher"], "threats": ["cavalry", "light_cavalry", "armored_cavalry"], "defense": 0.15},
 	"engineer_infantry_security":{"targets": ["combat_engineer"], "support": ["rifle_infantry", "motorized_infantry", "mechanized_infantry", "assault_infantry"], "threats": ["rifle_infantry", "machine_gun_company", "assault_infantry"], "defense": 0.2},
@@ -74,6 +75,6 @@ static func defense(formation:Dictionary,allies:Array,enemies:Array)->float:
 		for f:Dictionary in enemies:
 			var ready:=capacity(f);enemy_total+=ready
 			if f.get("unit","") in rule.threats:threats+=ready
-		var coverage:=clampf(support/maxf(1,targets*.5),0,1)
+		var coverage:=clampf(support/maxf(1,targets*SUPPORT_PER_TARGET),0,1)
 		modifier+=float(rule.defense)*practiced*coverage*(threats/maxf(1,enemy_total))
 	return minf(1.3,modifier)
