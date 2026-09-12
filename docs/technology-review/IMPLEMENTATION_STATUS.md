@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 104: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 105: **453 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1150,3 +1150,14 @@ Graph: 453 discoveries, 227 explicit routes, no errors. Resource dependency audi
 Save compatibility: existing stock and installation records carry instruments, slide inputs and specimen-observation service; bounds cover eleven installation types. Existing records need no new fields; new identities require this revision. Shared files: discovery registration, civilian recipes, installation catalog/validation and panel, society-exchange study loop, graph audit, bounds test, art queue and review records. New optical catalog, observation helper, tests and documentation are task-owned. Government retains labor ownership.
 
 Totals: 453 discoveries, 89 military roles, eleven installation types, 41 reviewed images and 412 queued live images. Another 4,547 discovery identities and the wider operating, acquisition, military, art, pacing and integration scope remain. Limits include optical resolution/quality, staining, sectioning, diagnosis, instrument wear and automatic bench installation. Enabled benches consume their daily preparation supplies even when assistance is unused. Session 57160 was confirmed live at the start; its 250-year target remains unverified on the older loaded 414-discovery revision.
+
+
+## Checkpoint 105: structural production-source and power-bootstrap audit
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `0d23af8`. No canonical integration or player launch.
+
+The common technology graph audit now includes civilian manufacturing and installation closure: named resource sources, tooling dependencies, alternative recipes, by-products and generator bootstrap. A recipe requiring power cannot bootstrap the only generator that could power it; stored-energy capacity is not treated as generation. The standalone tool reports blocked inputs and assumptions explicitly. See [Production dependencies](PRODUCTION_DEPENDENCIES.md).
+
+Verification: seven audit cases pass with zero errors/failures/skips/orphans. They cover nonexistent stocks, self-tooling cycles and alternatives, electricity circularity, dependent by-products, empty storage, invalid numeric requirements and all live recipes/installations. Both standalone and combined audits complete without script errors: 130 civilian recipes and eleven plant types reachable; 453 discovery identities, 227 explicit routes, no graph errors. An initial standalone script loaded an autoload-dependent plant script too early; runtime loading after autoload initialization corrected that harness issue before evidence was accepted.
+
+No gameplay, save, catalog count or artwork changes. Files are task-owned audit helper/entry point/tests/documentation plus the existing graph audit and review records. This does not prove finite production or full-history pacing: raw resources and methods are assumed available, and military recipes outside the civilian product catalog are excluded. Coupled research/material/energy and full-campaign evidence remain explicit unfinished work. The active long diagnostic was re-polled live at the start; its target completion is not claimed.
