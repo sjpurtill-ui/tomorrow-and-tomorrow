@@ -2,7 +2,7 @@
 
 The user approved the design on September 10, 2026. The target remains 5,000 distinct discoveries across the full historical and future span. The 600 review candidates are subject names awaiting individual production contracts; they are not 600 implemented discoveries.
 
-Current branch state after checkpoint 114: **463 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
+Current branch state after checkpoint 115: **466 live discoveries**, against the 5,000-discovery target. Earlier checkpoint counts below are historical.
 
 ## First checkpoint: routes and purchased studies
 
@@ -1264,3 +1264,14 @@ Diode Control Stores receives a separately generated subject illustration of tec
 No gameplay or save change. Task-owned PNG/import metadata and prompt; shared research binding, art manifest, prompt index and review record. Native player presentation remains unverified. Full-history work remains active and incomplete. Historical diagnostic session 57160 was confirmed live at the start; no terminal result is claimed.
 
 Verification: both headless imports exit cleanly; all eleven atlas cases pass with zero errors/failures/skips/orphans, covering 46 explicit bindings and the shared texture/cache constraints. Runtime image uses the 768-pixel limit and mipmaps. Manifest: 463 live discoveries, 46 verified illustrations and 417 queued live images. Latest inspected historical snapshot: year 208, population 29,343, 234 known discoveries, 17 settlements.
+
+
+## Checkpoint 115: three additional combined-arms research practices
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-technology-implementation`, branch `codex/technology-implementation`, original base `940d5a2ad848d9f45b8d98825cd5219a3eda83e9`; preceding commit `2208ffc`. General campaign design read before military work. No canonical integration or player launch.
+
+Three authored discoveries add Skirmisher–Infantry Screens, Engineer–Infantry Security and Infantry–Antitank Coordination. Each enables formation-held rehearsal with actual supporting troops, and a bounded defense effect only against specified threats. Research alone has no immediate effect; removing support removes protection. Existing gradual preparation, ammunition/equipment/condition dependence, replacement dilution and aggregate combat resolution remain in use. No direct cohort controls, free troops, extra unit archetypes or automatic breaches. See [Expanded combined arms](EXPANDED_COMBINED_ARMS.md).
+
+Verification: 48 cases pass with zero errors/failures/skips/orphans: combined-arms doctrine 13, military development 16, military training accounting 10 and technology tree 9. The all-doctrines scenario table now covers all six rules and asserts its size matches the rule set. Each case checks no immediate effect, actual rehearsed effect, an unrelated enemy receiving no benefit and support removal. Existing combat-loss, replacement dilution, current-civilization adoption, preparation integration and save round-trip tests also pass.
+
+Both graph/resource audits complete cleanly: 466 authored discoveries, 240 explicit routes, all 140 civilian recipes and eleven installation types structurally reachable. Manifest: 46 reviewed images, 420 queued live images. These audits are ideal-resource checks, not full-campaign acceptance. Shared files: doctrine rules/catalog and its test suite, art queue and review record; branch documentation is task-owned. No integration-hotspot edits or save fields added. New doctrine IDs require this revision; older saves remain compatible. Role count remains 89. Full-history scope remains incomplete, including 4,534 additional authored identities. Diagnostic session 57160 was confirmed live at the start; no target-completion claim.

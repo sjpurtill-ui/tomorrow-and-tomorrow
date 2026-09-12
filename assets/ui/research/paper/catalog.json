@@ -2090,6 +2090,30 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/skirmisher_infantry_screens.png",
+      "description": "Skirmishers and formed infantry rehearse withdrawing through one another so a screen can give warning without isolating the main line.",
+      "domain": "security",
+      "id": "skirmisher_infantry_screens",
+      "name": "Skirmisher–Infantry Screens",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/engineer_infantry_security.png",
+      "description": "Infantry and engineer teams rehearse mutual protection while specialists approach defended positions.",
+      "domain": "security",
+      "id": "engineer_infantry_security",
+      "name": "Engineer–Infantry Security",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/infantry_antitank_coordination.png",
+      "description": "Infantry and antitank crews rehearse complementary fields of protection against armored attacks.",
+      "domain": "security",
+      "id": "infantry_antitank_coordination",
+      "name": "Infantry–Antitank Coordination",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/cavalry_infantry_liaison.png",
       "description": "Foot and mounted troops rehearse mutual support so mounted attacks do not meet formed resistance alone.",
       "domain": "security",
@@ -3707,9 +3731,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 463,
+  "live_count": 466,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 417,
+  "queued_count": 420,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

@@ -84,15 +84,22 @@ func test_practice_ceiling_uses_the_current_civilizations_adoption()->void:
 
 func test_each_doctrine_needs_its_specific_target_support_and_threat()->void:
 	var cases:=[
+		["skirmisher_infantry_screens","spearman","spear","skirmisher","bow","cavalry","lance"],
+		["engineer_infantry_security","combat_engineer","engineering_kit","rifle_infantry","service_rifle","machine_gun_company","machine_gun"],
+		["infantry_antitank_coordination","rifle_infantry","service_rifle","anti_tank","anti_tank_kit","armored_formation","armored_vehicle"],
 		["cavalry_infantry_liaison","cavalry","lance","spearman","spear","pikeman","pike"],
 		["gun_line_security","field_artillery","field_gun","rifle_infantry","service_rifle","cavalry","lance"],
 		["infantry_tank_cooperation","armored_formation","armored_vehicle","rifle_infantry","service_rifle","anti_tank","anti_tank_kit"]
 	]
+	assert_int(cases.size()).is_equal(D.RULES.size())
 	for example:Array in cases:
 		var a:Dictionary=sim.create_formation_force("Mixed",[group(example[1],example[2]),group(example[3],example[4])])
 		var b:Dictionary=sim.create_formation_force("Threat",[group(example[5],example[6])])
+		assert_float(float(sim.evaluate_force(a,b)[0].doctrine_defense)).is_equal(1.0)
 		for n in 40:a=sim.advance_preparation_day(a,{"doctrine_levels":{example[0]:1.0},"doctrine_supply":1.0}).force
 		assert_float(float(sim.evaluate_force(a,b)[0].doctrine_defense)).is_equal(1.0+float(D.RULES[example[0]].defense))
+		var unrelated:Dictionary=sim.create_formation_force("Unrelated threat",[group("levy","improvised")])
+		assert_float(float(sim.evaluate_force(a,unrelated)[0].doctrine_defense)).is_equal(1.0)
 		a.formations.pop_back()
 		assert_float(float(sim.evaluate_force(a,b)[0].doctrine_defense)).is_equal(1.0)
 
