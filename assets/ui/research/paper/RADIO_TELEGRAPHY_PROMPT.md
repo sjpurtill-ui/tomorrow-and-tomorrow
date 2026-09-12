@@ -1,0 +1,13 @@
+# Radio telegraphy subject art
+
+Generated with the built-in image-generation tool. Style reference: `apprentice_contracts.png`. Source: `exec-002664ec-8b21-45b1-b248-a92b00569b0b.png` in the thread's generated-images directory. Final asset: `radio_telegraphy.png`.
+
+Visual review: warm fibrous paper, abundant negative space, matte restrained gouache, two operators visibly using a telegraph key and valve receiver, wired headphones, aerial mast, quiet coastal setting. No lettering or UI. Approved aesthetic matched; this records assistant visual inspection, not new user approval.
+
+## Exact prompt
+
+Create a square technology-tree illustration for Tomorrow and Tomorrow, subject RADIO TELEGRAPHY. The supplied image is a STYLE reference only, not an edit target: preserve its visual language, not its ancient tools or scene. Exact aesthetic: sparse matte gouache and dry-brush print on warm ivory fibrous paper, flat simplified silhouettes, almost featureless faces, distressed pigment grain and irregular brush edges, restrained charcoal, dark olive, muted ochre and terracotta. Depict two early radio operators at a plain wooden table in a modest coastal wireless station: one seated operator wears simple wired headphones and rests a hand on a brass telegraph key, another checks a compact dark wooden receiver and a few small valve components, with real wires leading toward a thin aerial mast. Plain shirts and work trousers appropriate to early electrical communications. A distant sea horizon indicated by a single muted slate blue brush stroke. Clear human action and recognizable telegraph equipment, not a museum object diagram. Keep figures, equipment and most structures in the lower third of the square; abundant untouched ivory paper above. A thin aerial wire can rise into the open space without filling it. Understated scene, broad confident shapes, quiet concentration. No readable text, no lettering, no labels, no symbols for radio waves, no logos, border or UI. No glossy rendering, photorealism, cinematic light, intricate facial detail or crowded background. Match the provided paper-and-gouache style closely.
+
+## Integration
+
+Art-only worktree `codex/communications-art`, base `604567c4bc6ae414ff256238a52e57513ed67d8c`. Requires the communications runtime batch before auditing live discovery bindings. The integrator should regenerate the combined live art catalog after merging. No runtime counts or catalog snapshot are changed here. The PNG was visually inspected at full resolution. Initial full headless import crashed while beginning unrelated font import; a single-threaded retry imported the asset. Mipmaps are enabled to match existing subject paintings.
