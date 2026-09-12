@@ -1,0 +1,14 @@
+{
+  "verified_baseline_discoveries": 556,
+  "pending_communications": 48,
+  "new_authored_drafts": 120,
+  "distinct_accounted_identities": 724,
+  "remaining_identities_to_author": 4276,
+  "target": 5000,
+  "draft_missing_parents": [],
+  "draft_unreachable_nodes": [],
+  "review_candidates_not_added_to_count": 600,
+  "branch_alternatives": 8,
+  "complete": false,
+  "validation_scope": "Identity and AND/OR reachability only; not historical review, operating implementation or campaign pacing."
+}
