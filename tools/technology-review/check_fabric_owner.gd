@@ -21,7 +21,17 @@ func run()->void:
   state.known_discoveries.append(method)
   state.known_discoveries.append_array(["seasonal_patterns","geometric_survey"])
   state.discovery_adoption[method]=1.0
-  state.resource_stockpiles["Building Shade Lattices"]=1.0
+  state.resource_stockpiles["Timber"]=10.0
+  state.resource_stockpiles["Fiber Plants"]=2.0
+  var recommendation:Dictionary=load("res://scripts/building_material_investment.gd").fabric_recommendation()
+  assert(recommendation.get("item","")=="building_shade_lattices")
+  assert(float(state.resource_stockpiles.get("Building Shade Lattices",0))==0)
+  assert(WorldSimulation.military.start_production_line(String(recommendation.item),1).get("ok",false))
+  var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+  load("res://scripts/persistent_production.gd").advance(WorldSimulation.military,job,3.0)
+  assert(float(state.resource_stockpiles.get("Building Shade Lattices",0))==1.0)
+  assert(float(state.resource_stockpiles["Timber"])<10.0)
+  WorldSimulation.military.cancel_equipment_job(int(job.id))
   var plot:Dictionary=state.settlement_plots[0]
   plot.status="active"
   # Let the real monthly owner select a supplied job without a direct start call.
