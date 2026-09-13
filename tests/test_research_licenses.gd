@@ -400,3 +400,35 @@ func test_paid_polymer_license_processes_imported_measured_feed_slowly_without_m
 	Production.advance(MilitaryCampaign,job,100.0)
 	assert_dict(GameState.resource_stockpiles).is_equal(before)
 	assert_int(int(job.completed)).is_equal(1)
+
+func test_paid_grinding_license_makes_traceable_parts_at_reduced_rate()->void:
+	prepare()
+	var subject:="cylindrical_grinding"
+	E.owner_state("neighbor").known_discoveries.append(subject)
+	E.owner_state("neighbor").discovery_adoption[subject]=1.0
+	var payment:=float(GameState.resource_stockpiles.Stone)
+	license_trip(subject)
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(payment)
+	assert_bool(L.active(subject)).is_true()
+	assert_bool(subject in GameState.known_discoveries).is_false()
+	# Externally supplied equipment/feed fixture; the license journey is real.
+	var spec:Dictionary=preload("res://scripts/civilian_industry.gd").product("cylindrical_ground_shaft_candidates")
+	for field:String in ["tooling","materials"]:
+		for item:String in spec[field]:GameState.resource_stockpiles[item]=100.0
+	var ops=preload("res://scripts/technology_operations.gd")
+	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":100.0}
+	assert_bool(MilitaryCampaign.start_production_line("cylindrical_ground_shaft_candidates",2).get("ok",false)).is_true()
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	Production.advance(MilitaryCampaign,job,3.0)
+	assert_int(int(job.completed)).is_equal(0)
+	assert_float(float(job.progress_days)).is_equal_approx(1.95,.000001)
+	Production.advance(MilitaryCampaign,job,3.0)
+	assert_int(int(job.completed)).is_equal(1)
+	assert_dict(preload("res://scripts/abrasive_inspection.gd").data().records).is_not_empty()
+	assert_bool(subject in GameState.known_discoveries).is_false()
+	GameState.elapsed_days=int(L.records()[subject].expires_day)
+	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":100.0}
+	var before:=GameState.resource_stockpiles.duplicate(true)
+	Production.advance(MilitaryCampaign,job,100.0)
+	assert_dict(GameState.resource_stockpiles).is_equal(before)
+	assert_int(int(job.completed)).is_equal(1)

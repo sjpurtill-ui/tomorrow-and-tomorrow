@@ -2,6 +2,7 @@ extends RefCounted
 ## Persistent workshop lines share the existing Crafting pool with civilian work.
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
+const Abrasive=preload("res://scripts/abrasive_inspection.gd")
 const Samples=preload("res://scripts/polymer_samples.gd")
 const Exposure=preload("res://scripts/exposure_production.gd")
 const MAX_TARGET := 1000000000
@@ -86,6 +87,9 @@ static func startup_blockers(host:Node,item:String,installed:Dictionary={})->Arr
 	if host.production_labor_share<=0:result.append("No crafting labor assigned to workshop production. Increase the workshop crafting share.")
 	if float(staff.workers)<=0:result.append("No available craftspeople. Assign crafting work in your cities.")
 	elif float(staff.condition_factor)<=0:result.append("Workforce or workplaces cannot operate. Restore health and usable workshops.")
+	var spec:=Industry.product(item)
+	if spec.has("abrasive_candidate") and not Abrasive.capacity():result.append("Abrasive lot register full.")
+	if spec.has("abrasive_inspection") and Abrasive.selected(spec).is_empty():result.append("No traceable abrasive candidates at this store.")
 	for resource:String in definition.materials:
 		var needed:=float(definition.materials[resource])+float(tooling.get(resource,0));var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
 		if stored<needed:result.append("%s: %.2f in stores; %.2f needed for one item." % [WorldSimulation.resources.display_name(resource),stored,needed])
@@ -136,6 +140,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		var retention:=.65 if String(job.job_type)==String(definition.job_type) else .35
 		job.efficiency=maxf(.10,float(job.efficiency)*retention)
 		Exposure.clear(job)
+		Abrasive.clear(job)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
 		job.required_days=job.work_per_item
 		job.erase("planner_managed")
@@ -156,10 +161,14 @@ static func state(host: Node, job: Dictionary) -> String:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(String(job.item))
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
+	if Industry.product(String(job.item)).has("abrasive_candidate") and not Abrasive.capacity():return "Abrasive lot register full"
 	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
+	var inspection:Dictionary=Industry.product(String(job.item))
+	if inspection.has("abrasive_inspection") and not job.has("abrasive_pending") and Abrasive.selected(inspection).is_empty():return "No traceable abrasive candidates"
+	if job.has("abrasive_pending") and job.abrasive_pending.source_store!=WorldSimulation.state.resource_settlement_id:return "Inspection belongs to another store"
 	var needs_specimen:=Industry.product(String(job.item)).has("exposure_days") and not job.has("exposure_started_day")
 	for resource in job.materials:
-		if job.has("exposure_started_day"):continue
+		if job.has("exposure_started_day") or job.has("abrasive_pending"):continue
 		var available:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
 		if needs_specimen and available<float(job.materials[resource]):return "Missing "+WorldSimulation.resources.display_name(String(resource))+" for full specimen"
 		if float(job.materials[resource])>0 and available<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
@@ -197,6 +206,9 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.has("abrasive_inspection"):
+		Abrasive.advance(job,work)
+		return
 	if exposure_spec.has("exposure_days"):
 		Exposure.advance(job,exposure_spec,work)
 		return
@@ -231,6 +243,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		# Yield belongs to the authored recipe, never mutable saved job metadata.
 		var definition:=Industry.product(String(job.item))
 		Samples.completed(String(job.item),produced)
+		Abrasive.record(job,produced)
 		var yields:Dictionary=definition.get("co_products",{}).duplicate()
 		yields[String(definition.output)]=1.0
 		for resource:String in yields:
@@ -270,6 +283,11 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	var power:=power_per_item(job)
 	result["electricity_per_item"]=power
 	if power>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),preload("res://scripts/technology_operations.gd").service("electricity")/power)
+	if exposure_spec.has("abrasive_inspection"):
+		result["forecast_inspections_per_day"]=result.forecast_output_per_day
+		result["accepted_total"]=int(job.completed)-int(job.get("abrasive_rejected",0))
+		result["rejected_total"]=int(job.get("abrasive_rejected",0))
+		result.forecast_output_per_day=0.0
 	return result
 
 static func validate_saved(payload: Dictionary) -> String:
@@ -291,6 +309,8 @@ static func validate_saved(payload: Dictionary) -> String:
 		if String(job.job_type)=="civilian":
 			var definition:=Industry.product(String(job.item))
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
+		var abrasive_error:=Abrasive.validate_job(job)
+		if not abrasive_error.is_empty():return abrasive_error
 		var exposure_error:=Exposure.validate(job,Industry.product(String(job.item)))
 		if not exposure_error.is_empty():return exposure_error
 		if job.has("installed_tooling"):

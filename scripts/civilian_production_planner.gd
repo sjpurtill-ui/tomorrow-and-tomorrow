@@ -36,6 +36,11 @@ static func study_recommendation(plan_power:bool=false)->Dictionary:
 		if not candidate.is_empty():return candidate
 	return {}
 
+static func usable_input(item:String,input:String)->float:
+	var spec:=I.product(item)
+	if spec.get("abrasive_inspection","")==input:return preload("res://scripts/abrasive_inspection.gd").available(spec)
+	return float(WorldSimulation.state.resource_stockpiles.get(input,0.0))
+
 static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=false)->Dictionary:
 	if path.has(resource) or path.size()>=24:return {}
 	var next:=path.duplicate();next[resource]=true
@@ -67,8 +72,9 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		# reservation. Plan upstream only when the next batch cannot be made.
 		var ready:=true
 		for input:String in recipe.materials:
-			if float(WorldSimulation.state.resource_stockpiles.get(input,0.0))<float(recipe.materials[input]):ready=false;break
+			if usable_input(item,input)<float(recipe.materials[input]):ready=false;break
 		if existing.is_empty():ready=P.startup_blockers(WorldSimulation.military,item,installed).is_empty()
+		elif existing.has("abrasive_pending"):ready=P.state(WorldSimulation.military,existing)=="Working"
 		if ready:
 			var direct_work:=float(recipe.work_per_item)*batches
 			if direct_work<best_work:best={"item":item,"target":target,"work":direct_work};best_work=direct_work
@@ -80,8 +86,11 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		var first:Dictionary={};var possible:=true
 		var work:=float(recipe.work_per_item)*batches
 		for input:String in needed:
-			if float(WorldSimulation.state.resource_stockpiles.get(input,0.0))>=float(needed[input]):continue
-			var upstream:=supply(input,ceili(float(needed[input])),next,plan_power)
+			if usable_input(item,input)>=float(needed[input]):continue
+			var input_target:=ceili(float(needed[input]))
+			if I.product(item).get("abrasive_inspection","")==input:
+				input_target=ceili(float(WorldSimulation.state.resource_stockpiles.get(input,0))+float(needed[input])-usable_input(item,input))
+			var upstream:=supply(input,input_target,next,plan_power)
 			if upstream.is_empty():possible=false;break
 			work+=float(upstream.get("work",0.0))
 			if first.is_empty():first=upstream

@@ -49,6 +49,7 @@ static func valid(mission:Dictionary)->bool:
 	var requested:Variant=mission.get("materials_requested")
 	if limits.is_empty() or not requested is Dictionary or requested.is_empty() or requested.size()>4:return false
 	for resource:Variant in requested:
+		if resource is String and preload("res://scripts/abrasive_inspection.gd").unfinished(resource):return false
 		if not resource is String or not limits.has(resource) or not E.number(requested[resource]) or requested[resource]<=0 or requested[resource]>limits[resource]:return false
 	var cargo:Variant=mission.get("material_cargo",{})
 	if not cargo is Dictionary or cargo.size()>4:return false

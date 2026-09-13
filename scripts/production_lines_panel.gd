@@ -101,8 +101,17 @@ func refresh(editors:bool=false)->void:
 	var condition:=String(line.state)
 	if condition=="Working" and float(line.daily_work)<=0:condition="Waiting for labor or usable workplaces"
 	elif condition=="Working" and line.get("licensed",false):condition="Working under foreign license (65% throughput)"
-	details.text="%s · stock %d · %s\nEfficiency %.0f%% · forecast %.2f/day · last day %d completed\nInputs at this rate: %s\nWork in progress %.0f%% · %.0f%% of military workshop effort" % [condition,int(line.stock),"CONTINUOUS — NO LIMIT" if int(line.target_stock)==0 else "maintain %d" % int(line.target_stock),float(line.efficiency)*100,float(line.forecast_output_per_day),int(line.last_output),", ".join(inputs),float(line.progress_days)/float(line.work_per_item)*100,float(line.share)*100]
+	var forecast:="forecast %.2f/day" % float(line.forecast_output_per_day)
+	if line.has("forecast_inspections_per_day"):
+		forecast="inspection capacity %.2f/day · accepted yield varies" % float(line.forecast_inspections_per_day)
+	details.text="%s · stock %d · %s\nEfficiency %.0f%% · %s · last day %d completed\nInputs at this rate: %s\nWork in progress %.0f%% · %.0f%% of military workshop effort" % [condition,int(line.stock),"CONTINUOUS — NO LIMIT" if int(line.target_stock)==0 else "maintain %d" % int(line.target_stock),float(line.efficiency)*100,forecast,int(line.last_output),", ".join(inputs),float(line.progress_days)/float(line.work_per_item)*100,float(line.share)*100]
 
+	if line.has("accepted_total"):
+		details.text+="\nInspected totals: %d accepted · %d rejected." % [int(line.accepted_total),int(line.rejected_total)]
+	if line.has("abrasive_last"):
+		var check:Dictionary=line.abrasive_last
+		details.text+="\nInspection: %s · %d rejected total." % ["accepted" if check.accepted else "rejected",int(line.get("abrasive_rejected",0))]
+		details.text+="\nSize / form / surface ratios: %.2f / %.2f / %.2f (limit 1.00)." % [float(check.report.size_ratio),float(check.report.form_ratio),float(check.report.surface_ratio)]
 	var coproducts:Array[String]=[]
 	for resource:String in line.get("co_products",{}):coproducts.append("%.2f %s" % [float(line.co_products[resource]),resource])
 	if not coproducts.is_empty():details.text+="\nAlso yields per completed batch: "+", ".join(coproducts)+". Target follows the primary product."
