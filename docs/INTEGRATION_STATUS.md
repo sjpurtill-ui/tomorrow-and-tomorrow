@@ -1,3 +1,9 @@
+## September 13 — polymer feedstock prerequisite
+
+Authored hydrocarbon_steam_cracking as a distinct thermal process with fuel_refining, pressure_vessels and precision_thermometry foundations. Steam dilution, quench, separation, paid heat/feed/water and mixed yields remain required operating behavior. It is not promoted; the polymer worker is implementing its typed upstream and downstream connections. See `technology-review/Polymer Feedstock Closure.md`.
+
+Ledger: **740 integrated +2,554 drafts =3,294 identities**, leaving **1,706 to author and4,260 to implement**. Parent/duplicate checks and15 ledger tests pass. Runtime/art unchanged; no player launch or package rebuild. Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/polymer-feedstock-coverage`, based on `d3e3bf327ef38d917171883bf1fea6b43c487dd5`; catalog-only prerequisite requested by the worker.
+
 ## September 12 — textile operation coverage
 
 Reviewed32 additional textile operations spanning feed preparation, loom setup/insertion, distinct finishing processes, machine knitting and nonwoven formation/bonding. Existing combing, generic weaving, drawloom/Jacquard selection, fulling/calendering and finished filtration qualification are excluded from duplicate counting. Each proposal has a primary mechanism reference, paid outside-learning contracts, explicit process inputs and a downstream consumer; none is counted as runtime behavior.

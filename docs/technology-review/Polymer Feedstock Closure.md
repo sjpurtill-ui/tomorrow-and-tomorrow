@@ -1,0 +1,7 @@
+# Polymer feedstock closure
+
+The polymer worker identified a missing steam-cracking identity. Thermal cracking with steam dilution is distinct from catalytic cracking, and purification cannot manufacture absent monomers. The new authored hydrocarbon_steam_cracking retains fuel_refining, pressure_vessels and precision_thermometry as mandatory game foundations with no catalyst dependency.
+
+It must consume a defined suitable hydrocarbon feed, water, heat, equipment capacity and separation work, and retain mixed yields and losses. Bitumen currently represents the game petroleum resource; that abstraction must not imply raw bitumen is directly suitable cracker feed or that every desired polymer precursor emerges from one generic fraction. Each claimed precursor route still needs material closure and a real consumer. The row remains a proposal until the worker delivery is integrated and verified.
+
+Sources: [Essential Chemical Industry cracking](https://www.essentialchemicalindustry.org/processes/cracking-isomerisation-and-reforming.html), [ethene](https://www.essentialchemicalindustry.org/chemicals/ethene.html), and [BASF operating steam crackers](https://www.basf.com/global/en/who-we-are/organization/locations/europe/german-sites/ludwigshafen/the-site/production/the-production-verbund/Steamcracker). Direct ECI opens timed out, but indexed text confirms the steam-cracking route; BASF independently describes naphtha feed and subsequent mixed-product separation. Prerequisites and operating ledger contracts are game-design inferences.

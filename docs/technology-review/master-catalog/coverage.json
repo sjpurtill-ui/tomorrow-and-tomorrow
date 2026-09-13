@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 740,
   "pending_communications": 0,
-  "new_authored_drafts": 2553,
-  "distinct_accounted_identities": 3293,
-  "remaining_identities_to_author": 1707,
+  "new_authored_drafts": 2554,
+  "distinct_accounted_identities": 3294,
+  "remaining_identities_to_author": 1706,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1197,
+    "assigned_identities": 1198,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2320,11 +2320,11 @@
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 239,
-        "target_slots_not_yet_assigned": 461,
+        "assigned": 240,
+        "target_slots_not_yet_assigned": 460,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 234
+        "authored_drafts": 235
       },
       {
         "id": "H05",
@@ -2356,7 +2356,7 @@
     "D02": 99,
     "D03": 97,
     "D04": 107,
-    "D05": 156,
+    "D05": 157,
     "D06": 53,
     "D07": 70,
     "D08": 95,
@@ -2424,9 +2424,9 @@
       "target": 260,
       "implemented_baseline": 19,
       "pending_communications": 0,
-      "authored_drafts": 156,
-      "accounted": 175,
-      "remaining_to_target": 85
+      "authored_drafts": 157,
+      "accounted": 176,
+      "remaining_to_target": 84
     },
     {
       "id": "D06",

@@ -12004,6 +12004,16 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "3b38175181ac9ab0c853b0e0858a31fd54e7c70b31f564a3ee538ada8908d80d"
+    },
+    {
+      "id": "hydrocarbon_steam_cracking",
+      "name": "Hydrocarbon Steam Cracking",
+      "horizon": "H04",
+      "source_file": "energy-conversion-storage-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified industrial thermal cracking is the authored scope; no invention date or runtime gate is asserted.",
+      "scope_digest": "aaf57ac61bc02e2ae5c08b49acc49406941bb0bdf789a06867d4fe8b61c983df"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
