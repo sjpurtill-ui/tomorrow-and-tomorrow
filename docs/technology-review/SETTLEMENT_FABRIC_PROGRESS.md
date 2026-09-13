@@ -42,3 +42,11 @@ Scope and owner inspection complete. Runtime implementation, component recipes, 
 Added settlement_fabric_knowledge.gd with ten unregistered entries preserving exact authored names and ALL/OR arrays. Added ten finite intermediate recipes to CivilianIndustry. These prepare components, not installed structures; no resulting service or successful inspection is claimed. Current generic timber tooling must be reviewed against available craft tools before delivery.
 
 A Python comparison verified the ten prerequisite copies. Git whitespace check passed. First isolated headless editor import terminated with exit 139 after an engine propagate_notification caller-thread error (/tmp/tt-fabric-import.log); this is a failed import check, not passing runtime evidence. No player was launched or stopped. Installed components, measured rejection, paid retrofit/repair, rendering, save validation, acquisition and supply checks remain unfinished. Delivery remains HELD.
+
+## Paid plot-job state
+
+Added SettlementFabricOperations with ten method/component mappings, start-time debit, one pending job per plot, shared-work input API, same-day guard and an awaiting-inspection state. Assembly never modifies inherited appearance or grants service. Added a headless assertion probe for all ten methods covering missing knowledge, debit, duplicate start, partial work, JSON serialization, exact remaining work, inspection hold and malformed paid state.
+
+Godot check-only parse passed. `--headless --path /Users/seanpurtill/Documents/Codex/tt-settlement-fabric-processes --script tools/technology-review/check_fabric_jobs.gd` passed, exit 0, /tmp/tt-fabric-jobs.log. This is a module test, not daily city scheduling, full save compatibility or supply closure. The earlier editor import failure remains recorded; this narrower invocation did not reproduce it.
+
+The module is not yet connected to plot scheduling or save validation. Inspection acceptance/rejection, selected physical evidence, repair, rendering and all acquisition paths remain outstanding. HELD, unregistered.
