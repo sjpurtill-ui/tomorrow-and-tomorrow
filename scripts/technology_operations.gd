@@ -222,11 +222,11 @@ static func valid(value:Variant)->bool:
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
-			if field=="services" and key not in ["electricity","cold_storage","hammer_work","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records"]:return false
-			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils"]:return false
+			if field=="services" and key not in ["electricity","cold_storage","hammer_work","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records","polymer_reactor_work","polymer_heat_removal","polymer_stirred_work"]:return false
+			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils","Brazed Steel Fittings","Pressure Pipe Fittings","Foam Cold-Store Panels"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}:
-		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]

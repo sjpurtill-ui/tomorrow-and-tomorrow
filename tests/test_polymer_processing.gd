@@ -717,3 +717,38 @@ func test_exposure_waits_for_full_specimen_before_first_and_subsequent_cycles()-
 				s.elapsed_days+=1;Ops.data().last_day=int(s.elapsed_days)
 				P.advance(WorldSimulation.military,job,10000)
 			assert_int(int(job.completed)).is_equal(cycle+1))
+
+func test_operating_polymer_plants_survive_full_save_with_services_and_maintenance()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	var expected:Dictionary={}
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();provision_plants()
+		for day:int in range(1,46):WorldSimulation.state.elapsed_days=day;Ops.advance(day)
+		assert_float(Ops.service("polymer_heat_removal")).is_greater(0.0)
+		assert_float(float(Ops.data().inputs.get("Pressure Pipe Fittings",0))).is_greater(0.0)
+		assert_bool(Ops.valid(Ops.data())).is_true()
+		expected.merge(Ops.data().duplicate(true)))
+	var slot:="polymer_operating_plants_%d"%OS.get_process_id()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear();var result:=SaveSystem.load_game(slot)
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
+	if not result.get("ok",false):return
+	WorldSimulation.scoped("polymers",func()->void:
+		assert_bool(Ops.data()==expected).is_true()
+		var before:=float(WorldSimulation.state.resource_stockpiles["Pressure Pipe Fittings"])
+		Ops.advance(45)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Pressure Pipe Fittings"])).is_equal(before)
+		WorldSimulation.state.elapsed_days=46;Ops.advance(46)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Pressure Pipe Fittings"])).is_less(before))
+
+func test_polymer_service_save_limits_reject_unknown_or_excess_capacity()->void:
+	var ledger:=Ops.empty_state()
+	ledger.services={"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"cold_storage":400000.0}
+	ledger.inputs={"Brazed Steel Fittings":1.0,"Pressure Pipe Fittings":1.0,"Foam Cold-Store Panels":1.0}
+	assert_bool(Ops.valid(ledger)).is_true()
+	for key:String in ledger.services:
+		var bad:=ledger.duplicate(true);bad.services[key]+=1.0
+		assert_bool(Ops.valid(bad)).is_false()
+	ledger.inputs["Invented Catalyst"]=1.0
+	assert_bool(Ops.valid(ledger)).is_false()
