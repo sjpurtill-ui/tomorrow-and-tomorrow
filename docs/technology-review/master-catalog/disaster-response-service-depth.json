@@ -1,0 +1,758 @@
+[
+  {
+    "id": "incident_command_roles",
+    "name": "Incident Command Roles",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "official_mandate_registers",
+      "crew_handoffs"
+    ],
+    "requires_any": [],
+    "foundations": "official_mandate_registers, crew_handoffs",
+    "mechanism": "Assign incident duties and reporting authority.",
+    "operating_requirement": "Authorized leaders, available staff and communicated assignments.",
+    "consequence": "Makes unresolved duties visible; staffing and communication failures still delay action.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate incident command roles using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "incident_command_roles",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Assign incident duties and reporting authority.",
+      "operating_requirements": "Authorized leaders, available staff and communicated assignments.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for incident command roles. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for incident command roles. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded incident command roles planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external incident command roles capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired incident command roles plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://training.fema.gov/EMIWeb/IS/IS700b/Handouts/National_Incident_Management%20System_Third%20Edition_October_2017.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H04 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "unified_response_command",
+    "name": "Unified Response Command",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "incident_command_roles",
+      "intergovernmental_compacts"
+    ],
+    "requires_any": [],
+    "foundations": "incident_command_roles, intergovernmental_compacts",
+    "mechanism": "Agree objectives across responding jurisdictions.",
+    "operating_requirement": "Participating authorities, liaison time and a shared decision record.",
+    "consequence": "Allows coordinated dispatch without erasing separate legal mandates.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate unified response command using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "unified_response_command",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Agree objectives across responding jurisdictions.",
+      "operating_requirements": "Participating authorities, liaison time and a shared decision record.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for unified response command. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for unified response command. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded unified response command planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external unified response command capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired unified response command plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://training.fema.gov/EMIWeb/IS/IS700b/Handouts/National_Incident_Management%20System_Third%20Edition_October_2017.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "incident_action_planning",
+    "name": "Incident Action Planning",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "incident_command_roles",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "foundations": "incident_command_roles, material_accounting",
+    "mechanism": "Match the next response period to achievable tasks.",
+    "operating_requirement": "Current observations, actual resources and accountable task owners.",
+    "consequence": "Revises achievable objectives as needs and available capacity change.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate incident action planning using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "incident_action_planning",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Match the next response period to achievable tasks.",
+      "operating_requirements": "Current observations, actual resources and accountable task owners.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for incident action planning. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for incident action planning. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded incident action planning planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external incident action planning capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired incident action planning plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://training.fema.gov/EMIWeb/IS/IS700b/Handouts/National_Incident_Management%20System_Third%20Edition_October_2017.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H04 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "response_resource_typing",
+    "name": "Response Resource Typing",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures",
+      "procurement_specifications"
+    ],
+    "requires_any": [],
+    "foundations": "standard_measures, procurement_specifications",
+    "mechanism": "Describe deployable capability using comparable criteria.",
+    "operating_requirement": "Inspected equipment, qualified crews and maintained capability records.",
+    "consequence": "Prevents incompatible substitutions from satisfying requests merely by quantity.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate response resource typing using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "response_resource_typing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Describe deployable capability using comparable criteria.",
+      "operating_requirements": "Inspected equipment, qualified crews and maintained capability records.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for response resource typing. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for response resource typing. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded response resource typing planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external response resource typing capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired response resource typing plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://training.fema.gov/EMIWeb/IS/IS700b/Handouts/National_Incident_Management%20System_Third%20Edition_October_2017.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "incident_resource_tracking",
+    "name": "Incident Resource Tracking",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting",
+      "incident_command_roles"
+    ],
+    "requires_any": [],
+    "foundations": "material_accounting, incident_command_roles",
+    "mechanism": "Track requested, traveling and assigned resources.",
+    "operating_requirement": "Returned reports, movement records and dispatch staff.",
+    "consequence": "Keeps committed crews and equipment unavailable to competing assignments.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate incident resource tracking using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "incident_resource_tracking",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Track requested, traveling and assigned resources.",
+      "operating_requirements": "Returned reports, movement records and dispatch staff.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for incident resource tracking. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for incident resource tracking. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded incident resource tracking planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external incident resource tracking capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired incident resource tracking plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usfa.fema.gov/a-z/nims/managing-resources.html"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H04 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "response_demobilization_planning",
+    "name": "Response Demobilization Planning",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "incident_resource_tracking",
+      "incident_action_planning"
+    ],
+    "requires_any": [],
+    "foundations": "incident_resource_tracking, incident_action_planning",
+    "mechanism": "Schedule the return and restoration of response assets.",
+    "operating_requirement": "Release approval, return transport and replacement supplies.",
+    "consequence": "Assets regain availability only after their recorded return and servicing.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate response demobilization planning using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "response_demobilization_planning",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Schedule the return and restoration of response assets.",
+      "operating_requirements": "Release approval, return transport and replacement supplies.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for response demobilization planning. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for response demobilization planning. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded response demobilization planning planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external response demobilization planning capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired response demobilization planning plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usfa.fema.gov/a-z/nims/managing-resources.html"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "evacuation_zone_planning",
+    "name": "Evacuation Zone Planning",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "regional_maps",
+      "hazard_early_warning_services"
+    ],
+    "requires_any": [],
+    "foundations": "regional_maps, hazard_early_warning_services",
+    "mechanism": "Partition threatened areas into actionable movement zones.",
+    "operating_requirement": "Current hazard evidence, mapped populations and reachable destinations.",
+    "consequence": "Limits unnecessary movement while exposing populations without viable routes.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate evacuation zone planning using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "evacuation_zone_planning",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Partition threatened areas into actionable movement zones.",
+      "operating_requirements": "Current hazard evidence, mapped populations and reachable destinations.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for evacuation zone planning. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for evacuation zone planning. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded evacuation zone planning planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external evacuation zone planning capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired evacuation zone planning plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fema.gov/sites/default/files/2020-07/fema_DRRA-1209-planning-considerations-evacuation-shelter-in-place_guide.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H04 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "phased_evacuation_release",
+    "name": "Phased Evacuation Release",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "evacuation_zone_planning",
+      "incident_action_planning"
+    ],
+    "requires_any": [],
+    "foundations": "evacuation_zone_planning, incident_action_planning",
+    "mechanism": "Time zone departures against constrained route capacity.",
+    "operating_requirement": "Current route access, transport capacity and communicated release decisions.",
+    "consequence": "Queues consume time; phased releases can reduce competing flows.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate phased evacuation release using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "phased_evacuation_release",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Time zone departures against constrained route capacity.",
+      "operating_requirements": "Current route access, transport capacity and communicated release decisions.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for phased evacuation release. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for phased evacuation release. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded phased evacuation release planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external phased evacuation release capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired phased evacuation release plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fema.gov/sites/default/files/2020-07/fema_DRRA-1209-planning-considerations-evacuation-shelter-in-place_guide.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "assisted_evacuation_dispatch",
+    "name": "Assisted Evacuation Dispatch",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "evacuation_zone_planning",
+      "accessible_transport_design"
+    ],
+    "requires_any": [],
+    "foundations": "evacuation_zone_planning, accessible_transport_design",
+    "mechanism": "Assign suitable transport to people needing assistance.",
+    "operating_requirement": "Accessible vehicles, helpers, loading time and receiving capacity.",
+    "consequence": "Assistance needs reserve real transport rather than assuming independent travel.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate assisted evacuation dispatch using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "assisted_evacuation_dispatch",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Assign suitable transport to people needing assistance.",
+      "operating_requirements": "Accessible vehicles, helpers, loading time and receiving capacity.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for assisted evacuation dispatch. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for assisted evacuation dispatch. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded assisted evacuation dispatch planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external assisted evacuation dispatch capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired assisted evacuation dispatch plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fema.gov/sites/default/files/2020-07/fema_DRRA-1209-planning-considerations-evacuation-shelter-in-place_guide.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "shelter_in_place_assessment",
+    "name": "Shelter-in-Place Assessment",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "evacuation_zone_planning",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "evacuation_zone_planning, structural_load_testing",
+    "mechanism": "Compare protection at the current location with movement risk.",
+    "operating_requirement": "Hazard duration evidence, suitable structures and local supplies.",
+    "consequence": "A dated recommendation expires when conditions or available protection change.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate shelter-in-place assessment using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "shelter_in_place_assessment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compare protection at the current location with movement risk.",
+      "operating_requirements": "Hazard duration evidence, suitable structures and local supplies.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for shelter-in-place assessment. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for shelter-in-place assessment. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded shelter-in-place assessment planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external shelter-in-place assessment capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired shelter-in-place assessment plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fema.gov/sites/default/files/2020-07/fema_DRRA-1209-planning-considerations-evacuation-shelter-in-place_guide.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "evacuation_reentry_staging",
+    "name": "Evacuation Re-entry Staging",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "phased_evacuation_release",
+      "disaster_damage_assessment"
+    ],
+    "requires_any": [],
+    "foundations": "phased_evacuation_release, disaster_damage_assessment",
+    "mechanism": "Release return movements after destination review.",
+    "operating_requirement": "Current access findings, essential services and communicated authorization.",
+    "consequence": "Return travel waits for supported destinations instead of teleporting displaced people.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate evacuation re-entry staging using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "evacuation_reentry_staging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Release return movements after destination review.",
+      "operating_requirements": "Current access findings, essential services and communicated authorization.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for evacuation re-entry staging. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for evacuation re-entry staging. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded evacuation re-entry staging planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external evacuation re-entry staging capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired evacuation re-entry staging plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fema.gov/sites/default/files/2020-07/fema_DRRA-1209-planning-considerations-evacuation-shelter-in-place_guide.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "evacuation_destination_balancing",
+    "name": "Evacuation Destination Balancing",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "evacuation_zone_planning",
+      "public_service_case_routing"
+    ],
+    "requires_any": [],
+    "foundations": "evacuation_zone_planning, public_service_case_routing",
+    "mechanism": "Allocate arrivals among reachable reception locations.",
+    "operating_requirement": "Returned occupancy counts, transport links and finite shelter supplies.",
+    "consequence": "Redirects new arrivals when a destination fills; capacity is never duplicated.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate evacuation destination balancing using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "evacuation_destination_balancing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Allocate arrivals among reachable reception locations.",
+      "operating_requirements": "Returned occupancy counts, transport links and finite shelter supplies.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for evacuation destination balancing. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for evacuation destination balancing. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded evacuation destination balancing planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external evacuation destination balancing capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired evacuation destination balancing plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fema.gov/sites/default/files/2020-07/fema_DRRA-1209-planning-considerations-evacuation-shelter-in-place_guide.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "disaster_damage_assessment",
+    "name": "Disaster Damage Assessment",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures",
+      "public_asset_registers"
+    ],
+    "requires_any": [],
+    "foundations": "standard_measures, public_asset_registers",
+    "mechanism": "Record observed post-event damage by location.",
+    "operating_requirement": "Qualified assessors, access, baseline assets and dated findings.",
+    "consequence": "Unvisited assets remain uncertain; reports do not repair damage.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate disaster damage assessment using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "disaster_damage_assessment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Record observed post-event damage by location.",
+      "operating_requirements": "Qualified assessors, access, baseline assets and dated findings.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for disaster damage assessment. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for disaster damage assessment. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded disaster damage assessment planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external disaster damage assessment capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired disaster damage assessment plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://emilms.fema.gov/is_0559/groups/211.html"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H04 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "damage_severity_classification",
+    "name": "Damage Severity Classification",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "disaster_damage_assessment",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "disaster_damage_assessment, experimental_controls",
+    "mechanism": "Apply repeatable categories to damaged assets.",
+    "operating_requirement": "Shared criteria, assessor calibration and comparable inspected evidence.",
+    "consequence": "Changes prioritization while retaining ambiguous and disputed classifications.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate damage severity classification using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "damage_severity_classification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Apply repeatable categories to damaged assets.",
+      "operating_requirements": "Shared criteria, assessor calibration and comparable inspected evidence.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for damage severity classification. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for damage severity classification. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded damage severity classification planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external damage severity classification capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired damage severity classification plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://emilms.fema.gov/is_0559/groups/211.html"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "disaster_loss_need_separation",
+    "name": "Disaster Loss and Need Separation",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "disaster_damage_assessment",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "foundations": "disaster_damage_assessment, public_budget_accounts",
+    "mechanism": "Distinguish damaged assets, disrupted flows and recovery costs.",
+    "operating_requirement": "Baseline accounts, verified field records and explicit valuation assumptions.",
+    "consequence": "Prevents adding a destroyed asset and its replacement cost as two damages.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate disaster loss and need separation using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "disaster_loss_need_separation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Distinguish damaged assets, disrupted flows and recovery costs.",
+      "operating_requirements": "Baseline accounts, verified field records and explicit valuation assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for disaster loss and need separation. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for disaster loss and need separation. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded disaster loss and need separation planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external disaster loss and need separation capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired disaster loss and need separation plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.undrr.org/publication/words-action-guidelines-build-back-better-recovery-rehabilitation-and-reconstruction"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "debris_clearance_priorities",
+    "name": "Debris Clearance Priorities",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "disaster_damage_assessment",
+      "incident_action_planning"
+    ],
+    "requires_any": [],
+    "foundations": "disaster_damage_assessment, incident_action_planning",
+    "mechanism": "Rank blocked routes for initial clearance.",
+    "operating_requirement": "Mapped obstructions, authorized crews, equipment and disposal access.",
+    "consequence": "Opens selected links with paid work; other obstructions remain.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate debris clearance priorities using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "debris_clearance_priorities",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Rank blocked routes for initial clearance.",
+      "operating_requirements": "Mapped obstructions, authorized crews, equipment and disposal access.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for debris clearance priorities. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for debris clearance priorities. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded debris clearance priorities planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external debris clearance priorities capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired debris clearance priorities plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://emilms.fema.gov/is_0558/groups/42.html"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H04 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "debris_stream_segregation",
+    "name": "Debris Stream Segregation",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "debris_clearance_priorities",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "foundations": "debris_clearance_priorities, material_accounting",
+    "mechanism": "Separate incompatible debris before further handling.",
+    "operating_requirement": "Sorting space, trained handlers and identified receiving facilities.",
+    "consequence": "Contaminated loads cannot be treated as ordinary recyclable material.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate debris stream segregation using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "debris_stream_segregation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate incompatible debris before further handling.",
+      "operating_requirements": "Sorting space, trained handlers and identified receiving facilities.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for debris stream segregation. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for debris stream segregation. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded debris stream segregation planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external debris stream segregation capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired debris stream segregation plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://emilms.fema.gov/is_0558/groups/42.html"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "temporary_debris_site_management",
+    "name": "Temporary Debris Site Management",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "debris_stream_segregation",
+      "resource_use_permits"
+    ],
+    "requires_any": [],
+    "foundations": "debris_stream_segregation, resource_use_permits",
+    "mechanism": "Control temporary accumulation and onward removal.",
+    "operating_requirement": "Approved land, bounded space, monitoring and transport.",
+    "consequence": "Full sites stop incoming loads until real clearance creates space.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate temporary debris site management using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "temporary_debris_site_management",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Control temporary accumulation and onward removal.",
+      "operating_requirements": "Approved land, bounded space, monitoring and transport.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for temporary debris site management. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for temporary debris site management. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded temporary debris site management planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external temporary debris site management capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired temporary debris site management plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://emilms.fema.gov/is_0558/groups/42.html"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "debris_load_verification",
+    "name": "Debris Load Verification",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "debris_stream_segregation",
+      "procurement_acceptance_checks"
+    ],
+    "requires_any": [],
+    "foundations": "debris_stream_segregation, procurement_acceptance_checks",
+    "mechanism": "Reconcile measured loads with their destinations.",
+    "operating_requirement": "Calibrated volume or mass records, monitors and receipt evidence.",
+    "consequence": "Unsupported or duplicate loads remain unpaid pending review.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate debris load verification using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "debris_load_verification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Reconcile measured loads with their destinations.",
+      "operating_requirements": "Calibrated volume or mass records, monitors and receipt evidence.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for debris load verification. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for debris load verification. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded debris load verification planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external debris load verification capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired debris load verification plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://rtlt.preptoolkit.fema.gov/Public/Resource/View/7-508-1234?q=public+works"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "recovery_project_prioritization",
+    "name": "Recovery Project Prioritization",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "disaster_loss_need_separation",
+      "appropriation_procedures"
+    ],
+    "requires_any": [],
+    "foundations": "disaster_loss_need_separation, appropriation_procedures",
+    "mechanism": "Rank recovery projects against limited funding and work.",
+    "operating_requirement": "Published objectives, affected-community input and project estimates.",
+    "consequence": "Commits scarce budgets transparently without automatically completing projects.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate recovery project prioritization using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "recovery_project_prioritization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Rank recovery projects against limited funding and work.",
+      "operating_requirements": "Published objectives, affected-community input and project estimates.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for recovery project prioritization. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for recovery project prioritization. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded recovery project prioritization planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external recovery project prioritization capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired recovery project prioritization plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.undrr.org/publication/words-action-guidelines-build-back-better-recovery-rehabilitation-and-reconstruction"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  },
+  {
+    "id": "predisaster_recovery_agreements",
+    "name": "Pre-disaster Recovery Agreements",
+    "field": "D16",
+    "status": "authored_draft",
+    "requires_all": [
+      "intergovernmental_compacts",
+      "public_budget_accounts"
+    ],
+    "requires_any": [],
+    "foundations": "intergovernmental_compacts, public_budget_accounts",
+    "mechanism": "Arrange recovery responsibilities before disruption.",
+    "operating_requirement": "Participating authorities, contingent funding and maintained agreements.",
+    "consequence": "Reduces unresolved responsibility but cannot create absent money or staff.",
+    "branching_note": "All mandatory parents apply. Historical horizon is an editorial capability class, never a calendar unlock. Existing owners retain population, worker, stock, authority and transport state; the player gives objectives through conversation.",
+    "recovery": "Acquire attributable instruction or evidence through a reachable capable partner; pay for access and delay, then demonstrate pre-disaster recovery agreements using local staff and available resources.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "predisaster_recovery_agreements",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Arrange recovery responsibilities before disruption.",
+      "operating_requirements": "Participating authorities, contingent funding and maintained agreements.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and finite instructor time for pre-disaster recovery agreements. Rehearse decisions against actual local records; instruction does not supply crews or authority.",
+        "partnership": "Contribute exercise staff and incident evidence for pre-disaster recovery agreements. Partner review consumes time and may reject incompatible assumptions.",
+        "purchased_research": "Commission a bounded pre-disaster recovery agreements planning question. Pay for evidence gathering and test delivered recommendations without a guaranteed useful result.",
+        "licensed_or_imported_service": "Contract finite external pre-disaster recovery agreements capacity. Transport, jurisdiction, continuing payment and provider commitments remain real limits; domestic mastery is not granted.",
+        "reverse_engineering": "Study an acquired pre-disaster recovery agreements plan or operational record. Reconstruct missing context through paid local exercises; possession of forms alone proves no capability."
+      }
+    },
+    "evidence_sources": [
+      "https://www.undrr.org/publication/documents-and-publications/recovery-readiness-framework-and-assessment-tool"
+    ],
+    "implementation_status": "Authored proposal only. Working incident owners, dispatch and service consequences, saved records and autonomous operation are required before promotion.",
+    "historical_scope": "H05 classifies this coordinated service capability; sources describe mechanisms, not invention dates. Parent selection and consequences are game-design proposals."
+  }
+]

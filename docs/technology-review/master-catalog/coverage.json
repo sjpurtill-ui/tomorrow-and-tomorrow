@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 700,
   "pending_communications": 0,
-  "new_authored_drafts": 2461,
-  "distinct_accounted_identities": 3161,
-  "remaining_identities_to_author": 1839,
+  "new_authored_drafts": 2482,
+  "distinct_accounted_identities": 3182,
+  "remaining_identities_to_author": 1818,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1065,
+    "assigned_identities": 1086,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2320,21 +2320,21 @@
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 203,
-        "target_slots_not_yet_assigned": 497,
+        "assigned": 209,
+        "target_slots_not_yet_assigned": 491,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 198
+        "authored_drafts": 204
       },
       {
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 513,
-        "target_slots_not_yet_assigned": 387,
+        "assigned": 528,
+        "target_slots_not_yet_assigned": 372,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 508
+        "authored_drafts": 523
       },
       {
         "id": "H06",
@@ -2367,7 +2367,7 @@
     "D13": 116,
     "D14": 176,
     "D15": 127,
-    "D16": 114,
+    "D16": 135,
     "D17": 115,
     "D18": 92,
     "D19": 95,
@@ -2534,9 +2534,9 @@
       "target": 240,
       "implemented_baseline": 6,
       "pending_communications": 0,
-      "authored_drafts": 114,
-      "accounted": 120,
-      "remaining_to_target": 120
+      "authored_drafts": 135,
+      "accounted": 141,
+      "remaining_to_target": 99
     },
     {
       "id": "D17",

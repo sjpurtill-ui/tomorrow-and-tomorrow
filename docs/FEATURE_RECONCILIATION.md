@@ -1,3 +1,9 @@
+## September 12 — reviewed civilian response coverage
+
+Twenty-one new disaster-response and recovery drafts extend incident assignments, finite evacuation destinations, damage accounting and debris handling. Three overlapping proposed methods were excluded and mapped conceptually to existing procurement, continuity and regulatory review. All 15 ledger-tool checks pass; no duplicate names, missing parents or unreachable drafts. See `technology-review/Disaster Response Service Review.md` for primary sources and future operating acceptance.
+
+Live remains **700 discoveries /482 routes /341 recipes /18 facilities**, with 115 verified illustrations. The authored ledger is **700 integrated + 2,482 drafts = 3,182 identities**, leaving **1,818 to author and 4,300 to implement**. These proposals add no functioning incident system or save state. Clinical care remains HELD in its separate implementation task.
+
 ## September 12 — 700 verified operating discoveries
 
 INTEGRATED runtime `07a8085d9e962b805eddc695a42a0f08f29e5201`: seven metal-processing identities provide twelve paid recipes connecting annealing, carburization, casting, brazing and electric welding to actual wire, gears, vessels, cart beds and rolled sheet. All **68 distinct worktree cases and 40 canonical cases pass**, including demanded generator fuel, shared electricity depletion, imported parts, partial-job saves and existing autonomous production. See `METAL_PROCESS_HANDOFF.md`.

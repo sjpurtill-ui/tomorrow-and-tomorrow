@@ -10684,6 +10684,216 @@
       "classification_status": "editorial_review",
       "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
       "scope_digest": "dd9e160a3906f93d1940d837c70d7e640910335d1bfc6b5bfc7503ce70ae3879"
+    },
+    {
+      "id": "incident_command_roles",
+      "name": "Incident Command Roles",
+      "horizon": "H04",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "284e87ed33866303cf2c02aff50477144579257f7d73dc38a64394c4b48eb013"
+    },
+    {
+      "id": "unified_response_command",
+      "name": "Unified Response Command",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "7c6db0449e8e4a64e34c20d5aa109ade003fcad0f1a9a02121d9bf4a9292bf7a"
+    },
+    {
+      "id": "incident_action_planning",
+      "name": "Incident Action Planning",
+      "horizon": "H04",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "8a0fa4118696894225bed9a42281ece17871ad4d278d95b3336be11ea45d29e0"
+    },
+    {
+      "id": "response_resource_typing",
+      "name": "Response Resource Typing",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "fa9baf930256db24d25973f4ffae4ff030779c9320401b20f3bf9f2a0ae692c5"
+    },
+    {
+      "id": "incident_resource_tracking",
+      "name": "Incident Resource Tracking",
+      "horizon": "H04",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "95b4b7cab0b1afbab2e4f2d978ba3c7f1163f1b57ccfb0a047b458c8f7de64c8"
+    },
+    {
+      "id": "response_demobilization_planning",
+      "name": "Response Demobilization Planning",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "b98c050d530fde9d6d86560474cbbf166bf4584ff6fbdfd90637d48c8e9ca8db"
+    },
+    {
+      "id": "evacuation_zone_planning",
+      "name": "Evacuation Zone Planning",
+      "horizon": "H04",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "0bda5b6a250b6d7e3a495f4cc64e85edb7e4cf16a23ee25d17e48a2a0c6f82f0"
+    },
+    {
+      "id": "phased_evacuation_release",
+      "name": "Phased Evacuation Release",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "7ecef84cff053d52498037758d5e9ff35f60738b2617366dca4693027133c95e"
+    },
+    {
+      "id": "assisted_evacuation_dispatch",
+      "name": "Assisted Evacuation Dispatch",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "caa62b7a4b4f1febebd39d58b6341b3d4b57c39c079ac345b75b5671df74ff28"
+    },
+    {
+      "id": "shelter_in_place_assessment",
+      "name": "Shelter-in-Place Assessment",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "52453d265d5f0d4c034baf84b734a2bc8fa717007b233353ab80564245b46551"
+    },
+    {
+      "id": "evacuation_reentry_staging",
+      "name": "Evacuation Re-entry Staging",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "324c8e3a35fa0823758ed83b598571077b5313b11f02780b7796f9b067e60f6f"
+    },
+    {
+      "id": "evacuation_destination_balancing",
+      "name": "Evacuation Destination Balancing",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "e6782fd5b5dc37b786f8b1a88beec86d004764d0c393c84dc2105fb52e261fd6"
+    },
+    {
+      "id": "disaster_damage_assessment",
+      "name": "Disaster Damage Assessment",
+      "horizon": "H04",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "3ab4aa1e3ef875a72e3d655ad37c83235bc33d051d97d981d9d152530306d634"
+    },
+    {
+      "id": "damage_severity_classification",
+      "name": "Damage Severity Classification",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "f52d9e4a6dc621cc08343c24e370a827b1f84bc7b01953e9a183b49af0ffade3"
+    },
+    {
+      "id": "disaster_loss_need_separation",
+      "name": "Disaster Loss and Need Separation",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "606e29d451f91290d38fb7fe3f8bdb2d5ee26d8047c1d2781d0583090735c375"
+    },
+    {
+      "id": "debris_clearance_priorities",
+      "name": "Debris Clearance Priorities",
+      "horizon": "H04",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "d542397011dc0effb9ddd975b41c139ef855c9ae51f6729d3caf2efbd61b32f2"
+    },
+    {
+      "id": "debris_stream_segregation",
+      "name": "Debris Stream Segregation",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "3f7b3e3671ac43c3d196026a5987ab148ceb5ffbc9fee5f419bf56ddbc81278f"
+    },
+    {
+      "id": "temporary_debris_site_management",
+      "name": "Temporary Debris Site Management",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "78b8aa133ddc5c30f82710f4b36f73c5a6ab60085de625ad86902c805b6b4cd4"
+    },
+    {
+      "id": "debris_load_verification",
+      "name": "Debris Load Verification",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "25b516e4695e785b493336609dbc64c8be799a0941107872592894d5e5cb2edd"
+    },
+    {
+      "id": "recovery_project_prioritization",
+      "name": "Recovery Project Prioritization",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "f5e6594f750965abcb3dd315f78ca696ee83d81fe6c29e20c223ec6796cc0a03"
+    },
+    {
+      "id": "predisaster_recovery_agreements",
+      "name": "Pre-disaster Recovery Agreements",
+      "horizon": "H05",
+      "source_file": "disaster-response-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
+      "scope_digest": "95ae5947c3efea057f35e2e3eee00ad66457449ab9862b10befd692769892dae"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
