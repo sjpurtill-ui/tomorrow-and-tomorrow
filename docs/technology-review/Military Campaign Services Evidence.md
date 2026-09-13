@@ -34,3 +34,5 @@ Worktree: `/Users/seanpurtill/Documents/Codex/tt-military-service-evidence`.
 Branch: `codex/military-service-evidence`.
 Base: `6fed85fb93fef79b3cabd134047b010b04437150`.
 Ownership: this new evidence document only. No catalog, coverage, runtime, save, image or shared-file changes. No game launch. Validation consists of checking source claims against retrieved institutional records and `git diff --check`; runtime suites are not relevant to this document. Discovery totals are unchanged.
+
+Integrator disposition: the provisional `artillery_survey_datum_control` proposal is excluded as a duplicate of existing `geodetic_reference_frames`. The sound and flash proposals require that existing identity together with `military_cartographic_reporting`. Nine drafts are retained; the historical limitations above remain in force.

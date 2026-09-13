@@ -1,6 +1,6 @@
 # Military campaign services: review proposal
 
-Ten additional D20 discovery proposals. These are design contracts, not operating discoveries. The batch adds no live units, runtime code or images. Its historical horizon labels are editorial proposals, not first-invention dates or a validated campaign calendar.
+Nine additional D20 discovery proposals. These are design contracts, not operating discoveries. The batch adds no live units, runtime code or images. Its historical horizon labels are editorial proposals, not first-invention dates or a validated campaign calendar.
 
 Generals allocate personnel, equipment, movement and service priorities. The player discusses objectives and sees shortages and consequences through existing conversations. GovernmentPeopleSystem remains responsible for settlement labor and civic officials; MilitaryCampaign remains responsible for military rosters and losses. A named service role below is a capability consumer, not an additional discovery or a free specialist.
 
@@ -12,7 +12,7 @@ Match actual arriving service personnel to available shelter while recording hou
 
 Requires: militia_muster_registers, census_rolls.
 
-Paid operating inputs: Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and finite compensation funds.
+Paid operating inputs: Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and actual institutional access, requisition and compensation obligations with finite resources.
 
 Player consequence: Sheltered troops can recover from exposure, but occupied beds cannot also shelter civilians; overcrowding and unpaid obligations damage health and relations.
 
@@ -90,25 +90,11 @@ Boundary: Telephone circuits supply voice transmission; exchange networks connec
 
 Acceptance scenario: Broken or unpowered links stop delivery; recovering wire removes that link and cannot duplicate its inventory.
 
-### Artillery Survey Datum Control
-
-Relate separately produced military position reports to a checked common survey reference and retain transformation uncertainty.
-
-Requires: geometric_survey, military_cartographic_reporting.
-
-Paid operating inputs: Survey staff, instruments, accessible reference marks, recorded coordinate conventions and repeat checks after reference damage.
-
-Player consequence: Observation teams can compare positions consistently; mismatched or stale references remain flagged rather than silently treated as precise agreement.
-
-Boundary: Cartographic reporting records observations on maps; datum control qualifies whether different local survey references can be compared.
-
-Acceptance scenario: Conflicting references do not yield a precise combined location; damaged reference marks require requalification.
-
 ### Artillery Sound Ranging
 
 Interpret coordinated acoustic observations as an uncertain, dated source-location report within a qualified observation envelope.
 
-Requires: artillery_survey_datum_control, acoustic_diaphragms, signals_detachment_training.
+Requires: geodetic_reference_frames, military_cartographic_reporting, acoustic_diaphragms, signals_detachment_training.
 
 Paid operating inputs: Trained observers, functioning acoustic recorders, checked timing and survey references, environmental observations and maintained communication.
 
@@ -122,7 +108,7 @@ Acceptance scenario: No event produces no location; inconsistent timing or inade
 
 Associate separately observed brief optical events into a qualified, dated location estimate while retaining ambiguous associations.
 
-Requires: artillery_survey_datum_control, signals_detachment_training.
+Requires: geodetic_reference_frames, military_cartographic_reporting, signals_detachment_training.
 
 Paid operating inputs: Trained observers, surveyed observation positions, suitable optics, adequate visibility and an operating reporting link.
 
@@ -173,3 +159,7 @@ Owned files: this review and master-catalog/military-campaign-services-depth.jso
 Implementation remains required for all ten entries, along with dedicated approved-style imagery, historical review and measured progression. Do not promote these rows to implemented on the basis of catalog validation.
 
 Validation: the existing master-catalog checker passed against this worktree with its coverage write captured in memory: 3,457 distinct identities, zero missing parents, zero unreachable drafts and zero normalized-name duplicates. D20 is190/280. Shared coverage files were not changed. `git diff --check` passed. These checks cover structural catalog validity, not historical accuracy or operating behavior; no Godot suite was rerun for these documentation-only changes.
+
+## Integrator disposition
+
+The proposed `artillery_survey_datum_control` identity is excluded: existing `geodetic_reference_frames` already owns consistent spatial references across measured positions. Sound ranging and flash spotting retain that foundation plus `military_cartographic_reporting` for dated, attributable campaign reports. Neither existing identity is rewritten. The remaining nine are authored drafts only. Historical evidence and its unresolved early-horizon limits are recorded in `Military Campaign Services Evidence.md`. Billeting follows actual societal obligations; inspected serviceable salvage can be reissued without unnecessary repair.

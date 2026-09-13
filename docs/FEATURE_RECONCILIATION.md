@@ -1,3 +1,9 @@
+## September 13 — campaign service proposal integration
+
+Integrated source proposals `9b74309` and historical evidence `8abca3b`, retaining nine distinct D20 drafts. The duplicate artillery survey datum proposal is excluded in favor of existing geodetic reference frames; sound and flash observation proposals require that foundation plus military cartographic reporting. Billeting follows actual institutional obligations, and inspected serviceable salvage can be reissued without mandatory repair. Generals retain operations and existing population/labor owners remain authoritative.
+
+Ledger: **801 integrated + 2,655 drafts = 3,456 identities**, leaving **1,544 to author and 4,199 to implement**. Parent, duplicate and reachability checks and 15 ledger tests pass. These are design contracts, not live discoveries; early historical horizons remain provisional. Runtime and art counts are unchanged. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/campaign-service-integration`, base `121c9f870c852d10902fedb0c5b7b44675aa4d85`. Catalog/docs only; no save effect or runtime conflict. No player launch or package rebuild. See `technology-review/Military Campaign Services Review.md` and its evidence addendum.
+
 ## September 13 — 801 verified operating discoveries
 
 Garment closure runtime/art commit `095266eb63b67509236153ed814a7f8d7ec218e6` is integrated into canonical main. Two original discoveries retain exact parent predicates. Ten paid workshop recipes make sewing needles, matched buttons and reinforced panels, or forming dies, spring snaps and gauged leather tabs. Two clothing methods consume checked closures through the existing daily production, labor, inventory and clothing owners.

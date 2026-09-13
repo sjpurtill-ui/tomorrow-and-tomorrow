@@ -5,7 +5,7 @@
     "name": "Military Billeting Allocation",
     "foundations": "militia_muster_registers,census_rolls",
     "mechanism": "Match actual arriving service personnel to available shelter while recording household occupancy and compensation obligations.",
-    "operating_requirement": "Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and finite compensation funds.",
+    "operating_requirement": "Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and actual institutional access, requisition and compensation obligations with finite resources.",
     "consequence": "Sheltered troops can recover from exposure, but occupied beds cannot also shelter civilians; overcrowding and unpaid obligations damage health and relations.",
     "status": "authored_draft",
     "requires_all": [
@@ -22,7 +22,7 @@
       "status": "design_proposal",
       "destination": "military_billeting_allocation",
       "local_demonstration": "Match actual arriving service personnel to available shelter while recording household occupancy and compensation obligations.",
-      "operating_requirements": "Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and finite compensation funds.",
+      "operating_requirements": "Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and actual institutional access, requisition and compensation obligations with finite resources.",
       "grants_instant_mastery": false,
       "outside_costs": [
         "available competent source",
@@ -194,7 +194,8 @@
     "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
     "semantic_boundary": "Armored recovery retrieves disabled vehicles; field diagnostics identifies faults. This owns recovery custody and finite disposition across ordinary campaign equipment.",
     "implementation_acceptance": [
-      "Revisiting the same site cannot recover an item twice; inaccessible losses stay lost and incompatible recovered equipment cannot refill a unit."
+      "Revisiting the same site cannot recover an item twice; inaccessible losses stay lost and incompatible recovered equipment cannot refill a unit.",
+      "Inspected compatible serviceable items may be reissued directly; damaged items require actual repair inputs and labor before use."
     ],
     "historical_horizon_proposal": "Early organized campaigns",
     "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
@@ -300,64 +301,16 @@
   },
   {
     "field": "D20",
-    "id": "artillery_survey_datum_control",
-    "name": "Artillery Survey Datum Control",
-    "foundations": "geometric_survey,military_cartographic_reporting",
-    "mechanism": "Relate separately produced military position reports to a checked common survey reference and retain transformation uncertainty.",
-    "operating_requirement": "Survey staff, instruments, accessible reference marks, recorded coordinate conventions and repeat checks after reference damage.",
-    "consequence": "Observation teams can compare positions consistently; mismatched or stale references remain flagged rather than silently treated as precise agreement.",
-    "status": "authored_draft",
-    "requires_all": [
-      "geometric_survey",
-      "military_cartographic_reporting"
-    ],
-    "requires_any": [],
-    "role_design_targets": [
-      "Military survey sections"
-    ],
-    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
-    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "artillery_survey_datum_control",
-      "local_demonstration": "Relate separately produced military position reports to a checked common survey reference and retain transformation uncertainty.",
-      "operating_requirements": "Survey staff, instruments, accessible reference marks, recorded coordinate conventions and repeat checks after reference damage.",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "available competent source",
-        "payment or reciprocal contribution",
-        "actual staff, information or equipment delivery",
-        "finite training and local qualification",
-        "continuing equipment, supplies, repairs and personnel"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
-        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
-        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
-        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
-        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
-      }
-    },
-    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
-    "semantic_boundary": "Cartographic reporting records observations on maps; datum control qualifies whether different local survey references can be compared.",
-    "implementation_acceptance": [
-      "Conflicting references do not yield a precise combined location; damaged reference marks require requalification."
-    ],
-    "historical_horizon_proposal": "Survey-supported campaigns",
-    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
-    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
-  },
-  {
-    "field": "D20",
     "id": "artillery_sound_ranging",
     "name": "Artillery Sound Ranging",
-    "foundations": "artillery_survey_datum_control,acoustic_diaphragms,signals_detachment_training",
+    "foundations": "geodetic_reference_frames,military_cartographic_reporting,acoustic_diaphragms,signals_detachment_training",
     "mechanism": "Interpret coordinated acoustic observations as an uncertain, dated source-location report within a qualified observation envelope.",
     "operating_requirement": "Trained observers, functioning acoustic recorders, checked timing and survey references, environmental observations and maintained communication.",
     "consequence": "Generals gain fallible indirect observation when a detectable event occurs; noise, timing errors and missing stations can make a report unusable.",
     "status": "authored_draft",
     "requires_all": [
-      "artillery_survey_datum_control",
+      "geodetic_reference_frames",
+      "military_cartographic_reporting",
       "acoustic_diaphragms",
       "signals_detachment_training"
     ],
@@ -401,13 +354,14 @@
     "field": "D20",
     "id": "artillery_flash_spotting",
     "name": "Artillery Flash Spotting",
-    "foundations": "artillery_survey_datum_control,signals_detachment_training",
+    "foundations": "geodetic_reference_frames,military_cartographic_reporting,signals_detachment_training",
     "mechanism": "Associate separately observed brief optical events into a qualified, dated location estimate while retaining ambiguous associations.",
     "operating_requirement": "Trained observers, surveyed observation positions, suitable optics, adequate visibility and an operating reporting link.",
     "consequence": "Provide a distinct visual observation channel whose usefulness changes with visibility and obstruction; unrelated events cannot be assumed identical.",
     "status": "authored_draft",
     "requires_all": [
-      "artillery_survey_datum_control",
+      "geodetic_reference_frames",
+      "military_cartographic_reporting",
       "signals_detachment_training"
     ],
     "requires_any": [],
