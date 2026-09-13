@@ -1,6 +1,115 @@
 extends RefCounted
 ## Authored processing and assay equipment. Rates use aggregate ration units.
 const METHODS := {
+  "nut_kernel_shelling": {
+    "name": "Nut Kernel Shelling",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [
+      [
+        "food_pounding_mortars",
+        "controlled_flaking"
+      ]
+    ],
+    "rate": 8,
+    "cost": {
+      "Stone": 2,
+      "Timber": 1
+    },
+    "inputs": {
+      "Stone": 0.001
+    },
+    "mode": "selected_food",
+    "observation": "Separate edible kernels from hard shells with controlled breakage. Known suitable nuts, fitted tools and sorting labor."
+  },
+  "acorn_leaching": {
+    "name": "Acorn Leaching",
+    "requires_all": [
+      "edible_resource_recognition",
+      "food_pounding_mortars"
+    ],
+    "requires_any": [],
+    "rate": 5,
+    "cost": {
+      "Stone": 3,
+      "Fiber Plants": 2,
+      "Clay": 2
+    },
+    "inputs": {
+      "Freshwater": 1.5,
+      "Fiber Plants": 0.003
+    },
+    "mode": "selected_food",
+    "observation": "Apply locally qualified leaching to identified acorn meal. Suitable acorns, clean water, retained meal and established preparation practice."
+  },
+  "root_grating_dewatering": {
+    "name": "Root Grating and Dewatering",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [
+      [
+        "controlled_flaking",
+        "food_pounding_mortars"
+      ]
+    ],
+    "rate": 10,
+    "cost": {
+      "Stone": 3,
+      "Timber": 2,
+      "Fiber Plants": 2
+    },
+    "inputs": {
+      "Freshwater": 0.1,
+      "Stone": 0.002
+    },
+    "mode": "selected_food",
+    "observation": "Disrupt root tissue and press liquid from the resulting pulp. Suitable roots, grating surfaces, pressable containers and qualified subsequent processing."
+  },
+  "pulse_splitting": {
+    "name": "Pulse Splitting",
+    "requires_all": [
+      "food_pounding_mortars",
+      "edible_resource_recognition"
+    ],
+    "requires_any": [],
+    "rate": 10,
+    "cost": {
+      "Stone": 3,
+      "Timber": 1
+    },
+    "inputs": {
+      "Freshwater": 0.12,
+      "Stone": 0.001
+    },
+    "mode": "selected_food",
+    "observation": "Separate pulse skins and divide suitable cotyledons with controlled treatment. Identified pulses, conditioning capacity and sorting tools."
+  },
+  "fruit_pulp_screening": {
+    "name": "Fruit Pulp Screening",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [
+      [
+        "basketry",
+        "flour_sifting"
+      ]
+    ],
+    "rate": 12,
+    "cost": {
+      "Fiber Plants": 2,
+      "Clay": 2
+    },
+    "inputs": {
+      "Freshwater": 0.1,
+      "Fiber Plants": 0.002
+    },
+    "mode": "selected_food",
+    "observation": "Separate usable fruit pulp from coarse skins and seeds. Suitable fruit, screens, collection vessels and cleaning work."
+  }
+,
   "grain_parboiling": {
     "name": "Grain Parboiling",
     "requires_all": [
@@ -327,4 +436,6 @@ static func entries()->Array[Dictionary]:
 	for id:String in METHODS:
 		var spec:Dictionary=METHODS[id]
 		result.append({"id":id,"name":spec.name,"direction":"Sustenance","day":0,"chance":.002,"requires":spec.requires_all.duplicate(),"requires_all":spec.requires_all.duplicate(),"requires_any":spec.requires_any.duplicate(true),"learning_routes":[{"id":"local","label":spec.name,"requires_all":[]}],"signals":["food","crafting","research"],"observation":spec.observation,"effects":{},"food_batch_method":id,"production_contract":"Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs."})
+	for entry:Dictionary in result:
+		if METHODS[entry.id].mode=="selected_food":entry.production_contract="Processes only identified compatible ingredient lots with paid equipment, water, handling losses and shared Logistics time. Leached acorn meal, grated root pulp and split pulses still require their adopted cooking step before they become edible rations."
 	return result

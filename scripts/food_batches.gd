@@ -4,9 +4,10 @@ extends RefCounted
 const K=preload("res://scripts/food_batch_knowledge.gd")
 const R=preload("res://scripts/technology_requirements.gd")
 const G=preload("res://scripts/grain_processing.gd")
+const Selected=preload("res://scripts/selected_food_processing.gd")
 const LIMIT:=96
-const KINDS:=["meal","dehulled","starch","residue","dough","leavened","bread","starter","wet_parboiled","parboiled","solar_drying","solar_dried"]
-const UNAVAILABLE:=["dough","leavened","starter","wet_parboiled","solar_drying"]
+const KINDS:=["meal","dehulled","starch","residue","dough","leavened","bread","starter","wet_parboiled","parboiled","solar_drying","solar_dried"]+Selected.KINDS
+const UNAVAILABLE:=["dough","leavened","starter","wet_parboiled","solar_drying"]+Selected.KINDS
 const ASSAYS:=["humidity","trace","loss","acidity","activity","review","barrier","leak"]
 static func empty_state()->Dictionary:return {"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}}
 static func data()->Dictionary:return WorldSimulation.state.food_batches
@@ -142,6 +143,7 @@ static func advance(logistics:float,demand:float,traveling:bool)->Dictionary:
 	data().last_day=day
 	if traveling or not WorldSimulation.state.settlement_site_committed:data().report=report;return report
 	var workers:=maxf(0,logistics)*.2
+	workers-=Selected.process(workers,demand,report,day)
 	workers-=condition_grain(workers,demand,report,day)
 	# Both player and rival use this same paid, input-aware steward.
 	if WorldSimulation.food._stock_total()>maxf(1,demand)*7:
@@ -200,9 +202,11 @@ static func valid(value:Variant)->bool:
 		if not id is String or not K.METHODS.has(id) or not number(value.tools[id]) or value.tools[id]<0 or value.tools[id]>100 or value.tools[id]!=floorf(float(value.tools[id])):return false
 	for key:String in ["next_id","last_day"]:
 		if not number(value[key]) or value[key]!=floorf(float(value[key])) or value[key]< (1 if key=="next_id" else -1) or value[key]>1e12:return false
+	if value.has("selected_harvest_day") and (not number(value.selected_harvest_day) or float(value.selected_harvest_day)!=floorf(float(value.selected_harvest_day)) or float(value.selected_harvest_day)<-1 or float(value.selected_harvest_day)>1e12):return false
 	var ids:Dictionary={}
 	for lot:Variant in value.lots:
 		if not lot is Dictionary or not lot.has_all(["id","kind","amount","origin","created","ready","observations","seal"]) or lot.kind not in KINDS:return false
+		if not Selected.valid_lot(lot):return false
 		for key:String in ["id","amount","origin","created","ready","seal"]:
 			if not number(lot[key]) or lot[key]<0 or lot[key]>1e12:return false
 		if lot.amount<=0 or lot.origin<lot.amount-.00001 or lot.seal>1 or lot.id<1 or lot.id>=value.next_id or lot.ready<lot.created or ids.has(lot.id):return false
