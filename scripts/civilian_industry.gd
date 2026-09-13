@@ -2,6 +2,10 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"cast_metal_type_sets":{"name": "Cast and finished bronze type sets", "output": "Metal Type Sets", "gate": "metal_type_casting", "materials": {"Refined Copper": 1.0, "Refined Tin": 0.12, "Charcoal": 0.5, "Clay": 0.25}, "days": 7, "tooling": {"Wrought Iron": 2, "Stone": 3, "Clay": 3}},
+	"carved_wood_type_sets":{"name": "Carved wooden type sets", "output": "Wood Type Sets", "gate": "wooden_movable_type", "materials": {"Timber": 1.8}, "days": 4, "tooling": {"Wrought Iron": 1, "Stone": 2}},
+	"composed_metal_type_forms":{"name": "Composed and proofed metal type forms", "output": "Printing Forms", "gate": "movable_type_composition", "materials": {"Metal Type Sets": 1, "Timber": 0.2, "Paper": 0.1, "Printing Ink": 0.01}, "days": 2.5, "tooling": {"Timber": 2, "Stone": 1}},
+	"composed_wood_type_forms":{"name": "Composed and proofed wooden type forms", "output": "Printing Forms", "gate": "movable_type_composition", "materials": {"Wood Type Sets": 1, "Timber": 0.2, "Paper": 0.1, "Printing Ink": 0.01}, "days": 3, "tooling": {"Timber": 2, "Stone": 1}},
 	# Untanned skins are stretched for parchment; finished leather is not interchangeable.
 	"parchment_prepared_skins":{"name": "Cleaned parchment skins", "output": "Parchment Prepared Skins", "gate": "parchment_record_preparation", "materials": {"Raw Hides": 1.25, "Slaked Lime": 0.15, "Freshwater": 3}, "days": 4, "tooling": {"Timber": 3, "Stone": 2}},
 	"parchment_sheets":{"name": "Stretched and finished parchment sheets", "output": "Parchment Sheets", "gate": "parchment_record_preparation", "materials": {"Parchment Prepared Skins": 1.1, "Freshwater": 0.5, "Limestone": 0.05}, "days": 5, "tooling": {"Timber": 4, "Fiber Plants": 1, "Stone": 2}},
