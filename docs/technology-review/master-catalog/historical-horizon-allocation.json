@@ -9994,6 +9994,236 @@
       "classification_status": "editorial_review",
       "rationale": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
       "scope_digest": "2972bb0c4c52fbe763812e4a9cbf97eb7d36189564c1fd4fc946f5b3f922af46"
+    },
+    {
+      "id": "nut_kernel_shelling",
+      "name": "Nut Kernel Shelling",
+      "horizon": "H01",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Direct resource preparation learned through local empirical practice.",
+      "scope_digest": "91a2235674df890447d40f4d4ed83efdd2b2da9084f66a3b39e5e3b5b44786c1"
+    },
+    {
+      "id": "acorn_leaching",
+      "name": "Acorn Leaching",
+      "horizon": "H01",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Direct resource preparation learned through local empirical practice.",
+      "scope_digest": "a8c2fba8048d858fba654bad4445a5821c142949562c3422880dd2d378c7cb75"
+    },
+    {
+      "id": "root_grating_dewatering",
+      "name": "Root Grating and Dewatering",
+      "horizon": "H02",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Repeatable community food processing with modest tools and retained inputs.",
+      "scope_digest": "70b574f5ca327c247ecc94a7920354ea27f62fe77ec86876787491e765ebc837"
+    },
+    {
+      "id": "pulse_splitting",
+      "name": "Pulse Splitting",
+      "horizon": "H02",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Repeatable community food processing with modest tools and retained inputs.",
+      "scope_digest": "acdfcec65e340acce74180888a0f7640316bba512af6d8c9d83ccce03f25d24f"
+    },
+    {
+      "id": "grain_parboiling",
+      "name": "Grain Parboiling",
+      "horizon": "H02",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Repeatable community food processing with modest tools and retained inputs.",
+      "scope_digest": "7626f84f858a02ca210fa9e239df006b34a09d288be398baa0c4dc8873ef4ded"
+    },
+    {
+      "id": "fruit_pulp_screening",
+      "name": "Fruit Pulp Screening",
+      "horizon": "H02",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Repeatable community food processing with modest tools and retained inputs.",
+      "scope_digest": "8403583a061c683c135114f6506392a5d113be6fbab854ba2e55faeb61f77e74"
+    },
+    {
+      "id": "pectin_gel_preservation",
+      "name": "Pectin Gel Preservation",
+      "horizon": "H03",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Specialized processing and controlled storage can develop before industrial instrumentation.",
+      "scope_digest": "d11291fcc4306710a3828ef94f1f9609113e09498c633e8ff2f8880d9ec51c34"
+    },
+    {
+      "id": "cheese_ripening_control",
+      "name": "Cheese Ripening Control",
+      "horizon": "H03",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Specialized processing and controlled storage can develop before industrial instrumentation.",
+      "scope_digest": "477757d363175f79471cd01de2d9e69a99a960c793570e996b5ad4e0ee14354b"
+    },
+    {
+      "id": "cultured_milk_processing",
+      "name": "Cultured Milk Processing",
+      "horizon": "H02",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Repeatable community food processing with modest tools and retained inputs.",
+      "scope_digest": "027b302caa2ce11a2526bf640daa1a37a95552fa2209fdfb801ec36c9b5c03a0"
+    },
+    {
+      "id": "milk_fat_clarification",
+      "name": "Milk Fat Clarification",
+      "horizon": "H03",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Specialized processing and controlled storage can develop before industrial instrumentation.",
+      "scope_digest": "89f6c8041d704abdf923b49fe876e6eeab6d77aad4e7f8640009923063a83456"
+    },
+    {
+      "id": "whey_protein_recovery",
+      "name": "Whey Protein Recovery",
+      "horizon": "H03",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Specialized processing and controlled storage can develop before industrial instrumentation.",
+      "scope_digest": "493681eaacadb4e1e1730e60e3a8af1ae121eb9c3b690d634dad40c7e0a25eca"
+    },
+    {
+      "id": "centrifugal_cream_separation",
+      "name": "Centrifugal Cream Separation",
+      "horizon": "H04",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Mechanized separation or calibrated process instrumentation.",
+      "scope_digest": "9f528f14bbd13208c43246cff89e8244a709589f6533d59a1193c784425e7632"
+    },
+    {
+      "id": "indirect_solar_food_drying",
+      "name": "Indirect Solar Food Drying",
+      "horizon": "H03",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Specialized processing and controlled storage can develop before industrial instrumentation.",
+      "scope_digest": "705dc1ed31098e5d2818ac0375471943ddc00f3ca3ffc97bbdbfea6e5816eed8"
+    },
+    {
+      "id": "edible_oil_winterization",
+      "name": "Edible Oil Winterization",
+      "horizon": "H04",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Mechanized separation or calibrated process instrumentation.",
+      "scope_digest": "43b9ac4a66b2dbb6c9d035e131adb4e38cad12a5bf1ce3e618b3cdfa24836f3d"
+    },
+    {
+      "id": "sugar_crystal_recovery",
+      "name": "Sugar Crystal Recovery",
+      "horizon": "H03",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Specialized processing and controlled storage can develop before industrial instrumentation.",
+      "scope_digest": "f5cb0a4bda1c3dc3e881504d5c83dd83892928a11de5559e6d886e8f68f50674"
+    },
+    {
+      "id": "refractometric_food_solids",
+      "name": "Refractometric Food Solids Testing",
+      "horizon": "H04",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Mechanized separation or calibrated process instrumentation.",
+      "scope_digest": "703c572a5fb74798f09fa7318d1ef391b19432d62c89bab8fdf3414b1a74b9e2"
+    },
+    {
+      "id": "modified_atmosphere_food_packing",
+      "name": "Modified Atmosphere Food Packing",
+      "horizon": "H05",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
+      "scope_digest": "0866476860e7665adf7fa69d63defffbdb51088adc4a7a42b8d4e7d99ed24585"
+    },
+    {
+      "id": "food_metal_detection",
+      "name": "Food Metal Detection",
+      "horizon": "H05",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
+      "scope_digest": "78c80aafc819ee4c4e582b5b417e6dfd46aa39f46d79e1c62ff475c878f98422"
+    },
+    {
+      "id": "food_xray_foreign_body_inspection",
+      "name": "Food X-ray Foreign Body Inspection",
+      "horizon": "H05",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
+      "scope_digest": "45b5b7d51269b2794d19573cbf79a394a69f27978283dc04b96dba6b7790f197"
+    },
+    {
+      "id": "membrane_food_fractionation",
+      "name": "Membrane Food Fractionation",
+      "horizon": "H05",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
+      "scope_digest": "af0ea4e45c268eaab5f8b3205bbbf211243dc8603ca14a137c790179302efed9"
+    },
+    {
+      "id": "high_pressure_food_processing",
+      "name": "High Pressure Food Processing",
+      "horizon": "H05",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
+      "scope_digest": "288fab778fddd5ee15671c83b6e19ec50aad60116404237a7605932f18f1a32f"
+    },
+    {
+      "id": "pulsed_electric_food_treatment",
+      "name": "Pulsed Electric Food Treatment",
+      "horizon": "H05",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
+      "scope_digest": "ec34957fea96e694779221623ca5eac9781a4e4dc4b36e436ed9acb694b9d3da"
+    },
+    {
+      "id": "food_enzyme_process_control",
+      "name": "Food Enzyme Process Control",
+      "horizon": "H05",
+      "source_file": "food-processing-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
+      "scope_digest": "f707ba78a4a29dda1c790d67339455d17db1e8a08afcbb94cf5040a21372c3be"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
