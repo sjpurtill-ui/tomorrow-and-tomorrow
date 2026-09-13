@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 676,
+  "verified_baseline_discoveries": 679,
   "pending_communications": 0,
-  "new_authored_drafts": 2463,
+  "new_authored_drafts": 2460,
   "distinct_accounted_identities": 3139,
   "remaining_identities_to_author": 1861,
   "target": 5000,
@@ -2349,7 +2349,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 469,
+  "branch_alternatives": 468,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 117,
@@ -2364,7 +2364,7 @@
     "D10": 79,
     "D11": 60,
     "D12": 60,
-    "D13": 119,
+    "D13": 116,
     "D14": 176,
     "D15": 119,
     "D16": 114,
@@ -2502,9 +2502,9 @@
       "id": "D13",
       "name": "Records and communications",
       "target": 240,
-      "implemented_baseline": 54,
+      "implemented_baseline": 57,
       "pending_communications": 0,
-      "authored_drafts": 119,
+      "authored_drafts": 116,
       "accounted": 173,
       "remaining_to_target": 67
     },

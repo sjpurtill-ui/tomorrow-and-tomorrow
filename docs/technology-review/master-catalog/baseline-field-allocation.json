@@ -4855,6 +4855,27 @@
       "source_domain": "production",
       "name": "Soap Manufacture",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "clay_record_tablets",
+      "field": "D13",
+      "source_domain": "knowledge",
+      "name": "Clay Record Tablets",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "knotted_record_systems",
+      "field": "D13",
+      "source_domain": "knowledge",
+      "name": "Knotted Record Systems",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "bookbinding_assemblies",
+      "field": "D13",
+      "source_domain": "knowledge",
+      "name": "Bookbinding Assemblies",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

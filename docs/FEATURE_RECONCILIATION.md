@@ -1,3 +1,9 @@
+## September 12 — physical record media and finite local study
+
+INTEGRATED runtime `5f2dc5c0bd070170f0aa34c2c6880eb3de9a2334`: three existing identities produce paid clay tablets, quantity-record cords and bound paper volumes. Local study consumes real media within one Knowledge work budget; knotted-record assistance is limited to trained specimen quantity work. All **67 distinct worktree cases and 32 canonical cases pass**, including stock conservation, arrived records, ordinary paper/print behavior and owned save continuation. See `RECORD_MEDIA_HANDOFF.md` for the imported-paper binding route and limits.
+
+Graph and exact canonical snapshot: **679 discoveries /461 explicit routes /313 recipes /17 facilities**. All 679 definitions match; 15 ledger-tool checks pass. Ledger: **679 integrated + 2,460 drafts = 3,139 identities**, with **1,861 still to author and 4,321 to implement**. Art: 110 verified /679 live, 569 queued. Rail freight remains HELD in its worker checkout pending complete ownership, shipment, save and control acceptance. No player launch, package rebuild or full-history pacing claim.
+
 ## September 12 — supplied laundry and broader rail/food coverage
 
 INTEGRATED runtime `368b7718c419ff73d788e29d3bf9e5ad212a37ce`: three authored identities now implement manufactured soap, electric laundry and dated garment wear trials. Actual supplies, generated power, worker time and sampled garments are consumed. All **109 distinct worktree cases and 61 canonical cases pass**; the final demand/investment checks include fuel-consuming generation and the daily dirt threshold. See `LAUNDRY_SUPPLY_HANDOFF.md` for save compatibility, primary-city electricity scope and the limited game wear protocol.

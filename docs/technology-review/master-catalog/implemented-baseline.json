@@ -1,5 +1,5 @@
 {
-  "source_commit": "368b7718c419ff73d788e29d3bf9e5ad212a37ce",
+  "source_commit": "5f2dc5c0bd070170f0aa34c2c6880eb3de9a2334",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -48531,6 +48531,286 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D13",
+      "id": "clay_record_tablets",
+      "name": "Clay Record Tablets",
+      "foundations": "clay_shaping,pictographic_records",
+      "mechanism": "Impress or inscribe records on prepared clay and preserve selected tablets",
+      "operating_requirement": "Suitable clay, marking tools, skilled recorders and storage",
+      "consequence": "Create durable physical records with handling and copying costs",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Clay Record Tablets: learn from a competent visiting teacher, delivered records or demonstrations, a reciprocal partnership or commissioned work. Outside access requires real travel or transmission, agreed payment or contribution and finite teaching time. Rebuild missing foundations and perform the local demonstration; purchasing results or a service does not award mastery. Route coefficients and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "clay_record_tablets",
+        "local_demonstration": "Impress or inscribe records on prepared clay and preserve selected tablets",
+        "operating_requirements": "Suitable clay, marking tools, skilled recorders and storage",
+        "outside_costs": [
+          "source competence and availability",
+          "negotiated payment or reciprocal contribution",
+          "travel or transmission delay",
+          "local interpretation and practice",
+          "finite teachers and learners"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate retrieval, delivery or interpretation using actual media, equipment and reachable participants. Stored or sent information is not automatically received knowledge."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "5f2dc5c0bd070170f0aa34c2c6880eb3de9a2334",
+        "editorial_source": "mathematics-records-culture.json",
+        "previous_requires_all": [
+          "clay_shaping",
+          "pictographic_records"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "clay_record_tablets",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Clay Record Tablets",
+            "missing_all": [
+              "clay_shaping",
+              "pictographic_records"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "clay_shaping",
+              "pictographic_records"
+            ],
+            "requires_all": [
+              "clay_shaping",
+              "pictographic_records"
+            ],
+            "requires_any": [],
+            "signals": [
+              "information",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Clay Record Tablets",
+        "observation": "Impress or inscribe records on prepared clay and preserve selected tablets. Suitable clay, marking tools, skilled recorders and storage.",
+        "production_contract": "Paid civilian batches produce actual record media. Local collection study allocates these supplies to notes alongside finite Knowledge work. Tablets and bound paper volumes support comparison; trained use of knotted records supports specimen quantity observations only. No purchased medium teaches its manufacture, translates a manuscript or grants instant research. The bound-volume implementation uses paper, not an invented parchment source.",
+        "production_items": [
+          "clay_record_tablets"
+        ],
+        "requires": [
+          "clay_shaping",
+          "pictographic_records"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "information",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Preserved knowledge"
+      }
+    },
+    {
+      "field": "D13",
+      "id": "knotted_record_systems",
+      "name": "Knotted Record Systems",
+      "foundations": "cordage,tallies",
+      "mechanism": "Encode agreed quantities or categories through structured knots and cord arrangements",
+      "operating_requirement": "Suitable cords, trained interpreters and shared conventions",
+      "consequence": "Store selected information without requiring phonetic writing",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Knotted Record Systems: learn from a competent visiting teacher, delivered records or demonstrations, a reciprocal partnership or commissioned work. Outside access requires real travel or transmission, agreed payment or contribution and finite teaching time. Rebuild missing foundations and perform the local demonstration; purchasing results or a service does not award mastery. Route coefficients and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "knotted_record_systems",
+        "local_demonstration": "Encode agreed quantities or categories through structured knots and cord arrangements",
+        "operating_requirements": "Suitable cords, trained interpreters and shared conventions",
+        "outside_costs": [
+          "source competence and availability",
+          "negotiated payment or reciprocal contribution",
+          "travel or transmission delay",
+          "local interpretation and practice",
+          "finite teachers and learners"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate retrieval, delivery or interpretation using actual media, equipment and reachable participants. Stored or sent information is not automatically received knowledge."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "5f2dc5c0bd070170f0aa34c2c6880eb3de9a2334",
+        "editorial_source": "mathematics-records-culture.json",
+        "previous_requires_all": [
+          "cordage",
+          "tallies"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "knotted_record_systems",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Knotted Record Systems",
+            "missing_all": [
+              "cordage",
+              "tallies"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cordage",
+              "tallies"
+            ],
+            "requires_all": [
+              "cordage",
+              "tallies"
+            ],
+            "requires_any": [],
+            "signals": [
+              "information",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Knotted Record Systems",
+        "observation": "Encode agreed quantities or categories through structured knots and cord arrangements. Suitable cords, trained interpreters and shared conventions.",
+        "production_contract": "Paid civilian batches produce actual record media. Local collection study allocates these supplies to notes alongside finite Knowledge work. Tablets and bound paper volumes support comparison; trained use of knotted records supports specimen quantity observations only. No purchased medium teaches its manufacture, translates a manuscript or grants instant research. The bound-volume implementation uses paper, not an invented parchment source.",
+        "production_items": [
+          "knotted_record_cords"
+        ],
+        "requires": [
+          "cordage",
+          "tallies"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "information",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Preserved knowledge"
+      }
+    },
+    {
+      "field": "D13",
+      "id": "bookbinding_assemblies",
+      "name": "Bookbinding Assemblies",
+      "foundations": "cordage",
+      "mechanism": "Join record leaves and protective covers into a usable ordered volume",
+      "operating_requirement": "Prepared leaves, bindings, skilled labor and compatible materials",
+      "consequence": "Improve handling and sequence retention while bindings can fail",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "branching_note": "A bound volume need not use paper or wooden covers; suitable material and assembly remain required.",
+      "recovery": "For Bookbinding Assemblies: learn from a competent visiting teacher, delivered records or demonstrations, a reciprocal partnership or commissioned work. Outside access requires real travel or transmission, agreed payment or contribution and finite teaching time. Rebuild missing foundations and perform the local demonstration; purchasing results or a service does not award mastery. Route coefficients and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "bookbinding_assemblies",
+        "local_demonstration": "Join record leaves and protective covers into a usable ordered volume",
+        "operating_requirements": "Prepared leaves, bindings, skilled labor and compatible materials",
+        "outside_costs": [
+          "source competence and availability",
+          "negotiated payment or reciprocal contribution",
+          "travel or transmission delay",
+          "local interpretation and practice",
+          "finite teachers and learners"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate retrieval, delivery or interpretation using actual media, equipment and reachable participants. Stored or sent information is not automatically received knowledge."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "5f2dc5c0bd070170f0aa34c2c6880eb3de9a2334",
+        "editorial_source": "mathematics-records-culture.json",
+        "previous_requires_all": [
+          "cordage"
+        ],
+        "previous_requires_any": [
+          [
+            "paper_making",
+            "parchment_record_preparation"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "bookbinding_assemblies",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Bookbinding Assemblies",
+            "missing_all": [
+              "cordage"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cordage"
+            ],
+            "requires_all": [
+              "cordage"
+            ],
+            "requires_any": [],
+            "signals": [
+              "information",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Bookbinding Assemblies",
+        "observation": "Join record leaves and protective covers into a usable ordered volume. Prepared leaves, bindings, skilled labor and compatible materials.",
+        "production_contract": "Paid civilian batches produce actual record media. Local collection study allocates these supplies to notes alongside finite Knowledge work. Tablets and bound paper volumes support comparison; trained use of knotted records supports specimen quantity observations only. No purchased medium teaches its manufacture, translates a manuscript or grants instant research. The bound-volume implementation uses paper, not an invented parchment source.",
+        "production_items": [
+          "bound_record_books"
+        ],
+        "requires": [
+          "cordage"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "information",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Preserved knowledge"
       }
     },
     {

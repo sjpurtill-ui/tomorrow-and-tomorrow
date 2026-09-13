@@ -5018,6 +5018,30 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/clay_record_tablets.png",
+      "description": "Impress or inscribe records on prepared clay and preserve selected tablets. Suitable clay, marking tools, skilled recorders and storage.",
+      "domain": "knowledge",
+      "id": "clay_record_tablets",
+      "name": "Clay Record Tablets",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/knotted_record_systems.png",
+      "description": "Encode agreed quantities or categories through structured knots and cord arrangements. Suitable cords, trained interpreters and shared conventions.",
+      "domain": "knowledge",
+      "id": "knotted_record_systems",
+      "name": "Knotted Record Systems",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/bookbinding_assemblies.png",
+      "description": "Join record leaves and protective covers into a usable ordered volume. Prepared leaves, bindings, skilled labor and compatible materials.",
+      "domain": "knowledge",
+      "id": "bookbinding_assemblies",
+      "name": "Bookbinding Assemblies",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/core_formed_glass.png",
       "description": "A removable core supports hot glass while a hollow vessel is built around it.",
       "domain": "production",
@@ -5411,9 +5435,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 676,
+  "live_count": 679,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 566,
+  "queued_count": 569,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
