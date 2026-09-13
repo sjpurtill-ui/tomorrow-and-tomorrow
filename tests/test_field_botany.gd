@@ -56,6 +56,7 @@ func test_local_operation_spends_materials_and_applies_only_paid_descendant_seed
 		state.known_discoveries.append_array(["standard_measures","seed_selection"])
 		state.resource_stockpiles={"Timber":2.0,"Fiber Plants":2.0,"Stone":2.0,"Clay":10.0,"Freshwater":1000.0}
 		B.retain_seed(state.field_botany,100,"home",0)
+		state.field_botany.lines[0].drought_tolerance=.4
 		for day:int in range(1,184):
 			state.elapsed_days=day
 			var report:=B.advance(20,false,.5)
@@ -94,3 +95,26 @@ func test_actual_food_consumer_uses_application_and_expiry_without_mutating_prev
 		assert_dict(food._produce(30,1,1,false)).is_equal(baseline)
 	)
 	WorldSimulation.clear()
+func test_small_matching_harvests_top_up_but_never_import_foreign_seed()->void:
+	var ledger:=B.empty_state()
+	B.retain_seed(ledger,1,"home",0)
+	assert_bool(B.sow_trial(ledger,0,"home",0)).is_false()
+	assert_float(B.retain_seed(ledger,10,"away",1)).is_equal(0.0)
+	for day:int in range(1,25):B.retain_seed(ledger,1,"home",day)
+	assert_bool(B.sow_trial(ledger,0,"home",25)).is_true()
+	assert_float(float(ledger.reference_seed)).is_less(.1)
+func test_failed_morphological_match_cannot_qualify_and_nested_forgery_is_rejected()->void:
+	var ledger:=B.empty_state();ledger.balance=true
+	B.retain_seed(ledger,100,"home",0)
+	B.sow_trial(ledger,0,"home",0)
+	for day:int in range(1,90):B.observe(ledger,day,"home",knowledge(),1,1,.5)
+	ledger.trials[0].stages[0].leaf_ratio=.999
+	B.observe(ledger,90,"home",knowledge(),1,1,.5)
+	assert_bool(ledger.vouchers[0].methods.has("identity")).is_false()
+	assert_bool(ledger.vouchers[0].qualified).is_false()
+	var corrupted:=ledger.duplicate(true)
+	corrupted.vouchers[0].qualified=true
+	assert_bool(B.valid(corrupted)).is_false()
+	corrupted=ledger.duplicate(true)
+	corrupted.lines[0].drought_tolerance=-.1
+	assert_bool(B.valid(corrupted)).is_false()
