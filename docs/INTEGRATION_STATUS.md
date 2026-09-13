@@ -4,7 +4,7 @@ Integrated eight reviewed paper illustrations from source commits `51d9fa57d4282
 
 Integrated pacing correction `e9f20af`: the exporter now reports recorded observations and provenance instead of generating the obsolete synthetic 3,000-year curve. Independent review preserved the historical report's two discovery samples and day 91,250 / 320-known endpoint, and rejected three malformed inputs. Archived files are preserved; neither this export nor graph reachability establishes full campaign pacing. See `technology-review/OBSERVED_PACING_EXPORT.md`.
 
-Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/campaign-service-integration`, base `121c9f870c852d10902fedb0c5b7b44675aa4d85`. Task-owned art/bindings and tool/docs only; no shared conflicts, player launch or package rebuild. Canonical texture and atlas verification follows the fast-forward.
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/campaign-service-integration`, base `121c9f870c852d10902fedb0c5b7b44675aa4d85`. Task-owned art/bindings and tool/docs only; no shared conflicts, player launch or package rebuild. Canonical import, all eight texture checks and 12 atlas cases also pass after fast-forward to `d16dd0d3337b648c8796970e4d950ab2fea8f774`.
 
 ## September 13 — campaign service proposal integration
 
