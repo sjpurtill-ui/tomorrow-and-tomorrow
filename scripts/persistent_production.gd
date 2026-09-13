@@ -2,6 +2,7 @@ extends RefCounted
 ## Persistent workshop lines share the existing Crafting pool with civilian work.
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
+const Exposure=preload("res://scripts/exposure_production.gd")
 const MAX_TARGET := 1000000000
 
 static func recipe(host: Node, item: String) -> Dictionary:
@@ -45,6 +46,7 @@ static func product_description(item:String)->String:
 		var joint_outputs:Array[String]=[]
 		for resource:String in definition.get("co_products",{}):joint_outputs.append("%.2f %s" % [float(definition.co_products[resource]),resource])
 		var co_note:=" Each completed batch also yields "+", ".join(joint_outputs)+"; the stock target tracks "+String(definition.output)+"." if not joint_outputs.is_empty() else ""
+		if definition.has("exposure_days"):power_note+=" Reserves one full specimen batch; requires %.0f observed exposure days with operators and power. Extra same-day labor cannot shorten exposure." % float(definition.exposure_days)
 		return ("Produces %s in the settlement stock ledger. Line setup consumes %s; batch inputs and workshop time are consumed during production. Machinery must be deployed separately to provide a service." % [definition.output,", ".join(parts)])+power_note+co_note
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
 	if not joint.is_empty():return "%s equipment. %d crew per hull or aircraft; commission through %s operations." % [String(joint.purpose),int(joint.crew),String(joint.domain)]
@@ -132,6 +134,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		job["installed_tooling"]=installed
 		var retention:=.65 if String(job.job_type)==String(definition.job_type) else .35
 		job.efficiency=maxf(.10,float(job.efficiency)*retention)
+		Exposure.clear(job)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
 		job.required_days=job.work_per_item
 		job.erase("planner_managed")
@@ -153,6 +156,7 @@ static func state(host: Node, job: Dictionary) -> String:
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
 	for resource in job.materials:
+		if job.has("exposure_started_day"):continue
 		if float(job.materials[resource])>0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
 	if power_per_item(job)>0 and preload("res://scripts/technology_operations.gd").service("electricity")<=.000000001:return "Waiting for electricity"
 	for name:String in services_per_item(job):
@@ -187,6 +191,10 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	if not eligible(host,job) or work<=0:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
+	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.has("exposure_days"):
+		Exposure.advance(job,exposure_spec,work)
+		return
 	var per_item:=float(job.work_per_item)
 	var units:=work/per_item
 	if int(job.target_stock)>0:
@@ -235,10 +243,17 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 		elif float(staff.workplace_condition)<=0:result.state="No usable workplaces"
 		else:result.state="Workforce unable to work"
 	if String(job.job_type)=="civilian":result["co_products"]=Industry.product(String(job.item)).get("co_products",{}).duplicate()
+	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.has("exposure_days"):result.daily_work=minf(float(result.daily_work),1.0)
 	result["output_per_day"]=float(result.daily_work)/float(job.work_per_item)
 	result["inputs_per_day"]={}
 	for resource in job.materials: result.inputs_per_day[resource]=float(job.materials[resource])*float(result.output_per_day)
 	result["forecast_output_per_day"]=float(result.output_per_day) if result.state=="Working" else 0.0
+	if exposure_spec.has("exposure_days"):
+		for resource:String in result.inputs_per_day:result.inputs_per_day[resource]=0.0
+		result["exposure_days_completed"]=float(job.progress_days)
+		result["exposure_days_required"]=float(exposure_spec.exposure_days)
+		result.forecast_output_per_day=0.0
 	result["materials_status"]=[]
 	for resource:String in job.materials:
 		var cost:=float(job.materials[resource]);var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
@@ -269,6 +284,8 @@ static func validate_saved(payload: Dictionary) -> String:
 		if String(job.job_type)=="civilian":
 			var definition:=Industry.product(String(job.item))
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
+		var exposure_error:=Exposure.validate(job,Industry.product(String(job.item)))
+		if not exposure_error.is_empty():return exposure_error
 		if job.has("installed_tooling"):
 			if not job.installed_tooling is Dictionary:return "Invalid installed tooling."
 			var allowed:Dictionary={}

@@ -1455,5 +1455,42 @@
     },
     "power": 1,
     "daily_power": 0.5
+  },
+  "exposed_panel_sealant": {
+    "name": "Thirty-day exposure-tested panel sealant",
+    "output": "Exposure-Tested Panel Sealant",
+    "gate": "polymer_weathering_trials",
+    "materials": {
+      "Polybutene Panel Sealant": 1.1,
+      "Freshwater": 1,
+      "Steel Sheets": 0.05
+    },
+    "days": 30,
+    "exposure_days": 30,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Optical Lenses": 1,
+      "Steel": 4,
+      "Electric Motors": 1
+    },
+    "power": 6,
+    "daily_power": 0.2
+  },
+  "exposure_tested_cold_panels": {
+    "name": "Panels with exposure-tested sealant",
+    "output": "Foam Cold-Store Panels",
+    "gate": "polymer_foam_cell_control",
+    "materials": {
+      "Insulation-Grade LDPE Foam": 1.1,
+      "Steel Sheets": 0.5,
+      "Exposure-Tested Panel Sealant": 0.025
+    },
+    "days": 2,
+    "tooling": {
+      "Steel": 3,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 1,
+    "daily_power": 0.5
   }
 }

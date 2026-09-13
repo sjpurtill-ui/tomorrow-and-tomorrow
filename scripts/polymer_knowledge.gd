@@ -1322,7 +1322,8 @@ static func entries()->Array[Dictionary]:
       "expanded_ldpe_foam",
       "qualified_ldpe_foam",
       "foam_cold_store_panels",
-      "polybutene_sealed_cold_panels"
+      "polybutene_sealed_cold_panels",
+      "exposure_tested_cold_panels"
     ],
     "operating_plants": [
       "foam_insulated_cold_store"
@@ -1393,6 +1394,40 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Qualified mixed C4 feed and dry Lewis-acid reagent undergo controlled cationic chain growth with paid heat removal and catalyst separation. Low-molecular-weight polybutene supplies a qualified panel sealant, not high-molecular-weight rubber or pure polyisobutylene.",
     "production_items": [
       "cationic_polybutene"
+    ]
+  },
+  {
+    "id": "polymer_weathering_trials",
+    "name": "Polymer Weathering Trials",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_additive_formulation",
+      "statistical_inference"
+    ],
+    "requires_all": [
+      "polymer_additive_formulation",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Weathering Trials",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Measure property changes under specified light, moisture and temperature exposure",
+    "effects": {},
+    "production_contract": "Reserves a finite sealant specimen batch and requires thirty distinct observed exposure days with paid operators and power. Qualification remains bounded to that exposure; it does not grant indefinite service life. Tested material feeds a separate panel assembly recipe.",
+    "production_items": [
+      "exposed_panel_sealant"
     ]
   }
 ]

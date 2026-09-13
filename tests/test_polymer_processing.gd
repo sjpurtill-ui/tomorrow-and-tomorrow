@@ -500,3 +500,58 @@ func test_cationic_c4_route_supplies_panel_sealant_with_finite_catalyst_and_cool
 		assert_float(float(s.resource_stockpiles["Polybutene Panel Sealant"])).is_equal_approx(.94,.000001)
 		assert_float(float(s.resource_stockpiles["Foam Cold-Store Panels"])).is_equal(2.0)
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(8.0))
+func start_exposure()->Dictionary:
+	prepare();var s=WorldSimulation.state
+	s.known_discoveries.append("polymer_weathering_trials");s.discovery_adoption.polymer_weathering_trials=1.0
+	var spec:=I.product("exposed_panel_sealant")
+	for resource:String in spec.tooling:s.resource_stockpiles[resource]=100.0
+	for resource:String in spec.materials:s.resource_stockpiles[resource]=spec.materials[resource]
+	Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+	assert_bool(WorldSimulation.military.start_production_line("exposed_panel_sealant",1).get("ok",false)).is_true()
+	var job:Dictionary=WorldSimulation.military.equipment_queue.back();P.advance(WorldSimulation.military,job,10000)
+	return job
+func test_exposure_reserves_batch_and_cannot_accelerate_or_skip_unpowered_days()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		var job:=start_exposure();var s=WorldSimulation.state
+		assert_float(float(s.resource_stockpiles["Polybutene Panel Sealant"])).is_equal(0.0)
+		P.advance(WorldSimulation.military,job,10000)
+		assert_float(float(job.progress_days)).is_equal(0.0)
+		s.elapsed_days=1;Ops.data().last_day=1;P.advance(WorldSimulation.military,job,.5);P.advance(WorldSimulation.military,job,10000);P.advance(WorldSimulation.military,job,10000)
+		assert_float(float(job.progress_days)).is_equal(1.0)
+		s.elapsed_days=2;Ops.data().last_day=2;Ops.data().services.electricity=0.0;P.advance(WorldSimulation.military,job,10000)
+		assert_float(float(job.progress_days)).is_equal(1.0)
+		s.elapsed_days=3;Ops.data().last_day=3;Ops.data().services.electricity=100.0;job.paused=true;P.advance(WorldSimulation.military,job,10000)
+		job.paused=false;s.elapsed_days=20;Ops.data().last_day=20;P.advance(WorldSimulation.military,job,10000)
+		assert_float(float(job.progress_days)).is_equal(2.0)
+		for day:int in range(21,49):s.elapsed_days=day;Ops.data().last_day=day;P.advance(WorldSimulation.military,job,10000)
+		assert_int(int(job.completed)).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Exposure-Tested Panel Sealant"])).is_equal(1.0)
+		assert_bool("ionic_chain_polymerization" in s.known_discoveries).is_false()
+		WorldSimulation.military.cancel_equipment_job(int(job.id))
+		s.resource_stockpiles["Insulation-Grade LDPE Foam"]=2;s.resource_stockpiles["Steel Sheets"]=1
+		assert_int(int(run_batch("exposure_tested_cold_panels",1).get("completed",0))).is_equal(1))
+func test_exposure_survives_full_save_without_repaying_or_replaying_days()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	WorldSimulation.scoped("polymers",func()->void:
+		var job:=start_exposure()
+		for day:int in range(1,6):WorldSimulation.state.elapsed_days=day;Ops.data().last_day=day;P.advance(WorldSimulation.military,job,10000)
+		assert_float(float(job.progress_days)).is_equal(5.0))
+	var slot:="polymer_exposure_%d"%OS.get_process_id()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear();var result:=SaveSystem.load_game(slot)
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
+	if not result.get("ok",false):return
+	WorldSimulation.scoped("polymers",func()->void:
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		Ops.data().last_day=5;Ops.data().services={"electricity":100.0}
+		P.advance(WorldSimulation.military,job,10000)
+		assert_float(float(job.progress_days)).is_equal(5.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Polybutene Panel Sealant"])).is_equal(0.0)
+		for day:int in range(6,31):WorldSimulation.state.elapsed_days=day;Ops.data().last_day=day;P.advance(WorldSimulation.military,job,10000)
+		assert_int(int(job.completed)).is_equal(1))
+func test_exposure_save_validation_rejects_impossible_days()->void:
+	var helper=preload("res://scripts/exposure_production.gd")
+	var spec:=I.product("exposed_panel_sealant")
+	assert_str(helper.validate({"exposure_started_day":0,"exposure_last_day":1,"exposure_day_work":1,"progress_days":20},spec)).is_not_empty()
+	assert_str(helper.validate({"exposure_started_day":0},spec)).is_not_empty()
