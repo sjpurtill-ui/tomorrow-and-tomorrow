@@ -4,6 +4,8 @@ var subject:=""
 var rows:Dictionary={}
 var elapsed:=0.0
 func _ready()->void:
+	if subject in preload("res://scripts/rail_freight.gd").REQUIRED:
+		add_child(preload("res://scripts/hud/rail_freight_controls.gd").new())
 	for id:String in Ops.PLANTS:
 		var spec:Dictionary=Ops.PLANTS[id]
 		if spec.gate!=subject:continue
