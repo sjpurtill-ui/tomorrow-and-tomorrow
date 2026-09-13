@@ -7,7 +7,7 @@
       "domain": "ecology",
       "id": "seasonal_patterns",
       "name": "Seasonal Patterns",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/seed_selection.png",
@@ -31,7 +31,7 @@
       "domain": "nutrition",
       "id": "smoking",
       "name": "Smoke Preservation",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/cordage.png",
@@ -87,7 +87,7 @@
       "domain": "infrastructure",
       "id": "drainage",
       "name": "Ground Drainage",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/well_siting.png",
@@ -143,7 +143,7 @@
       "domain": "knowledge",
       "id": "route_memory",
       "name": "Encoded Routes",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/labor_rotations.png",
@@ -151,7 +151,7 @@
       "domain": "institutions",
       "id": "labor_rotations",
       "name": "Labor Rotations",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/customary_law.png",
@@ -6413,9 +6413,9 @@
   "live_art_complete": false,
   "live_count": 801,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 570,
+  "queued_count": 565,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 231
+  "verified_count": 236
 }
