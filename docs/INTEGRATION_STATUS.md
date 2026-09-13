@@ -1,3 +1,9 @@
+## September 13 — polymer NMR prerequisite
+
+Authored `nuclear_magnetic_resonance_spectroscopy` for the worker's sequence-sensitive measurement gap, with mandatory atomic physics, spectroscopy, tuned circuits and precision thermometry. A calibrated magnetic field, RF probe/excitation, sensitive receiver, references, thermal control and finite acquisition are required. Bruker's benchtop composition example does not establish universal sequence resolution; ambiguous or unresolved evidence cannot certify a grade. MRI is a distinct existing proposal. See `technology-review/Polymer NMR Prerequisite.md`.
+
+Ledger: **750 integrated +2,680 drafts =3,430 identities**, leaving **1,570 to author and4,250 to implement**. Parent/duplicate checks and15ledger tests pass. Runtime750/532/434/20 and art172/750 are unchanged. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/polymer-nmr-prerequisite`, base `3d81ef2061c30bbf5eadef42697d56b97de591b0`. Catalog/docs only; no save-format effect. Marine research is paused for this dependency. Polymer runtime remains isolated and under review; no player launch or package rebuild.
+
 ## September 13 — aviation subsystem coverage
 
 Authored24 distinct D11 mechanisms covering wing flow/control hardware, fuel routing and gauging, emergency/auxiliary power, electrical isolation, fire sensing, rotor drives/damping, landing-gear behavior, air-cycle cooling and pneumatic deicing. Each proposal names paid hardware, measured limits and a real proposed consumer. Crossfeed is not tank transfer; emergency airflow power and auxiliary turbines have actual energy sources; detection does not extinguish fires. See `technology-review/Aviation Systems Review.md`.

@@ -13364,6 +13364,16 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "4b3d405f6d54072886b2bc4f2c11230bb436af88ad299b061a7d14dfbed8a060"
+    },
+    {
+      "id": "nuclear_magnetic_resonance_spectroscopy",
+      "name": "Nuclear Magnetic Resonance Spectroscopy",
+      "horizon": "H05",
+      "source_file": "polymer-nmr-prerequisite.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c480ec0c6798fd2bb99570e6cfed4453dd9302c452939b2d814d28205495541f"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

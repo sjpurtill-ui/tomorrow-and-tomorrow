@@ -1,0 +1,42 @@
+[
+  {
+    "id": "nuclear_magnetic_resonance_spectroscopy",
+    "name": "Nuclear Magnetic Resonance Spectroscopy",
+    "field": "D13",
+    "status": "authored_draft",
+    "requires_all": [
+      "atomic_physics",
+      "spectroscopy",
+      "resonant_tuned_circuits",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "atomic_physics,spectroscopy,resonant_tuned_circuits,precision_thermometry",
+    "mechanism": "Observe radio-frequency responses of selected nuclear spins in a stable magnetic field to distinguish resolved chemical environments.",
+    "operating_requirement": "Build and calibrate a field source, homogeneous sample region, RF excitation/probe and sensitive detection; pay power, thermal control, sample preparation, reference material and acquisition time, with explicit resolution and sensitivity limits.",
+    "consequence": "A qualified analytical bench supplies sample-specific spectral evidence to polymer composition or sequence review only when the selected signals are resolved; unavailable or ambiguous evidence cannot certify a grade or reveal arbitrary molecular structure.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nuclear magnetic resonance spectroscopy instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nuclear_magnetic_resonance_spectroscopy",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Observe radio-frequency responses of selected nuclear spins in a stable magnetic field to distinguish resolved chemical environments.",
+      "operating_requirements": "Build and calibrate a field source, homogeneous sample region, RF excitation/probe and sensitive detection; pay power, thermal control, sample preparation, reference material and acquisition time, with explicit resolution and sensitivity limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nuclear magnetic resonance spectroscopy trials.",
+        "partnership": "Share actual samples and operator time for nuclear magnetic resonance spectroscopy; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nuclear magnetic resonance spectroscopy process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nuclear magnetic resonance spectroscopy processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nuclear magnetic resonance spectroscopy machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.jeol.com/products/science/nmr.php",
+      "https://www.bruker.com/en/resources/library/application-notes-mr/automated-copolymer-qc-using-benchtop-nmr.html",
+      "https://www.bruker.com/en/products-and-solutions/mr/chemistry/polymer-chemistry.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]
