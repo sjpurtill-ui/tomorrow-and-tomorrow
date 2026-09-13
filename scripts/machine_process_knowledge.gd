@@ -1,5 +1,5 @@
 extends RefCounted
-# Unregistered until finite operating consumers are verified.
+# Registered after finite process and downstream consumer checks; integration remains separate.
 static func entries()->Array[Dictionary]:
 	return [
   {

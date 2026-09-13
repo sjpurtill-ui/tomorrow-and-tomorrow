@@ -90,3 +90,13 @@ func test_rejected_inspection_output_requires_its_actual_manufacturing_route()->
 	var result:=Audit.audit(products,{"generator":generator({"Candidate":1})},["Candidate"],["method"])
 	assert_dict(result.blocked_products).is_empty()
 	assert_array(result.conditional_quality_outcomes_assumed).contains(["check"])
+
+func test_machine_acceptance_requires_inspection_supplies_and_reports_conditional_quality()->void:
+	var machine:=recipe("Checked Part",{"Metal":1})
+	machine.machine_program=[];machine.machine_inspection={"Slide":.01};machine.machine_inspection_tools={"Microscope":1}
+	var products:={"machine":machine}
+	var missing:=Audit.audit(products,{},["Metal"],["method"])
+	assert_array(missing.errors).contains(["machine: no source for Slide (machine_inspection)","machine: no source for Microscope (machine_inspection_tools)"])
+	var supplied:=Audit.audit(products,{},["Metal","Slide","Microscope"],["method"])
+	assert_dict(supplied.blocked_products).is_empty()
+	assert_array(supplied.conditional_quality_outcomes_assumed).contains(["machine"])

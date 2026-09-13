@@ -187,3 +187,30 @@ func test_retooling_retains_head_wear_and_abandons_reserved_material()->void:
 		assert_float(float(line.machine_wear)).is_greater(.7)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Steel Sheets"])).is_equal_approx(before-1.2,.000001)
 	)
+
+func test_machine_capital_recipes_pay_inputs_and_complete_after_partial_work()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var outputs:Array=["Coordinate Drive Tables","Water-Film Bearing Sets","Machining Water Filter Sets","Machine Load Test Sets","Machine Vibration Test Sets"]
+		for item:String in ITEMS:
+			var head:String=I.product(item).tooling.keys()[0]
+			outputs.append(head)
+		for item:String in I.PRODUCTS:
+			var spec:=I.product(item)
+			if spec.output not in outputs:continue
+			WorldSimulation.military.equipment_queue.clear()
+			var state=WorldSimulation.state
+			state.settlement_site_committed=true;state.population_allocations.Crafting=100;state.population_allocations.Logistics=100
+			state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
+			for field:String in ["materials","tooling"]:
+				for resource:String in spec[field]:state.resource_stockpiles[resource]=100.0
+			state.resource_stockpiles[spec.output]=0.0
+			Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":100.0}
+			assert_bool(WorldSimulation.military.start_production_line(item,1).get("ok",false)).is_true()
+			var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+			var stocks:Dictionary=state.resource_stockpiles.duplicate(true)
+			P.advance(WorldSimulation.military,job,float(spec.days)/2)
+			assert_float(float(state.resource_stockpiles[spec.output])).is_equal(0.0)
+			P.advance(WorldSimulation.military,job,float(spec.days)/2)
+			assert_float(float(state.resource_stockpiles[spec.output])).is_equal(1.0)
+			for resource:String in spec.materials:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(float(stocks[resource])-float(spec.materials[resource]),.000001)
+	)
