@@ -1194,44 +1194,5 @@
     "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
     "confidence_class": "performance_conditional",
     "uncertainty_limit": "A research result opens evaluated development choices; economic scale, lifetime, net output and integrated reliability require separate measured evidence."
-  },
-  {
-    "field": "D05",
-    "id": "hydrocarbon_steam_cracking",
-    "name": "Hydrocarbon Steam Cracking",
-    "foundations": "fuel_refining,pressure_vessels,precision_thermometry",
-    "mechanism": "Thermal cleavage of a defined hydrocarbon feed with steam dilution, rapid quench and product separation.",
-    "operating_requirement": "Qualified feed, paid furnace heat, steam water, maintained hot equipment, quench and separation work; account for mixed yields, coke and rejected material.",
-    "consequence": "Supply bounded identified olefin fractions to compatible monomer preparation; no catalyst is mandatory and no universal monomer output is implied.",
-    "status": "authored_draft",
-    "requires_all": [
-      "fuel_refining",
-      "pressure_vessels",
-      "precision_thermometry"
-    ],
-    "requires_any": [],
-    "recovery": "Outside help carries payment or reciprocal obligations, travel or transmission delay, finite local adaptation and continuing supplier dependence where applicable.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "hydrocarbon_steam_cracking",
-      "local_demonstration": "Thermal cleavage of a defined hydrocarbon feed with steam dilution, rapid quench and product separation.",
-      "operating_requirements": "Qualified feed, paid furnace heat, steam water, maintained hot equipment, quench and separation work; account for mixed yields, coke and rejected material.",
-      "grants_instant_mastery": false,
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner of hydrocarbon steam cracking; reproduce the method locally with the required equipment and inputs.",
-        "partnership": "Contribute paid staff, samples or operating evidence to joint work on hydrocarbon steam cracking; access, communication delay and dependence remain negotiated.",
-        "purchased_research": "Commission a bounded investigation of thermal cleavage with dilution, quench and fraction separation; pay for evidence and local acceptance work, without a guaranteed favorable result.",
-        "licensed_or_imported_service": "Pay a qualified supplier for compatible equipment, fuel or operating service for hydrocarbon steam cracking; delivery capacity and continuing supply dependence remain, and ownership grants no mastery.",
-        "reverse_engineering": "Inspect an accessible artifact or operating record relevant to hydrocarbon steam cracking using suitable instruments and local trials; inaccessible internals and long-term performance remain unknown."
-      }
-    },
-    "implementation_status": "Authored proposal; physical processes, acquisition behavior, AI operation and balancing remain to implement.",
-    "evidence_sources": [
-      "https://www.essentialchemicalindustry.org/processes/cracking-isomerisation-and-reforming.html",
-      "https://www.essentialchemicalindustry.org/chemicals/ethene.html",
-      "https://www.basf.com/global/en/who-we-are/organization/locations/europe/german-sites/ludwigshafen/the-site/production/the-production-verbund/Steamcracker"
-    ],
-    "branching_note": "Distinct from catalytic cracking: thermal olefin production is not a renamed catalyst route. These are selected game foundations, not exhaustive historical origin claims.",
-    "historical_scope": "H04 describes the industrial process scope, not a date unlock. Game costs and feedstock abstraction require explicit implementation qualification."
   }
 ]

@@ -5490,6 +5490,382 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/hydrocarbon_steam_cracking.png",
+      "description": "Thermally cleave a suitable hydrocarbon feed with steam dilution, quench and separation into a finite mixture of lighter chemical streams.",
+      "domain": "production",
+      "id": "hydrocarbon_steam_cracking",
+      "name": "Hydrocarbon Steam Cracking",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_chain_models.png",
+      "description": "Relate macromolecular structure to observed material behavior",
+      "domain": "production",
+      "id": "polymer_chain_models",
+      "name": "Polymer-Chain Models",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_film_extrusion.png",
+      "description": "Form a continuous qualified polymer film through controlled die flow and cooling",
+      "domain": "production",
+      "id": "polymer_film_extrusion",
+      "name": "Polymer Film Extrusion",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_melt_rheology.png",
+      "description": "Measure flow response of a polymer melt under defined thermal and deformation conditions",
+      "domain": "production",
+      "id": "polymer_melt_rheology",
+      "name": "Polymer Melt Rheology",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_monomer_purification.png",
+      "description": "Qualify feed monomers by separating and measuring process-relevant impurities",
+      "domain": "production",
+      "id": "polymer_monomer_purification",
+      "name": "Polymer Monomer Purification",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_reaction_heat_management.png",
+      "description": "Measure and control heat release and removal in a qualified polymer production process",
+      "domain": "production",
+      "id": "polymer_reaction_heat_management",
+      "name": "Polymer Reaction Heat Management",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/radical_chain_polymerization.png",
+      "description": "Build polymer chains through controlled radical propagation with evaluated product properties",
+      "domain": "production",
+      "id": "radical_chain_polymerization",
+      "name": "Radical Chain Polymerization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/thermoplastic_processing.png",
+      "description": "Shape qualified polymers through reversible softening and cooling within their process window",
+      "domain": "production",
+      "id": "thermoplastic_processing",
+      "name": "Thermoplastic Processing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_injection_molding.png",
+      "description": "Fill a qualified mold with controlled polymer flow and solidification",
+      "domain": "production",
+      "id": "polymer_injection_molding",
+      "name": "Polymer Injection Molding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_thermoforming.png",
+      "description": "Shape a heated qualified polymer sheet against compatible tooling",
+      "domain": "production",
+      "id": "polymer_thermoforming",
+      "name": "Polymer Thermoforming",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/industrial_catalyst_design.png",
+      "description": "Relate a catalyst's composition and accessible structure to a declared process reaction",
+      "domain": "production",
+      "id": "industrial_catalyst_design",
+      "name": "Industrial Catalyst Design",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/condensative_step_polymerization.png",
+      "description": "Join functional molecules through qualified step reactions that release small-molecule products",
+      "domain": "production",
+      "id": "condensative_step_polymerization",
+      "name": "Condensative Step Polymerization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/adhesive_bond_design.png",
+      "description": "Join prepared surfaces with a qualified bonding material and load-bearing interface",
+      "domain": "production",
+      "id": "adhesive_bond_design",
+      "name": "Adhesive-Bond Design",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/engineered_wood_lamination.png",
+      "description": "Bond graded wood elements into a qualified structural product",
+      "domain": "production",
+      "id": "engineered_wood_lamination",
+      "name": "Engineered Wood Lamination",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wood_methanol_recovery.png",
+      "description": "Capture wood-carbonization vapors and separate a methanol-bearing fraction from watery condensate and tar; further refining distinguishes usable methanol from crude mixed solvent.",
+      "domain": "production",
+      "id": "wood_methanol_recovery",
+      "name": "Wood Methanol Recovery",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/silver_cupellation.png",
+      "description": "Oxidize the lead and base-metal carrier of a qualified silver-bearing metal charge, retaining a noble-metal-rich residue and separating oxidized material in a consumable hearth lining.",
+      "domain": "production",
+      "id": "silver_cupellation",
+      "name": "Silver Cupellation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/formaldehyde_synthesis.png",
+      "description": "Convert qualified methanol through a selected catalytic oxidation/dehydrogenation route and absorb the resulting formaldehyde into a defined solution.",
+      "domain": "production",
+      "id": "formaldehyde_synthesis",
+      "name": "Formaldehyde Synthesis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/urea_synthesis.png",
+      "description": "React defined ammonia and carbon-dioxide feeds through the carbamate-to-urea pathway, separating product from unconverted material.",
+      "domain": "production",
+      "id": "urea_synthesis",
+      "name": "Urea Synthesis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/enzyme_catalysis.png",
+      "description": "Identify biological catalysts that alter reaction rates under suitable conditions",
+      "domain": "production",
+      "id": "enzyme_catalysis",
+      "name": "Enzyme Catalysis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ring_opening_polymerization.png",
+      "description": "Convert suitable cyclic monomers into a qualified polymer through ring-opening reactions",
+      "domain": "production",
+      "id": "ring_opening_polymerization",
+      "name": "Ring Opening Polymerization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/metallurgical_mass_balances.png",
+      "description": "Account for useful material and losses across a metallurgical process",
+      "domain": "production",
+      "id": "metallurgical_mass_balances",
+      "name": "Metallurgical Mass Balances",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nickel_metal_recovery.png",
+      "description": "Separate and refine nickel from a characterized feed through a qualified process",
+      "domain": "production",
+      "id": "nickel_metal_recovery",
+      "name": "Nickel Metal Recovery",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/biomass_gasification.png",
+      "description": "Convert biomass into a characterized combustible gas through controlled partial conversion",
+      "domain": "production",
+      "id": "biomass_gasification",
+      "name": "Biomass Gasification",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gas_composition_analysis.png",
+      "description": "Measure components of a gas mixture using calibrated separation or spectral response",
+      "domain": "production",
+      "id": "gas_composition_analysis",
+      "name": "Gas Composition Analysis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/additive_step_polymerization.png",
+      "description": "Join functional molecules through qualified step reactions without a required small-molecule elimination",
+      "domain": "production",
+      "id": "additive_step_polymerization",
+      "name": "Additive Step Polymerization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ethylene_oxide_synthesis.png",
+      "description": "Oxidize qualified ethene over a separately qualified supported silver catalyst and separate ethylene oxide from competing reaction products.",
+      "domain": "production",
+      "id": "ethylene_oxide_synthesis",
+      "name": "Ethylene Oxide Synthesis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ethylene_glycol_hydrolysis.png",
+      "description": "React a defined ethylene-oxide feed with water and separate monoethylene glycol from the resulting product mixture.",
+      "domain": "production",
+      "id": "ethylene_glycol_hydrolysis",
+      "name": "Ethylene Glycol Hydrolysis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coal_light_oil_recovery.png",
+      "description": "Capture coke-making byproduct streams and separate a light aromatic fraction from other condensates and gas.",
+      "domain": "production",
+      "id": "coal_light_oil_recovery",
+      "name": "Coal Light-oil Recovery",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aromatic_nitration.png",
+      "description": "Convert a specified aromatic feed through a controlled nitration pathway and qualify its intended intermediate fraction.",
+      "domain": "production",
+      "id": "aromatic_nitration",
+      "name": "Aromatic Nitration",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aromatic_amine_hydrogenation.png",
+      "description": "Reduce a named nitroaromatic intermediate with supplied hydrogen and a reaction-qualified catalyst into its corresponding amine feed.",
+      "domain": "production",
+      "id": "aromatic_amine_hydrogenation",
+      "name": "Aromatic Amine Hydrogenation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/isocyanate_synthesis.png",
+      "description": "Convert a defined amine with separately prepared industrial carbonylation feeds into the selected isocyanate product and separate residual material.",
+      "domain": "production",
+      "id": "isocyanate_synthesis",
+      "name": "Isocyanate Synthesis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_blow_molding.png",
+      "description": "Expand a qualified polymer preform against a mold through controlled pressure",
+      "domain": "production",
+      "id": "polymer_blow_molding",
+      "name": "Polymer Blow Molding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_solution_processing.png",
+      "description": "Form and recover qualified polymer material through controlled dissolution and solvent handling",
+      "domain": "production",
+      "id": "polymer_solution_processing",
+      "name": "Polymer Solution Processing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_solvent_recovery.png",
+      "description": "Recover suitable solvent from a characterized polymer-process stream",
+      "domain": "production",
+      "id": "polymer_solvent_recovery",
+      "name": "Polymer Solvent Recovery",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_molecular_weight_control.png",
+      "description": "Characterize and control the distribution of polymer chain sizes",
+      "domain": "production",
+      "id": "polymer_molecular_weight_control",
+      "name": "Polymer Molecular-Weight Control",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_additive_formulation.png",
+      "description": "Assess modifiers against declared material properties and exposure conditions",
+      "domain": "production",
+      "id": "polymer_additive_formulation",
+      "name": "Polymer-Additive Formulation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_foam_cell_control.png",
+      "description": "Control and measure cell structure in a qualified expanded polymer material",
+      "domain": "production",
+      "id": "polymer_foam_cell_control",
+      "name": "Polymer Foam Cell Control",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/selective_polymer_depolymerization.png",
+      "description": "Deconstruct a specified polymer into qualified recoverable intermediates through a selected process",
+      "domain": "production",
+      "id": "selective_polymer_depolymerization",
+      "name": "Selective Polymer Depolymerization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ionic_chain_polymerization.png",
+      "description": "Build polymer chains through qualified ionic active centers under controlled conditions",
+      "domain": "production",
+      "id": "ionic_chain_polymerization",
+      "name": "Ionic Chain Polymerization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_weathering_trials.png",
+      "description": "Measure property changes under specified light, moisture and temperature exposure",
+      "domain": "production",
+      "id": "polymer_weathering_trials",
+      "name": "Polymer Weathering Trials",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/alumina_refining.png",
+      "description": "Separate a qualified aluminum-oxide feed from suitable mineral sources",
+      "domain": "production",
+      "id": "alumina_refining",
+      "name": "Alumina Refining",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aluminum_electrolysis.png",
+      "description": "Reduce qualified alumina to aluminum through a maintained electrolytic process",
+      "domain": "production",
+      "id": "aluminum_electrolysis",
+      "name": "Aluminum Electrolysis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/coordination_polymerization.png",
+      "description": "Use a qualified coordination catalyst system to control chain growth and selected structure",
+      "domain": "production",
+      "id": "coordination_polymerization",
+      "name": "Coordination Polymerization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/polymer_tacticity_characterization.png",
+      "description": "Measure stereochemical ordering in a qualified polymer against a defined analytical method",
+      "domain": "production",
+      "id": "polymer_tacticity_characterization",
+      "name": "Polymer Tacticity Characterization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/copolymer_sequence_control.png",
+      "description": "Control and characterize incorporation of different monomer units within a specified copolymer",
+      "domain": "production",
+      "id": "copolymer_sequence_control",
+      "name": "Copolymer Sequence Control",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
+      "description": "Observe radio-frequency responses of selected nuclear spins in a stable magnetic field to distinguish resolved chemical environments.",
+      "domain": "production",
+      "id": "nuclear_magnetic_resonance_spectroscopy",
+      "name": "Nuclear Magnetic Resonance Spectroscopy",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/size_exclusion_chromatography.png",
+      "description": "Separate compatible dissolved chains by their access to a qualified porous stationary phase and measure a calibrated elution profile within a finite size range.",
+      "domain": "production",
+      "id": "size_exclusion_chromatography",
+      "name": "Size-Exclusion Chromatography",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/edible_resource_recognition.png",
       "description": "Distinguish locally known food resources through transmitted observations and verified identification",
       "domain": "nutrition",
@@ -6019,11 +6395,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 752,
+  "live_count": 799,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 174
+  "verified_count": 221
 }

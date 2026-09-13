@@ -275,44 +275,6 @@
   },
   {
     "field": "D08",
-    "id": "engineered_wood_lamination",
-    "name": "Engineered Wood Lamination",
-    "foundations": "adhesive_bond_design,timber_grading",
-    "mechanism": "Bond graded wood elements into a qualified structural product",
-    "operating_requirement": "Suitable timber, compatible adhesive, pressing equipment and quality checks",
-    "consequence": "Produce supported structural members with moisture and bond-life limits",
-    "status": "authored_draft",
-    "requires_all": [
-      "adhesive_bond_design",
-      "timber_grading"
-    ],
-    "requires_any": [],
-    "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "engineered_wood_lamination",
-      "local_demonstration": "Bond graded wood elements into a qualified structural product",
-      "operating_requirements": "Suitable timber, compatible adhesive, pressing equipment and quality checks",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "available competent source",
-        "payment or reciprocal contribution",
-        "real travel or information/material delivery",
-        "finite local trials and qualified construction",
-        "continuing maintenance, staff and service inputs"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
-        "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
-        "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
-        "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
-        "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
-      }
-    },
-    "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending."
-  },
-  {
-    "field": "D08",
     "id": "cross_laminated_timber_panels",
     "name": "Cross Laminated Timber Panels",
     "foundations": "engineered_wood_lamination",

@@ -167,44 +167,6 @@
   },
   {
     "field": "D05",
-    "id": "biomass_gasification",
-    "name": "Biomass Gasification",
-    "foundations": "charcoal,gas_composition_analysis",
-    "mechanism": "Convert biomass into a characterized combustible gas through controlled partial conversion",
-    "operating_requirement": "Prepared feedstock, qualified reactor, gas cleaning and operators",
-    "consequence": "Supply variable fuel gas while consuming biomass and producing residues",
-    "status": "authored_draft",
-    "requires_all": [
-      "charcoal",
-      "gas_composition_analysis"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain a competent paid specialist, reciprocal operating evidence, commissioned research or a qualified imported service. Pay actual delivery, local adaptation and commissioning costs. Imported fuel or electricity retains source dependence and does not grant local generation mastery.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "biomass_gasification",
-      "local_demonstration": "Convert biomass into a characterized combustible gas through controlled partial conversion",
-      "operating_requirements": "Prepared feedstock, qualified reactor, gas cleaning and operators",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "available competent source",
-        "negotiated payment or reciprocal contribution",
-        "physical delivery or information transmission",
-        "finite local qualification and commissioning",
-        "continuing fuel, utilities, spares and staff"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay travel, board and finite instruction by a competent practitioner; qualify the method with actual local equipment.",
-        "partnership": "Contribute staff, materials or measured operating evidence; shared access and communication incur delay and negotiated obligations.",
-        "purchased_research": "Commission a defined engineering question and inspect delivered evidence; payment does not guarantee a favorable result or a functioning plant.",
-        "licensed_or_imported_service": "Pay for actual fuel, electricity, heat, equipment or qualified operation within supplier capacity; dependency persists and local mastery is not granted.",
-        "reverse_engineering": "Analyze a delivered component or inspectable operating record with appropriate instruments and local work; a purchased unit cannot establish long-term plant reliability or unresolved fusion performance."
-      }
-    },
-    "implementation_status": "Authored proposal; actual plant models, service throughput, loss accounting, acquisition costs and AI operation remain pending."
-  },
-  {
-    "field": "D05",
     "id": "producer_gas_cleanup",
     "name": "Producer Gas Cleanup",
     "foundations": "biomass_gasification",

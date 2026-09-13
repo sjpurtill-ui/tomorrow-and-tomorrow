@@ -161,38 +161,6 @@
   },
   {
     "field": "D04",
-    "id": "metallurgical_mass_balances",
-    "name": "Metallurgical Mass Balances",
-    "foundations": "material_accounting,ore_assaying",
-    "mechanism": "Account for useful material and losses across a metallurgical process",
-    "operating_requirement": "Measured feeds, products, residues and sampling",
-    "consequence": "Expose recovery losses rather than treating ore grade as finished metal output",
-    "status": "authored_draft",
-    "requires_all": [
-      "material_accounting",
-      "ore_assaying"
-    ],
-    "requires_any": [],
-    "recovery": "For Metallurgical Mass Balances: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "metallurgical_mass_balances",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Metallurgical Mass Balances",
-      "local_demonstration": "Account for useful material and losses across a metallurgical process",
-      "operating_requirements": "Measured feeds, products, residues and sampling",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
     "id": "copper_electrorefining",
     "name": "Copper Electrorefining",
     "foundations": "copper_smelting,electrochemical_cells,electrical_measurement",
@@ -296,38 +264,6 @@
   },
   {
     "field": "D04",
-    "id": "nickel_metal_recovery",
-    "name": "Nickel Metal Recovery",
-    "foundations": "ore_assaying,metallurgical_mass_balances",
-    "mechanism": "Separate and refine nickel from a characterized feed through a qualified process",
-    "operating_requirement": "Suitable plant, reagents or heat, energy and controlled residues",
-    "consequence": "Provide nickel for selected alloys and devices with feed-dependent processing costs",
-    "status": "authored_draft",
-    "requires_all": [
-      "ore_assaying",
-      "metallurgical_mass_balances"
-    ],
-    "requires_any": [],
-    "recovery": "For Nickel Metal Recovery: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "nickel_metal_recovery",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Nickel Metal Recovery",
-      "local_demonstration": "Separate and refine nickel from a characterized feed through a qualified process",
-      "operating_requirements": "Suitable plant, reagents or heat, energy and controlled residues",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
     "id": "chromium_alloy_feedstocks",
     "name": "Chromium Alloy Feedstocks",
     "foundations": "electric_arc_furnaces,ore_assaying",
@@ -379,71 +315,6 @@
       "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Stainless-Steel Alloying",
       "local_demonstration": "Control alloy composition and processing to support a protective surface condition",
       "operating_requirements": "Qualified feedstocks, melting and processing, testing and suitable service conditions",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
-    "id": "alumina_refining",
-    "name": "Alumina Refining",
-    "foundations": "ore_assaying,metallurgical_mass_balances",
-    "mechanism": "Separate a qualified aluminum-oxide feed from suitable mineral sources",
-    "operating_requirement": "Appropriate chemical plant, energy, water and residue management",
-    "consequence": "Prepare feed for aluminum production while creating substantial process demands",
-    "status": "authored_draft",
-    "requires_all": [
-      "ore_assaying",
-      "metallurgical_mass_balances"
-    ],
-    "requires_any": [],
-    "recovery": "For Alumina Refining: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "alumina_refining",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Alumina Refining",
-      "local_demonstration": "Separate a qualified aluminum-oxide feed from suitable mineral sources",
-      "operating_requirements": "Appropriate chemical plant, energy, water and residue management",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
-    "id": "aluminum_electrolysis",
-    "name": "Aluminum Electrolysis",
-    "foundations": "alumina_refining,electrical_generators,electrochemical_cells",
-    "mechanism": "Reduce qualified alumina to aluminum through a maintained electrolytic process",
-    "operating_requirement": "Suitable cells, large electricity supply, electrodes and controlled handling",
-    "consequence": "Produce a light metal through an energy-intensive industrial chain",
-    "status": "authored_draft",
-    "requires_all": [
-      "alumina_refining",
-      "electrical_generators",
-      "electrochemical_cells"
-    ],
-    "requires_any": [],
-    "recovery": "For Aluminum Electrolysis: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "aluminum_electrolysis",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Aluminum Electrolysis",
-      "local_demonstration": "Reduce qualified alumina to aluminum through a maintained electrolytic process",
-      "operating_requirements": "Suitable cells, large electricity supply, electrodes and controlled handling",
       "outside_costs": [
         "competent source availability",
         "negotiated payment or reciprocal work",
@@ -780,43 +651,6 @@
   },
   {
     "field": "D04",
-    "id": "adhesive_bond_design",
-    "name": "Adhesive-Bond Design",
-    "foundations": "experimental_controls",
-    "mechanism": "Join prepared surfaces with a qualified bonding material and load-bearing interface",
-    "operating_requirement": "Compatible materials, preparation, curing conditions and joint tests",
-    "consequence": "Join selected dissimilar materials while moisture, temperature and aging can weaken bonds",
-    "status": "authored_draft",
-    "requires_all": [
-      "experimental_controls"
-    ],
-    "requires_any": [
-      [
-        "joinery",
-        "elastic_deformation"
-      ]
-    ],
-    "branching_note": "Empirical joint trials can precede a formal elasticity model.",
-    "recovery": "For Adhesive-Bond Design: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "adhesive_bond_design",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Adhesive-Bond Design",
-      "local_demonstration": "Join prepared surfaces with a qualified bonding material and load-bearing interface",
-      "operating_requirements": "Compatible materials, preparation, curing conditions and joint tests",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
     "id": "natural_rubber_processing",
     "name": "Natural-Rubber Processing",
     "foundations": "experimental_controls",
@@ -887,70 +721,6 @@
   },
   {
     "field": "D04",
-    "id": "polymer_chain_models",
-    "name": "Polymer-Chain Models",
-    "foundations": "chemical_distillation,experimental_controls",
-    "mechanism": "Relate macromolecular structure to observed material behavior",
-    "operating_requirement": "Characterized substances, qualified measurements and explicit models",
-    "consequence": "Explain selected processing and mechanical properties without assuming all polymers behave alike",
-    "status": "authored_draft",
-    "requires_all": [
-      "chemical_distillation",
-      "experimental_controls"
-    ],
-    "requires_any": [],
-    "recovery": "For Polymer-Chain Models: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "polymer_chain_models",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Polymer-Chain Models",
-      "local_demonstration": "Relate macromolecular structure to observed material behavior",
-      "operating_requirements": "Characterized substances, qualified measurements and explicit models",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
-    "id": "thermoplastic_processing",
-    "name": "Thermoplastic Processing",
-    "foundations": "polymer_chain_models,precision_thermometry",
-    "mechanism": "Shape qualified polymers through reversible softening and cooling within their process window",
-    "operating_requirement": "Suitable resin, shaping equipment, energy and temperature control",
-    "consequence": "Produce repeatable shapes while thermal history and contamination affect quality",
-    "status": "authored_draft",
-    "requires_all": [
-      "polymer_chain_models",
-      "precision_thermometry"
-    ],
-    "requires_any": [],
-    "recovery": "For Thermoplastic Processing: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "thermoplastic_processing",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Thermoplastic Processing",
-      "local_demonstration": "Shape qualified polymers through reversible softening and cooling within their process window",
-      "operating_requirements": "Suitable resin, shaping equipment, energy and temperature control",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
     "id": "thermoset_resin_processing",
     "name": "Thermoset-Resin Processing",
     "foundations": "polymer_chain_models,adhesive_bond_design",
@@ -1002,70 +772,6 @@
       "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Synthetic Elastomers",
       "local_demonstration": "Produce and qualify elastic polymer families for specified service conditions",
       "operating_requirements": "Chemical plant, controlled feedstocks, processing and testing",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
-    "id": "polymer_molecular_weight_control",
-    "name": "Polymer Molecular-Weight Control",
-    "foundations": "polymer_chain_models,measurement_uncertainty",
-    "mechanism": "Characterize and control the distribution of polymer chain sizes",
-    "operating_requirement": "Qualified chemistry, measurement instruments and process control",
-    "consequence": "Tune selected processing and strength properties while distributions remain finite",
-    "status": "authored_draft",
-    "requires_all": [
-      "polymer_chain_models",
-      "measurement_uncertainty"
-    ],
-    "requires_any": [],
-    "recovery": "For Polymer Molecular-Weight Control: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "polymer_molecular_weight_control",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Polymer Molecular-Weight Control",
-      "local_demonstration": "Characterize and control the distribution of polymer chain sizes",
-      "operating_requirements": "Qualified chemistry, measurement instruments and process control",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
-    "id": "polymer_additive_formulation",
-    "name": "Polymer-Additive Formulation",
-    "foundations": "thermoplastic_processing,experimental_controls",
-    "mechanism": "Assess modifiers against declared material properties and exposure conditions",
-    "operating_requirement": "Compatible additives, mixing, tests and traceable formulations",
-    "consequence": "Change processing or durability while introducing migration and recycling tradeoffs",
-    "status": "authored_draft",
-    "requires_all": [
-      "thermoplastic_processing",
-      "experimental_controls"
-    ],
-    "requires_any": [],
-    "recovery": "For Polymer-Additive Formulation: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "polymer_additive_formulation",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Polymer-Additive Formulation",
-      "local_demonstration": "Assess modifiers against declared material properties and exposure conditions",
-      "operating_requirements": "Compatible additives, mixing, tests and traceable formulations",
       "outside_costs": [
         "competent source availability",
         "negotiated payment or reciprocal work",
@@ -1377,45 +1083,6 @@
       "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Geopolymer Binder Systems",
       "local_demonstration": "Form and qualify a chemically activated aluminosilicate binding network",
       "operating_requirements": "Suitable feed, compatible activators, controlled handling and curing tests",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
-    "id": "industrial_catalyst_design",
-    "name": "Industrial Catalyst Design",
-    "foundations": "experimental_controls,chemical_distillation",
-    "mechanism": "Relate a catalyst's composition and accessible structure to a declared process reaction",
-    "operating_requirement": "Qualified materials, characterization and representative process trials",
-    "consequence": "Improve selected process rates or selectivity while poisoning and regeneration costs remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "experimental_controls",
-      "chemical_distillation"
-    ],
-    "requires_any": [
-      [
-        "iron_ammonia_catalysts",
-        "enzyme_catalysis",
-        "sulfuric_acid_production"
-      ]
-    ],
-    "branching_note": "Catalytic process development is not universally downstream of ammonia synthesis.",
-    "recovery": "For Industrial Catalyst Design: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "industrial_catalyst_design",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Industrial Catalyst Design",
-      "local_demonstration": "Relate a catalyst's composition and accessible structure to a declared process reaction",
-      "operating_requirements": "Qualified materials, characterization and representative process trials",
       "outside_costs": [
         "competent source availability",
         "negotiated payment or reciprocal work",

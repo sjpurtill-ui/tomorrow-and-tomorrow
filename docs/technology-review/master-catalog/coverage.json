@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 752,
+  "verified_baseline_discoveries": 799,
   "pending_communications": 0,
-  "new_authored_drafts": 2695,
+  "new_authored_drafts": 2648,
   "distinct_accounted_identities": 3447,
   "remaining_identities_to_author": 1553,
   "target": 5000,
@@ -2302,9 +2302,9 @@
         "target": 700,
         "assigned": 75,
         "target_slots_not_yet_assigned": 625,
-        "implemented_baseline": 16,
+        "implemented_baseline": 17,
         "pending_communications": 0,
-        "authored_drafts": 59
+        "authored_drafts": 58
       },
       {
         "id": "H03",
@@ -2322,9 +2322,9 @@
         "target": 700,
         "assigned": 297,
         "target_slots_not_yet_assigned": 403,
-        "implemented_baseline": 15,
+        "implemented_baseline": 27,
         "pending_communications": 0,
-        "authored_drafts": 282
+        "authored_drafts": 270
       },
       {
         "id": "H05",
@@ -2332,9 +2332,9 @@
         "target": 900,
         "assigned": 695,
         "target_slots_not_yet_assigned": 205,
-        "implemented_baseline": 5,
+        "implemented_baseline": 7,
         "pending_communications": 0,
-        "authored_drafts": 690
+        "authored_drafts": 688
       },
       {
         "id": "H06",
@@ -2349,24 +2349,24 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 456,
+  "branch_alternatives": 448,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 109,
     "D02": 99,
     "D03": 97,
-    "D04": 117,
-    "D05": 157,
+    "D04": 77,
+    "D05": 155,
     "D06": 75,
     "D07": 80,
-    "D08": 95,
+    "D08": 94,
     "D09": 111,
     "D10": 95,
     "D11": 84,
     "D12": 115,
-    "D13": 115,
+    "D13": 113,
     "D14": 173,
-    "D15": 127,
+    "D15": 126,
     "D16": 135,
     "D17": 115,
     "D18": 92,
@@ -2374,7 +2374,7 @@
     "D20": 107,
     "D21": 196,
     "D22": 115,
-    "D23": 135,
+    "D23": 134,
     "D24": 56
   },
   "field_coverage": [
@@ -2412,9 +2412,9 @@
       "id": "D04",
       "name": "Materials and chemical processes",
       "target": 300,
-      "implemented_baseline": 82,
+      "implemented_baseline": 122,
       "pending_communications": 0,
-      "authored_drafts": 117,
+      "authored_drafts": 77,
       "accounted": 199,
       "remaining_to_target": 101
     },
@@ -2422,9 +2422,9 @@
       "id": "D05",
       "name": "Energy",
       "target": 260,
-      "implemented_baseline": 19,
+      "implemented_baseline": 21,
       "pending_communications": 0,
-      "authored_drafts": 157,
+      "authored_drafts": 155,
       "accounted": 176,
       "remaining_to_target": 84
     },
@@ -2452,9 +2452,9 @@
       "id": "D08",
       "name": "Buildings and settlements",
       "target": 220,
-      "implemented_baseline": 34,
+      "implemented_baseline": 35,
       "pending_communications": 0,
-      "authored_drafts": 95,
+      "authored_drafts": 94,
       "accounted": 129,
       "remaining_to_target": 91
     },
@@ -2502,9 +2502,9 @@
       "id": "D13",
       "name": "Records and communications",
       "target": 240,
-      "implemented_baseline": 60,
+      "implemented_baseline": 62,
       "pending_communications": 0,
-      "authored_drafts": 115,
+      "authored_drafts": 113,
       "accounted": 175,
       "remaining_to_target": 65
     },
@@ -2522,9 +2522,9 @@
       "id": "D15",
       "name": "Biology",
       "target": 200,
-      "implemented_baseline": 0,
+      "implemented_baseline": 1,
       "pending_communications": 0,
-      "authored_drafts": 127,
+      "authored_drafts": 126,
       "accounted": 127,
       "remaining_to_target": 73
     },
@@ -2602,9 +2602,9 @@
       "id": "D23",
       "name": "Space",
       "target": 180,
-      "implemented_baseline": 0,
+      "implemented_baseline": 1,
       "pending_communications": 0,
-      "authored_drafts": 135,
+      "authored_drafts": 134,
       "accounted": 135,
       "remaining_to_target": 45
     },

@@ -5387,6 +5387,335 @@
       "source_domain": "production",
       "name": "Quilted Layer Assembly",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "hydrocarbon_steam_cracking",
+      "field": "D05",
+      "source_domain": "production",
+      "name": "Hydrocarbon Steam Cracking",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_chain_models",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer-Chain Models",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_film_extrusion",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Film Extrusion",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_melt_rheology",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Melt Rheology",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_monomer_purification",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Monomer Purification",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_reaction_heat_management",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Reaction Heat Management",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "radical_chain_polymerization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Radical Chain Polymerization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "thermoplastic_processing",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Thermoplastic Processing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_injection_molding",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Injection Molding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_thermoforming",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Thermoforming",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "industrial_catalyst_design",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Industrial Catalyst Design",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "condensative_step_polymerization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Condensative Step Polymerization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "adhesive_bond_design",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Adhesive-Bond Design",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "engineered_wood_lamination",
+      "field": "D08",
+      "source_domain": "production",
+      "name": "Engineered Wood Lamination",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "wood_methanol_recovery",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Wood Methanol Recovery",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "silver_cupellation",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Silver Cupellation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "formaldehyde_synthesis",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Formaldehyde Synthesis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "urea_synthesis",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Urea Synthesis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "enzyme_catalysis",
+      "field": "D15",
+      "source_domain": "production",
+      "name": "Enzyme Catalysis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ring_opening_polymerization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Ring Opening Polymerization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "metallurgical_mass_balances",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Metallurgical Mass Balances",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "nickel_metal_recovery",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Nickel Metal Recovery",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "biomass_gasification",
+      "field": "D05",
+      "source_domain": "production",
+      "name": "Biomass Gasification",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "gas_composition_analysis",
+      "field": "D23",
+      "source_domain": "production",
+      "name": "Gas Composition Analysis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "additive_step_polymerization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Additive Step Polymerization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ethylene_oxide_synthesis",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Ethylene Oxide Synthesis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ethylene_glycol_hydrolysis",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Ethylene Glycol Hydrolysis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "coal_light_oil_recovery",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Coal Light-oil Recovery",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "aromatic_nitration",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Aromatic Nitration",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "aromatic_amine_hydrogenation",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Aromatic Amine Hydrogenation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "isocyanate_synthesis",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Isocyanate Synthesis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_blow_molding",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Blow Molding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_solution_processing",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Solution Processing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_solvent_recovery",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Solvent Recovery",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_molecular_weight_control",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Molecular-Weight Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_additive_formulation",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer-Additive Formulation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_foam_cell_control",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Foam Cell Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "selective_polymer_depolymerization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Selective Polymer Depolymerization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ionic_chain_polymerization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Ionic Chain Polymerization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_weathering_trials",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Weathering Trials",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "alumina_refining",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Alumina Refining",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "aluminum_electrolysis",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Aluminum Electrolysis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "coordination_polymerization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Coordination Polymerization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "polymer_tacticity_characterization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Polymer Tacticity Characterization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "copolymer_sequence_control",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Copolymer Sequence Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "nuclear_magnetic_resonance_spectroscopy",
+      "field": "D13",
+      "source_domain": "production",
+      "name": "Nuclear Magnetic Resonance Spectroscopy",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "size_exclusion_chromatography",
+      "field": "D13",
+      "source_domain": "production",
+      "name": "Size-Exclusion Chromatography",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

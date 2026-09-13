@@ -1709,22 +1709,6 @@
   },
   {
     "field": "D23",
-    "id": "gas_composition_analysis",
-    "name": "Gas Composition Analysis",
-    "foundations": "spectroscopy,chemical_distillation",
-    "mechanism": "Measure components of a gas mixture using calibrated separation or spectral response",
-    "operating_requirement": "Sampling equipment, references and trained analysts",
-    "consequence": "Detect composition changes instead of inferring them from total pressure",
-    "status": "authored_draft",
-    "requires_all": [
-      "spectroscopy",
-      "chemical_distillation"
-    ],
-    "requires_any": [],
-    "recovery": "Existing paid evidence, scholar, partnership, license or specimen route where applicable; local foundations and replication work remain required."
-  },
-  {
-    "field": "D23",
     "id": "carbon_dioxide_removal",
     "name": "Carbon-Dioxide Removal",
     "foundations": "gas_composition_analysis,chemical_distillation",

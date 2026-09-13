@@ -664,37 +664,6 @@
   },
   {
     "field": "D15",
-    "id": "enzyme_catalysis",
-    "name": "Enzyme Catalysis",
-    "foundations": "fermentation_control,chemical_distillation",
-    "mechanism": "Identify biological catalysts that alter reaction rates under suitable conditions",
-    "operating_requirement": "Purified fractions, controlled assays and comparative measurements",
-    "consequence": "Separate catalytic activity from an assumption that whole living organisms are required",
-    "status": "authored_draft",
-    "requires_all": [
-      "fermentation_control",
-      "chemical_distillation"
-    ],
-    "requires_any": [],
-    "recovery_profile": "biological",
-    "recovery": "For Enzyme Catalysis: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "methods": [
-        "scholar_envoy",
-        "partnership",
-        "commissioned_research"
-      ],
-      "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
-      "local_demonstration": "Identify biological catalysts that alter reaction rates under suitable conditions",
-      "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
-      "reconverges_on": "enzyme_catalysis",
-      "grants_instant_mastery": false,
-      "operation_requires": "Purified fractions, controlled assays and comparative measurements"
-    }
-  },
-  {
-    "field": "D15",
     "id": "protein_separation",
     "name": "Protein Separation",
     "foundations": "enzyme_catalysis,chemical_distillation",
