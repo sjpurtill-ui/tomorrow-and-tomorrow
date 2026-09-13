@@ -38,6 +38,7 @@ static func credit_day(host:Node,day:int)->void:
 	d.work=minf(30.0,float(d.work)+paid)
 	d["last_reserved_work"]=paid
 static func register_jurisdiction(host:Node,place:String,subjects:Array)->Dictionary:
+	if host!=WorldSimulation.government:return {"error":"This register belongs to another government."}
 	if not known("jurisdiction_boundaries"):return {"error":"We have not established jurisdiction records."}
 	if settlement(place).is_empty():return {"error":"That settlement is not under our authority."}
 	if subjects.is_empty() or subjects.size()>SUBJECTS.size():return {"error":"Specify the matters this authority handles."}
@@ -54,7 +55,8 @@ static func register_jurisdiction(host:Node,place:String,subjects:Array)->Dictio
 		for subject:String in d.mandates[place].subjects.duplicate():
 			if subject not in unique:d.mandates[place].subjects.erase(subject)
 	return {"ok":true,"jurisdiction":d.jurisdictions[place].duplicate(true)}
-static func issue_mandate(host:Node,place:String,person:int,subjects:Array,days:int)->Dictionary:
+static func issue_mandate(host:Node,place:String,person:int,subjects:Array,days:int,routine:bool=false)->Dictionary:
+	if host!=WorldSimulation.government:return {"error":"This register belongs to another government."}
 	if not known("official_mandate_registers"):return {"error":"We have not established mandate registers."}
 	if not appointed(host,place,person):return {"error":"Only the appointed local official can receive this mandate."}
 	var d:Dictionary=host.administration_records
@@ -69,7 +71,7 @@ static func issue_mandate(host:Node,place:String,person:int,subjects:Array,days:
 	if not d.mandates.has(place) and d.mandates.size()>=MAX_RECORDS:return {"error":"The mandate register is full."}
 	if not spend(host,1.0):return {"error":"The clerks need time to record the mandate."}
 	var day:=int(WorldSimulation.state.elapsed_days)
-	d.mandates[place]={"settlement_id":place,"person_id":person,"subjects":unique,"issued_day":day,"expires_day":day+days}
+	d.mandates[place]={"settlement_id":place,"person_id":person,"subjects":unique,"issued_day":day,"expires_day":day+days,"routine":routine,"revoked":false}
 	return {"ok":true,"mandate":d.mandates[place].duplicate(true)}
 static func authorized(host:Node,place:String,person:int,subject:String)->bool:
 	if not known("official_mandate_registers") or not appointed(host,place,person):return false
@@ -77,13 +79,14 @@ static func authorized(host:Node,place:String,person:int,subject:String)->bool:
 	var m:Dictionary=d.mandates.get(place,{})
 	var j:Dictionary=d.jurisdictions.get(place,{})
 	var day:=int(WorldSimulation.state.elapsed_days)
-	return not m.is_empty() and not j.is_empty() and int(m.person_id)==person and day>=int(m.issued_day) and day<int(m.expires_day) and subject in m.subjects and subject in j.subjects
+	return not m.is_empty() and not j.is_empty() and not m.get("revoked",false) and int(m.person_id)==person and day>=int(m.issued_day) and day<int(m.expires_day) and subject in m.subjects and subject in j.subjects
 
 static func order_by_id(id:String)->Dictionary:
 	for order:Dictionary in WorldSimulation.state.sovereign_orders:
 		if String(order.get("id",""))==id:return order
 	return {}
 static func queue_handovers(host:Node,place:String,successor:int)->void:
+	if host!=WorldSimulation.government:return
 	if not known("public_office_handover") or not appointed(host,place,successor):return
 	var d:Dictionary=host.administration_records
 	for order:Dictionary in WorldSimulation.state.sovereign_orders:
@@ -91,19 +94,25 @@ static func queue_handovers(host:Node,place:String,successor:int)->void:
 		var f:Dictionary=order.get("implementation_followup",{})
 		if f.get("state")!="pending":continue
 		var previous:=int(f.get("custodian_person_id",f.get("leader_person_id",0)))
-		if previous<=0 or previous==successor:continue
+		if previous<=0:continue
+		if previous==successor:
+			if f.get("handover_state") in ["pending","waiting_for_register"]:f["handover_state"]="cancelled"
+			continue
 		if f.get("handover_state")=="pending" and int(f.get("handover_successor",0))==successor:continue
 		while d.handovers.size()>=MAX_RECORDS:
 			var retired:=-1
 			for i in d.handovers.size():
 				if d.handovers[i].state!="pending":retired=i;break
-			if retired<0:return
+			if retired<0:break
 			d.handovers.remove_at(retired)
-		if int(d.next_id)>=1000000000:return
+		if d.handovers.size()>=MAX_RECORDS or int(d.next_id)>=1000000000:
+			f["handover_state"]="waiting_for_register";f["handover_successor"]=successor
+			continue
 		var id:=int(d.next_id);d.next_id=id+1
 		d.handovers.append({"id":id,"order_id":String(order.get("id","")),"settlement_id":place,"from_person":previous,"to_person":successor,"queued_day":int(WorldSimulation.state.elapsed_days),"state":"pending"})
 		f["handover_id"]=id;f["handover_state"]="pending";f["handover_successor"]=successor
 static func process_handovers(host:Node)->void:
+	if host!=WorldSimulation.government:return
 	if not known("public_office_handover"):return
 	var d:Dictionary=host.administration_records
 	for record:Dictionary in d.handovers:
@@ -119,8 +128,11 @@ static func process_handovers(host:Node)->void:
 		record.state="completed";record["completed_day"]=int(WorldSimulation.state.elapsed_days)
 		host.record_person_memory(int(record.to_person),"I received the pending civic duty recorded as "+String(record.order_id)+" from my predecessor.","civic_handover",.6,{"order_id":record.order_id,"from_person":record.from_person})
 static func can_review(host:Node,followup:Dictionary)->bool:
-	if followup.get("handover_state")=="pending":return false
-	if not followup.has("custodian_person_id"):return true
+	if followup.get("handover_state") in ["pending","waiting_for_register"]:return false
+	if not followup.has("custodian_person_id"):
+		var place:=String(followup.get("settlement_id",""))
+		if known("public_office_handover") and not place.is_empty():return appointed(host,place,int(followup.get("leader_person_id",0)))
+		return true
 	var place:=String(followup.get("settlement_id",""))
 	var person:=int(followup.custodian_person_id)
 	if not appointed(host,place,person):return false
@@ -143,6 +155,7 @@ static func condition(place:String,subject:String)->Dictionary:
 		)
 	)
 static func observe_petitions(host:Node)->void:
+	if host!=WorldSimulation.government:return
 	if not known("petition_registers"):return
 	var d:Dictionary=host.administration_records
 	for site:Dictionary in WorldSimulation.state.player_settlements:
@@ -170,6 +183,7 @@ static func petition_by_id(host:Node,id:int)->Dictionary:
 		if int(p.id)==id:return p
 	return {}
 static func dispose_petition(host:Node,place:String,person:int,id:int,action:String)->Dictionary:
+	if host!=WorldSimulation.government:return {"error":"This register belongs to another government."}
 	if not known("petition_registers"):return {"error":"We have not established petition records."}
 	var p:=petition_by_id(host,id)
 	if p.is_empty() or p.settlement_id!=place:return {"error":"That petition does not belong to this settlement."}
@@ -177,18 +191,18 @@ static func dispose_petition(host:Node,place:String,person:int,id:int,action:Str
 	if known("official_mandate_registers") and not authorized(host,place,person,p.subject):return {"error":"My current mandate does not authorize that matter."}
 	if action not in ["address","defer","resolve"]:return {"error":"That petition action is not supported."}
 	if p.state=="resolved":return {"error":"That petition is already resolved."}
-	if p.dispositions.size()>=32:return {"error":"This petition's disposition record is full."}
 	var observation:=condition(place,p.subject)
 	if observation.is_empty():return {"error":"I cannot verify the settlement's present condition."}
 	if action=="resolve" and observation.active:return {"error":"The recorded shortage still exists. I cannot report it as resolved."}
-	if float(host.administration_records.work)<.25:return {"error":"The clerks need time to record this disposition."}
+	if not spend(host,.25):return {"error":"The clerks need time to record this disposition."}
 	if action=="address":
 		var result:Dictionary=host.set_settlement_focus(place,p.subject)
-		if not result.get("ok",false):return {"error":String(result.get("reason","The work could not be assigned."))}
-	spend(host,.25)
+		if not result.get("ok",false):
+			host.administration_records.work+=.25
+			return {"error":String(result.get("reason","The work could not be assigned."))}
 	p.state={"address":"addressing","defer":"deferred","resolve":"resolved"}[action]
 	p["disposed_day"]=int(WorldSimulation.state.elapsed_days)
-	p.dispositions.append({"day":int(WorldSimulation.state.elapsed_days),"person_id":person,"action":action,"observation":observation})
+	append_disposition(p,{"day":int(WorldSimulation.state.elapsed_days),"person_id":person,"action":action,"observation":observation})
 	return {"ok":true,"message":{"address":"I have directed local work toward this shortage. The petition remains open until conditions improve.","defer":"I have recorded the deferral; the shortage remains on the record.","resolve":"The current observation meets the requirement. I have recorded the petition as resolved."}[action]}
 static func conversation(host:Node,place:String,person:int,text:String)->Dictionary:
 	var normalized:=text.strip_edges().to_lower().trim_suffix(".").trim_suffix("?")
@@ -200,13 +214,17 @@ static func conversation(host:Node,place:String,person:int,text:String)->Diction
 		return {"handled":true,"message":"No unresolved petitions are recorded here." if lines.is_empty() else "\n".join(lines)}
 	var result:Dictionary={}
 	if normalized in ["record our jurisdiction","record this settlement's jurisdiction"]:result=register_jurisdiction(host,place,SUBJECTS)
-	elif normalized in ["record your mandate","renew your mandate"]:
-		result=issue_mandate(host,place,person,host.administration_records.jurisdictions.get(place,{}).get("subjects",[]),90)
+	elif normalized in ["record your mandate","renew your mandate","restore your routine mandate"]:
+		var current:Dictionary=host.administration_records.mandates.get(place,{})
+		var routine:bool=bool(current.get("routine",true)) or normalized=="restore your routine mandate"
+		var subjects:Array=host.administration_records.jurisdictions.get(place,{}).get("subjects",[]) if routine else current.get("subjects",[])
+		result=issue_mandate(host,place,person,subjects,90,routine)
+	elif normalized=="revoke your mandate":result=revoke_mandate(host,place,person)
 	else:
 		var words:=normalized.split(" ",false)
 		if words.size()!=3 or words[0] not in ["address","defer","resolve"] or words[1]!="petition" or not words[2].is_valid_int():return {}
 		result=dispose_petition(host,place,person,int(words[2]),words[0])
-	return {"handled":true,"ok":result.get("ok",false),"message":String(result.get("error",result.get("message","I have recorded the jurisdiction." if normalized.contains("jurisdiction") else "I have recorded my authorized duties for90 days.")))}
+	return {"handled":true,"ok":result.get("ok",false),"message":String(result.get("error",result.get("message","I have recorded the jurisdiction." if normalized.contains("jurisdiction") else "I have recorded the authorized duties and their review term.")))}
 
 static func number(v:Variant,low:float=0,high:float=1000000000)->bool:
 	return (v is int or v is float) and is_finite(float(v)) and float(v)>=low and float(v)<=high
@@ -233,6 +251,8 @@ static func valid(v:Variant)->bool:
 			if field=="jurisdictions":
 				if not integer(r.get("recorded_day")):return false
 			else:
+				if r.has("routine") and not r.routine is bool:return false
+				if r.has("revoked") and not r.revoked is bool:return false
 				if not integer(r.get("person_id"),1) or not integer(r.get("issued_day")) or not integer(r.get("expires_day")):return false
 				if int(r.expires_day)<=int(r.issued_day) or int(r.expires_day)-int(r.issued_day)>365:return false
 	var ids:Array=[]
@@ -246,6 +266,8 @@ static func valid(v:Variant)->bool:
 				if r.state=="completed" and (not integer(r.get("completed_day")) or int(r.completed_day)<int(r.queued_day)):return false
 			else:
 				if r.get("subject") not in ["water","provisions","shelter"] or r.get("state") not in ["open","addressing","deferred","resolved"] or not integer(r.get("recorded_day")) or not integer(r.get("recorded_by"),1) or not valid_observation(r.get("observation")):return false
+				if r.has("retired_dispositions") and not integer(r.retired_dispositions):return false
+				if r.has("retired_through_day") and not integer(r.retired_through_day):return false
 				if r.observation.subject!=r.subject:return false
 				if not r.get("dispositions") is Array or r.dispositions.size()>32:return false
 				for action:Variant in r.dispositions:
@@ -258,3 +280,72 @@ static func valid(v:Variant)->bool:
 					var last:Dictionary=r.dispositions.back()
 					if int(r.disposed_day)!=int(last.day) or r.state!={"address":"addressing","defer":"deferred","resolve":"resolved"}[last.action]:return false
 	return true
+
+static func revoke_mandate(host:Node,place:String,person:int)->Dictionary:
+	if host!=WorldSimulation.government:return {"error":"This register belongs to another government."}
+	var d:Dictionary=host.administration_records
+	var m:Dictionary=d.mandates.get(place,{})
+	if not appointed(host,place,person) or m.is_empty() or int(m.person_id)!=person:return {"error":"There is no current mandate for this official."}
+	if m.get("revoked",false):return {"error":"This mandate is already revoked."}
+	if not spend(host,.25):return {"error":"The clerks need time to record revocation."}
+	m["revoked"]=true
+	# Revocation is an explicit exception; routine maintenance cannot undo it.
+	m["routine"]=false
+	return {"ok":true,"message":"I have recorded the revocation. These duties will not be renewed automatically."}
+static func maintain_records(host:Node)->void:
+	if host!=WorldSimulation.government:return
+	if not known("jurisdiction_boundaries"):return
+	var d:Dictionary=host.administration_records
+	for site:Dictionary in WorldSimulation.state.player_settlements:
+		var place:=String(site.get("id",""));var person:=int(site.get("leader_person_id",0))
+		if not appointed(host,place,person):continue
+		if not d.jurisdictions.has(place):
+			# Describe the existing local office; do not expand a recorded exception.
+			if not register_jurisdiction(host,place,SUBJECTS).get("ok",false):continue
+		if not known("official_mandate_registers"):continue
+		var m:Dictionary=d.mandates.get(place,{})
+		if not m.is_empty() and (not m.get("routine",false) or m.get("revoked",false)):continue
+		if m.is_empty() or int(m.person_id)!=person or int(WorldSimulation.state.elapsed_days)>=int(m.expires_day):
+			issue_mandate(host,place,person,d.jurisdictions[place].subjects,90,true)
+static func reconcile_handovers(host:Node)->void:
+	if host!=WorldSimulation.government:return
+	if not known("public_office_handover"):return
+	# Retire stale successors before admitting replacement records into the cap.
+	for r:Dictionary in host.administration_records.handovers:
+		if r.state!="pending":continue
+		var f:Dictionary=order_by_id(r.order_id).get("implementation_followup",{})
+		if not appointed(host,r.settlement_id,int(r.to_person)) or f.get("state")!="pending" or int(f.get("handover_id",0))!=int(r.id):r.state="superseded"
+	for site:Dictionary in WorldSimulation.state.player_settlements:
+		queue_handovers(host,String(site.get("id","")),int(site.get("leader_person_id",0)))
+static func maintain_petitions(host:Node)->void:
+	if host!=WorldSimulation.government:return
+	if not known("petition_registers"):return
+	for p:Dictionary in host.administration_records.petitions:
+		if p.state=="resolved":continue
+		var site:=settlement(p.settlement_id)
+		if site.is_empty():continue
+		var person:=int(site.get("leader_person_id",0))
+		var observation:=condition(p.settlement_id,p.subject)
+		if observation.is_empty():continue
+		if not observation.active:
+			dispose_petition(host,p.settlement_id,person,int(p.id),"resolve")
+		elif p.state=="open" and site.get("auto_manage",true) and site.get("management_focus","")==p.subject:
+			# Record the existing delegate's work; never replace manual priorities.
+			if known("official_mandate_registers") and not authorized(host,p.settlement_id,person,p.subject):continue
+			if not appointed(host,p.settlement_id,person) or not spend(host,.25):continue
+			p.state="addressing";p["disposed_day"]=int(WorldSimulation.state.elapsed_days)
+			append_disposition(p,{"day":int(WorldSimulation.state.elapsed_days),"person_id":person,"action":"address","observation":observation})
+static func finish_day(host:Node)->void:
+	if host!=WorldSimulation.government:return
+	maintain_records(host)
+	reconcile_handovers(host)
+	process_handovers(host)
+	observe_petitions(host)
+	maintain_petitions(host)
+
+static func append_disposition(p:Dictionary,entry:Dictionary)->void:
+	while p.dispositions.size()>=32:
+		var retired:Dictionary=p.dispositions.pop_front()
+		p["retired_dispositions"]=int(p.get("retired_dispositions",0))+1
+		p["retired_through_day"]=int(retired.day)
+	p.dispositions.append(entry)

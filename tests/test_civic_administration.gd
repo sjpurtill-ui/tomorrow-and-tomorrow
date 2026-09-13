@@ -210,3 +210,146 @@ func test_pending_handover_survives_full_save_without_duplicate_completion()->vo
 	assert_bool(C.can_review(GovernmentPeopleSystem,f)).is_true()
 	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
+
+func test_routine_mandate_renews_without_player_upkeep_or_repeated_day_charges()->void:
+	GovernmentPeopleSystem.administration_records.work=0.0
+	GameState.housing_capacity=ceili(GameState.population_exact)
+	GameState.water_metrics={"intake_ratio":1.0};GameState.simulation_metrics["food_intake_ratio"]=1.0
+	for day in range(1,301):
+		GameState.elapsed_days=day
+		GovernmentPeopleSystem.process_day(day)
+	var site:Dictionary=GameState.player_settlements[0]
+	var mandate:Dictionary=GovernmentPeopleSystem.administration_records.mandates[site.id]
+	assert_bool(mandate.routine).is_true()
+	assert_bool(C.authorized(GovernmentPeopleSystem,site.id,int(site.leader_person_id),"water")).is_true()
+	assert_int(int(mandate.issued_day)).is_greater(180)
+	var before:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	GovernmentPeopleSystem.process_day(300)
+	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(before)
+func test_manual_narrow_expired_and_revoked_mandates_are_not_overridden()->void:
+	var site:Dictionary=GameState.player_settlements[0];var person:=int(site.leader_person_id)
+	C.register_jurisdiction(GovernmentPeopleSystem,site.id,["water","shelter"])
+	C.issue_mandate(GovernmentPeopleSystem,site.id,person,["water"],2)
+	GameState.elapsed_days=10
+	var before:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	C.maintain_records(GovernmentPeopleSystem)
+	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(before)
+	assert_bool(C.authorized(GovernmentPeopleSystem,site.id,person,"water")).is_false()
+	assert_bool(C.conversation(GovernmentPeopleSystem,site.id,person,"renew your mandate").ok).is_true()
+	assert_bool(C.authorized(GovernmentPeopleSystem,site.id,person,"shelter")).is_false()
+	C.revoke_mandate(GovernmentPeopleSystem,site.id,person)
+	C.maintain_records(GovernmentPeopleSystem)
+	assert_bool(C.authorized(GovernmentPeopleSystem,site.id,person,"water")).is_false()
+	var successor:=int(GovernmentPeopleSystem.people[1].person_id)
+	GovernmentPeopleSystem.mark_central_appointment(successor,"Steward")
+	C.maintain_records(GovernmentPeopleSystem)
+	assert_bool(C.authorized(GovernmentPeopleSystem,site.id,successor,"water")).is_false()
+func test_saturated_handover_queue_reconciles_latest_replacement()->void:
+	GameState.known_discoveries.append("public_office_handover")
+	var site:Dictionary=GameState.player_settlements[0]
+	var previous:=int(site.leader_person_id)
+	var alternatives:Array[int]=[]
+	for person:Dictionary in GovernmentPeopleSystem.people:
+		if int(person.person_id)!=previous:alternatives.append(int(person.person_id))
+	var a:=alternatives[0];var b:=alternatives[1]
+	var f:={"state":"pending","leader_person_id":previous,"settlement_id":site.id,"due_day":10}
+	GameState.sovereign_orders.append({"id":"replacement_stress","settlement_id":site.id,"implementation_followup":f})
+	for i in 130:GovernmentPeopleSystem.mark_central_appointment(a if i%2==0 else b,"Steward")
+	assert_int(GovernmentPeopleSystem.administration_records.handovers.size()).is_less_equal(C.MAX_RECORDS)
+	assert_bool(C.can_review(GovernmentPeopleSystem,f)).is_false()
+	C.finish_day(GovernmentPeopleSystem)
+	assert_int(int(f.custodian_person_id)).is_equal(b)
+	assert_bool(C.can_review(GovernmentPeopleSystem,f)).is_true()
+	assert_bool(C.valid(GovernmentPeopleSystem.administration_records)).is_true()
+func test_ai_government_maintains_and_resolves_petitions_without_manual_commands()->void:
+	var before:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	WorldSimulation.create_actor("civic_auto",1902)
+	assert_str(String(WorldSimulation.actors.civic_auto.controller)).is_equal("ai")
+	WorldSimulation.scoped("civic_auto",func()->void:
+		var state=WorldSimulation.state;var host=WorldSimulation.government
+		state.settlement_site_committed=true;state.settlement_completed.assign(["Hearth Circle"])
+		state.housing_capacity=ceili(state.population_exact)
+		WorldSimulation.settlements.ensure_founded();host.initialize()
+		state.player_settlements[0].founded_day=-1000
+		state.water_metrics={"intake_ratio":.5};state.simulation_metrics["food_intake_ratio"]=1.0
+		state.known_discoveries.append_array(["jurisdiction_boundaries","official_mandate_registers","petition_registers"])
+		for day in range(1,31):state.elapsed_days=day;host.process_day(day)
+		var p:Dictionary=host.administration_records.petitions[0]
+		assert_str(String(p.subject)).is_equal("water")
+		assert_str(String(p.state)).is_equal("addressing")
+		assert_bool(state.player_settlements[0].auto_manage).is_true()
+		assert_int(p.dispositions.size()).is_equal(1)
+		state.water_metrics.intake_ratio=1.0;state.elapsed_days=31;host.process_day(31)
+		assert_str(String(p.state)).is_equal("resolved"))
+	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(before)
+func test_disposition_history_can_retire_details_and_still_resolve()->void:
+	GameState.known_discoveries.append("petition_registers")
+	GameState.water_metrics={"intake_ratio":.4};GameState.housing_capacity=ceili(GameState.population_exact)
+	GovernmentPeopleSystem.administration_records.work=30.0
+	C.maintain_records(GovernmentPeopleSystem);C.observe_petitions(GovernmentPeopleSystem)
+	var p:Dictionary=GovernmentPeopleSystem.administration_records.petitions[0]
+	var site:Dictionary=GameState.player_settlements[0]
+	for i in 40:assert_bool(C.dispose_petition(GovernmentPeopleSystem,site.id,int(site.leader_person_id),int(p.id),"defer").get("ok",false)).is_true()
+	GameState.water_metrics.intake_ratio=1.0
+	assert_bool(C.dispose_petition(GovernmentPeopleSystem,site.id,int(site.leader_person_id),int(p.id),"resolve").get("ok",false)).is_true()
+	assert_int(p.dispositions.size()).is_equal(32)
+	assert_int(int(p.retired_dispositions)).is_equal(9)
+	assert_bool(C.valid(GovernmentPeopleSystem.administration_records)).is_true()
+func test_foreign_host_disposition_cannot_change_focus_or_either_ledger()->void:
+	GameState.known_discoveries.append("petition_registers")
+	GameState.water_metrics={"intake_ratio":.4};GameState.housing_capacity=ceili(GameState.population_exact)
+	C.maintain_records(GovernmentPeopleSystem);C.observe_petitions(GovernmentPeopleSystem)
+	var root_before:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	var site:Dictionary=GameState.player_settlements[0];var focus:=String(site.management_focus)
+	WorldSimulation.create_actor("civic_foreign",1902)
+	WorldSimulation.scoped("civic_foreign",func()->void:
+		WorldSimulation.government.administration_records.work=20.0
+		var peer_before:=WorldSimulation.government.administration_records.duplicate(true)
+		assert_bool(C.dispose_petition(GovernmentPeopleSystem,site.id,int(site.leader_person_id),int(root_before.petitions[0].id),"address").has("error")).is_true()
+		C.process_handovers(GovernmentPeopleSystem);C.observe_petitions(GovernmentPeopleSystem)
+		assert_dict(WorldSimulation.government.administration_records).is_equal(peer_before))
+	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(root_before)
+	assert_str(String(site.management_focus)).is_equal(focus)
+
+func test_existing_community_project_uses_only_remaining_administration_work()->void:
+	GameState.population_allocations.Administration=2.0
+	GameState.population_allocations.Knowledge=0.0
+	GameState.resource_stockpiles.Timber=20.0;GameState.resource_stockpiles["Fiber Plants"]=10.0
+	CommunityNetwork.reset_for_new_world()
+	assert_bool(CommunityNetwork.start("records").get("ok",false)).is_true()
+	GovernmentPeopleSystem.administration_records.work=0.0
+	var raw:=GameState.effective_workers("Administration",false,false,true)
+	C.credit_day(GovernmentPeopleSystem,1)
+	CommunityNetwork.advance(1)
+	var project_worker_days:=CommunityNetwork.progress*4.0
+	var clerk_work:=float(GovernmentPeopleSystem.administration_records.work)
+	assert_float(project_worker_days).is_less(raw)
+	assert_float(project_worker_days+clerk_work).is_equal_approx(raw,.000001)
+
+func test_all_unadmitted_duties_wait_for_paid_custody_at_register_capacity()->void:
+	GameState.known_discoveries.append("public_office_handover")
+	var site:Dictionary=GameState.player_settlements[0];var previous:=int(site.leader_person_id)
+	var successor:=0
+	for person:Dictionary in GovernmentPeopleSystem.people:
+		if int(person.person_id)!=previous:successor=int(person.person_id);break
+	var last:Dictionary={}
+	for i in 131:
+		var f:={"state":"pending","leader_person_id":previous,"settlement_id":site.id,"due_day":10}
+		GameState.sovereign_orders.append({"id":"capacity_%d" % i,"settlement_id":site.id,"implementation_followup":f})
+		last=f
+	assert_bool(C.can_review(GovernmentPeopleSystem,last)).is_true()
+	GovernmentPeopleSystem.mark_central_appointment(successor,"Steward")
+	assert_int(GovernmentPeopleSystem.administration_records.handovers.size()).is_equal(C.MAX_RECORDS)
+	for order:Dictionary in GameState.sovereign_orders:
+		assert_bool(C.can_review(GovernmentPeopleSystem,order.implementation_followup)).is_false()
+	assert_str(String(last.handover_state)).is_equal("waiting_for_register")
+	GovernmentPeopleSystem.administration_records.work=30.0
+	C.finish_day(GovernmentPeopleSystem)
+	assert_bool(C.can_review(GovernmentPeopleSystem,last)).is_false()
+	for cycle in 3:
+		# Additional completed clerical-work fixture; shared generation is tested separately.
+		GovernmentPeopleSystem.administration_records.work=30.0
+		C.finish_day(GovernmentPeopleSystem)
+	assert_int(int(last.custodian_person_id)).is_equal(successor)
+	assert_bool(C.can_review(GovernmentPeopleSystem,last)).is_true()
+	assert_int(GovernmentPeopleSystem.administration_records.handovers.size()).is_less_equal(C.MAX_RECORDS)

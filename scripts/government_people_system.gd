@@ -161,8 +161,6 @@ func process_day(day:int)->Array[Dictionary]:
 	initialize(false)
 	if people.is_empty(): return []
 	WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/civic_administration.gd").credit_day(self,day))
-	preload("res://scripts/civic_administration.gd").process_handovers(self)
-	preload("res://scripts/civic_administration.gd").observe_petitions(self)
 	var month:=day/MONTH_DAYS
 	# Local leaders rebalance ordinary labor every day. Mortality, succession and
 	# institutional expansion remain monthly, but survival cannot wait up to thirty
@@ -173,6 +171,7 @@ func process_day(day:int)->Array[Dictionary]:
 		# again for each city.
 		initializing=true
 		_delegate_settlements(day)
+		preload("res://scripts/civic_administration.gd").finish_day(self)
 		initializing=false
 		return []
 	last_processed_month=month
@@ -187,6 +186,7 @@ func process_day(day:int)->Array[Dictionary]:
 	_synchronize_office_holders(events,true)
 	_ensure_local_leaders(events)
 	_delegate_settlements(day)
+	preload("res://scripts/civic_administration.gd").finish_day(self)
 	_sync_advisor_roster()
 	initializing=false
 	return events
