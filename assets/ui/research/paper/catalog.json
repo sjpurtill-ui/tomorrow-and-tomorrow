@@ -4242,6 +4242,46 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/abrasive_grinding_control.png",
+      "description": "Remove material through a qualified abrasive process while controlling heat and geometry",
+      "domain": "production",
+      "id": "abrasive_grinding_control",
+      "name": "Abrasive-Grinding Control",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/centerless_grinding.png",
+      "description": "A regulating wheel and support locate an uncentered workpiece.",
+      "domain": "production",
+      "id": "centerless_grinding",
+      "name": "Centerless Grinding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cylindrical_grinding.png",
+      "description": "A rotating supported part is ground to a cylindrical surface.",
+      "domain": "production",
+      "id": "cylindrical_grinding",
+      "name": "Cylindrical Grinding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/surface_grinding.png",
+      "description": "An abrasive wheel traverses a fixtured surface.",
+      "domain": "production",
+      "id": "surface_grinding",
+      "name": "Surface Grinding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/abrasive_belt_finishing.png",
+      "description": "A moving coated abrasive works a contacted surface.",
+      "domain": "production",
+      "id": "abrasive_belt_finishing",
+      "name": "Abrasive Belt Finishing",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/metal_spinning_forming.png",
       "description": "A roller forms a rotating blank around a mandrel.",
       "domain": "production",
@@ -6411,11 +6451,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 801,
+  "live_count": 806,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 565,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 236
+  "verified_count": 241
 }
