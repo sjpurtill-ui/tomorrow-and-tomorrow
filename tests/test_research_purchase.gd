@@ -309,3 +309,28 @@ func test_paid_civic_studies_require_foundations_and_local_examination()->void:
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_float(P.multiplier(entry)).is_equal(2.5)
 		assert_dict(GovernmentPeopleSystem.administration_records.mandates).is_empty()
+
+func test_botany_purchase_requires_paid_delivery_and_local_study_without_seed_or_mastery()->void:
+	for entry:Dictionary in preload("res://scripts/field_botany_knowledge.gd").entries():
+		before_test();prepare()
+		var subject:=String(entry.id)
+		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
+		for alternatives:Array in entry.requires_any:
+			GameState.known_discoveries.append(String(alternatives[-1]))
+		var peer:=E.owner_state("neighbor")
+		peer.known_discoveries.append(subject);peer.discovery_adoption[subject]=1.0
+		var before:=float(GameState.resource_stockpiles.Stone)
+		assert_bool(Purchase.dispatch("neighbor",subject,"Stone").get("ok",false)).is_true()
+		assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
+		var mission:Dictionary=CivilizationSystem.diplomatic_mission
+		E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day))
+		assert_bool(mission.research_refused).is_false()
+		Purchase.prepare_return(mission);E.returned(mission,int(mission.return_day))
+		assert_dict(P.evidence(subject)).is_empty()
+		GameState.population_allocations.Knowledge=60
+		for day in range(100007,100100):E.advance(day)
+		assert_bool(P.evidence(subject).get("research_purchase",false)).is_true()
+		assert_bool(subject in GameState.known_discoveries).is_false()
+		assert_float(P.multiplier(entry)).is_equal(2.5)
+		assert_array(GameState.field_botany.lines).is_empty()
+		assert_array(GameState.field_botany.vouchers).is_empty()

@@ -115,7 +115,7 @@ static func retain_seed(ledger:Dictionary,harvest:float,site:String,day:int)->fl
 		# Only the original local harvest population can be topped up; never
 		# turn ordinary crop output into a bred descendant's seed.
 		for line:Dictionary in ledger.lines:
-			if line.site==site and int(line.generation)==0 and float(line.seed)<.1:
+			if line.site==site and int(line.generation)==0 and (float(line.seed)<.1 or float(ledger.reference_seed)<.1):
 				line.seed+=amount*.5;ledger.reference_seed+=amount*.5
 				ledger.reference_line.seed=ledger.reference_seed
 				return amount
@@ -240,6 +240,9 @@ static func advance(workers:float,traveling:bool,drought:float)->Dictionary:
 	var ledger:Dictionary=state.field_botany
 	var day:=int(state.elapsed_days)
 	if traveling or not state.settlement_site_committed or "habitat_observation_records" not in state.known_discoveries or day<=int(ledger.last_day):return result
+	for settlement:Dictionary in state.player_settlements:
+		if (String(state.resource_settlement_id).is_empty() and bool(settlement.get("primary",false))) or String(settlement.get("id",""))==String(state.resource_settlement_id):
+			if not String(settlement.get("occupied_by","")).is_empty():return result
 	var budget:=minf(.5,maxf(0,workers)*.05)
 	var stocks:Dictionary=state.resource_stockpiles
 	var site:=site_key()
@@ -256,7 +259,7 @@ static func advance(workers:float,traveling:bool,drought:float)->Dictionary:
 			var needed:=false
 			for trial:Dictionary in ledger.trials:
 				if int(trial.line.id)==int(candidate.id):needed=true
-			if not needed and float(candidate.seed)<.1:
+			if not needed and int(candidate.generation)>0 and float(candidate.seed)<.1:
 				ledger.lines.remove_at(index);break
 	# At most one generation in progress for automatic research. Prefer the
 	# newest viable descendant, keeping its parent voucher for comparison.
