@@ -42,6 +42,23 @@ debits, plus polymerization blocked by absent cooling and resumed with paid
 capacity. It does not establish automatic daily dispatch, end-to-end chemical
 stock closure, pattern qualification or the twelve discovery mechanisms.
 
+Thermal runner: `metallurgy_thermal_cycle.gd` now retains a selected specimen's
+temperature, thermal capacity, paid energy/coolant receipts, peak temperature,
+hot exposure and stage history. A lumped heat-loss calculation makes specimen
+capacity and supplied power affect the actual temperature; thermostat control
+stops excessive heating. Air cooling requires elapsed process work, while a
+selected quench also requires finite coolant. This is a normalized game model,
+not a general steel heat-treatment solver or engineering qualification.
+Its runner owns no stocks and currently has no production dispatch hook.
+Adapter debit, recipe/source binding and stronger saved-state provenance remain
+necessary before use in accepted production.
+
+`test_metallurgy_thermal_cycle.gd`: 3/3 pass, zero errors/failures/skips/orphans
+(`/tmp/tt-metallurgy-thermal-tests.log`). Covers energy starvation, capacity
+sensitivity, serialized partial thermal continuation, retained hot exposure,
+air cooling, coolant-limited quenching and malformed progress. Existing
+precursor tests were not repeated because this module does not change them.
+
 Also pending: full material closure audit, acquisition checks, save validation,
 imagery and canonical integration. The integrator owns imagery and the shared
 manufacturing merge. Do not edit PersistentProduction or the machine adapters
