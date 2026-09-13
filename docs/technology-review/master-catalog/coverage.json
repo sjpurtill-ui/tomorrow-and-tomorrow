@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 667,
   "pending_communications": 0,
-  "new_authored_drafts": 2405,
-  "distinct_accounted_identities": 3072,
-  "remaining_identities_to_author": 1928,
+  "new_authored_drafts": 2425,
+  "distinct_accounted_identities": 3092,
+  "remaining_identities_to_author": 1908,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 976,
+    "assigned_identities": 996,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2310,31 +2310,31 @@
         "id": "H03",
         "name": "Complex societies and learned traditions",
         "target": 800,
-        "assigned": 202,
-        "target_slots_not_yet_assigned": 598,
+        "assigned": 204,
+        "target_slots_not_yet_assigned": 596,
         "implemented_baseline": 7,
         "pending_communications": 0,
-        "authored_drafts": 195
+        "authored_drafts": 197
       },
       {
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 177,
-        "target_slots_not_yet_assigned": 523,
+        "assigned": 180,
+        "target_slots_not_yet_assigned": 520,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 172
+        "authored_drafts": 175
       },
       {
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 466,
-        "target_slots_not_yet_assigned": 434,
+        "assigned": 481,
+        "target_slots_not_yet_assigned": 419,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 461
+        "authored_drafts": 476
       },
       {
         "id": "H06",
@@ -2349,7 +2349,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 457,
+  "branch_alternatives": 465,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 94,
@@ -2361,7 +2361,7 @@
     "D07": 54,
     "D08": 97,
     "D09": 60,
-    "D10": 61,
+    "D10": 81,
     "D11": 60,
     "D12": 60,
     "D13": 119,
@@ -2474,9 +2474,9 @@
       "target": 160,
       "implemented_baseline": 27,
       "pending_communications": 0,
-      "authored_drafts": 61,
-      "accounted": 88,
-      "remaining_to_target": 72
+      "authored_drafts": 81,
+      "accounted": 108,
+      "remaining_to_target": 52
     },
     {
       "id": "D11",

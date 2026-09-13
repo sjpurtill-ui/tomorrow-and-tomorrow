@@ -9,6 +9,10 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 
+## Maritime authoring follow-up
+
+[Maritime Cargo and Survey Review](Maritime%20Cargo%20and%20Survey%20Review.md) adds twenty distinct proposals. This branch accounts for **3,092 identities (667 integrated + 2,425 drafts), leaving 1,908 unauthored**. Maritime authored coverage is 108/160. These additions are not runtime features or new atlas mappings; historical publication counts below remain checkpoints.
+
 ## Authoring contract
 
 Every discovery has one stable identity, a distinct mechanism or practice, necessary foundations, any alternative causal routes, its operating requirement and its intended observable consequence. Physical acquisition never grants mastery: foreign evidence, paid scholars, partnerships, licenses and reverse engineering retain their existing local work and dependency penalties. Formal scientific explanations should offer alternatives to empirical routes where historically defensible.
