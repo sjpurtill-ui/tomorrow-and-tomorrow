@@ -4722,6 +4722,76 @@
       "source_domain": "production",
       "name": "Textile Moisture Transport",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "clay_pipe_forming",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Clay Pipe Forming",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ceramic_pipe_firing_qualification",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Ceramic Pipe Firing Qualification",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ceramic_pipe_fit_gauges",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Ceramic Pipe Fit Gauges",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "clay_pipe_socket_jointing",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Clay Pipe Socket Jointing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rigid_pipe_bedding",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Rigid Pipe Bedding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "buried_pipe_load_assessment",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Buried Pipe Load Assessment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "conduit_infiltration_testing",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Conduit Infiltration Testing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "wooden_log_conduits",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Wooden Log Conduits",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "gravity_conduit_grade_control",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Gravity Conduit Grade Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "sewer_rodding_service",
+      "field": "D02",
+      "source_domain": "infrastructure",
+      "name": "Sewer Rodding Service",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

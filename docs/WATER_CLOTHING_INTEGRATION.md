@@ -1,6 +1,6 @@
 # Water conveyance and clothing integration
 
-Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/water-clothing-integration`, base `7a5e91ff9cc2005c1560bdb348fc8ff67e796044`. Frozen source water delivery `5d08c2b8c949c08d89c49a8eefdaf87e2e87e205` is merged in full. Canonical verification follows this runtime commit before the ledger is promoted.
+Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/water-clothing-integration`, base `7a5e91ff9cc2005c1560bdb348fc8ff67e796044`. Frozen source water delivery `5d08c2b8c949c08d89c49a8eefdaf87e2e87e205` is merged in full. Runtime merge `04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8` is canonical-verified: all 42 water, clothing and city-resource cases pass. The verified 667-definition snapshot is reconciled with the ledger.
 
 The combined graph contains **667 discoveries, 449 explicit learning routes, 309 civilian recipes and 17 facilities**, with no graph or production-dependency errors. Ten existing authored conduit identities gain actual manufacture, installation or service consumers. Water lines require sampled downhill routes, paid sections, construction, upkeep and confirmed intakes. Secondary-city pipe supply uses donor debits, existing transport gates and delayed shipment arrival. Imported sections do not grant manufacturing mastery. Timber manufacture is available when ceramic manufacture is unknown. Load assessment requires paid bedding and extra completed construction work.
 

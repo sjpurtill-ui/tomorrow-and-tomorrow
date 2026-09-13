@@ -1,6 +1,6 @@
 # Physical water conveyance — implementation contract
 
-Status: frozen implementation delivered as `5d08c2b8c949c08d89c49a8eefdaf87e2e87e205`; the integrator is validating it with canonical clothing and grain changes. The original design contract below defines the scope; the delivery section records implemented behavior and tests. Canonical inclusion is recorded separately in `INTEGRATION_STATUS.md`.
+Status: frozen implementation delivered as `5d08c2b8c949c08d89c49a8eefdaf87e2e87e205`; integrated as `04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8` with canonical clothing and grain changes. Combined 107 and canonical 42 cases pass. The original design contract below defines the scope; the delivery section records implemented behavior and tests. Canonical inclusion is recorded separately in `INTEGRATION_STATUS.md`.
 
 ## Existing authority and observed gap
 

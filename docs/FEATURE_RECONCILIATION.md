@@ -1,5 +1,14 @@
 ## September 12 — grain equipment quotas and two construction illustrations
 
+## September 12 — verified water conveyance, 667 live discoveries
+
+INTEGRATED runtime `04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8`, incorporating frozen water `5d08c2b` into canonical `7a5e91f`. **107 combined worktree cases across nine suites and 42 canonical water/clothing/city cases pass**. The graph is clean at **667 discoveries /449 explicit learning routes /309 civilian recipes /17 facilities**. See `WATER_CLOTHING_INTEGRATION.md` for source-bound paid installation, real secondary-city shipping, household-fetching conservation, owner/save coverage and limitations. No player/editor launch or package update occurred.
+
+Reviewed computing coverage `001a230` adds 16 authored proposals; verified water promotion adds no identities. The ledger is **667 integrated + 2,405 authored drafts = 3,072 distinct identities**, leaving **1,928 to author and 4,333 to implement** toward 5,000. All 667 stored definitions exactly match the canonical snapshot ; 15 ledger-tool cases pass. Paid alternative pipe installation foundations retain their earlier draft predicates as reconciliation evidence.
+
+Both water illustrations were visually reviewed and merged from `965c7c6` / `73ab651`, with explicit 768-pixel mipmapped imports. Art inventory: **108 verified /667 live**, 559 queued. All 12 atlas checks pass after import (`/tmp/tt-667-atlas.log`). Full historical pacing, all 5,000 implementations and the remaining illustrations are unfinished. Canonical evidence: `/tmp/tt-water-clothing-canonical-results.json`, `/tmp/tt-667-canonical-snapshot.json`.
+
+
 ## September 12 — supplied household clothing
 
 INTEGRATED runtime `3dce8a70fbc537cce2b0743d1d1e4d167da7d079` from `2bcd799`: six authored textile methods now produce and maintain finite garments and woven wraps. Paid tools, material inputs and remaining Logistics work constrain production, layering and laundering; only issued condition/coverage reduces cold health and cold/storm mortality costs. Save state is owner- and city-local. See `HOUSEHOLD_CLOTHING_HANDOFF.md`.

@@ -4738,6 +4738,86 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/clay_pipe_forming.png",
+      "description": "Shape continuous hollow clay sections with controlled walls and open ends.",
+      "domain": "infrastructure",
+      "id": "clay_pipe_forming",
+      "name": "Clay Pipe Forming",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ceramic_pipe_firing_qualification.png",
+      "description": "Compare fired conduit batches for warping, absorption and fracture under declared service conditions.",
+      "domain": "infrastructure",
+      "id": "ceramic_pipe_firing_qualification",
+      "name": "Ceramic Pipe Firing Qualification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ceramic_pipe_fit_gauges.png",
+      "description": "Compare fired ends and bores with repeatable mating references.",
+      "domain": "infrastructure",
+      "id": "ceramic_pipe_fit_gauges",
+      "name": "Ceramic Pipe Fit Gauges",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png",
+      "description": "Fit overlapping ceramic ends with a compatible placed joint seal.",
+      "domain": "infrastructure",
+      "id": "clay_pipe_socket_jointing",
+      "name": "Clay Pipe Socket Jointing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rigid_pipe_bedding.png",
+      "description": "Support a conduit continuously on a prepared trench bed and place compatible side support.",
+      "domain": "infrastructure",
+      "id": "rigid_pipe_bedding",
+      "name": "Rigid Pipe Bedding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/buried_pipe_load_assessment.png",
+      "description": "Relate observed cover, surface loading and support to tested conduit resistance.",
+      "domain": "infrastructure",
+      "id": "buried_pipe_load_assessment",
+      "name": "Buried Pipe Load Assessment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/conduit_infiltration_testing.png",
+      "description": "Compare water gained or lost across an isolated installed conduit section under recorded conditions.",
+      "domain": "infrastructure",
+      "id": "conduit_infiltration_testing",
+      "name": "Conduit Infiltration Testing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wooden_log_conduits.png",
+      "description": "Bore timber lengths and fit adjoining ends into a continuous water passage.",
+      "domain": "infrastructure",
+      "id": "wooden_log_conduits",
+      "name": "Wooden Log Conduits",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gravity_conduit_grade_control.png",
+      "description": "Set and check an installed conduit invert against an intended downhill alignment.",
+      "domain": "infrastructure",
+      "id": "gravity_conduit_grade_control",
+      "name": "Gravity Conduit Grade Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sewer_rodding_service.png",
+      "description": "Pass connected rods and compatible clearing heads through accessible conduit runs.",
+      "domain": "infrastructure",
+      "id": "sewer_rodding_service",
+      "name": "Sewer Rodding Service",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -5259,11 +5339,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 657,
+  "live_count": 667,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 551,
+  "queued_count": 559,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 106
+  "verified_count": 108
 }

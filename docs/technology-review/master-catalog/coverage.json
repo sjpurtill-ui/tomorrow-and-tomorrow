@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 657,
+  "verified_baseline_discoveries": 667,
   "pending_communications": 0,
-  "new_authored_drafts": 2415,
+  "new_authored_drafts": 2405,
   "distinct_accounted_identities": 3072,
   "remaining_identities_to_author": 1928,
   "target": 5000,
@@ -2302,9 +2302,9 @@
         "target": 700,
         "assigned": 69,
         "target_slots_not_yet_assigned": 631,
-        "implemented_baseline": 8,
+        "implemented_baseline": 12,
         "pending_communications": 0,
-        "authored_drafts": 61
+        "authored_drafts": 57
       },
       {
         "id": "H03",
@@ -2312,9 +2312,9 @@
         "target": 800,
         "assigned": 202,
         "target_slots_not_yet_assigned": 598,
-        "implemented_baseline": 1,
+        "implemented_baseline": 7,
         "pending_communications": 0,
-        "authored_drafts": 201
+        "authored_drafts": 195
       },
       {
         "id": "H04",
@@ -2349,11 +2349,11 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 462,
+  "branch_alternatives": 457,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 94,
-    "D02": 109,
+    "D02": 99,
     "D03": 97,
     "D04": 116,
     "D05": 156,
@@ -2392,9 +2392,9 @@
       "id": "D02",
       "name": "Water and sanitation",
       "target": 180,
-      "implemented_baseline": 16,
+      "implemented_baseline": 26,
       "pending_communications": 0,
-      "authored_drafts": 109,
+      "authored_drafts": 99,
       "accounted": 125,
       "remaining_to_target": 55
     },
