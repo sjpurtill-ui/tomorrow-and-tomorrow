@@ -1125,5 +1125,77 @@
     },
     "power": 2,
     "daily_power": 0.6666666666666666
+  },
+  "metered_peg_starter": {
+    "name": "Assayed and metered PEG starter",
+    "output": "Metered PEG Starter",
+    "gate": "polymer_molecular_weight_control",
+    "materials": {
+      "Ethylene Glycol": 1.05,
+      "Laboratory Glassware": 0.01
+    },
+    "days": 3,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Steel": 2
+    }
+  },
+  "controlled_chain_peg": {
+    "name": "Ratio-controlled PEG synthesis",
+    "output": "Controlled-Chain PEG",
+    "gate": "ring_opening_polymerization",
+    "materials": {
+      "Ethylene Oxide": 1.15,
+      "Metered PEG Starter": 0.04,
+      "Caustic Soda": 0.01,
+      "Sulfuric Acid": 0.01,
+      "Freshwater": 0.3
+    },
+    "days": 6,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Steel": 2
+    },
+    "power": 1.2,
+    "daily_power": 0.2,
+    "services": {
+      "polymer_stirred_work": 1.2,
+      "polymer_heat_removal": 1
+    }
+  },
+  "characterized_controlled_peg": {
+    "name": "Reference-compared PEG chain-size batch",
+    "output": "Size-Qualified PEG",
+    "gate": "polymer_molecular_weight_control",
+    "materials": {
+      "Controlled-Chain PEG": 1.04,
+      "PEG Diol": 0.02,
+      "Freshwater": 0.2
+    },
+    "days": 4,
+    "tooling": {
+      "Laboratory Glassware": 4,
+      "Optical Lenses": 1,
+      "Steel": 2
+    },
+    "power": 1,
+    "daily_power": 0.25
+  },
+  "size_qualified_peg_binder": {
+    "name": "Binding-tested size-qualified PEG",
+    "output": "Binder-Grade PEG",
+    "gate": "polymer_solution_processing",
+    "materials": {
+      "Size-Qualified PEG": 1.02,
+      "Freshwater": 0.1,
+      "Alumina Catalyst Supports": 0.02
+    },
+    "days": 2,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Steel": 2
+    },
+    "power": 1,
+    "daily_power": 0.5
   }
 }

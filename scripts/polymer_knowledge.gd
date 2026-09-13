@@ -724,7 +724,8 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_contract": "Consumes named cyclic oxide and glycol initiation feed through paid stirred-reactor and cooling capacity into a distinct PEG diol. No isocyanate, polyurethane or universal resin is granted.",
     "production_items": [
-      "ring_opened_peg_diol"
+      "ring_opened_peg_diol",
+      "controlled_chain_peg"
     ]
   },
   {
@@ -1174,7 +1175,8 @@ static func entries()->Array[Dictionary]:
       "qualified_peg_binder",
       "aqueous_peg_binder",
       "recovered_water_peg_binder",
-      "dried_peg_alumina_granules"
+      "dried_peg_alumina_granules",
+      "size_qualified_peg_binder"
     ]
   },
   {
@@ -1209,6 +1211,41 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Separates a typed PEG dryer condensate with finite yield, fuel, power and quality-control work. Recovered water can only replace make-up water in the compatible binder recipe; it does not grant drinking-water or general solvent stock.",
     "production_items": [
       "recovered_peg_process_water"
+    ]
+  },
+  {
+    "id": "polymer_molecular_weight_control",
+    "name": "Polymer Molecular-Weight Control",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_chain_models",
+      "measurement_uncertainty"
+    ],
+    "requires_all": [
+      "polymer_chain_models",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Molecular-Weight Control",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Characterize and control the distribution of polymer chain sizes",
+    "effects": {},
+    "production_contract": "Assay and meter a finite starter stock, then characterize a separately synthesized PEG batch against reference material. Controlled synthesis still requires ring-opening knowledge and operating reactor/cooling services. Application testing remains separate; this does not certify arbitrary stock or grant monodispersity.",
+    "production_items": [
+      "metered_peg_starter",
+      "characterized_controlled_peg"
     ]
   }
 ]
