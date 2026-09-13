@@ -10,8 +10,8 @@ The branch registers 47 discovery identities (including the unfinished SEC prere
 installations, retained-sample analysis, and downstream civilian consumers.
 These identities are already counted in the authored catalog; integrating them
 must not increase the distinct authored total a second time. Canonical coverage
-at `0947d0efc8db5c6a5696526b67ffb6e33dec40f1` is 752 implemented and
-3,446 authored identities toward 5,000. This file does not certify campaign pacing
+at `24cfea7d76295608099335083ee2c59956fd32d1` is 752 implemented and
+3,447 authored identities toward 5,000. This file does not certify campaign pacing
 or the complete technology overhaul.
 
 ## Completed acceptance evidence
@@ -31,6 +31,13 @@ or the complete technology overhaul.
   suite passed 12/12, including loading every bound subject texture and checking
   its square dimensions and card path. Remaining 17 illustrations are not yet
   bound here.
+
+- `edb9a0c`: finite external SEC supplier and paid consignment path; material
+  suite 20/20, including whole-game exhausted-reserve reload.
+- `8aa36b3`: structural dependency audit now includes conditional retained
+  analytical transformations with sample/reference/service costs, rather than
+  treating their outputs as raw resources. Dependency suite 10/10. This remains
+  structural reachability, not a campaign or guaranteed-assay-success proof.
 
 ## Outstanding before family handoff
 
