@@ -25,3 +25,5 @@ The initial daily fixture exhausted unprovided water; after adding an observed w
 Five native illustrations were personally reviewed; originals and prompts are recorded in `assets/ui/research/paper/FORMED_METAL_PROMPTS.md`. Canonical acceptance and exact ledger promotion remain pending. No player/editor launch or package rebuild.
 
 Isolated art verification passes all five 768-pixel mipmapped textures and 12 atlas cases. Graph: 750 discoveries /532 routes /434 recipes /20 facilities, zero graph errors or blocked products. Art catalog:172 verified /750 live,578 queued. Structural closure is not campaign proof.
+
+Canonical acceptance at `991ef0778aafced0bac3af208daf7262009128f8`: formed10, precision10, technology operations16, planner15, owned simulation19 and dependency audit9 pass (79 runtime cases), plus12 atlas. All five textures load at768 pixels with mipmaps. Graph750/532/434/20, thirty-frame startup, exact750-definition snapshot and15ledger tests pass. No player launch or package rebuild.

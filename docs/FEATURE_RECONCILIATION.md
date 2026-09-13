@@ -1,3 +1,11 @@
+## September 13 — 750 verified operating discoveries
+
+Formed-metal runtime/art commit `991ef0778aafced0bac3af208daf7262009128f8` is integrated and verified. Five original identities retain exact predicates: metal spinning, rotary swaging, rotary-draw bending, roll forming and centrifugal tube casting. Eighteen paid recipes turn distinct tooling and prepared components into actual motors, qualified pressure fittings and a commissioned pneumatic workshop. Raw blanks and untested frames cannot substitute for finished parts.
+
+**111 isolated runtime cases and 79 canonical runtime cases pass**, plus12 atlas cases on each checkout. Canonical graph: **750 discoveries /532 routes /434 recipes /20 facilities**, all declared production structurally reachable with zero errors. Five new textures load at768 pixels with mipmaps; art is **172 verified /750 live,578 queued**. Clean thirty-frame startup, exact750-definition snapshot comparison and15ledger tests pass.
+
+Ledger: **750 integrated +2,655 drafts =3,405 identities**, leaving **1,595 to author and4,250 to implement**. Existing recipes, daily owners and save schema remain unchanged; fractional work, full binary save continuation and actor isolation pass. Named grades remain bounded abstractions; tests establish paid chains and real daily progress, not a full historical campaign bootstrap. No player launch or package rebuild. See `FORMED_METAL_HANDOFF.md`. Polymer remains isolated pending its complete acceptance.
+
 ## September 13 — 745 verified operating discoveries
 
 Precision component runtime/art commit `0ecb2a1f459625f4dd72d58abc4b4f63afc01462` is integrated and verified. Five existing identities retain original predicates: reamed bore finishing, reciprocating profile slotting, gear shaping, progressive broaching and interchangeable component fits. Fourteen paid routes supply distinct tooling, finished sleeves/shafts, family-specific bearing assemblies, keyed clutch hubs and generated gears; actual existing motors and commissioned geared workshops consume those parts. No global fit certificate, free mechanical power or extra labor owner is added.

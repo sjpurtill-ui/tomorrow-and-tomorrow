@@ -5338,6 +5338,41 @@
       "source_domain": "production",
       "name": "Interchangeable Component Fits",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "metal_spinning_forming",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Metal Spinning Forming",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rotary_swaging",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Rotary Swaging",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "tube_rotary_draw_bending",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Tube Rotary-Draw Bending",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "roll_formed_sections",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Roll-Formed Sections",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "centrifugal_tube_casting",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Centrifugal Tube Casting",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

@@ -1,5 +1,5 @@
 {
-  "source_commit": "0ecb2a1f459625f4dd72d58abc4b4f63afc01462",
+  "source_commit": "991ef0778aafced0bac3af208daf7262009128f8",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -39235,6 +39235,501 @@
         "requires": [
           "dimensional_metrology",
           "workshop_standards"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "metal_spinning_forming",
+      "name": "Metal Spinning Forming",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "centre_lathe_assembly,sheet_steel_rolling",
+      "mechanism": "A roller forms a rotating blank around a mandrel.",
+      "operating_requirement": "Pay mandrel, sheet, forming work and lubrication; track thinning, wrinkling and trim loss.",
+      "consequence": "Supply rotationally symmetric shells to equipment assembly; asymmetric products require another method.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable metal spinning forming instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "metal_spinning_forming",
+        "grants_instant_mastery": false,
+        "local_demonstration": "A roller forms a rotating blank around a mandrel.",
+        "operating_requirements": "Pay mandrel, sheet, forming work and lubrication; track thinning, wrinkling and trim loss.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local metal spinning forming trials.",
+          "partnership": "Share actual samples and operator time for metal spinning forming; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded metal spinning forming process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external metal spinning forming processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable metal spinning forming machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://leifeldms.com/en/index.html"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "991ef0778aafced0bac3af208daf7262009128f8",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "centre_lathe_assembly",
+          "sheet_steel_rolling"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "metal_spinning_forming",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Metal Spinning Forming",
+            "missing_all": [
+              "centre_lathe_assembly",
+              "sheet_steel_rolling"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "centre_lathe_assembly",
+              "sheet_steel_rolling"
+            ],
+            "requires_all": [
+              "centre_lathe_assembly",
+              "sheet_steel_rolling"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Metal Spinning Forming",
+        "observation": "A roller forms a rotating blank around a mandrel.",
+        "production_contract": "Paid mandrels, rollers, compatible sheet, lubricant and trim/cutting work form rotationally symmetric motor shrouds. Existing motor assembly consumes the actual shroud with qualified leads, winding material and bearings. A shroud is not a pressure vessel or universal protective housing.",
+        "production_items": [
+          "metal_spinning_tool_sets",
+          "spun_motor_shrouds"
+        ],
+        "requires": [
+          "centre_lathe_assembly",
+          "sheet_steel_rolling"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "rotary_swaging",
+      "name": "Rotary Swaging",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "precision_machinery,toolbit_heat_treatment",
+      "mechanism": "Repeated radial die blows reduce a rod or tube profile.",
+      "operating_requirement": "Spend dies, compatible stock and machine work; inspect wall thickness, concentricity and cracking.",
+      "consequence": "Supply shaped shafts or tube ends to fitting; recovered mass and work-hardening limits remain explicit.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable rotary swaging instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "rotary_swaging",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Repeated radial die blows reduce a rod or tube profile.",
+        "operating_requirements": "Spend dies, compatible stock and machine work; inspect wall thickness, concentricity and cracking.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local rotary swaging trials.",
+          "partnership": "Share actual samples and operator time for rotary swaging; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded rotary swaging process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external rotary swaging processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable rotary swaging machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://felss.com/en/maschine/rotary-swaging-machinesha/"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "991ef0778aafced0bac3af208daf7262009128f8",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "precision_machinery",
+          "toolbit_heat_treatment"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "rotary_swaging",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Rotary Swaging",
+            "missing_all": [
+              "precision_machinery",
+              "toolbit_heat_treatment"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "precision_machinery",
+              "toolbit_heat_treatment"
+            ],
+            "requires_all": [
+              "precision_machinery",
+              "toolbit_heat_treatment"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Rotary Swaging",
+        "observation": "Repeated radial die blows reduce a rod or tube profile.",
+        "production_contract": "Make matched dies and spend repeated radial forming work on a specified copper terminal-pin blank. Finished pins are consumed in a separate paid joining and continuity-check operation for motor leads. Unformed blanks do not substitute for shaped pins; die wear and rejected-material allowance are paid.",
+        "production_items": [
+          "rotary_swaging_dies",
+          "swaged_terminal_pins"
+        ],
+        "requires": [
+          "precision_machinery",
+          "toolbit_heat_treatment"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "tube_rotary_draw_bending",
+      "name": "Tube Rotary-Draw Bending",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "precision_machinery,stress_strain_relations",
+      "mechanism": "A rotating bend die draws tubing around a fixed radius.",
+      "operating_requirement": "Pay bend tooling, supported tube, lubrication and work; test ovality, thinning and springback.",
+      "consequence": "Supply qualified bent tube to framework assembly; a successful bend does not itself certify a fluid-pressure rating.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable tube rotary-draw bending instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "tube_rotary_draw_bending",
+        "grants_instant_mastery": false,
+        "local_demonstration": "A rotating bend die draws tubing around a fixed radius.",
+        "operating_requirements": "Pay bend tooling, supported tube, lubrication and work; test ovality, thinning and springback.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local tube rotary-draw bending trials.",
+          "partnership": "Share actual samples and operator time for tube rotary-draw bending; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded tube rotary-draw bending process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external tube rotary-draw bending processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable tube rotary-draw bending machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://arxiv.org/abs/2509.10272"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "991ef0778aafced0bac3af208daf7262009128f8",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "precision_machinery",
+          "stress_strain_relations"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "tube_rotary_draw_bending",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Tube Rotary-Draw Bending",
+            "missing_all": [
+              "precision_machinery",
+              "stress_strain_relations"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "precision_machinery",
+              "stress_strain_relations"
+            ],
+            "requires_all": [
+              "precision_machinery",
+              "stress_strain_relations"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Tube Rotary-Draw Bending",
+        "observation": "A rotating bend die draws tubing around a fixed radius.",
+        "production_contract": "Make matched bending dies/supports and pay forming work on already bored steel tubes. The resulting bend is not pressure-rated stock: a separately known joining/water-test operation consumes it with fittings and water before existing Pressure Pipe Fittings can be produced.",
+        "production_items": [
+          "tube_bend_tool_sets",
+          "formed_steel_pipe_bends"
+        ],
+        "requires": [
+          "precision_machinery",
+          "stress_strain_relations"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "roll_formed_sections",
+      "name": "Roll-Formed Sections",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "sheet_steel_rolling,shaft_alignment_methods",
+      "mechanism": "Successive roll stands progressively bend a strip profile.",
+      "operating_requirement": "Consume sheet coils, aligned roll tooling, drive work and cutoff capacity; inspect twist and section dimensions.",
+      "consequence": "Supply specified structural sections to assembly; the process does not change alloy identity or certify structural loads.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable roll-formed sections instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "roll_formed_sections",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Successive roll stands progressively bend a strip profile.",
+        "operating_requirements": "Consume sheet coils, aligned roll tooling, drive work and cutoff capacity; inspect twist and section dimensions.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local roll-formed sections trials.",
+          "partnership": "Share actual samples and operator time for roll-formed sections; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded roll-formed sections process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external roll-formed sections processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable roll-formed sections machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.voestalpine.com/sadef/en/SEO/Roll-forming/Rolvormen-Roll-forming"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "991ef0778aafced0bac3af208daf7262009128f8",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "sheet_steel_rolling",
+          "shaft_alignment_methods"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "roll_formed_sections",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Roll-Formed Sections",
+            "missing_all": [
+              "sheet_steel_rolling",
+              "shaft_alignment_methods"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "sheet_steel_rolling",
+              "shaft_alignment_methods"
+            ],
+            "requires_all": [
+              "sheet_steel_rolling",
+              "shaft_alignment_methods"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Roll-Formed Sections",
+        "observation": "Successive roll stands progressively bend a strip profile.",
+        "production_contract": "Pay aligned roll stands, sheet, cutoff wear, drive electricity and work into steel channels. A separate structural-load-test operation assembles and checks actual press frames using fasteners and sacrificial test material; pneumatic press assembly consumes those frames. Forming alone grants no structural certification.",
+        "production_items": [
+          "channel_roll_tool_sets",
+          "roll_formed_channels"
+        ],
+        "requires": [
+          "sheet_steel_rolling",
+          "shaft_alignment_methods"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "centrifugal_tube_casting",
+      "name": "Centrifugal Tube Casting",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "metal_casting_feed_design,precision_machinery",
+      "mechanism": "Rotation distributes molten alloy along a tubular mold wall.",
+      "operating_requirement": "Consume suitable alloy, rotating mold, heating and cooling work; machine and inspect the retained inner surface.",
+      "consequence": "Supply tubular blanks for later qualification; inclusions and uneven wall formation are not certified away.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable centrifugal tube casting instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "centrifugal_tube_casting",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Rotation distributes molten alloy along a tubular mold wall.",
+        "operating_requirements": "Consume suitable alloy, rotating mold, heating and cooling work; machine and inspect the retained inner surface.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local centrifugal tube casting trials.",
+          "partnership": "Share actual samples and operator time for centrifugal tube casting; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded centrifugal tube casting process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external centrifugal tube casting processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable centrifugal tube casting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.metaltek.com/metal-casting/centrifugal-casting/?nab=1"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "991ef0778aafced0bac3af208daf7262009128f8",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "metal_casting_feed_design",
+          "precision_machinery"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "centrifugal_tube_casting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Centrifugal Tube Casting",
+            "missing_all": [
+              "metal_casting_feed_design",
+              "precision_machinery"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "metal_casting_feed_design",
+              "precision_machinery"
+            ],
+            "requires_all": [
+              "metal_casting_feed_design",
+              "precision_machinery"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Centrifugal Tube Casting",
+        "observation": "Rotation distributes molten alloy along a tubular mold wall.",
+        "production_contract": "Pay a balanced rotating mold, alloy feed, furnace fuel, drive power and cooling to produce tubular steel blanks. Later boring removes the retained inner allowance and inspects the bore before tube bending and separate pressure-joint qualification. Raw cast blanks cannot bypass those consumers or claim a universal pressure rating.",
+        "production_items": [
+          "centrifugal_tube_molds",
+          "centrifugal_steel_tube_blanks"
+        ],
+        "requires": [
+          "metal_casting_feed_design",
+          "precision_machinery"
         ],
         "requires_all": [],
         "requires_any": [],
