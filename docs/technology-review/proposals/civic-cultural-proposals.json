@@ -1,0 +1,1636 @@
+[
+  {
+    "id": "appointment_eligibility_scrutiny",
+    "name": "Appointment Eligibility Scrutiny",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "household_councils",
+      "customary_law"
+    ],
+    "requires_any": [
+      [
+        "witnessed_obligations",
+        "formal_archives"
+      ]
+    ],
+    "historical_horizon": "early/classical",
+    "mechanism": "Hear objections before confirming an officeholder's eligibility.",
+    "operating_requirement": "Reserve council and witness time; travel and board for an actual nominee; retain each objection and response.",
+    "consequence": "Existing civic owner can confirm an eligible appointment or seek another nominee.",
+    "failure_modes": "Unanswered eligibility evidence leaves appointment pending; refusal preserves the vacancy.",
+    "semantic_neighbors": [
+      "civil_service_examinations",
+      "council_elected_succession",
+      "conflict_of_interest_recusal"
+    ],
+    "distinctness": "Public eligibility challenge before taking office differs from skill examinations, selection votes and recusal in a particular case.",
+    "sources": [
+      "https://classics.mit.edu/Aristotle/athenian_const.3.3.html"
+    ],
+    "source_locator": "55",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "appointment_eligibility_scrutiny",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "post_tenure_conduct_inquiry",
+    "name": "Post-Tenure Conduct Inquiry",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "customary_law",
+      "witnessed_obligations"
+    ],
+    "requires_any": [
+      [
+        "household_councils",
+        "specialized_courts"
+      ]
+    ],
+    "historical_horizon": "early/classical",
+    "mechanism": "Receive conduct complaints after an official's term.",
+    "operating_requirement": "Pay hearing staff, complainant travel and retained testimony; reserve a finite post-term challenge window.",
+    "consequence": "Civic appointment review consumes the conduct finding without automatically punishing or appointing anyone.",
+    "failure_modes": "A substantiated unresolved complaint prevents discharge; missing testimony leaves an explicit unresolved finding.",
+    "semantic_neighbors": [
+      "ministerial_responsibility_hearings",
+      "public_procurement_audits",
+      "public_office_handover"
+    ],
+    "distinctness": "This is a term-end public conduct discharge procedure, excluding financial accounts and procurement review. A handover transfers duties and records; this inquiry adjudicates complaints and discharge after the term.",
+    "sources": [
+      "https://classics.mit.edu/Aristotle/athenian_const.3.3.html"
+    ],
+    "source_locator": "48",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "post_tenure_conduct_inquiry",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "sworn_deposition_records",
+    "name": "Sworn Deposition Records",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "evidentiary_hearings",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Preserve sworn questioning outside the trial hearing.",
+    "operating_requirement": "Pay an authorized examiner, witness time, record medium and delivery; preserve questions, objections and answers in order.",
+    "consequence": "A subsequent hearing receives attributable testimony when a witness cannot attend, subject to adopted admissibility rules.",
+    "failure_modes": "Missing authentication or an unrecorded answer is flagged; later testimony can contradict the record.",
+    "semantic_neighbors": [
+      "evidentiary_hearings",
+      "oral_history_interviewing"
+    ],
+    "distinctness": "Creates a reviewable pre-hearing evidentiary record with formal objections, rather than general interview recollection.",
+    "sources": [
+      "https://www.uscourts.gov/sites/default/files/document/federal-rules-of-civil-procedure.pdf"
+    ],
+    "source_locator": "Rule 30",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates. Written and recorded testimony are operating-media alternatives; an inherited writing foundation is not advertised as an independent research bypass.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "sworn_deposition_records",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "judicial_search_warrants",
+    "name": "Judicial Search Warrants",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "specialized_courts",
+      "written_legal_codes"
+    ],
+    "requires_any": [
+      [
+        "witnessed_obligations",
+        "formal_archives"
+      ]
+    ],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Review evidence before authorizing a bounded search.",
+    "operating_requirement": "Pay an adjudicator and applicant's preparation; issue a particularized warrant and record an actual return from finite officials.",
+    "consequence": "The civic enforcement owner can search only the stated place/items under the adopted warrant.",
+    "failure_modes": "Insufficient grounds denies authority; wrong location, expired authority or excess scope creates a reviewable breach.",
+    "semantic_neighbors": [
+      "procedural_notice",
+      "resource_use_permits",
+      "official_mandate_registers"
+    ],
+    "distinctness": "Prior judicial authorization of an intrusive search is neither notification nor permission to extract resources. An office mandate is continuing competence; each warrant is a separately justified intrusive act.",
+    "sources": [
+      "https://www.uscourts.gov/sites/default/files/document/criminal_federal_rules_pamphlet_dec_1_2023.pdf"
+    ],
+    "source_locator": "Rule 41",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "judicial_search_warrants",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "habeas_corpus_review",
+    "name": "Habeas Corpus Review",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "specialized_courts",
+      "written_legal_codes"
+    ],
+    "requires_any": [
+      [
+        "court_case_dockets",
+        "petition_registers"
+      ]
+    ],
+    "historical_horizon": "medieval/early-modern",
+    "mechanism": "Require a custodian to justify a person's detention.",
+    "operating_requirement": "Pay petition delivery, court time and custodian attendance; retain the detention grounds and judicial order.",
+    "consequence": "The existing custody owner executes a valid release or retains lawful custody; no population is created.",
+    "failure_modes": "Failure to produce a return is recorded; unsupported detention can lead to a release order that still needs enforcement.",
+    "semantic_neighbors": [
+      "administrative_appeals",
+      "appellate_review"
+    ],
+    "distinctness": "Tests continuing authority to detain rather than errors in a prior judgment or generic administrative action.",
+    "sources": [
+      "https://hansard.parliament.uk/Lords/1979-06-27/debates/dc651752-89bd-4039-8ced-1e2fa5b75af8/ActOfHabeasCorpus"
+    ],
+    "source_locator": "historical remedy and 1679 Act",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "habeas_corpus_review",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "bail_surety_administration",
+    "name": "Bail Surety Administration",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "specialized_courts",
+      "witnessed_obligations"
+    ],
+    "requires_any": [],
+    "historical_horizon": "medieval/early-modern",
+    "mechanism": "Secure conditional appearance through an accountable bond.",
+    "operating_requirement": "Reserve an actual surety commitment or pledged stock, staff review and hearing appointments; record discharge or breach.",
+    "consequence": "Court scheduling consumes appearance records; the resource owner releases or lawfully transfers only the pledged amount.",
+    "failure_modes": "Missed appearance triggers a reviewed bond claim; no fictional payment or automatic conviction.",
+    "semantic_neighbors": [
+      "witnessed_obligations",
+      "court_case_dockets"
+    ],
+    "distinctness": "A custody-alternative appearance bond has conditional release, breach and discharge transitions absent from generic obligations.",
+    "sources": [
+      "https://www.uscourts.gov/sites/default/files/document/criminal_federal_rules_pamphlet_dec_1_2023.pdf"
+    ],
+    "source_locator": "Rule 46",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "bail_surety_administration",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "interim_injunction_orders",
+    "name": "Interim Injunction Orders",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "specialized_courts",
+      "written_judgment_reasons"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Temporarily restrain specified conduct pending adjudication.",
+    "operating_requirement": "Pay a hearing, service of the precise order and finite follow-up inspection; retain expiry and review dates.",
+    "consequence": "The authorized civic owner pauses the named disputed action while the main case proceeds.",
+    "failure_modes": "Unserved or expired orders supply no assumed compliance; conflicting evidence can dissolve the restraint.",
+    "semantic_neighbors": [
+      "resource_use_permits",
+      "emergency_power_sunset_rules"
+    ],
+    "distinctness": "Case-specific temporary relief differs from licensing activities or expiring extraordinary governmental powers.",
+    "sources": [
+      "https://www.uscourts.gov/sites/default/files/document/federal-rules-of-civil-procedure.pdf"
+    ],
+    "source_locator": "Rule 65",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "interim_injunction_orders",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "claim_limitation_review",
+    "name": "Claim Limitation Review",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "written_legal_codes",
+      "court_case_dockets"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Compare filing time with adopted limitation and exception rules.",
+    "operating_requirement": "Pay clerk review of dated events, filing evidence and any tolling claim; preserve the chosen rule version.",
+    "consequence": "Docket admission accepts a timely claim or records a reasoned time-bar decision with challenge access.",
+    "failure_modes": "Missing dates or disputed exceptions require a hearing; elapsed time alone never invents proof of liability.",
+    "semantic_neighbors": [
+      "court_case_dockets",
+      "procedural_notice"
+    ],
+    "distinctness": "Computes admissible filing windows and exceptions instead of merely tracking cases or notifying parties.",
+    "sources": [
+      "https://www.legislation.gov.uk/ukpga/1980/58/pdfs/ukpga_19800058_en.pdf"
+    ],
+    "source_locator": "limitation periods and extensions",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "claim_limitation_review",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "final_claim_preclusion",
+    "name": "Final Claim Preclusion",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "written_judgment_reasons",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern exemplar; earlier forms need separate historical review",
+    "mechanism": "Prevent re-litigation covered by a valid final judgment.",
+    "operating_requirement": "Pay retrieval and comparison of parties, claims, jurisdiction and finality evidence; retain the matched judgment.",
+    "consequence": "The court can refuse a duplicate proceeding while preserving genuinely different claims.",
+    "failure_modes": "A provisional order or different claim fails the preclusion test; missing finality leaves review pending.",
+    "semantic_neighbors": [
+      "precedent_collections",
+      "appellate_review"
+    ],
+    "distinctness": "A prior result binds specified parties/claims; precedent only informs interpretation of other cases.",
+    "sources": [
+      "https://www.nycourts.gov/REPORTER/3dseries/2020/2020_04237.htm"
+    ],
+    "source_locator": "valid final judgment and same claim",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "final_claim_preclusion",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "related_claim_joinder",
+    "name": "Related Claim Joinder",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "court_case_dockets",
+      "evidentiary_hearings"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Combine related parties or claims in one proceeding.",
+    "operating_requirement": "Pay linkage review, notices to actual parties and shared hearing capacity; retain separately addressable claims.",
+    "consequence": "Court calendars reuse common evidence while producing claim-specific dispositions.",
+    "failure_modes": "Unrelated facts or prejudice can cause severance; consolidation cannot erase a party's response.",
+    "semantic_neighbors": [
+      "court_case_dockets",
+      "interagency_record_matching"
+    ],
+    "distinctness": "Changes which disputes are heard together rather than matching records or keeping a docket.",
+    "sources": [
+      "https://www.uscourts.gov/sites/default/files/document/federal-rules-of-civil-procedure.pdf"
+    ],
+    "source_locator": "Rules 19-21",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "related_claim_joinder",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "default_judgment_relief",
+    "name": "Default Judgment Relief",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "written_judgment_reasons",
+      "procedural_notice"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Reopen qualifying judgments entered without a party's response.",
+    "operating_requirement": "Pay verification of service, absence explanation, deadlines and the asserted defense; schedule a finite rehearing if allowed.",
+    "consequence": "Dockets replace an operative default with a contested hearing while retaining both records.",
+    "failure_modes": "A validly served ineligible request can be denied; reopening never decides the underlying merits.",
+    "semantic_neighbors": [
+      "appellate_review",
+      "administrative_appeals"
+    ],
+    "distinctness": "Restores participation after procedural default through the issuing court, rather than generic appellate error review.",
+    "sources": [
+      "https://www.uscourts.gov/sites/default/files/document/federal-rules-of-civil-procedure.pdf"
+    ],
+    "source_locator": "Rules 55 and 60",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "default_judgment_relief",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "judicial_venue_transfer",
+    "name": "Judicial Venue Transfer",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "specialized_courts",
+      "court_case_dockets"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Move a proceeding to another competent forum.",
+    "operating_requirement": "Pay competence review, record carriage and party travel; receive acknowledgement before closing the source assignment.",
+    "consequence": "Court workloads and travel routes move the actual case rather than creating a second case.",
+    "failure_modes": "No receiving capacity leaves the original obligation open; missing files delay transfer.",
+    "semantic_neighbors": [
+      "public_service_case_routing",
+      "intergovernmental_compacts"
+    ],
+    "distinctness": "Transfers an already lodged judicial proceeding with jurisdiction and custody checks, not initial service routing.",
+    "sources": [
+      "https://uscode.house.gov/view.xhtml?req=%28title%3A28+section%3A1404+edition%3Aprelim%29"
+    ],
+    "source_locator": "28 USC 1404, change of venue; adopted game rules determine eligible receiving forums",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "judicial_venue_transfer",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "legislative_committee_evidence_review",
+    "name": "Legislative Committee Evidence Review",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "representative_agenda_rules",
+      "evidentiary_hearings"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Examine a proposed bill through a delegated evidence hearing.",
+    "operating_requirement": "Pay committee member time, witness travel and clause review; retain competing evidence and a recommendation.",
+    "consequence": "The parent assembly receives an evidentiary report before deciding whether the bill proceeds.",
+    "failure_modes": "Unresolved affected-party objections remain visible; recommendation is not enactment.",
+    "semantic_neighbors": [
+      "legislative_amendment_tracking",
+      "citizen_deliberation_panels"
+    ],
+    "distinctness": "A delegated legislative committee examines a lodged bill with witnesses; text tracking and citizen advice have different authority.",
+    "sources": [
+      "https://www.parliament.uk/about/how/laws/bills/private/private-stages/committee/"
+    ],
+    "source_locator": "opposed private bill committee",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "legislative_committee_evidence_review",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "staged_legislative_readings",
+    "name": "Staged Legislative Readings",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "representative_agenda_rules",
+      "assembly_quorum_rules"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Separate deliberation on a bill's principle and final text.",
+    "operating_requirement": "Reserve multiple assembly sessions and pay publication or reading labor; retain version-specific votes.",
+    "consequence": "The assembly sends only a stage-complete bill toward formal enactment.",
+    "failure_modes": "A changed text without the required final decision cannot advance; no quorum leaves the stage pending.",
+    "semantic_neighbors": [
+      "representative_agenda_rules",
+      "legislative_amendment_tracking"
+    ],
+    "distinctness": "Adds successive decision gates with different remits, not another agenda or amendment list.",
+    "sources": [
+      "https://www.parliament.uk/business/lords/work-of-the-house-of-lords/making-laws/"
+    ],
+    "source_locator": "second and third reading",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "staged_legislative_readings",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "final_bill_authentication",
+    "name": "Final Bill Authentication",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "legislative_amendment_tracking",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Certify the agreed final legislative text.",
+    "operating_requirement": "Pay copy comparison and authorized attestation; preserve the approved version and delivered signed copy.",
+    "consequence": "Enactment and public proclamation consume the authenticated version, preventing accidental use of a superseded draft.",
+    "failure_modes": "Text mismatch stops transmission; signature does not substitute for a required decision.",
+    "semantic_neighbors": [
+      "copyist_collation",
+      "roll_call_decision_records"
+    ],
+    "distinctness": "A specific enactment handoff binds adopted text to attesting officers; copying and vote records alone cannot do so.",
+    "sources": [
+      "https://www.govinfo.gov/help/bills"
+    ],
+    "source_locator": "Enrolled bill version",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "final_bill_authentication",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "ratification_instrument_deposit",
+    "name": "Ratification Instrument Deposit",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "intergovernmental_compacts",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Deliver authenticated consent through an agreed treaty depositary.",
+    "operating_requirement": "Pay competent officials, instrument preparation and envoy delivery; record receipt and entry-condition checks.",
+    "consequence": "Diplomacy recognizes a party only when the agreement's consent and entry conditions are met.",
+    "failure_modes": "A signature without domestic authority or undelivered instrument grants no new treaty status.",
+    "semantic_neighbors": [
+      "intercommunity_oath_compacts",
+      "intergovernmental_compacts"
+    ],
+    "distinctness": "Separates negotiated text/signature from formal consent delivery and effective treaty participation.",
+    "sources": [
+      "https://treaties.un.org/doc/source/publications/treatyhandbook/TreatyHandbookEng.pdf"
+    ],
+    "source_locator": "ratification and deposit",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "ratification_instrument_deposit",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "treaty_reservation_processing",
+    "name": "Treaty Reservation Processing",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "ratification_instrument_deposit",
+      "written_legal_codes"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Circulate proposed exceptions and counterpart responses to treaty terms.",
+    "operating_requirement": "Pay legal comparison, notification dispatch and reply handling; retain scope, dates and objections per counterparty.",
+    "consequence": "Diplomacy evaluates the actual applicable obligation between each pair of parties.",
+    "failure_modes": "Forbidden reservations are rejected; unanswered or contested relations remain distinct from full agreement.",
+    "semantic_neighbors": [
+      "intergovernmental_compacts",
+      "cross_border_resource_arbitration"
+    ],
+    "distinctness": "Manages qualified consent and objections before applying terms, rather than arbitrating a later resource dispute.",
+    "sources": [
+      "https://treaties.un.org/doc/source/publications/treatyhandbook/TreatyHandbookEng.pdf"
+    ],
+    "source_locator": "reservations and objections",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "treaty_reservation_processing",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "extradition_compatibility_review",
+    "name": "Extradition Compatibility Review",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "specialized_courts",
+      "intergovernmental_compacts",
+      "written_legal_codes"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Compare a surrender request against both jurisdictions' applicable conditions.",
+    "operating_requirement": "Pay translation, evidence delivery and judicial review of conduct and refusal grounds; reserve no transport before authorization.",
+    "consequence": "The existing custody and travel owners execute only an authorized, resourced transfer.",
+    "failure_modes": "Dual-criminality mismatch or an applicable refusal ground blocks surrender; the request never proves guilt.",
+    "semantic_neighbors": [
+      "cross_border_resource_arbitration",
+      "interhabitat_jurisdiction"
+    ],
+    "distinctness": "Evaluates an actual person's requested surrender under two legal systems, not shared-resource arbitration or general jurisdiction.",
+    "sources": [
+      "https://www.unodc.org/documents/treaties/UNTOC/Publications/Convention/English/ENG_United_Nations_Convention_against_Transnational_Organized_Crime.pdf"
+    ],
+    "source_locator": "Article 16",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "extradition_compatibility_review",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "judicial_exhibit_custody",
+    "name": "Judicial Exhibit Custody",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "evidentiary_hearings",
+      "formal_archives"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-modern/modern",
+    "mechanism": "Track an exhibit's identity and custodial transfers.",
+    "operating_requirement": "Pay sealed storage, handlers, labels and transport; record receiver acknowledgement and observed condition.",
+    "consequence": "Hearings receive a specific retained object with a challengeable handling history.",
+    "failure_modes": "Broken seals, missing receipts or substitution disputes reduce evidentiary usability and trigger review.",
+    "semantic_neighbors": [
+      "ballot_chain_of_custody",
+      "cultural_rights_provenance"
+    ],
+    "distinctness": "Judicial exhibits need item identity, condition and admissibility review; ballot reconciliation and cultural permissions are separate operations.",
+    "sources": [
+      "https://www.nist.gov/system/files/documents/forensics/NIST-IR-7928.pdf"
+    ],
+    "source_locator": "chain of custody tracking",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "judicial_exhibit_custody",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "witness_sequestration",
+    "name": "Witness Sequestration",
+    "field": "D16",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "evidentiary_hearings"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern exemplar; earlier forms need separate historical review",
+    "mechanism": "Keep designated witnesses apart from other testimony.",
+    "operating_requirement": "Pay separate waiting space, attendants and scheduling; retain exemptions and reported exposure.",
+    "consequence": "A hearing compares independently given accounts and can schedule a new examination after contamination.",
+    "failure_modes": "Observed contact is recorded for the adjudicator; separation does not guarantee truthful testimony.",
+    "semantic_neighbors": [
+      "evidentiary_hearings",
+      "conflict_of_interest_recusal"
+    ],
+    "distinctness": "Controls information exposure of witnesses, not the decision-maker's personal conflicts.",
+    "sources": [
+      "https://www.uscourts.gov/sites/default/files/2021-10-05_civil_rules_agenda_book_final_1.pdf"
+    ],
+    "source_locator": "Rule 615 discussion",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected adopted procedure with a bounded case record; no guarantee of truth, justice, consent or compliance. GovernmentPeopleSystem retains officials and labor; learning never enacts policy.",
+    "recovery_contract": {
+      "destination": "witness_sequestration",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "articulatory_sound_classification",
+    "name": "Articulatory Sound Classification",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-to-modern",
+    "mechanism": "Organize speech sounds by observed articulation.",
+    "operating_requirement": "Pay speaker and analyst sessions, recording or transcription supplies and repeated examples.",
+    "consequence": "Pronunciation lessons and language descriptions use the agreed sound inventory.",
+    "failure_modes": "Disagreement remains marked; a chart never labels speakers superior or makes uncertain articulation exact.",
+    "semantic_neighbors": [
+      "phonetic_notation",
+      "shared_technical_lexicons"
+    ],
+    "distinctness": "Analyzes place/manner and vowel position rather than only providing symbols or technical vocabulary.",
+    "sources": [
+      "https://www.internationalphoneticassociation.org/IPAcharts/IPA_charts_TI/IPA_charts_TI.html"
+    ],
+    "source_locator": "consonant and vowel charts",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "articulatory_sound_classification",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "minimal_pair_elicitation",
+    "name": "Minimal-Pair Elicitation",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-to-modern",
+    "mechanism": "Test meaning contrasts in minimally different spoken forms.",
+    "operating_requirement": "Pay consenting speakers for paired utterances in recorded contexts and analyst comparison.",
+    "consequence": "Local pronunciation teaching uses verified distinctions and retains dialect-specific variation.",
+    "failure_modes": "Speaker disagreement or inconsistent meanings prevents a confident contrast claim.",
+    "semantic_neighbors": [
+      "language_documentation_corpora",
+      "articulatory_sound_classification"
+    ],
+    "distinctness": "Tests functional contrast in one language rather than merely collecting speech or classifying articulation.",
+    "sources": [
+      "https://mexico.sil.org/language_culture/aztec/nawatl-nlv/long-short-vowels-nawatl-nlv"
+    ],
+    "source_locator": "Orizaba Nawatl vowel-length examples",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "minimal_pair_elicitation",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "morpheme_boundary_analysis",
+    "name": "Morpheme Boundary Analysis",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early-to-modern",
+    "mechanism": "Compare recurring form-meaning units within words.",
+    "operating_requirement": "Pay speakers and analysts to compare a finite word paradigm; record proposed boundaries and counterexamples.",
+    "consequence": "Grammar lessons and dictionary indexing consume the reviewed paradigm.",
+    "failure_modes": "An irregular or fused form retains an uncertain segmentation instead of forcing a universal split.",
+    "semantic_neighbors": [
+      "language_documentation_corpora",
+      "shared_technical_lexicons",
+      "written_word_boundary_conventions"
+    ],
+    "distinctness": "Infers internal word structure from recurring contrasts, not corpus collection or agreement on terminology. Word spacing separates written words, whereas this tests meaningful parts within a word.",
+    "sources": [
+      "https://www.eva.mpg.de/lingua/resources/glossing-rules.php",
+      "https://philippines.sil.org/resources/works-progress/ifk/dictionary_entries"
+    ],
+    "source_locator": "Rules 2 and 4",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "morpheme_boundary_analysis",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "interlinear_morpheme_glossing",
+    "name": "Interlinear Morpheme Glossing",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "morpheme_boundary_analysis",
+      "phonetic_notation"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Align word parts with grammatical and meaning annotations.",
+    "operating_requirement": "Pay annotation, speaker review and publication materials; preserve alignment to the original utterance.",
+    "consequence": "Translation review and teaching can inspect each interpreted element in context.",
+    "failure_modes": "Unaligned elements or unresolved categories remain explicit; glosses do not replace the source language.",
+    "semantic_neighbors": [
+      "cultural_translation_practice",
+      "language_documentation_corpora"
+    ],
+    "distinctness": "Produces inspectable morpheme-aligned analysis rather than a fluent translation or unanalysed collection.",
+    "sources": [
+      "https://www.eva.mpg.de/lingua/resources/glossing-rules.php"
+    ],
+    "source_locator": "word and morpheme alignment conventions",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "interlinear_morpheme_glossing",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "regular_sound_correspondence_analysis",
+    "name": "Regular Sound-Correspondence Analysis",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "phonetic_notation",
+      "morpheme_boundary_analysis"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Compare recurring sound relations across candidate cognate sets.",
+    "operating_requirement": "Pay access to multiple language records, speaker checks and analyst time; test proposed correspondences against withheld forms.",
+    "consequence": "Historical language studies and teaching use qualified reconstructions with alternative explanations.",
+    "failure_modes": "Borrowings and unexplained mismatches remain flagged; similar spelling alone cannot establish ancestry.",
+    "semantic_neighbors": [
+      "collective_memory_authentication",
+      "language_documentation_corpora"
+    ],
+    "distinctness": "Tests repeated linguistic transformations, not provenance of collective accounts or mere lexical resemblance.",
+    "sources": [
+      "https://linguistics.berkeley.edu/~dwbruhn/dwbruhn_Ling230_squib_PFWHm.pdf"
+    ],
+    "source_locator": "original comparative reconstruction study",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "regular_sound_correspondence_analysis",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "lexicographic_sense_separation",
+    "name": "Lexicographic Sense Separation",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "phonetic_notation"
+    ],
+    "requires_any": [
+      [
+        "language_documentation_corpora",
+        "cultural_translation_practice"
+      ]
+    ],
+    "historical_horizon": "early-to-modern",
+    "mechanism": "Distinguish a word's senses using contextual examples.",
+    "operating_requirement": "Pay collection and speaker review of real usages; retain examples, grammatical behavior and provisional sense labels.",
+    "consequence": "Dictionary lookup and translation lessons select context-appropriate meanings.",
+    "failure_modes": "Sparse evidence leaves an entry provisional; overlapping senses can remain cross-referenced.",
+    "semantic_neighbors": [
+      "shared_technical_lexicons",
+      "cultural_translation_practice"
+    ],
+    "distinctness": "Structures polysemous entries from usage evidence rather than standardizing technical terms or translating a work.",
+    "sources": [
+      "https://philippines.sil.org/resources/works-progress/ifk/dictionary_entries"
+    ],
+    "source_locator": "numbered senses and grammatical functions",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "lexicographic_sense_separation",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "verse_meter_scansion",
+    "name": "Verse-Meter Scansion",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [],
+    "requires_any": [
+      [
+        "oral_epics",
+        "phonetic_notation"
+      ]
+    ],
+    "historical_horizon": "early/classical",
+    "mechanism": "Analyze recurring syllable patterns and pauses in verse.",
+    "operating_requirement": "Pay reciter and analyst practice; preserve the poem, declared local metrical convention and alternative readings.",
+    "consequence": "Poetry teaching and rehearsal use the annotated rhythm without imposing a universal aesthetic.",
+    "failure_modes": "A forced pattern that conflicts with performance is disputed; variation is not automatically an error.",
+    "semantic_neighbors": [
+      "musical_notation_systems",
+      "oral_epics"
+    ],
+    "distinctness": "Analyzes verbal meter for a declared poetic tradition rather than recording musical pitch or preserving an epic.",
+    "sources": [
+      "https://www.poetryfoundation.org/education/glossary/scansion"
+    ],
+    "source_locator": "metrical pattern analysis",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "verse_meter_scansion",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "manuscript_quire_collation",
+    "name": "Manuscript Quire Collation",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "formal_archives"
+    ],
+    "requires_any": [
+      [
+        "copyist_collation",
+        "museum_collection_curation"
+      ]
+    ],
+    "historical_horizon": "medieval-to-modern",
+    "mechanism": "Describe a codex's physical gatherings and missing leaves.",
+    "operating_requirement": "Pay careful handling, diagramming and custodian access; retain conjugate leaf and sewing observations without disbinding by default.",
+    "consequence": "Conservation and text editors use the physical loss map alongside textual variants.",
+    "failure_modes": "Hidden folds or repairs leave uncertain relations; missing leaves are never reconstructed as observed.",
+    "semantic_neighbors": [
+      "copyist_collation",
+      "critical_text_editions"
+    ],
+    "distinctness": "Records physical sheets and gatherings, not agreement between textual witnesses.",
+    "sources": [
+      "https://www.library.upenn.edu/news/rebuilding-rare-books-virtual"
+    ],
+    "source_locator": "collation formulas and VisColl",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "manuscript_quire_collation",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "encaustic_painting",
+    "name": "Encaustic Painting",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "mineral_pigment_preparation",
+      "pigment_image_composition"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early/classical",
+    "mechanism": "Bind a painted image with a wax medium.",
+    "operating_requirement": "Pay wax, pigments, prepared support, controlled heat and painter work; inspect a retained trial patch.",
+    "consequence": "Accepted panels supply commissioned portraits and exhibition objects with material-specific care.",
+    "failure_modes": "Poor adhesion, overheated medium or support distortion rejects the panel.",
+    "semantic_neighbors": [
+      "tempera_paint_formulation",
+      "oil_paint_formulation"
+    ],
+    "distinctness": "Wax setting and heat handling differ from aqueous protein binders and drying oils.",
+    "sources": [
+      "https://www.metmuseum.org/art/collection/search/547856"
+    ],
+    "source_locator": "beeswax pigment medium",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "encaustic_painting",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "water_gilding",
+    "name": "Water Gilding",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "pigment_image_composition",
+      "joinery"
+    ],
+    "requires_any": [],
+    "historical_horizon": "medieval/early-modern",
+    "mechanism": "Apply and burnish gold leaf over a prepared ground.",
+    "operating_requirement": "Pay leaf, ground materials, frame preparation, drying and burnishing work; inspect coverage and attachment.",
+    "consequence": "Accepted gilded frames and panels furnish actual cultural commissions.",
+    "failure_modes": "Cracked ground or detached leaf causes rework using fresh materials.",
+    "semantic_neighbors": [
+      "paint_layer_consolidation",
+      "oil_paint_formulation"
+    ],
+    "distinctness": "Creates a leaf-covered ground with burnishing rather than conserving paint or mixing a binder.",
+    "sources": [
+      "https://www.vam.ac.uk/articles/how-was-it-made-water-gilding"
+    ],
+    "source_locator": "gesso, leaf and burnishing",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "water_gilding",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "plaster_sgraffito",
+    "name": "Plaster Sgraffito",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "fresco_surface_painting"
+    ],
+    "requires_any": [],
+    "historical_horizon": "medieval/early-modern",
+    "mechanism": "Reveal contrasting plaster layers by controlled scratching.",
+    "operating_requirement": "Pay layered plaster, pigment, scaffold occupancy and artist work within the workable interval.",
+    "consequence": "Accepted decorative wall sections become maintained architectural artworks.",
+    "failure_modes": "Too-deep cuts or dried layers damage the pattern and require a new patch.",
+    "semantic_neighbors": [
+      "fresco_surface_painting",
+      "stone_sculpture_work"
+    ],
+    "distinctness": "Subtractive patterning across colored plaster layers differs from applying paint or carving structural stone.",
+    "sources": [
+      "https://www.vam.ac.uk/articles/light-sgraffito"
+    ],
+    "source_locator": "contrasting plaster layers",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "plaster_sgraffito",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "aquatint_ground_printmaking",
+    "name": "Aquatint-Ground Printmaking",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "rolling_intaglio_printing"
+    ],
+    "requires_any": [
+      [
+        "photochemical_metal_etching",
+        "burin_engraving"
+      ]
+    ],
+    "historical_horizon": "early-modern/industrial",
+    "mechanism": "Create tonal intaglio areas with a granular resist.",
+    "operating_requirement": "Pay plate, resist, etching consumables, ventilation, ink, paper and proof labor; compare a tone patch series.",
+    "consequence": "Qualified tonal plates supply repeatable illustrated prints.",
+    "failure_modes": "Uneven ground or overbitten areas reject the plate/proof; rework consumes materials.",
+    "semantic_neighbors": [
+      "mezzotint_printmaking",
+      "drypoint_printmaking",
+      "photochemical_metal_etching"
+    ],
+    "distinctness": "Granular resist and bitten tone fields differ from rocker roughening, scratched burrs and sheet-part patterning.",
+    "sources": [
+      "https://www.metmuseum.org/it/essays/the-printed-image-in-the-west-aquatint"
+    ],
+    "source_locator": "tonal granular-ground technique",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "aquatint_ground_printmaking",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "cyanotype_contact_printing",
+    "name": "Cyanotype Contact Printing",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "paper_making",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Expose iron-salt paper in contact with an object or image.",
+    "operating_requirement": "Pay coated sheets, wash water, exposure and drying space; preserve contact and exposure witness patches.",
+    "consequence": "Accepted contact records supply specimen albums and declared drawing copies.",
+    "failure_modes": "Blurred contact or incomplete washing rejects a sheet; the original cannot be invented from the blue print.",
+    "semantic_neighbors": [
+      "photographic_reproduction",
+      "lithographic_printing"
+    ],
+    "distinctness": "Iron photochemistry and contact exposure form blue images without an inked printing surface.",
+    "sources": [
+      "https://www.loc.gov/pictures/item/tgm002839/"
+    ],
+    "source_locator": "iron-salt photographic prints",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates. Camera-based photography is not mandatory for contact photograms; its experimental-control foundation would make that former OR branch redundant.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "cyanotype_contact_printing",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "silver_plate_daguerreotypy",
+    "name": "Silver-Plate Daguerreotypy",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "photographic_image_capture",
+      "silver_cupellation"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Form a direct positive on a prepared silvered plate.",
+    "operating_requirement": "Pay a silvered plate, enclosed processing apparatus, qualified consumables, exposure and specialist labor; retain a test exposure.",
+    "consequence": "An accepted portrait or observation plate enters an actual collection.",
+    "failure_modes": "Motion, surface damage or poor processing rejects the unique plate; no reusable negative is created.",
+    "semantic_neighbors": [
+      "photographic_image_capture",
+      "calotype_paper_negatives"
+    ],
+    "distinctness": "A unique reflective plate differs from generic capture and the reusable paper-negative route.",
+    "sources": [
+      "https://www.loc.gov/pictures/collection/dag/medium.html"
+    ],
+    "source_locator": "direct-positive plate",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "silver_plate_daguerreotypy",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "calotype_paper_negatives",
+    "name": "Calotype Paper Negatives",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "photographic_image_capture",
+      "paper_making"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Capture a reusable negative on sensitized paper.",
+    "operating_requirement": "Pay prepared sheets, camera occupancy, processing supplies and comparison prints; retain the negative's identity.",
+    "consequence": "A retained accepted negative supplies later paid positive-print jobs.",
+    "failure_modes": "Paper texture, exposure failure or torn negatives limit usable detail and reproduction.",
+    "semantic_neighbors": [
+      "photographic_image_capture",
+      "photographic_reproduction"
+    ],
+    "distinctness": "The image master is a reusable paper negative, with different detail and copying behavior from direct plates.",
+    "sources": [
+      "https://blogs.loc.gov/teachers/2018/09/pre-civil-war-photographic-technologies-the-calotype-and-daguerreotype/"
+    ],
+    "source_locator": "negative-to-positive paper process",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "calotype_paper_negatives",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "wet_collodion_glass_negatives",
+    "name": "Wet-Collodion Glass Negatives",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "photographic_image_capture"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Expose and process a coated glass plate while wet.",
+    "operating_requirement": "Pay glass, prepared coating, enclosed chemical handling, water and a nearby processing station; retain elapsed time.",
+    "consequence": "A surviving accepted glass negative supplies repeatable photographic prints.",
+    "failure_modes": "A dried coating or broken plate rejects the capture and consumes the reserved supplies.",
+    "semantic_neighbors": [
+      "calotype_paper_negatives",
+      "photographic_image_capture"
+    ],
+    "distinctness": "Wet timing and rigid glass support create a distinct field logistics constraint.",
+    "sources": [
+      "https://www.vam.ac.uk/articles/photographic-processes"
+    ],
+    "source_locator": "Collodion negative",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "wet_collodion_glass_negatives",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "albumen_contact_prints",
+    "name": "Albumen Contact Prints",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "photographic_reproduction",
+      "paper_making"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Make contact positives on an albumen-coated sheet.",
+    "operating_requirement": "Pay a usable negative, coated paper, processing materials, water and finishing labor; retain the exposure pairing.",
+    "consequence": "Accepted portrait editions consume an existing negative and finite sheets.",
+    "failure_modes": "Uneven coating or poor contact rejects a print; yellowing remains a material-care liability.",
+    "semantic_neighbors": [
+      "calotype_paper_negatives",
+      "photographic_reproduction"
+    ],
+    "distinctness": "This is a smooth coated positive-print surface, not creation of the source negative.",
+    "sources": [
+      "https://www.vam.ac.uk/articles/photographic-processes"
+    ],
+    "source_locator": "Albumen print",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "albumen_contact_prints",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "starch_screen_color_plates",
+    "name": "Starch-Screen Color Plates",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "color_photographic_processes"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Combine a color-grain screen with a photographic transparency.",
+    "operating_requirement": "Pay qualified screen plates, camera time and processing; compare the image under transmitted light.",
+    "consequence": "Accepted color transparencies supply viewed cultural and survey collections.",
+    "failure_modes": "Screen defects and exposure mismatch impair color; no fidelity bonus appears without a usable plate.",
+    "semantic_neighbors": [
+      "color_photographic_processes",
+      "color_relationship_studies"
+    ],
+    "distinctness": "Selected additive grain-screen capture differs from generic color studies and other unspecified color recording routes.",
+    "sources": [
+      "https://www.vam.ac.uk/articles/photographic-processes"
+    ],
+    "source_locator": "Autochrome",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "starch_screen_color_plates",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "floating_color_paper_marbling",
+    "name": "Floating-Color Paper Marbling",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "paper_making",
+      "pigment_image_composition"
+    ],
+    "requires_any": [],
+    "historical_horizon": "medieval/early-modern",
+    "mechanism": "Transfer a floating color pattern onto a sheet.",
+    "operating_requirement": "Pay a prepared bath, colors, paper, drying racks and practiced transfer; retain actual sheet inspection.",
+    "consequence": "Accepted decorative sheets supply book endpapers and commissioned designs.",
+    "failure_modes": "Collapsed pattern, bubbles or a torn lift consumes a sheet without accepted output.",
+    "semantic_neighbors": [
+      "textile_printing",
+      "paper_making"
+    ],
+    "distinctness": "A one-lift floating pattern differs from fabric printing and manufacture of the base sheet.",
+    "sources": [
+      "https://content.lib.washington.edu/dpweb/essay1.html"
+    ],
+    "source_locator": "floating colors transferred to paper",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "floating_color_paper_marbling",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  },
+  {
+    "id": "pictorial_wood_intarsia",
+    "name": "Pictorial Wood Intarsia",
+    "field": "D19",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "joinery",
+      "pigment_image_composition"
+    ],
+    "requires_any": [],
+    "historical_horizon": "medieval/early-modern",
+    "mechanism": "Assemble fitted contrasting wood pieces into an image.",
+    "operating_requirement": "Pay selected wood, cutting-tool wear, adhesive, backing and fitting labor; inspect gaps and attachment.",
+    "consequence": "Accepted pictorial panels furnish a study, cabinet or exhibition installation.",
+    "failure_modes": "Misfit, warping or delamination rejects the panel or requires paid replacement pieces.",
+    "semantic_neighbors": [
+      "mosaic_surface_design",
+      "scenic_perspective_construction"
+    ],
+    "distinctness": "Fitted wood pieces require grain-aware joinery and attachment; stone mosaic and stage illusion use different construction.",
+    "sources": [
+      "https://www.metmuseum.org/fr/met-publications/the-gubbio-studiolo-and-its-conservation-vol-2-italian-renaissance-intarsia-and-the-conservation-o"
+    ],
+    "source_locator": "Gubbio fitted contrasting wood",
+    "source_scope": "Supports the named historical/technical mechanism; paid operations and failure transitions are original proposed game design, not claims that the source specifies game rules.",
+    "branching_note": "All ALL parents plus one member of every OR group are required. These are capability foundations, not a compulsory historical sequence or enacted policy. Era labels are representative design horizons, not first-invention dates.",
+    "scope_boundary": "Selected material process or language sample with retained observations; no universal aesthetic, language hierarchy or instant competence. Existing labor and collection owners remain authoritative.",
+    "recovery_contract": {
+      "destination": "pictorial_wood_intarsia",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay a competent available practitioner travel, board and teaching time; local participants repeat the named operation using actual resources.",
+      "partnership": "Both communities commit staff and attributable case evidence or specimens; returned findings require local validation and cannot create shared authority or cultural consent.",
+      "purchased_research": "Commission a specified question, pay delivery delay and local evaluation; inconclusive findings remain possible.",
+      "imported_service": "Pay finite external performance or processing capacity plus travel or freight; continued supply depends on the provider and grants no domestic mastery.",
+      "foundations_preserved": true
+    },
+    "implementation_status": "Proposal only. No runtime registration, stock recipe, ledger promotion, imagery, AI operation or pacing result.",
+    "source_checked_date": "2026-09-13",
+    "operating_resources_note": "Named materials, facilities and staff are proposed operating inputs, not existing stock IDs. Implementation must bind them to paid local or imported supplies before this discovery can be counted as operating."
+  }
+]
