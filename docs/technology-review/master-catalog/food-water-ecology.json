@@ -1806,22 +1806,6 @@
   },
   {
     "field": "D03",
-    "id": "habitat_observation_records",
-    "name": "Habitat Observation Records",
-    "foundations": "herbal_classification,seasonal_patterns",
-    "mechanism": "Record organisms alongside the places and seasonal conditions where they occur",
-    "operating_requirement": "Observers, repeatable descriptions and retained records",
-    "consequence": "Relate species observations to habitat rather than treating them as isolated sightings",
-    "status": "authored_draft",
-    "requires_all": [
-      "herbal_classification",
-      "seasonal_patterns"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D03",
     "id": "ecological_transects",
     "name": "Ecological Transects",
     "foundations": "habitat_observation_records,geometric_survey",

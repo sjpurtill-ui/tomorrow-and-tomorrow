@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 812,
+  "verified_baseline_discoveries": 821,
   "pending_communications": 0,
-  "new_authored_drafts": 2658,
+  "new_authored_drafts": 2649,
   "distinct_accounted_identities": 3470,
   "remaining_identities_to_author": 1530,
   "target": 5000,
@@ -2300,9 +2300,9 @@
         "target": 600,
         "assigned": 25,
         "target_slots_not_yet_assigned": 575,
-        "implemented_baseline": 8,
+        "implemented_baseline": 9,
         "pending_communications": 0,
-        "authored_drafts": 17
+        "authored_drafts": 16
       },
       {
         "id": "H02",
@@ -2357,12 +2357,12 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 449,
+  "branch_alternatives": 447,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 109,
     "D02": 99,
-    "D03": 97,
+    "D03": 96,
     "D04": 77,
     "D05": 155,
     "D06": 70,
@@ -2374,7 +2374,7 @@
     "D12": 115,
     "D13": 113,
     "D14": 173,
-    "D15": 126,
+    "D15": 118,
     "D16": 131,
     "D17": 115,
     "D18": 92,
@@ -2410,9 +2410,9 @@
       "id": "D03",
       "name": "Ecology and land stewardship",
       "target": 180,
-      "implemented_baseline": 7,
+      "implemented_baseline": 8,
       "pending_communications": 0,
-      "authored_drafts": 97,
+      "authored_drafts": 96,
       "accounted": 104,
       "remaining_to_target": 76
     },
@@ -2530,9 +2530,9 @@
       "id": "D15",
       "name": "Biology",
       "target": 200,
-      "implemented_baseline": 1,
+      "implemented_baseline": 9,
       "pending_communications": 0,
-      "authored_drafts": 126,
+      "authored_drafts": 118,
       "accounted": 127,
       "remaining_to_target": 73
     },

@@ -5807,6 +5807,69 @@
       "source_domain": "production",
       "name": "Leather Thickness Skiving",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "habitat_observation_records",
+      "field": "D03",
+      "source_domain": "nutrition",
+      "name": "Habitat Observation Records",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "comparative_anatomy",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Comparative Anatomy",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "biological_classification",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Biological Classification",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "biological_reference_collections",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Biological Reference Collections",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "developmental_stage_series",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Developmental Stage Series",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "heredity_experiments",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Heredity Experiments",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "plant_transpiration_measurement",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Plant Transpiration Measurement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "plant_pathology_diagnosis",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Plant Pathology Diagnosis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "plant_resistance_trait_trials",
+      "field": "D15",
+      "source_domain": "nutrition",
+      "name": "Plant Resistance Trait Trials",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

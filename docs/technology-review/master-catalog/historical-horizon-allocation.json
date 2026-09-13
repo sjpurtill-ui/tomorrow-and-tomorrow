@@ -4519,8 +4519,8 @@
       "id": "habitat_observation_records",
       "name": "Habitat Observation Records",
       "horizon": "H01",
-      "source_file": "food-water-ecology.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The authored practice can develop through direct gathering, handling, fire or seasonal observation before settled agricultural infrastructure; later specialization does not change its underlying mechanism.",
       "scope_digest": "6f930821b80ab64b0fd698aba333bb61d13abbec019aa886e02bfca3cc6d781e"
