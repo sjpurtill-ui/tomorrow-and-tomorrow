@@ -176,7 +176,8 @@ static func entries()->Array[Dictionary]:
     "observation": "Qualify feed monomers by separating and measuring process-relevant impurities",
     "effects": {},
     "production_items": [
-      "purified_ethene_feed"
+      "purified_ethene_feed",
+      "qualified_cationic_c4_feed"
     ],
     "production_contract": "Uses named feedstock batches, installed tooling, shared Crafting labor and specified daily power/services. Material qualification consumes the specific batch and samples; ownership of imported output grants no manufacturing mastery."
   },
@@ -406,7 +407,8 @@ static func entries()->Array[Dictionary]:
       "ethene_oxidation_catalyst",
       "qualified_nickel_hydrogenation_catalyst",
       "formed_alumina_supports",
-      "formed_ethene_catalyst"
+      "formed_ethene_catalyst",
+      "anhydrous_aluminum_chloride"
     ]
   },
   {
@@ -1282,7 +1284,8 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Finite screened carbonate and LDPE feed a tested formulation. Gas expansion and destructive cell/compression qualification produce enclosed insulation panels; cold storage still requires refrigeration machinery, operators, power and maintenance. No structural, fireproof or universal polymer-grade claim.",
     "production_items": [
       "polymer_carbonate_filler",
-      "formulated_foam_ldpe"
+      "formulated_foam_ldpe",
+      "polybutene_panel_sealant"
     ]
   },
   {
@@ -1318,7 +1321,8 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "expanded_ldpe_foam",
       "qualified_ldpe_foam",
-      "foam_cold_store_panels"
+      "foam_cold_store_panels",
+      "polybutene_sealed_cold_panels"
     ],
     "operating_plants": [
       "foam_insulated_cold_store"
@@ -1357,6 +1361,38 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "pu_offcut_glycolysis",
       "qualified_recovered_pu_blend"
+    ]
+  },
+  {
+    "id": "ionic_chain_polymerization",
+    "name": "Ionic Chain Polymerization",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_monomer_purification"
+    ],
+    "requires_all": [
+      "polymer_monomer_purification"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Ionic Chain Polymerization",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Build polymer chains through qualified ionic active centers under controlled conditions",
+    "effects": {},
+    "production_contract": "Qualified mixed C4 feed and dry Lewis-acid reagent undergo controlled cationic chain growth with paid heat removal and catalyst separation. Low-molecular-weight polybutene supplies a qualified panel sealant, not high-molecular-weight rubber or pure polyisobutylene.",
+    "production_items": [
+      "cationic_polybutene"
     ]
   }
 ]

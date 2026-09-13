@@ -485,3 +485,18 @@ func test_selective_glycolysis_uses_completed_virgin_offcuts_and_restricted_blen
 		assert_float(float(s.resource_stockpiles["Recovered PU Glycolysate"])).is_equal_approx(.9,.000001)
 		assert_float(float(s.resource_stockpiles["PEG Diol"])).is_equal_approx(99.06,.000001)
 		assert_float(float(s.resource_stockpiles["Recovered-Blend PU Belt Web"])).is_equal(0.0))
+func test_cationic_c4_route_supplies_panel_sealant_with_finite_catalyst_and_cooling()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		Ops.data().last_day=0;Ops.data().services={"electricity":1000.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
+		for resource:String in ["Refinery Naphtha","Quicklime","Alumina Catalyst Supports","Charcoal","Chlorine","Hydrogen Chloride","Caustic Soda","Bitumen","Polymer Carbonate Filler","Steel Sheets","Insulation-Grade LDPE Foam"]:s.resource_stockpiles[resource]=100.0
+		s.resource_stockpiles["Freshwater"]=1000.0
+		var items:Array[String]=["steam_cracked_ethene","qualified_cationic_c4_feed","anhydrous_aluminum_chloride","cationic_polybutene","polybutene_panel_sealant","polybutene_sealed_cold_panels"]
+		var targets:Array[int]=[12,3,1,1,1,2]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(s.resource_stockpiles["Mixed Cracker C4"])).is_equal_approx(0.0,.000001)
+		assert_float(float(s.resource_stockpiles["Qualified Cationic C4 Feed"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["Anhydrous Aluminum Chloride"])).is_equal_approx(.98,.000001)
+		assert_float(float(s.resource_stockpiles["Polybutene Panel Sealant"])).is_equal_approx(.94,.000001)
+		assert_float(float(s.resource_stockpiles["Foam Cold-Store Panels"])).is_equal(2.0)
+		assert_float(Ops.service("polymer_heat_removal")).is_equal(8.0))
