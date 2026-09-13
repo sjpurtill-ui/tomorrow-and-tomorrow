@@ -10,6 +10,18 @@ static func data()->Dictionary:
 	return ledger.polymer_samples
 static func has_capacity()->bool:
 	return data().records.size()<LIMIT and int(data().next_serial)<MAX_SERIAL
+static func retire_completed()->void:
+	var ledger:=data()
+	if ledger.records.size()<LIMIT:return
+	# Keep recent reports and all unfinished work. Released physical specimens
+	# remain in stock; removing an old record neither refunds nor releases them.
+	var ids:Array=ledger.records.keys()
+	ids.sort_custom(func(a:String,b:String)->bool:return int(a)<int(b))
+	for id:String in ids:
+		if ledger.records.size()<=LIMIT/2:break
+		if ledger.records[id].status!="measured_unqualified":continue
+		ledger.records.erase(id)
+		ledger["retired_count"]=int(ledger.get("retired_count",0))+1
 static func completed(item:String,quantity:int)->void:
 	var spec:=Industry.product(item)
 	if quantity<=0 or not spec.has("specimen_source"):return
@@ -21,6 +33,7 @@ static func completed(item:String,quantity:int)->void:
 static func valid(value:Variant)->bool:
 	if not value is Dictionary or not value.has_all(["next_serial","records"]):return false
 	if not integer(value.next_serial,1,MAX_SERIAL) or not value.records is Dictionary or value.records.size()>LIMIT:return false
+	if not integer(value.get("retired_count",0),0,int(value.next_serial)-1) or int(value.get("retired_count",0))+value.records.size()>=int(value.next_serial):return false
 	for key:Variant in value.records:
 		if not key is String or not key.is_valid_int() or str(int(key))!=key:return false
 		var serial:=int(key)

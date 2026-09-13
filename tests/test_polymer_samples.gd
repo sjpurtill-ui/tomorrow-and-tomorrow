@@ -117,25 +117,31 @@ func test_partial_acquisition_survives_save_and_does_not_reserve_twice()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Sealed Copolymer Specimens"])).is_equal(0.0)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Freshwater)).is_equal_approx(.8,.000001))
 
-func test_daily_operations_advance_prepared_samples_and_stop_when_bench_loses_power()->void:
+func test_daily_operations_calibrate_before_spending_first_specimen_and_survive_outage()->void:
 	WorldSimulation.scoped("samples",func()->void:
 		var job:=start();P.advance(WorldSimulation.military,job,1)
 		var s=WorldSimulation.state
 		s.population_allocations.Crafting=20;s.population_health=1.0;s.simulation_metrics.labor_efficiency=1.0
-		for item:String in ["Coal","Freshwater","Insulated Cable"]:s.resource_stockpiles[item]=100.0
+		s.known_discoveries.append("polymer_solution_processing");s.discovery_adoption.polymer_solution_processing=1.0
+		for item:String in ["Coal","Freshwater","Insulated Cable","Toluene"]:s.resource_stockpiles[item]=100.0
+		s.resource_stockpiles["NMR Methanol References"]=1.0
 		for id:String in ["nmr_analytical_bench","steam_generator"]:Ops.data().plants[id]={"installed":1,"building":0,"work":0.0,"enabled":true}
 		s.elapsed_days=1;Ops.advance(1)
 		var sample:Dictionary=Samples.data().records["1"]
-		assert_str(sample.status).is_equal("acquiring")
-		var progress:=float(sample.acquisition.work)
+		assert_str(sample.status).is_equal("unmeasured")
+		assert_float(float(s.resource_stockpiles["Sealed Copolymer Specimens"])).is_equal(1.0)
+		var progress:=float(Ops.data().nmr_calibration.work)
 		assert_float(progress).is_greater(0.0)
 		Ops.advance(1)
-		assert_float(float(sample.acquisition.work)).is_equal(progress)
+		assert_float(float(Ops.data().nmr_calibration.work)).is_equal(progress)
 		s.resource_stockpiles.Coal=0.0;s.elapsed_days=2;Ops.advance(2)
-		assert_float(float(sample.acquisition.work)).is_equal(progress)
+		assert_float(float(Ops.data().nmr_calibration.work)).is_equal(progress)
 		s.resource_stockpiles.Coal=100.0
-		for day:int in range(3,12):s.elapsed_days=day;Ops.advance(day)
+		for day:int in range(3,21):s.elapsed_days=day;Ops.advance(day)
 		assert_str(sample.status).is_equal("measured_unqualified")
+		assert_bool(preload("res://scripts/nmr_acquisition.gd").report("1").interpretation.resolved).is_true()
+		assert_float(float(s.resource_stockpiles["Sequence-Characterized Copolymer Specimens"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["Sealed Copolymer Specimens"])).is_equal(0.0)
 		assert_bool(Ops.valid(Ops.data())).is_true())
 
 func qualify_reference()->void:
@@ -213,3 +219,31 @@ func test_conditioning_shortage_is_atomic_and_expired_reference_pauses_qualified
 		assert_float(float(Samples.data().records["1"].acquisition.work)).is_equal(1.0)
 		assert_float(float(Samples.data().records["1"].acquisition.discarded_work)).is_equal(1.0)
 		assert_int(int(Samples.data().records["1"].acquisition.reference.checked_day)).is_equal(22))
+
+func test_full_register_retires_old_completed_reports_without_refunds_or_id_reuse()->void:
+	WorldSimulation.scoped("samples",func()->void:
+		var job:=start();P.advance(WorldSimulation.military,job,1)
+		var s=WorldSimulation.state;s.resource_stockpiles.Freshwater=1.0
+		Ops.data().last_day=0;Ops.data().services={"nmr_unqualified_time":4.0}
+		var acquisition=preload("res://scripts/nmr_acquisition.gd")
+		acquisition.start("1");acquisition.advance("1",4)
+		var completed:Dictionary=Samples.data().records["1"].duplicate(true)
+		for serial:int in range(2,257):
+			var copy:=completed.duplicate(true);copy.sample_id=str(serial);copy.observation.sample_id=str(serial);copy.response_model.seed=serial
+			Samples.data().records[str(serial)]=copy
+		Samples.data().next_serial=257
+		var unfinished:Dictionary=Samples.data().records["256"]
+		unfinished.status="acquiring";unfinished.acquisition.work=.5;unfinished.erase("observation")
+		assert_bool(Samples.valid(Samples.data())).is_true()
+		assert_bool(Samples.has_capacity()).is_false()
+		var before:Dictionary=s.resource_stockpiles.duplicate()
+		Samples.retire_completed()
+		assert_int(Samples.data().records.size()).is_equal(128)
+		assert_int(int(Samples.data().retired_count)).is_equal(128)
+		assert_bool(Samples.data().records.has("256")).is_true()
+		assert_bool(s.resource_stockpiles==before).is_true()
+		assert_bool(Samples.has_capacity()).is_true()
+		P.advance(WorldSimulation.military,job,1)
+		assert_bool(Samples.data().records.has("257")).is_true()
+		assert_int(int(Samples.data().next_serial)).is_equal(258)
+		assert_bool(Samples.valid(JSON.parse_string(JSON.stringify(Samples.data())))).is_true())

@@ -94,16 +94,20 @@ static func observe(sample:Dictionary)->Dictionary:
 static func advance_pending()->void:
 	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
 	var calibration=load("res://scripts/nmr_calibration.gd")
-	if not records.is_empty():calibration.start()
+	var pending:=false
+	for sample:Dictionary in records.values():
+		if sample.status in ["unmeasured","acquiring"] and sample.has("response_model"):pending=true
+	if pending:calibration.start()
 	calibration.advance()
 	for sample_id:String in records:
-		if records[sample_id].status=="unmeasured":start(sample_id)
+		if records[sample_id].status=="unmeasured" and calibration.usable() and WorldSimulation.discovery.adoption("polymer_solution_processing")>=.1:start(sample_id)
 		advance(sample_id,WORK)
+	if not records.is_empty():load("res://scripts/polymer_samples.gd").retire_completed()
 
 static func report(sample_id:String)->Dictionary:
 	var sample:=record(sample_id)
 	if sample.is_empty():return {"status":"unavailable","message":"Sample is unavailable."}
-	if sample.status=="unmeasured":return {"status":"unmeasured","message":"Prepared; awaiting supported bench time and supplies."}
+	if sample.status=="unmeasured":return {"status":"unmeasured","message":"Prepared; awaiting a calibrated method, bench time and supplies."}
 	if sample.status=="acquiring":return {"status":"acquiring","message":"Acquiring: %.1f / %.1f instrument-time units." % [float(sample.acquisition.work),WORK]}
 	var interpretation:Dictionary=load("res://scripts/nmr_trace_analysis.gd").analyze(sample.observation,sample.observation.get("reference",{}))
 	if bool(interpretation.get("resolved",false)):return {"status":"resolved","message":"Selected dyads resolved for this retained specimen; no stock-pool qualification.","interpretation":interpretation}
