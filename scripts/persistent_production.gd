@@ -107,6 +107,7 @@ static func configure(host: Node, id: int, target: int, paused: bool) -> Diction
 	for job in host.equipment_queue:
 		if int(job.id)==id and bool(job.get("persistent",false)):
 			job.target_stock=target;job.paused=paused
+			job.erase("planner_managed")
 			return {"ok":true,"message":"Production line updated."}
 	return {"error":"Select a persistent production line."}
 
@@ -129,6 +130,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		job.efficiency=maxf(.10,float(job.efficiency)*retention)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
 		job.required_days=job.work_per_item
+		job.erase("planner_managed")
 		return {"ok":true,"message":"Line retooled. Existing setup tools remain assigned; missing tools are added. Some efficiency is retained; unfinished work is discarded without refunding consumed materials."}
 	return {"error":"Select a persistent production line."}
 
@@ -245,6 +247,7 @@ static func validate_saved(payload: Dictionary) -> String:
 	for job in payload.get("equipment_queue",[]):
 		if not job is Dictionary: return "Invalid production line."
 		if not bool(job.get("persistent",false)): continue
+		if job.has("planner_managed") and not job.planner_managed is bool:return "Invalid production management flag."
 		for key in ["target_stock","progress_days","work_per_item","allocation","efficiency","completed"]:
 			var value: Variant=job.get(key,null)
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid persistent production value: "+key

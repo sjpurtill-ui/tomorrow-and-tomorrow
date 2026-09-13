@@ -134,14 +134,19 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 	if recommendation.is_empty():return
 	var campaign:=WorldSimulation.military
 	var item:=String(recommendation.item)
-	var exists:=false
+	var exists:=false;var managed:=true
 	for job:Dictionary in campaign.equipment_queue:
-		if String(job.get("item",""))==item:exists=true;break
+		if String(job.get("item",""))==item:
+			exists=true;managed=bool(job.get("planner_managed",false));break
 	if not exists and campaign.equipment_queue.size()>=campaign.production_line_capacity():
-		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line()
+		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line(String(preload("res://scripts/civilian_industry.gd").product(item).get("output","")))
 		if reusable<0:return
 		if WorldSimulation.submit(id,{"kind":"production_retool","job":reusable,"item":item}).has("error"):return
 	ensure_line(id,item,int(recommendation.target))
+	if managed:
+		for job:Dictionary in campaign.equipment_queue:
+			if String(job.get("item",""))==item and String(job.get("job_type",""))=="civilian" and bool(job.get("persistent",false)):
+				job.planner_managed=true;break
 
 static func military_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)

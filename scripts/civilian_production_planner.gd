@@ -43,7 +43,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 			if String(I.PRODUCTS[item].output)==resource:candidates.append(item)
 	var installed:Dictionary={}
 	if existing.is_empty() and WorldSimulation.military.equipment_queue.size()>=WorldSimulation.military.production_line_capacity():
-		var reusable:=finished_line()
+		var reusable:=finished_line(resource)
 		for job:Dictionary in WorldSimulation.military.equipment_queue:
 			if int(job.id)==reusable:installed=P.installed_tooling(job);break
 	var best:Dictionary={};var best_work:=INF
@@ -81,13 +81,31 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		if work<best_work:best=first.duplicate();best["work"]=work;best_work=work
 	return best
 
-static func finished_line()->int:
+static func finished_line(resource:String="")->int:
 	for job:Dictionary in WorldSimulation.military.equipment_queue:
 		if String(job.get("job_type",""))!="civilian" or not bool(job.get("persistent",false)):continue
 		if bool(job.get("paused",false)) or float(job.get("progress_days",0.0))>0.0:continue
 		if not (job.get("reserved_materials",{}) as Dictionary).is_empty():continue
-		if P.state(WorldSimulation.military,job)=="Target met":return int(job.id)
+		var status:=P.state(WorldSimulation.military,job)
+		if status=="Target met":return int(job.id)
+		if resource.is_empty() or not bool(job.get("planner_managed",false)) or not status.begins_with("Missing "):continue
+		for input:String in job.materials:
+			if float(WorldSimulation.state.resource_stockpiles.get(input,0))>.000000001:continue
+			if input==resource or input_depends_on(input,resource,{}):return int(job.id)
 	return -1
+
+
+## Only unblock an ancestor of the waiting line's actual missing input. This
+## does not let an unrelated new demand steal an unfinished production target.
+static func input_depends_on(output:String,resource:String,visited:Dictionary)->bool:
+	if visited.has(output) or visited.size()>=24:return false
+	var next:=visited.duplicate();next[output]=true
+	for item:String in I.PRODUCTS:
+		var spec:Dictionary=I.PRODUCTS[item]
+		if String(spec.output)!=output or P.recipe(WorldSimulation.military,item).has("error"):continue
+		for input:String in spec.materials:
+			if input==resource or input_depends_on(input,resource,next):return true
+	return false
 
 static func nutrient_recommendation(plan_power:bool=false)->Dictionary:
 	var state=WorldSimulation.state

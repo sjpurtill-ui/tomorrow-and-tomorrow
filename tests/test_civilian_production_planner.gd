@@ -150,3 +150,67 @@ func test_clothing_supply_respects_absence_pause_travel_and_sufficient_stocks()-
 		state.resource_stockpiles["Spun Yarn"]=0.0;preload("res://scripts/household_clothing.gd").add("knit",110)
 		assert_dict(F.clothing_recommendation()).is_empty()
 	)
+func test_single_automatic_workshop_replenishes_upstream_after_garment_consumption()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup();var state=WorldSimulation.state
+		var production=preload("res://scripts/persistent_production.gd")
+		var clothing=preload("res://scripts/household_clothing.gd")
+		for item:String in ["retted_fibers","spun_yarn"]:
+			C.civilian_orders("paper_ruler",{})
+			var job:Dictionary=WorldSimulation.military.equipment_queue[0]
+			assert_str(String(job.item)).is_equal(item)
+			for step in 10:production.advance(WorldSimulation.military,job,20.0)
+		var fibers:=float(state.resource_stockpiles["Fiber Plants"])
+		for day in range(1,4):
+			state.elapsed_days=day;clothing.advance(100,100,false)
+			assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(8.0)
+			for item:String in ["retted_fibers","spun_yarn"]:
+				C.civilian_orders("paper_ruler",{})
+				assert_int(WorldSimulation.military.equipment_queue.size()).is_equal(1)
+				var job:Dictionary=WorldSimulation.military.equipment_queue[0]
+				assert_str(String(job.item)).is_equal(item)
+				for step in 5:production.advance(WorldSimulation.military,job,20.0)
+			assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(10.0)
+		assert_float(float(state.resource_stockpiles["Fiber Plants"])).is_less(fibers)
+		assert_float(clothing.count()).is_equal(6.0)
+	)
+func test_blocked_reuse_preserves_manual_paused_reserved_and_in_progress_lines()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup();var state=WorldSimulation.state;var production=preload("res://scripts/persistent_production.gd")
+		state.resource_stockpiles["Prepared Fibers"]=10.0
+		C.civilian_orders("paper_ruler",{})
+		var job:Dictionary=WorldSimulation.military.equipment_queue[0]
+		assert_str(String(job.item)).is_equal("spun_yarn")
+		state.resource_stockpiles["Prepared Fibers"]=0.0
+		assert_int(F.finished_line("Prepared Fibers")).is_equal(int(job.id))
+		assert_int(F.finished_line("Paper")).is_equal(-1)
+		job.progress_days=.1;assert_int(F.finished_line("Prepared Fibers")).is_equal(-1)
+		job.progress_days=0.0;job.reserved_materials={"Prepared Fibers":.1};assert_int(F.finished_line("Prepared Fibers")).is_equal(-1)
+		job.reserved_materials={};job.paused=true;assert_int(F.finished_line("Prepared Fibers")).is_equal(-1)
+		job.paused=false;production.configure(WorldSimulation.military,int(job.id),10,false)
+		assert_bool(bool(job.get("planner_managed",false))).is_false()
+		assert_int(F.finished_line("Prepared Fibers")).is_equal(-1)
+		C.civilian_orders("paper_ruler",{})
+		assert_str(String(job.item)).is_equal("spun_yarn")
+		assert_bool(bool(job.get("planner_managed",false))).is_false()
+	)
+func test_saved_automatic_line_resumes_without_rebuying_existing_tools()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup();var state=WorldSimulation.state
+		state.resource_stockpiles["Prepared Fibers"]=10.0;C.civilian_orders("paper_ruler",{})
+		state.resource_stockpiles["Prepared Fibers"]=0.0
+	)
+	var saved:=WorldSimulation.export_state();assert_bool(WorldSimulation.import_state(bytes_to_var(var_to_bytes(saved))).get("ok",false)).is_true()
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		var state=WorldSimulation.state;var production=preload("res://scripts/persistent_production.gd")
+		var job:Dictionary=WorldSimulation.military.equipment_queue[0]
+		assert_bool(bool(job.get("planner_managed",false))).is_true()
+		var clay:=float(state.resource_stockpiles.Clay);var tools:=production.installed_tooling(job)
+		C.civilian_orders("paper_ruler",{})
+		assert_str(String(job.item)).is_equal("retted_fibers")
+		# Retting needs 3 clay tools; the spinner's existing 1 is retained.
+		assert_float(float(state.resource_stockpiles.Clay)).is_equal(clay-maxf(0,3.0-float(tools.get("Clay",0))))
+		assert_bool(bool(job.get("planner_managed",false))).is_true()
+		job.planner_managed="yes"
+		assert_str(production.validate_saved({"equipment_queue":[job]})).is_not_empty()
+	)
