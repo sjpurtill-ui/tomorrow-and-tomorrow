@@ -1324,7 +1324,8 @@ static func entries()->Array[Dictionary]:
       "qualified_ldpe_foam",
       "foam_cold_store_panels",
       "polybutene_sealed_cold_panels",
-      "exposure_tested_cold_panels"
+      "exposure_tested_cold_panels",
+      "aluminum_faced_cold_panels"
     ],
     "operating_plants": [
       "foam_insulated_cold_store"
@@ -1462,7 +1463,44 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_contract": "Finite recognized bauxite is digested, separated, precipitated and calcined with paid chemical plant, water, reagents, fuel and power. Refined alumina supplies separately formed and qualified catalyst supports.",
     "production_items": [
-      "bauxite_alumina_refining"
+      "bauxite_alumina_refining",
+      "electrolysis_grade_aluminum_chloride"
+    ]
+  },
+  {
+    "id": "aluminum_electrolysis",
+    "name": "Aluminum Electrolysis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "alumina_refining",
+      "electrical_generators",
+      "electrochemical_cells"
+    ],
+    "requires_all": [
+      "alumina_refining",
+      "electrical_generators",
+      "electrochemical_cells"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Aluminum Electrolysis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Reduce qualified alumina to aluminum through a maintained electrolytic process",
+    "effects": {},
+    "production_contract": "A purified aluminum-chloride feed is electrolyzed in a paid mixed sodium/potassium-chloride bath with graphite apparatus, substantial electrical demand and finite make-up salts. Metal and captured chlorine appear only on completion. This is a chloride-route implementation, not an assumed fluoride bath.",
+    "production_items": [
+      "chloride_aluminum_electrolysis"
     ]
   }
 ]

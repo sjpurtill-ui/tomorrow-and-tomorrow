@@ -600,3 +600,29 @@ func test_bauxite_refining_supplies_operating_oxidation_catalyst()->void:
 		assert_float(float(s.resource_stockpiles["Refined Alumina"])).is_equal_approx(.92,.000001)
 		assert_float(float(s.resource_stockpiles["Ethene Oxidation Catalyst"])).is_equal_approx(.98,.000001)
 		assert_float(float(s.resource_stockpiles["Ethylene Oxide"])).is_equal(1.0))
+func test_chloride_aluminum_requires_paid_mixed_bath_and_power_before_metal_or_chlorine()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		for resource:String in ["Timber","Freshwater","Hydrogen Chloride","Refined Alumina","Charcoal","Chlorine"]:s.resource_stockpiles[resource]=1000.0
+		var items:Array[String]=["wood_ash_potassium_extract","purified_potassium_chloride","electrolysis_grade_aluminum_chloride"]
+		var targets:Array[int]=[7,5,6]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		s.known_discoveries.append("aluminum_electrolysis");s.discovery_adoption.aluminum_electrolysis=1.0
+		for resource:String in ["Salt","Graphite","Refractory Bricks","Steel"]:s.resource_stockpiles[resource]=100.0
+		assert_bool(WorldSimulation.military.start_production_line("chloride_aluminum_electrolysis",1).get("ok",false)).is_true()
+		assert_float(float(s.resource_stockpiles["Purified Potassium Chloride"])).is_equal(1.0)
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		var chlorine_before:float=float(s.resource_stockpiles["Chlorine"])
+		Ops.data().services.electricity=10.0;P.advance(WorldSimulation.military,job,10000)
+		assert_int(int(job.completed)).is_equal(0)
+		assert_float(float(s.resource_stockpiles.get("Refined Aluminum",0))).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["Chlorine"])).is_equal(chlorine_before)
+		Ops.data().services.electricity=10.0;P.advance(WorldSimulation.military,job,10000)
+		assert_int(int(job.completed)).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Chlorine"])).is_equal_approx(chlorine_before+3.4,.000001)
+		assert_float(float(s.resource_stockpiles["Purified Potassium Chloride"])).is_equal_approx(.97,.000001)
+		WorldSimulation.military.cancel_equipment_job(int(job.id))
+		s.resource_stockpiles["Insulation-Grade LDPE Foam"]=2;s.resource_stockpiles["Bitumen"]=1;Ops.data().services.electricity=10.0
+		assert_int(int(run_batch("aluminum_faced_cold_panels",1).get("completed",0))).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Refined Aluminum"])).is_equal_approx(.6,.000001))
