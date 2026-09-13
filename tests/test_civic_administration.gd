@@ -111,6 +111,9 @@ func test_petition_conversation_changes_work_and_requires_observed_resolution()-
 	var forged:=GovernmentPeopleSystem.administration_records.duplicate(true)
 	forged.petitions[0].dispositions.back().observation.active=true
 	assert_bool(C.valid(forged)).is_false()
+	forged=GovernmentPeopleSystem.administration_records.duplicate(true)
+	forged.petitions[0].state="addressing"
+	assert_bool(C.valid(forged)).is_false()
 func test_invalid_ledger_and_legacy_absence()->void:
 	assert_bool(C.valid(C.empty_state())).is_true()
 	var bad:=C.empty_state();bad.work=-1
@@ -143,5 +146,67 @@ func test_full_save_restores_civic_register_without_granting_new_authority()->vo
 	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(before)
 	assert_bool(C.authorized(GovernmentPeopleSystem,place,person,"water")).is_true()
 	assert_bool(C.authorized(GovernmentPeopleSystem,place,person,"shelter")).is_false()
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
+
+func test_secondary_shortages_and_primary_clerical_work_remain_separate()->void:
+	GameState.known_discoveries.append("petition_registers")
+	GameState.ensure_population_total(1000)
+	GameState.player_settlements.append({"id":"second","name":"Rivermeet","position":Vector2(10,10),"primary":false,"population_share":.2,"founded_day":20})
+	GovernmentPeopleSystem.process_day(31)
+	var site:=SettlementModel.settlement_record("second")
+	SettlementModel._ensure_city_resources(site)
+	site.local_resources.water_metrics={"intake_ratio":.4}
+	GameState.water_metrics={"intake_ratio":1.0}
+	var primary:=String(GameState.player_settlements[0].id)
+	assert_bool(C.condition(primary,"water").active).is_false()
+	assert_float(float(C.condition("second","water").ratio)).is_equal(.4)
+	GovernmentPeopleSystem.administration_records.last_day=-1
+	GovernmentPeopleSystem.administration_records.work=0.0
+	SettlementModel.with_city_resources("second",func()->void:C.credit_day(GovernmentPeopleSystem,32))
+	assert_int(int(GovernmentPeopleSystem.administration_records.last_day)).is_equal(-1)
+	SettlementModel.with_local_population(func()->void:
+		var raw:=GameState.effective_workers("Administration",false,false,true)
+		var ordinary:=GameState.effective_workers("Administration")
+		C.credit_day(GovernmentPeopleSystem,32)
+		assert_float(ordinary+float(GovernmentPeopleSystem.administration_records.work)).is_equal_approx(raw,.000001))
+func test_other_civilization_cannot_spend_or_receive_this_registers_work()->void:
+	var before:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	WorldSimulation.create_actor("civic_peer",1902)
+	WorldSimulation.scoped("civic_peer",func()->void:
+		assert_bool(C.spend(GovernmentPeopleSystem,1.0)).is_false()
+		C.credit_day(GovernmentPeopleSystem,90)
+		WorldSimulation.government.administration_records.work=4.0
+		assert_bool(C.spend(WorldSimulation.government,1.0)).is_true()
+		assert_float(float(WorldSimulation.government.administration_records.work)).is_equal(3.0))
+	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(before)
+
+func test_pending_handover_survives_full_save_without_duplicate_completion()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	GameState.known_discoveries.append("public_office_handover")
+	var site:Dictionary=GameState.player_settlements[0]
+	var place:=String(site.id)
+	var previous:=int(site.leader_person_id)
+	var successor:=int(GovernmentPeopleSystem.people[1].person_id)
+	C.register_jurisdiction(GovernmentPeopleSystem,place,["work"])
+	GameState.sovereign_orders.append({"id":"saved_custody","settlement_id":place,"implementation_followup":{"state":"pending","leader_person_id":previous,"settlement_id":place,"due_day":10}})
+	GovernmentPeopleSystem.mark_central_appointment(successor,"Steward")
+	C.issue_mandate(GovernmentPeopleSystem,place,successor,["work"],30)
+	var before:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	var slot:="codex_civic_custody_%d" % Time.get_ticks_usec()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	GovernmentPeopleSystem.administration_records=C.empty_state()
+	var restored:=SaveSystem.load_game(slot)
+	assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(before)
+	var f:Dictionary=C.order_by_id("saved_custody").implementation_followup
+	assert_str(String(f.handover_state)).is_equal("pending")
+	assert_bool(C.can_review(GovernmentPeopleSystem,f)).is_false()
+	C.process_handovers(GovernmentPeopleSystem)
+	assert_int(int(f.custodian_person_id)).is_equal(successor)
+	var paid:=float(GovernmentPeopleSystem.administration_records.work)
+	C.process_handovers(GovernmentPeopleSystem)
+	assert_float(float(GovernmentPeopleSystem.administration_records.work)).is_equal(paid)
+	assert_bool(C.can_review(GovernmentPeopleSystem,f)).is_true()
 	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)

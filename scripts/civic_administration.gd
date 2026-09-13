@@ -14,6 +14,7 @@ static func appointed(host:Node,place:String,person:int)->bool:
 	var holder:Dictionary=host.person_snapshot(person)
 	return not site.is_empty() and int(site.get("leader_person_id",0))==person and not holder.is_empty() and holder.get("status")=="active"
 static func spend(host:Node,amount:float)->bool:
+	if host!=WorldSimulation.government:return false
 	if float(host.administration_records.work)<amount:return false
 	host.administration_records.work-=amount
 	return true
@@ -25,6 +26,7 @@ static func reserved(state:Node,capacity:float)->float:
 	# government processing. Other settlements do not fund this register twice.
 	return maxf(0.0,capacity)*.1
 static func credit_day(host:Node,day:int)->void:
+	if host!=WorldSimulation.government or not WorldSimulation.state.resource_settlement_id.is_empty():return
 	var d:Dictionary=host.administration_records
 	if day<=int(d.last_day):return
 	d.last_day=day
@@ -244,9 +246,15 @@ static func valid(v:Variant)->bool:
 				if r.state=="completed" and (not integer(r.get("completed_day")) or int(r.completed_day)<int(r.queued_day)):return false
 			else:
 				if r.get("subject") not in ["water","provisions","shelter"] or r.get("state") not in ["open","addressing","deferred","resolved"] or not integer(r.get("recorded_day")) or not integer(r.get("recorded_by"),1) or not valid_observation(r.get("observation")):return false
+				if r.observation.subject!=r.subject:return false
 				if not r.get("dispositions") is Array or r.dispositions.size()>32:return false
 				for action:Variant in r.dispositions:
 					if not action is Dictionary or not integer(action.get("day")) or not integer(action.get("person_id"),1) or action.get("action") not in ["address","defer","resolve"] or not valid_observation(action.get("observation")):return false
+					if action.observation.subject!=r.subject or int(action.day)<int(r.recorded_day):return false
 					if action.action=="resolve" and action.observation.active:return false
-				if r.state!="open" and (not integer(r.get("disposed_day")) or r.dispositions.is_empty()):return false
+				if r.state=="open" and not r.dispositions.is_empty():return false
+				if r.state!="open":
+					if not integer(r.get("disposed_day")) or r.dispositions.is_empty():return false
+					var last:Dictionary=r.dispositions.back()
+					if int(r.disposed_day)!=int(last.day) or r.state!={"address":"addressing","defer":"deferred","resolve":"resolved"}[last.action]:return false
 	return true
