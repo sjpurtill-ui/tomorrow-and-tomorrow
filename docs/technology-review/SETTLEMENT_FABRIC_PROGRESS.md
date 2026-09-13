@@ -64,3 +64,11 @@ Automatic selection, method compatibility and qualification, inspection, install
 Retrofit start now checks every authored ALL parent and one member of each OR group directly from the unregistered knowledge definitions before payment. Occupied building land uses and recorded material families constrain applicability: timber methods require timber/organic fabric, capillary breaks require stone/earth, and fields or encampments are excluded. This is a coarse first compatibility boundary, not qualified geometry or engineering acceptance.
 
 Expanded headless module checks pass for each missing ALL parent, absent OR group and each alternate OR member, plus incompatible-use rejection without payment. Actual settlement-owner probe passes with the shading foundations present. Logs /tmp/tt-fabric-all-or.log and /tmp/tt-fabric-owner-branches.log, both exit 0. Exact branch checks do not prove research acquisition or global reachability. Inspection and final installed service remain pending.
+
+## Selected inspection classifier
+
+Added separate method-specific observation contracts for joint slip, splice opening, braced drift, restrained moisture movement, retained runoff, wind-load residual displacement, capillary uptake, flashing leakage, rainscreen wetting and shade transmission. Each produces accepted, rejected or inconclusive outcomes. Missing/negative/nonfinite observations, inadequate excitation and exposure outside the selected reference envelope cannot pass; uncertainty crossing a limit remains inconclusive.
+
+Thresholds are explicitly original bounded game specifications in normalized measurement units, not universal engineering recommendations. This classifier consumes observations; it does not produce them, prove their provenance, or install components. Paid site-trial production and retained physical geometry remain required before runtime acceptance. No caller-provided result is currently sufficient to grant building service.
+
+Ten-method headless classifier probe passes acceptance/rejection/uncertainty, insufficient and out-of-envelope exposure, NaN and missing measurements. /tmp/tt-fabric-inspection.log, exit 0. Whole gameplay, inspections under city work budgets, physical failure consequences and visuals remain unfinished. HELD.
