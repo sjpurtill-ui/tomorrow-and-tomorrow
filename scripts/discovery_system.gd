@@ -125,6 +125,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/communications_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/building_material_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/water_conveyance_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/naval_service_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/textile_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/textile_mechanization.gd").entries())
 	catalog.append_array(preload("res://scripts/paper_knowledge.gd").entries())
@@ -1050,6 +1051,7 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
+	if not String(entry.get("naval_service_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("grain_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("clothing_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("food_batch_method","")).is_empty():return String(entry.production_contract)
