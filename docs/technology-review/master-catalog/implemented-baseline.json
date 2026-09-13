@@ -1,5 +1,5 @@
 {
-  "source_commit": "08547e7e6f764f8d8acd8d655d757ee0cac81e15",
+  "source_commit": "095266eb63b67509236153ed814a7f8d7ec218e6",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -17207,6 +17207,208 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "buttonhole_edge_reinforcement",
+      "name": "Buttonhole Edge Reinforcement",
+      "field": "D07",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "bone_needle_sewing,garment_pattern_cutting",
+      "mechanism": "Bind and reinforce a cut fabric opening with edge stitches and end reinforcement matched to a closure button.",
+      "operating_requirement": "Pay fabric, thread, marking/cutting and stitch work; check button clearance and repeated pull resistance without fraying or slit extension.",
+      "consequence": "Produce a qualified button opening in an actual garment panel for a paid button closure; a pattern mark is not a completed reinforced opening.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable buttonhole edge reinforcement instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "buttonhole_edge_reinforcement",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Bind and reinforce a cut fabric opening with edge stitches and end reinforcement matched to a closure button.",
+        "operating_requirements": "Pay fabric, thread, marking/cutting and stitch work; check button clearance and repeated pull resistance without fraying or slit extension.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local buttonhole edge reinforcement trials.",
+          "partnership": "Share actual samples and operator time for buttonhole edge reinforcement; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded buttonhole edge reinforcement process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external buttonhole edge reinforcement processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable buttonhole edge reinforcement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.juki.co.jp/industrial_e/products_e/appareljin_e/button_hole_jin/detail_jin.php?cd=B-1E_E"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "095266eb63b67509236153ed814a7f8d7ec218e6",
+        "editorial_source": "textile-assembly-depth.json",
+        "previous_requires_all": [
+          "bone_needle_sewing",
+          "garment_pattern_cutting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "buttonhole_edge_reinforcement",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "buttonhole_edge_reinforcement",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Buttonhole Edge Reinforcement",
+            "missing_all": [
+              "bone_needle_sewing",
+              "garment_pattern_cutting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "bone_needle_sewing",
+              "garment_pattern_cutting"
+            ],
+            "requires_all": [
+              "bone_needle_sewing",
+              "garment_pattern_cutting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Buttonhole Edge Reinforcement",
+        "observation": "Bind cut cloth openings with edge stitches and reinforced ends, fit matched buttons, and check the closure before joining fronts into fitted garments.",
+        "production_contract": "Selected wooden-button closures use shaped steel hand needles, real cloth/thread and finite cutting, sewing and pull-check work. Checked fronts and remaining cloth become ordinary fitted garments through shared Logistics labor. Unreinforced cloth and loose buttons cannot substitute for checked fronts. The small qualification allowance consumes trial material; no universal pull rating, automatic resistance gain or warmth bonus is granted. Garment wear and repair remain aggregate textile behavior.",
+        "production_items": [
+          "closure_sewing_needles",
+          "matched_wooden_buttons",
+          "reinforced_buttonhole_panels",
+          "checked_button_fronts"
+        ],
+        "requires": [
+          "bone_needle_sewing",
+          "garment_pattern_cutting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "snap_fastener_closures",
+      "name": "Snap Fastener Closures",
+      "field": "D07",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "leather_goods_patterning,elastic_deformation",
+      "mechanism": "Mate a shaped stud and resilient socket whose deformation permits engagement and release while retaining the closure.",
+      "operating_requirement": "Pay compatible stud/socket parts, backing support, installation tooling and pull/cycle trials; reject loose attachment, damaged springs and inappropriate substrate thickness.",
+      "consequence": "Install a qualified releasable closure in a garment or leather pouch; successful engagement does not certify the surrounding material against tearing.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable snap fastener closures instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "snap_fastener_closures",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Mate a shaped stud and resilient socket whose deformation permits engagement and release while retaining the closure.",
+        "operating_requirements": "Pay compatible stud/socket parts, backing support, installation tooling and pull/cycle trials; reject loose attachment, damaged springs and inappropriate substrate thickness.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local snap fastener closures trials.",
+          "partnership": "Share actual samples and operator time for snap fastener closures; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded snap fastener closures process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external snap fastener closures processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable snap fastener closures machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://ykkamericas.com/wp-content/uploads/2021/10/fastening-catalog-compressed-1.pdf"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "095266eb63b67509236153ed814a7f8d7ec218e6",
+        "editorial_source": "textile-assembly-depth.json",
+        "previous_requires_all": [
+          "leather_goods_patterning",
+          "elastic_deformation"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "snap_fastener_closures",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "snap_fastener_closures",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Snap Fastener Closures",
+            "missing_all": [
+              "leather_goods_patterning",
+              "elastic_deformation"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "leather_goods_patterning",
+              "elastic_deformation"
+            ],
+            "requires_all": [
+              "leather_goods_patterning",
+              "elastic_deformation"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Snap Fastener Closures",
+        "observation": "Form matching stud/socket hardware with resilient spring rings, set it in supported compatible leather tabs, and check repeated engagement and attachment before garment assembly.",
+        "production_contract": "A selected ring-spring closure consumes shaped shell parts and tempered spring rings, then matching and cycle-check work. Gauged supported leather tabs and actual matched snaps undergo paid setting and attachment checks. Checked panels feed ordinary leather garments through existing Logistics labor. Raw hides, ungauged tabs and shell parts alone cannot substitute. Dimensions and qualification yield describe one compatible game design, not arbitrary substrate certification; surrounding leather keeps its existing wear and repair behavior, without a waterproofing, strength or insulation bonus.",
+        "production_items": [
+          "garment_snap_dies",
+          "garment_snap_shells",
+          "garment_snap_rings",
+          "matched_garment_snaps",
+          "gauged_leather_closure_tabs",
+          "checked_snap_leather_panels"
+        ],
+        "requires": [
+          "leather_goods_patterning",
+          "elastic_deformation"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {

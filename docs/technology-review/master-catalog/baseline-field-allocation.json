@@ -5716,6 +5716,20 @@
       "source_domain": "production",
       "name": "Size-Exclusion Chromatography",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "buttonhole_edge_reinforcement",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Buttonhole Edge Reinforcement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "snap_fastener_closures",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Snap Fastener Closures",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

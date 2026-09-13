@@ -1842,6 +1842,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/buttonhole_edge_reinforcement.png",
+      "description": "Bind cut cloth openings with edge stitches and reinforced ends, fit matched buttons, and check the closure before joining fronts into fitted garments.",
+      "domain": "production",
+      "id": "buttonhole_edge_reinforcement",
+      "name": "Buttonhole Edge Reinforcement",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/snap_fastener_closures.png",
+      "description": "Form matching stud/socket hardware with resilient spring rings, set it in supported compatible leather tabs, and check repeated engagement and attachment before garment assembly.",
+      "domain": "production",
+      "id": "snap_fastener_closures",
+      "name": "Snap Fastener Closures",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/textile_braiding.png",
       "description": "Interlace yarn paths under controlled tension to make garment cords, then use actual cords to fasten woven wraps.",
       "domain": "production",
@@ -6395,11 +6411,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 799,
+  "live_count": 801,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 221
+  "verified_count": 223
 }

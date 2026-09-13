@@ -12989,8 +12989,8 @@
       "id": "buttonhole_edge_reinforcement",
       "name": "Buttonhole Edge Reinforcement",
       "horizon": "H03",
-      "source_file": "textile-assembly-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "5e35bfa43d820a4ae6108e56035a607974a4ca5153cf57fdc7a2c48beb1efb88"
@@ -13019,8 +13019,8 @@
       "id": "snap_fastener_closures",
       "name": "Snap Fastener Closures",
       "horizon": "H04",
-      "source_file": "textile-assembly-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "812d5826bdc3befe8438a67e1cb25958e1d0f276e8667ba714601edebe662fc4"
