@@ -2,6 +2,13 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"unfired_clay_conduits":{"name": "Formed clay conduit batches", "output": "Unfired Clay Conduits", "gate": "clay_pipe_forming", "materials": {"Prepared Clay": 2, "Freshwater": 0.2}, "days": 3, "tooling": {"Timber": 2, "Stone": 2}},
+	"fired_clay_conduits":{"name": "Qualified fired conduit batches", "output": "Fired Clay Conduits", "gate": "ceramic_pipe_firing_qualification", "materials": {"Unfired Clay Conduits": 1.25, "Timber": 2}, "days": 4, "tooling": {"Stone": 4, "Clay": 3}},
+	"conduit_fit_gauges":{"name": "Conduit fit gauge sets", "output": "Conduit Fit Gauges", "gate": "ceramic_pipe_fit_gauges", "materials": {"Timber": 2}, "days": 2, "tooling": {"Stone": 2}},
+	"wooden_conduits":{"name": "Bored timber conduit batches", "output": "Wooden Conduits", "gate": "wooden_log_conduits", "materials": {"Timber": 4}, "days": 5, "tooling": {"Wrought Iron": 1, "Timber": 2}},
+	"conduit_bedding":{"name": "Prepared conduit bedding", "output": "Conduit Bedding", "gate": "rigid_pipe_bedding", "materials": {"Stone": 2, "Fine Sand": 1}, "days": 2, "tooling": {"Timber": 1}},
+	"conduit_rodding_sets":{"name": "Conduit clearing rod sets", "output": "Conduit Rodding Sets", "gate": "sewer_rodding_service", "materials": {"Timber": 2, "Rope Coils": 0.2}, "days": 3, "tooling": {"Stone": 1}},
+
 	"cement_gypsum":{"name":"Precipitated cement gypsum","output":"Gypsum","gate":"portland_cement_clinker","materials":{"Limestone":1.0,"Sulfuric Acid":0.5,"Freshwater":1.0},"days":3,"tooling":{"Glass":2,"Clay":2}},
 	"quicklime":{"name":"Burned quicklime","output":"Quicklime","gate":"lime_burning","materials":{"Limestone":2,"Timber":2},"days":3,"tooling":{"Stone":6,"Clay":2}},
 	"slaked_lime":{"name":"Slaked lime","output":"Slaked Lime","gate":"lime_mortar","materials":{"Quicklime":1,"Freshwater":1},"days":2,"tooling":{"Clay":2,"Timber":1}},

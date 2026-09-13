@@ -1336,7 +1336,8 @@ func _sample_civilization_geography(origin:Vector2)->Dictionary:
 	var ground:=_survey_ground_at(origin)
 	var water_distance:=_river_distance_at(origin.x,origin.y)*KM_PER_WORLD_UNIT
 	var catchments:=_surface_material_catchments(Vector3(origin.x,0,origin.y))
-	return {"environment_profile":PlanetEnvironment.profile_at(origin,ground),"surface_water_distance_km":water_distance,"surface_water_recognized":water_distance<=72.0,"surface_material_catchments":catchments,"woodland_catchment":catchments.Timber,"terrain_height_at":Callable(self,"_height_at"),"buildable_land_at":func(x:float,z:float)->bool:return _height_at(x,z)>SEA_LEVEL+.012,"river_distance_at":Callable(self,"_river_distance_at"),"drainage_tangent_at":Callable(self,"_drainage_tangent_at"),"moisture_at":Callable(self,"_land_moisture_at")}
+	var water_sources:=_water_conveyance_sources(Vector3(origin.x,_height_at(origin.x,origin.y),origin.y))
+	return {"water_conveyance_sources":water_sources,"environment_profile":PlanetEnvironment.profile_at(origin,ground),"surface_water_distance_km":water_distance,"surface_water_recognized":water_distance<=72.0,"surface_material_catchments":catchments,"woodland_catchment":catchments.Timber,"terrain_height_at":Callable(self,"_height_at"),"buildable_land_at":func(x:float,z:float)->bool:return _height_at(x,z)>SEA_LEVEL+.012,"river_distance_at":Callable(self,"_river_distance_at"),"drainage_tangent_at":Callable(self,"_drainage_tangent_at"),"moisture_at":Callable(self,"_land_moisture_at")}
 
 func _discovery_context()->Dictionary:
 	if WorldSimulation.enabled:
@@ -9614,6 +9615,28 @@ func _surface_water_sources(origin:Vector3,limit:float=INF)->Array[Dictionary]:
 			sources.append({"position":Vector3(channel_x,height,origin.z),"distance_km":drainage_distance,"kind":"Surface drainage"})
 	return sources
 
+func _water_conveyance_sources(origin:Vector3)->Array[Dictionary]:
+	# Consider upstream intakes on the SAME authored local waterways; the nearest
+	# riverbank is often below the town. The local six-kilometre observation bound
+	# remains unchanged, and no groundwater/deposit is exposed by this sampling.
+	var result:Array[Dictionary]=[]
+	var seen:Dictionary={}
+	for offset:Vector2 in [Vector2.ZERO,Vector2(0,-1),Vector2(0,1),Vector2(0,-3),Vector2(0,3),Vector2(-3,0),Vector2(3,0)]:
+		for source:Dictionary in _surface_water_sources(origin+Vector3(offset.x,0,offset.y),6.0):
+			var distance:=Vector2(origin.x,origin.z).distance_to(Vector2(source.position.x,source.position.z))
+			if distance>6.0:continue
+			var id:="surface:%s:%.5f:%.5f" % [source.kind,source.position.x,source.position.z]
+			if seen.has(id):continue
+			seen[id]=true;source.id=id;source.revealed=true;source.distance_km=distance
+			var route:=preload("res://scripts/water_conveyance_route.gd").survey(source,origin,Callable(self,"_height_at"))
+			source.gravity_feasible=bool(route.get("ok",false))
+			result.append(source)
+	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if bool(a.gravity_feasible)!=bool(b.gravity_feasible):return bool(a.gravity_feasible)
+		return float(a.distance_km)<float(b.distance_km))
+	if result.size()>4:result.resize(4)
+	return result
+
 func _open_founding_site_guide(position:Vector3,later_city:bool=false)->void:
 	if not interface_layer:return
 	_close_founding_site_guide()
@@ -14206,6 +14229,7 @@ func _open_materials_detail_overlay(rows:Array[Dictionary],water_access:Dictiona
 	var close:=Button.new(); close.text="BACK TO FLOW"; close.custom_minimum_size=Vector2(150,36); close.pressed.connect(overlay.queue_free); heading_row.add_child(close)
 	var scroll:=FIT_CONTENT_PANEL.new(); scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL; root.add_child(scroll)
 	var detail:=VBoxContainer.new(); detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL; detail.add_theme_constant_override("separation",7); scroll.add_child(detail)
+	preload("res://scripts/hud/water_conveyance_controls.gd").build_all(detail,_discovery_context())
 	if bool(water_access.get("recognized",false)): _add_compact_provision_text(detail,"CONTINUOUS SURFACE WATER","Mapped river/drainage access is tracked separately from deposits. %.1f collected / %.1f needed today." % [float(water_access.get("collected_today",0.0)),float(water_access.get("required_today",0.0))],Color("#8fb2b6"))
 	for row_data in rows:
 		var text:="%d known occurrences  •  %d reachable  •  %d developed\n%d workers  •  %.1f extracted  •  %.1f waiting  •  %.1f moving\n%s" % [int(row_data.occurrences),int(row_data.reachable),int(row_data.developed),int(row_data.workers),float(row_data.extracted),float(row_data.at_source),float(row_data.moving),String(row_data.status_detail)]

@@ -288,6 +288,8 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var collection_capacity:=household_collection+organized_collection
 	var flow_factor:=clampf(0.75+accessible_quality*0.25,0.0,1.08)
 	var collected:=minf(required*1.35,collection_capacity)*flow_factor if accessible_quality>0.0 else 0.0
+	var conveyed:=preload("res://scripts/water_conveyance.gd").delivery(context,int(WorldSimulation.state.elapsed_days),maxf(0.0,required*1.35-household_collection*flow_factor))
+	collected=minf(required*1.35,collected+conveyed)
 	var portable_days:=float(WorldSimulation.state.founding_manifest.get("water_vessel_days",3.0))
 	portable_days+=maxf(0.0,WorldSimulation.consequences.policy_effect("water_storage"))
 	if "Storage Pits" in WorldSimulation.state.settlement_completed: portable_days+=2.0
@@ -299,7 +301,7 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var stored:=maxf(0.0,available-consumed)
 	WorldSimulation.state.resource_stockpiles["Freshwater"]=stored
 	var intake:=clampf(consumed/maxf(0.01,required),0.0,1.0)
-	WorldSimulation.state.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":required,"consumed_today":consumed,"intake_ratio":intake,"days":stored/maxf(0.01,required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
+	WorldSimulation.state.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"conveyed_today":conveyed,"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":required,"consumed_today":consumed,"intake_ratio":intake,"days":stored/maxf(0.01,required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
 	WorldSimulation.state.water_history.append({"day":int(WorldSimulation.state.elapsed_days),"stored":stored,"collected":collected,"household_collected":minf(collected,household_collection*flow_factor),"required":required,"consumed":consumed,"intake_ratio":intake,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_id":source_id,"source_origin":source_origin})
 	if WorldSimulation.state.water_history.size()>370: WorldSimulation.state.water_history.pop_front()
 	if intake<0.98:

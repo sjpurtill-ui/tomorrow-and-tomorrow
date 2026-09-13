@@ -230,6 +230,7 @@ var water_metrics: Dictionary = {"stored":0.0,"capacity":0.0,"collected_today":0
 var water_history: Array[Dictionary] = []
 var food_stocks: Dictionary = {}
 var household_clothing:Dictionary=preload("res://scripts/household_clothing.gd").empty_state()
+var water_conveyance:Dictionary={"lines":[],"next_id":1,"last_day":-1,"report":{}}
 var food_batches:Dictionary=preload("res://scripts/food_batches.gd").empty_state()
 var grain_processing:Dictionary=preload("res://scripts/grain_processing.gd").empty_state()
 var cultivation_nutrients:Dictionary={"nitrogen":0.0,"phosphorus":0.0}
@@ -539,6 +540,7 @@ func reset_for_new_world(new_seed:int)->void:
 	water_history=[]
 	food_stocks={}
 	household_clothing=preload("res://scripts/household_clothing.gd").empty_state()
+	water_conveyance={"lines":[],"next_id":1,"last_day":-1,"report":{}}
 	food_batches=preload("res://scripts/food_batches.gd").empty_state()
 	grain_processing=preload("res://scripts/grain_processing.gd").empty_state()
 	cultivation_nutrients={"nitrogen":0.0,"phosphorus":0.0}

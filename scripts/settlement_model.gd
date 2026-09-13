@@ -22,6 +22,7 @@ const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","h
 
 const CITY_RESOURCE_DEFAULTS:={
 	"household_clothing":{"tools":{},"lots":[],"last_day":-1,"report":{}},
+	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
 	"grain_processing":{"stocks":{"grain":0.0,"clean":0.0,"tested":0.0,"dry":0.0,"flour":0.0,"fine":0.0,"bran":0.0,"malt":0.0},"tools":{},"batches":[],"last_day":-1,"report":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
@@ -330,6 +331,12 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	WorldSimulation.state.city_trade_shipments=pending
 	var capacity:=city_trade_capacity()
 	if not bool(capacity.ready) or WorldSimulation.state.player_settlements.size()<2: return
+	var water_targets:Dictionary={}
+	var conduit_supply:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate()
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		if not String(city.get("occupied_by","")).is_empty():continue
+		water_targets[String(city.id)]=with_city_resources(String(city.id),func()->Dictionary:
+			return with_local_population(func()->Dictionary:return preload("res://scripts/water_conveyance_investment.gd").targets(conduit_supply)))
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
 		if not String(source.get("occupied_by","")).is_empty():continue
@@ -347,12 +354,20 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		if not String(destination.get("occupied_by","")).is_empty():continue
 		var destination_population:=_settlement_population(destination)
 		var destination_stores:=_city_stores(destination)
-		for resource_name in CITY_TRADE_GOODS:
+		var trade_goods:Array=CITY_TRADE_GOODS.duplicate()
+		for item:String in water_targets.get(String(destination.id),{}):
+			if item not in trade_goods:trade_goods.append(item)
+		for resource_name in trade_goods:
 			if WorldSimulation.state.city_trade_shipments.size()>=MAX_CITY_SHIPMENTS: return
 			var stored:=float(destination_stores.get(resource_name,0.0))
 			var shortage_floor:=destination_population*14.0 if resource_name=="Food" else maxf(2.0,destination_population*0.02)
+			var conduit_target:=float(water_targets.get(String(destination.id),{}).get(resource_name,0))
+			if resource_name not in CITY_TRADE_GOODS:shortage_floor=0.0
+			shortage_floor=maxf(shortage_floor,conduit_target)
 			if stored>=shortage_floor: continue
 			var target:=destination_population*30.0 if resource_name=="Food" else maxf(6.0,destination_population*0.06)
+			if resource_name not in CITY_TRADE_GOODS:target=0.0
+			target=maxf(target,conduit_target)
 			var requested:=target-stored-_city_incoming(String(destination.id),resource_name)
 			if requested<=0.01: continue
 			var donor:Dictionary={}
@@ -364,6 +379,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				var distance:=_record_position(source).distance_to(_record_position(destination))
 				if distance>float(capacity.range_km) or distance>=nearest: continue
 				var reserve:=_settlement_population(source)*45.0 if resource_name=="Food" else maxf(20.0,_settlement_population(source)*0.15)
+				if resource_name not in CITY_TRADE_GOODS:reserve=0.0
+				reserve=maxf(reserve,float(water_targets.get(String(source.id),{}).get(resource_name,0)))
 				var spare:=float(_city_stores(source).get(resource_name,0.0))-reserve
 				if spare<=0.01: continue
 				if not bool(known_route_assessment(_record_position(source),_record_position(destination)).get("known",false)): continue
@@ -1289,7 +1306,11 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
 	var builders:=WorldSimulation.state.effective_workers("Construction")
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
-	var builders_per_site:=builders/float(maxi(1,active_construction.size()))
+	var water_sites:=0
+	for line:Dictionary in WorldSimulation.state.water_conveyance.lines:
+		if String(line.status)=="under_construction":water_sites+=1
+	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites))
+	preload("res://scripts/water_conveyance.gd").construction_work(builders_per_site*water_sites*labor_efficiency*0.10,month_day)
 	for plot in WorldSimulation.state.settlement_plots:
 		plot["last_update_day"]=month_day
 		if String(plot.get("status",""))=="under_construction":
@@ -1974,7 +1995,9 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) in ["ruin","reclaimed","under_construction"]: continue
 		maintained_plots+=1
-	var maintenance_per_plot:=builders*labor_efficiency/maxf(1.0,float(maintained_plots))*0.0032
+	var water_lines:=preload("res://scripts/water_conveyance.gd").active_lines()
+	var maintenance_per_plot:=builders*labor_efficiency/maxf(1.0,float(maintained_plots+water_lines))*0.0032
+	preload("res://scripts/water_conveyance.gd").scheduled_maintenance(maintenance_per_plot/.01,day)
 	var hardship:=clampf(1.0-float(WorldSimulation.state.simulation_metrics.get("health",WorldSimulation.state.population_health)),0.0,1.0)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=WorldSimulation.state.world_seed^day^0x27d4eb2d

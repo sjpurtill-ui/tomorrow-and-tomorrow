@@ -777,7 +777,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 
 	var settlement_score := clampf(float(WorldSimulation.state.settlement_completed.size())/8.0,0.0,1.0)
 	WorldSimulation.state.simulation_metrics = {
-		"clothing_coverage":clothing.duplicate(),"environment_profile":environment.duplicate(true),"environmental_health_cost":environmental_health_cost,
+		"clothing_coverage":clothing.duplicate(),"environmental_health_cost":environmental_health_cost,
 		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"housing_capacity":WorldSimulation.state.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
 		"material_capacity":material_capacity,"logistics":logistics,"security":security,"ecology":ecology,"legitimacy":legitimacy,
 		"governance_administrative_load":administrative_load,"governance_policy_churn":policy_churn,"governance_council_support":council_support,"governance_active_policies":int(governance.active_policy_count),
