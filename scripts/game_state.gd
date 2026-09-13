@@ -235,6 +235,7 @@ var civilian_care:Dictionary=preload("res://scripts/civilian_care_fabric.gd").em
 var rail_freight:Dictionary=preload("res://scripts/rail_freight_fabric.gd").empty_state()
 var food_batches:Dictionary=preload("res://scripts/food_batches.gd").empty_state()
 var grain_processing:Dictionary=preload("res://scripts/grain_processing.gd").empty_state()
+var field_botany:Dictionary=preload("res://scripts/field_botany.gd").empty_state()
 var cultivation_nutrients:Dictionary={"nitrogen":0.0,"phosphorus":0.0}
 var food_source_health := {"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
 var food_history: Array[Dictionary] = []
@@ -547,6 +548,7 @@ func reset_for_new_world(new_seed:int)->void:
 	rail_freight=preload("res://scripts/rail_freight_fabric.gd").empty_state()
 	food_batches=preload("res://scripts/food_batches.gd").empty_state()
 	grain_processing=preload("res://scripts/grain_processing.gd").empty_state()
+	field_botany=preload("res://scripts/field_botany.gd").empty_state()
 	cultivation_nutrients={"nitrogen":0.0,"phosphorus":0.0}
 	food_source_health={"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
 	food_history=[]

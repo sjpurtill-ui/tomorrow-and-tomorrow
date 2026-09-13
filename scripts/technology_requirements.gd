@@ -29,26 +29,39 @@ static func parents(spec:Dictionary)->Array[String]:
 			if id not in result:result.append(id)
 	return result
 
-static func validate(catalog:Array)->Array[String]:
+static func validate(catalog:Array,dormant_or:Array=[])->Array[String]:
 	var errors:Array[String]=[]
 	var index:Dictionary={}
 	for entry:Dictionary in catalog:
 		var id:=String(entry.get("id",""))
 		if id.is_empty() or index.has(id):errors.append("Missing or duplicate technology ID: "+id)
 		index[id]=entry
+	var approved:Array=[]
+	if not dormant_or.is_empty():
+		var audit:Dictionary=load("res://tools/technology-review/dormant_or_audit.gd").verify(index,dormant_or)
+		errors.append_array(audit.errors)
+		approved=audit.approved
 	for entry:Dictionary in catalog:
 		var specs:Array=[entry]
 		specs.append_array(entry.get("learning_routes",[]))
 		var route_ids:Array=[]
-		for spec:Dictionary in specs:
-			if spec!=entry:
+		for spec_index:int in range(specs.size()):
+			var spec:Dictionary=specs[spec_index]
+			if spec_index>0:
 				var route_id:=String(spec.get("id",""))
 				if route_id.is_empty() or route_id in route_ids:errors.append(String(entry.id)+": missing or duplicate route ID")
 				route_ids.append(route_id)
 			for group:Array in spec.get("requires_any",[]):
 				if group.is_empty():errors.append(String(entry.id)+": empty OR group")
 			for parent:String in parents(spec):
-				if not index.has(parent):errors.append(String(entry.id)+": unknown prerequisite "+parent)
+				if not index.has(parent):
+					var dormant:=false
+					# Only a common OR edge may be declared dormant; AND and
+					# local acquisition-route requirements remain strict.
+					if spec_index==0 and parent not in spec.get("requires_all",spec.get("requires",[])):
+						for declaration:Dictionary in approved:
+							if declaration.child==entry.id and declaration.parent==parent:dormant=true
+					if not dormant:errors.append(String(entry.id)+": unknown prerequisite "+parent)
 	# Revisit only entries affected by a newly reachable parent. Optional cycles
 	# remain valid when another route reaches a root; authoring order is irrelevant.
 	var dependents:Dictionary={}
@@ -80,6 +93,11 @@ static func validate(catalog:Array)->Array[String]:
 			if not reachable.has(child) and not queued.has(child):
 				queue.append(child)
 				queued[child]=true
+	for declaration:Dictionary in approved:
+		var alternative_reachable:=false
+		for parent:String in declaration.group:
+			if reachable.has(parent):alternative_reachable=true
+		if not alternative_reachable:errors.append(String(declaration.child)+": dormant OR has no reachable live alternative")
 	for id:String in index:
 		if not reachable.has(id):errors.append(id+": no reachable causal route (cycle or missing foundation)")
 	return errors

@@ -11,7 +11,9 @@ func run()->void:
 	discovery.initialize()
 	var graph:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:graph.append(pathways.graph_entry(entry))
-	var errors:Array=requirements.validate(graph)
+	graph=load("res://tools/technology-review/dormant_or_audit.gd").factor_common(graph,discovery.technology_catalog)
+	var dormant:Array=load("res://tools/technology-review/dormant_or_audit.gd").pending(graph)
+	var errors:Array=requirements.validate(graph,dormant)
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/civilian_care_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/food_preparation.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/grain_processing.gd").entries(),discovery.technology_catalog))
@@ -64,6 +66,6 @@ func run()->void:
 	var authored_routes:=0
 	for entry:Dictionary in discovery.technology_catalog:
 		authored_routes+=(entry.get("learning_routes",[]) as Array).size()
-	var result:={"proposed_discovery_target":5000,"live_discoveries":discovery.technology_catalog.size(),"explicit_learning_routes":authored_routes,"graph_errors":errors,"production_dependencies":production,"complete_catalog":false}
+	var result:={"proposed_discovery_target":5000,"live_discoveries":discovery.technology_catalog.size(),"explicit_learning_routes":authored_routes,"declared_dormant_or":dormant,"graph_errors":errors,"production_dependencies":production,"complete_catalog":false}
 	print(JSON.stringify(result))
 	quit(0 if errors.is_empty() else 1)
