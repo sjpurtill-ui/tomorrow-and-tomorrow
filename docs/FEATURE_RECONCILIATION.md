@@ -1,3 +1,13 @@
+## September 13 — 812 verified operating discoveries
+
+Integrated zipper closures and leather edge skiving at canonical runtime/art commit `7899db5b29c220158763116b2ac6e9c3e68b93e4`. Twelve paid workshop recipes make matched zipper fronts and gauged, skived, checked and folded leather panels. Actual inputs feed existing fitted/leather garments using shared Logistics work; material, tooling, save continuation, finite offcuts and downstream automatic production are tested. Existing wear and repair apply. Nominal batch qualification consumes a five-percent destructive allowance; no sensor, universal strength, waterproofing or fatigue-life claim.
+
+**114 isolated runtime tests and 114 canonical runtime tests pass**, plus **12 atlas tests on each checkout**. Both 768px/mipmap textures pass. Canonical graph: **812 discoveries / 594 learning routes / 613 workshop recipes plus five conditional analyses / 27 facilities**, zero graph or structural production errors under declared assumptions. Clean imports and paced 120-frame canonical startup pass. All 810 previous runtime definitions remain exact; two new definitions preserve authored normalized AND/OR predicates. Exact snapshot reconciliation and 15 ledger tests pass. Art: **251 verified / 812 live, 561 queued**.
+
+Ledger: **812 integrated + 2,658 drafts = 3,470 identities**, leaving **1,530 to author and 4,188 to implement**. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/zipper-skiving`, base `603ceb0aa39ac4255ea041d9a7e1d661d645c4ea`. No merge conflicts; additive industry/clothing/art changes and one catalog count assertion. No new mandatory save fields; full saved work resumes once and actors retain independent garments. Downgrade of new recipe jobs is not promised. See `technology-review/ZIPPER_SKIVING_HANDOFF.md` and `assets/ui/research/paper/ZIPPER_SKIVING_PROMPTS.md`.
+
+No player launch or package rebuild; running player state is unchanged. No millennial pacing claim. Nine field-botany methods remain in integration review; the 5,000-discovery objective is unfinished.
+
 ## September 13 — six geological interpretation proposals
 
 Authored six distinct D22 methods for ash and fossil correlation, cave-carbonate chronology, helium retention, fluid inclusions and clumped-isotope thermometry. Each retains actual specimen and observation requirements, uncertainty, paid instrument or external service, explicit failure cases and a downstream interpretation. Source review boundaries and semantic distinctions are documented in `technology-review/Geologic Interpretation Methods Review.md`. Historical horizons remain unassigned; existing definitions are unchanged.

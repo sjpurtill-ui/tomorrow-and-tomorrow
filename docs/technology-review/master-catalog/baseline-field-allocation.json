@@ -5793,6 +5793,20 @@
       "source_domain": "Society",
       "name": "Petition Registers",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "zipper_chain_closures",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Zipper Chain Closures",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "leather_thickness_skiving",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Leather Thickness Skiving",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

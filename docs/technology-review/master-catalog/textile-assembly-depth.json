@@ -72,42 +72,6 @@
     "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   },
   {
-    "id": "zipper_chain_closures",
-    "name": "Zipper Chain Closures",
-    "field": "D07",
-    "status": "authored_draft",
-    "requires_all": [
-      "sewing_machine_mechanisms",
-      "dimensional_metrology"
-    ],
-    "requires_any": [],
-    "foundations": "sewing_machine_mechanisms,dimensional_metrology",
-    "mechanism": "Guide two compatible rows of fastening elements through a slider so the rows interlock or separate along their tapes.",
-    "operating_requirement": "Pay matched elements, tapes, slider and stops, attachment work and cycling tests; reject misaligned pitch, jammed travel and weak tape joints.",
-    "consequence": "Supply a replaceable tested closure for a specified garment or textile bag; ordinary zipper engagement does not certify waterproof sealing.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable zipper chain closures instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "zipper_chain_closures",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Guide two compatible rows of fastening elements through a slider so the rows interlock or separate along their tapes.",
-      "operating_requirements": "Pay matched elements, tapes, slider and stops, attachment work and cycling tests; reject misaligned pitch, jammed travel and weak tape joints.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local zipper chain closures trials.",
-        "partnership": "Share actual samples and operator time for zipper chain closures; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded zipper chain closures process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external zipper chain closures processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable zipper chain closures machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.ykk.com/english/ykk/tech/01.html"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
     "id": "hook_loop_fastening",
     "name": "Hook-and-loop Fastening",
     "field": "D07",
@@ -178,42 +142,6 @@
     ],
     "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
     "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "leather_thickness_skiving",
-    "name": "Leather Thickness Skiving",
-    "field": "D07",
-    "status": "authored_draft",
-    "requires_all": [
-      "leather_goods_patterning",
-      "dimensional_metrology"
-    ],
-    "requires_any": [],
-    "foundations": "leather_goods_patterning,dimensional_metrology",
-    "mechanism": "Remove a controlled thin layer from selected leather edges to produce a specified thickness transition for folding or joining.",
-    "operating_requirement": "Pay actual leather, sharp blade or skiving machine, supports, measuring and cutting work; retain offcuts and reject cuts that weaken the remaining edge.",
-    "consequence": "Provide a graded thinned edge for a known pouch, shoe-upper or garment seam; skiving does not tan hide or improve the untouched leather grade.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable leather thickness skiving instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "leather_thickness_skiving",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Remove a controlled thin layer from selected leather edges to produce a specified thickness transition for folding or joining.",
-      "operating_requirements": "Pay actual leather, sharp blade or skiving machine, supports, measuring and cutting work; retain offcuts and reject cuts that weaken the remaining edge.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local leather thickness skiving trials.",
-        "partnership": "Share actual samples and operator time for leather thickness skiving; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded leather thickness skiving process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external leather thickness skiving processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable leather thickness skiving machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.fortuna-gmbh.de/EN/PRODUCTS/SKIVING_MACHINES/SM_50/content.php"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   },
   {
     "id": "leather_surface_finishing",

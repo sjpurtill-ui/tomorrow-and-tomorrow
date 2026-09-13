@@ -12999,8 +12999,8 @@
       "id": "zipper_chain_closures",
       "name": "Zipper Chain Closures",
       "horizon": "H04",
-      "source_file": "textile-assembly-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "d065fa313a143de996888a5a2545af911bb82c6034a14e1220d2059c02ddb25d"
@@ -13039,8 +13039,8 @@
       "id": "leather_thickness_skiving",
       "name": "Leather Thickness Skiving",
       "horizon": "H04",
-      "source_file": "textile-assembly-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "e33ce7ee2bee2256862239e084c7a3c9623257bc44fd7c79958dc007de2e3d5f"

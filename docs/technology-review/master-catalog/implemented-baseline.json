@@ -1,5 +1,5 @@
 {
-  "source_commit": "4e44916bff6de7e8ec810ef9890a9790071b4d86",
+  "source_commit": "7899db5b29c220158763116b2ac6e9c3e68b93e4",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -17207,6 +17207,210 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "zipper_chain_closures",
+      "name": "Zipper Chain Closures",
+      "field": "D07",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "sewing_machine_mechanisms,dimensional_metrology",
+      "mechanism": "Guide two compatible rows of fastening elements through a slider so the rows interlock or separate along their tapes.",
+      "operating_requirement": "Pay matched elements, tapes, slider and stops, attachment work and cycling tests; reject misaligned pitch, jammed travel and weak tape joints.",
+      "consequence": "Supply a replaceable tested closure for a specified garment or textile bag; ordinary zipper engagement does not certify waterproof sealing.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable zipper chain closures instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "zipper_chain_closures",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Guide two compatible rows of fastening elements through a slider so the rows interlock or separate along their tapes.",
+        "operating_requirements": "Pay matched elements, tapes, slider and stops, attachment work and cycling tests; reject misaligned pitch, jammed travel and weak tape joints.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local zipper chain closures trials.",
+          "partnership": "Share actual samples and operator time for zipper chain closures; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded zipper chain closures process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external zipper chain closures processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable zipper chain closures machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.ykk.com/english/ykk/tech/01.html"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "7899db5b29c220158763116b2ac6e9c3e68b93e4",
+        "editorial_source": "textile-assembly-depth.json",
+        "previous_requires_all": [
+          "sewing_machine_mechanisms",
+          "dimensional_metrology"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "zipper_chain_closures",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "zipper_chain_closures",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Zipper Chain Closures",
+            "missing_all": [
+              "sewing_machine_mechanisms",
+              "dimensional_metrology"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "sewing_machine_mechanisms",
+              "dimensional_metrology"
+            ],
+            "requires_all": [
+              "sewing_machine_mechanisms",
+              "dimensional_metrology"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Zipper Chain Closures",
+        "observation": "Fit matched element rows, a compatible slider and end stops to reinforced tapes; cycle-check the closure and sew the checked front into a fitted garment.",
+        "production_contract": "One selected light aluminum zipper design uses real tapes, elements, slider/stops, forming tools and paid matching, cycling and attachment work. Checked fronts feed ordinary fitted garments through shared Logistics labor. Loose rows or sliders cannot replace a finished closure. A five-percent destructive qualification allowance represents batch checks on nominal compatible parts, not a geometric sensor simulation or guaranteed arbitrary-stock acceptance. No waterproofing, fatigue-life or insulation bonus is granted; the resulting garment retains existing aggregate textile wear and repair.",
+        "production_items": [
+          "zipper_forming_dies",
+          "zipper_tape_pairs",
+          "zipper_element_rows",
+          "zipper_slider_stops",
+          "matched_zipper_chains",
+          "checked_garment_zippers",
+          "zippered_garment_fronts"
+        ],
+        "requires": [
+          "sewing_machine_mechanisms",
+          "dimensional_metrology"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "leather_thickness_skiving",
+      "name": "Leather Thickness Skiving",
+      "field": "D07",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "leather_goods_patterning,dimensional_metrology",
+      "mechanism": "Remove a controlled thin layer from selected leather edges to produce a specified thickness transition for folding or joining.",
+      "operating_requirement": "Pay actual leather, sharp blade or skiving machine, supports, measuring and cutting work; retain offcuts and reject cuts that weaken the remaining edge.",
+      "consequence": "Provide a graded thinned edge for a known pouch, shoe-upper or garment seam; skiving does not tan hide or improve the untouched leather grade.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable leather thickness skiving instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "leather_thickness_skiving",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Remove a controlled thin layer from selected leather edges to produce a specified thickness transition for folding or joining.",
+        "operating_requirements": "Pay actual leather, sharp blade or skiving machine, supports, measuring and cutting work; retain offcuts and reject cuts that weaken the remaining edge.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local leather thickness skiving trials.",
+          "partnership": "Share actual samples and operator time for leather thickness skiving; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded leather thickness skiving process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external leather thickness skiving processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable leather thickness skiving machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.fortuna-gmbh.de/EN/PRODUCTS/SKIVING_MACHINES/SM_50/content.php"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "7899db5b29c220158763116b2ac6e9c3e68b93e4",
+        "editorial_source": "textile-assembly-depth.json",
+        "previous_requires_all": [
+          "leather_goods_patterning",
+          "dimensional_metrology"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "leather_thickness_skiving",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "leather_thickness_skiving",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Leather Thickness Skiving",
+            "missing_all": [
+              "leather_goods_patterning",
+              "dimensional_metrology"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "leather_goods_patterning",
+              "dimensional_metrology"
+            ],
+            "requires_all": [
+              "leather_goods_patterning",
+              "dimensional_metrology"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Leather Thickness Skiving",
+        "observation": "Gauge actual leather blanks, remove controlled edge layers, check remaining material and fold the thinned edges into sewn garment seams.",
+        "production_contract": "Paid knives, supports and gauges prepare a selected flexible-leather seam. Cutting and skiving retain finite named offcuts; they do not create extra full-grade leather. A five-percent destructive trial allowance checks nominal compatible panels before folding and stitching. Checked panels and additional leather/thread feed existing leather garments through shared Logistics labor; unskived blanks cannot substitute. This is a selected hand-knife production route, not a universal thickness or seam-strength certificate. Untouched leather gains no strength, tanning or waterproofing effect. Existing leather wear and compatible patch repair remain in use.",
+        "production_items": [
+          "leather_skiving_knives",
+          "leather_edge_blanks",
+          "skived_leather_panels",
+          "checked_skived_panels",
+          "folded_skived_panels"
+        ],
+        "requires": [
+          "leather_goods_patterning",
+          "dimensional_metrology"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {
