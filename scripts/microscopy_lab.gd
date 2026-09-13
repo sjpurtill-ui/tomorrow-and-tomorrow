@@ -46,6 +46,15 @@ static func prepare_station(ledger:Dictionary,stocks:Dictionary,known:Array,day:
 			ledger.tools.heat_readings=readings
 			if readings.size()==2 and float(readings[0].observed_heat)>=.7 and observed_heat-float(calibration.uncertainty)>=.9:
 				ledger.tools.sterile_until=day+1;ledger.tools.sterile_uses=2;ledger.tools.heat_steps=0
+static func prepare_section(ledger:Dictionary,sample:Dictionary,stocks:Dictionary,day:int)->bool:
+	if sample.kind!="plant" or float(sample.amount)<.0001:return false
+	if sample.methods.has("section") and int(sample.methods.section.day)==day:return true
+	if not pay(ledger,stocks,{"Steel Tool Bits":.001,"Specimen Slides":.01,"Freshwater":.01},.1):return false
+	var fraction:=.0001/float(sample.amount)
+	var portion_cells:=float(sample.cells)*fraction
+	sample.amount-=.0001;sample.cells-=portion_cells
+	Samples.record(ledger,sample,day,"section",{"portion":.0001,"cells":portion_cells,"viable_fraction":float(sample.viability),"organized_fraction":float(sample.profile.get("tissue_order",0)),"tool_wear":.001,"slide":.01,"work":.1})
+	return true
 static func collect_starter(ledger:Dictionary,stocks:Dictionary,day:int)->void:
 	var batches=load("res://scripts/food_batches.gd")
 	for lot:Dictionary in batches.data().lots:
@@ -101,6 +110,7 @@ static func advance(traveling:bool)->Dictionary:
 					if aseptic:ledger.tools.sterile_uses-=1
 					Samples.record(ledger,sample,day,"culture",{"media":float(sample.media),"aseptic":aseptic,"line":int(sample.line)})
 					report.cultured+=1
+		if sample.kind=="plant" and "tissue_histology" in known:prepare_section(ledger,sample,stocks,day)
 		if not pay(ledger,stocks,{"Clay":.002},.05):continue
 		var stained:=false
 		if "biological_staining" in known:stained=pay(ledger,stocks,{"Plant Tannin Extract":.001,"Freshwater":.01},.02)

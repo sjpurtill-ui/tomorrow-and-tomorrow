@@ -38,3 +38,14 @@ Older saves default absent ledgers empty. New saves retain bounded specimens (12
 Shared hooks: discovery_system registration; game_state default/reset and Knowledge reservation; settlement_model local state; food_batches invocation/starter decisions; field_botany optional evidence/voucher validation; save_system and world_simulation validation. HouseholdClothing and CivilianProductionPlanner were not edited. Root must resolve additive shared-file changes and bind separately owned 14-art delivery. No main merge or player launch performed.
 
 Source has 835 nodes; combined with root's two barrier discoveries it would have 837 after integration acceptance. Root must promote editorial provenance and reconcile counts only after combined verification. No claim of 5,000 completion, whole-history pacing, comprehensive military coverage or completed imagery. Earlier progress notes are historical checkpoints; this handoff supersedes their unregistered status.
+
+
+## Follow-up observation correction
+
+Separate worktree `/Users/seanpurtill/Documents/Codex/tt-microscopy-observation-correction`, branch `codex/microscopy-observation-correction`, base frozen `0a83f8a9c8a7a69544aeef99378bfd7aadff9efd`. Apply the correction commit after the frozen delivery; the original worktree is unchanged.
+
+Aggregate count growth no longer qualifies cell division. A bounded representative visual cell progresses from compact to constricted parent to two separately identified daughters only during sufficiently supplied growth. Paid high-contrast microscopy retains visible identities/shapes/positions in each frame. Division requires consecutive resolved constriction/separation frames with retained parent/daughter identities; missed or unresolved frames and count-only increases cannot qualify. This is one representative simulated event per specimen, not a complete cell population, species identification or an inferred event reconstructed from later counts.
+
+Histology now requires a separately prepared same-day section. Preparation consumes 0.0001 specimen mass and proportional cells, blade wear, a slide, water and work. Staining a mounted whole specimen cannot qualify histology. The tissue record retains the exact paid section and measured estimates. Section portions are not returned to culture/food. No extra labor/save owner or UI changes.
+
+`/tmp/tt-microscopy-correction.log`: 23/23 pass (10 sample, 3 lifecycle, 10 field-botany), including count-only/unresolved/missed-frame division rejection, real growth division observations, missing-section rejection, finite section/tool debit, full save/local isolation, and actual crop consumer behavior. Acquisition predicates/registration unchanged; previous 44-case acquisition evidence still applies to those unchanged paths. Existing canonical saves have no microscopy records; pre-correction isolated prototype tissue/division records are not a supported persisted format.

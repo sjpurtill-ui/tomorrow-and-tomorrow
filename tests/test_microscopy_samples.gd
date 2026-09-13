@@ -18,9 +18,9 @@ func test_growth_and_time_lapse_require_distinct_days_and_supplied_media()->void
 	var before:=sample.duplicate(true)
 	assert_bool(S.grow(sample,1,.02,true)).is_false()
 	assert_dict(sample).is_equal(before)
-	S.measure(ledger,sample,1,false,["cell_division_observation"])
+	S.measure(ledger,sample,1,true,["cell_division_observation","microscopic_cell_observation"])
 	assert_bool(sample.methods.has("division")).is_false()
-	S.grow(sample,2,.02,true);S.measure(ledger,sample,2,false,["cell_division_observation"])
+	S.grow(sample,2,.02,true);S.measure(ledger,sample,2,true,["cell_division_observation","microscopic_cell_observation"])
 	assert_bool(sample.methods.has("division")).is_true()
 	S.expire(ledger,22)
 	assert_array(ledger.specimens).is_empty()
@@ -128,7 +128,7 @@ func test_real_crop_trial_rejects_recent_cellular_tissue_failure()->void:
 		for day:int in range(177,181):botany.observe(comparison,day,"home",known,1,1,1)
 		assert_bool(comparison.vouchers[-1].qualified).is_true()
 		state.field_botany=field
-		state.resource_stockpiles={"Specimen Slides":1.0,"Freshwater":1.0}
+		state.resource_stockpiles={"Specimen Slides":1.0,"Freshwater":1.0,"Steel Tool Bits":1.0}
 		state.microscopy.work_bank=1.0
 		botany.observe(field,177,"home",known,1,1,1)
 		lab.collect_plant(state.microscopy,state.resource_stockpiles,177)
@@ -136,6 +136,7 @@ func test_real_crop_trial_rejects_recent_cellular_tissue_failure()->void:
 		for day:int in range(177,180):
 			if day>177:botany.observe(field,day,"home",known,1,1,1)
 			if S.grow(sample,day,.02,true):S.record(state.microscopy,sample,day,"culture",{"media":float(sample.media),"aseptic":true,"line":0})
+			lab.prepare_section(state.microscopy,sample,state.resource_stockpiles,day)
 			S.measure(state.microscopy,sample,day,true,known)
 		var starter:=S.add(state.microscopy,"starter",3,177,"home",177,.01,{"viability":1.0})
 		S.measure(state.microscopy,starter,179,false,known)
@@ -188,3 +189,32 @@ func test_heat_evidence_expires_and_calibration_alone_is_valid()->void:
 	lab.prepare_station(ledger,stocks,known,40)
 	assert_int(int(ledger.tools.calibration.day)).is_equal(40)
 	assert_bool(S.valid(ledger)).is_true()
+
+func test_histology_requires_paid_section_not_whole_sample_staining()->void:
+	var ledger:=S.empty_state();ledger.work_bank=1.0
+	var sample:=S.add(ledger,"plant",1,0,"home",0,.001,{"viability":.8,"tissue_order":.7})
+	var known:Array=["tissue_histology","biological_staining"]
+	S.measure(ledger,sample,0,true,known)
+	assert_bool(sample.methods.has("tissue")).is_false()
+	var lab=preload("res://scripts/microscopy_lab.gd")
+	assert_bool(lab.prepare_section(ledger,sample,{},1)).is_false()
+	var stocks:={"Steel Tool Bits":1.0,"Specimen Slides":1.0,"Freshwater":1.0}
+	assert_bool(lab.prepare_section(ledger,sample,stocks,1)).is_true()
+	assert_float(float(sample.amount)).is_equal_approx(.0009,.000001)
+	assert_float(float(stocks["Steel Tool Bits"])).is_equal_approx(.999,.000001)
+	S.measure(ledger,sample,1,true,known)
+	assert_bool(sample.methods.has("tissue")).is_true()
+	assert_bool(S.valid(ledger)).is_true()
+
+func test_counts_alone_or_unresolved_or_missing_frame_cannot_prove_division()->void:
+	var known:Array=["cell_division_observation","microscopic_cell_observation"]
+	for mode:String in ["counts","unresolved","gap"]:
+		var ledger:=S.empty_state()
+		var sample:=S.add(ledger,"starter",1,0,"home",0,.04,{"viability":.9})
+		if mode!="counts":S.grow(sample,1,.02,true)
+		S.measure(ledger,sample,1,mode!="unresolved",known)
+		var day:=3 if mode=="gap" else 2
+		if mode=="counts":sample.cells+=10.0
+		else:S.grow(sample,day,.02,true)
+		S.measure(ledger,sample,day,true,known)
+		assert_bool(sample.methods.has("division")).is_false()
