@@ -12319,8 +12319,8 @@
       "id": "honed_bore_finishing",
       "name": "Honed Bore Finishing",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "9625fcf9544627d1df5facf75e4800e0b15db057663ed778f46df208bba1f08f"
@@ -12369,8 +12369,8 @@
       "id": "short_stroke_superfinishing",
       "name": "Short-Stroke Superfinishing",
       "horizon": "H05",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "a16734f9ee89b5e0b8b00f0179cf04cc3aae694157bc3e66eea4e3651454dc90"
@@ -12549,8 +12549,8 @@
       "id": "investment_casting_process",
       "name": "Investment Casting Process",
       "horizon": "H03",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "e85d9be3ebe7c94f9bdc730131f66737021f0dbda3cc9f48d203ee81503aa2fd"
@@ -12579,8 +12579,8 @@
       "id": "lost_foam_casting",
       "name": "Lost-Foam Casting",
       "horizon": "H05",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "da15fa1e3bfefc28a383365e5741a88e8193766199fcc89ba142834eae80a79d"

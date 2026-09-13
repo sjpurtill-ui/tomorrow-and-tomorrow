@@ -1096,38 +1096,6 @@
   },
   {
     "field": "D04",
-    "id": "material_phase_diagrams",
-    "name": "Material Phase Diagrams",
-    "foundations": "crystallography,precision_thermometry",
-    "mechanism": "Map stable or observed phase relations against declared composition and conditions",
-    "operating_requirement": "Characterized samples, controlled conditions and measurement evidence",
-    "consequence": "Guide processing choices while nonequilibrium behavior requires additional evidence",
-    "status": "authored_draft",
-    "requires_all": [
-      "crystallography",
-      "precision_thermometry"
-    ],
-    "requires_any": [],
-    "recovery": "For Material Phase Diagrams: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "material_phase_diagrams",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Material Phase Diagrams",
-      "local_demonstration": "Map stable or observed phase relations against declared composition and conditions",
-      "operating_requirements": "Characterized samples, controlled conditions and measurement evidence",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
     "id": "high_entropy_alloy_design",
     "name": "High-Entropy Alloy Design",
     "foundations": "material_phase_diagrams,metallurgical_mass_balances",

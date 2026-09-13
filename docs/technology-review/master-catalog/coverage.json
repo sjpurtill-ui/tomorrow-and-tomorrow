@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 856,
+  "verified_baseline_discoveries": 868,
   "pending_communications": 0,
-  "new_authored_drafts": 2614,
+  "new_authored_drafts": 2602,
   "distinct_accounted_identities": 3470,
   "remaining_identities_to_author": 1530,
   "target": 5000,
@@ -2320,9 +2320,9 @@
         "target": 800,
         "assigned": 222,
         "target_slots_not_yet_assigned": 578,
-        "implemented_baseline": 15,
+        "implemented_baseline": 16,
         "pending_communications": 0,
-        "authored_drafts": 207
+        "authored_drafts": 206
       },
       {
         "id": "H04",
@@ -2330,9 +2330,9 @@
         "target": 700,
         "assigned": 299,
         "target_slots_not_yet_assigned": 401,
-        "implemented_baseline": 35,
+        "implemented_baseline": 36,
         "pending_communications": 0,
-        "authored_drafts": 264
+        "authored_drafts": 263
       },
       {
         "id": "H05",
@@ -2340,9 +2340,9 @@
         "target": 900,
         "assigned": 706,
         "target_slots_not_yet_assigned": 194,
-        "implemented_baseline": 16,
+        "implemented_baseline": 18,
         "pending_communications": 0,
-        "authored_drafts": 690
+        "authored_drafts": 688
       },
       {
         "id": "H06",
@@ -2357,15 +2357,15 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 445,
+  "branch_alternatives": 442,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 109,
     "D02": 99,
     "D03": 96,
-    "D04": 76,
+    "D04": 68,
     "D05": 155,
-    "D06": 57,
+    "D06": 53,
     "D07": 69,
     "D08": 94,
     "D09": 111,
@@ -2420,9 +2420,9 @@
       "id": "D04",
       "name": "Materials and chemical processes",
       "target": 300,
-      "implemented_baseline": 123,
+      "implemented_baseline": 131,
       "pending_communications": 0,
-      "authored_drafts": 76,
+      "authored_drafts": 68,
       "accounted": 199,
       "remaining_to_target": 101
     },
@@ -2440,9 +2440,9 @@
       "id": "D06",
       "name": "Machinery and mechanical production",
       "target": 240,
-      "implemented_baseline": 112,
+      "implemented_baseline": 116,
       "pending_communications": 0,
-      "authored_drafts": 57,
+      "authored_drafts": 53,
       "accounted": 169,
       "remaining_to_target": 71
     },
