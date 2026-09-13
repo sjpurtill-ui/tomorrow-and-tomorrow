@@ -59,6 +59,31 @@ reload, observed profiles, worn-tool rejection and actual consumer stock debit.
 Full acquisition, supply closure, capital recipe coverage, art and canonical
 integration remain pending; neither discovery is registered yet.
 
+Phase survey now has an actual retained workshop path: eighteen 0.05-unit
+lead/tin samples spanning three weighed compositions and six target
+temperatures. Each sample runs a paid thermal stage and records quantized
+temperature and standard-tilt mobility; partial observations survive serialized
+continuation. The selected composition is derived from the recorded first
+fully flowing temperature. Only a survey supporting the selected low-melting
+composition grants the chart required by a solder recipe; other results yield
+unresolved notes. Consumed alloy samples become spent sample stock. The paid
+chart is installed as tooling for solder preparation. A further motor-lead
+recipe exists but its consumer behavior has not yet been exercised.
+
+The Pb-Sn eutectic anchor follows the
+[NIST assessed Pb-Sn system](https://www.metallurgy.nist.gov/phase/solder/pbsn.html).
+Liquidus interpolation, mobility and game heat/work parameters are explicitly
+simplified game models; solid solubility, equilibrium phase fractions and
+kinetic effects are not represented. This is a bounded observed melting-range
+survey, not a complete assessed phase diagram for every alloy.
+
+`test_alloy_phase_trials.gd` and metallurgy workshop pass 5/5, zero
+errors/failures/skips/orphans (`/tmp/tt-alloy-connected-final.log`). Includes
+actual weighed stock reservation, eighteen recorded observations, partial
+reload, composition selection from observations and chart-consuming solder
+production. Initial run caught a GDScript type inference error, corrected.
+The twelve definitions remain unregistered; overall completion is unproven.
+
 The twelve definitions in `metallurgy_process_knowledge.gd` preserve the exact
 authored AND/OR predicates. They remain unregistered until their actual
 processes, observations, acquisition and downstream consumers are working.
