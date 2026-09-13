@@ -67,3 +67,52 @@ static func pay_access(base:Dictionary,force:Dictionary,stock:Dictionary,day:int
 	if int(dock.access_day)!=day:dock.access_day=day;dock.access_used=0.0
 	dock.access_used=float(dock.access_used)+float(quote.work)
 	return quote
+
+static func repair_plan(base:Dictionary,force:Dictionary,day:int,crew_work:float,afloat_rate:float,survey_known:bool)->Dictionary:
+	if int(force.get("dock_service_day",-1))>=day:return {}
+	var load:=handling_load(force)
+	if load<=0:return {}
+	var available:=minf(load,minf(maxf(0,crew_work),remaining_access(base,day)))
+	var observation:Dictionary=force.get("hull_survey",{})
+	var fresh:=not observation.is_empty() and day-int(observation.day)<30 and absf(float(observation.condition)-float(force.condition))<=.1
+	var inspection:=load*.1 if survey_known and not fresh and available>=load*.1 else 0.0
+	var multiplier:=.02 if fresh or inspection>0 else .01
+	var extra:=minf(maxf(0,1.0-float(force.condition)-afloat_rate),multiplier*maxf(0,available-inspection)/load)
+	var work:=inspection+extra/multiplier*load
+	if work<=0:return {}
+	var result:=access_quote(base,force,day,work)
+	if result.has("error"):return {}
+	result.extra_rate=extra;result.inspection_work=inspection
+	return result
+
+static func commit_repair_access(base:Dictionary,force:Dictionary,plan:Dictionary,day:int)->void:
+	# Owner calls only after checking and paying the combined repair/access bill.
+	var dock:Dictionary=base.dock_service
+	if int(dock.access_day)!=day:dock.access_day=day;dock.access_used=0.0
+	dock.access_used=float(dock.access_used)+float(plan.work)
+	force.dock_service_day=day
+	if float(plan.inspection_work)>0:
+		force.hull_survey={"day":day,"condition":float(force.condition),"base_id":int(base.id),"work":float(plan.inspection_work)}
+
+static func number(value:Variant,minimum:float,maximum:float,whole:bool=false)->bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value)>=minimum and float(value)<=maximum and (not whole or float(value)==floorf(float(value)))
+
+static func valid_dock(value:Variant)->bool:
+	if not value is Dictionary:return false
+	if value.get("kind","")!="timber_lift_access":return false
+	if not number(value.get("work_required"),.001,10000) or not number(value.get("work_done"),0,float(value.work_required)):return false
+	for key:String in ["started_day","last_work_day","access_day"]:
+		if not number(value.get(key),0 if key=="started_day" else -1,100000000,true):return false
+	if not number(value.get("access_used"),0,DAILY_ACCESS):return false
+	var paid:Variant=value.get("paid_materials")
+	if not paid is Dictionary or paid.size()!=BILL.size():return false
+	for item:String in BILL:
+		if not number(paid.get(item),.001,100000):return false
+	return true
+
+static func valid_force_fields(force:Dictionary)->bool:
+	if force.has("dock_service_day") and not number(force.dock_service_day,0,100000000,true):return false
+	if not force.has("hull_survey"):return true
+	var survey:Variant=force.hull_survey
+	if not survey is Dictionary:return false
+	return number(survey.get("day"),0,100000000,true) and number(survey.get("base_id"),1,100000000,true) and number(survey.get("condition"),0,1) and number(survey.get("work"),.000001,DAILY_ACCESS)

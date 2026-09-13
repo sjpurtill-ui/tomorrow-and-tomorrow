@@ -6,6 +6,7 @@ const MISSIONS:Dictionary={
 	"navy":{"hold":"Hold in port","patrol":"Patrol","strike_force":"Strike force","convoy_raiding":"Convoy raiding","convoy_escort":"Convoy escort","invasion_support":"Naval invasion support","transport":"Transport troops or supplies"},
 	"air":{"hold":"Stand down","air_superiority":"Air superiority","interception":"Interception","close_air_support":"Close air support","logistics_strike":"Logistics strike","strategic_bombing":"Strategic bombing","naval_strike":"Naval strike","port_strike":"Port strike","reconnaissance":"Reconnaissance","air_supply":"Air supply","transport":"Transport troops"}}
 const R=preload("res://scripts/joint_regions.gd")
+const Dock=preload("res://scripts/naval_dock_service.gd")
 const MAX_FORCES:=128
 var geography=preload("res://scripts/joint_geography.gd").new()
 var logistics=preload("res://scripts/joint_logistics.gd").new(self)
@@ -110,6 +111,17 @@ func available_base(domain:String)->bool:
 	for record:Dictionary in state.bases:
 		if record.domain==domain and base_ready(record) and base_owned(record):return true
 	return false
+func build_dock(base_id:int)->Dictionary:
+	var port:=base(base_id)
+	if not base_owned(port) or not base_ready(port):return {"error":"Choose an owned, completed naval port."}
+	var known:Array=[]
+	for id:String in ["dry_dock_services","hull_condition_surveys"]:
+		if bool(host._knowledge_gate(id,.25).unlocked):known.append(id)
+	var result:Dictionary=WorldSimulation.settlements.with_city_resources(String(port.city_id),func()->Dictionary:
+		return Dock.begin(port,WorldSimulation.state.resource_stockpiles,known,int(WorldSimulation.state.elapsed_days)))
+	if result.has("ok"):result.message="Dock construction started for canoe and ram-galley access; port construction crews share the work."
+	return result
+
 func commission_quote(base_id:int,type_id:String,count:int)->Dictionary:
 	if not C.UNITS.has(type_id) or count<=0 or count>100:return {"error":"Select a valid hull or aircraft count (1–100)."}
 	if state.forces.size()>=MAX_FORCES:return {"error":"The force command limit is reached."}
@@ -259,7 +271,7 @@ func construction_share(city_id:String="")->float:
 		for city:Dictionary in WorldSimulation.state.player_settlements:
 			if bool(city.get("primary",false)):selected=String(city.id);break
 	for record:Dictionary in state.bases:
-		if record.owner=="player" and record.city_id==selected and base_owned(record) and float(record.construction_work)<float(record.required_work):return .25
+		if record.owner=="player" and record.city_id==selected and base_owned(record) and (float(record.construction_work)<float(record.required_work) or Dock.building(record)):return .25
 	return 0.0
 
 func force_position(record:Dictionary)->Vector2:
@@ -409,27 +421,42 @@ func repair_costs(record:Dictionary,rate:float=.04)->Dictionary:
 	return costs
 
 func repair_at_base(record:Dictionary,origin:Dictionary)->Dictionary:
+	if not base_owned(origin,String(record.owner)) or not base_ready(origin) or force_position(record).distance_to(point(origin))>=2:return {"error":"Repairs require access to the owned home port."}
 	var waiting:=0
 	for other:Dictionary in state.forces:
 		if other.base_id==record.base_id and (bool(other.get("repairing",false)) or float(other.condition)<float(other.repair_threshold)) and force_position(other).distance_to(point(origin))<2:waiting+=hardware(other)
 	var rate:=minf(1.0-float(record.condition),.04*minf(1,float(origin.capacity)/maxi(1,waiting)))
 	var costs:=repair_costs(record,rate)
 	var paid:Dictionary
+	var day:=int(WorldSimulation.state.elapsed_days)
 	if record.owner=="player":
-		paid=WorldSimulation.settlements.with_city_resources(String(origin.city_id),func():
+		paid=WorldSimulation.settlements.with_city_resources(String(origin.city_id),func()->Dictionary:
+			var stock:Dictionary=WorldSimulation.state.resource_stockpiles
+			var dock_plan:=Dock.repair_plan(origin,record,day,float(crew(record))*.25*WorldSimulation.state.population_health,rate,bool(host._knowledge_gate("hull_condition_surveys",.25).unlocked))
+			if bool(dock_plan.get("ok",false)):
+				var combined:=repair_costs(record,rate+float(dock_plan.extra_rate))
+				for material:String in dock_plan.cost:combined[material]=float(combined.get(material,0))+float(dock_plan.cost[material])
+				var affordable:=true
+				for material:String in combined:
+					if float(stock.get(material,0))<float(combined[material]):affordable=false;break
+				if affordable:
+					for material:String in combined:stock[material]=float(stock.get(material,0))-float(combined[material])
+					Dock.commit_repair_access(origin,record,dock_plan,day)
+					return {"ok":true,"rate":rate+float(dock_plan.extra_rate),"dock":true}
+			# A dock shortage does not remove existing material-paid afloat repair.
 			var shortages:Array[String]=[]
 			for material:String in costs:
-				var available:=float(WorldSimulation.state.resource_stockpiles.get(material,0))
-				if available<float(costs[material]):shortages.append("%.1f %s (%.1f available)" % [costs[material],WorldSimulation.resources.display_name(material),available])
+				var available:=float(stock.get(material,0))
+				if available<float(costs[material]):shortages.append("%.1f %s (%.1f available)" % [float(costs[material]),WorldSimulation.resources.display_name(material),available])
 			if not shortages.is_empty():return {"error":"Repairs waiting for "+", ".join(shortages)+" at "+String(origin.name)}
-			for material:String in costs:WorldSimulation.state.resource_stockpiles[material]-=costs[material]
-			return {"ok":true})
+			for material:String in costs:stock[material]=float(stock.get(material,0))-float(costs[material])
+			return {"ok":true,"rate":rate})
 	else:
 		var total:=0.0
 		for amount in costs.values():total+=float(amount)
 		paid={"ok":true} if rival.spend(String(record.owner),total) else {"error":"Repairs waiting for supplies"}
 	if paid.has("error"):return paid
-	record.condition=minf(1,float(record.condition)+rate)
+	record.condition=minf(1,float(record.condition)+float(paid.get("rate",rate)))
 	return {"ok":true,"message":"Repairing at %s · %d%% condition" % [origin.name,roundi(float(record.condition)*100)]}
 
 func advance(day:int)->void:
@@ -448,13 +475,17 @@ func advance(day:int)->void:
 			set_route(wing,point(base(int(wing.base_id))))
 	var projects:Dictionary={}
 	for record:Dictionary in state.bases:
-		if record.owner=="player" and base_owned(record) and float(record.construction_work)<float(record.required_work):
-			projects[record.city_id]=int(projects.get(record.city_id,0))+1
+		if record.owner!="player" or not base_owned(record):continue
+		var count:=int(float(record.construction_work)<float(record.required_work))+int(Dock.building(record))
+		projects[record.city_id]=int(projects.get(record.city_id,0))+count
 	for record:Dictionary in state.bases:
-		if not projects.has(record.city_id) or record.owner!="player":continue
+		if record.owner!="player" or not base_owned(record) or int(projects.get(record.city_id,0))<=0:continue
 		WorldSimulation.settlements.with_city_resources(String(record.city_id),func():
-			var builders:=WorldSimulation.state.effective_workers("Construction",true)*.25
-			record.construction_work=minf(float(record.required_work),float(record.construction_work)+builders*.1/int(projects[record.city_id])))
+			WorldSimulation.settlements.with_local_population(func():
+				var share:=WorldSimulation.state.effective_workers("Construction",true)*.25*.1/int(projects[record.city_id])
+				if float(record.construction_work)<float(record.required_work):
+					record.construction_work=minf(float(record.required_work),float(record.construction_work)+share)
+				if Dock.building(record):Dock.construct(record,share,day)))
 	for record:Dictionary in state.forces:
 		record.efficiency=0.0;record.fuel_used=0
 		var origin:=base(int(record.base_id))
@@ -677,6 +708,7 @@ func validate(payload:Variant)->String:
 		for key in ["capacity","condition","construction_work","required_work"]:
 			if not _finite_nonnegative(record[key]):return "Invalid base capacity or condition."
 		if float(record.capacity)<1 or float(record.required_work)<=0 or float(record.condition)>1:return "Invalid base limits."
+		if record.has("dock_service") and (record.domain!="navy" or not Dock.valid_dock(record.dock_service)):return "Invalid dock construction or access ledger."
 		ids[record.id]=true;bases[record.id]=record
 	for record in payload.get("forces",[]):
 		if not record is Dictionary or record.get("domain","") not in MISSIONS or not record.get("units",{}) is Dictionary:return "Invalid fleet or wing."
@@ -685,6 +717,7 @@ func validate(payload:Variant)->String:
 		if not _whole_number(record.id,1) or ids.has(record.id) or int(record.id)>=int(payload.next_id):return "Invalid force identifier."
 		if not bases.has(record.base_id) or bases[record.base_id].domain!=record.domain or bases[record.base_id].owner!=record.owner:return "Invalid force home base."
 		ids[record.id]=true
+		if not Dock.valid_force_fields(record):return "Invalid hull survey or service date."
 		if not record.authorized is Dictionary or record.authorized.size()!=record.units.size():return "Invalid force establishment."
 		if not record.auto_replace is bool or not _finite_nonnegative(record.repair_threshold) or float(record.repair_threshold)>1:return "Invalid repair policy."
 		for key in ["owner","name","status"]:
