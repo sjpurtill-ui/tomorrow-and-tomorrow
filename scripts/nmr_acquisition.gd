@@ -69,6 +69,9 @@ static func observe(sample:Dictionary)->Dictionary:
 
 static func advance_pending()->void:
 	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
+	var calibration=load("res://scripts/nmr_calibration.gd")
+	if not records.is_empty():calibration.start()
+	calibration.advance()
 	for sample_id:String in records:
 		if records[sample_id].status=="unmeasured":start(sample_id)
 		advance(sample_id,WORK)

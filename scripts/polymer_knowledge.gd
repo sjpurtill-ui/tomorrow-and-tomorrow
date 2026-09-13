@@ -1657,7 +1657,8 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "nmr_field_assembly",
       "nmr_probe_receiver",
-      "nmr_bench_assembly"
+      "nmr_bench_assembly",
+      "nmr_methanol_reference"
     ],
     "production_contract": "Physical field and RF/thermal assemblies consume real capital, work and energy. The installed bench supplies unqualified instrument time only; reference qualification, sample-specific resolved spectra and downstream grade acceptance remain required."
   }

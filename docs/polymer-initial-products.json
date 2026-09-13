@@ -1948,5 +1948,21 @@
     },
     "power": 4,
     "daily_power": 0.5
+  },
+  "nmr_methanol_reference": {
+    "name": "Purified and sealed NMR methanol reference",
+    "output": "NMR Methanol References",
+    "gate": "nuclear_magnetic_resonance_spectroscopy",
+    "materials": {
+      "Methanol": 1.1,
+      "Glass Tubes": 0.1,
+      "Paper": 0.05
+    },
+    "days": 2,
+    "tooling": {
+      "Laboratory Glassware": 3
+    },
+    "power": 1,
+    "daily_power": 0.5
   }
 }
