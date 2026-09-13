@@ -330,3 +330,33 @@ func test_isocyanate_chain_and_addition_cured_web_supply_operating_belt_maintena
 		for day:int in range(1,22):s.elapsed_days=day;Ops.advance(day)
 		assert_float(float(s.resource_stockpiles["Drive Belts"])).is_less(1.0)
 		assert_float(float(Ops.data().plants.belt_workshop.running_units)).is_greater(0.0))
+func test_natural_nickel_occurrence_can_be_recognized_and_worked()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state;var resource=WorldSimulation.resources
+		var found:Dictionary={}
+		for x:int in range(-19000,19001,1000):
+			for y:int in range(-9000,9001,1000):
+				var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(x,y))
+				if float(profile.resource_potentials["Nickel Ore"])<.14:continue
+				s.resource_deposits.clear();resource.reset_for_new_world()
+				resource.register_local_occurrences([],"Hills",profile)
+				for deposit:Dictionary in s.resource_deposits:
+					if deposit.resource=="Nickel Ore":found=deposit;break
+				if not found.is_empty():break
+			if not found.is_empty():break
+		assert_bool(found.is_empty()).override_failure_message("Natural terrain must supply reachable nickel; no synthetic potential override").is_false()
+		if found.is_empty():return
+		s.resource_deposits.assign([found]);found.clues=1.0
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(found.stage)).is_equal("unknown")
+		for gate:String in ["ore_assaying","nickel_metal_recovery"]:
+			s.known_discoveries.append(gate);s.discovery_adoption[gate]=1.0
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(found.stage)).is_equal("recognized")
+		assert_float(float(s.resource_stockpiles.get("Nickel Ore",0))).is_equal(0.0)
+		found.stage="surveyed";found.route=1.0
+		var initial:float=float(found.remaining)
+		s.population_allocations.Extraction=8;s.population_allocations.Logistics=8;s.population_allocations.Knowledge=5;s.population_allocations.Construction=10
+		resource.process_day({"origin":Vector3.ZERO,"settled":false,"tools":1.0})
+		assert_float(float(found.lifetime_extracted)).is_greater(0.0)
+		assert_float(float(found.remaining)+float(found.lifetime_extracted)).is_equal_approx(initial,.00001))
