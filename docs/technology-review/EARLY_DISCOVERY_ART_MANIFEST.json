@@ -1,0 +1,35 @@
+{
+  "base": "6fed85fb93fef79b3cabd134047b010b04437150",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "generator": "built-in image_gen",
+  "entries": [
+    {
+      "id": "seed_selection",
+      "prompt": "Create one square 1024x1024 civilization technology illustration. Reference image is STYLE ONLY: match warm ivory uncoated paper, matte gouache and dry pigment grain, broad simplified silhouettes, restrained charcoal/ochre/umber palette, quiet monumental negative space across upper half, human-scale historical work concentrated in lower half. No text, border, logos, gradients, photographic detail or interface. Distinct new scene, not a copy of the storyteller. Selective Planting: two early farmers compare cereal seed heads beside a small ochre field. One seated figure separates robust seed heads into a small shallow tray for next planting; a second crouches beside growing plants. Make selection clearly visible, not generic harvesting. Plain early woven garments, tiny dark faces, sparse distant hills.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-842da1d4-4e28-4a33-9e17-9fb65037e08b.png",
+      "asset": "assets/ui/research/paper/seed_selection.png",
+      "mapping": "paper/seed_selection"
+    },
+    {
+      "id": "food_drying",
+      "prompt": "Create one square 1024x1024 civilization technology illustration. Reference image is STYLE ONLY: match warm ivory uncoated paper, matte gouache and dry pigment grain, broad simplified silhouettes, restrained charcoal/ochre/umber palette, quiet monumental negative space across upper half, human-scale historical work concentrated in lower half. No text, border, logos, gradients, photographic detail or interface. Distinct new scene, not a copy of the storyteller. Food Drying: early villagers place thin food pieces on raised woven racks in open dry air. Low sunlit ochre ground, two simple human silhouettes checking racks, rows of separated food pieces clearly legible, spare distant terrain. No fire or smoke: this discovery is air and sun drying.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-0c356c0e-e5c0-480d-a2d6-61cd76f424aa.png",
+      "asset": "assets/ui/research/paper/food_drying.png",
+      "mapping": "paper/food_drying"
+    },
+    {
+      "id": "basketry",
+      "prompt": "Create one square 1024x1024 civilization technology illustration. Reference image is STYLE ONLY: match warm ivory uncoated paper, matte gouache and dry pigment grain, broad simplified silhouettes, restrained charcoal/ochre/umber palette, quiet monumental negative space across upper half, human-scale historical work concentrated in lower half. No text, border, logos, gradients, photographic detail or interface. Distinct new scene, not a copy of the storyteller. Basketry: a seated early craftsperson interlaces long flexible reeds around the visible unfinished rim of a large woven basket, reed bundles lying nearby, one completed basket at their feet. One companion gathers reeds near a faint marsh. Bold legible basket form, no pottery focus.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-809be720-3eae-40ec-9ed8-7e4bc14353fe.png",
+      "asset": "assets/ui/research/paper/basketry.png",
+      "mapping": "paper/basketry"
+    },
+    {
+      "id": "tallies",
+      "prompt": "Create one square 1024x1024 civilization technology illustration. Reference image is STYLE ONLY: match warm ivory uncoated paper, matte gouache and dry pigment grain, broad simplified silhouettes, restrained charcoal/ochre/umber palette, quiet monumental negative space across upper half, human-scale historical work concentrated in lower half. No text, border, logos, gradients, photographic detail or interface. Distinct new scene, not a copy of the storyteller. Material Tallies: an early storekeeper seated beside grain sacks and baskets makes short tally incisions on a wooden counting stick, with several already notched sticks laid in an orderly small group on a low mat. Another person delivers one sack. Notches are abstract marks, no numerals or written alphabet. Clear relationship between counted supplies and retained physical record.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-c72fa861-ba73-4656-b64b-66769488a0cc.png",
+      "asset": "assets/ui/research/paper/tallies.png",
+      "mapping": "paper/tallies"
+    }
+  ]
+}
