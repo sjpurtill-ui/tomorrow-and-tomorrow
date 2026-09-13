@@ -1,6 +1,17 @@
 extends RefCounted
 ## Uses paid daily bench capacity; no new clock, workers, or save owner.
 const WORK=4.0
+## Structural dependency declarations for conditional retained-specimen releases.
+## These are analytical operations, not workshop recipes or guaranteed grades.
+static func dependency_routes()->Dictionary:
+	var routes:Dictionary={}
+	for recipe:String in ["sealed_copolymer_specimens","traceable_peg_batch","traceable_pp_batch"]:
+		var peg:=recipe=="traceable_peg_batch";var pp:=recipe=="traceable_pp_batch"
+		var source:Dictionary=load("res://scripts/civilian_industry.gd").product(recipe)
+		var materials:Dictionary={String(source.output):1.0,"NMR Methanol References":1.0,"Paper":.1,"Freshwater":.7 if peg else .2}
+		if not peg:materials["Toluene"]=.5
+		routes["analysis_"+recipe]={"gate":"nuclear_magnetic_resonance_spectroscopy","requires":["polymer_solution_processing"],"output":"Size-Characterized PEG Batches" if peg else ("Tacticity-Characterized PP Batches" if pp else "Sequence-Characterized Copolymer Specimens"),"materials":materials,"tooling":{},"days":14.0 if peg or pp else 12.0,"power":0.0,"services":{"nmr_unqualified_time":14.0 if peg or pp else 12.0},"conditional":true}
+	return routes
 static func record(sample_id:String)->Dictionary:
 	return WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{}).get(sample_id,{})
 static func supported(sample:Dictionary)->bool:
