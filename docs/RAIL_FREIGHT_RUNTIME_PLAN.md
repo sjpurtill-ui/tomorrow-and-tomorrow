@@ -1,6 +1,6 @@
-# Physical rail freight — implementation in progress
+# Physical rail freight — worker delivery
 
-HELD worktree `/Users/seanpurtill/Documents/Codex/tt-rail-freight`, branch `codex/rail-freight`, base `368b7718c419ff73d788e29d3bf9e5ad212a37ce`. Integrator authorized rail-only additions in shipment dispatch, optional save state, civilian recipes and investment dispatch. No player build or discovery promotion is claimed.
+READY for integrator review; isolated worktree `/Users/seanpurtill/Documents/Codex/tt-rail-freight`, branch `codex/rail-freight`, base `368b7718c419ff73d788e29d3bf9e5ad212a37ce`. Integrator authorized rail-only additions in shipment dispatch, optional save state, civilian recipes and investment dispatch. No player build or discovery promotion is claimed.
 
 Existing intercity trade debits actual source goods, occupies carrier capacity and delivers later. It has no installed track, gauge-specific rolling stock or return-trip asset commitment. Rail must become an alternative physical mode for those same shipments, preserving all water/naval supply targets and laundry power demand.
 
@@ -20,10 +20,73 @@ Candidate existing promotions: `aggregate_road_foundations`, `rail_gauge_standar
 
 Acceptance must cover paid install and shortages, real shared construction, gauge/grade/access rejection, finite stock and crew return occupancy, both shipment directions, maintenance closure and shortages, primary/secondary/actor isolation, autonomous supply, actual controls, save continuation, and dependency closure. Run one cohesive affected test set after connection, then focused follow-ups only for changed or failed behavior. No long pacing simulation is needed to establish these local mechanics; full 2,500–3,000-year balance remains separately unfinished.
 
-## Isolated foundation checkpoint
+## Delivered behavior and evidence
 
-The route survey and paid fabrication helpers are written. Route geometry uses the canonical terrain's kilometre units, at 250-metre sample spacing with a 2% supported grade, a 120-km route bound and rejection of unsupported river crossings. These are declared game-service bounds, not certification of an engineered alignment. The owner must resurvey before installation and validate endpoint access before dispatch.
+The owner is connected to optional GameState rail state, monthly shared construction,
+existing delayed city shipments, civilian manufacturing, autonomous investment, and
+research-card controls. Eight paid recipes produce ballast, templates, rail panels,
+two compatible wheelset/wagon families and brakes. The UI selects endpoints, gauge
+and one to eight wagons; it refreshes supply and operating status every five seconds.
+Installation and autonomous investment call the same paid action. Established trade
+partners are considered for autonomous installation, with up to three surveys per call.
 
-The fabrication model pays for gauge templates, timber rail panels, support material, gauge-specific wagons and brakes; it retains partial work and a single exclusive round-trip commitment. It quotes reserved crew count separately from cumulative worker-days, so integration can subtract actual committed workers without multiplying their daily reservation by the trip duration a second time. Maintenance consumes replacements and closes the line for that day. These helpers are not registered or connected to game state yet.
+Routes use actual returned knowledge and current terrain. Positive infinity from the
+terrain water-distance provider means no nearby water; NaN, negative distance,
+unsupported crossings, excessive grade and missing callbacks remain rejected.
+No resurvey occurs for active cargo; dispatch checks the installed alignment again.
+Occupation holds cargo and committed stock until endpoint access resumes. Cargo
+arrives through the existing inventory/food ledger and cannot release its fleet
+before the scheduled return. Gauge-specific equipment and source-city supplies
+are debited once. Maintenance closes the line for its work day.
 
-Godot 4.7.2 syntax compilation is the current validation scope only. Operating tests belong after owner connection; no runtime acceptance or new live discovery is claimed. Next: optional-state validation, owner-local installation/construction and shipment dispatch, supply/UI, then the cohesive acceptance set above.
+Validation on Godot 4.7.2, explicit isolated worktree:
+
+- 46-case combined run: 14 rail, 13 city-resource and 19 owned-civilization cases,
+  zero errors/failures, terminal exit 0. Log `/tmp/tt-rail-freight-acceptance.log`.
+- Final rail suite: 16 cases, zero errors/failures, terminal exit 0, 1.950 seconds.
+  Adds paid autonomous wagon manufacturing before installation and full owned-actor
+  save restoration of partial construction. Log `/tmp/tt-rail-freight-final-focused.log`.
+  Across the two runs there are 48 distinct cases, not 62 distinct cases.
+- Tests cover atomic shortage rejection, gauge incompatibility, grade/chart/water
+  evidence, shared builders, actual food cargo, same-material upkeep, finite return
+  occupancy, reverse service after occupation clears, maintenance closure, secondary
+  stores, actual button action, human full save with cargo, actor full save with work,
+  malformed saved dates/coordinates/commitments and duplicate consignments.
+- Graph audit: 681 live definitions on this older 676-definition base, 463 explicit
+  learning routes, 318 reachable recipes and 17 reachable plants; no graph errors or
+  blocked plants/products. Log `/tmp/tt-rail-freight-graph.log`, terminal exit 0.
+  This structural closure does not prove campaign pacing.
+- Normal headless project boot reaches DIRECTION_SCREEN_READY and exits 0 without
+  parse/runtime errors. Log `/tmp/tt-rail-freight-boot.log`. No player was launched.
+
+## Integration, compatibility and remaining scope
+
+Deliver the complete branch range after base
+`368b7718c419ff73d788e29d3bf9e5ad212a37ce`, including foundation `6eb949b`.
+Shared additive edits are in GameState, SaveSystem, WorldSimulation, SettlementModel,
+CivilianIndustry, CivilizationController, DiscoverySystem and the technology operations
+panel. Preserve subsequent record-media and geared-workshop additions on main,
+especially their recipes, plants and service bounds. This branch does not modify
+TechnologyOperations, LocalTerrain, military authority or project settings.
+
+Promote only the five existing identities listed above after canonical acceptance.
+Wagonway Haulage intentionally drops `draft_harness_fitting` from its prior mandatory
+parents: this operating mode uses human crews. Retain `rail_track_foundations` and
+`cart_running_gear`; record the old/new predicate in the promotion reconciliation.
+Promotions add zero authored identities. Existing disadvantaged research acquisition
+systems remain in place; these five definitions add local method routes, not a new
+foreign research service.
+
+Absent rail state migrates to an empty register. Saved partial work, local materials,
+gauge, stock wear, active cargo and return commitments round-trip through whole-game
+saves for human and owned civilizations. Validation rejects mismatched paid bills,
+route sampling, trip quantities/crew/dates and duplicated pending rail consignments.
+
+Explicit limits: first human-powered single-track wagonways only; 120 km maximum,
+2% grade and 250-metre terrain samples are game-service bounds, not engineering
+certification. UI/automatic proposals survey straight alignments; the owner API can
+accept explicit waypoints, but automatic detour planning is unfinished. Existing
+city-trade logistics range still limits donor selection. No rail bridges, tunnels,
+yard junctions, block signaling, steam/electric traction, passenger traffic or military
+rail supply is claimed. Later rail technology consumers and additional imagery remain
+unfinished, as does full 2,500–3,000-year pacing validation and the 5,000-discovery goal.

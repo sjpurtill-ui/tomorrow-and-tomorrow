@@ -14,7 +14,7 @@ static func empty_state()->Dictionary:
 static func installation_bill(route:Dictionary,gauge:int,wagons:int)->Dictionary:
 	if not Route.valid(route) or not GAUGES.has(gauge) or wagons<1 or wagons>MAX_WAGONS:return {}
 	var distance:=float(route.length_km)
-	return {"Timber Rail Panels":ceil(distance*8.0),"Rail Gauge Templates":1.0,"Stone":ceil(distance*40.0),"Timber":ceil(distance*12.0),String(GAUGES[gauge].wagon):float(wagons),"Rail Brake Sets":float(wagons)}
+	return {"Timber Rail Panels":ceil(distance*8.0),"Rail Gauge Templates":1.0,"Track Ballast":ceil(distance*40.0),"Timber":ceil(distance*12.0),String(GAUGES[gauge].wagon):float(wagons),"Rail Brake Sets":float(wagons)}
 
 static func can_pay(stock:Dictionary,bill:Dictionary)->bool:
 	for item:String in bill:

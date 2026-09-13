@@ -315,6 +315,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		if float(shipment.arrival_day)>WorldSimulation.state.elapsed_days:
 			pending.append(shipment)
 			continue
+		if shipment.get("transport_mode","")=="rail" and not preload("res://scripts/rail_freight.gd").delivery_available(shipment):
+			pending.append(shipment);continue
 		var destination:=settlement_record(String(shipment.destination_id))
 		if destination.is_empty():
 			pending.append(shipment)
@@ -329,6 +331,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		arrived.merge({"status":"delivered","day":today,"delivered":delivered,"lost":quantity-delivered},true)
 		_record_city_trade(arrived)
 	WorldSimulation.state.city_trade_shipments=pending
+	preload("res://scripts/rail_freight.gd").advance(today)
 	var capacity:=city_trade_capacity()
 	if not bool(capacity.ready) or WorldSimulation.state.player_settlements.size()<2: return
 	var water_targets:Dictionary={}
@@ -340,6 +343,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				var needs:=preload("res://scripts/water_conveyance_investment.gd").targets(conduit_supply)
 				var dock_needs:=preload("res://scripts/naval_dock_investment.gd").targets()
 				for item:String in dock_needs:needs[item]=float(needs.get(item,0))+float(dock_needs[item])
+				var rail_needs:=preload("res://scripts/rail_freight_investment.gd").maintenance_targets(String(city.id))
+				for item:String in rail_needs:needs[item]=float(needs.get(item,0))+float(rail_needs[item])
 				return needs))
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
@@ -349,9 +354,9 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		for amount in WorldSimulation.state.population_allocations.values(): workforce+=float(amount)
 		var allocations:Dictionary=source.get("local_allocations",{})
 		var carriers:=workforce*share*float(allocations.get("Logistics",0.0))/100.0 if not allocations.is_empty() else float(WorldSimulation.state.population_allocations.get("Logistics",0))*share
-		var occupied:=0.0
+		var occupied:=preload("res://scripts/rail_freight.gd").reserved_workers(String(source.id))*float(capacity.capacity_per_worker)
 		for shipment in WorldSimulation.state.city_trade_shipments:
-			if String(shipment.source_id)==String(source.id): occupied+=float(shipment.quantity)*float(shipment.travel_days)
+			if shipment.get("transport_mode","")!="rail" and String(shipment.source_id)==String(source.id): occupied+=float(shipment.quantity)*float(shipment.travel_days)
 		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)
 	# One request per good per city; no citizen or merchant entities are created.
 	for destination in WorldSimulation.state.player_settlements:
@@ -397,14 +402,26 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 			var travel_days:=maxf(1.0,ceil(nearest/(float(capacity.speed_km_per_day)*clampf(float(route.get("terrain_modifier",1.0)),0.2,2.0))))
 			var quantity:=minf(requested,minf(surplus,float(available_transport[donor.id])/travel_days))
 			if quantity<=0.01: continue
-			var sent:float=with_city_resources(String(donor.id),func()->float:
-				if resource_name=="Food": return WorldSimulation.food.issue_for_obligation(quantity,"city_trade","Trade to %s" % String(destination.name),travel_days,0)
-				WorldSimulation.state.resource_stockpiles[resource_name]=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-quantity
-				return quantity
-			)
+			var rail_workers:=float(available_transport[donor.id])/float(capacity.capacity_per_worker)
+			var rail_plan:=preload("res://scripts/rail_freight.gd").dispatch_quote(String(donor.id),String(destination.id),String(resource_name),minf(requested,surplus),rail_workers)
+			var use_rail:=not rail_plan.is_empty() and (float(rail_plan.quantity)>quantity or float(rail_plan.travel_days)<travel_days)
+			var rail_receipt:Dictionary={}
+			if use_rail:
+				rail_receipt=preload("res://scripts/rail_freight.gd").issue_dispatch(String(donor.id),String(destination.id),String(resource_name),minf(requested,surplus),rail_workers,int(WorldSimulation.state.next_city_trade_id))
+				if rail_receipt.is_empty():continue
+				travel_days=float(rail_receipt.travel_days)
+			var sent:=float(rail_receipt.quantity) if use_rail else 0.0
+			if not use_rail:
+				sent=with_city_resources(String(donor.id),func()->float:
+					if resource_name=="Food": return WorldSimulation.food.issue_for_obligation(quantity,"city_trade","Trade to %s" % String(destination.name),travel_days,0)
+					WorldSimulation.state.resource_stockpiles[resource_name]=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-quantity
+					return quantity
+				)
 			if sent<=0.01: continue
-			available_transport[donor.id]=maxf(0.0,float(available_transport[donor.id])-sent*travel_days)
+			var transport_used:=float(rail_receipt.crew_workers)*float(capacity.capacity_per_worker) if use_rail else sent*travel_days
+			available_transport[donor.id]=maxf(0.0,float(available_transport[donor.id])-transport_used)
 			var shipment:={"id":WorldSimulation.state.next_city_trade_id,"source_id":String(donor.id),"source_name":String(donor.name),"destination_id":String(destination.id),"destination_name":String(destination.name),"resource":resource_name,"quantity":sent,"departure_day":WorldSimulation.state.elapsed_days,"arrival_day":WorldSimulation.state.elapsed_days+travel_days,"travel_days":travel_days,"status":"in_transit","day":today,"reason":"Local leaders arranged a delivery to cover a %s shortage." % resource_name}
+			if use_rail:shipment.merge({"transport_mode":"rail","rail_line_id":int(rail_receipt.line_id),"reason":"Local leaders dispatched paid rolling stock on the installed wagonway."},true)
 			WorldSimulation.state.next_city_trade_id+=1
 			WorldSimulation.state.city_trade_shipments.append(shipment)
 			_record_city_trade(shipment)
@@ -1313,8 +1330,10 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	var water_sites:=0
 	for line:Dictionary in WorldSimulation.state.water_conveyance.lines:
 		if String(line.status)=="under_construction":water_sites+=1
-	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites))
+	var rail_sites:=preload("res://scripts/rail_freight.gd").construction_sites()
+	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites+rail_sites))
 	preload("res://scripts/water_conveyance.gd").construction_work(builders_per_site*water_sites*labor_efficiency*0.10,month_day)
+	preload("res://scripts/rail_freight.gd").construction_work(builders_per_site*rail_sites*labor_efficiency*.10,int(WorldSimulation.state.elapsed_days))
 	for plot in WorldSimulation.state.settlement_plots:
 		plot["last_update_day"]=month_day
 		if String(plot.get("status",""))=="under_construction":

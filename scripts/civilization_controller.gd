@@ -115,6 +115,7 @@ static func civilian_orders(id:String,plan:Dictionary)->void:
 	if recommendation.is_empty():recommendation=preload("res://scripts/building_material_investment.gd").recommendation()
 	if recommendation.is_empty():recommendation=preload("res://scripts/water_conveyance_investment.gd").recommendation()
 	if recommendation.is_empty():recommendation=preload("res://scripts/naval_dock_investment.gd").recommendation()
+	if recommendation.is_empty():recommendation=preload("res://scripts/rail_freight_investment.gd").recommendation()
 	if recommendation.is_empty():
 		var candidate:=preload("res://scripts/civilian_production_planner.gd").recommendation(true)
 		if not candidate.is_empty():

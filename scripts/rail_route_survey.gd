@@ -19,6 +19,7 @@ static func survey(waypoints:Array,terrain:Dictionary)->Dictionary:
 	var points:Array[Vector3]=[]
 	var length:=0.0
 	var steepest:=0.0
+	var previous_river:float=0.0
 	for segment in range(1,waypoints.size()):
 		var start:Vector3=waypoints[segment-1]
 		var finish:Vector3=waypoints[segment]
@@ -34,18 +35,21 @@ static func survey(waypoints:Array,terrain:Dictionary)->Dictionary:
 			if not bool(terrain.known_at.call(point.x,point.z)):return {"error":"Return a chart covering the complete proposed rail route."}
 			if not bool(terrain.land_at.call(point.x,point.z)):return {"error":"This route needs an unsupported water crossing or ground structure."}
 			var river:Variant=terrain.river_distance_at.call(point.x,point.z)
-			if not number(river) or float(river)<RIVER_CLEARANCE_KM:return {"error":"A river crossing needs a separately qualified rail bridge."}
+			# Positive infinity is the terrain provider’s explicit no-nearby-water result.
+			if not (river is int or river is float) or is_nan(float(river)) or float(river)<RIVER_CLEARANCE_KM:return {"error":"A river crossing needs a separately qualified rail bridge."}
 			var height:Variant=terrain.height_at.call(point.x,point.z)
 			if not number(height):return {"error":"Rail elevation evidence is incomplete."}
 			point.y=float(height)
 			if not points.is_empty():
 				var before:Vector3=points.back()
 				var horizontal:=Vector2(before.x,before.z).distance_to(Vector2(point.x,point.z))
+				if previous_river+float(river)<=horizontal+2.0*RIVER_CLEARANCE_KM:return {"error":"The sampled corridor cannot exclude an unsupported river crossing."}
 				var grade:=absf(point.y-before.y)/maxf(.000001,horizontal)
 				steepest=maxf(steepest,grade)
 				if grade>MAX_GRADE:return {"error":"The surveyed grade exceeds supported wagon haulage; select a different alignment."}
+			previous_river=float(river)
 			points.append(point)
-	return {"ok":true,"samples":points,"length_km":length,"max_grade":steepest,"origin":points.front(),"destination":points.back()}
+	return {"ok":true,"waypoints":waypoints.duplicate(),"samples":points,"length_km":length,"max_grade":steepest,"origin":points.front(),"destination":points.back()}
 
 static func number(value:Variant)->bool:
 	return (value is int or value is float) and is_finite(float(value))
@@ -56,10 +60,25 @@ static func valid(route:Variant)->bool:
 	if not number(route.get("max_grade")) or float(route.max_grade)<0 or float(route.max_grade)>MAX_GRADE:return false
 	var points:Variant=route.get("samples")
 	if not points is Array or points.size()<2 or points.size()>MAX_SAMPLES:return false
+	var waypoints:Variant=route.get("waypoints")
+	if not waypoints is Array or waypoints.size()<2 or waypoints.size()>8:return false
+	var expected:Array[Vector2]=[]
+	for point:Variant in waypoints:
+		if not finite_point(point):return false
+	for segment in range(1,waypoints.size()):
+		var start:=Vector2(waypoints[segment-1].x,waypoints[segment-1].z)
+		var finish:=Vector2(waypoints[segment].x,waypoints[segment].z)
+		var distance:=start.distance_to(finish)
+		if distance<.001 or distance>MAX_LENGTH_KM:return false
+		var steps:=maxi(1,ceili(distance/SAMPLE_SPACING_KM))
+		for index in range(0 if segment==1 else 1,steps+1):
+			if expected.size()>=MAX_SAMPLES:return false
+			expected.append(start.lerp(finish,float(index)/steps))
+	if expected.size()!=points.size():return false
 	var length:=0.0
 	var steepest:=0.0
 	for index in points.size():
-		if not finite_point(points[index]):return false
+		if not finite_point(points[index]) or expected[index].distance_to(Vector2(points[index].x,points[index].z))>.00001:return false
 		if index==0:continue
 		var before:Vector3=points[index-1]
 		var point:Vector3=points[index]
