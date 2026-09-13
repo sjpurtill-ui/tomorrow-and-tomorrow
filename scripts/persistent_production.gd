@@ -3,6 +3,7 @@ extends RefCounted
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
 const Machine=preload("res://scripts/machine_workshop.gd")
+const Formed=preload("res://scripts/formed_workpiece.gd")
 const Vacuum=preload("res://scripts/vacuum_workshop.gd")
 const Weld=preload("res://scripts/weld_workshop.gd")
 const Fracture=preload("res://scripts/fracture_workshop.gd")
@@ -151,6 +152,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		Exposure.clear(job)
 		Abrasive.clear(job)
 		Machine.clear(job)
+		Formed.clear(job)
 		Vacuum.clear(job)
 		Weld.clear(job)
 		Fracture.clear(job)
@@ -182,6 +184,10 @@ static func state(host: Node, job: Dictionary) -> String:
 	if Industry.product(String(job.item)).has("abrasive_candidate") and not Abrasive.capacity():return "Abrasive lot register full"
 	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
 	var inspection:Dictionary=Industry.product(String(job.item))
+	if inspection.has("formed_source_curvature"):
+		if job.has("formed_piece") and not job.formed_piece.consumed:return "Waiting for workpiece collection"
+		if job.has("forming_pending"):
+			return "Working" if job.forming_pending.site==WorldSimulation.state.resource_settlement_id else "Workpiece belongs to another store"
 	if inspection.get("vacuum_trial",false) and job.has("vacuum_pending"):
 		if job.vacuum_pending.site!=WorldSimulation.state.resource_settlement_id:return "Melt belongs to another store"
 		return "Working"
@@ -255,6 +261,9 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.has("formed_source_curvature"):
+		Formed.advance(job,exposure_spec,work)
+		return
 	if exposure_spec.get("vacuum_trial",false):
 		Vacuum.advance(job,exposure_spec,work)
 		return
@@ -387,6 +396,8 @@ static func validate_saved(payload: Dictionary) -> String:
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
 		var machine_error:=Machine.validate_job(job,Industry.product(String(job.item)))
 		if not machine_error.is_empty():return machine_error
+		var formed_error:=Formed.validate_job(job,Industry.product(String(job.item)))
+		if not formed_error.is_empty():return formed_error
 		var vacuum_error:=Vacuum.validate_job(job,Industry.product(String(job.item)))
 		if not vacuum_error.is_empty():return vacuum_error
 		var weld_error:=Weld.validate_job(job,Industry.product(String(job.item)))

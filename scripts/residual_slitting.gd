@@ -16,10 +16,10 @@ static func compliance(cut:int,removed:int)->float:
 	for index:int in range(count):mean+=float(Y[index])/float(count)
 	for index:int in range(count):inertia+=pow(float(Y[index])-mean,2)
 	return (1.0/float(count)+(float(Y[0])-mean)*(float(Y[4-removed])-mean)/inertia)/E
-static func reading(piece:Dictionary,cut:int)->Dictionary:
+static func reading(piece:Dictionary,cut:int,resolution:float=RESOLUTION)->Dictionary:
 	var strain:=0.0
 	for index:int in range(cut):strain+=compliance(cut,index)*float(piece.residual[4-index])
-	return {"depth":cut,"strain":snappedf(strain,RESOLUTION),"uncertainty":RESOLUTION/2.0,"applied_force":0.0,"applied_moment":0.0}
+	return {"depth":cut,"strain":snappedf(strain,resolution),"uncertainty":resolution/2.0,"applied_force":0.0,"applied_moment":0.0}
 static func measure(readings:Array)->Dictionary:
 	var bad:={"qualified":false,"reason":"Need three unloaded incremental cuts of the calibrated strip."}
 	if readings.size()!=3:return bad
@@ -27,7 +27,7 @@ static func measure(readings:Array)->Dictionary:
 	for index:int in range(3):
 		var r:Variant=readings[index]
 		if not r is Dictionary or r.get("depth")!=index+1 or r.get("applied_force")!=0.0 or r.get("applied_moment")!=0.0:return bad
-		if not preload("res://scripts/metallurgy_thermal_cycle.gd").number(r.get("strain")) or r.get("uncertainty")!=RESOLUTION/2.0:return bad
+		if not preload("res://scripts/metallurgy_thermal_cycle.gd").number(r.get("strain")) or r.get("uncertainty") not in [RESOLUTION/2.0,0.000001/2.0]:return bad
 		var measured_strain:=float(r.strain);var uncertainty:=float(r.uncertainty)
 		for previous:int in range(index):
 			var coefficient:=compliance(index+1,previous)
