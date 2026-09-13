@@ -1,13 +1,21 @@
 extends RefCounted
 ## Selected forge-welded strap: local heat, upsetting, cooling and witness tests.
 ## Normalized responses, not arbitrary alloy weld qualification.
-static func evidence(work:float,cooling:float)->Dictionary:
+static func evidence(work:float,cooling:float,pauses:Array=[])->Dictionary:
 	var temperatures:Array=[20.0,20.0,20.0]
 	var peaks:Array=temperatures.duplicate();var trace:Array=[]
 	var bond:=0.0;var oxide:=.12;var rapid_cooling:=0.0
 	var remaining:=minf(work,5.0);var elapsed:=0.0
-	while remaining>.000001:
+	var pause_index:=0
+	while remaining>.000001 or pause_index<pauses.size():
+		if pause_index<pauses.size() and float(pauses[pause_index].work)<=elapsed+.000001:
+			var days:=float(pauses[pause_index].days)
+			for zone:int in range(3):temperatures[zone]=20.0+(float(temperatures[zone])-20.0)*exp(-2.0*days)
+			pause_index+=1
+			continue
+		if remaining<=.000001:break
 		var used:=minf(.05,remaining)
+		if pause_index<pauses.size():used=minf(used,float(pauses[pause_index].work)-elapsed)
 		var before:Array=temperatures.duplicate()
 		var heating:=elapsed+.000001<3.0
 		for zone:int in range(3):

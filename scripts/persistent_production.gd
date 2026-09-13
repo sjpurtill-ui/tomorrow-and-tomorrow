@@ -258,6 +258,8 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
 	var can_run:=eligible(host,job)
 	Induction.synchronize_idle(job,work if can_run else 0.0)
+	Weld.synchronize_idle(job,work if can_run else 0.0)
+	Vacuum.synchronize_idle(job,work if can_run else 0.0)
 	if not can_run or work<=0:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65

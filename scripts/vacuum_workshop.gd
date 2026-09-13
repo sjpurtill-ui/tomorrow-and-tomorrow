@@ -1,5 +1,6 @@
 extends RefCounted
 const F=preload("res://scripts/vacuum_melt.gd")
+const Pause=preload("res://scripts/thermal_pause.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
 static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	if work<=0 or not job.get("tooling_paid",false):return
@@ -13,13 +14,13 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 		for resource:String in spec.materials:
 			state.resource_stockpiles[resource]-=float(spec.materials[resource])
 			job.last_consumed[resource]=float(job.last_consumed.get(resource,0))+float(spec.materials[resource])
-		job.vacuum_pending={"recipe":job.item,"source_job":job.id,"ordinal":int(job.completed)+1,"site":state.resource_settlement_id,"reserved":spec.materials.duplicate(true),"work":0.0,"energy":0.0,"evidence":F.evidence(0,float(spec.vacuum_leak))}
+		job.vacuum_pending={"recipe":job.item,"source_job":job.id,"ordinal":int(job.completed)+1,"site":state.resource_settlement_id,"reserved":spec.materials.duplicate(true),"work":0.0,"energy":0.0,"last_day":int(state.elapsed_days),"pauses":[],"evidence":F.evidence(0,float(spec.vacuum_leak))}
 	var p:Dictionary=job.vacuum_pending
 	if p.site!=state.resource_settlement_id:return
 	var used:=minf(work,minf(6.5-float(p.work),Ops.service("electricity")/2.0))
 	if used<=0:return
 	Ops.consume_electricity(used*2);p.energy+=used*2;p.work+=used
-	job.last_work=float(job.last_work)+used;job.progress_days=float(p.work);p.evidence=F.evidence(float(p.work),float(spec.vacuum_leak))
+	job.last_work=float(job.last_work)+used;job.progress_days=float(p.work);p.evidence=F.evidence(float(p.work),float(spec.vacuum_leak),p.pauses)
 	if float(p.work)+.000001<6.5:return
 	p.witness=F.witness(p.evidence);p.report=F.inspect(p.witness)
 	var output:=String(spec.output if p.report.qualified else "Rejected Vacuum Copper")
@@ -41,8 +42,17 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 		if p.recipe!=job.item or p.source_job!=job.id or p.ordinal!=int(job.completed)+(0 if finished else 1) or p.reserved!=spec.materials:return "Invalid vacuum source."
 		if not p.site is String or p.site.length()>128:return "Invalid vacuum store."
 		if not preload("res://scripts/metallurgy_thermal_cycle.gd").number(p.work) or p.work<0 or p.work>6.500001 or not preload("res://scripts/metallurgy_thermal_cycle.gd").number(p.energy) or absf(float(p.energy)-float(p.work)*2)>.000001:return "Invalid paid vacuum work."
-		if p.evidence!=F.evidence(float(p.work),float(spec.vacuum_leak)):return "Invalid vacuum specimen evidence."
+		if not Pause.valid(p,6.0):return "Invalid vacuum interruptions."
+		if p.evidence!=F.evidence(float(p.work),float(spec.vacuum_leak),p.pauses):return "Invalid vacuum specimen evidence."
 		if finished:
 			if absf(float(p.work)-6.5)>.000001 or p.get("witness")!=F.witness(p.evidence) or p.get("report")!=F.inspect(p.witness):return "Invalid vacuum report."
 		elif absf(float(job.progress_days)-float(p.work))>.000001:return "Invalid vacuum progress."
 	return ""
+static func synchronize_idle(job:Dictionary,work:float)->void:
+	if not job.has("vacuum_pending"):return
+	var p:Dictionary=job.vacuum_pending
+	var state=WorldSimulation.state
+	var available:bool=work>0 and not bool(job.get("paused",false)) and p.site==state.resource_settlement_id and Ops.service("electricity")>0
+	Pause.synchronize(p,available,6.0,int(state.elapsed_days))
+	var spec:=preload("res://scripts/civilian_industry.gd").product(String(job.item))
+	p.evidence=F.evidence(float(p.work),float(spec.vacuum_leak),p.pauses)

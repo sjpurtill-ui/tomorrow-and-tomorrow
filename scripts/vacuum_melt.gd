@@ -2,12 +2,21 @@ extends RefCounted
 ## Selected copper charge in a pumped chamber; normalized gas/thermal response.
 const CHARGE:=1.05
 const GAS:=.001
-static func evidence(work:float,leak:float)->Dictionary:
+static func evidence(work:float,leak:float,pauses:Array=[])->Dictionary:
 	var p:=101.0;var temperature:=20.0;var dissolved:=GAS;var headspace:=0.0
 	var pumped:=0.0;var vapor:=0.0;var molten_work:=0.0;var elapsed:=0.0;var trace:Array=[]
 	var remaining:=minf(work,6.0)
-	while remaining>.000001:
+	var pause_index:=0
+	while remaining>.000001 or pause_index<pauses.size():
+		if pause_index<pauses.size() and float(pauses[pause_index].work)<=elapsed+.000001:
+			var days:=float(pauses[pause_index].days)
+			temperature=20.0+(temperature-20.0)*exp(-2.0*days)
+			p=101.0-(101.0-p)*exp(-leak*days)
+			pause_index+=1
+			continue
+		if remaining<=.000001:break
 		var used:=minf(.05,remaining)
+		if pause_index<pauses.size():used=minf(used,float(pauses[pause_index].work)-elapsed)
 		var heated:=elapsed+.000001>=1 and elapsed+.000001<4
 		var supplied:=minf(800,maxf(0,(1200-temperature)/used)) if heated else 0.0
 		temperature=maxf(20,temperature+(supplied-(temperature-20)*(.02 if heated else 2.0))*used)

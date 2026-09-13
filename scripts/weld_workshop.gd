@@ -1,5 +1,6 @@
 extends RefCounted
 const F=preload("res://scripts/weld_metallurgy.gd")
+const Pause=preload("res://scripts/thermal_pause.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
 static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	if work<=0 or not job.get("tooling_paid",false):return
@@ -13,13 +14,13 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 		for resource:String in spec.materials:
 			state.resource_stockpiles[resource]-=float(spec.materials[resource])
 			job.last_consumed[resource]=float(job.last_consumed.get(resource,0))+float(spec.materials[resource])
-		job.weld_pending={"recipe":job.item,"source_job":job.id,"ordinal":int(job.completed)+1,"site":state.resource_settlement_id,"reserved":spec.materials.duplicate(true),"work":0.0,"energy":0.0,"evidence":F.evidence(0,float(spec.weld_cooling))}
+		job.weld_pending={"recipe":job.item,"source_job":job.id,"ordinal":int(job.completed)+1,"site":state.resource_settlement_id,"reserved":spec.materials.duplicate(true),"work":0.0,"energy":0.0,"last_day":int(state.elapsed_days),"pauses":[],"evidence":F.evidence(0,float(spec.weld_cooling))}
 	var p:Dictionary=job.weld_pending
 	if p.site!=state.resource_settlement_id:return
 	var used:=minf(work,minf(5.5-float(p.work),Ops.service("electricity")/2.0))
 	if used<=0:return
 	Ops.consume_electricity(used*2);p.energy+=used*2;p.work+=used
-	job.last_work=float(job.last_work)+used;job.progress_days=float(p.work);p.evidence=F.evidence(float(p.work),float(spec.weld_cooling))
+	job.last_work=float(job.last_work)+used;job.progress_days=float(p.work);p.evidence=F.evidence(float(p.work),float(spec.weld_cooling),p.pauses)
 	if float(p.work)+.000001<5.5:return
 	p.witness=F.witness(p.evidence);p.report=F.inspect(p.witness)
 	var output:=String(spec.output if p.report.qualified else "Rejected Welded Straps")
@@ -38,8 +39,17 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 		if p.recipe!=job.item or p.source_job!=job.id or p.ordinal!=int(job.completed)+(0 if finished else 1) or p.reserved!=spec.materials:return "Invalid weld source."
 		if not p.site is String or p.site.length()>128:return "Invalid weld store."
 		if not preload("res://scripts/metallurgy_thermal_cycle.gd").number(p.work) or p.work<0 or p.work>5.500001 or not preload("res://scripts/metallurgy_thermal_cycle.gd").number(p.energy) or absf(float(p.energy)-float(p.work)*2)>.000001:return "Invalid paid weld work."
-		if p.evidence!=F.evidence(float(p.work),float(spec.weld_cooling)):return "Invalid weld specimen evidence."
+		if not Pause.valid(p,5.0):return "Invalid weld interruptions."
+		if p.evidence!=F.evidence(float(p.work),float(spec.weld_cooling),p.pauses):return "Invalid weld specimen evidence."
 		if finished:
 			if absf(float(p.work)-5.5)>.000001 or p.get("witness")!=F.witness(p.evidence) or p.get("report")!=F.inspect(p.witness):return "Invalid weld report."
 		elif absf(float(job.progress_days)-float(p.work))>.000001:return "Invalid weld progress."
 	return ""
+static func synchronize_idle(job:Dictionary,work:float)->void:
+	if not job.has("weld_pending"):return
+	var p:Dictionary=job.weld_pending
+	var state=WorldSimulation.state
+	var available:bool=work>0 and not bool(job.get("paused",false)) and p.site==state.resource_settlement_id and Ops.service("electricity")>0
+	Pause.synchronize(p,available,5.0,int(state.elapsed_days))
+	var spec:=preload("res://scripts/civilian_industry.gd").product(String(job.item))
+	p.evidence=F.evidence(float(p.work),float(spec.weld_cooling),p.pauses)
