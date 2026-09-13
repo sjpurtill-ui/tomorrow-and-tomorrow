@@ -63,7 +63,7 @@ static func validate_piece(job:Dictionary,spec:Dictionary,pending:Variant,finish
 	return ""
 static func accepted(p:Dictionary)->bool:
 	var observation:Dictionary=p.get("section",{}).get("observation",{})
-	return bool(observation.get("qualified",false)) and float(p.run.hot_work)>=1.0 and float(p.run.peak)>=800 and float(p.run.peak)<=950 and float(p.run.temperature)<=150 and float(observation.get("mean_intercept_um",1000))+float(observation.get("uncertainty_um",1000))<=12.0
+	return bool(observation.get("qualified",false)) and float(p.run.longest_hold)+Thermal.EPS>=1.0 and float(p.run.peak)>=800 and float(p.run.peak)<=950 and float(p.run.temperature)<=150 and float(observation.get("mean_intercept_um",1000))+float(observation.get("uncertainty_um",1000))<=12.0
 static func finish(job:Dictionary,spec:Dictionary)->void:
 	var p:Dictionary=job.metallurgy_pending
 	if not Sections.valid(p,spec):return
@@ -95,5 +95,6 @@ static func synchronize_idle(job:Dictionary,work:float)->void:
 		var stage:=mini(int(p.run.stage),p.run.program.size()-1)
 		var loss:=float(p.run.program[stage].loss)
 		p.run.temperature=20.0+(float(p.run.temperature)-20.0)*exp(-loss*float(missed)/float(p.run.capacity))
+		if float(p.run.temperature)<800 or float(p.run.temperature)>950:p.run.hold_streak=0.0
 		p.idle_days+=missed
 	p.last_day=today

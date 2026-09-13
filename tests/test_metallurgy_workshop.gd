@@ -131,5 +131,7 @@ func test_idle_calendar_cools_without_paying_or_satisfying_hot_work()->void:
 		var uninterrupted:=T.start(recipe.thermal_program)
 		T.advance(uninterrupted,7,3000,0)
 		assert_float(float(line.metallurgy_pending.run.hot_work)).is_less(float(uninterrupted.hot_work))
+		assert_float(float(line.metallurgy_pending.run.longest_hold)).is_equal(0.0)
+		assert_float(float(uninterrupted.longest_hold)).is_equal_approx(1.0,.000001)
 		assert_str(M.validate_job(line,recipe)).is_empty()
 	)

@@ -44,3 +44,16 @@ func test_selected_quench_requires_finite_coolant_and_invalid_progress_is_reject
 	assert_bool(T.valid(corrupt)).is_false()
 	corrupt=run.duplicate(true);corrupt.trace[0].energy=INF
 	assert_bool(T.valid(corrupt)).is_false()
+
+func test_preheating_cannot_replace_the_declared_hold()->void:
+	var run:=T.start(T.normalizing_program())
+	T.advance(run,3,3000,0)
+	assert_float(float(run.hot_work)).is_greater(1.0)
+	assert_float(float(run.longest_hold)).is_equal(0.0)
+	T.advance(run,.5,3000,0)
+	assert_float(float(run.longest_hold)).is_equal_approx(.5,.000001)
+	var corrupted:=run.duplicate(true);corrupted.longest_hold=2.0
+	assert_bool(T.valid(corrupted)).is_false()
+	T.advance(run,.5,3000,0)
+	assert_float(float(run.longest_hold)).is_equal_approx(1.0,.000001)
+	assert_bool(T.valid(run)).is_true()
