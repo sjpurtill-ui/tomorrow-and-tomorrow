@@ -360,3 +360,33 @@ func test_natural_nickel_occurrence_can_be_recognized_and_worked()->void:
 		resource.process_day({"origin":Vector3.ZERO,"settled":false,"tools":1.0})
 		assert_float(float(found.lifetime_extracted)).is_greater(0.0)
 		assert_float(float(found.remaining)+float(found.lifetime_extracted)).is_equal_approx(initial,.00001))
+func test_blow_molding_needs_air_and_completed_bottles_equip_real_assay()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		s.resource_stockpiles["LDPE Pellets"]=5.0
+		assert_int(int(run_batch("ldpe_blow_grade",1).completed)).is_equal(1)
+		assert_int(int(run_batch("ldpe_molding_grade",1).completed)).is_equal(1)
+		s.known_discoveries.append("polymer_blow_molding");s.discovery_adoption.polymer_blow_molding=1.0
+		for resource:String in I.product("blown_wash_bottle_bodies").tooling:s.resource_stockpiles[resource]=1000.0
+		var stopped:Dictionary=WorldSimulation.military.start_production_line("blown_wash_bottle_bodies",1)
+		assert_bool(stopped.get("ok",false)).is_false()
+		assert_str(String(stopped.get("error",""))).contains("Compressed Air")
+		assert_float(float(s.resource_stockpiles["Blow-Grade LDPE"])).is_equal(1.0)
+		s.resource_stockpiles["Compressed Air"]=.4
+		assert_int(int(run_batch("blown_wash_bottle_bodies",1).completed)).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Compressed Air"])).is_equal(0.0)
+		assert_int(int(run_batch("injected_wash_bottle_closures",1).completed)).is_equal(1)
+		assert_int(int(run_batch("assembled_water_wash_bottles",1).completed)).is_equal(1)
+		assert_float(float(s.resource_stockpiles["LDPE Wash Bottle Bodies"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["LDPE Wash Bottle Closures"])).is_equal(0.0)
+		s.known_discoveries.append("enzyme_catalysis");s.discovery_adoption.enzyme_catalysis=1.0
+		s.resource_stockpiles["Pancreatic Enzyme Fraction"]=1.1;s.resource_stockpiles["Prepared Tanning Hides"]=.02
+		s.resource_stockpiles["Salt"]=.05;s.resource_stockpiles["Clay"]=2;s.resource_stockpiles["Laboratory Glassware"]=1
+		# Do not use run_batch here: its tooling fixture would invent wash bottles.
+		assert_bool(WorldSimulation.military.start_production_line("wash_bottle_bating_assay",1).get("ok",false)).is_true()
+		assert_float(float(s.resource_stockpiles["Water Wash Bottles"])).is_equal(0.0)
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		P.advance(WorldSimulation.military,job,10000)
+		assert_int(int(job.completed)).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Bating Protease"])).is_equal(1.0))

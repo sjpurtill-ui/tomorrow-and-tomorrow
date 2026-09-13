@@ -138,7 +138,8 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_items": [
       "ldpe_film_grade",
-      "ldpe_molding_grade"
+      "ldpe_molding_grade",
+      "ldpe_blow_grade"
     ],
     "production_contract": "Uses named feedstock batches, installed tooling, shared Crafting labor and specified daily power/services. Material qualification consumes the specific batch and samples; ownership of imported output grants no manufacturing mastery."
   },
@@ -321,7 +322,8 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_contract": "Consumes compatible grade or formed sheet, paid process tooling, shared workshop work and energy into fitted low-load telephone covers. Covers retain a timber internal mounting base; they do not replace pressure vessels or structural machine parts.",
     "production_items": [
-      "injected_telephone_covers"
+      "injected_telephone_covers",
+      "injected_wash_bottle_closures"
     ]
   },
   {
@@ -681,7 +683,8 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "pancreatic_enzyme_fraction",
       "qualified_bating_protease",
-      "enzyme_bated_hides"
+      "enzyme_bated_hides",
+      "wash_bottle_bating_assay"
     ],
     "production_contract": "Separate a finite rapidly decaying pancreatic fraction from actual hunted gland tissue, qualify its activity on hide samples, and spend specific protease in hide bating. Biological stocks lose activity daily; imported enzyme does not teach extraction."
   },
@@ -1099,5 +1102,40 @@ static func entries()->Array[Dictionary]:
       "qualified_isocyanate_feed"
     ],
     "production_contract": "Pay named amine and compatible carbonylation inputs, contained conversion and cooling capacity, separation, quality checks and residue handling; retain finite yield and losses.; named feedstocks and finite paid operating inputs are required. Imported material does not confer synthesis mastery."
+  },
+  {
+    "id": "polymer_blow_molding",
+    "name": "Polymer Blow Molding",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_melt_rheology",
+      "compressed_air_systems"
+    ],
+    "requires_all": [
+      "polymer_melt_rheology",
+      "compressed_air_systems"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Blow Molding",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Expand a qualified polymer preform against a mold through controlled pressure",
+    "effects": {},
+    "production_contract": "Qualified parison resin, compressed air, mold tooling and power produce hollow rinse-bottle bodies. Separately molded closures and leak testing produce water dispensers used in paid enzyme assays. No pressure-vessel, sterile, hot-liquid or universal-solvent qualification.",
+    "production_items": [
+      "blown_wash_bottle_bodies",
+      "assembled_water_wash_bottles"
+    ]
   }
 ]

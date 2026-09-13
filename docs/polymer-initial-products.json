@@ -921,5 +921,87 @@
       "Steel": 2,
       "Timber": 2
     }
+  },
+  "ldpe_blow_grade": {
+    "name": "Parison-tested LDPE batch",
+    "output": "Blow-Grade LDPE",
+    "gate": "polymer_melt_rheology",
+    "materials": {
+      "LDPE Pellets": 1.06
+    },
+    "days": 3,
+    "tooling": {
+      "Pressure Vessels": 1,
+      "Laboratory Glassware": 2,
+      "Steel": 3
+    },
+    "power": 1,
+    "daily_power": 0.3333333333333333
+  },
+  "blown_wash_bottle_bodies": {
+    "name": "Blow-molded rinse bottle bodies",
+    "output": "LDPE Wash Bottle Bodies",
+    "gate": "polymer_blow_molding",
+    "materials": {
+      "Blow-Grade LDPE": 0.25,
+      "Compressed Air": 0.4,
+      "Freshwater": 0.5
+    },
+    "days": 2,
+    "tooling": {
+      "Electric Motors": 1,
+      "Steel": 6,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 2,
+    "daily_power": 1
+  },
+  "injected_wash_bottle_closures": {
+    "name": "Molded rinse bottle closure and nozzle",
+    "output": "LDPE Wash Bottle Closures",
+    "gate": "polymer_injection_molding",
+    "materials": {
+      "Molding-Grade LDPE": 0.06,
+      "Freshwater": 0.1
+    },
+    "days": 1,
+    "tooling": {
+      "Electric Motors": 1,
+      "Steel": 3,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 1,
+    "daily_power": 1
+  },
+  "assembled_water_wash_bottles": {
+    "name": "Leak-tested water wash bottles",
+    "output": "Water Wash Bottles",
+    "gate": "polymer_blow_molding",
+    "materials": {
+      "LDPE Wash Bottle Bodies": 1,
+      "LDPE Wash Bottle Closures": 1,
+      "Freshwater": 0.2
+    },
+    "days": 1,
+    "tooling": {
+      "Steel": 1
+    }
+  },
+  "wash_bottle_bating_assay": {
+    "name": "Water-dispensed bating assay",
+    "output": "Bating Protease",
+    "gate": "enzyme_catalysis",
+    "materials": {
+      "Pancreatic Enzyme Fraction": 1.1,
+      "Prepared Tanning Hides": 0.02,
+      "Salt": 0.05,
+      "Freshwater": 0.1
+    },
+    "days": 2,
+    "tooling": {
+      "Laboratory Glassware": 1,
+      "Water Wash Bottles": 1,
+      "Clay": 2
+    }
   }
 }
