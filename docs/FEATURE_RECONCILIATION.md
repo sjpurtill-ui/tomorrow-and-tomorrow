@@ -1,3 +1,9 @@
+## September 13 — eight geological chronology proposals
+
+Authored eight distinct D22 methods for natural annual chronologies, calibrated radiocarbon, luminescence, cosmogenic exposure and burial, fission-track thermal histories and argon release spectra. Each preserves its actual observation, paid sample/reference requirements, uncertainty and failure conditions. Existing broad geochronology and core reconstruction identities are unchanged. See `technology-review/Geochronology Methods Review.md` for institutional sources and explicit game-design boundaries.
+
+Ledger: **801 integrated + 2,663 drafts = 3,464 identities**, leaving **1,536 to author and 4,199 to implement**. D22 coverage is **140 / 160**. Parent, duplicate, reachability and horizon checks and 15 ledger tests pass. These are proposals only; runtime801 and art236/801/565queued remain unchanged. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/geochronology-coverage`, base `49137cbf2631315fe7a3314b4fb952c73ccde7eb`. Catalog/docs only, no runtime conflicts or save effect, player launch or package rebuild. Geological ages are sample interpretations, not gameplay calendar gates.
+
 ## September 13 — five early foundation illustrations
 
 Added reviewed paper illustrations for seasonal patterns, smoke preservation, drainage, route memory and labor rotations. Native originals and exact prompts are retained in `assets/ui/research/paper/EARLY_FOUNDATION_PROMPTS.md`; five imported textures pass 768-pixel/mipmap checks and 12 isolated atlas cases pass. Art: **236 verified / 801 live, 565 queued**. No new runtime identities or save behavior.

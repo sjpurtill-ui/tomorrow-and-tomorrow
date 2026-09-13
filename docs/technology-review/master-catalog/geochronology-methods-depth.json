@@ -1,0 +1,332 @@
+[
+  {
+    "id": "tree_ring_crossdating",
+    "name": "Tree-Ring Crossdating",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "seasonal_patterns",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "seasonal_patterns, measurement_uncertainty",
+    "mechanism": "Match overlapping sequences of ring-width patterns to establish a supported relative or anchored calendar chronology.",
+    "operating_requirement": "Attributable wood samples, prepared surfaces, magnification, measured ring series, overlapping reference samples and analyst time.",
+    "consequence": "Dates qualified growth sequences; absent outer rings do not establish a felling date, and an unanchored sequence remains floating.",
+    "semantic_boundary": "Seasonal observation recognizes recurrence; crossdating resolves correspondence between retained annual sequences. A climate interpretation still requires proxy calibration.",
+    "implementation_acceptance": [
+      "Introduce a missing or false ring and require inconsistent matches to be flagged; no calendar year appears without an anchored reference."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tree_ring_crossdating",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Introduce a missing or false ring and require inconsistent matches to be flagged; no calendar year appears without an anchored reference.",
+      "operating_requirements": "Attributable wood samples, prepared surfaces, magnification, measured ring series, overlapping reference samples and analyst time.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nps.gov/articles/archeology-dendrochronology.htm",
+      "https://oceanservice.noaa.gov/education/dyw-tree-detective.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H04 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  },
+  {
+    "id": "varve_chronology_correlation",
+    "name": "Varve Chronology Correlation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "sediment_core_reconstruction",
+      "compound_microscopy"
+    ],
+    "requires_any": [],
+    "foundations": "sediment_core_reconstruction, compound_microscopy",
+    "mechanism": "Correlate qualified annual sediment couplets across overlapping cores while retaining counting gaps and ambiguous layers.",
+    "operating_requirement": "Actual undisturbed cores, section preparation, optical measurements, independent annuality evidence and finite correlation work.",
+    "consequence": "Constrains elapsed sediment accumulation time; erosion, disturbances and unverified annuality prevent an exact continuous calendar.",
+    "semantic_boundary": "Core reconstruction preserves sequences; this specifically tests annual layer correspondence and accumulated counting uncertainty.",
+    "implementation_acceptance": [
+      "A missing core interval remains a gap; a storm layer cannot be counted as a year solely because it is visible."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "varve_chronology_correlation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A missing core interval remains a gap; a storm layer cannot be counted as a year solely because it is visible.",
+      "operating_requirements": "Actual undisturbed cores, section preparation, optical measurements, independent annuality evidence and finite correlation work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://water.usgs.gov/wrri/grant-details.php?ProjectID=2008CA243B&Type=Annual"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H04 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  },
+  {
+    "id": "radiocarbon_calendar_calibration",
+    "name": "Radiocarbon Calendar Calibration",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiometric_geochronology",
+      "measurement_uncertainty",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "radiometric_geochronology, measurement_uncertainty, experimental_controls",
+    "mechanism": "Map a measured conventional radiocarbon age and its uncertainty through an attributable calibration curve and an appropriate reservoir model.",
+    "operating_requirement": "Prepared dated sample, actual qualified carbon measurement, blanks and standards, applicable curve version, sample-context evidence and analysis work.",
+    "consequence": "Produces a possibly disjoint calendar-age range; contamination or unsupported reservoir correction prevents a confident event date.",
+    "semantic_boundary": "General isotope geochronology does not equate conventional radiocarbon years to calendar years. A sample date is not automatically the age of its surrounding artifact or water body.",
+    "implementation_acceptance": [
+      "Retain separate probability ranges where the curve permits multiple dates; changing reservoir evidence must change or invalidate the result."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radiocarbon_calendar_calibration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Retain separate probability ranges where the curve permits multiple dates; changing reservoir evidence must change or invalidate the result.",
+      "operating_requirements": "Prepared dated sample, actual qualified carbon measurement, blanks and standards, applicable curve version, sample-context evidence and analysis work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://cmgds.marine.usgs.gov/catalog/spcmsc/FL_keys_radiocarbon_reservoir_age_variability_metadata_Marine20.faq.html",
+      "https://pubs.usgs.gov/pp/pp1661f/pp1661f.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H05 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  },
+  {
+    "id": "luminescence_sediment_dating",
+    "name": "Luminescence Sediment Dating",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiation_measurement",
+      "spectroscopy",
+      "sediment_core_reconstruction"
+    ],
+    "requires_any": [],
+    "foundations": "radiation_measurement, spectroscopy, sediment_core_reconstruction",
+    "mechanism": "Combine an observed trapped-charge luminescence dose with a qualified environmental dose rate to estimate time since a supported resetting event.",
+    "operating_requirement": "Light-protected suitable mineral sample, preparation, controlled stimulation and photon detection, dose references, environmental and moisture evidence, instrument time.",
+    "consequence": "Constrains burial or resetting age; incomplete bleaching, unstable signal or unsupported dose history prevents an unconditional age.",
+    "semantic_boundary": "Measures accumulated trapped charge rather than a parent/daughter isotope ratio. Sample exposure during collection can destroy the relevant record.",
+    "implementation_acceptance": [
+      "A light-exposed or incompletely reset sample must not yield the same accepted burial date as a qualified specimen; dose-rate uncertainty propagates."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "luminescence_sediment_dating",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A light-exposed or incompletely reset sample must not yield the same accepted burial date as a qualified specimen; dose-rate uncertainty propagates.",
+      "operating_requirements": "Light-protected suitable mineral sample, preparation, controlled stimulation and photon detection, dose references, environmental and moisture evidence, instrument time.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/labs/luminescence-dating-laboratory/luminescence-dating-laboratory",
+      "https://www.usgs.gov/publications/guide-interpreting-and-reporting-luminescence-dating-results"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H05 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  },
+  {
+    "id": "cosmogenic_surface_exposure_dating",
+    "name": "Cosmogenic Surface Exposure Dating",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiometric_geochronology",
+      "geometric_survey",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "radiometric_geochronology, geometric_survey, measurement_uncertainty",
+    "mechanism": "Interpret measured in-situ cosmogenic nuclide concentration using a qualified production and surface-history model.",
+    "operating_requirement": "Located rock specimens, separation chemistry, sensitive isotope analysis, production-rate references, shielding and erosion evidence, field and laboratory labor.",
+    "consequence": "Constrains surface residence or erosion; inherited nuclides and changing cover can prevent a unique exposure age.",
+    "semantic_boundary": "Near-surface production is part of this clock, unlike a generic closed decay system; it does not directly date initial rock crystallization.",
+    "implementation_acceptance": [
+      "Changing documented cover or inherited concentration changes the inferred interval; the method cannot reveal an unvisited surface."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cosmogenic_surface_exposure_dating",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Changing documented cover or inherited concentration changes the inferred interval; the method cannot reveal an unvisited surface.",
+      "operating_requirements": "Located rock specimens, separation chemistry, sensitive isotope analysis, production-rate references, shielding and erosion evidence, field and laboratory labor.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/dating-cosmogenic-nuclides"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H05 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  },
+  {
+    "id": "paired_nuclide_burial_histories",
+    "name": "Paired-Nuclide Burial Histories",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "cosmogenic_surface_exposure_dating",
+      "sediment_core_reconstruction"
+    ],
+    "requires_any": [],
+    "foundations": "cosmogenic_surface_exposure_dating, sediment_core_reconstruction",
+    "mechanism": "Use two measured cosmogenic nuclides with different decay behavior to constrain exposure followed by burial under an explicit history model.",
+    "operating_requirement": "A qualified common specimen, both isotope measurements, correlated uncertainties, production and burial-shielding assumptions, finite model comparison.",
+    "consequence": "Can distinguish some burial histories that a single concentration cannot resolve; complex re-exposure can remain ambiguous.",
+    "semantic_boundary": "Adds a two-nuclide history constraint, not another name for a single surface-exposure clock.",
+    "implementation_acceptance": [
+      "Withhold a unique burial duration when two incompatible histories fit the observations; one isotope alone cannot satisfy the method."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "paired_nuclide_burial_histories",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Withhold a unique burial duration when two incompatible histories fit the observations; one isotope alone cannot satisfy the method.",
+      "operating_requirements": "A qualified common specimen, both isotope measurements, correlated uncertainties, production and burial-shielding assumptions, finite model comparison.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/dating-cosmogenic-nuclides"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H05 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  },
+  {
+    "id": "fission_track_thermochronology",
+    "name": "Fission-Track Thermochronology",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiometric_geochronology",
+      "compound_microscopy",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "radiometric_geochronology, compound_microscopy, precision_thermometry",
+    "mechanism": "Compare retained fission-track counts and length distributions with qualified annealing behavior to constrain a mineral thermal history.",
+    "operating_requirement": "Prepared suitable grains, track microscopy and calibration, mineral-composition evidence, an applicable annealing model and paid interpretation.",
+    "consequence": "Constrains a range of cooling or heating histories; mineral chemistry and model extrapolation uncertainty remain visible.",
+    "semantic_boundary": "Track damage and its thermal shortening are the observations; a track age alone is not a universal crystallization date or exact peak temperature.",
+    "implementation_acceptance": [
+      "Different track-length distributions at similar apparent ages must affect the allowed history; unsupported annealing calibration prevents a precise reconstruction."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fission_track_thermochronology",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Different track-length distributions at similar apparent ages must affect the allowed history; unsupported annealing calibration prevents a precise reconstruction.",
+      "operating_requirements": "Prepared suitable grains, track microscopy and calibration, mineral-composition evidence, an applicable annealing model and paid interpretation.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/high-temperature-annealing-fission-tracks-fluorapatite-santa-fe-springs-oil-field-los",
+      "https://www.usgs.gov/publications/fission-track-dating-apatite-and-zircon-interlaboratory-comparison"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H05 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  },
+  {
+    "id": "argon_step_heating_interpretation",
+    "name": "Argon Step-Heating Interpretation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiometric_geochronology",
+      "vacuum_pumps",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "radiometric_geochronology, vacuum_pumps, precision_thermometry",
+    "mechanism": "Interpret a measured incremental argon-release age spectrum and associated uncertainties to assess a supported geological age component.",
+    "operating_requirement": "Suitable prepared mineral, qualified irradiation service and reference monitors, maintained vacuum extraction and heating, isotope measurements, blanks and analyst work.",
+    "consequence": "Disturbed steps or excess argon can defeat a plateau interpretation; a reported age retains the selected steps and released-gas fraction.",
+    "semantic_boundary": "A sequence of measured release fractions tests internal consistency beyond a bulk isotope age. It provides no automatic cooling or crystallization label.",
+    "implementation_acceptance": [
+      "Discordant release steps cannot be silently averaged into a precise plateau; missing reference or blank evidence blocks qualification."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "argon_step_heating_interpretation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Discordant release steps cannot be silently averaged into a precise plateau; missing reference or blank evidence blocks qualification.",
+      "operating_requirements": "Suitable prepared mineral, qualified irradiation service and reference monitors, maintained vacuum extraction and heating, isotope measurements, blanks and analyst work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or a traceable dataset and reconstruct calibration through paid comparisons; an imported age label does not provide mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/publication/dr1227/full",
+      "https://pubs.usgs.gov/bul/b2194/B2194-508.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "H05 is an editorial capability classification, not an invention date or calendar unlock. Parent choices, recovery and acceptance scenarios are game-design proposals."
+  }
+]

@@ -13544,6 +13544,86 @@
       "classification_status": "editorial_review",
       "rationale": "Qualified chromatography measures a bounded distribution through actual separation and calibration; no exclusive invention date or runtime time gate is implied.",
       "scope_digest": "1fcba8910c20827cc9b7aa264f317a145ccc716409a32c5a73d9db7169f6a9b5"
+    },
+    {
+      "id": "tree_ring_crossdating",
+      "name": "Tree-Ring Crossdating",
+      "horizon": "H04",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "95d13ee2e82e3980fc18e33a85715fee6ab19ff73ffb97063df1474959ccf300"
+    },
+    {
+      "id": "varve_chronology_correlation",
+      "name": "Varve Chronology Correlation",
+      "horizon": "H04",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "618b5d452bffd724b645dfd59fa2d2ff49ee28abc1a0c2df98a2a69223069f1c"
+    },
+    {
+      "id": "radiocarbon_calendar_calibration",
+      "name": "Radiocarbon Calendar Calibration",
+      "horizon": "H05",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "436eb90034cb01aa4415445d02a966c88ad49b62c3e7a2d05a72c8947f77e69b"
+    },
+    {
+      "id": "luminescence_sediment_dating",
+      "name": "Luminescence Sediment Dating",
+      "horizon": "H05",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "3b123d5d96c01016024b2674ce24abe98dd84a7b3a9675192c66cbc93d90c59e"
+    },
+    {
+      "id": "cosmogenic_surface_exposure_dating",
+      "name": "Cosmogenic Surface Exposure Dating",
+      "horizon": "H05",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "b3c100bbacc895eb32e66b908d003e2ea1a05904c2f7e39bc3ef0edc12d50a0c"
+    },
+    {
+      "id": "paired_nuclide_burial_histories",
+      "name": "Paired-Nuclide Burial Histories",
+      "horizon": "H05",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "24cef13c3ed0ade9bfa66c658521449d9fda039f577240e821a5166412db4de4"
+    },
+    {
+      "id": "fission_track_thermochronology",
+      "name": "Fission-Track Thermochronology",
+      "horizon": "H05",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "418a3b7bf30f7ec6cac085dcfd09cdbfc3ae2b96a02ac89ffe2ed94bc08671c1"
+    },
+    {
+      "id": "argon_step_heating_interpretation",
+      "name": "Argon Step-Heating Interpretation",
+      "horizon": "H05",
+      "source_file": "geochronology-methods-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
+      "scope_digest": "0c3dde9885c0f6a7dd1f135e901cf505246288c2665abed1478b7e5eae91c41a"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
