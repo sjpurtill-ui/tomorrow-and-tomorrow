@@ -4,8 +4,8 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 
 ## Authoritative baselines
 
-- Verified canonical runtime/art `cab79f9c037b1235a24bb2c231c6e3b30b5030fb`: **856 discoveries, 638 learning routes, 666 civilian workshop recipes plus five analyses, and 27 facilities**. See `../../INTEGRATION_STATUS.md` for the current integration checkpoint and acceptance limits.
-- The reconciled ledger contains **856 integrated + 2,614 drafts = 3,470 identities**, leaving **1,530 to author and 4,144 to implement**. Verified subject art: **295; 561 remain queued**.
+- Verified canonical runtime/art `41f5b51b21f3d0884d957374ab1b824d241e9e0b`: **868 discoveries, 650 learning routes, 726 civilian workshop recipes plus five analyses, and 27 facilities**. See `../../INTEGRATION_STATUS.md` for the current integration checkpoint and acceptance limits.
+- The reconciled ledger contains **868 integrated + 2,602 drafts = 3,470 identities**, leaving **1,530 to author and 4,132 to implement**. Verified subject art: **307; 561 remain queued**.
 - `../candidate-atlas.json` contains 600 review subjects, not additional discovery identities. Coverage currently maps 475 subjects (469 fully mapped authored scopes and six partial), leaving 125 unmapped. This is authoring reconciliation, not gameplay acceptance.
 - New records remain `authored_draft` until operating implementation is independently verified and promoted from a committed canonical snapshot. Historical dates are not unlock gates.
 - Earlier sections below retain their publication checkpoints. `coverage.json` and the current integration record provide the live totals.

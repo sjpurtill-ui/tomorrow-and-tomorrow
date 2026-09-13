@@ -1,49 +1,6 @@
 [
   {
     "field": "D04",
-    "id": "steel_normalizing_control",
-    "name": "Steel Normalizing Control",
-    "foundations": "steel_refining",
-    "mechanism": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
-    "operating_requirement": "Known steel composition, suitable furnace and structural or mechanical tests",
-    "consequence": "Produce a bounded microstructural condition without universal strength gains",
-    "status": "authored_draft",
-    "requires_all": [
-      "steel_refining"
-    ],
-    "requires_any": [
-      [
-        "material_phase_diagrams",
-        "experimental_controls"
-      ]
-    ],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "steel_normalizing_control",
-      "local_demonstration": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
-      "operating_requirements": "Known steel composition, suitable furnace and structural or mechanical tests",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
-    "branching_note": "Controlled comparative trials can precede full equilibrium phase models; the learned process retains material-specific limits."
-  },
-  {
-    "field": "D04",
     "id": "steel_nitriding_qualification",
     "name": "Steel Nitriding Qualification",
     "foundations": "material_phase_diagrams",
@@ -84,44 +41,6 @@
     },
     "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
     "branching_note": "Different qualified surface-reaction traditions can support investigation; carburized cases are not required on every treated part."
-  },
-  {
-    "field": "D04",
-    "id": "induction_surface_hardening",
-    "name": "Induction Surface Hardening",
-    "foundations": "electromagnetic_induction,hardened_edges",
-    "mechanism": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
-    "operating_requirement": "Compatible power equipment, workpiece, thermal control and inspection",
-    "consequence": "Localize treatment while geometry and material response limit results",
-    "status": "authored_draft",
-    "requires_all": [
-      "electromagnetic_induction",
-      "hardened_edges"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "induction_surface_hardening",
-      "local_demonstration": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
-      "operating_requirements": "Compatible power equipment, workpiece, thermal control and inspection",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
   },
   {
     "field": "D04",
@@ -168,130 +87,6 @@
   },
   {
     "field": "D04",
-    "id": "metal_grain_size_measurement",
-    "name": "Metal Grain Size Measurement",
-    "foundations": "compound_microscopy",
-    "mechanism": "Measure representative grain structure using a defined preparation and counting method",
-    "operating_requirement": "Prepared samples, qualified imaging and analysts",
-    "consequence": "Compare microstructure without treating grain size alone as complete performance",
-    "status": "authored_draft",
-    "requires_all": [
-      "compound_microscopy"
-    ],
-    "requires_any": [
-      [
-        "material_phase_diagrams",
-        "experimental_controls"
-      ]
-    ],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "metal_grain_size_measurement",
-      "local_demonstration": "Measure representative grain structure using a defined preparation and counting method",
-      "operating_requirements": "Prepared samples, qualified imaging and analysts",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
-    "branching_note": "Prepared microstructure can be measured before a complete phase theory; sampling and preparation artifacts remain limits."
-  },
-  {
-    "field": "D04",
-    "id": "residual_stress_assessment",
-    "name": "Residual Stress Assessment",
-    "foundations": "stress_strain_relations,dimensional_metrology",
-    "mechanism": "Estimate retained internal stresses through qualified measurement and model assumptions",
-    "operating_requirement": "Suitable specimens, instruments and interpretation expertise",
-    "consequence": "Identify distortion or failure contributions with method-specific uncertainty",
-    "status": "authored_draft",
-    "requires_all": [
-      "stress_strain_relations",
-      "dimensional_metrology"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "residual_stress_assessment",
-      "local_demonstration": "Estimate retained internal stresses through qualified measurement and model assumptions",
-      "operating_requirements": "Suitable specimens, instruments and interpretation expertise",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
-  },
-  {
-    "field": "D04",
-    "id": "metal_fracture_toughness_testing",
-    "name": "Metal Fracture Toughness Testing",
-    "foundations": "stress_strain_relations",
-    "mechanism": "Measure resistance to crack extension under a defined qualified specimen condition",
-    "operating_requirement": "Representative material, calibrated loading equipment and trained analysis",
-    "consequence": "Support bounded damage tolerance rather than equating strength with toughness",
-    "status": "authored_draft",
-    "requires_all": [
-      "stress_strain_relations"
-    ],
-    "requires_any": [
-      [
-        "cyclic_fatigue",
-        "structural_load_testing"
-      ]
-    ],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "metal_fracture_toughness_testing",
-      "local_demonstration": "Measure resistance to crack extension under a defined qualified specimen condition",
-      "operating_requirements": "Representative material, calibrated loading equipment and trained analysis",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
-    "branching_note": "Crack-extension testing may derive from repeated-load or static fracture evidence; prior fatigue specialization is not mandatory."
-  },
-  {
-    "field": "D04",
     "id": "metal_hydrogen_damage_assessment",
     "name": "Metal Hydrogen Damage Assessment",
     "foundations": "corrosion_rate_measurement,metal_fracture_toughness_testing",
@@ -310,44 +105,6 @@
       "destination": "metal_hydrogen_damage_assessment",
       "local_demonstration": "Evaluate susceptibility to hydrogen-related degradation under defined exposure and loading",
       "operating_requirements": "Characterized material, qualified tests and environmental controls",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
-  },
-  {
-    "field": "D04",
-    "id": "welding_metallurgy",
-    "name": "Welding Metallurgy",
-    "foundations": "forge_welding,material_phase_diagrams",
-    "mechanism": "Relate joining thermal history to local microstructure and mechanical performance",
-    "operating_requirement": "Qualified joining equipment, known materials and inspection or test capacity",
-    "consequence": "Select evaluated joint processes rather than assuming a joined part matches parent material",
-    "status": "authored_draft",
-    "requires_all": [
-      "forge_welding",
-      "material_phase_diagrams"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "welding_metallurgy",
-      "local_demonstration": "Relate joining thermal history to local microstructure and mechanical performance",
-      "operating_requirements": "Qualified joining equipment, known materials and inspection or test capacity",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent available source",
@@ -462,44 +219,6 @@
       "destination": "hot_isostatic_densification",
       "local_demonstration": "Densify a suitable material under a qualified combined thermal and pressure treatment",
       "operating_requirements": "Industrial pressure equipment, appropriate material and property verification",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
-  },
-  {
-    "field": "D04",
-    "id": "vacuum_metal_melting",
-    "name": "Vacuum Metal Melting",
-    "foundations": "vacuum_pumps,metal_casting_feed_design",
-    "mechanism": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
-    "operating_requirement": "Compatible furnace, vacuum equipment, power and composition testing",
-    "consequence": "Produce evaluated material quality while volatile losses and equipment limits remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "vacuum_pumps",
-      "metal_casting_feed_design"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "vacuum_metal_melting",
-      "local_demonstration": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
-      "operating_requirements": "Compatible furnace, vacuum equipment, power and composition testing",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent available source",

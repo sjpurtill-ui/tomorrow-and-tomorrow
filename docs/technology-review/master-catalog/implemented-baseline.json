@@ -1,5 +1,5 @@
 {
-  "source_commit": "cab79f9c037b1235a24bb2c231c6e3b30b5030fb",
+  "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -69706,6 +69706,1280 @@
         "requires": [
           "mechanical_oscillation",
           "precision_machinery"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "material_phase_diagrams",
+      "name": "Material Phase Diagrams",
+      "foundations": "crystallography,precision_thermometry",
+      "mechanism": "Map stable or observed phase relations against declared composition and conditions",
+      "operating_requirement": "Characterized samples, controlled conditions and measurement evidence",
+      "consequence": "Guide processing choices while nonequilibrium behavior requires additional evidence",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Material Phase Diagrams: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "material_phase_diagrams",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Material Phase Diagrams",
+        "local_demonstration": "Map stable or observed phase relations against declared composition and conditions",
+        "operating_requirements": "Characterized samples, controlled conditions and measurement evidence",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "crystallography",
+          "precision_thermometry"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "material_phase_diagrams",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Material Phase Diagrams",
+            "missing_all": [
+              "crystallography",
+              "precision_thermometry"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "crystallography",
+              "precision_thermometry"
+            ],
+            "requires_all": [
+              "crystallography",
+              "precision_thermometry"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Material Phase Diagrams",
+        "observation": "Map stable or observed phase relations against declared composition and conditions",
+        "operating_contract": "Characterized samples, controlled conditions and measurement evidence",
+        "production_contract": "Paid Pb-Sn samples at selected nominal feed grades and temperatures produce observed-flow survey charts consumed by solder manufacture; this selected survey does not assay composition or solve universal phase equilibria.",
+        "production_items": [
+          "lead_tin_phase_survey",
+          "phase_selected_solder"
+        ],
+        "requires": [
+          "crystallography",
+          "precision_thermometry"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "steel_normalizing_control",
+      "name": "Steel Normalizing Control",
+      "foundations": "steel_refining",
+      "mechanism": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
+      "operating_requirement": "Known steel composition, suitable furnace and structural or mechanical tests",
+      "consequence": "Produce a bounded microstructural condition without universal strength gains",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "material_phase_diagrams",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "steel_normalizing_control",
+        "local_demonstration": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
+        "operating_requirements": "Known steel composition, suitable furnace and structural or mechanical tests",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Controlled comparative trials can precede full equilibrium phase models; the learned process retains material-specific limits.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "steel_refining"
+        ],
+        "previous_requires_any": [
+          [
+            "material_phase_diagrams",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "steel_normalizing_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Steel Normalizing Control",
+            "missing_all": [
+              "steel_refining"
+            ],
+            "missing_any": [
+              [
+                "material_phase_diagrams",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "steel_refining",
+              "material_phase_diagrams",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "steel_refining"
+            ],
+            "requires_any": [
+              [
+                "material_phase_diagrams",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Steel Normalizing Control",
+        "observation": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
+        "operating_contract": "Known steel composition, suitable furnace and structural or mechanical tests",
+        "production_contract": "Heat nominal steel in a paid furnace, retain conserved energy, continuous hold and cooling history, then prepare and measure a destructive grain section before accepting shaft stock.",
+        "production_items": [
+          "normalizing_steel_sections"
+        ],
+        "requires": [
+          "steel_refining"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "material_phase_diagrams",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "induction_surface_hardening",
+      "name": "Induction Surface Hardening",
+      "foundations": "electromagnetic_induction,hardened_edges",
+      "mechanism": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
+      "operating_requirement": "Compatible power equipment, workpiece, thermal control and inspection",
+      "consequence": "Localize treatment while geometry and material response limit results",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "induction_surface_hardening",
+        "local_demonstration": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
+        "operating_requirements": "Compatible power equipment, workpiece, thermal control and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "electromagnetic_induction",
+          "hardened_edges"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "induction_surface_hardening",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Induction Surface Hardening",
+            "missing_all": [
+              "electromagnetic_induction",
+              "hardened_edges"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "electromagnetic_induction",
+              "hardened_edges"
+            ],
+            "requires_all": [
+              "electromagnetic_induction",
+              "hardened_edges"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Induction Surface Hardening",
+        "observation": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
+        "operating_contract": "Compatible power equipment, workpiece, thermal control and inspection",
+        "production_contract": "Pay compatible induction apparatus, power and coolant for selected surface/core heating, quench and tempering; measured inspection accepts or rejects treated shafts.",
+        "production_items": [
+          "induction_hardened_shafts"
+        ],
+        "requires": [
+          "electromagnetic_induction",
+          "hardened_edges"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "metal_grain_size_measurement",
+      "name": "Metal Grain Size Measurement",
+      "foundations": "compound_microscopy",
+      "mechanism": "Measure representative grain structure using a defined preparation and counting method",
+      "operating_requirement": "Prepared samples, qualified imaging and analysts",
+      "consequence": "Compare microstructure without treating grain size alone as complete performance",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "material_phase_diagrams",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "metal_grain_size_measurement",
+        "local_demonstration": "Measure representative grain structure using a defined preparation and counting method",
+        "operating_requirements": "Prepared samples, qualified imaging and analysts",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Prepared microstructure can be measured before a complete phase theory; sampling and preparation artifacts remain limits.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "compound_microscopy"
+        ],
+        "previous_requires_any": [
+          [
+            "material_phase_diagrams",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "metal_grain_size_measurement",
+        "inspection_items": [
+          "normalizing_steel_sections"
+        ],
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Metal Grain Size Measurement",
+            "missing_all": [
+              "compound_microscopy"
+            ],
+            "missing_any": [
+              [
+                "material_phase_diagrams",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "compound_microscopy",
+              "material_phase_diagrams",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "compound_microscopy"
+            ],
+            "requires_any": [
+              [
+                "material_phase_diagrams",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Metal Grain Size Measurement",
+        "observation": "Measure representative grain structure using a defined preparation and counting method",
+        "operating_contract": "Prepared samples, qualified imaging and analysts",
+        "production_contract": "Pay destructive section preparation, microscope operation and analyst work; derive image scale from a fabricated reference slide with bounded tolerance and measure synthetic grain boundaries before releasing normalized steel.",
+        "requires": [
+          "compound_microscopy"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "material_phase_diagrams",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "residual_stress_assessment",
+      "name": "Residual Stress Assessment",
+      "foundations": "stress_strain_relations,dimensional_metrology",
+      "mechanism": "Estimate retained internal stresses through qualified measurement and model assumptions",
+      "operating_requirement": "Suitable specimens, instruments and interpretation expertise",
+      "consequence": "Identify distortion or failure contributions with method-specific uncertainty",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "residual_stress_assessment",
+        "local_demonstration": "Estimate retained internal stresses through qualified measurement and model assumptions",
+        "operating_requirements": "Suitable specimens, instruments and interpretation expertise",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "stress_strain_relations",
+          "dimensional_metrology"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "residual_stress_assessment",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Residual Stress Assessment",
+            "missing_all": [
+              "stress_strain_relations",
+              "dimensional_metrology"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "stress_strain_relations",
+              "dimensional_metrology"
+            ],
+            "requires_all": [
+              "stress_strain_relations",
+              "dimensional_metrology"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Residual Stress Assessment",
+        "observation": "Estimate retained internal stresses through qualified measurement and model assumptions",
+        "operating_contract": "Suitable specimens, instruments and interpretation expertise",
+        "production_contract": "Pay instruments and analysis of a traceable formed bar; infer residual stress from measured slit response using the selected five-layer compliance model and bounded gauge resolution.",
+        "production_items": [
+          "external_residual_assessment",
+          "residual_slitting_surveys",
+          "calibrated_slitting_stations"
+        ],
+        "requires": [
+          "stress_strain_relations",
+          "dimensional_metrology"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "metal_fracture_toughness_testing",
+      "name": "Metal Fracture Toughness Testing",
+      "foundations": "stress_strain_relations",
+      "mechanism": "Measure resistance to crack extension under a defined qualified specimen condition",
+      "operating_requirement": "Representative material, calibrated loading equipment and trained analysis",
+      "consequence": "Support bounded damage tolerance rather than equating strength with toughness",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "cyclic_fatigue",
+          "structural_load_testing"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "metal_fracture_toughness_testing",
+        "local_demonstration": "Measure resistance to crack extension under a defined qualified specimen condition",
+        "operating_requirements": "Representative material, calibrated loading equipment and trained analysis",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Crack-extension testing may derive from repeated-load or static fracture evidence; prior fatigue specialization is not mandatory.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "stress_strain_relations"
+        ],
+        "previous_requires_any": [
+          [
+            "cyclic_fatigue",
+            "structural_load_testing"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "metal_fracture_toughness_testing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Metal Fracture Toughness Testing",
+            "missing_all": [
+              "stress_strain_relations"
+            ],
+            "missing_any": [
+              [
+                "cyclic_fatigue",
+                "structural_load_testing"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "stress_strain_relations",
+              "cyclic_fatigue",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "stress_strain_relations"
+            ],
+            "requires_any": [
+              [
+                "cyclic_fatigue",
+                "structural_load_testing"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Metal Fracture Toughness Testing",
+        "observation": "Measure resistance to crack extension under a defined qualified specimen condition",
+        "operating_contract": "Representative material, calibrated loading equipment and trained analysis",
+        "production_contract": "Pay selected-geometry specimen preparation, precracking and loading of a traceable formed bar; observed load/displacement yields provisional fracture screening, not certified fracture toughness.",
+        "production_items": [
+          "external_fracture_assessment",
+          "precracked_fracture_trials",
+          "fracture_reference_stations"
+        ],
+        "requires": [
+          "stress_strain_relations"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "cyclic_fatigue",
+            "structural_load_testing"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "welding_metallurgy",
+      "name": "Welding Metallurgy",
+      "foundations": "forge_welding,material_phase_diagrams",
+      "mechanism": "Relate joining thermal history to local microstructure and mechanical performance",
+      "operating_requirement": "Qualified joining equipment, known materials and inspection or test capacity",
+      "consequence": "Select evaluated joint processes rather than assuming a joined part matches parent material",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "welding_metallurgy",
+        "local_demonstration": "Relate joining thermal history to local microstructure and mechanical performance",
+        "operating_requirements": "Qualified joining equipment, known materials and inspection or test capacity",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "forge_welding",
+          "material_phase_diagrams"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "welding_metallurgy",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Welding Metallurgy",
+            "missing_all": [
+              "forge_welding",
+              "material_phase_diagrams"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "forge_welding",
+              "material_phase_diagrams"
+            ],
+            "requires_all": [
+              "forge_welding",
+              "material_phase_diagrams"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Welding Metallurgy",
+        "observation": "Relate joining thermal history to local microstructure and mechanical performance",
+        "operating_contract": "Qualified joining equipment, known materials and inspection or test capacity",
+        "production_contract": "Pay joining apparatus and nominal steel feed; retain heating, upsetting and cooling history and observe destructive joint witnesses before accepting frame straps.",
+        "production_items": [
+          "welded_strap_qualification"
+        ],
+        "requires": [
+          "forge_welding",
+          "material_phase_diagrams"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "vacuum_metal_melting",
+      "name": "Vacuum Metal Melting",
+      "foundations": "vacuum_pumps,metal_casting_feed_design",
+      "mechanism": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
+      "operating_requirement": "Compatible furnace, vacuum equipment, power and composition testing",
+      "consequence": "Produce evaluated material quality while volatile losses and equipment limits remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "vacuum_metal_melting",
+        "local_demonstration": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
+        "operating_requirements": "Compatible furnace, vacuum equipment, power and composition testing",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "vacuum_pumps",
+          "metal_casting_feed_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "vacuum_metal_melting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Vacuum Metal Melting",
+            "missing_all": [
+              "vacuum_pumps",
+              "metal_casting_feed_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "vacuum_pumps",
+              "metal_casting_feed_design"
+            ],
+            "requires_all": [
+              "vacuum_pumps",
+              "metal_casting_feed_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Vacuum Metal Melting",
+        "observation": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
+        "operating_contract": "Compatible furnace, vacuum equipment, power and composition testing",
+        "production_contract": "Pay vacuum apparatus, power and nominal copper; retain selected pressure, leak, gas-release and metal balances, then measure mass and section porosity before wire feed acceptance. This is degassing and porosity inspection, not purity or composition assay.",
+        "production_items": [
+          "vacuum_copper_casting"
+        ],
+        "requires": [
+          "vacuum_pumps",
+          "metal_casting_feed_design"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "investment_casting_process",
+      "name": "Investment Casting Process",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "metal_casting_feed_design,ceramic_slip_casting",
+      "mechanism": "An expendable pattern creates a refractory casting mold.",
+      "operating_requirement": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks.",
+      "consequence": "Supply complex near-net blanks for final machining; casting alone does not deliver finished mechanical tolerances.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable investment casting process instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "investment_casting_process",
+        "grants_instant_mastery": false,
+        "local_demonstration": "An expendable pattern creates a refractory casting mold.",
+        "operating_requirements": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local investment casting process trials.",
+          "partnership": "Share actual samples and operator time for investment casting process; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded investment casting process process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external investment casting process processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable investment casting process machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.investmentcasting.org/uploads/8/1/9/8/81988734/the_investment_casting_process_-_website.pdf"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "metal_casting_feed_design",
+          "ceramic_slip_casting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "investment_casting_process",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Investment Casting Process",
+            "missing_all": [
+              "metal_casting_feed_design",
+              "ceramic_slip_casting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "metal_casting_feed_design",
+              "ceramic_slip_casting"
+            ],
+            "requires_all": [
+              "metal_casting_feed_design",
+              "ceramic_slip_casting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Investment Casting Process",
+        "observation": "An expendable pattern creates a refractory casting mold.",
+        "operating_contract": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks.",
+        "production_contract": "Pay pattern, multiple shell layers, drying, hot-exposure burnout, molten metal, cooling and inspection; selected geometry and normalized thermal/fill response determine bracket acceptance without a full mold-flow solver.",
+        "production_items": [
+          "investment_copper_brackets"
+        ],
+        "requires": [
+          "metal_casting_feed_design",
+          "ceramic_slip_casting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "lost_foam_casting",
+      "name": "Lost-Foam Casting",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "polymer_foam_cell_control,metal_casting_feed_design",
+      "mechanism": "Molten metal replaces an expendable foam pattern in a prepared mold.",
+      "operating_requirement": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection.",
+      "consequence": "Supply complex blanks to machining; generic foam stock and an untested pattern cannot guarantee a sound casting.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable lost-foam casting instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "lost_foam_casting",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Molten metal replaces an expendable foam pattern in a prepared mold.",
+        "operating_requirements": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local lost-foam casting trials.",
+          "partnership": "Share actual samples and operator time for lost-foam casting; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded lost-foam casting process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external lost-foam casting processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable lost-foam casting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.afsinc.org/lost-foam-division"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "polymer_foam_cell_control",
+          "metal_casting_feed_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "lost_foam_casting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Lost-Foam Casting",
+            "missing_all": [
+              "polymer_foam_cell_control",
+              "metal_casting_feed_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "polymer_foam_cell_control",
+              "metal_casting_feed_design"
+            ],
+            "requires_all": [
+              "polymer_foam_cell_control",
+              "metal_casting_feed_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Lost-Foam Casting",
+        "observation": "Molten metal replaces an expendable foam pattern in a prepared mold.",
+        "operating_contract": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection.",
+        "production_contract": "Pay measured EPS patterns, coating, support media, molten metal, cooling and ventilation; retain the pattern until pour and inspect selected fill, residue and bracket geometry using normalized foam and casting response.",
+        "production_items": [
+          "lost_foam_copper_brackets"
+        ],
+        "requires": [
+          "polymer_foam_cell_control",
+          "metal_casting_feed_design"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "honed_bore_finishing",
+      "name": "Honed Bore Finishing",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "cylinder_boring,abrasive_grinding_control",
+      "mechanism": "Abrasive contact and controlled motion refine bore geometry.",
+      "operating_requirement": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition.",
+      "consequence": "Supply specified cylinder or bearing bores; rejected geometry requires real rework or scrap.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable honed bore finishing instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "honed_bore_finishing",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Abrasive contact and controlled motion refine bore geometry.",
+        "operating_requirements": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local honed bore finishing trials.",
+          "partnership": "Share actual samples and operator time for honed bore finishing; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded honed bore finishing process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external honed bore finishing processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable honed bore finishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.sunnen.com/pages/processes"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "cylinder_boring",
+          "abrasive_grinding_control"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "honed_bore_finishing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Honed Bore Finishing",
+            "missing_all": [
+              "cylinder_boring",
+              "abrasive_grinding_control"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cylinder_boring",
+              "abrasive_grinding_control"
+            ],
+            "requires_all": [
+              "cylinder_boring",
+              "abrasive_grinding_control"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Honed Bore Finishing",
+        "observation": "Abrasive contact and controlled motion refine bore geometry.",
+        "operating_contract": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition.",
+        "production_contract": "Consume prepared bores, honing stones, fluid and machine work; measured selected bore profiles with bounded gauge resolution determine sleeve acceptance.",
+        "production_items": [
+          "honing_head_sets",
+          "honing_qualified_parts"
+        ],
+        "requires": [
+          "cylinder_boring",
+          "abrasive_grinding_control"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "short_stroke_superfinishing",
+      "name": "Short-Stroke Superfinishing",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "cylindrical_grinding,lubrication_regimes",
+      "mechanism": "Light abrasive oscillation removes surface peaks.",
+      "operating_requirement": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry.",
+      "consequence": "Supply specified rolling-contact surfaces; do not use fine finishing to hide deep defects or wrong dimensions.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable short-stroke superfinishing instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "short_stroke_superfinishing",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Light abrasive oscillation removes surface peaks.",
+        "operating_requirements": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local short-stroke superfinishing trials.",
+          "partnership": "Share actual samples and operator time for short-stroke superfinishing; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded short-stroke superfinishing process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external short-stroke superfinishing processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable short-stroke superfinishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.supfina.com/us/products-us/technology-us/superfinishing-us.html"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "cylindrical_grinding",
+          "lubrication_regimes"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "short_stroke_superfinishing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Short-Stroke Superfinishing",
+            "missing_all": [
+              "cylindrical_grinding",
+              "lubrication_regimes"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cylindrical_grinding",
+              "lubrication_regimes"
+            ],
+            "requires_all": [
+              "cylindrical_grinding",
+              "lubrication_regimes"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Short-Stroke Superfinishing",
+        "observation": "Light abrasive oscillation removes surface peaks.",
+        "operating_contract": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry.",
+        "production_contract": "Pay finishing media, fluid and controlled short-stroke contact work on prepared surfaces; measure synthetic surface traces and selected geometry with bounded resolution before shaft acceptance.",
+        "production_items": [
+          "superfinishing_head_sets",
+          "superfinishing_qualified_parts"
+        ],
+        "requires": [
+          "cylindrical_grinding",
+          "lubrication_regimes"
         ],
         "requires_all": [],
         "requires_any": [],

@@ -1,77 +1,5 @@
 [
   {
-    "id": "honed_bore_finishing",
-    "name": "Honed Bore Finishing",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "cylinder_boring",
-      "abrasive_grinding_control"
-    ],
-    "requires_any": [],
-    "foundations": "cylinder_boring,abrasive_grinding_control",
-    "mechanism": "Abrasive contact and controlled motion refine bore geometry.",
-    "operating_requirement": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition.",
-    "consequence": "Supply specified cylinder or bearing bores; rejected geometry requires real rework or scrap.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable honed bore finishing instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "honed_bore_finishing",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Abrasive contact and controlled motion refine bore geometry.",
-      "operating_requirements": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local honed bore finishing trials.",
-        "partnership": "Share actual samples and operator time for honed bore finishing; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded honed bore finishing process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external honed bore finishing processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable honed bore finishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.sunnen.com/pages/processes"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "short_stroke_superfinishing",
-    "name": "Short-Stroke Superfinishing",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "cylindrical_grinding",
-      "lubrication_regimes"
-    ],
-    "requires_any": [],
-    "foundations": "cylindrical_grinding,lubrication_regimes",
-    "mechanism": "Light abrasive oscillation removes surface peaks.",
-    "operating_requirement": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry.",
-    "consequence": "Supply specified rolling-contact surfaces; do not use fine finishing to hide deep defects or wrong dimensions.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable short-stroke superfinishing instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "short_stroke_superfinishing",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Light abrasive oscillation removes surface peaks.",
-      "operating_requirements": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local short-stroke superfinishing trials.",
-        "partnership": "Share actual samples and operator time for short-stroke superfinishing; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded short-stroke superfinishing process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external short-stroke superfinishing processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable short-stroke superfinishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.supfina.com/us/products-us/technology-us/superfinishing-us.html"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
     "id": "laser_sheet_cutting",
     "name": "Laser Sheet Cutting",
     "field": "D06",
@@ -288,42 +216,6 @@
     "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   },
   {
-    "id": "investment_casting_process",
-    "name": "Investment Casting Process",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "metal_casting_feed_design",
-      "ceramic_slip_casting"
-    ],
-    "requires_any": [],
-    "foundations": "metal_casting_feed_design,ceramic_slip_casting",
-    "mechanism": "An expendable pattern creates a refractory casting mold.",
-    "operating_requirement": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks.",
-    "consequence": "Supply complex near-net blanks for final machining; casting alone does not deliver finished mechanical tolerances.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable investment casting process instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "investment_casting_process",
-      "grants_instant_mastery": false,
-      "local_demonstration": "An expendable pattern creates a refractory casting mold.",
-      "operating_requirements": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local investment casting process trials.",
-        "partnership": "Share actual samples and operator time for investment casting process; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded investment casting process process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external investment casting process processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable investment casting process machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.investmentcasting.org/uploads/8/1/9/8/81988734/the_investment_casting_process_-_website.pdf"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
     "id": "pressure_die_casting",
     "name": "Pressure Die Casting",
     "field": "D06",
@@ -358,41 +250,5 @@
     ],
     "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
     "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "lost_foam_casting",
-    "name": "Lost-Foam Casting",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "polymer_foam_cell_control",
-      "metal_casting_feed_design"
-    ],
-    "requires_any": [],
-    "foundations": "polymer_foam_cell_control,metal_casting_feed_design",
-    "mechanism": "Molten metal replaces an expendable foam pattern in a prepared mold.",
-    "operating_requirement": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection.",
-    "consequence": "Supply complex blanks to machining; generic foam stock and an untested pattern cannot guarantee a sound casting.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable lost-foam casting instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "lost_foam_casting",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Molten metal replaces an expendable foam pattern in a prepared mold.",
-      "operating_requirements": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local lost-foam casting trials.",
-        "partnership": "Share actual samples and operator time for lost-foam casting; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded lost-foam casting process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external lost-foam casting processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable lost-foam casting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.afsinc.org/lost-foam-division"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   }
 ]

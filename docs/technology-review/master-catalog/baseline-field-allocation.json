@@ -6115,6 +6115,90 @@
       "source_domain": "production",
       "name": "Ultrasonic Metal Joining",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "material_phase_diagrams",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Material Phase Diagrams",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "steel_normalizing_control",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Steel Normalizing Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "induction_surface_hardening",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Induction Surface Hardening",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "metal_grain_size_measurement",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Metal Grain Size Measurement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "residual_stress_assessment",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Residual Stress Assessment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "metal_fracture_toughness_testing",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Metal Fracture Toughness Testing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "welding_metallurgy",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Welding Metallurgy",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "vacuum_metal_melting",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Vacuum Metal Melting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "investment_casting_process",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Investment Casting Process",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "lost_foam_casting",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Lost-Foam Casting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "honed_bore_finishing",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Honed Bore Finishing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "short_stroke_superfinishing",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Short-Stroke Superfinishing",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
