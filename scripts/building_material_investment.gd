@@ -36,7 +36,7 @@ static func recommendation()->Dictionary:
 		if feasible:return first
 	return {}
 
-static func fabric_recommendation()->Dictionary:
+static func fabric_targets()->Dictionary:
 	var state=WorldSimulation.state
 	var fabric=preload("res://scripts/settlement_fabric_operations.gd")
 	# Maintenance targets are bounded by installed components, not by discoveries.
@@ -48,16 +48,33 @@ static func fabric_recommendation()->Dictionary:
 		if not job.is_empty() and String(job.get("state",""))=="awaiting_inspection":
 			for item:String in fabric.trial_cost(String(job.method)):
 				needs[item]=maxf(float(needs.get(item,0)),float(fabric.trial_cost(String(job.method))[item]))
-	for item:String in needs:
-		if float(state.resource_stockpiles.get(item,0))>=float(needs[item]):continue
-		var next:Dictionary=Supply.supply(item,ceili(float(needs[item])),{})
-		if not next.is_empty():return next
 	# A private availability map asks which missing component would serve a real
 	# compatible plot. It never mutates city stores or starts an unpaid project.
 	var prospective:Dictionary=state.resource_stockpiles.duplicate()
 	for item:String in fabric.COMPONENTS.values():prospective[item]=maxf(1.0,float(prospective.get(item,0)))
 	var choice:Dictionary=fabric.choose_retrofit(state.settlement_plots,prospective,state.known_discoveries,state.discovery_adoption)
-	if choice.is_empty():return {}
-	var item:String=fabric.COMPONENTS[String(choice.method)]
-	if float(state.resource_stockpiles.get(item,0))>=1:return {}
-	return Supply.supply(item,1,{})
+	if not choice.is_empty():
+		var item:String=fabric.COMPONENTS[String(choice.method)]
+		needs[item]=maxf(1.0,float(needs.get(item,0)))
+	return needs
+
+static func fabric_recommendation()->Dictionary:
+	var state=WorldSimulation.state
+	var required:=fabric_targets()
+	# Home workshops supply local use plus outstanding demand from other cities.
+	# Existing shipments and destination stock already cover part of that demand.
+	if state.resource_settlement_id.is_empty():
+		for city:Dictionary in state.player_settlements:
+			if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
+			var needs:Dictionary=WorldSimulation.settlements.with_city_resources(String(city.id),func()->Dictionary:
+				return WorldSimulation.settlements.with_local_population(func()->Dictionary:
+					var result:=fabric_targets()
+					for item:String in result:
+						result[item]=maxf(0,float(result[item])-float(state.resource_stockpiles.get(item,0))-WorldSimulation.settlements._city_incoming(String(city.id),item))
+					return result))
+			for item:String in needs:required[item]=float(required.get(item,0))+float(needs[item])
+	for item:String in required:
+		if float(state.resource_stockpiles.get(item,0))>=float(required[item]):continue
+		var next:Dictionary=Supply.supply(item,ceili(float(required[item])),{})
+		if not next.is_empty():return next
+	return {}

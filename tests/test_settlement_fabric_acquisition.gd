@@ -130,3 +130,44 @@ func test_all_fabric_scholar_visits_pay_for_temporary_subject_specific_teaching(
 		assert_float(provider.population_exact).is_equal(population)
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_array(MilitaryCampaign.equipment_queue).is_empty()
+
+func test_fabric_license_pays_for_delayed_slower_production_without_mastery()->void:
+	var license=preload("res://scripts/research_licenses.gd")
+	var production=preload("res://scripts/persistent_production.gd")
+	var industry=preload("res://scripts/civilian_industry.gd")
+	for entry:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
+		before_test();prepare()
+		GameState.known_discoveries.assign(["workshop_standards","material_accounting"])
+		E.owner_state("neighbor").known_discoveries.append(entry.id)
+		E.owner_state("neighbor").discovery_adoption[entry.id]=1.0
+		var item:String=entry.production_items[0]
+		var recipe:Dictionary=industry.product(item)
+		for material:String in recipe.materials:GameState.resource_stockpiles[material]=20.0
+		for material:String in recipe.tooling:GameState.resource_stockpiles[material]=20.0
+		GameState.resource_stockpiles.Stone=1000.0
+		assert_bool(MilitaryCampaign.start_production_line(item,1).has("error")).is_true()
+		var payment:=float(GameState.resource_stockpiles.Stone)
+		var dispatched:Dictionary=license.dispatch("neighbor",entry.id,"Stone")
+		assert_bool(dispatched.get("ok",false)).override_failure_message(str(dispatched)).is_true()
+		if not dispatched.get("ok",false):return
+		assert_float(float(GameState.resource_stockpiles.Stone)).is_less(payment)
+		var mission:Dictionary=CivilizationSystem.diplomatic_mission
+		E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day))
+		preload("res://scripts/research_purchase.gd").prepare_return(mission)
+		assert_bool(license.active(entry.id)).is_false()
+		GameState.elapsed_days=int(mission.return_day);E.returned(mission,int(mission.return_day))
+		assert_bool(license.active(entry.id)).is_true()
+		assert_bool(MilitaryCampaign.start_production_line(item,1).get("ok",false)).is_true()
+		var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+		production.advance(MilitaryCampaign,job,float(recipe.days))
+		assert_int(int(job.completed)).is_equal(0)
+		assert_float(float(job.progress_days)).is_equal_approx(float(recipe.days)*.65,.000001)
+		var stocks:Dictionary=GameState.resource_stockpiles.duplicate(true)
+		E.owner_state("neighbor").society_exchange.sharing_policy="guarded"
+		production.advance(MilitaryCampaign,job,100)
+		assert_dict(GameState.resource_stockpiles).is_equal(stocks)
+		E.owner_state("neighbor").society_exchange.sharing_policy="open"
+		production.advance(MilitaryCampaign,job,float(recipe.days))
+		assert_float(float(GameState.resource_stockpiles.get(recipe.output,0))).is_equal(1.0)
+		assert_bool(entry.id in GameState.known_discoveries).is_false()
+		assert_float(float(GameState.discovery_adoption.get(entry.id,0))).is_equal(0.0)
