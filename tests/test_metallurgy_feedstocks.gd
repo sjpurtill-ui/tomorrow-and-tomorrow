@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
-const CHAIN=["material_vacuum_pump_sets","separated_pattern_benzene","pattern_ethylbenzene","styrene_iron_oxide","styrene_promoter_salts","qualified_styrene_catalyst","crude_pattern_styrene","purified_pattern_styrene","thermal_pattern_polystyrene","devolatilized_pattern_polystyrene","pattern_pentane"]
+const CHAIN=["metallographic_nitric_acid","metallographic_nital","reflected_metal_microscope","metal_section_preparation_sets","material_vacuum_pump_sets","separated_pattern_benzene","pattern_ethylbenzene","styrene_iron_oxide","styrene_promoter_salts","qualified_styrene_catalyst","crude_pattern_styrene","purified_pattern_styrene","thermal_pattern_polystyrene","devolatilized_pattern_polystyrene","pattern_pentane"]
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("metallurgy_feed",1215)
 func after_test()->void:WorldSimulation.clear()
 func prepare(item:String)->Dictionary:

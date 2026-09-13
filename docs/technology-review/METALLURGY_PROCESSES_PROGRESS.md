@@ -71,6 +71,30 @@ construction, inspection/acceptance, calendar-time passive cooling and the
 daily production/save hooks are not yet wired. Do not present this as a
 completed heat-treatment discovery.
 
+Grain inspection now has a bounded pixel-based measurement module. It reads
+six horizontal/vertical test lines from a retained calibrated reflected-light
+field, records resolved boundary-band crossings, and reports a field-specific
+mean intercept and resolution/calibration uncertainty. It does not read a
+latent grain-size property or equate a small grain measurement with strength.
+Insufficient crossings, invalid calibration, unprepared sections and
+transmitted illumination cannot qualify. This is a selected game measurement,
+not an ASTM certification or whole-lot sampling conclusion.
+
+Four additional paid recipes provide section-preparation fixtures, a carbon-
+illuminated reflected-light microscope, nitrate-derived acid, and dilute steel
+etchant. Recipe tests now cover fifteen precursors/apparatus outputs.
+`test_metallurgy_grain_measurement.gd` plus the updated feedstock suite pass
+4/4 tests, zero errors/failures/skips/orphans
+(`/tmp/tt-metallurgy-grain-tests.log`). Field production from an actual reserved
+metal section, section/coupon destruction, paid image acquisition and accepted
+material release remain to be connected; current measurement tests use explicit
+image fixtures.
+
+Measurement references:
+[Buehler metallographic preparation and reflected-light contrast](https://www.buehler.com/assets/solutions/technotes/TechNote_MPA_Vol-6-Issue-1_0516_WEB.pdf),
+[Buehler steel preparation/etchant selection](https://www.buehler.com/solutions/buehler-solutions/solutions-by-material/solutions-by-material-carbon-steels/),
+and [NIST optical grain-boundary/intercept analysis](https://github.com/usnistgov/grain-size-analysis-tools).
+
 Also pending: full material closure audit, acquisition checks, save validation,
 imagery and canonical integration. The integrator owns imagery and the shared
 manufacturing merge. Do not edit PersistentProduction or the machine adapters
