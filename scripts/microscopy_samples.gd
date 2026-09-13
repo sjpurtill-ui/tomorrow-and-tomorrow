@@ -25,7 +25,7 @@ static func measure(ledger:Dictionary,specimen:Dictionary,day:int,stained:bool,k
 	var contrast:=.85 if stained else .45
 	# Microscopic visibility distinguishes aggregate structures from reliably
 	# separated cellular units. Staining is optional and material-paid by owner.
-	var view:={"day":day,"cells":float(specimen.cells)*float(specimen.viability),"contrast":contrast,"contamination":float(specimen.contamination),"blank_contamination":float(specimen.blank_contamination),"tissue_order":float(specimen.profile.get("tissue_order",0)),"line":int(specimen.line)}
+	var view:={"day":day,"cells":float(specimen.cells)*float(specimen.viability),"total_cells":float(specimen.cells),"uncertainty":1.0-contrast,"sample_mass":float(specimen.amount),"source_stage":int(specimen.profile.get("stage",0)),"blank_paid":float(specimen.blank_media),"aseptic":bool(specimen.methods.get("culture",{}).get("observation",{}).get("aseptic",false)),"contrast":contrast,"contamination":float(specimen.contamination),"blank_contamination":float(specimen.blank_contamination),"tissue_order":float(specimen.profile.get("tissue_order",0)),"line":int(specimen.line)}
 	specimen.history.append(view)
 	while specimen.history.size()>8:specimen.history.pop_front()
 	if "laboratory_notebooks" in known:record(ledger,specimen,day,"notebook",{"kind":String(specimen.kind),"preparation":"stained" if stained else "unstained","elapsed":day-int(specimen.day),"view":view})
@@ -36,7 +36,7 @@ static func measure(ledger:Dictionary,specimen:Dictionary,day:int,stained:bool,k
 		var previous:Dictionary=specimen.history[-2]
 		if day>int(previous.day) and float(view.cells)>float(previous.cells):record(ledger,specimen,day,"division",{"before":float(previous.cells),"after":float(view.cells),"elapsed":day-int(previous.day)})
 	if specimen.kind=="plant" and "tissue_histology" in known and contrast>=.8:
-		record(ledger,specimen,day,"tissue",{"organized_fraction":view.tissue_order,"viable_fraction":float(specimen.viability),"cohort":int(specimen.source),"sampled_stage":int(specimen.profile.get("stage",0))})
+		record(ledger,specimen,day,"tissue",{"organized_fraction":view.tissue_order,"viable_fraction":clampf(float(view.cells)/maxf(.000001,float(view.total_cells)),0,1),"uncertainty":float(view.uncertainty),"contrast":contrast,"cohort":int(specimen.source),"sampled_stage":int(specimen.profile.get("stage",0))})
 	if "live_cell_time_lapse" in known and specimen.history.size()>=3 and specimen.methods.has("culture"):
 		record(ledger,specimen,day,"time_lapse",{"frames":specimen.history.duplicate(true),"source_line":int(specimen.line)})
 	return true
@@ -87,7 +87,10 @@ static func valid(ledger:Variant)->bool:
 			if not ledger.tools[key] is bool:return false
 		elif key in ["heat_day","sterile_until","sterile_uses","heat_steps"]:
 			if not ledger.tools[key] is int or ledger.tools[key]<0:return false
-		else:return false
+		elif key=="heat_level":
+			if not number(ledger.tools[key],1):return false
+		elif key not in ["calibration","heat_readings"]:return false
+	if not valid_heat(ledger.tools):return false
 	if int(ledger.tools.get("sterile_uses",0))>2 or int(ledger.tools.get("heat_steps",0))>1:return false
 	for key:Variant in ledger.report:
 		if key not in ["staff","observed","cultured","expired"] or not number(ledger.report[key]):return false
@@ -131,8 +134,10 @@ static func valid_settlements(records:Variant)->bool:
 
 static func valid_frame(frame:Variant)->bool:
 	if not frame is Dictionary or not frame.get("day") is int or frame.day<0 or not frame.get("line") is int or frame.line<0:return false
-	for key:String in ["cells","contrast","contamination","blank_contamination","tissue_order"]:
-		if not number(frame.get(key),1000000 if key=="cells" else 1):return false
+	for key:String in ["cells","total_cells","contrast","uncertainty","sample_mass","blank_paid","contamination","blank_contamination","tissue_order"]:
+		if not number(frame.get(key),1000000 if key in ["cells","total_cells","sample_mass","blank_paid"] else 1):return false
+	if not frame.get("source_stage") is int or frame.source_stage<0 or not frame.get("aseptic") is bool:return false
+	if absf(float(frame.uncertainty)-(1.0-float(frame.contrast)))>.00001:return false
 	return true
 static func valid_record(row:Variant)->bool:
 	if not row is Dictionary:return false
@@ -146,7 +151,7 @@ static func valid_record(row:Variant)->bool:
 		"contrast":return o.get("contrast")==.85 and o.get("unstained_reference")==.45
 		"microbes":return number(o.get("count")) and number(o.get("mixed_fraction"),1) and number(o.get("blank_fraction"),1) and o.get("identity")=="unassigned local culture"
 		"division":return number(o.get("before")) and number(o.get("after")) and o.after>o.before and o.get("elapsed") is int and o.elapsed>0
-		"tissue":return number(o.get("organized_fraction"),1) and number(o.get("viable_fraction"),1) and o.get("cohort")==row.source and o.get("sampled_stage") is int and o.sampled_stage>=0
+		"tissue":return number(o.get("organized_fraction"),1) and number(o.get("viable_fraction"),1) and number(o.get("uncertainty"),1) and number(o.get("contrast"),1) and o.get("cohort")==row.source and o.get("sampled_stage") is int and o.sampled_stage>=0
 		"time_lapse":
 			if not o.get("frames") is Array or o.frames.size()<3 or o.frames.size()>8 or not o.get("source_line") is int:return false
 			var previous:=-1
@@ -165,7 +170,7 @@ static func valid_record(row:Variant)->bool:
 	return false
 static func valid_protocol(protocol:Variant)->bool:
 	if not protocol is Dictionary or protocol.get("kind") not in ["starter","plant"] or not protocol.get("repeatable") is bool:return false
-	for key:String in ["first","second","day","first_source","second_source"]:
+	for key:String in ["first","second","day","first_source","second_source","first_sample_day","second_sample_day"]:
 		if not protocol.get(key) is int or protocol[key]<0:return false
 	if protocol.first<1 or protocol.second<1 or protocol.first==protocol.second or protocol.first_source==protocol.second_source:return false
 	if not number(protocol.get("first_viability"),1) or not number(protocol.get("second_viability"),1):return false
@@ -173,4 +178,26 @@ static func valid_protocol(protocol:Variant)->bool:
 	for key:String in ["procedure","replication"]:
 		var o:Variant=protocol.get(key)
 		if not o is Dictionary or o.get("kind")!=protocol.kind or o.get("preparation") not in ["stained","unstained"] or not valid_frame(o.get("view")) or o.view.day>protocol.day:return false
+	var a:Dictionary=protocol.procedure.view
+	var b:Dictionary=protocol.replication.view
+	if a.source_stage!=b.source_stage or a.aseptic!=b.aseptic or a.contrast!=b.contrast or a.contrast<.8 or a.blank_paid<=0 or b.blank_paid<=0:return false
+	if absf(float(a.sample_mass)-float(b.sample_mass))>.00001 or a.day-protocol.first_sample_day!=b.day-protocol.second_sample_day:return false
+	if absf(float(protocol.first_viability)-float(a.cells)/maxf(.000001,float(a.total_cells)))>.00001 or absf(float(protocol.second_viability)-float(b.cells)/maxf(.000001,float(b.total_cells)))>.00001:return false
+	return true
+
+static func valid_heat(tools:Dictionary)->bool:
+	var calibration:Variant=tools.get("calibration",{})
+	if not calibration is Dictionary:return false
+	if not calibration.is_empty():
+		if not calibration.get("day") is int or calibration.day<0 or calibration.get("cold_reference")!=0.0 or calibration.get("hot_reference")!=1.0 or calibration.get("uncertainty")!=.05:return false
+	var readings:Variant=tools.get("heat_readings",[])
+	if not readings is Array or readings.size()>2:return false
+	var previous:=-1
+	for reading:Variant in readings:
+		if not reading is Dictionary or not reading.get("day") is int or reading.day<0 or not number(reading.get("observed_heat"),1):return false
+		if previous>=0 and reading.day!=previous+1:return false
+		if calibration.is_empty() or reading.get("calibration_day")!=calibration.day or reading.day-calibration.day>30 or reading.get("uncertainty")!=calibration.uncertainty or reading.get("fuel")!=.05 or reading.get("water")!=.2:return false
+		previous=reading.day
+	if int(tools.get("sterile_uses",0))>0:
+		if readings.size()!=2 or float(readings[0].observed_heat)<.7 or float(readings[-1].observed_heat)-float(readings[-1].uncertainty)<.9 or int(tools.get("sterile_until",0))!=int(readings[-1].day)+1:return false
 	return true

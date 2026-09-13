@@ -23,3 +23,9 @@ Paid blank media now tracks procedural contamination separately; source-starter 
 Nested method/frame/protocol/tool validation rejects mismatched evidence. Field sampling cannot use a future cohort stage, and retained field vouchers record the precise recent microscopy evidence responsible for rejecting a recommendation. A real two-generation crop trial test compares an otherwise qualified result with the recent cellular/tissue rejection.
 
 /tmp/tt-microscopy-botany.log passes16/16:6 microscopy and10 existing field-botany cases. Remaining: whole-save/primary-secondary-rival lifecycle tests; direct starvation/tool-loss recovery; acquisition/catalog registration, aggregate production/input availability checks and frozen review handoff. All14 remain unregistered and uncounted at this checkpoint.
+
+## Recorded evidence correction
+
+Replication now compares retained dated frames with matching elapsed sample age, stage, preparation contrast, mass, aseptic condition and paid blank controls. Field recommendations use recorded tissue estimates and uncertainty; later latent viability or tissue changes cannot update a retained report. Thermal apparatus now retains paid calibration and consecutive heat readings in abstract game units, with uncertainty thresholds and expiring finite uses. Recalibration clears old readings; gaps clear heat credit. Nested validation rejects inadequate heat evidence.
+
+Focused suite `/tmp/tt-microscopy-recorded.log`: 8/8 passed, including latent-state mutation, mismatched/missing observations, calibration-only state, expiry and failed heat evidence. Remaining: whole-save and settlement/rival isolation, supply-loss recovery, paid acquisition and final registration/graph review. All 14 remain unregistered.

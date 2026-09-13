@@ -25,11 +25,26 @@ static func prepare_station(ledger:Dictionary,stocks:Dictionary,known:Array,day:
 		# A finite comparison vessel/probe assembly. Calibration and exposure are
 		# abstract game units, not a real sterilization protocol or temperature.
 		if pay(ledger,stocks,{"Glass Tubes":1.0,"Copper Wire":.1,"Glass Vessels":1.0},.5):ledger.tools.thermometry=true
-	if "instrument_sterilization" in known and bool(ledger.tools.get("thermometry",false)) and int(ledger.tools.get("sterile_until",-1))<day:
+	if int(ledger.tools.get("sterile_until",-1))<day:ledger.tools.sterile_uses=0
+	var calibration:Dictionary=ledger.tools.get("calibration",{})
+	if bool(ledger.tools.get("thermometry",false)) and "precision_thermometry" in known and (calibration.is_empty() or day-int(calibration.day)>30):
+		if pay(ledger,stocks,{"Freshwater":.2,"Charcoal":.05},.1):
+			ledger.tools.calibration={"day":day,"cold_reference":0.0,"hot_reference":1.0,"uncertainty":.05}
+			calibration=ledger.tools.calibration
+			ledger.tools.heat_readings=[];ledger.tools.erase("heat_day");ledger.tools.heat_level=0.0
+	if "instrument_sterilization" in known and not calibration.is_empty() and day-int(calibration.day)<=30 and int(ledger.tools.get("sterile_until",-1))<day:
 		if pay(ledger,stocks,{"Charcoal":.05,"Freshwater":.2},.1):
-			ledger.tools.heat_steps=(int(ledger.tools.get("heat_steps",0))+1) if int(ledger.tools.get("heat_day",-2))==day-1 else 1
-			ledger.tools.heat_day=day
-			if int(ledger.tools.heat_steps)>=2:
+			var consecutive:bool=int(ledger.tools.get("heat_day",-2))==day-1
+			var carried:=float(ledger.tools.get("heat_level",0))*.5 if consecutive else 0.0
+			var observed_heat:=minf(1.0,carried+.75)
+			ledger.tools.heat_steps=(int(ledger.tools.get("heat_steps",0))+1) if consecutive else 1
+			ledger.tools.heat_day=day;ledger.tools.heat_level=observed_heat
+			var readings:Array=ledger.tools.get("heat_readings",[])
+			if not consecutive:readings.clear()
+			readings.append({"day":day,"observed_heat":observed_heat,"uncertainty":float(calibration.uncertainty),"calibration_day":int(calibration.day),"fuel":.05,"water":.2})
+			while readings.size()>2:readings.pop_front()
+			ledger.tools.heat_readings=readings
+			if readings.size()==2 and float(readings[0].observed_heat)>=.7 and observed_heat-float(calibration.uncertainty)>=.9:
 				ledger.tools.sterile_until=day+1;ledger.tools.sterile_uses=2;ledger.tools.heat_steps=0
 static func collect_starter(ledger:Dictionary,stocks:Dictionary,day:int)->void:
 	var batches=load("res://scripts/food_batches.gd")
@@ -121,12 +136,16 @@ static func interpret(ledger:Dictionary,stocks:Dictionary,known:Array,day:int)->
 			for protocol:Dictionary in ledger.protocols:
 				if protocol.kind==first.kind and (bool(protocol.repeatable) or (mini(int(protocol.first_source),int(protocol.second_source))==mini(int(first.source),int(second.source)) and maxi(int(protocol.first_source),int(protocol.second_source))==maxi(int(first.source),int(second.source)))):exists=true
 			if exists:continue
-			var repeatable:=absf(float(first.viability)-float(second.viability))<=.25
+			var pair:=replication_pair(first,second)
+			if pair.is_empty():continue
+			var first_estimate:=float(pair.first.cells)/maxf(.000001,float(pair.first.total_cells))
+			var second_estimate:=float(pair.second.cells)/maxf(.000001,float(pair.second.total_cells))
+			var repeatable:=absf(first_estimate-second_estimate)<=.25
 			if not pay(ledger,stocks,{"Printed Sheets":.1},.2):return
 			if ledger.protocols.size()>=8:
 				for index:int in range(ledger.protocols.size()):
 					if not bool(ledger.protocols[index].repeatable):ledger.protocols.remove_at(index);break
-			ledger.protocols.append({"kind":String(first.kind),"first":int(first.id),"second":int(second.id),"day":day,"repeatable":repeatable,"first_source":int(first.source),"second_source":int(second.source),"procedure":first.methods.notebook.observation.duplicate(true),"replication":second.methods.notebook.observation.duplicate(true),"first_viability":float(first.viability),"second_viability":float(second.viability)})
+			ledger.protocols.append({"kind":String(first.kind),"first":int(first.id),"second":int(second.id),"day":day,"repeatable":repeatable,"first_source":int(first.source),"second_source":int(second.source),"first_sample_day":int(first.day),"second_sample_day":int(second.day),"procedure":{"kind":String(first.kind),"preparation":"stained" if float(pair.first.contrast)>.8 else "unstained","view":pair.first.duplicate(true)},"replication":{"kind":String(second.kind),"preparation":"stained" if float(pair.second.contrast)>.8 else "unstained","view":pair.second.duplicate(true)},"first_viability":first_estimate,"second_viability":second_estimate})
 			return
 static func starter_usable(lot:Dictionary,day:int)->bool:
 	var ledger:Dictionary=WorldSimulation.state.microscopy
@@ -146,10 +165,20 @@ static func field_evidence(cohort:int,start_day:int,day:int)->Dictionary:
 		if sample.kind!="plant" or sample.site!=site() or int(sample.source)!=cohort or int(sample.source_day)!=start_day:continue
 		if not sample.methods.has("tissue") or not sample.methods.has("cellular_model") or not sample.methods.has("time_lapse"):continue
 		if day-int(sample.methods.tissue.day)>7:continue
-		return {"sample":int(sample.id),"cohort":int(sample.source),"source_day":int(sample.source_day),"day":int(sample.methods.tissue.day),"viable_fraction":float(sample.viability),"tissue_order":float(sample.profile.tissue_order)}
+		return {"sample":int(sample.id),"cohort":int(sample.source),"source_day":int(sample.source_day),"day":int(sample.methods.tissue.day),"viable_fraction":maxf(0,float(sample.methods.tissue.observation.viable_fraction)-float(sample.methods.tissue.observation.uncertainty)),"tissue_order":float(sample.methods.tissue.observation.organized_fraction)}
 	return {}
 
 static func protocol_ready(ledger:Dictionary,kind:String)->bool:
 	for protocol:Dictionary in ledger.protocols:
 		if protocol.kind==kind and bool(protocol.repeatable):return true
 	return false
+
+static func replication_pair(first:Dictionary,second:Dictionary)->Dictionary:
+	for a:Dictionary in first.history:
+		if int(a.day)<=int(first.day) or float(a.blank_paid)<=0 or float(a.contrast)<.8:continue
+		for b:Dictionary in second.history:
+			if int(a.day)-int(first.day)!=int(b.day)-int(second.day):continue
+			if a.source_stage!=b.source_stage or a.aseptic!=b.aseptic or a.contrast!=b.contrast or float(b.blank_paid)<=0:continue
+			if absf(float(a.sample_mass)-float(b.sample_mass))>.00001:continue
+			return {"first":a.duplicate(true),"second":b.duplicate(true)}
+	return {}

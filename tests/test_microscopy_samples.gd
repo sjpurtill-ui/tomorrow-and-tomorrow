@@ -92,22 +92,22 @@ func test_failed_replication_can_retry_new_sources_and_heat_does_not_accumulate_
 	var known:Array=["laboratory_notebooks","experimental_protocol_publication"]
 	for id:int in [1,2]:
 		var sample:=S.add(ledger,"starter",id,0,"home",0,.04,{"viability":1.0 if id==1 else .2})
-		S.measure(ledger,sample,0,false,known);S.measure(ledger,sample,1,false,known)
+		S.measure(ledger,sample,0,true,known);S.grow(sample,1,.02,true);S.measure(ledger,sample,1,true,known)
 	var stocks:={"Printed Sheets":2.0,"Charcoal":2.0,"Freshwater":2.0}
 	var lab=preload("res://scripts/microscopy_lab.gd")
 	lab.interpret(ledger,stocks,known,1)
 	assert_bool(lab.protocol_ready(ledger,"starter")).is_false()
 	var third:=S.add(ledger,"starter",3,0,"home",0,.04,{"viability":.95})
-	S.measure(ledger,third,0,false,known);S.measure(ledger,third,1,false,known)
+	S.measure(ledger,third,0,true,known);S.grow(third,1,.02,true);S.measure(ledger,third,1,true,known)
 	lab.interpret(ledger,stocks,known,1)
 	assert_bool(lab.protocol_ready(ledger,"starter")).is_true()
 	assert_float(float(stocks["Printed Sheets"])).is_equal_approx(1.8,.00001)
 	ledger.tools={"bench":true,"thermometry":true}
-	lab.prepare_station(ledger,stocks,["instrument_sterilization"],2)
+	lab.prepare_station(ledger,stocks,["instrument_sterilization","precision_thermometry"],2)
 	assert_int(int(ledger.tools.get("sterile_uses",0))).is_equal(0)
-	lab.prepare_station(ledger,stocks,["instrument_sterilization"],5)
+	lab.prepare_station(ledger,stocks,["instrument_sterilization","precision_thermometry"],5)
 	assert_int(int(ledger.tools.get("sterile_uses",0))).is_equal(0)
-	lab.prepare_station(ledger,stocks,["instrument_sterilization"],6)
+	lab.prepare_station(ledger,stocks,["instrument_sterilization","precision_thermometry"],6)
 	assert_int(int(ledger.tools.get("sterile_uses",0))).is_equal(2)
 func test_real_crop_trial_rejects_recent_cellular_tissue_failure()->void:
 	WorldSimulation.clear();WorldSimulation.create_actor("crop_lab",91420)
@@ -140,8 +140,51 @@ func test_real_crop_trial_rejects_recent_cellular_tissue_failure()->void:
 		var starter:=S.add(state.microscopy,"starter",3,177,"home",177,.01,{"viability":1.0})
 		S.measure(state.microscopy,starter,179,false,known)
 		lab.interpret(state.microscopy,{},known,179)
-		assert_dict(lab.field_evidence(int(field.trials[0].line.id),90,180)).is_not_empty()
+		var retained:Dictionary=lab.field_evidence(int(field.trials[0].line.id),90,180)
+		assert_dict(retained).is_not_empty()
+		sample.viability=1.0;sample.profile.tissue_order=1.0
+		assert_dict(lab.field_evidence(int(field.trials[0].line.id),90,180)).is_equal(retained)
 		botany.observe(field,180,"home",known,1,1,1)
 		assert_bool(field.vouchers[-1].qualified).is_false()
 	)
 	WorldSimulation.clear()
+
+func test_replication_requires_matching_recorded_conditions()->void:
+	var ledger:=S.empty_state()
+	var known:Array=["laboratory_notebooks"]
+	var a:=S.add(ledger,"starter",1,0,"home",0,.04,{"viability":.8})
+	var b:=S.add(ledger,"starter",2,0,"home",0,.04,{"viability":.8})
+	for sample:Dictionary in [a,b]:
+		S.grow(sample,1,.02,true);S.measure(ledger,sample,1,true,known)
+	var lab=preload("res://scripts/microscopy_lab.gd")
+	assert_dict(lab.replication_pair(a,b)).is_not_empty()
+	for field:String in ["source_stage","aseptic","contrast","blank_paid"]:
+		var changed:=b.duplicate(true)
+		if field=="source_stage":changed.history[0][field]=2
+		elif field=="aseptic":changed.history[0][field]=true
+		elif field=="contrast":changed.history[0][field]=.45
+		else:changed.history[0][field]=0.0
+		assert_dict(lab.replication_pair(a,changed)).is_empty()
+	b.history.clear()
+	assert_dict(lab.replication_pair(a,b)).is_empty()
+
+func test_heat_evidence_expires_and_calibration_alone_is_valid()->void:
+	var ledger:=S.empty_state();ledger.work_bank=8.0
+	ledger.tools={"bench":true,"thermometry":true}
+	var stocks:={"Freshwater":10.0,"Charcoal":10.0}
+	var lab=preload("res://scripts/microscopy_lab.gd")
+	lab.prepare_station(ledger,stocks,["precision_thermometry"],1)
+	assert_bool(S.valid(ledger)).is_true()
+	var known:Array=["precision_thermometry","instrument_sterilization"]
+	lab.prepare_station(ledger,stocks,known,2)
+	lab.prepare_station(ledger,stocks,known,3)
+	assert_int(int(ledger.tools.sterile_uses)).is_equal(2)
+	assert_bool(S.valid(ledger)).is_true()
+	var forged:=ledger.duplicate(true);forged.tools.heat_readings[-1].observed_heat=.8
+	assert_bool(S.valid(forged)).is_false()
+	lab.prepare_station(ledger,stocks,known,6)
+	assert_int(int(ledger.tools.sterile_uses)).is_equal(0)
+	assert_bool(S.valid(ledger)).is_true()
+	lab.prepare_station(ledger,stocks,known,40)
+	assert_int(int(ledger.tools.calibration.day)).is_equal(40)
+	assert_bool(S.valid(ledger)).is_true()
