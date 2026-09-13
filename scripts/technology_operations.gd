@@ -88,8 +88,10 @@ static func consume_electricity(amount:float)->float:
 	var used:=minf(maxf(0,amount),service("electricity"))
 	if used>0:data().services.electricity-=used
 	return used
-static func advance(day:int)->void:
+static func advance(day:int,current_context:Variant=null)->void:
 	if not WorldSimulation.state.resource_settlement_id.is_empty():return
+	# The ordered daily owner supplies today's observations before discovery refresh.
+	var operating_context:Dictionary=current_context if current_context is Dictionary else WorldSimulation.discovery.latest_context
 	var ledger:=data()
 	if day<=int(ledger.last_day):return
 	var elapsed:=maxi(1,day-int(ledger.last_day)) if int(ledger.last_day)>=0 else 1
@@ -123,7 +125,7 @@ static func advance(day:int)->void:
 		if float(spec.power)>0:units=minf(units,float(ledger.services.get("electricity",0))/float(spec.power))
 		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
 		if id=="cannery":units=minf(units,canning_demand()/float(spec.services.food_preservation))
-		if id=="water_hammer":units=minf(units,float(WaterDrive.assessment(record.get("river_site",{}),WorldSimulation.discovery.latest_context,day).capacity))
+		if id=="water_hammer":units=minf(units,float(WaterDrive.assessment(record.get("river_site",{}),operating_context,day).capacity))
 		if units>0:available=_operate(ledger,record,spec,units,available,condition)
 	# Charging can use spare generation, after consumer operators and the
 	# electricity budget for pending workshop production have been protected.

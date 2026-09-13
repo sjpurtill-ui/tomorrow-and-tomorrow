@@ -121,3 +121,7 @@ Historical mechanism references, not claims about earliest invention dates:
 ## Canonical acceptance
 
 Integrated at `c4af26837581201c3007fb0c971258512982d241`, retaining both additive recipe families. 109 combined worktree cases pass; canonical machinery10, operations16, persistent19, planner15 and parchment8 all pass (68). Exact731-definition canonical snapshot matches the promoted ledger and15 catalog tests pass. Graph731/513/396/20 and normal headless boot are clean. Earlier READY wording is source-handoff history. No player launch or package rebuild.
+
+## Current-day context correction
+
+An actual CivilizationDay integration review found operations preceding discovery-context refresh. Two new daily-step tests reproduced four stale hammer-work units after source deletion or home migration. CivilizationDay now supplies today's context explicitly to Operations.advance; direct legacy callers retain their existing fallback. Both regression cases pass and check zero running units; deleted-source maintenance is checked in the operations input ledger because other daily owners legitimately consume Rope Coils. No order change to discovery, resources, labor or daily consequences.

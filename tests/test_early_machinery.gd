@@ -151,3 +151,20 @@ func test_full_save_restores_site_partial_forging_and_spent_daily_service()->voi
 		P.advance(WorldSimulation.military,job,.75)
 		assert_float(Ops.service("hammer_work")).is_equal(0.0)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Armor Plates"])).is_equal(1.0))
+func test_actual_daily_step_rejects_deleted_source_without_spending_stale_river_service()->void:
+	WorldSimulation.scoped("machines",func()->void:
+		setup();Ops.install("water_hammer")
+		Ops.data().plants.water_hammer.installed=1;Ops.data().plants.water_hammer.building=0
+		var today:=context();today.water_conveyance_sources=[]
+		preload("res://scripts/civilization_day.gd").advance(1,today)
+		assert_float(Ops.service("hammer_work")).is_equal(0.0)
+		assert_float(float(Ops.data().plants.water_hammer.running_units)).is_equal(0.0)
+		assert_float(float(Ops.data().inputs.get("Rope Coils",0))).is_equal(0.0))
+func test_actual_daily_step_rejects_moved_home_using_todays_context()->void:
+	WorldSimulation.scoped("machines",func()->void:
+		setup();Ops.install("water_hammer")
+		Ops.data().plants.water_hammer.installed=1;Ops.data().plants.water_hammer.building=0
+		var today:=context();today.settlement_origin=Vector3(2,0,0);today.origin=Vector3(2,0,0)
+		preload("res://scripts/civilization_day.gd").advance(1,today)
+		assert_float(Ops.service("hammer_work")).is_equal(0.0)
+		assert_float(float(Ops.data().plants.water_hammer.running_units)).is_equal(0.0))
