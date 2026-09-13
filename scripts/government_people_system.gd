@@ -115,6 +115,7 @@ const PUBLIC_DOUBTS:Dictionary={
 	"Diplomacy":"Their handling of rivals and divided loyalties remains uncertain",
 }
 
+var administration_records:Dictionary=preload("res://scripts/civic_administration.gd").empty_state()
 var people:Array[Dictionary]=[]
 var next_person_id:=1
 var last_processed_month:=-1
@@ -124,6 +125,7 @@ var initializing:=false
 
 
 func reset_for_new_world()->void:
+	administration_records=preload("res://scripts/civic_administration.gd").empty_state()
 	people=[]
 	next_person_id=1
 	last_processed_month=-1
@@ -158,6 +160,7 @@ func process_day(day:int)->Array[Dictionary]:
 	# ordinary UI initialization may reconcile an older save silently.
 	initialize(false)
 	if people.is_empty(): return []
+	WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/civic_administration.gd").credit_day(self,day))
 	var month:=day/MONTH_DAYS
 	# Local leaders rebalance ordinary labor every day. Mortality, succession and
 	# institutional expansion remain monthly, but survival cannot wait up to thirty
@@ -168,6 +171,7 @@ func process_day(day:int)->Array[Dictionary]:
 		# again for each city.
 		initializing=true
 		_delegate_settlements(day)
+		preload("res://scripts/civic_administration.gd").finish_day(self)
 		initializing=false
 		return []
 	last_processed_month=month
@@ -182,6 +186,7 @@ func process_day(day:int)->Array[Dictionary]:
 	_synchronize_office_holders(events,true)
 	_ensure_local_leaders(events)
 	_delegate_settlements(day)
+	preload("res://scripts/civic_administration.gd").finish_day(self)
 	_sync_advisor_roster()
 	initializing=false
 	return events
@@ -750,6 +755,7 @@ func assign_settlement_leader(settlement_id:String,person_id:int)->Dictionary:
 	people[person_index]["appointed_day"]=int(WorldSimulation.state.elapsed_days)
 	WorldSimulation.state.player_settlements[settlement_index]["leader_person_id"]=person_id
 	WorldSimulation.state.player_settlements[settlement_index]["leader_title"]=settlement_leader_title()
+	preload("res://scripts/civic_administration.gd").queue_handovers(self,settlement_id,person_id)
 	WorldSimulation.state.settlement_network_revision+=1
 	revision+=1
 	return {"ok":true,"leader":person_snapshot(person_id),"title":settlement_leader_title()}

@@ -580,7 +580,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var carriers := float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var observers := float(WorldSimulation.state.effective_workers("Knowledge"))
-	var stewards := float(WorldSimulation.state.population_allocations.get("Administration",0))
+	var stewards := float(WorldSimulation.state.effective_workers("Administration"))
 	var guards := float(WorldSimulation.state.population_allocations.get("Defense",0))
 	var dynamics:=WorldSimulation.state.society_capacities
 	var governance:=governance_metrics()

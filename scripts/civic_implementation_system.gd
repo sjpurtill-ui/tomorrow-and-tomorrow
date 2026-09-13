@@ -37,6 +37,7 @@ func process_day(day:int=-1)->Array[Dictionary]:
 		if String(followup.get("state",""))!="pending": continue
 		_repair_pending_snapshot(order,followup)
 		if current_day<int(followup.get("due_day",current_day+1)): continue
+		if not preload("res://scripts/civic_administration.gd").can_review(WorldSimulation.government,followup):continue
 		var event:=_resolve_order(order,followup,current_day)
 		if not event.is_empty(): events.append(event)
 	return events

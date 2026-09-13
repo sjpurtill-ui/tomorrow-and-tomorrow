@@ -56,7 +56,7 @@ func advance(day:int)->void:
 	if day<=last_day: return
 	var elapsed:=day-last_day; last_day=day
 	if active=="" or _prerequisite(active)!="": return
-	var workers:=float(WorldSimulation.state.population_allocations.get("Knowledge",0))+float(WorldSimulation.state.population_allocations.get("Administration",0))
+	var workers:=float(WorldSimulation.state.population_allocations.get("Knowledge",0))+float(WorldSimulation.state.effective_workers("Administration"))
 	if workers<=0: return
 	progress+=elapsed*minf(1.0,workers/4.0)
 	if progress>=float(PROJECTS[active].work):
