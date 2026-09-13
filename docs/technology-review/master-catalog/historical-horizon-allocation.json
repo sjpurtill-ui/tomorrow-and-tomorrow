@@ -12584,6 +12584,46 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "da15fa1e3bfefc28a383365e5741a88e8193766199fcc89ba142834eae80a79d"
+    },
+    {
+      "id": "wood_methanol_recovery",
+      "name": "Wood Methanol Recovery",
+      "horizon": "H04",
+      "source_file": "polymer-condensation-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c6ed98e6b28be9ac0b168bbe190abeb475f9613c36517a4fc6651101f46ce290"
+    },
+    {
+      "id": "silver_cupellation",
+      "name": "Silver Cupellation",
+      "horizon": "H02",
+      "source_file": "polymer-condensation-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2a6a42e4c977ad85a61f9bd40d9c1b67818948ef19b80c333a1dd58f9176f5e2"
+    },
+    {
+      "id": "formaldehyde_synthesis",
+      "name": "Formaldehyde Synthesis",
+      "horizon": "H04",
+      "source_file": "polymer-condensation-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f9555fee26378cf55e0d41a25a27330f29edf8de53e2bea818304bddcfac1076"
+    },
+    {
+      "id": "urea_synthesis",
+      "name": "Urea Synthesis",
+      "horizon": "H04",
+      "source_file": "polymer-condensation-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c2710dad0c16aa78d56d4bde9ab308be43a2011065f66adf2cf414a988fe16a6"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

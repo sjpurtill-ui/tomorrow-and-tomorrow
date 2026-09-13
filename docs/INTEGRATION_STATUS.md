@@ -1,3 +1,9 @@
+## September 13 — polymer condensation prerequisites
+
+Authored four worker-requested prerequisites: wood methanol recovery, silver cupellation, formaldehyde synthesis and urea synthesis. Original requested foundations are retained. Each requires typed feed, finite equipment/work and qualification with losses; crude wood condensate is not pure methanol, and ordinary lead stock has no implicit silver content. These remain proposals pending the isolated polymer implementation and integration checks. See `technology-review/Polymer Condensation Prerequisites.md`.
+
+Ledger: **740 integrated +2,615 drafts =3,355 identities**, leaving **1,645 to author and 4,260 to implement**. All parent paths resolve, normalized names are distinct and 15 ledger tests pass. Runtime remains 740/522/402/20 and art 162/740. No player launch or package rebuild. Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/polymer-condensation-coverage`, base `366ff3b937c242c365507c4b879a9c87ccbcb357`. Catalog-only changes have no save-format impact; shared ledger files were reviewed against current main.
+
 ## September 13 — manufacturing process coverage
 
 Reviewed32 distinct removal, forming, joining and casting processes with specific component consumers. Support geometry, tooling access, material compatibility, paid work/energy, consumable losses and inspection remain explicit. Existing generic grinding, gear generation/hobbing, lapping, fastener production and casting-feed design are not recounted. These rows remain authored proposals.

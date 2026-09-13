@@ -1,0 +1,148 @@
+[
+  {
+    "id": "wood_methanol_recovery",
+    "name": "Wood Methanol Recovery",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "charcoal_retorts",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "foundations": "charcoal_retorts,chemical_distillation",
+    "mechanism": "Capture wood-carbonization vapors and separate a methanol-bearing fraction from watery condensate and tar; further refining distinguishes usable methanol from crude mixed solvent.",
+    "operating_requirement": "Pay suitable Timber, retort and condenser capacity, heat, water, separation work and feed-quality trials; account for low variable methanol recovery and rejected watery or tarry fractions.",
+    "consequence": "Supply qualified methanol to a known formaldehyde process; charcoal making alone neither supplies pure methanol nor permits counting the same timber twice.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable wood methanol recovery instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wood_methanol_recovery",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Capture wood-carbonization vapors and separate a methanol-bearing fraction from watery condensate and tar; further refining distinguishes usable methanol from crude mixed solvent.",
+      "operating_requirements": "Pay suitable Timber, retort and condenser capacity, heat, water, separation work and feed-quality trials; account for low variable methanol recovery and rejected watery or tarry fractions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local wood methanol recovery trials.",
+        "partnership": "Share actual samples and operator time for wood methanol recovery; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded wood methanol recovery process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external wood methanol recovery processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable wood methanol recovery machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/x5328e/x5328e0d.htm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "silver_cupellation",
+    "name": "Silver Cupellation",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "lead_smelting",
+      "ore_assaying"
+    ],
+    "requires_any": [],
+    "foundations": "lead_smelting,ore_assaying",
+    "mechanism": "Oxidize the lead and base-metal carrier of a qualified silver-bearing metal charge, retaining a noble-metal-rich residue and separating oxidized material in a consumable hearth lining.",
+    "operating_requirement": "Pay assayed silver-bearing feed, any required lead collector, fuel, furnace work and lining replacement; retain slag/litharge and metal losses, and verify the recovered silver grade.",
+    "consequence": "Provide recovered silver for separately qualified catalyst fabrication; ordinary Lead Ore has no implied silver content and recovered noble metal is not automatically catalyst-ready or separated from gold.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable silver cupellation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "silver_cupellation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Oxidize the lead and base-metal carrier of a qualified silver-bearing metal charge, retaining a noble-metal-rich residue and separating oxidized material in a consumable hearth lining.",
+      "operating_requirements": "Pay assayed silver-bearing feed, any required lead collector, fuel, furnace work and lining replacement; retain slag/litharge and metal losses, and verify the recovered silver grade.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local silver cupellation trials.",
+        "partnership": "Share actual samples and operator time for silver cupellation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded silver cupellation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external silver cupellation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable silver cupellation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://historicengland.org.uk/images-books/publications/archaeometallurgy-guidelines-best-practice/heag003-archaeometallurgy-guidelines/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H02 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "formaldehyde_synthesis",
+    "name": "Formaldehyde Synthesis",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "industrial_catalyst_design,chemical_distillation,experimental_controls",
+    "mechanism": "Convert qualified methanol through a selected catalytic oxidation/dehydrogenation route and absorb the resulting formaldehyde into a defined solution.",
+    "operating_requirement": "Pay named methanol feed, maintained qualified catalyst, controlled air handling, reaction and cooling capacity, water, separation work and output checks; retain catalyst wear and rejected fractions.",
+    "consequence": "Supply a specified formaldehyde solution to paid condensation-resin production; solution is not anhydrous monomer, finished resin or permission to substitute every catalyst.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable formaldehyde synthesis instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "formaldehyde_synthesis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Convert qualified methanol through a selected catalytic oxidation/dehydrogenation route and absorb the resulting formaldehyde into a defined solution.",
+      "operating_requirements": "Pay named methanol feed, maintained qualified catalyst, controlled air handling, reaction and cooling capacity, water, separation work and output checks; retain catalyst wear and rejected fractions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local formaldehyde synthesis trials.",
+        "partnership": "Share actual samples and operator time for formaldehyde synthesis; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded formaldehyde synthesis process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external formaldehyde synthesis processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable formaldehyde synthesis machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.essentialchemicalindustry.org/chemicals/methanal"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "urea_synthesis",
+    "name": "Urea Synthesis",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "pressure_vessels",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "pressure_vessels,chemical_distillation,experimental_controls",
+    "mechanism": "React defined ammonia and carbon-dioxide feeds through the carbamate-to-urea pathway, separating product from unconverted material.",
+    "operating_requirement": "Pay named Ammonia and Carbon Dioxide, maintained pressure plant, heat, cooling and separation work; bounded recycle retains makeup requirements and losses, and product qualification consumes samples.",
+    "consequence": "Supply qualified urea to a known urea-formaldehyde resin process; generic nitrogen stock or atmospheric carbon cannot bypass captured feeds and conversion equipment.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable urea synthesis instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "urea_synthesis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "React defined ammonia and carbon-dioxide feeds through the carbamate-to-urea pathway, separating product from unconverted material.",
+      "operating_requirements": "Pay named Ammonia and Carbon Dioxide, maintained pressure plant, heat, cooling and separation work; bounded recycle retains makeup requirements and losses, and product qualification consumes samples.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local urea synthesis trials.",
+        "partnership": "Share actual samples and operator time for urea synthesis; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded urea synthesis process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external urea synthesis processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable urea synthesis machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.essentialchemicalindustry.org/chemicals/urea.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]

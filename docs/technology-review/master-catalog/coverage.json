@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 740,
   "pending_communications": 0,
-  "new_authored_drafts": 2611,
-  "distinct_accounted_identities": 3351,
-  "remaining_identities_to_author": 1649,
+  "new_authored_drafts": 2615,
+  "distinct_accounted_identities": 3355,
+  "remaining_identities_to_author": 1645,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1255,
+    "assigned_identities": 1259,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2300,11 +2300,11 @@
         "id": "H02",
         "name": "Settlement and regional exchange",
         "target": 700,
-        "assigned": 74,
-        "target_slots_not_yet_assigned": 626,
+        "assigned": 75,
+        "target_slots_not_yet_assigned": 625,
         "implemented_baseline": 16,
         "pending_communications": 0,
-        "authored_drafts": 58
+        "authored_drafts": 59
       },
       {
         "id": "H03",
@@ -2320,11 +2320,11 @@
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 260,
-        "target_slots_not_yet_assigned": 440,
+        "assigned": 263,
+        "target_slots_not_yet_assigned": 437,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 255
+        "authored_drafts": 258
       },
       {
         "id": "H05",
@@ -2355,7 +2355,7 @@
     "D01": 109,
     "D02": 99,
     "D03": 97,
-    "D04": 107,
+    "D04": 111,
     "D05": 157,
     "D06": 85,
     "D07": 70,
@@ -2414,9 +2414,9 @@
       "target": 300,
       "implemented_baseline": 82,
       "pending_communications": 0,
-      "authored_drafts": 107,
-      "accounted": 189,
-      "remaining_to_target": 111
+      "authored_drafts": 111,
+      "accounted": 193,
+      "remaining_to_target": 107
     },
     {
       "id": "D05",
