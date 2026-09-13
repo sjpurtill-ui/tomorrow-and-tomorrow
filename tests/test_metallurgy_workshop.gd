@@ -62,14 +62,33 @@ func test_actual_normalizing_line_pays_section_and_supplies_a_shaft_consumer()->
 		var state=WorldSimulation.state
 		state.settlement_site_committed=true;state.convoy_traveling=false
 		state.population_allocations.Crafting=100;state.population_allocations.Logistics=100
+		var reference_recipe:=I.product("microscope_scale_slides")
+		state.known_discoveries.append(reference_recipe.gate);state.discovery_adoption[reference_recipe.gate]=1.0
+		for field:String in ["materials","tooling"]:
+			for resource:String in reference_recipe[field]:state.resource_stockpiles[resource]=10.0
+		state.resource_stockpiles[reference_recipe.output]=0.0
+		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":3000.0}
+		assert_bool(WorldSimulation.military.start_production_line("microscope_scale_slides",1).get("ok",false)).is_true()
+		var fabrication:Dictionary=WorldSimulation.military.equipment_queue.back()
+		var stock_before:Dictionary=state.resource_stockpiles.duplicate(true)
+		P.advance(WorldSimulation.military,fabrication,2)
+		assert_float(float(state.resource_stockpiles[reference_recipe.output])).is_equal(0.0)
+		P.advance(WorldSimulation.military,fabrication,2)
+		assert_float(float(state.resource_stockpiles[reference_recipe.output])).is_equal(1.0)
+		for resource:String in reference_recipe.materials:
+			assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(float(stock_before[resource])-float(reference_recipe.materials[resource]),.000001)
+		WorldSimulation.military.equipment_queue.clear()
 		var recipe:=I.product("normalizing_steel_sections")
 		state.known_discoveries.append(recipe.gate);state.discovery_adoption[recipe.gate]=1.0
-		for resource:String in recipe.tooling:state.resource_stockpiles[resource]=10.0
+		for resource:String in recipe.tooling:
+			if resource!=reference_recipe.output:state.resource_stockpiles[resource]=10.0
 		for resource:String in Sections.COST:state.resource_stockpiles[resource]=10.0
 		state.resource_stockpiles["Selected Medium-Carbon Steel"]=1.02
 		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":3000.0}
 		assert_bool(WorldSimulation.military.start_production_line("normalizing_steel_sections",1).get("ok",false)).is_true()
 		var line:Dictionary=WorldSimulation.military.equipment_queue.back()
+		assert_float(float(state.resource_stockpiles[reference_recipe.output])).is_equal(0.0)
+		assert_float(float(line.tooling[reference_recipe.output])).is_equal(1.0)
 		P.advance(WorldSimulation.military,line,1)
 		assert_float(float(state.resource_stockpiles["Selected Medium-Carbon Steel"])).is_equal(0.0)
 		assert_float(Ops.workshop_power_demand()).is_greater(0.0)
