@@ -1,3 +1,9 @@
+## September 13 — military horizon evidence review
+
+Integrated evidence-only source `83d2c4f6d39d5060c1789c77ece59e99eccdd088` as `7d6db84`. Seven existing military identities have proposed broad historical placements, with unsuccessful full-page fetches explicitly marked provisional. No horizon mappings, prerequisite edits, new identities or runtime changes are included. See `technology-review/MILITARY_HORIZON_EVIDENCE.md`.
+
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/military-horizon-integration`, base `d8afdc3c62bda8bd066e30122743b5298e258c50`. Reviewed documentation and whitespace only; no runtime tests required for this change. No merge conflicts or save effects. Runtime remains806, art241/806, ledger3,464 distinct identities. No player launch or package rebuild. Civic source remains held for authority maintenance, actor ownership and handover-capacity fixes.
+
 ## September 13 — 806 verified operating discoveries
 
 Integrated frozen abrasive handoff `25e4b8ad773e7351571973d6b3438798e4cc89ba` and five reviewed illustrations as canonical runtime/art commit `11241aee7f00f49df88648536e466e34ebb06205`. Five original discoveries and 32 paid recipes connect actual refined alumina, bonded wheels or dry glue-backed belts, separate grinding fixtures, retained candidate inspection and selected rejected-metal recovery to finished motor components and motors. Candidate identity survives inspection cancellation and save/load; unsupported unfinished-candidate trade fails before either side is debited. Qualified finished products trade normally. The planner replaces untraceable stock, and the panel distinguishes inspection capacity from accepted yield. Paid foreign licenses operate at 65% without mastery and expire.
