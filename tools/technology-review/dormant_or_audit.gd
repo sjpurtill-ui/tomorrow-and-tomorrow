@@ -2,6 +2,7 @@ extends RefCounted
 ## Editorial audit only. These identities are never added to the runtime graph.
 const SOURCE:="res://docs/technology-review/master-catalog/biology-measurement-depth.json"
 const PARENT_SOURCE:="res://docs/technology-review/master-catalog/medicine-biology-computation.json"
+const BASELINE:="res://docs/technology-review/master-catalog/implemented-baseline.json"
 const DECLARATIONS:=[
 	{"child":"plant_transpiration_measurement","parent":"photosynthetic_process_analysis","group":["photosynthetic_process_analysis","crop_calendars"]},
 	{"child":"plant_pathology_diagnosis","parent":"germ_theory","group":["germ_theory","experimental_controls"]}
@@ -15,22 +16,31 @@ static func pending(catalog:Array)->Array:
 	return result
 
 static func verify(index:Dictionary,declarations:Array)->Dictionary:
+	if declarations.is_empty():return {"approved":[],"errors":[]}
+	return verify_records(index,declarations,JSON.parse_string(FileAccess.get_file_as_string(SOURCE)),JSON.parse_string(FileAccess.get_file_as_string(PARENT_SOURCE)),JSON.parse_string(FileAccess.get_file_as_string(BASELINE)))
+
+## Pure resolver also exercised with post-promotion ledger fixtures. Normalized
+## runtime_definition/outer requires fields are not evidence of authored edges.
+static func resolve_authored(id:String,drafts:Array,implemented:Array,editorial_source:String)->Dictionary:
+	var matches:Array=[]
+	for row:Variant in drafts:
+		if row is Dictionary and row.get("id")==id:
+			if not row.get("requires_all") is Array or not row.get("requires_any") is Array:return {}
+			matches.append(row)
+	for row:Variant in implemented:
+		if not row is Dictionary or row.get("id")!=id:continue
+		var reconciliation:Variant=row.get("implementation_reconciliation")
+		if row.get("status")!="implemented_baseline" or not reconciliation is Dictionary:return {}
+		if reconciliation.get("editorial_source")!=editorial_source or not reconciliation.get("previous_requires_all") is Array or not reconciliation.get("previous_requires_any") is Array:return {}
+		matches.append({"id":id,"requires_all":reconciliation.previous_requires_all.duplicate(),"requires_any":reconciliation.previous_requires_any.duplicate(true)})
+	return matches[0] if matches.size()==1 else {}
+
+static func verify_records(index:Dictionary,declarations:Array,source:Variant,parent_rows:Variant,baseline:Variant)->Dictionary:
 	var result:={"approved":[],"errors":[]}
 	if declarations.is_empty():return result
-	var source:Variant=JSON.parse_string(FileAccess.get_file_as_string(SOURCE))
-	if not source is Array:
-		result.errors.append("Dormant OR audit: authored source unavailable or malformed")
+	if not source is Array or not parent_rows is Array or not baseline is Dictionary or not baseline.get("items") is Array:
+		result.errors.append("Dormant OR audit: authored source or implemented baseline unavailable or malformed")
 		return result
-	var authored:Dictionary={}
-	for row:Variant in source:
-		if row is Dictionary and row.get("id") is String:authored[row.id]=row
-	var parent_rows:Variant=JSON.parse_string(FileAccess.get_file_as_string(PARENT_SOURCE))
-	if not parent_rows is Array:
-		result.errors.append("Dormant OR audit: authored parent source unavailable or malformed")
-		return result
-	var authored_parents:Dictionary={}
-	for row:Variant in parent_rows:
-		if row is Dictionary and row.get("id") is String:authored_parents[row.id]=row
 	var seen:Dictionary={}
 	for value:Variant in declarations:
 		if not value is Dictionary or value.size()!=3 or not value.get("child") is String or not value.get("parent") is String or not value.get("group") is Array:
@@ -40,9 +50,10 @@ static func verify(index:Dictionary,declarations:Array)->Dictionary:
 		if d not in DECLARATIONS or seen.has(key):
 			result.errors.append("Dormant OR audit: unknown or duplicate declaration "+key);continue
 		seen[key]=true
-		if not index.has(d.child) or index.has(d.parent) or not authored.has(d.child) or not authored_parents.has(d.parent):
+		var row:=resolve_authored(String(d.child),source,baseline.items,SOURCE.get_file())
+		var parent_row:=resolve_authored(String(d.parent),parent_rows,baseline.items,PARENT_SOURCE.get_file())
+		if not index.has(d.child) or index.has(d.parent) or row.is_empty() or parent_row.is_empty():
 			result.errors.append("Dormant OR audit: invalid live/dormant identity "+key);continue
-		var row:Dictionary=authored[d.child]
 		var entry:Dictionary=index[d.child]
 		if row.get("requires_all",[])!=entry.get("requires_all",entry.get("requires",[])) or row.get("requires_any",[])!=entry.get("requires_any",[]) or d.group not in row.get("requires_any",[]) or d.parent not in d.group:
 			result.errors.append("Dormant OR audit: authored predicates differ "+key);continue

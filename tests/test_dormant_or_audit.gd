@@ -54,3 +54,40 @@ func test_expanded_route_factorization_preserves_predicates_and_acquisition_requ
 	expanded[3].learning_routes[0].requires_all.push_front("missing_local_instrument")
 	factored=D.factor_common(expanded,catalog)
 	assert_array(R.validate(factored,D.pending(factored))).contains(["plant_transpiration_measurement: unknown prerequisite missing_local_instrument"])
+func promoted(row:Dictionary,source:String)->Dictionary:
+	return {"id":row.id,"status":"implemented_baseline","requires_all":[],"requires_any":[],"runtime_definition":{"id":row.id,"requires_all":[],"requires_any":[]},"implementation_reconciliation":{"editorial_source":source,"previous_requires_all":row.requires_all.duplicate(),"previous_requires_any":row.requires_any.duplicate(true)}}
+func test_post_promotion_ledger_uses_preserved_authored_edges_for_child_and_parent()->void:
+	var catalog:=graph();var index:Dictionary={}
+	for entry:Dictionary in catalog:index[entry.id]=entry
+	var draft:Array=JSON.parse_string(FileAccess.get_file_as_string(D.SOURCE))
+	var parents:Array=JSON.parse_string(FileAccess.get_file_as_string(D.PARENT_SOURCE))
+	var implemented:Array=[]
+	for id:String in ["plant_transpiration_measurement","plant_pathology_diagnosis"]:
+		for row:Dictionary in draft.duplicate():
+			if row.id==id:implemented.append(promoted(row,D.SOURCE.get_file()));draft.erase(row)
+	for id:String in ["photosynthetic_process_analysis","germ_theory"]:
+		for row:Dictionary in parents.duplicate():
+			if row.id==id:implemented.append(promoted(row,D.PARENT_SOURCE.get_file()));parents.erase(row)
+	var baseline:={"source_commit":"fixture","status":"implemented_baseline","items":implemented}
+	var result:=D.verify_records(index,D.DECLARATIONS,draft,parents,baseline)
+	assert_array(result.errors).is_empty()
+	assert_int(result.approved.size()).is_equal(2)
+	# Normalized runtime edges are deliberately empty above. Altering preserved
+	# authored edges must fail despite a plausible normalized definition.
+	baseline.items[0].implementation_reconciliation.previous_requires_any=[]
+	assert_array(D.verify_records(index,D.DECLARATIONS,draft,parents,baseline).errors).is_not_empty()
+func test_missing_or_ambiguous_promotion_provenance_is_rejected()->void:
+	var catalog:=graph();var index:Dictionary={}
+	for entry:Dictionary in catalog:index[entry.id]=entry
+	var draft:Array=JSON.parse_string(FileAccess.get_file_as_string(D.SOURCE))
+	var parents:Array=JSON.parse_string(FileAccess.get_file_as_string(D.PARENT_SOURCE))
+	var row:Dictionary={}
+	for candidate:Dictionary in draft:
+		if candidate.id=="plant_transpiration_measurement":row=candidate;break
+	var baseline:={"items":[promoted(row,D.SOURCE.get_file())]}
+	assert_array(D.verify_records(index,D.DECLARATIONS,draft,parents,baseline).errors).is_not_empty()
+	draft.erase(row)
+	baseline.items[0].implementation_reconciliation.editorial_source="unrelated.json"
+	assert_array(D.verify_records(index,D.DECLARATIONS,draft,parents,baseline).errors).is_not_empty()
+	baseline.items[0].implementation_reconciliation={"editorial_source":D.SOURCE.get_file()}
+	assert_array(D.verify_records(index,D.DECLARATIONS,draft,parents,baseline).errors).is_not_empty()
