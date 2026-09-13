@@ -3,9 +3,9 @@ extends RefCounted
 const T=preload("res://scripts/metallurgy_thermal_cycle.gd")
 const BURNOUT_HOT_WORK:=.2 # Selected small pattern exposure, in normalized work units.
 const Ops=preload("res://scripts/technology_operations.gd")
-static func run_for(stage:Dictionary)->Dictionary:
+static func run_for(stage:Dictionary,initial_temperature:float=20.0)->Dictionary:
 	return T.start([{"duration":float(stage.work),"target":float(stage.get("temperature",20)),
-		"power":float(stage.get("heat_power",0)),"loss":float(stage.get("loss",.05)),"coolant":0.0}])
+		"power":float(stage.get("heat_power",0)),"loss":float(stage.get("loss",.05)),"coolant":0.0}],1.0,initial_temperature)
 static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	if work<=0:return
 	var state=WorldSimulation.state
@@ -57,9 +57,7 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 		p.stage+=1;p.paid={}
 		if int(p.stage)<spec.casting_stages.size():
 			var next:Dictionary=spec.casting_stages[int(p.stage)]
-			p.run=run_for(next)
-			if next.kind in ["cool","inspect"]:
-				p.run.temperature=previous_temperature;p.run.peak=previous_temperature
+			p.run=run_for(next,previous_temperature if next.kind in ["cool","inspect"] else 20.0)
 	if int(p.stage)==spec.casting_stages.size():finish(job,spec)
 static func burnout_remaining(run:Dictionary)->float:
 	var reached:=clampf((float(run.peak)-700.0)/150.0,0,1)
@@ -109,6 +107,8 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 			var paid:Dictionary=stage.materials.duplicate(true);paid.stage_charged=true
 			if not frame is Dictionary or frame.get("kind")!=stage.kind or frame.get("paid")!=paid or not frame.get("thermal") is Dictionary:return "Invalid casting stage history."
 			if not T.complete(frame.thermal) or frame.thermal.program!=run_for(stage).program:return "Invalid casting thermal history."
+			var initial:=float(p.trace[index-1].thermal.temperature) if stage.kind in ["cool","inspect"] and index>0 else 20.0
+			if not T.close_number(float(frame.thermal.initial_temperature),initial):return "Invalid casting carried heat."
 		if finished:
 			if p.stage!=spec.casting_stages.size() or not p.has_all(["observation","accepted","pour_temperature","pour_pattern_mass","pour_moisture"]):return "Incomplete casting inspection."
 			if p.run!=p.trace.back().thermal:return "Casting final thermal record disagrees with stage history."
@@ -118,6 +118,8 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 			if not p.accepted is bool or p.accepted!=passed:return "Invalid casting acceptance."
 		else:
 			if p.stage>=spec.casting_stages.size() or not T.valid(p.run) or p.run.program!=run_for(spec.casting_stages[p.stage]).program:return "Invalid partial casting stage."
+			var initial:=float(p.trace[p.stage-1].thermal.temperature) if spec.casting_stages[p.stage].kind in ["cool","inspect"] and p.stage>0 else 20.0
+			if not T.close_number(float(p.run.initial_temperature),initial):return "Invalid partial casting carried heat."
 			var paid:Dictionary=spec.casting_stages[p.stage].materials.duplicate(true);paid.stage_charged=true
 			if not p.paid.is_empty() and p.paid!=paid:return "Invalid casting charge."
 			if float(p.run.work)>0 and p.paid.is_empty():return "Missing casting charge."
@@ -168,6 +170,6 @@ static func synchronize_idle(job:Dictionary,spec:Dictionary,work:float)->void:
 	var unavailable:bool=work<=0 or bool(job.get("paused",false)) or p.site!=state.resource_settlement_id or (powered and Ops.service("electricity")<=0)
 	var missed:=delta if unavailable else maxi(0,delta-1)
 	if missed>0:
-		p.run.temperature=20.0+(float(p.run.temperature)-20.0)*exp(-float(stage.get("loss",.05))*float(missed))
+		T.idle(p.run,missed)
 		p.idle_days+=missed
 	p.last_day=today

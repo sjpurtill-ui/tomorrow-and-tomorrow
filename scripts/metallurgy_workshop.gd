@@ -55,7 +55,7 @@ static func validate_piece(job:Dictionary,spec:Dictionary,pending:Variant,finish
 	if pending.recipe!=job.item or pending.source_job!=job.id or pending.ordinal!=int(job.completed)+(0 if finished else 1) or pending.reserved!=spec.materials:return "Wrong metallurgy source."
 	if not pending.get("last_day") is int or pending.last_day<0 or not pending.get("idle_days") is int or pending.idle_days<0 or pending.idle_days>pending.last_day:return "Invalid metallurgy calendar."
 	if not pending.site is String or pending.site.length()>128:return "Invalid metallurgy site."
-	if not Thermal.valid(pending.run) or pending.run.program!=spec.thermal_program or pending.run.capacity!=spec.thermal_capacity:return "Invalid metallurgy thermal history."
+	if not Thermal.valid(pending.run) or pending.run.program!=spec.thermal_program or pending.run.capacity!=spec.thermal_capacity or pending.run.initial_temperature!=20.0:return "Invalid metallurgy thermal history."
 	if pending.phase!=("inspection" if Thermal.complete(pending.run) else "thermal"):return "Inconsistent metallurgy stage."
 	if not Sections.valid(pending,spec):return "Invalid metallurgy section."
 	if finished:
@@ -92,9 +92,6 @@ static func synchronize_idle(job:Dictionary,work:float)->void:
 	var missed:=delta if unavailable else maxi(0,delta-1)
 	if missed>0:
 		# Idle cooling is not paid treatment time and does not satisfy a hot hold.
-		var stage:=mini(int(p.run.stage),p.run.program.size()-1)
-		var loss:=float(p.run.program[stage].loss)
-		p.run.temperature=20.0+(float(p.run.temperature)-20.0)*exp(-loss*float(missed)/float(p.run.capacity))
-		if float(p.run.temperature)<800 or float(p.run.temperature)>950:p.run.hold_streak=0.0
+		Thermal.idle(p.run,missed)
 		p.idle_days+=missed
 	p.last_day=today

@@ -57,3 +57,56 @@ func test_preheating_cannot_replace_the_declared_hold()->void:
 	T.advance(run,.5,3000,0)
 	assert_float(float(run.longest_hold)).is_equal_approx(1.0,.000001)
 	assert_bool(T.valid(run)).is_true()
+
+func test_hot_history_requires_conserved_energy_and_exact_coolant()->void:
+	var program:=T.normalizing_program()
+	program[2].coolant=2.0
+	var run:=T.start(program)
+	T.advance(run,7,5000,6)
+	assert_bool(T.complete(run)).is_true()
+	var corrupt:=run.duplicate(true)
+	corrupt.energy=0.0
+	for frame:Dictionary in corrupt.trace:frame.energy=0.0
+	assert_bool(T.valid(corrupt)).is_false()
+	corrupt.heat_loss=0.0
+	for frame:Dictionary in corrupt.trace:frame.heat_loss=0.0
+	assert_bool(T.valid(corrupt)).is_false()
+	corrupt=run.duplicate(true);corrupt.coolant=0.0
+	for frame:Dictionary in corrupt.trace:frame.coolant=0.0
+	assert_bool(T.valid(corrupt)).is_false()
+	corrupt=run.duplicate(true);corrupt.trace[0].longest_hold=.5
+	assert_bool(T.valid(corrupt)).is_false()
+	corrupt=run.duplicate(true);corrupt.longest_hold=.9
+	assert_bool(T.valid(corrupt)).is_false()
+
+func test_fractional_reload_and_idle_conserve_paid_heat_without_hold_credit()->void:
+	var run:=T.start(T.normalizing_program())
+	for step:int in range(35):T.advance(run,.1,100,0)
+	assert_bool(T.valid(run)).is_true()
+	var paid:=float(run.energy)
+	var work:=float(run.work)
+	T.idle(run,100)
+	assert_float(float(run.energy)).is_equal(paid)
+	assert_float(float(run.work)).is_equal(work)
+	assert_float(float(run.hold_streak)).is_equal(0.0)
+	assert_bool(T.valid(run)).is_true()
+	run=bytes_to_var(var_to_bytes(run))
+	for step:int in range(50):
+		T.advance(run,.03,100,0)
+		T.advance(run,.07,100,0)
+	assert_bool(T.complete(run)).is_true()
+	assert_bool(T.balance(run,run)).is_true()
+	assert_float(float(run.longest_hold)).is_less(.51)
+
+func test_passive_casting_cooling_accepts_explicit_carried_heat()->void:
+	var run:=T.start([{"duration":2.0,"target":20.0,"power":0.0,"loss":2.0,"coolant":0.0}],1.0,1100.0)
+	T.advance(run,.37,0,0)
+	T.idle(run,1)
+	run=bytes_to_var(var_to_bytes(run))
+	T.advance(run,1.63,0,0)
+	assert_bool(T.complete(run)).is_true()
+	assert_float(float(run.energy)).is_equal(0.0)
+	assert_float(float(run.temperature)).is_less(30.0)
+	assert_bool(T.balance(run,run)).is_true()
+	var corrupt:=run.duplicate(true);corrupt.initial_temperature=20.0
+	assert_bool(T.valid(corrupt)).is_false()

@@ -36,7 +36,7 @@ static func entries()->Array[Dictionary]:
       "lead_tin_phase_survey",
       "phase_selected_solder"
     ],
-    "production_contract": "Characterized samples, controlled conditions and measurement evidence"
+    "production_contract": "Paid Pb-Sn samples at selected nominal feed grades and temperatures produce observed-flow survey charts consumed by solder manufacture; this selected survey does not assay composition or solve universal phase equilibria."
   },
   {
     "id": "steel_normalizing_control",
@@ -74,7 +74,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "normalizing_steel_sections"
     ],
-    "production_contract": "Known steel composition, suitable furnace and structural or mechanical tests"
+    "production_contract": "Heat nominal steel in a paid furnace, retain conserved energy, continuous hold and cooling history, then prepare and measure a destructive grain section before accepting shaft stock."
   },
   {
     "id": "induction_surface_hardening",
@@ -109,7 +109,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "induction_hardened_shafts"
     ],
-    "production_contract": "Compatible power equipment, workpiece, thermal control and inspection"
+    "production_contract": "Pay compatible induction apparatus, power and coolant for selected surface/core heating, quench and tempering; measured inspection accepts or rejects treated shafts."
   },
   {
     "id": "metal_grain_size_measurement",
@@ -144,7 +144,7 @@ static func entries()->Array[Dictionary]:
     "observation": "Measure representative grain structure using a defined preparation and counting method",
     "effects": {},
     "operating_contract": "Prepared samples, qualified imaging and analysts",
-    "production_contract": "Prepare and measure a destructive grain section from the retained normalized workpiece; pay preparation supplies, microscope operation and analyst work before releasing inspected steel.",
+    "production_contract": "Pay destructive section preparation, microscope operation and analyst work; derive image scale from a fabricated reference slide with bounded tolerance and measure synthetic grain boundaries before releasing normalized steel.",
     "inspection_items": [
       "normalizing_steel_sections"
     ]
@@ -184,7 +184,7 @@ static func entries()->Array[Dictionary]:
       "residual_slitting_surveys",
       "calibrated_slitting_stations"
     ],
-    "production_contract": "Suitable specimens, instruments and interpretation expertise"
+    "production_contract": "Pay instruments and analysis of a traceable formed bar; infer residual stress from measured slit response using the selected five-layer compliance model and bounded gauge resolution."
   },
   {
     "id": "metal_fracture_toughness_testing",
@@ -224,7 +224,7 @@ static func entries()->Array[Dictionary]:
       "precracked_fracture_trials",
       "fracture_reference_stations"
     ],
-    "production_contract": "Representative material, calibrated loading equipment and trained analysis"
+    "production_contract": "Pay selected-geometry specimen preparation, precracking and loading of a traceable formed bar; observed load/displacement yields provisional fracture screening, not certified fracture toughness."
   },
   {
     "id": "welding_metallurgy",
@@ -259,7 +259,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "welded_strap_qualification"
     ],
-    "production_contract": "Qualified joining equipment, known materials and inspection or test capacity"
+    "production_contract": "Pay joining apparatus and nominal steel feed; retain heating, upsetting and cooling history and observe destructive joint witnesses before accepting frame straps."
   },
   {
     "id": "vacuum_metal_melting",
@@ -294,7 +294,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "vacuum_copper_casting"
     ],
-    "production_contract": "Compatible furnace, vacuum equipment, power and composition testing"
+    "production_contract": "Pay vacuum apparatus, power and nominal copper; retain selected pressure, leak, gas-release and metal balances, then measure mass and section porosity before wire feed acceptance. This is degassing and porosity inspection, not purity or composition assay."
   },
   {
     "id": "investment_casting_process",
@@ -329,7 +329,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "investment_copper_brackets"
     ],
-    "production_contract": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks."
+    "production_contract": "Pay pattern, multiple shell layers, drying, hot-exposure burnout, molten metal, cooling and inspection; selected geometry and normalized thermal/fill response determine bracket acceptance without a full mold-flow solver."
   },
   {
     "id": "lost_foam_casting",
@@ -364,7 +364,7 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "lost_foam_copper_brackets"
     ],
-    "production_contract": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection."
+    "production_contract": "Pay measured EPS patterns, coating, support media, molten metal, cooling and ventilation; retain the pattern until pour and inspect selected fill, residue and bracket geometry using normalized foam and casting response."
   },
   {
     "id": "honed_bore_finishing",
@@ -400,7 +400,7 @@ static func entries()->Array[Dictionary]:
       "honing_head_sets",
       "honing_qualified_parts"
     ],
-    "production_contract": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition."
+    "production_contract": "Consume prepared bores, honing stones, fluid and machine work; measured selected bore profiles with bounded gauge resolution determine sleeve acceptance."
   },
   {
     "id": "short_stroke_superfinishing",
@@ -436,6 +436,6 @@ static func entries()->Array[Dictionary]:
       "superfinishing_head_sets",
       "superfinishing_qualified_parts"
     ],
-    "production_contract": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry."
+    "production_contract": "Pay finishing media, fluid and controlled short-stroke contact work on prepared surfaces; measure synthetic surface traces and selected geometry with bounded resolution before shaft acceptance."
   }
 ]

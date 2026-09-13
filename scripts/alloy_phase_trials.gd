@@ -76,12 +76,12 @@ static func valid_trial(trial:Variant,job:Dictionary,spec:Dictionary,finished:bo
 	for index:int in range(trial.samples.size()):
 		var s:Variant=trial.samples[index];var fraction:float=COMPOSITIONS[index/6]
 		if not s is Dictionary or s.get("index")!=index or s.get("tin_mass")!=fraction*.05 or s.get("lead_mass")!=(1-fraction)*.05:return false
-		if not s.get("thermal") is Dictionary or not Thermal.complete(s.thermal) or s.thermal.program!=trial_run(index).program:return false
+		if not s.get("thermal") is Dictionary or not Thermal.complete(s.thermal) or s.thermal.program!=trial_run(index).program or s.thermal.initial_temperature!=20.0:return false
 		if s.get("observation")!=observation(fraction,float(s.thermal.temperature)):return false
 	if finished and trial.run!=trial.samples.back().thermal:return false
 	if finished and trial.get("selected_tin")!=selected_composition(trial.samples):return false
 	if finished and (not trial.get("qualified") is bool or trial.qualified!=(absf(float(trial.selected_tin)-.6213)<.000001)):return false
-	if not Thermal.valid(trial.run) or trial.run.program!=trial_run(mini(17,trial.samples.size())).program:return false
+	if not Thermal.valid(trial.run) or trial.run.program!=trial_run(mini(17,trial.samples.size())).program or trial.run.initial_temperature!=20.0:return false
 	if not finished and absf(float(job.progress_days)-trial.samples.size()*2.0-float(trial.run.work))>.000001:return false
 	return true
 static func validate_job(job:Dictionary,spec:Dictionary)->String:
@@ -101,6 +101,6 @@ static func synchronize_idle(job:Dictionary,work:float)->void:
 	var unavailable:bool=work<=0 or bool(job.get("paused",false)) or trial.site!=state.resource_settlement_id or Ops.service("electricity")<=0
 	var missed:=delta if unavailable else maxi(0,delta-1)
 	if missed>0:
-		trial.run.temperature=20.0+(float(trial.run.temperature)-20.0)*exp(-.05*float(missed))
+		Thermal.idle(trial.run,missed)
 		trial.idle_days+=missed
 	trial.last_day=today
