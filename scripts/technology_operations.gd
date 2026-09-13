@@ -81,6 +81,36 @@ static func workshop_power_demand()->float:
 		if int(job.get("target_stock",0))>0 and float(WorldSimulation.state.resource_stockpiles.get(recipe.output,0))>=int(job.target_stock):continue
 		# Reserved machine feed is already inside this local unfinished workpiece.
 		# Free-stock exhaustion must not cancel the next day's generation request.
+		if recipe.has("casting_stages") and job.has("casting_pending"):
+			if job.casting_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.get("alloy_phase_trial",false) and job.has("alloy_trial"):
+			if job.alloy_trial.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.has("formed_source_curvature") and job.has("forming_pending"):
+			if job.forming_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.get("vacuum_trial",false) and job.has("vacuum_pending"):
+			if job.vacuum_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.get("pattern_trial",false) and job.has("pattern_pending"):
+			if job.pattern_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.get("weld_trial",false) and job.has("weld_pending"):
+			if job.weld_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.get("fracture_trial",false) and job.has("fracture_pending"):
+			if job.fracture_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.has("slitting_curvature") and job.has("slitting_pending"):
+			if job.slitting_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
+		if recipe.has("induction_frequency") and job.has("induction_pending"):
+			if job.induction_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.get("daily_power",0))
+			continue
+		if recipe.has("thermal_program") and job.has("metallurgy_pending"):
+			if job.metallurgy_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
 		if recipe.has("machine_program") and job.has("machine_pending"):
 			if job.machine_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
 			continue

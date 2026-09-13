@@ -3,6 +3,16 @@ extends RefCounted
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
 const Machine=preload("res://scripts/machine_workshop.gd")
+const Formed=preload("res://scripts/formed_workpiece.gd")
+const Vacuum=preload("res://scripts/vacuum_workshop.gd")
+const Pattern=preload("res://scripts/pattern_workshop.gd")
+const Weld=preload("res://scripts/weld_workshop.gd")
+const Fracture=preload("res://scripts/fracture_workshop.gd")
+const Slitting=preload("res://scripts/slitting_workshop.gd")
+const Induction=preload("res://scripts/induction_workshop.gd")
+const Metallurgy=preload("res://scripts/metallurgy_workshop.gd")
+const AlloyTrials=preload("res://scripts/alloy_phase_trials.gd")
+const Casting=preload("res://scripts/casting_workshop.gd")
 const Abrasive=preload("res://scripts/abrasive_inspection.gd")
 const Samples=preload("res://scripts/polymer_samples.gd")
 const Exposure=preload("res://scripts/exposure_production.gd")
@@ -128,6 +138,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 	if definition.has("error"): return definition
 	for job in host.equipment_queue:
 		if int(job.id)!=id or not bool(job.get("persistent",false)): continue
+		if not Formed.can_clear(job):return {"error":"Return to the formed workpiece store before retooling this line."}
 		if String(job.item)==item: return {"ok":true,"message":"This line already makes that item."}
 		var installed:=installed_tooling(job)
 		var additions:=missing_tooling(definition.tooling,installed)
@@ -143,6 +154,16 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		Exposure.clear(job)
 		Abrasive.clear(job)
 		Machine.clear(job)
+		Formed.clear(job)
+		Vacuum.clear(job)
+		Pattern.clear(job)
+		Weld.clear(job)
+		Fracture.clear(job)
+		Slitting.clear(job)
+		Induction.clear(job)
+		Metallurgy.clear(job)
+		AlloyTrials.clear(job)
+		Casting.clear(job)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
 		job.required_days=job.work_per_item
 		job.erase("planner_managed")
@@ -166,6 +187,39 @@ static func state(host: Node, job: Dictionary) -> String:
 	if Industry.product(String(job.item)).has("abrasive_candidate") and not Abrasive.capacity():return "Abrasive lot register full"
 	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
 	var inspection:Dictionary=Industry.product(String(job.item))
+	if inspection.has("formed_source_curvature"):
+		if job.has("formed_piece") and not job.formed_piece.consumed:return "Waiting for workpiece collection"
+		if job.has("forming_pending"):
+			return "Working" if job.forming_pending.site==WorldSimulation.state.resource_settlement_id else "Workpiece belongs to another store"
+	if inspection.get("vacuum_trial",false) and job.has("vacuum_pending"):
+		if job.vacuum_pending.site!=WorldSimulation.state.resource_settlement_id:return "Melt belongs to another store"
+		return "Working"
+	if inspection.get("pattern_trial",false) and job.has("pattern_pending"):
+		return "Working" if job.pattern_pending.site==WorldSimulation.state.resource_settlement_id else "Pattern belongs to another store"
+	if inspection.get("weld_trial",false) and job.has("weld_pending"):
+		if job.weld_pending.site!=WorldSimulation.state.resource_settlement_id:return "Joint belongs to another store"
+		return "Working"
+	if inspection.get("fracture_trial",false) and job.has("fracture_pending"):
+		if job.fracture_pending.site!=WorldSimulation.state.resource_settlement_id:return "Specimen belongs to another store"
+		return "Working"
+	if inspection.has("slitting_curvature") and job.has("slitting_pending"):
+		if job.slitting_pending.site!=WorldSimulation.state.resource_settlement_id:return "Specimen belongs to another store"
+		return "Working"
+	if inspection.has("induction_frequency") and job.has("induction_pending"):
+		if job.induction_pending.site!=WorldSimulation.state.resource_settlement_id:return "Workpiece belongs to another store"
+		return "Working"
+	if inspection.has("casting_stages") and job.has("casting_pending"):
+		if job.casting_pending.site!=WorldSimulation.state.resource_settlement_id:return "Casting belongs to another store"
+		return "Working"
+	if inspection.get("alloy_phase_trial",false) and job.has("alloy_trial"):
+		if job.alloy_trial.site!=WorldSimulation.state.resource_settlement_id:return "Trial belongs to another store"
+		return "Working" if preload("res://scripts/technology_operations.gd").service("electricity")>0 else "Waiting for electricity"
+	if inspection.has("thermal_program") and job.has("metallurgy_pending"):
+		if job.metallurgy_pending.site!=WorldSimulation.state.resource_settlement_id:return "Workpiece belongs to another store"
+		var pending:Dictionary=job.metallurgy_pending
+		if pending.phase=="inspection" and not preload("res://scripts/metallurgy_sections.gd").available(inspection):return "Waiting for adopted grain-size measurement"
+		var cooling:bool=pending.phase=="thermal" and float(pending.run.program[int(pending.run.stage)].power)==0
+		return "Working" if cooling or preload("res://scripts/technology_operations.gd").service("electricity")>0 else "Waiting for electricity"
 	if inspection.has("machine_program") and job.has("machine_pending"):
 		if job.machine_pending.site!=WorldSimulation.state.resource_settlement_id:return "Workpiece belongs to another store"
 		return "Working" if preload("res://scripts/technology_operations.gd").service("electricity")>0 else "Waiting for electricity"
@@ -207,10 +261,48 @@ static func workforce() -> Dictionary:
 
 static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
-	if not eligible(host,job) or work<=0:
+	var can_run:=eligible(host,job)
+	if job.has("casting_pending"):Casting.synchronize_idle(job,Industry.product(String(job.item)),work if can_run else 0.0)
+	AlloyTrials.synchronize_idle(job,work if can_run else 0.0)
+	Metallurgy.synchronize_idle(job,work if can_run else 0.0)
+	Induction.synchronize_idle(job,work if can_run else 0.0)
+	Pattern.synchronize_idle(job,work if can_run else 0.0)
+	Weld.synchronize_idle(job,work if can_run else 0.0)
+	Vacuum.synchronize_idle(job,work if can_run else 0.0)
+	if not can_run or work<=0:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.has("formed_source_curvature"):
+		Formed.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.get("vacuum_trial",false):
+		Vacuum.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.get("pattern_trial",false):
+		Pattern.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.get("weld_trial",false):
+		Weld.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.get("fracture_trial",false):
+		Fracture.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.has("slitting_curvature"):
+		Slitting.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.has("induction_frequency"):
+		Induction.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.has("casting_stages"):
+		Casting.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.get("alloy_phase_trial",false):
+		AlloyTrials.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.has("thermal_program"):
+		Metallurgy.advance(job,exposure_spec,work)
+		return
 	if exposure_spec.has("machine_program"):
 		Machine.advance(job,exposure_spec,work)
 		return
@@ -319,6 +411,26 @@ static func validate_saved(payload: Dictionary) -> String:
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
 		var machine_error:=Machine.validate_job(job,Industry.product(String(job.item)))
 		if not machine_error.is_empty():return machine_error
+		var formed_error:=Formed.validate_job(job,Industry.product(String(job.item)))
+		if not formed_error.is_empty():return formed_error
+		var vacuum_error:=Vacuum.validate_job(job,Industry.product(String(job.item)))
+		if not vacuum_error.is_empty():return vacuum_error
+		var pattern_error:=Pattern.validate_job(job,Industry.product(String(job.item)))
+		if not pattern_error.is_empty():return pattern_error
+		var weld_error:=Weld.validate_job(job,Industry.product(String(job.item)))
+		if not weld_error.is_empty():return weld_error
+		var fracture_error:=Fracture.validate_job(job,Industry.product(String(job.item)))
+		if not fracture_error.is_empty():return fracture_error
+		var slitting_error:=Slitting.validate_job(job,Industry.product(String(job.item)))
+		if not slitting_error.is_empty():return slitting_error
+		var induction_error:=Induction.validate_job(job,Industry.product(String(job.item)))
+		if not induction_error.is_empty():return induction_error
+		var metallurgy_error:=Metallurgy.validate_job(job,Industry.product(String(job.item)))
+		if not metallurgy_error.is_empty():return metallurgy_error
+		var alloy_error:=AlloyTrials.validate_job(job,Industry.product(String(job.item)))
+		if not alloy_error.is_empty():return alloy_error
+		var casting_error:=Casting.validate_job(job,Industry.product(String(job.item)))
+		if not casting_error.is_empty():return casting_error
 		var abrasive_error:=Abrasive.validate_job(job)
 		if not abrasive_error.is_empty():return abrasive_error
 		var exposure_error:=Exposure.validate(job,Industry.product(String(job.item)))
@@ -336,4 +448,7 @@ static func validate_saved(payload: Dictionary) -> String:
 				if not (value is int or value is float) or not is_finite(float(value)) or float(value)<=0 or float(value)>MAX_TARGET:return "Invalid installed tooling quantity."
 		for value in job.materials.values():
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid material cost."
-	return ""
+	return Formed.validate_links(payload.get("equipment_queue",[]))
+
+static func close(job:Dictionary)->bool:
+	return Formed.clear(job)

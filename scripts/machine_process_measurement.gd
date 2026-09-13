@@ -2,6 +2,7 @@ extends RefCounted
 ## Bounded game error measures, not manufacturing tolerances in physical units.
 ## Distinct error channels are retained for the particular process and workpiece.
 static func produced(kind:String,run:Dictionary,wear:float)->Dictionary:
+	if kind in ["honing","superfinishing"]:return preload("res://scripts/surface_finish_measurement.gd").produced(kind,run,wear)
 	var feed:=0.0
 	for instruction:Dictionary in run.program:feed=maxf(feed,float(instruction.feed))
 	var travel:=float(run.distance)
@@ -16,6 +17,7 @@ static func produced(kind:String,run:Dictionary,wear:float)->Dictionary:
 		"joining":return {"proof_slip":.15+wear*.6,"joint_damage":.05+float(run.energy)*.02+wear*.4}
 	return {}
 static func observed(physical:Dictionary,spec:Dictionary)->Dictionary:
+	if spec.get("machine_kind","") in ["honing","superfinishing"]:return preload("res://scripts/surface_finish_measurement.gd").observed(physical,spec)
 	var method:Dictionary=spec.machine_observation
 	var readings:={}
 	for key:String in physical:readings[key]=snappedf(float(physical[key]),float(method.resolution))
