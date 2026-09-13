@@ -50,3 +50,11 @@ Added SettlementFabricOperations with ten method/component mappings, start-time 
 Godot check-only parse passed. `--headless --path /Users/seanpurtill/Documents/Codex/tt-settlement-fabric-processes --script tools/technology-review/check_fabric_jobs.gd` passed, exit 0, /tmp/tt-fabric-jobs.log. This is a module test, not daily city scheduling, full save compatibility or supply closure. The earlier editor import failure remains recorded; this narrower invocation did not reproduce it.
 
 The module is not yet connected to plot scheduling or save validation. Inspection acceptance/rejection, selected physical evidence, repair, rendering and all acquisition paths remain outstanding. HELD, unregistered.
+
+## Construction owner integration
+
+SettlementModel.start_fabric_retrofit now starts against the selected city's existing plot, stocks and adoption. Monthly construction counts assembling retrofit sites alongside buildings, water and rail before dividing the same builder pool. Awaiting-inspection jobs receive no assembly labor. BuildingMaterialOperations.valid_plot now validates optional fabric jobs, including through its existing primary/secondary state traversal.
+
+Actual-owner headless probe passes: debit, positive monthly work, repeat-month guard, JSON plot persistence and malformed job rejection. Log /tmp/tt-fabric-owner.log, exit 0. Initial probe compile failed because direct SceneTree scripts cannot resolve the autoload identifier at compile time; runtime root lookup corrected the probe. The module probe also passes after integration. These checks do not prove whole-save reload, all cities, all ten daily acquisition routes or workforce balance under a mature campaign.
+
+Automatic selection, method compatibility and qualification, inspection, installed records, paid repair, renderer/cache/bounds changes remain unfinished. No registration or promotion.

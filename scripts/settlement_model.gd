@@ -1340,11 +1340,17 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	for line:Dictionary in WorldSimulation.state.water_conveyance.lines:
 		if String(line.status)=="under_construction":water_sites+=1
 	var rail_sites:=preload("res://scripts/rail_freight.gd").construction_sites()
-	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites+rail_sites))
+	var retrofit_sites:=0
+	for plot:Dictionary in WorldSimulation.state.settlement_plots:
+		if preload("res://scripts/settlement_fabric_operations.gd").needs_work(plot):retrofit_sites+=1
+	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites+rail_sites+retrofit_sites))
 	preload("res://scripts/water_conveyance.gd").construction_work(builders_per_site*water_sites*labor_efficiency*0.10,month_day)
 	preload("res://scripts/rail_freight.gd").construction_work(builders_per_site*rail_sites*labor_efficiency*.10,int(WorldSimulation.state.elapsed_days))
 	for plot in WorldSimulation.state.settlement_plots:
 		plot["last_update_day"]=month_day
+		if preload("res://scripts/settlement_fabric_operations.gd").needs_work(plot):
+			var used_work:float=preload("res://scripts/settlement_fabric_operations.gd").advance(plot,builders_per_site*labor_efficiency*.10,month_day)
+			if used_work>0:WorldSimulation.state.morphology_revision+=1
 		if String(plot.get("status",""))=="under_construction":
 			var previous_progress:=float(plot.get("construction_progress",0.0))
 			# Parallel projects divide the real monthly builder pool. A large population
@@ -3077,3 +3083,13 @@ func _active_nuclei()->int:
 	for nucleus in WorldSimulation.state.settlement_nuclei:
 		if bool(nucleus.get("active",true)): count+=1
 	return count
+
+## Current city scope supplies stocks, knowledge and the existing plot authority.
+func start_fabric_retrofit(plot_id:int,method:String)->Dictionary:
+	for plot:Dictionary in WorldSimulation.state.settlement_plots:
+		if int(plot.get("id",0))!=plot_id:continue
+		var result:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").start(plot,method,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries,WorldSimulation.state.discovery_adoption,int(WorldSimulation.state.elapsed_days))
+		if bool(result.get("ok",false)):
+			WorldSimulation.state.morphology_revision+=1
+		return result
+	return {"ok":false,"reason":"Plot is absent from this city."}

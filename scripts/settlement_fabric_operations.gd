@@ -60,3 +60,7 @@ static func valid_job(value:Variant)->bool:
  if float(value.last_day)<float(value.started_day) or float(value.last_day)!=floorf(float(value.last_day)):return false
  if value.get("state") not in ["assembling","awaiting_inspection"]:return false
  return (String(value.state)=="awaiting_inspection")==is_equal_approx(float(value.work),float(value.required_work))
+
+static func needs_work(plot:Dictionary)->bool:
+ var job:Variant=plot.get("fabric_job",{})
+ return valid_job(job) and not job.is_empty() and String(job.state)=="assembling" and String(plot.get("status","")) in ["active","stressed","damaged"]
