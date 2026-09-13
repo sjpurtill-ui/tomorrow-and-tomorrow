@@ -186,7 +186,7 @@ func test_silver_has_geographic_potential_and_old_ore_keys_keep_order()->void:
 	var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(100,200))
 	assert_bool(profile.resource_potentials.has("Silver Ore")).is_true()
 	assert_float(float(profile.resource_potentials["Silver Ore"])).is_between(0.0,1.0)
-	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Bauxite")
+	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Rutile Ore")
 	assert_bool(bool(ResourceSystem.catalog["Silver Ore"].renewable)).is_false()
 func test_appended_silver_does_not_change_existing_generated_deposits()->void:
 	WorldSimulation.scoped("polymers",func()->void:
@@ -194,23 +194,24 @@ func test_appended_silver_does_not_change_existing_generated_deposits()->void:
 		var silver:Dictionary=resource.catalog["Silver Ore"].duplicate(true)
 		var nickel:Dictionary=resource.catalog["Nickel Ore"].duplicate(true)
 		var bauxite:Dictionary=resource.catalog["Bauxite"].duplicate(true)
+		var rutile:Dictionary=resource.catalog["Rutile Ore"].duplicate(true)
 		var potentials:Dictionary={}
 		for key:String in resource.catalog:potentials[key]=.8
 		var profile:={"resource_potentials":potentials,"signature":"silver-regression"}
 		var seen_silver:=false
 		for seed_value:int in range(10,18):
 			WorldSimulation.state.world_seed=seed_value
-			resource.catalog.erase("Silver Ore");resource.catalog.erase("Nickel Ore");resource.catalog.erase("Bauxite")
+			resource.catalog.erase("Silver Ore");resource.catalog.erase("Nickel Ore");resource.catalog.erase("Bauxite");resource.catalog.erase("Rutile Ore")
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var old: Array=WorldSimulation.state.resource_deposits.duplicate(true)
-			resource.catalog["Silver Ore"]=silver;resource.catalog["Nickel Ore"]=nickel;resource.catalog["Bauxite"]=bauxite
+			resource.catalog["Silver Ore"]=silver;resource.catalog["Nickel Ore"]=nickel;resource.catalog["Bauxite"]=bauxite;resource.catalog["Rutile Ore"]=rutile
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var unchanged:Array=[]
 			for deposit:Dictionary in WorldSimulation.state.resource_deposits:
 				if deposit.resource=="Silver Ore":seen_silver=true
-				elif deposit.resource in ["Nickel Ore","Bauxite"]:pass
+				elif deposit.resource in ["Nickel Ore","Bauxite","Rutile Ore"]:pass
 				else:unchanged.append(deposit)
 			assert_array(unchanged).is_equal(old)
 		assert_bool(seen_silver).is_true())
@@ -626,3 +627,47 @@ func test_chloride_aluminum_requires_paid_mixed_bath_and_power_before_metal_or_c
 		s.resource_stockpiles["Insulation-Grade LDPE Foam"]=2;s.resource_stockpiles["Bitumen"]=1;Ops.data().services.electricity=10.0
 		assert_int(int(run_batch("aluminum_faced_cold_panels",1).get("completed",0))).is_equal(1)
 		assert_float(float(s.resource_stockpiles["Refined Aluminum"])).is_equal_approx(.6,.000001))
+
+func test_natural_rutile_occurrence_can_be_recognized_and_worked()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state;var resource=WorldSimulation.resources
+		var found:Dictionary={}
+		for x:int in range(-19000,19001,1000):
+			for y:int in range(-9000,9001,1000):
+				var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(x,y))
+				if float(profile.resource_potentials["Rutile Ore"])<.14:continue
+				s.resource_deposits.clear();resource.reset_for_new_world()
+				resource.register_local_occurrences([],"Hills",profile)
+				for deposit:Dictionary in s.resource_deposits:
+					if deposit.resource=="Rutile Ore":found=deposit;break
+				if not found.is_empty():break
+			if not found.is_empty():break
+		assert_bool(found.is_empty()).override_failure_message("Natural terrain must supply reachable rutile; no synthetic potential override").is_false()
+		if found.is_empty():return
+		s.resource_deposits.assign([found]);found.clues=1.0
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(found.stage)).is_equal("unknown")
+		for gate:String in ["ore_assaying","industrial_catalyst_design"]:
+			s.known_discoveries.append(gate);s.discovery_adoption[gate]=1.0
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(found.stage)).is_equal("recognized")
+		assert_float(float(s.resource_stockpiles.get("Rutile Ore",0))).is_equal(0.0)
+		found.stage="surveyed";found.route=1.0
+		var initial:float=float(found.remaining)
+		s.population_allocations.Extraction=8;s.population_allocations.Logistics=8;s.population_allocations.Knowledge=5;s.population_allocations.Construction=10
+		resource.process_day({"origin":Vector3.ZERO,"settled":false,"tools":1.0})
+		assert_float(float(found.lifetime_extracted)).is_greater(0.0)
+		assert_float(float(found.remaining)+float(found.lifetime_extracted)).is_equal_approx(initial,.00001))
+func test_coordination_and_tacticity_route_produces_usable_wash_bottle_closures()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		Ops.data().last_day=0;Ops.data().services={"electricity":1000.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
+		for resource:String in ["Polymer-Grade Ethene","Hydrogen Chloride","Anhydrous Aluminum Chloride","Refined Aluminum","Rutile Ore","Charcoal","Chlorine","Crude Propene","Quicklime","Toluene","Methanol","Caustic Soda","LDPE Wash Bottle Bodies"]:s.resource_stockpiles[resource]=100.0
+		var items:Array[String]=["catalyst_ethyl_chloride","ethylaluminum_cocatalyst","purified_titanium_chloride","reduced_titanium_catalyst","purified_propene_feed","coordination_polypropylene","spectrally_qualified_polypropylene","polypropylene_molding_grade","injected_pp_wash_closures","pp_closure_wash_bottles"]
+		var targets:Array[int]=[2,1,2,1,5,4,3,2,1,1]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(s.resource_stockpiles["Water Wash Bottles"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["PP Wash Bottle Closures"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["Titanium Trichloride Catalyst"])).is_equal_approx(.92,.000001)
+		assert_float(float(s.resource_stockpiles["Ethylaluminum Cocatalyst"])).is_equal_approx(.96,.000001)
+		assert_float(Ops.service("polymer_heat_removal")).is_equal(2.0))

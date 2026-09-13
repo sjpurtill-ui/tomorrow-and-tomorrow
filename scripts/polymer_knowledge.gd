@@ -139,7 +139,8 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "ldpe_film_grade",
       "ldpe_molding_grade",
-      "ldpe_blow_grade"
+      "ldpe_blow_grade",
+      "polypropylene_molding_grade"
     ],
     "production_contract": "Uses named feedstock batches, installed tooling, shared Crafting labor and specified daily power/services. Material qualification consumes the specific batch and samples; ownership of imported output grants no manufacturing mastery."
   },
@@ -177,7 +178,8 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_items": [
       "purified_ethene_feed",
-      "qualified_cationic_c4_feed"
+      "qualified_cationic_c4_feed",
+      "purified_propene_feed"
     ],
     "production_contract": "Uses named feedstock batches, installed tooling, shared Crafting labor and specified daily power/services. Material qualification consumes the specific batch and samples; ownership of imported output grants no manufacturing mastery."
   },
@@ -324,7 +326,8 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Consumes compatible grade or formed sheet, paid process tooling, shared workshop work and energy into fitted low-load telephone covers. Covers retain a timber internal mounting base; they do not replace pressure vessels or structural machine parts.",
     "production_items": [
       "injected_telephone_covers",
-      "injected_wash_bottle_closures"
+      "injected_wash_bottle_closures",
+      "injected_pp_wash_closures"
     ]
   },
   {
@@ -409,7 +412,11 @@ static func entries()->Array[Dictionary]:
       "formed_alumina_supports",
       "formed_ethene_catalyst",
       "anhydrous_aluminum_chloride",
-      "refined_alumina_supports"
+      "refined_alumina_supports",
+      "catalyst_ethyl_chloride",
+      "ethylaluminum_cocatalyst",
+      "purified_titanium_chloride",
+      "reduced_titanium_catalyst"
     ]
   },
   {
@@ -1143,7 +1150,8 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Qualified parison resin, compressed air, mold tooling and power produce hollow rinse-bottle bodies. Separately molded closures and leak testing produce water dispensers used in paid enzyme assays. No pressure-vessel, sterile, hot-liquid or universal-solvent qualification.",
     "production_items": [
       "blown_wash_bottle_bodies",
-      "assembled_water_wash_bottles"
+      "assembled_water_wash_bottles",
+      "pp_closure_wash_bottles"
     ]
   },
   {
@@ -1501,6 +1509,77 @@ static func entries()->Array[Dictionary]:
     "production_contract": "A purified aluminum-chloride feed is electrolyzed in a paid mixed sodium/potassium-chloride bath with graphite apparatus, substantial electrical demand and finite make-up salts. Metal and captured chlorine appear only on completion. This is a chloride-route implementation, not an assumed fluoride bath.",
     "production_items": [
       "chloride_aluminum_electrolysis"
+    ]
+  },
+  {
+    "id": "coordination_polymerization",
+    "name": "Coordination Polymerization",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "industrial_catalyst_design"
+    ],
+    "requires_all": [
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [
+      [
+        "polymer_chain_models",
+        "experimental_controls"
+      ]
+    ],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Coordination Polymerization",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Use a qualified coordination catalyst system to control chain growth and selected structure",
+    "effects": {},
+    "production_contract": "Qualified propene and separately prepared titanium/alkylaluminum catalysts produce a raw polypropylene batch with finite cooling, work and chemical supply. Paid spectral characterization remains separate from rheological/application qualification. Raw resin does not grant a universal forming grade.",
+    "production_items": [
+      "coordination_polypropylene"
+    ]
+  },
+  {
+    "id": "polymer_tacticity_characterization",
+    "name": "Polymer Tacticity Characterization",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "coordination_polymerization",
+      "spectroscopy"
+    ],
+    "requires_all": [
+      "coordination_polymerization",
+      "spectroscopy"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Tacticity Characterization",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Measure stereochemical ordering in a qualified polymer against a defined analytical method",
+    "effects": {},
+    "production_contract": "Qualified propene and separately prepared titanium/alkylaluminum catalysts produce a raw polypropylene batch with finite cooling, work and chemical supply. Paid spectral characterization remains separate from rheological/application qualification. Raw resin does not grant a universal forming grade.",
+    "production_items": [
+      "spectrally_qualified_polypropylene"
     ]
   }
 ]
