@@ -85,6 +85,8 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 			if not useful:errors.append(id+": agronomy needs an operating benefit")
 		var batch:=String(entry.get("food_batch_method",""))
 		if not batch.is_empty() and (batch!=id or not preload("res://scripts/food_batch_knowledge.gd").METHODS.has(batch)):errors.append(id+": no implemented food batch method")
+		var conveyance:=String(entry.get("water_conveyance_method",""))
+		if not conveyance.is_empty() and (conveyance!=id or conveyance not in preload("res://scripts/water_conveyance.gd").METHODS):errors.append(id+": no implemented conveyance method")
 		var building:=String(entry.get("building_method",""))
 		if not building.is_empty() and (building!=id or building not in preload("res://scripts/building_material_operations.gd").METHODS):errors.append(id+": no implemented building method")
 		var grain:=String(entry.get("grain_method",""))
@@ -99,5 +101,5 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		if not medical.is_empty() and (medical!=id or not preload("res://scripts/field_medicine.gd").METHODS.has(medical)):errors.append(id+": no implemented medical method")
 		var doctrine:=String(entry.get("doctrine",""))
 		if not doctrine.is_empty() and (doctrine!=id or not preload("res://scripts/combined_arms_doctrine.gd").RULES.has(doctrine)):errors.append(id+": no implemented doctrine")
-		if building.is_empty() and batch.is_empty() and grain.is_empty() and meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
+		if conveyance.is_empty() and building.is_empty() and batch.is_empty() and grain.is_empty() and meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
 	return errors

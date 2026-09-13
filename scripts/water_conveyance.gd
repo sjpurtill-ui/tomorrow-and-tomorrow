@@ -3,6 +3,7 @@ extends RefCounted
 const Fabric=preload("res://scripts/water_conveyance_fabric.gd")
 const Route=preload("res://scripts/water_conveyance_route.gd")
 const LIMIT:=8
+const METHODS=["clay_pipe_socket_jointing","buried_pipe_load_assessment","conduit_infiltration_testing","gravity_conduit_grade_control"]
 
 static func data()->Dictionary:return WorldSimulation.state.water_conveyance
 static func adopted()->Array:
@@ -86,3 +87,35 @@ static func maintain(line_id:int,work:float,clear_obstruction:bool=false)->float
 		line[field]=float(line[field])-amount if clear_obstruction else float(line[field])+amount
 		return amount/.01
 	return 0.0
+
+static func active_lines()->int:
+	var count:=0
+	for line:Dictionary in data().lines:
+		if line.status=="active":count+=1
+	return count
+
+static func scheduled_maintenance(work_per_line:float,day:int)->void:
+	if work_per_line<=0:return
+	var known:=adopted()
+	for line:Dictionary in data().lines:
+		if line.status!="active" or int(line.get("last_maintenance_day",-1))>=day:continue
+		line.last_maintenance_day=day
+		var remaining:=work_per_line
+		# Tests consume local water and work; they reveal loss but do not repair it.
+		if "conduit_infiltration_testing" in known and remaining>=.1 and float(WorldSimulation.state.resource_stockpiles.get("Freshwater",0))>=.5:
+			WorldSimulation.state.resource_stockpiles.Freshwater-=.5
+			remaining-=.1;line.inspected_day=day
+			line.observed_leakage=clampf(float(line.leakage)+(1.0-float(line.condition))*.3,0,1)
+		remaining-=maintain(int(line.id),remaining*.5,true)
+		maintain(int(line.id),remaining,false)
+
+static func describe()->String:
+	if data().lines.is_empty():return "No installed water conveyance."
+	var text:="Water conveyance\n"
+	for line:Dictionary in data().lines:
+		text+="Line %d · %s · %s\n" % [int(line.id),String(line.material),String(line.status).replace("_"," ")]
+		if line.status=="under_construction":text+="Construction %.1f / %.1f work\n" % [float(line.work_done),float(line.work_required)]
+		else:text+="Delivered %.1f today · condition %d%%\n" % [float(line.get("delivered_today",0)),roundi(float(line.condition)*100)]
+		if line.has("inspected_day"):text+="Last inspected day %d · observed loss %d%%\n" % [int(line.inspected_day),roundi(float(line.observed_leakage)*100)]
+		if not String(line.get("blocker","")).is_empty():text+=String(line.blocker)+"\n"
+	return text

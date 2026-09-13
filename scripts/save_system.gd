@@ -187,6 +187,7 @@ static func _apply_reflected(target:Object,state:Dictionary,skip:Array=[])->void
 func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	var nutrition:=preload("res://scripts/crop_nutrition.gd")
 	var state:Dictionary=payload.get("reflected_GameState",{})
+	if not preload("res://scripts/water_conveyance_state.gd").valid_state(state):return {"error":"Invalid water conveyance records."}
 	var batches=preload("res://scripts/food_batches.gd")
 	if not batches.valid(state.get("food_batches",batches.empty_state())) or not batches.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid food batch records."}
 	if not preload("res://scripts/building_material_operations.gd").valid_state(state):return {"error":"Invalid building material or curing records."}

@@ -14210,6 +14210,7 @@ func _open_materials_detail_overlay(rows:Array[Dictionary],water_access:Dictiona
 	var close:=Button.new(); close.text="BACK TO FLOW"; close.custom_minimum_size=Vector2(150,36); close.pressed.connect(overlay.queue_free); heading_row.add_child(close)
 	var scroll:=FIT_CONTENT_PANEL.new(); scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL; root.add_child(scroll)
 	var detail:=VBoxContainer.new(); detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL; detail.add_theme_constant_override("separation",7); scroll.add_child(detail)
+	preload("res://scripts/hud/water_conveyance_controls.gd").build(detail,_discovery_context())
 	if bool(water_access.get("recognized",false)): _add_compact_provision_text(detail,"CONTINUOUS SURFACE WATER","Mapped river/drainage access is tracked separately from deposits. %.1f collected / %.1f needed today." % [float(water_access.get("collected_today",0.0)),float(water_access.get("required_today",0.0))],Color("#8fb2b6"))
 	for row_data in rows:
 		var text:="%d known occurrences  •  %d reachable  •  %d developed\n%d workers  •  %.1f extracted  •  %.1f waiting  •  %.1f moving\n%s" % [int(row_data.occurrences),int(row_data.reachable),int(row_data.developed),int(row_data.workers),float(row_data.extracted),float(row_data.at_source),float(row_data.moving),String(row_data.status_detail)]
