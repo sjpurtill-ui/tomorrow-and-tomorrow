@@ -10894,6 +10894,316 @@
       "classification_status": "editorial_review",
       "rationale": "Classifies the coordinated civilian response method; no calendar unlock or exclusive historical origin.",
       "scope_digest": "95ae5947c3efea057f35e2e3eee00ad66457449ab9862b10befd692769892dae"
+    },
+    {
+      "id": "stream_sediment_reconnaissance",
+      "name": "Stream Sediment Reconnaissance",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "9707596f8ed75ba3e4e9bbd18a50931a38c39d7ddbb1a4939dbe044af61e435b"
+    },
+    {
+      "id": "heavy_mineral_indicator_sampling",
+      "name": "Heavy Mineral Indicator Sampling",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "19ad6c59f7a54218ae82f156d814e97302eed6c12a16d81c60c0015e9bf3c577"
+    },
+    {
+      "id": "soil_geochemical_grids",
+      "name": "Soil Geochemical Grids",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "ac413c0dc57191730d65fba825a3a418d0e3a6c593f84a16e64155fbf9d2501f"
+    },
+    {
+      "id": "geochemical_dispersion_models",
+      "name": "Geochemical Dispersion Models",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "51ea415691f0da78c1c57dcea1152380c1dad7b59845cce878f3b3d2b6c27052"
+    },
+    {
+      "id": "mineral_thin_section_preparation",
+      "name": "Mineral Thin Section Preparation",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "9bcc5bceab335faae26f8ae45bfa722751bcd5f1448172341c4a260cb1109a5a"
+    },
+    {
+      "id": "polarized_light_petrography",
+      "name": "Polarized Light Petrography",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "c27681b7233d6ffc1e4fc1527e76fdab25e769aba34625560213597c2d26db15"
+    },
+    {
+      "id": "core_drilling_recovery",
+      "name": "Core Drilling Recovery",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "f9c00e63fe6ea7083f97afe784eb0d6a6560d6a4e1ca0b0a13c004ecae5fe488"
+    },
+    {
+      "id": "oriented_core_logging",
+      "name": "Oriented Core Logging",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "05daecb2e17b81cbf5574d3b3e6760986a7b5016d10ac59c504ce9a877338671"
+    },
+    {
+      "id": "borehole_deviation_surveys",
+      "name": "Borehole Deviation Surveys",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "dabc2c9fe8ac82d81502b68bf4d92ea0a0cb86b6ffa66d400b959b750b2e17b0"
+    },
+    {
+      "id": "borehole_caliper_logging",
+      "name": "Borehole Caliper Logging",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "2acfe5742fcd99daddff0fec35817ed053cbf82a91fd4a0cad32f2fd3ba2f83e"
+    },
+    {
+      "id": "natural_gamma_borehole_logging",
+      "name": "Natural Gamma Borehole Logging",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "55424081bb81964413358cf1cbca465ff2323cec0f76b1ebb7965360087d3d64"
+    },
+    {
+      "id": "downhole_resistivity_logging",
+      "name": "Downhole Resistivity Logging",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "fff8827063a0827e7554576c9ebdfb7aa317a3c6d45917a683b9bcec47df249e"
+    },
+    {
+      "id": "acoustic_borehole_imaging",
+      "name": "Acoustic Borehole Imaging",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "1cce5605feaa0901bc32105ea14e0e22566d5ac6181e0be3f8059dfb2bef0f57"
+    },
+    {
+      "id": "optical_borehole_imaging",
+      "name": "Optical Borehole Imaging",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "ebf29f9be1f07d826dee4a7a73f7f1706655308317497a92a543e73dfa71b377"
+    },
+    {
+      "id": "borehole_flow_logging",
+      "name": "Borehole Flow Logging",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "fc3fa8f7d0af6e5e0ca3ae6abd019610c6cad86b71ebbc843cbac55a7b6efb8a"
+    },
+    {
+      "id": "packer_interval_testing",
+      "name": "Packer Interval Testing",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "8af7dfe92b685f58272137cf22b64b38ad7c6f40ef8eda5c4aaa3ed8cde42dcb"
+    },
+    {
+      "id": "standard_penetration_testing",
+      "name": "Standard Penetration Testing",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "914ad1a7d3a3b130cbfcfc6e5ad4087267bab160df79b6662558674825771867"
+    },
+    {
+      "id": "cone_penetration_soundings",
+      "name": "Cone Penetration Soundings",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "da884ccdcaf7369a061b2cd9f0381af7db05eb2c10135370a80a55aeda48d398"
+    },
+    {
+      "id": "pressuremeter_ground_testing",
+      "name": "Pressuremeter Ground Testing",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "234b8e250c42a7d25d55b384b83180cd0efeaf892c52a26904ee371c4c3247ad"
+    },
+    {
+      "id": "rock_joint_shear_testing",
+      "name": "Rock Joint Shear Testing",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "0b4947e997fd6f094a33ddd476890f11339e77fbd7904f4c159c3e78d9c25d21"
+    },
+    {
+      "id": "seismic_refraction_surveys",
+      "name": "Seismic Refraction Surveys",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "edc5ea403ad3d054d8095df1892aa32cbc9471b37d9dbab0f945fe217f5e6d20"
+    },
+    {
+      "id": "seismic_reflection_profiling",
+      "name": "Seismic Reflection Profiling",
+      "horizon": "H04",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "a4d84107dd688b275649a70f91a6f3cc7a0744cd6d3044db87df63bcdd3bcca0"
+    },
+    {
+      "id": "surface_wave_ground_characterization",
+      "name": "Surface Wave Ground Characterization",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "b13d18cc823fe8dac72b4d7c1f6583bd504a44fbafd3df9e15c0a45a98e40e59"
+    },
+    {
+      "id": "electrical_resistivity_tomography",
+      "name": "Electrical Resistivity Tomography",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "392964aa370e95ea993bf4262dcb3efa3604b790a364239ad707c3364311b9e0"
+    },
+    {
+      "id": "induced_polarization_surveys",
+      "name": "Induced Polarization Surveys",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "ee212a2c2c1ccf636b14bc8d7511bfea6b5cff78d2a028037145a789a690d33a"
+    },
+    {
+      "id": "ground_penetrating_radar_surveys",
+      "name": "Ground Penetrating Radar Surveys",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "5ffff362873781b752dd92d2901a7b851742df0e32ff7648dbaddc1a90aa5877"
+    },
+    {
+      "id": "transient_electromagnetic_soundings",
+      "name": "Transient Electromagnetic Soundings",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "84d51aac215565d60ca7ed095d044fc943e4140b153efe52add6c0da805abc8c"
+    },
+    {
+      "id": "regional_grade_tonnage_models",
+      "name": "Regional Grade Tonnage Models",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "3415abd0bce5b5257d94e1374fdd9e872fe5470d3512846c39b5b95a77d710cf"
+    },
+    {
+      "id": "acid_rock_drainage_characterization",
+      "name": "Acid Rock Drainage Characterization",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "a3ec95c37fcdf849669ca019d45dd1e9440184ce7f0afe38d266be1847874f7c"
+    },
+    {
+      "id": "geophysical_joint_interpretation",
+      "name": "Geophysical Joint Interpretation",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "fd1728fd9a431020603c2a65e84b66018b7c130edd33e270a82980fb5fbf3ea6"
+    },
+    {
+      "id": "geochemical_background_models",
+      "name": "Geochemical Background Models",
+      "horizon": "H05",
+      "source_file": "geological-investigation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
+      "scope_digest": "b832f9fa092da1838533684312f7e52a829b289678547d3a72ca75a04e0907d8"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

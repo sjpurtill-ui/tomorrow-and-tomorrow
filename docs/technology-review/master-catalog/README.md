@@ -5,7 +5,7 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 ## Authoritative baselines
 
 - Verified canonical runtime `2d0048225faccc4fc1f7563a510e74c8c6565aa9`: **716 discoveries,498 learning routes,365 civilian recipes and18 facilities**. Earthen/textile integration passes110 combined worktree and61 canonical cases. Earlier acceptance and limitations remain in integration handoffs.
-- Eight existing identities are promoted from the exact loaded canonical snapshot. The ledger contains **716 integrated +2,466 drafts =3,182 identities**, leaving **1,818 to author and4,284 to implement**. Verified subject art: **125;591 remain queued**.
+- Eight existing identities are promoted from the exact loaded canonical snapshot. The ledger contains **716 integrated +2,497 drafts =3,213 identities**, leaving **1,787 to author and4,284 to implement**. Verified subject art: **131;585 remain queued**.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 
@@ -113,3 +113,5 @@ Validation: `python3 tools/technology-review/test_atlas_coverage.py` passes seve
 Canonical integration checkpoint: `2fc24b4`, with runtime merge `5eab52a`, includes communications and staple processing. The old player opening window remains untouched; a new player launch is not claimed. Full 5,000-discovery implementation, historical pacing and remaining artwork are unfinished.
 
 [Building heat scope review](Building%20Heat%20Scope%20Review.md) merges a duplicate shared-heat network identity. User direction now prioritizes completing and integrating working runtime batches toward all5,000; remaining design/horizon review continues as needed alongside implementation, rather than blocking it.
+
+- [Geological Investigation Depth Review](../Geological%20Investigation%20Depth%20Review.md):31 distinct ground/mineral-investigation proposals with paid recovery, explicit uncertainty and reviewed exclusions.

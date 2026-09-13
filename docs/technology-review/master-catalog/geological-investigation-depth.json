@@ -1,0 +1,1127 @@
+[
+  {
+    "id": "stream_sediment_reconnaissance",
+    "name": "Stream Sediment Reconnaissance",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "sediment_provenance",
+      "ore_assaying"
+    ],
+    "requires_any": [],
+    "foundations": "sediment_provenance, ore_assaying",
+    "mechanism": "Use catchment sediment chemistry to narrow upstream mineral search areas.",
+    "operating_requirement": "Accessible catchments, collection crews, sample separation and paid assays.",
+    "consequence": "Directs follow-up visits while transport and mixed sources can displace anomalies.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable stream sediment reconnaissance instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "stream_sediment_reconnaissance",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use catchment sediment chemistry to narrow upstream mineral search areas.",
+      "operating_requirements": "Accessible catchments, collection crews, sample separation and paid assays.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for stream sediment reconnaissance; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for stream sediment reconnaissance; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded stream sediment reconnaissance investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite stream sediment reconnaissance equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired stream sediment reconnaissance dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/stream-sediment-geochemistry-mineral-exploration-a-review-fine-fraction-clay-fraction"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "heavy_mineral_indicator_sampling",
+    "name": "Heavy Mineral Indicator Sampling",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "mineral_specific_gravity",
+      "stream_sediment_reconnaissance"
+    ],
+    "requires_any": [],
+    "foundations": "mineral_specific_gravity, stream_sediment_reconnaissance",
+    "mechanism": "Concentrate and identify resistant heavy grains as source indicators.",
+    "operating_requirement": "Collected sediments, separation equipment, microscopy and reference specimens.",
+    "consequence": "Retains selected indicators lost in bulk averages; biased grain survival remains explicit.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable heavy mineral indicator sampling instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "heavy_mineral_indicator_sampling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Concentrate and identify resistant heavy grains as source indicators.",
+      "operating_requirements": "Collected sediments, separation equipment, microscopy and reference specimens.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for heavy mineral indicator sampling; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for heavy mineral indicator sampling; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded heavy mineral indicator sampling investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite heavy mineral indicator sampling equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired heavy mineral indicator sampling dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/stream-sediment-geochemistry-mineral-exploration-a-review-fine-fraction-clay-fraction"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "soil_geochemical_grids",
+    "name": "Soil Geochemical Grids",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "soil_assays",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "foundations": "soil_assays, geometric_survey",
+    "mechanism": "Compare soil chemistry across a recorded spatial sampling grid.",
+    "operating_requirement": "Access, consistent sampling depth, bags, assays and location records.",
+    "consequence": "Bounds local anomalies without treating untested ground as an ore body.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable soil geochemical grids instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "soil_geochemical_grids",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compare soil chemistry across a recorded spatial sampling grid.",
+      "operating_requirements": "Access, consistent sampling depth, bags, assays and location records.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for soil geochemical grids; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for soil geochemical grids; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded soil geochemical grids investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite soil geochemical grids equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired soil geochemical grids dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/geochemical-exploration-techniques-applicable-search-copper-deposits"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "geochemical_dispersion_models",
+    "name": "Geochemical Dispersion Models",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "soil_geochemical_grids",
+      "sediment_provenance"
+    ],
+    "requires_any": [],
+    "foundations": "soil_geochemical_grids, sediment_provenance",
+    "mechanism": "Explain how weathering and transport displace chemical evidence from its source.",
+    "operating_requirement": "Mapped samples, local hydrology, mineral observations and analyst time.",
+    "consequence": "Separates plausible source zones from downstream or transported signals.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable geochemical dispersion models instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "geochemical_dispersion_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Explain how weathering and transport displace chemical evidence from its source.",
+      "operating_requirements": "Mapped samples, local hydrology, mineral observations and analyst time.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for geochemical dispersion models; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for geochemical dispersion models; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded geochemical dispersion models investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite geochemical dispersion models equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired geochemical dispersion models dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/beyond-obvious-limits-ore-deposits-use-mineralogical-geochemical-and-biological"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "mineral_thin_section_preparation",
+    "name": "Mineral Thin Section Preparation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "compound_microscopy",
+      "abrasive_grinding_control"
+    ],
+    "requires_any": [],
+    "foundations": "compound_microscopy, abrasive_grinding_control",
+    "mechanism": "Cut and mount a rock slice with controlled thickness for transmitted-light inspection.",
+    "operating_requirement": "Identified rock, cutting tools, abrasive, mounts and skilled preparation.",
+    "consequence": "Creates an inspectable section while preparation loss and damaged grains remain costs.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable mineral thin section preparation instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "mineral_thin_section_preparation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Cut and mount a rock slice with controlled thickness for transmitted-light inspection.",
+      "operating_requirements": "Identified rock, cutting tools, abrasive, mounts and skilled preparation.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for mineral thin section preparation; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for mineral thin section preparation; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded mineral thin section preparation investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite mineral thin section preparation equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired mineral thin section preparation dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/data/thin-section-images-xenoliths-north-stillwater-complex-montana"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "polarized_light_petrography",
+    "name": "Polarized Light Petrography",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "mineral_thin_section_preparation",
+      "optical_polarization_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "mineral_thin_section_preparation, optical_polarization_analysis",
+    "mechanism": "Interpret grain textures and optical responses in a prepared rock section.",
+    "operating_requirement": "Polarizing microscope, sections, comparison material and interpretation work.",
+    "consequence": "Distinguishes mineral assemblages and textures without automatically measuring bulk grade.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable polarized light petrography instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polarized_light_petrography",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Interpret grain textures and optical responses in a prepared rock section.",
+      "operating_requirements": "Polarizing microscope, sections, comparison material and interpretation work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for polarized light petrography; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for polarized light petrography; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded polarized light petrography investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite polarized light petrography equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired polarized light petrography dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/data/thin-section-images-xenoliths-north-stillwater-complex-montana"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "core_drilling_recovery",
+    "name": "Core Drilling Recovery",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "drill_bit_fluting",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "foundations": "drill_bit_fluting, geometric_survey",
+    "mechanism": "Recover a depth-indexed cylindrical sample while accounting for unrecovered intervals.",
+    "operating_requirement": "A suitable core rig, bits, rods, flushing supply, fuel and field crews.",
+    "consequence": "Adds subsurface specimens; poor recovery leaves gaps rather than invented rock.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable core drilling recovery instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "core_drilling_recovery",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Recover a depth-indexed cylindrical sample while accounting for unrecovered intervals.",
+      "operating_requirements": "A suitable core rig, bits, rods, flushing supply, fuel and field crews.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for core drilling recovery; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for core drilling recovery; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded core drilling recovery investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite core drilling recovery equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired core drilling recovery dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/geotech/pubs/012546.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "oriented_core_logging",
+    "name": "Oriented Core Logging",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "structural_geologic_mapping"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, structural_geologic_mapping",
+    "mechanism": "Relate recovered structures to core depth and an orientation reference.",
+    "operating_requirement": "Intact marked core, racks, orientation tools and logging staff.",
+    "consequence": "Preserves structural evidence while broken or rotated pieces reduce confidence.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable oriented core logging instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "oriented_core_logging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Relate recovered structures to core depth and an orientation reference.",
+      "operating_requirements": "Intact marked core, racks, orientation tools and logging staff.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for oriented core logging; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for oriented core logging; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded oriented core logging investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite oriented core logging equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired oriented core logging dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/geotech/pubs/012546.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "borehole_deviation_surveys",
+    "name": "Borehole Deviation Surveys",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, geometric_survey",
+    "mechanism": "Measure the borehole path so downhole observations have spatial coordinates.",
+    "operating_requirement": "Calibrated orientation probes, access, depth registration and survey time.",
+    "consequence": "Corrects apparent vertical locations while sensor interference leaves uncertainty.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable borehole deviation surveys instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "borehole_deviation_surveys",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure the borehole path so downhole observations have spatial coordinates.",
+      "operating_requirements": "Calibrated orientation probes, access, depth registration and survey time.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for borehole deviation surveys; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for borehole deviation surveys; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded borehole deviation surveys investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite borehole deviation surveys equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired borehole deviation surveys dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://water.usgs.gov/ogw/bgas/logging_table.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "borehole_caliper_logging",
+    "name": "Borehole Caliper Logging",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, dimensional_metrology",
+    "mechanism": "Measure borehole diameter along depth.",
+    "operating_requirement": "Accessible hole, calibrated caliper probe, cable and operator time.",
+    "consequence": "Identifies enlargement or constriction relevant to interpreting other logs.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable borehole caliper logging instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "borehole_caliper_logging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure borehole diameter along depth.",
+      "operating_requirements": "Accessible hole, calibrated caliper probe, cable and operator time.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for borehole caliper logging; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for borehole caliper logging; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded borehole caliper logging investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite borehole caliper logging equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired borehole caliper logging dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://water.usgs.gov/ogw/bgas/logging_table.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "natural_gamma_borehole_logging",
+    "name": "Natural Gamma Borehole Logging",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "radiation_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, radiation_measurement",
+    "mechanism": "Record natural gamma response along a borehole.",
+    "operating_requirement": "Calibrated passive detector, depth encoder, logging power and reference records.",
+    "consequence": "Helps correlate lithologic intervals without directly proving ore grade.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable natural gamma borehole logging instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "natural_gamma_borehole_logging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Record natural gamma response along a borehole.",
+      "operating_requirements": "Calibrated passive detector, depth encoder, logging power and reference records.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for natural gamma borehole logging; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for natural gamma borehole logging; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded natural gamma borehole logging investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite natural gamma borehole logging equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired natural gamma borehole logging dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/centers/idaho-water-science-center/science/inlpo-geophysical-and-video-logging"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "downhole_resistivity_logging",
+    "name": "Downhole Resistivity Logging",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "resistive_bridge_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, resistive_bridge_measurement",
+    "mechanism": "Measure formation and fluid electrical responses at known depths.",
+    "operating_requirement": "Compatible borehole conditions, electrodes, reference calibration and power.",
+    "consequence": "Constrains electrical contrasts while fluids and geometry complicate interpretation.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable downhole resistivity logging instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "downhole_resistivity_logging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure formation and fluid electrical responses at known depths.",
+      "operating_requirements": "Compatible borehole conditions, electrodes, reference calibration and power.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for downhole resistivity logging; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for downhole resistivity logging; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded downhole resistivity logging investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite downhole resistivity logging equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired downhole resistivity logging dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/centers/idaho-water-science-center/science/inlpo-geophysical-and-video-logging"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "acoustic_borehole_imaging",
+    "name": "Acoustic Borehole Imaging",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "borehole_deviation_surveys",
+      "signal_sampling"
+    ],
+    "requires_any": [],
+    "foundations": "borehole_deviation_surveys, signal_sampling",
+    "mechanism": "Image borehole-wall reflections with a rotating acoustic probe.",
+    "operating_requirement": "Suitable liquid-filled hole, acoustic probe, calibrated timing and logging staff.",
+    "consequence": "Records oriented wall features where acoustic contrast and access permit.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable acoustic borehole imaging instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "acoustic_borehole_imaging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Image borehole-wall reflections with a rotating acoustic probe.",
+      "operating_requirements": "Suitable liquid-filled hole, acoustic probe, calibrated timing and logging staff.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for acoustic borehole imaging; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for acoustic borehole imaging; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded acoustic borehole imaging investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite acoustic borehole imaging equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired acoustic borehole imaging dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/ds/500/pdf/ds500.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "optical_borehole_imaging",
+    "name": "Optical Borehole Imaging",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "borehole_deviation_surveys",
+      "photographic_image_capture"
+    ],
+    "requires_any": [],
+    "foundations": "borehole_deviation_surveys, photographic_image_capture",
+    "mechanism": "Record oriented optical views of the borehole wall.",
+    "operating_requirement": "Camera, lighting, clear viewing conditions, depth control and power.",
+    "consequence": "Makes visible features inspectable; turbid water and casing obscure evidence.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable optical borehole imaging instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_borehole_imaging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Record oriented optical views of the borehole wall.",
+      "operating_requirements": "Camera, lighting, clear viewing conditions, depth control and power.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for optical borehole imaging; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for optical borehole imaging; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded optical borehole imaging investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite optical borehole imaging equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired optical borehole imaging dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/ds/500/pdf/ds500.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "borehole_flow_logging",
+    "name": "Borehole Flow Logging",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, flow_continuity",
+    "mechanism": "Measure vertical borehole flow under declared hydraulic conditions.",
+    "operating_requirement": "Calibrated flow probe, water-level records, repeat observations and staff.",
+    "consequence": "Locates contributing intervals without treating open-hole flow as isolated aquifer yield.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable borehole flow logging instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "borehole_flow_logging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure vertical borehole flow under declared hydraulic conditions.",
+      "operating_requirements": "Calibrated flow probe, water-level records, repeat observations and staff.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for borehole flow logging; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for borehole flow logging; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded borehole flow logging investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite borehole flow logging equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired borehole flow logging dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://water.usgs.gov/ogw/bgas/logging_table.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "packer_interval_testing",
+    "name": "Packer Interval Testing",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "borehole_caliper_logging",
+      "aquifer_response_testing"
+    ],
+    "requires_any": [],
+    "foundations": "borehole_caliper_logging, aquifer_response_testing",
+    "mechanism": "Isolate a borehole interval to test its hydraulic response.",
+    "operating_requirement": "Compatible packers, pumps, pressure instruments, water and test crews.",
+    "consequence": "Separates interval behavior where seals hold; leakage invalidates conclusions.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable packer interval testing instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "packer_interval_testing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Isolate a borehole interval to test its hydraulic response.",
+      "operating_requirements": "Compatible packers, pumps, pressure instruments, water and test crews.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for packer interval testing; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for packer interval testing; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded packer interval testing investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite packer interval testing equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired packer interval testing dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://water.usgs.gov/ogw/bgas/publications/FracRock04_Green/FracRock04_Green.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "standard_penetration_testing",
+    "name": "Standard Penetration Testing",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, measurement_uncertainty",
+    "mechanism": "Record corrected penetration resistance and recover a disturbed split-barrel sample.",
+    "operating_requirement": "Boring access, controlled hammer equipment, sampler and logged corrections.",
+    "consequence": "Supplies an empirical ground indicator within its calibration limits.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable standard penetration testing instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "standard_penetration_testing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Record corrected penetration resistance and recover a disturbed split-barrel sample.",
+      "operating_requirements": "Boring access, controlled hammer equipment, sampler and logged corrections.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for standard penetration testing; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for standard penetration testing; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded standard penetration testing investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite standard penetration testing equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired standard penetration testing dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/geotech/pubs/012546.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "cone_penetration_soundings",
+    "name": "Cone Penetration Soundings",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "piezoresistive_strain_sensing",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "foundations": "piezoresistive_strain_sensing, geometric_survey",
+    "mechanism": "Push an instrumented cone to obtain continuous penetration-response profiles.",
+    "operating_requirement": "Reaction rig, calibrated tip and sleeve sensors, power and accessible ground.",
+    "consequence": "Resolves changing ground response without producing a physical soil sample.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable cone penetration soundings instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cone_penetration_soundings",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Push an instrumented cone to obtain continuous penetration-response profiles.",
+      "operating_requirements": "Reaction rig, calibrated tip and sleeve sensors, power and accessible ground.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for cone penetration soundings; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for cone penetration soundings; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded cone penetration soundings investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite cone penetration soundings equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired cone penetration soundings dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/geotech/pubs/nhi16072.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "pressuremeter_ground_testing",
+    "name": "Pressuremeter Ground Testing",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "hydrostatic_pressure"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, hydrostatic_pressure",
+    "mechanism": "Measure pressure and deformation as a probe expands against ground.",
+    "operating_requirement": "Prepared hole, calibrated expandable probe, pressure supply and trained crew.",
+    "consequence": "Constrains in-situ stiffness and response where disturbance is controlled.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable pressuremeter ground testing instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pressuremeter_ground_testing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure pressure and deformation as a probe expands against ground.",
+      "operating_requirements": "Prepared hole, calibrated expandable probe, pressure supply and trained crew.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for pressuremeter ground testing; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for pressuremeter ground testing; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded pressuremeter ground testing investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite pressuremeter ground testing equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired pressuremeter ground testing dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/geotech/pubs/012546.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "rock_joint_shear_testing",
+    "name": "Rock Joint Shear Testing",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "core_drilling_recovery",
+      "stress_strain_relations"
+    ],
+    "requires_any": [],
+    "foundations": "core_drilling_recovery, stress_strain_relations",
+    "mechanism": "Test sliding response of a rock discontinuity under controlled normal loading.",
+    "operating_requirement": "Representative joint samples, loading frame, displacement gauges and test labor.",
+    "consequence": "Constrains a tested joint class; untested roughness and scale remain uncertain.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable rock joint shear testing instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rock_joint_shear_testing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Test sliding response of a rock discontinuity under controlled normal loading.",
+      "operating_requirements": "Representative joint samples, loading frame, displacement gauges and test labor.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for rock joint shear testing; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for rock joint shear testing; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded rock joint shear testing investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite rock joint shear testing equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired rock joint shear testing dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/geotech/pubs/nhi16072.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "seismic_refraction_surveys",
+    "name": "Seismic Refraction Surveys",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "seismic_wave_observation",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "foundations": "seismic_wave_observation, geometric_survey",
+    "mechanism": "Interpret first-arrival travel times from controlled surface sources.",
+    "operating_requirement": "Source equipment, receivers, surveyed positions and recorded timing.",
+    "consequence": "Constrains suitable velocity boundaries while hidden layers may remain unresolved.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable seismic refraction surveys instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "seismic_refraction_surveys",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Interpret first-arrival travel times from controlled surface sources.",
+      "operating_requirements": "Source equipment, receivers, surveyed positions and recorded timing.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for seismic refraction surveys; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for seismic refraction surveys; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded seismic refraction surveys investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite seismic refraction surveys equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired seismic refraction surveys dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/introduction-using-surface-geophysics-characterize-sand-and-gravel-deposits"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "seismic_reflection_profiling",
+    "name": "Seismic Reflection Profiling",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "seismic_wave_observation",
+      "signal_sampling"
+    ],
+    "requires_any": [],
+    "foundations": "seismic_wave_observation, signal_sampling",
+    "mechanism": "Image subsurface reflectors from timed returning seismic energy.",
+    "operating_requirement": "Source and receiver arrays, positioning, data storage and processing work.",
+    "consequence": "Suggests interface geometry with resolution and interpretation limits.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable seismic reflection profiling instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "seismic_reflection_profiling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Image subsurface reflectors from timed returning seismic energy.",
+      "operating_requirements": "Source and receiver arrays, positioning, data storage and processing work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for seismic reflection profiling; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for seismic reflection profiling; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded seismic reflection profiling investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite seismic reflection profiling equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired seismic reflection profiling dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/introduction-using-surface-geophysics-characterize-sand-and-gravel-deposits"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H04 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "surface_wave_ground_characterization",
+    "name": "Surface Wave Ground Characterization",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "seismic_wave_observation",
+      "inverse_problem_regularization"
+    ],
+    "requires_any": [],
+    "foundations": "seismic_wave_observation, inverse_problem_regularization",
+    "mechanism": "Infer near-surface velocity structure from surface-wave dispersion.",
+    "operating_requirement": "Measured wavefields, array geometry, processing capacity and plausible models.",
+    "consequence": "Estimates a family of ground profiles rather than a uniquely known subsurface.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable surface wave ground characterization instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_wave_ground_characterization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Infer near-surface velocity structure from surface-wave dispersion.",
+      "operating_requirements": "Measured wavefields, array geometry, processing capacity and plausible models.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for surface wave ground characterization; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for surface wave ground characterization; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded surface wave ground characterization investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite surface wave ground characterization equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired surface wave ground characterization dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://water.usgs.gov/ogw/bgas/2013-hydrogeophysics-trends.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "electrical_resistivity_tomography",
+    "name": "Electrical Resistivity Tomography",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "resistive_bridge_measurement",
+      "inverse_problem_regularization"
+    ],
+    "requires_any": [],
+    "foundations": "resistive_bridge_measurement, inverse_problem_regularization",
+    "mechanism": "Invert multiple electrode configurations into a constrained resistivity section.",
+    "operating_requirement": "Electrodes, suitable contact, power, survey geometry and computing work.",
+    "consequence": "Maps possible electrical structure while nonuniqueness and poor contact limit resolution.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable electrical resistivity tomography instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electrical_resistivity_tomography",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Invert multiple electrode configurations into a constrained resistivity section.",
+      "operating_requirements": "Electrodes, suitable contact, power, survey geometry and computing work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for electrical resistivity tomography; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for electrical resistivity tomography; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded electrical resistivity tomography investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite electrical resistivity tomography equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired electrical resistivity tomography dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/twri/twri2-d1/html/toc.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "induced_polarization_surveys",
+    "name": "Induced Polarization Surveys",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrochemical_cells",
+      "electrical_resistivity_tomography"
+    ],
+    "requires_any": [],
+    "foundations": "electrochemical_cells, electrical_resistivity_tomography",
+    "mechanism": "Observe delayed or frequency-dependent polarization after electrical excitation.",
+    "operating_requirement": "Qualified current source, low-noise receivers, electrodes and repeat measurements.",
+    "consequence": "Adds chargeability evidence without equating every anomaly with valuable mineralization.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable induced polarization surveys instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "induced_polarization_surveys",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Observe delayed or frequency-dependent polarization after electrical excitation.",
+      "operating_requirements": "Qualified current source, low-noise receivers, electrodes and repeat measurements.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for induced polarization surveys; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for induced polarization surveys; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded induced polarization surveys investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite induced polarization surveys equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired induced polarization surveys dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/twri/twri2-d1/html/toc.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "ground_penetrating_radar_surveys",
+    "name": "Ground Penetrating Radar Surveys",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "pulse_radar_observation",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "foundations": "pulse_radar_observation, geometric_survey",
+    "mechanism": "Trace shallow electromagnetic reflections along surveyed ground paths.",
+    "operating_requirement": "Ground-coupled antennas, power, timing calibration and navigable survey lines.",
+    "consequence": "Resolves some buried contrasts; conductive ground can erase useful penetration.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable ground penetrating radar surveys instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ground_penetrating_radar_surveys",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Trace shallow electromagnetic reflections along surveyed ground paths.",
+      "operating_requirements": "Ground-coupled antennas, power, timing calibration and navigable survey lines.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for ground penetrating radar surveys; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for ground penetrating radar surveys; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded ground penetrating radar surveys investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite ground penetrating radar surveys equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired ground penetrating radar surveys dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/introduction-using-surface-geophysics-characterize-sand-and-gravel-deposits"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "transient_electromagnetic_soundings",
+    "name": "Transient Electromagnetic Soundings",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "electromagnetic_induction",
+      "signal_sampling"
+    ],
+    "requires_any": [],
+    "foundations": "electromagnetic_induction, signal_sampling",
+    "mechanism": "Interpret the decay of induced subsurface currents after transmitter switch-off.",
+    "operating_requirement": "Transmitter loop, receiver, power, timing and interference controls.",
+    "consequence": "Constrains conductive structure within a bounded footprint and depth sensitivity.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable transient electromagnetic soundings instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "transient_electromagnetic_soundings",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Interpret the decay of induced subsurface currents after transmitter switch-off.",
+      "operating_requirements": "Transmitter loop, receiver, power, timing and interference controls.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for transient electromagnetic soundings; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for transient electromagnetic soundings; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded transient electromagnetic soundings investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite transient electromagnetic soundings equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired transient electromagnetic soundings dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/introduction-using-surface-geophysics-characterize-sand-and-gravel-deposits"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "regional_grade_tonnage_models",
+    "name": "Regional Grade Tonnage Models",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "ore_assaying",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "foundations": "ore_assaying, statistical_inference",
+    "mechanism": "Use comparable deposit populations to describe regional grade and size distributions.",
+    "operating_requirement": "Vetted deposit records, declared population selection and analysis work.",
+    "consequence": "Supports uncertain regional assessment without creating a discovered mine or reserve.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable regional grade tonnage models instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regional_grade_tonnage_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use comparable deposit populations to describe regional grade and size distributions.",
+      "operating_requirements": "Vetted deposit records, declared population selection and analysis work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for regional grade tonnage models; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for regional grade tonnage models; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded regional grade tonnage models investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite regional grade tonnage models equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired regional grade tonnage models dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/bul/b2004/html/bull2004introduction_and_overview_of_min.htm"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "acid_rock_drainage_characterization",
+    "name": "Acid Rock Drainage Characterization",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "ore_assaying",
+      "raw_water_quality_sampling"
+    ],
+    "requires_any": [],
+    "foundations": "ore_assaying, raw_water_quality_sampling",
+    "mechanism": "Evaluate rock-water reactions and observed drainage chemistry.",
+    "operating_requirement": "Representative rock, water samples, reaction tests, instruments and monitoring time.",
+    "consequence": "Identifies possible acidic or metal-bearing drainage and follow-up needs.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable acid rock drainage characterization instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "acid_rock_drainage_characterization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Evaluate rock-water reactions and observed drainage chemistry.",
+      "operating_requirements": "Representative rock, water samples, reaction tests, instruments and monitoring time.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for acid rock drainage characterization; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for acid rock drainage characterization; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded acid rock drainage characterization investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite acid rock drainage characterization equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired acid rock drainage characterization dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/mission-areas/water-resources/science/mine-drainage"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "geophysical_joint_interpretation",
+    "name": "Geophysical Joint Interpretation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "geologic_cross_sections",
+      "inverse_problem_regularization"
+    ],
+    "requires_any": [
+      [
+        "seismic_refraction_surveys",
+        "seismic_reflection_profiling"
+      ],
+      [
+        "electrical_resistivity_tomography",
+        "transient_electromagnetic_soundings"
+      ]
+    ],
+    "foundations": "geologic_cross_sections, inverse_problem_regularization",
+    "mechanism": "Compare independent geophysical observations against a shared geological interpretation.",
+    "operating_requirement": "At least two compatible measured datasets, position control and analyst capacity.",
+    "consequence": "Rejects some inconsistent models while shared biases and ambiguity remain.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable geophysical joint interpretation instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "geophysical_joint_interpretation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compare independent geophysical observations against a shared geological interpretation.",
+      "operating_requirements": "At least two compatible measured datasets, position control and analyst capacity.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for geophysical joint interpretation; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for geophysical joint interpretation; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded geophysical joint interpretation investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite geophysical joint interpretation equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired geophysical joint interpretation dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://water.usgs.gov/ogw/bgas/2013-hydrogeophysics-trends.html"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  },
+  {
+    "id": "geochemical_background_models",
+    "name": "Geochemical Background Models",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "soil_geochemical_grids",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "foundations": "soil_geochemical_grids, statistical_inference",
+    "mechanism": "Estimate context-dependent background before flagging chemical anomalies.",
+    "operating_requirement": "Comparable local samples, censored-value handling and documented analysis.",
+    "consequence": "Reduces false anomaly claims without labeling all elevated concentrations harmless.",
+    "branching_note": "Mandatory foundations and every OR group apply. Horizons describe editorial capability, not calendar locks. Survey access, finite crews, sampling damage, instrument limits and interpretation uncertainty remain real.",
+    "recovery": "Acquire attributable geochemical background models instruction or evidence through a reachable partner, then fund a local demonstration with actual access and equipment.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "geochemical_background_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Estimate context-dependent background before flagging chemical anomalies.",
+      "operating_requirements": "Comparable local samples, censored-value handling and documented analysis.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, field access and instructor time for geochemical background models; training does not provide a rig or reveal unvisited ground.",
+        "partnership": "Contribute actual samples or field observations and finite analysis work for geochemical background models; incompatible datasets can prevent a useful result.",
+        "purchased_research": "Commission a bounded geochemical background models investigation; pay for evidence acquisition and test the delivered interpretation locally.",
+        "licensed_or_imported_service": "Hire finite geochemical background models equipment and specialist capacity; transport, maintenance, access and continuing payment remain constraints.",
+        "reverse_engineering": "Inspect an acquired geochemical background models dataset or apparatus; reconstruct calibration and missing context through paid local comparisons without instant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/centers/geology%2C-geophysics%2C-and-geochemistry-science-center/science/science-topics/background"
+    ],
+    "implementation_status": "Authored proposal only. Requires real spatial samples or observations, instrument and workforce costs, bounded saved records, interpretation limits and operating consequences before promotion.",
+    "historical_scope": "H05 is a capability classification, not a claimed invention date. Sources describe physical methods; parent selection, recovery routes and consequences are game-design proposals."
+  }
+]

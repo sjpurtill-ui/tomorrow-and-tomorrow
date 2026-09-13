@@ -1,5 +1,11 @@
 ## September 12 — reviewed civilian response coverage
 
+## September 12 — geological coverage and textile art checkpoint
+
+Reviewed31 new geological-investigation proposals:716 integrated +2,497 drafts =**3,213 distinct identities**, leaving **1,787 to author and4,284 to implement**. Existing orebody models, spatial variograms, general traceability and broad observation methods were excluded from duplicate counting. All new parents and AND/OR groups resolve;15 catalog-tool tests pass. These proposals add no runtime survey or resource capability. See `technology-review/Geological Investigation Depth Review.md`.
+
+Textile art source `a76c245` is integrated as `d13ca4b`: six images visually reviewed, all canonical768px/mipmap loads pass, and12 canonical atlas cases pass. Art now covers **131 of716 live discoveries**, with **585 queued**. Runtime remains **716 /498 routes /365 recipes /18 facilities**. The other task is preparing a bounded five-method armor implementation under the existing general-led campaign and equipment owners. No player launch or package rebuild.
+
 ## September 12 — 716 verified operating discoveries
 
 Integrated six textile methods from `6d749d4` and two earthen building methods from `9f03bbd` as canonical `2d0048225faccc4fc1f7563a510e74c8c6565aa9`. Paid measured yarn and powered/manual spinning feed actual cloth and garments; imported figured cloth retains its identity through use, care and saves. Actual city trade pays and delays delivery. Adobe units dry before wall assembly, while wattle infill dries after application; local weather delays housing and upkeep spends real materials.

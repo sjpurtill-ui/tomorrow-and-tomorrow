@@ -65,3 +65,5 @@ Use case: historical-scene. Asset type: square technology-discovery illustration
 ## Verification
 
 All six native PNGs are 1254 × 1254. Godot 4.7.2 imports each at 768 × 768 with mipmaps; all six explicit ResearchVisuals bindings resolve. Fresh headless import exited 0 without script errors (`/tmp/tt-textile-art-import.log`); texture check exited 0 (`/tmp/tt-textile-art-check.log`). No runtime or save changes, no player process touched.
+
+Canonical integration: source `a76c245`, integrated `d13ca4b`. All six canonical texture/binding loads pass at768 pixels with mipmaps;12 canonical atlas cases pass. Inventory131/716,585 queued. No runtime behavior change.

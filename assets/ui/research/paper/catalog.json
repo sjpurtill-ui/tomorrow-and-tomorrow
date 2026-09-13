@@ -5199,7 +5199,7 @@
       "domain": "production",
       "id": "yarn_count_standards",
       "name": "Yarn-Count Standards",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/yarn_tension_control.png",
@@ -5207,7 +5207,7 @@
       "domain": "production",
       "id": "yarn_tension_control",
       "name": "Yarn-Tension Control",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/ring_spinning_systems.png",
@@ -5215,7 +5215,7 @@
       "domain": "production",
       "id": "ring_spinning_systems",
       "name": "Ring-Spinning Systems",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/rotor_spinning_systems.png",
@@ -5223,7 +5223,7 @@
       "domain": "production",
       "id": "rotor_spinning_systems",
       "name": "Rotor-Spinning Systems",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/drawloom_pattern_control.png",
@@ -5231,7 +5231,7 @@
       "domain": "production",
       "id": "drawloom_pattern_control",
       "name": "Drawloom-Pattern Control",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/punched_card_loom_control.png",
@@ -5239,7 +5239,7 @@
       "domain": "production",
       "id": "punched_card_loom_control",
       "name": "Punched-Card Loom Control",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
@@ -5733,9 +5733,9 @@
   "live_art_complete": false,
   "live_count": 716,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 591,
+  "queued_count": 585,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 125
+  "verified_count": 131
 }

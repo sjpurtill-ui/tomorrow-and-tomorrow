@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 716,
   "pending_communications": 0,
-  "new_authored_drafts": 2466,
-  "distinct_accounted_identities": 3182,
-  "remaining_identities_to_author": 1818,
+  "new_authored_drafts": 2497,
+  "distinct_accounted_identities": 3213,
+  "remaining_identities_to_author": 1787,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1086,
+    "assigned_identities": 1117,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2320,21 +2320,21 @@
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 209,
-        "target_slots_not_yet_assigned": 491,
+        "assigned": 221,
+        "target_slots_not_yet_assigned": 479,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 204
+        "authored_drafts": 216
       },
       {
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 528,
-        "target_slots_not_yet_assigned": 372,
+        "assigned": 547,
+        "target_slots_not_yet_assigned": 353,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 523
+        "authored_drafts": 542
       },
       {
         "id": "H06",
@@ -2349,7 +2349,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 461,
+  "branch_alternatives": 463,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 115,
@@ -2373,7 +2373,7 @@
     "D19": 95,
     "D20": 113,
     "D21": 196,
-    "D22": 59,
+    "D22": 90,
     "D23": 135,
     "D24": 56
   },
@@ -2594,9 +2594,9 @@
       "target": 160,
       "implemented_baseline": 17,
       "pending_communications": 0,
-      "authored_drafts": 59,
-      "accounted": 76,
-      "remaining_to_target": 84
+      "authored_drafts": 90,
+      "accounted": 107,
+      "remaining_to_target": 53
     },
     {
       "id": "D23",
