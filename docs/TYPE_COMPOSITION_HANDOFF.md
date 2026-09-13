@@ -13,3 +13,5 @@ Sources: the [Academy of Korean Studies account of early printing](https://www.a
 Validation and integration acceptance will be appended after checks.
 
 Worktree validation: 45 distinct cases pass: type composition7, printing4, planner15, early machinery10 and dependency audit9. The new test syntax and initial unrecognized Tin label were corrected; the final recipe consumes existing Refined Tin. Canonical verification remains pending.
+
+Canonical acceptance at `17430c9d498830b348709a0e0fbc2e523c8d133e`: seven type, four printing, twelve machinery, sixteen operations and nineteen owned-simulation cases all pass (58). Combined runtime worktree coverage82, plus12 atlas on both. Clean733/515/400/20 graph and boot; exactsnapshot and15ledger tests pass. Type illustrations36f3c45 pass final canonical768/mipmap and12atlas verification. No player launch or package rebuild.

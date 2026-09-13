@@ -5240,6 +5240,20 @@
       "source_domain": "production",
       "name": "Belt-Power Transmission",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "metal_type_casting",
+      "field": "D13",
+      "source_domain": "knowledge",
+      "name": "Metal-Type Casting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "movable_type_composition",
+      "field": "D13",
+      "source_domain": "knowledge",
+      "name": "Movable-Type Composition",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

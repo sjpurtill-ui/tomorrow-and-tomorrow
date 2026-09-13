@@ -1,3 +1,13 @@
+## September 12 — 733 discoveries and current-day river verification
+
+Type casting/composition source `7b402f1` and current-day river fix `17430c9d498830b348709a0e0fbc2e523c8d133e` are integrated. Two existing identities retain their original predicates, including wooden OR metal type. Four paid routes supply type and proofed forms to real printing and study. Composition allocates actual type, proof paper, ink and work. Existing complete forms remain usable; no arbitrary text or mastery is granted.
+
+The actual daily owner previously advanced machinery before refreshing discovery context. New daily-step tests reproduced four stale hammer-work units on source deletion or migration. The owner now passes current observations directly to operations, stopping the drive that day. Direct callers retain their existing fallback. Original direct machinery tests alone did not cover this call order.
+
+**82 distinct runtime worktree and 58 canonical cases pass**, plus12 atlas cases on both checkouts. Graph: **733 discoveries /515 routes /400 recipes /20 facilities**, all declared production reachable with no errors. Exact733-definition snapshot matches the ledger;15 catalog-tool tests and normal headless boot pass. Ledger: **733 integrated +2,504 drafts =3,237 identities**, leaving **1,763 to author and4,267 to implement**.
+
+Machinery art source `e4c93fb` is integrated as `f1a5c2c`; type art is `36f3c45`. All eight images visually reviewed and canonical768px/mipmap loads pass; the final12-case canonical atlas rerun passes. Art now **155 verified /733 live,578 queued**. No new top-level save fields, player launch or package rebuild. Type repertoires/proof correction and hydraulic capacity retain explicitly bounded abstractions; full historical pacing is unverified. See `TYPE_COMPOSITION_HANDOFF.md` and `EARLY_MACHINERY_HANDOFF.md`. The other task is implementing six selected-food discoveries.
+
 ## September 12 — 731 verified operating discoveries
 
 Early machinery source `3b0c030f18a4ab21033eafa526114325cd184b22` is integrated as `c4af26837581201c3007fb0c971258512982d241`. Six existing discoveries retain original predicates. Fourteen paid recipes supply actual cart parts, paper presses, belt drives and forge products. River hammers require a pinned confirmed nearby river, maintenance, operators and suitable local climate; all installations share at most eight daily hammer-work units. Forging consumes that finite service alongside materials and labor. A belt workshop spends real electricity and replacement belts. Existing general-led military and simulation owners remain authoritative.
