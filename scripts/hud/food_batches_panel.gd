@@ -19,6 +19,7 @@ func refresh()->void:
 	if not is_instance_valid(details):return
 	var ledger:=B.data();var spec:Dictionary=K.METHODS[subject]
 	var lines:Array[String]=["%d installed · %.0f rations per handler-day. Shares remaining Logistics workers with grain handling and preservation."%[int(ledger.tools.get(subject,0)),float(spec.rate)],"Available: %.1f rations · in process: %.1f · loss today: %.2f."%[B.available_total(),B.in_process(),float(ledger.report.get("loss",0))]]
+	if spec.mode=="selected_food":lines.append("Uses only identified compatible ingredient lots. Raw ingredients are unavailable as rations. Leached acorns, root pulp and split pulses require later hearth cooking with fuel and water; acorns and pulses also need a qualified clay vessel.")
 	var shown:=0
 	for lot:Dictionary in ledger.lots:
 		var observations:Array[String]=[]

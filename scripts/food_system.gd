@@ -65,7 +65,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var demand_breakdown:=_calculate_demand(traveling)
 	var nutrient_report:Dictionary={}
-	var harvest:=_produce(workers,labor_efficiency,ecology,traveling,true,nutrient_report)
+	var selected_access:float=military_campaign.siege_home_food_access() if military_campaign!=null else 1.0
+	var selected:=preload("res://scripts/selected_food_processing.gd").harvest(context,workers,labor_efficiency,ecology,float(demand_breakdown.total),selected_access)
+	var harvest:=_produce(maxf(0,workers-float(selected.workers)),labor_efficiency,ecology,traveling,true,nutrient_report)
 	if WorldSimulation.state.resource_settlement_id.is_empty() and not traveling:
 		var access:=WorldSimulation.military.siege_home_food_access()
 		for food_type in harvest: harvest[food_type]*=access
@@ -110,7 +112,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var prepared:=preload("res://scripts/food_preparation.gd").prepare(meal_plan,consumed)
 	var diet_quality:=clampf(_diet_quality(consumed,eaten)+float(prepared.quality_bonus)+.02*float(grain_issued.get("processed",0))/maxf(.001,eaten),0.0,1.0)
 	_update_nutrition(intake_ratio,diet_quality)
-	_update_source_health(harvest,workers,traveling)
+	var ecological_harvest:=harvest.duplicate()
+	ecological_harvest["Fresh plants"]+=float(selected.gathered)
+	_update_source_health(ecological_harvest,workers,traveling)
 	var total:=_stock_total()
 	var spoilage_total:=0.0
 	for amount in spoilage.values(): spoilage_total+=float(amount)
@@ -148,6 +152,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_batches":batches,
 		"food_batch_stock":Batches.available_total(),
 		"food_batch_work":Batches.in_process(),
+		"selected_food_harvest":selected,
 		"grain_processing":grain,
 		"grain_stocks":Grain.data().stocks.duplicate(true),
 		"grain_in_process":Grain.in_process(),

@@ -19,9 +19,9 @@ func equip(id:String)->void:
 	assert_bool(B.install(id).get("ok",false)).is_true()
 func report()->Dictionary:return {"workers":0.0,"loss":0.0,"inputs":{},"methods":{}}
 func energy()->float:return WorldSimulation.food._stock_total()+G.in_process()+B.in_process()
-func test_seventeen_operating_methods_have_reachable_real_inputs()->void:
+func test_operating_methods_have_reachable_real_inputs()->void:
 	WorldSimulation.scoped("batches",func()->void:
-		assert_int(K.entries().size()).is_equal(17)
+		assert_int(K.entries().size()).is_equal(22)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 		var outputs:Array=WorldSimulation.resources.catalog.keys()
 		for product:Dictionary in preload("res://scripts/civilian_industry.gd").PRODUCTS.values():outputs.append(product.output)
@@ -116,7 +116,11 @@ func test_all_operations_share_workers_and_same_day_is_idempotent()->void:
 	WorldSimulation.scoped("batches",func()->void:
 		prepare()
 		for id:String in K.METHODS:equip(id)
-		for kind:String in B.KINDS:B.add_lot(kind,100,0)
+		for kind:String in B.KINDS:
+			var lot:=B.add_lot(kind,100,0)
+			if kind in B.Selected.KINDS:
+				var source_kind:String={"leached_acorn_meal":"selected_acorns","pressed_root_pulp":"selected_roots","split_pulses":"selected_pulses"}.get(kind,kind)
+				lot.source_id="0:0:"+source_kind;lot.source_origin=[0.0,0.0]
 		for key:String in G.STOCKS:G.data().stocks[key]=100.0
 		WorldSimulation.state.elapsed_days=1;var before:=energy();var result:=B.advance(10,100,false)
 		assert_float(float(result.workers)).is_less_equal(2.000001)
