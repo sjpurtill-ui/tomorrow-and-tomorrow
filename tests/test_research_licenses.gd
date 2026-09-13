@@ -45,8 +45,8 @@ func prepare()->void:
 	CivilizationSystem.civilizations[0].player_relation.merge({"contact_level":2,"home_location_known":true,"home_position":{"x":30.0,"z":0.0}},true)
 	CivilizationSystem.civilizations[0].strategic_regions=[{"id":"neighbor_city","role":"capital","name":"Neighbor city","map_x":.5,"map_y":.5,"position":Vector2(30,0),"controller":"neighbor","fortification":.2,"damage":0.0,"population":200,"strategic_weight":1.0}]
 
-func license_trip()->Dictionary:
-	assert_bool(L.dispatch("neighbor","glassmaking","Stone").get("ok",false)).is_true()
+func license_trip(subject:String="glassmaking")->Dictionary:
+	assert_bool(L.dispatch("neighbor",subject,"Stone").get("ok",false)).is_true()
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
 	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day))
 	Purchase.prepare_return(mission)
@@ -366,3 +366,37 @@ func test_paused_operating_input_line_does_not_trigger_new_license()->void:
 	operating_license_need()
 	MilitaryCampaign.equipment_queue.append({"persistent":true,"paused":true,"item":"compressed_air"})
 	assert_dict(AI.recommendation()).is_empty()
+
+func test_paid_polymer_license_processes_imported_measured_feed_slowly_without_mastery()->void:
+	prepare()
+	var subject:="polymer_molecular_weight_control"
+	E.owner_state("neighbor").known_discoveries.append(subject)
+	E.owner_state("neighbor").discovery_adoption[subject]=1.0
+	var payment_before:=float(GameState.resource_stockpiles.Stone)
+	license_trip(subject)
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(payment_before)
+	assert_bool(L.active(subject)).is_true()
+	assert_bool(subject in GameState.known_discoveries).is_false()
+	var spec:Dictionary=preload("res://scripts/civilian_industry.gd").product("characterized_controlled_peg")
+	for item:String in spec.tooling:GameState.resource_stockpiles[item]=100.0
+	GameState.resource_stockpiles["Size-Characterized PEG Batches"]=2.0
+	GameState.resource_stockpiles["Freshwater"]=2.0
+	var ops=preload("res://scripts/technology_operations.gd")
+	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":10.0}
+	assert_bool(MilitaryCampaign.start_production_line("characterized_controlled_peg",2).get("ok",false)).is_true()
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	Production.advance(MilitaryCampaign,job,4.0)
+	assert_int(int(job.completed)).is_equal(0)
+	assert_float(float(job.progress_days)).is_equal_approx(2.6,.000001)
+	assert_float(float(GameState.resource_stockpiles["Size-Characterized PEG Batches"])).is_equal_approx(1.35,.000001)
+	Production.advance(MilitaryCampaign,job,4.0)
+	assert_int(int(job.completed)).is_equal(1)
+	assert_float(float(GameState.resource_stockpiles["Size-Qualified PEG"])).is_equal(1.0)
+	assert_bool(subject in GameState.known_discoveries).is_false()
+	assert_bool("ring_opening_polymerization" in GameState.known_discoveries).is_false()
+	GameState.elapsed_days=int(L.records()[subject].expires_day)
+	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":10.0}
+	var before:=GameState.resource_stockpiles.duplicate(true)
+	Production.advance(MilitaryCampaign,job,100.0)
+	assert_dict(GameState.resource_stockpiles).is_equal(before)
+	assert_int(int(job.completed)).is_equal(1)

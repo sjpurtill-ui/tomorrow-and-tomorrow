@@ -3,6 +3,7 @@ const Ops=preload("res://scripts/technology_operations.gd")
 var subject:=""
 var rows:Dictionary={}
 var elapsed:=0.0
+var specimen_report:Label
 func _ready()->void:
 	if subject in preload("res://scripts/rail_freight.gd").REQUIRED:
 		add_child(preload("res://scripts/hud/rail_freight_controls.gd").new())
@@ -20,11 +21,15 @@ func _ready()->void:
 			message.text=String(result.get("message",result.get("error","")));refresh())
 		pause.pressed.connect(func()->void:
 			Ops.set_enabled(id,not bool(Ops.data().plants.get(id,{}).get("enabled",true)));refresh())
+	if subject in ["nuclear_magnetic_resonance_spectroscopy","size_exclusion_chromatography"]:
+		specimen_report=Label.new();specimen_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(specimen_report)
 	refresh()
 func _process(delta:float)->void:
 	elapsed+=delta
 	if elapsed>=1:elapsed=0;refresh()
 func refresh()->void:
+	if is_instance_valid(specimen_report):
+		specimen_report.text=preload("res://scripts/sec_acquisition.gd").report_text() if subject=="size_exclusion_chromatography" else preload("res://scripts/nmr_acquisition.gd").report_text()
 	for id:String in rows:
 		var row:Dictionary=rows[id];var spec:Dictionary=Ops.PLANTS[id]
 		var record:Dictionary=Ops.data().plants.get(id,{})

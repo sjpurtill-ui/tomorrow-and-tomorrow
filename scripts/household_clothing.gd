@@ -5,7 +5,7 @@ const K=preload("res://scripts/clothing_knowledge.gd")
 const R=preload("res://scripts/technology_requirements.gd")
 const LIMIT:=48
 const QUILT_REPAIR_INPUTS:={"Plant-Fiber Quilt Batts":.08,"Woven Cloth":.08,"Spun Yarn":.03}
-const HUNTING_BYPRODUCTS:={"Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay"}
+const HUNTING_BYPRODUCTS:={"Pancreatic Tissue": "Selected gland tissue from actual newly hunted rations, bounded and rapidly decaying","Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay"}
 const BONE_RESOURCE:="Recovered Bone"
 const CREATION_MODES:=["knit","twill","pile","sew","fit","grade","leather","tied","quilt"]
 const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42,"leather":.32,"tied":.25,"quilt":.50}
@@ -204,6 +204,13 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 	data().last_day=day
 	# Raw hides are local hunting byproducts, not a conversion of stored meat.
 	# The existing once-per-day clothing guard also owns decay and collection.
+	# Selected gland tissue supports a specific protease process. Existing daily
+	# guard scopes harvest and biological activity loss to this settlement.
+	var tissue:=maxf(0,available("Pancreatic Tissue"))*.25
+	if "enzyme_catalysis" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("enzyme_catalysis")>=.1 and is_finite(hunted_rations):tissue+=maxf(0,hunted_rations)*.0002
+	WorldSimulation.state.resource_stockpiles["Pancreatic Tissue"]=minf(maxf(0,population)*.001,tissue)
+	for enzyme:String in ["Pancreatic Enzyme Fraction","Bating Protease"]:
+		if WorldSimulation.state.resource_stockpiles.has(enzyme):WorldSimulation.state.resource_stockpiles[enzyme]=maxf(0,available(enzyme))*(.5 if enzyme=="Pancreatic Enzyme Fraction" else .98)
 	var fat:=maxf(0,available("Recovered Animal Fat"))*.75
 	var raw:=maxf(0,available("Raw Hides"))*.75
 	var tanning:="hide_tanning" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("hide_tanning")>=.1

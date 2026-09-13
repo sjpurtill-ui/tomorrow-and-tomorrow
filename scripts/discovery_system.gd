@@ -138,6 +138,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/textile_process_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/armor_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/early_machinery_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/polymer_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/selected_food_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/paper_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/record_media_knowledge.gd").entries())
@@ -1024,6 +1025,8 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 func technology_depth(id:String,visiting:Dictionary={})->int:
 	if visiting.has(id): return 0
 	var entry:Dictionary=catalog_by_id.get(id,{})
+	# Unknown parents remain graph validation errors, not invented root nodes.
+	if entry.is_empty(): return 0
 	if entry.has("causal_depth"): return int(entry.causal_depth)
 	var path:=visiting.duplicate()
 	path[id]=true

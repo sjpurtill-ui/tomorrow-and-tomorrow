@@ -15,7 +15,7 @@ static func visible_for(topic:String, exposed:bool, known:bool)->bool:
 	if not exposed:return false
 	var license_needed:=Licenses.available() and topic in Licenses.subjects() and not Licenses.independent(topic)
 	if license_needed:return true
-	if known and not Partnerships.pending(topic):return false
+	if known and not Partnerships.pending(topic) and not (topic=="size_exclusion_chromatography" and Materials.available(topic)):return false
 	return Purchase.available() or Scholars.available() or Partnerships.available() or Materials.available(topic)
 
 func _ready()->void:
