@@ -4,7 +4,7 @@ const T=preload("res://scripts/metallurgy_thermal_cycle.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
 static func run_for(stage:Dictionary)->Dictionary:
 	return T.start([{"duration":float(stage.work),"target":float(stage.get("temperature",20)),
-		"power":float(stage.get("heat_power",0)),"loss":.05,"coolant":0.0}])
+		"power":float(stage.get("heat_power",0)),"loss":float(stage.get("loss",.05)),"coolant":0.0}])
 static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	if work<=0:return
 	var state=WorldSimulation.state
@@ -12,8 +12,9 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 		if int(job.target_stock)>0 and float(state.resource_stockpiles.get(spec.output,0))>=int(job.target_stock):return
 		if not bool(job.get("tooling_paid",false)):return
 		job.casting_pending={"recipe":job.item,"source_job":job.id,"ordinal":int(job.completed)+1,
-			"site":state.resource_settlement_id,"stage":0,"trace":[],"paid":{},"run":run_for(spec.casting_stages[0]),
+			"site":state.resource_settlement_id,"last_day":int(state.elapsed_days),"idle_days":0,"stage":0,"trace":[],"paid":{},"run":run_for(spec.casting_stages[0]),
 			"pattern_mass":0.0,"moisture":0.0,"evaporated_water":0.0,"shell_layers":0,"wear":float(job.get("casting_wear",0))}
+	synchronize_idle(job,spec,work)
 	var p:Dictionary=job.casting_pending
 	if p.site!=state.resource_settlement_id:return
 	while work>.000001 and int(p.stage)<spec.casting_stages.size():
@@ -51,8 +52,13 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 			if spec.casting_kind=="lost_foam":p.pattern_mass=0.0
 		p.trace.append({"kind":stage.kind,"paid":p.paid.duplicate(true),"thermal":p.run.duplicate(true),
 			"pattern_remaining":p.pattern_mass,"moisture":p.moisture})
+		var previous_temperature:=float(p.run.temperature)
 		p.stage+=1;p.paid={}
-		if int(p.stage)<spec.casting_stages.size():p.run=run_for(spec.casting_stages[int(p.stage)])
+		if int(p.stage)<spec.casting_stages.size():
+			var next:Dictionary=spec.casting_stages[int(p.stage)]
+			p.run=run_for(next)
+			if next.kind in ["cool","inspect"]:
+				p.run.temperature=previous_temperature;p.run.peak=previous_temperature
 	if int(p.stage)==spec.casting_stages.size():finish(job,spec)
 static func completed_work(spec:Dictionary,count:int)->float:
 	var total:=0.0
@@ -60,11 +66,11 @@ static func completed_work(spec:Dictionary,count:int)->float:
 	return total
 static func readings(p:Dictionary,spec:Dictionary)->Dictionary:
 	var residual:=float(p.get("pour_pattern_mass",0)) if spec.casting_kind=="investment" else 0.0
-	return {"profile_error":snappedf(.1+.35*float(p.wear),.025),
+	return {"temperature":snappedf(float(p.run.temperature),1.0),"profile_error":snappedf(.1+.35*float(p.wear),.025),
 		"section_void_fraction":snappedf(.03+.25*float(p.wear)+float(p.get("pour_moisture",0))+residual,.025),
 		"fill_shortfall":snappedf(clampf((1100.0-float(p.get("pour_temperature",20)))/100.0,0,1),.025)}
 static func accepted(report:Dictionary)->bool:
-	return float(report.profile_error)+.05<=.5 and float(report.section_void_fraction)+.05<=.5 and float(report.fill_shortfall)+.05<=.1
+	return float(report.get("temperature",1800))<=150 and float(report.profile_error)+.05<=.5 and float(report.section_void_fraction)+.05<=.5 and float(report.fill_shortfall)+.05<=.1
 static func finish(job:Dictionary,spec:Dictionary)->void:
 	var p:Dictionary=job.casting_pending
 	p.observation={"method":"template_fit_and_polished_witness_section","readings":readings(p,spec),"resolution":.025,"uncertainty":.05}
@@ -87,6 +93,7 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 		if not spec.has("casting_stages") or not p is Dictionary:return "Unexpected casting state."
 		if not p.has_all(["recipe","source_job","ordinal","site","stage","trace","paid","run","pattern_mass","moisture","evaporated_water","shell_layers","wear"]):return "Incomplete casting state."
 		if p.recipe!=job.item or p.source_job!=job.id or p.ordinal!=int(job.completed)+(0 if finished else 1):return "Invalid casting source."
+		if not p.get("last_day") is int or p.last_day<0 or not p.get("idle_days") is int or p.idle_days<0 or p.idle_days>p.last_day:return "Invalid casting calendar."
 		if not p.site is String or p.site.length()>128 or not p.stage is int or p.stage<0 or p.stage>spec.casting_stages.size():return "Invalid casting stage."
 		if not p.trace is Array or p.trace.size()!=p.stage or not p.paid is Dictionary:return "Invalid casting record."
 		for field:String in ["pattern_mass","moisture","evaporated_water","wear"]:
@@ -143,3 +150,18 @@ static func validate_balance(p:Dictionary,spec:Dictionary,finished:bool)->String
 	return ""
 static func same_quantity(value:Variant,expected:float)->bool:
 	return T.number(value) and absf(float(value)-expected)<=.000001
+
+static func synchronize_idle(job:Dictionary,spec:Dictionary,work:float)->void:
+	if not job.has("casting_pending"):return
+	var p:Dictionary=job.casting_pending
+	var state=WorldSimulation.state;var today:=int(state.elapsed_days)
+	var delta:=maxi(0,today-int(p.last_day))
+	if delta==0:return
+	var stage:Dictionary=spec.casting_stages[int(p.stage)]
+	var powered:bool=float(stage.get("heat_power",0))+float(stage.get("auxiliary_power",0))>0
+	var unavailable:bool=work<=0 or bool(job.get("paused",false)) or p.site!=state.resource_settlement_id or (powered and Ops.service("electricity")<=0)
+	var missed:=delta if unavailable else maxi(0,delta-1)
+	if missed>0:
+		p.run.temperature=20.0+(float(p.run.temperature)-20.0)*exp(-float(stage.get("loss",.05))*float(missed))
+		p.idle_days+=missed
+	p.last_day=today

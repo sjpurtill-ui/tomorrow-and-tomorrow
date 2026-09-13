@@ -77,3 +77,34 @@ func test_casting_saved_materials_must_follow_paid_stage_history()->void:
 		altered.casting_last.trace[0].pattern_remaining=0.0
 		assert_str(C.validate_job(altered,spec)).is_not_empty()
 	)
+
+func test_cast_metal_retains_heat_until_cooling_and_paused_days_do_not_add_work()->void:
+	WorldSimulation.scoped("casting_work",func()->void:
+		for kind:String in ["investment","lost_foam"]:
+			WorldSimulation.military.equipment_queue.clear()
+			var line:=prepare(kind+"_copper_brackets");var spec:=I.product(line.item)
+			var before_cooling:=0.0
+			for stage:Dictionary in spec.casting_stages:
+				if stage.kind=="cool":break
+				before_cooling+=float(stage.work)
+			P.advance(WorldSimulation.military,line,before_cooling)
+			assert_float(float(line.casting_pending.run.temperature)).is_greater(1000.0)
+			assert_float(float(WorldSimulation.state.resource_stockpiles[spec.output])).is_equal(0.0)
+			var progress:=float(line.progress_days)
+			var stocks:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
+			line.paused=true;WorldSimulation.state.elapsed_days+=3
+			P.advance(WorldSimulation.military,line,1)
+			assert_float(float(line.casting_pending.run.temperature)).is_less(150.0)
+			assert_float(float(line.progress_days)).is_equal(progress)
+			assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(stocks)
+			var cooled:Dictionary=line.duplicate(true)
+			P.advance(WorldSimulation.military,line,1)
+			assert_dict(line.casting_pending).is_equal(cooled.casting_pending)
+			line=bytes_to_var(var_to_bytes(line));line.paused=false
+			assert_str(C.validate_job(line,spec)).is_empty()
+			Ops.data().last_day=int(WorldSimulation.state.elapsed_days);Ops.data().services={"electricity":100.0}
+			P.advance(WorldSimulation.military,line,float(spec.days)-before_cooling)
+			assert_bool(line.casting_last.accepted).is_true()
+			assert_float(float(line.casting_last.observation.readings.temperature)).is_less(150.0)
+			assert_str(C.validate_job(line,spec)).is_empty()
+	)
