@@ -40,49 +40,48 @@ static func mesh_for(name:String,storeys:int=3,features:int=0)->ArrayMesh:
 	var height:=3.1*storeys
 	match type:
 		"courtyard":
-			_block(surface,Vector3(-3,0,0),Vector3(2,height,10),wall,glass,trim)
-			_block(surface,Vector3(3,0,0),Vector3(2,height,10),wall,glass,trim)
-			_block(surface,Vector3(0,0,-4),Vector3(4,height,2),wall,glass,trim)
+			_block(surface,Vector3(-3,0,0),Vector3(2,height,10),wall,glass,trim,features)
+			_block(surface,Vector3(3,0,0),Vector3(2,height,10),wall,glass,trim,features)
+			_block(surface,Vector3(0,0,-4),Vector3(4,height,2),wall,glass,trim,features)
 			_box(surface,Vector3(0,.12,0),Vector3(3,.24,5),Color("71845c"))
 		"corner":
-			_block(surface,Vector3(-1.5,0,0),Vector3(5,height,10),wall,glass,trim)
-			_block(surface,Vector3(2.5,0,2.7),Vector3(3,height*.78,4.6),wall,glass,trim)
+			_block(surface,Vector3(-1.5,0,0),Vector3(5,height,10),wall,glass,trim,features)
+			_block(surface,Vector3(2.5,0,2.7),Vector3(3,height*.78,4.6),wall,glass,trim,features)
 		"villa":
-			_block(surface,Vector3(0,0,-1),Vector3(7,height*.75,7),wall,glass,trim)
+			_block(surface,Vector3(0,0,-1),Vector3(7,height*.75,7),wall,glass,trim,features)
 			_box(surface,Vector3(0,.18,3.1),Vector3(7,.36,2.5),trim)
 			for x in [-2.6,2.6]:_box(surface,Vector3(x,1.4,3.3),Vector3(.22,2.8,.22),trim)
 			_box(surface,Vector3(0,2.8,3.1),Vector3(7,.24,2.5),roof)
 		"arcade":
-			_block(surface,Vector3(0,0,-1),Vector3(8,height,7),wall,glass,trim)
+			_block(surface,Vector3(0,0,-1),Vector3(8,height,7),wall,glass,trim,features)
 			for x in [-3.5,-1.2,1.2,3.5]:_box(surface,Vector3(x,1.6,3.7),Vector3(.32,3.2,.32),trim)
 			_box(surface,Vector3(0,3.3,3.5),Vector3(8,.4,2.8),roof)
 		"hall":
-			_block(surface,Vector3(0,0,-1.5),Vector3(8,height,6.5),wall,glass,trim)
-			for x in [-3,3]:_block(surface,Vector3(x,0,2.5),Vector3(2,height*.6,5),wall,glass,trim)
+			_block(surface,Vector3(0,0,-1.5),Vector3(8,height,6.5),wall,glass,trim,features)
+			for x in [-3,3]:_block(surface,Vector3(x,0,2.5),Vector3(2,height*.6,5),wall,glass,trim,features)
 			_box(surface,Vector3(0,.18,3),Vector3(4,.36,4),trim)
 			if modern:_box(surface,Vector3(0,height+.8,-1.5),Vector3(6,1.6,4),glass)
 			else:_roof(surface,Vector3(0,height,-1.5),Vector2(8.4,6.9),1.7,roof)
 		"workshop", "warehouse":
 			height=maxf(4,minf(height,9))
-			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim)
+			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim,features)
 			if type=="workshop":
 				for z in [-3.4,0,3.4]:_roof(surface,Vector3(0,height,z),Vector2(8.2,3.2),1.0,roof)
 				if industrial:_box(surface,Vector3(3,height*.9,-3.5),Vector3(.8,height*1.8,.8),wall.darkened(.18))
 			else:_roof(surface,Vector3(0,height,0),Vector2(8.4,10.4),1.2,roof)
 			_box(surface,Vector3(0,1.6,5.05),Vector3(3.8,3.2,.18),Color("505859"))
 		_:
-			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim)
+			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim,features)
 			if modern and storeys>=5:
-				_block(surface,Vector3(0,height,0),Vector3(5,3.1,7),wall,glass,trim)
+				_block(surface,Vector3(0,height,0),Vector3(5,3.1,7),wall,glass,trim,features)
 			else:_roof(surface,Vector3(0,height,0),Vector2(8.4,10.4),1.4 if not modern else .18,roof)
 	if modern and type not in ["workshop","warehouse"]:
 		# Roof gardens and raised parapets retain readable, restrained roof detail.
 		_box(surface,Vector3(-2,height+.22,-2.6),Vector3(2.2,.44,2.4),Color("6d875b"))
-	_add_installed_details(surface,height,features)
 	surface.generate_normals()
 	var mesh:=surface.commit();cache[key]=mesh;return mesh
 
-static func _block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Color,trim:Color)->void:
+static func _block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Color,trim:Color,features:int=0)->void:
 	_box(s,base+Vector3(0,size.y*.5,0),size,wall)
 	var floors:=maxi(1,floori(size.y/3.1))
 	for floor in floors:
@@ -96,6 +95,9 @@ static func _block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Colo
 				_box(s,Vector3(base.x+side*(size.x*.5+.025),y,base.z+offset),Vector3(.06,1.35,.85),glass)
 		_box(s,base+Vector3(0,(floor+1)*3.1-.08,0),Vector3(size.x+.12,.16,size.z+.12),trim)
 	_box(s,base+Vector3(0,1.05,size.z*.5+.05),Vector3(.9,2.1,.12),Color("514e44"))
+	if features:
+		var bounds:=AABB(base-Vector3(size.x*.5,0,size.z*.5),size)
+		s.append_from(detail_mesh(bounds,features,1.0),0,Transform3D.IDENTITY)
 static func _box(s:SurfaceTool,center:Vector3,size:Vector3,color:Color)->void:
 	var box:=BoxMesh.new();box.size=size
 	var arrays:=box.get_mesh_arrays();var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX];var indices:PackedInt32Array=arrays[Mesh.ARRAY_INDEX]
@@ -150,10 +152,16 @@ static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->
 		for x in [-3.8,0.0,3.8]:_box(surface,Vector3(x,height*.5,5.12),Vector3(.18,height,.18),wood)
 		_box(surface,Vector3(0,height-.12,5.12),Vector3(8,.22,.18),wood)
 	if flags&2:
-		# Stepped diagonal timber representatives remain bounded mesh geometry.
-		for step in 8:
-			var t:=float(step)/7.0
-			_box(surface,Vector3(-3.5+t*3.0,.5+t*2.2,5.15),Vector3(.48,.35,.18),wood)
+		var bottom:=Vector3(-3.5,.35,5.15)
+		var top:=Vector3(-.5,minf(height-.3,2.7),5.15)
+		var delta:=top-bottom
+		var brace:=BoxMesh.new();brace.size=Vector3(.18,delta.length(),.18)
+		var arrays:=brace.get_mesh_arrays()
+		var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+		var indices:PackedInt32Array=arrays[Mesh.ARRAY_INDEX]
+		var rotation:=Basis(Vector3.BACK,atan2(-delta.x,delta.y))
+		for index in indices:
+			surface.set_color(wood);surface.add_vertex(rotation*vertices[index]+(bottom+top)*.5)
 	if flags&4:_box(surface,Vector3(0,height*.5,5.14),Vector3(.06,height,.08),Color("302e29"))
 	if flags&8:
 		_box(surface,Vector3(4.3,.1,0),Vector3(.35,.2,10.8),Color("827969"))
@@ -166,11 +174,11 @@ static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->
 		_box(surface,Vector3(0,2.5,6.22),Vector3(8,.12,.12),wood)
 	if flags&128:_box(surface,Vector3(0,.18,0),Vector3(8.2,.12,10.2),Color("524e46"))
 
-static func detail_mesh(bounds:AABB,features:int)->ArrayMesh:
-	var key:="details:"+str(bounds)+":"+str(features)
+static func detail_mesh(bounds:AABB,features:int,wall_ratio:float=.8)->ArrayMesh:
+	var key:="details:"+str(bounds)+":"+str(features)+":"+str(wall_ratio)
 	if cache.has(key):return cache[key]
 	var raw:=SurfaceTool.new();raw.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_add_installed_details(raw,maxf(.5,bounds.size.y*.8),features)
+	_add_installed_details(raw,maxf(.5,bounds.size.y*wall_ratio),features)
 	raw.generate_normals()
 	var source:=raw.commit()
 	var baked:=SurfaceTool.new()

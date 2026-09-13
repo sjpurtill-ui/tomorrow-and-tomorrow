@@ -51,3 +51,13 @@ func test_modern_fabric_requires_adopted_construction_knowledge()->void:
 	assert_int(KNOWLEDGE.ceiling()).is_equal(12)
 	var cost:Dictionary=SettlementModel._fabric_upgrade_cost({"land_use":"mixed_household"},12)
 	assert_bool(cost.has("Iron Ore") and cost.has("Limestone") and cost.has("Fine Sand")).is_true()
+
+func test_installed_details_preserve_the_open_courtyard_entrance()->void:
+	var mesh:=KIT.mesh_for("timber_courtyard",2,255)
+	for surface in mesh.get_surface_count():
+		var arrays:=mesh.surface_get_arrays(surface)
+		var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+		for vertex:Vector3 in vertices:
+			# The front opening between the two wings must remain traversable;
+			# façade details belong on the wings and the recessed rear block.
+			assert_bool(absf(vertex.x)<1.5 and vertex.z>5.0 and vertex.y>.5).is_false()
