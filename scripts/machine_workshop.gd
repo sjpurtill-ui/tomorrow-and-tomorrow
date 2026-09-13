@@ -1,6 +1,7 @@
 extends RefCounted
 ## Adapter for retained machine work inside the existing persistent workshop job.
 ## The pending workpiece remains in its job; it is never fungible accepted stock.
+const Skiving=preload("res://scripts/skiving_motion.gd")
 const Support=preload("res://scripts/machine_support.gd")
 const Measurement=preload("res://scripts/machine_process_measurement.gd")
 const Program=preload("res://scripts/machine_coordinate_program.gd")
@@ -17,6 +18,7 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 			if float(state.resource_stockpiles.get(resource,0))<float(spec.materials[resource]):return
 		if ops.service("electricity")<=0:return
 		job.machine_pending={"recipe":String(job.item),"source_job":int(job.id),"ordinal":int(job.completed)+1,"site":String(state.resource_settlement_id),"reserved":spec.materials.duplicate(true),"run":Program.start(spec.machine_program),"phase":"machining","tool_wear":float(job.get("machine_wear",0))}
+		if spec.get("machine_kind","")=="skiving":job.machine_pending.synchronization=Skiving.start()
 		if spec.has("machine_witness"):
 			job.machine_pending.witness=spec.machine_witness.duplicate(true)
 			job.machine_pending.witness.merge({"source_job":int(job.id),"ordinal":int(job.completed)+1,"site":String(state.resource_settlement_id),"disposition":"reserved"})
@@ -32,6 +34,7 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	if work<=0:return
 	var rate:=float(spec.power)/float(spec.days)
 	var receipt:=Program.advance(pending.run,Support.limit_work(job,work,spec),ops.service("electricity"),rate)
+	if spec.get("machine_kind","")=="skiving":Skiving.advance(pending.synchronization,float(receipt.work),float(pending.run.position.z),float(pending.tool_wear))
 	Support.consume(job,float(receipt.work))
 	var installed:Dictionary=job.get("machine_support",{}).get("installed",{})
 	pending.film_work=float(pending.get("film_work",0))+(float(receipt.work) if installed.has("fluid_film_bearings") else 0.0)
@@ -44,7 +47,7 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	if Program.complete(pending.run):
 		pending.phase="inspection"
 		if spec.has("machine_kind"):
-			pending.physical=Measurement.produced(String(spec.machine_kind),pending.run,float(pending.tool_wear))
+			pending.physical=physical(spec,pending)
 			pending.inspection_work=0.0
 static func clear(job:Dictionary)->void:
 	# Changing production abandons the reserved workpiece; no free refund.
@@ -78,8 +81,9 @@ static func valid_piece(p:Variant,job:Dictionary,spec:Dictionary,finished:bool)-
 	if not Program.finite(checked) or checked<0 or float(checked)+float(p.run.work)>float(spec.days)+.000001:return false
 	if p.has("inspection_paid") and p.inspection_paid!=spec.get("machine_inspection",{}):return false
 	if float(checked)>0 and not p.has("inspection_paid"):return false
+	if spec.get("machine_kind","")=="skiving" and not Skiving.valid(p.get("synchronization"),p.run,float(p.tool_wear)):return false
 	if p.phase=="inspection" and spec.has("machine_kind"):
-		if p.get("physical")!=Measurement.produced(spec.machine_kind,p.run,float(p.tool_wear)):return false
+		if p.get("physical")!=physical(spec,p):return false
 	if spec.has("machine_witness") and not valid_witness(p,job,spec,finished):return false
 	if finished:
 		if not p.has_all(["observation","accepted","inspection_paid"]) or not p.accepted is bool:return false
@@ -91,6 +95,7 @@ static func inspect(job:Dictionary,spec:Dictionary,work:float)->void:
 	if not spec.has("machine_limits"):return
 	var state=WorldSimulation.state
 	var pending:Dictionary=job.machine_pending
+	if spec.get("machine_kind","")=="skiving" and not Skiving.valid(pending.get("synchronization"),pending.run,float(pending.tool_wear)):return
 	if spec.has("machine_witness") and not valid_witness(pending,job,spec,false):return
 	for apparatus:String in spec.machine_inspection_tools:
 		if not bool(job.get("tooling_paid",false)) or float(job.get("tooling",{}).get(apparatus,0))<float(spec.machine_inspection_tools[apparatus]):return
@@ -132,3 +137,8 @@ static func valid_witness(p:Dictionary,job:Dictionary,spec:Dictionary,finished:b
 	if witness.get("source_job")!=job.id or witness.get("ordinal")!=p.ordinal or witness.get("site")!=p.site:return false
 	if finished:return witness.get("disposition")=="destroyed"
 	return witness.get("disposition")==("prepared" if p.has("inspection_paid") else "reserved")
+
+static func physical(spec:Dictionary,pending:Dictionary)->Dictionary:
+	var result:=Measurement.produced(String(spec.machine_kind),pending.run,float(pending.tool_wear))
+	if spec.machine_kind=="skiving":result.pitch_error+=Skiving.phase_error(pending.synchronization)*10.0
+	return result

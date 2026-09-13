@@ -78,3 +78,20 @@ func test_recast_inspection_waits_for_paid_section_supplies_and_correct_apparatu
 		assert_float(float(line.machine_last.witness.amount)).is_equal(.02)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Specimen Slides"])).is_equal(.99)
 	)
+
+func test_skiving_requires_retained_opposed_rotation_with_axial_feed()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("skiving_qualified_parts");var spec:=I.product(line.item)
+		P.advance(WorldSimulation.military,line,1)
+		assert_float(float(line.machine_pending.synchronization.cutter_turns)).is_equal(2.0)
+		assert_float(float(line.machine_pending.synchronization.workpiece_turns)).is_equal_approx(-2.0/3.0,.000001)
+		var restored:Dictionary=bytes_to_var(var_to_bytes(line))
+		P.advance(WorldSimulation.military,restored,2)
+		assert_float(float(restored.machine_pending.synchronization.axial)).is_equal(2.0)
+		var missing:=restored.duplicate(true);missing.machine_pending.erase("synchronization")
+		M.inspect(missing,spec,1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal(0.0)
+		assert_str(M.validate_job(missing,spec)).is_not_empty()
+		P.advance(WorldSimulation.military,restored,1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal(1.0)
+	)

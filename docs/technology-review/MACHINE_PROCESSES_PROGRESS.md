@@ -50,3 +50,10 @@ Inspection now retains a method, quantized readings, resolution/uncertainty and 
 Nested support validation now checks bounded repair/filter progress, paid service consistency, installed apparatus, measured decisions, observation dates/revisions and film separation/water receipts. `/tmp/tt-machine-inspection-validation.log` passes12/12 across support, all eight typed processes/rejection/witness cases and reserved-workpiece tests. This includes the final feed/wear default-bearing load from the previous commit. One earlier run had a test variable type-inference parse error and crashed; the variable was typed explicitly and the affected combined run passes. No broader or full-save claim.
 
 Next: actual whole-save job/support/inspection continuity and power restoration, downstream assemblies and reachable apparatus inputs, product-change wear continuity, selected gear synchronization distinct from a generic XYZ move, acquisition/predicates/registration and art integration. Root separately completed13art in a06e1c19c10e1e83a3802a4674a79b679042fdef; still unbound. No operating count increase.
+
+
+## Selected skiving synchronization
+
+Skiving now executes and retains opposed cutter/workpiece turns for one explicitly selected external 30-tooth workpiece / 10-tooth cutter configuration at a 20-degree crossing angle. Axial feed progresses alongside those rotations. Loaded phase deviation depends on retained apparatus wear and contributes to the measured pitch-error channel. A completed XYZ path without a matching spindle record cannot pass inspection or saved-state validation. This is a bounded selected configuration, not a general involute tooth-surface solver or arbitrary gear program.
+
+`/tmp/tt-machine-skiving.log`:5/5 process/witness tests pass, including all eight part recipes, partial spindle serialization/resume and missing-synchronization rejection. Full-save/integrated support continuity, product-change wear ownership, downstream/input reachability and acquisition/registration remain; no discovery-count increase.
