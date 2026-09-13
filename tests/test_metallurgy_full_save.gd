@@ -33,6 +33,7 @@ func test_full_game_save_preserves_retained_processes_and_resumes_outputs()->voi
 				assert_bool(WorldSimulation.military.start_production_line("gently_formed_steel_bars",1).get("ok",false)).is_true()
 				P.advance(WorldSimulation.military,WorldSimulation.military.equipment_queue.back(),2)
 			state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
+			state.known_discoveries.append("metal_grain_size_measurement");state.discovery_adoption["metal_grain_size_measurement"]=1.0
 			for field:String in ["materials","tooling","machine_inspection"]:
 				for resource:String in spec.get(field,{}):
 					if resource!="Traceable Formed Steel Bars":state.resource_stockpiles[resource]=100.0

@@ -213,6 +213,7 @@ static func state(host: Node, job: Dictionary) -> String:
 	if inspection.has("thermal_program") and job.has("metallurgy_pending"):
 		if job.metallurgy_pending.site!=WorldSimulation.state.resource_settlement_id:return "Workpiece belongs to another store"
 		var pending:Dictionary=job.metallurgy_pending
+		if pending.phase=="inspection" and not preload("res://scripts/metallurgy_sections.gd").available(inspection):return "Waiting for adopted grain-size measurement"
 		var cooling:bool=pending.phase=="thermal" and float(pending.run.program[int(pending.run.stage)].power)==0
 		return "Working" if cooling or preload("res://scripts/technology_operations.gd").service("electricity")>0 else "Waiting for electricity"
 	if inspection.has("machine_program") and job.has("machine_pending"):

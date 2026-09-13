@@ -18,7 +18,7 @@ func test_commissioned_generator_supplies_actual_daily_production_without_inject
 			state.settlement_site_committed=true;state.convoy_traveling=false
 			state.population_allocations.Crafting=100;state.population_allocations.Logistics=100
 			state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
-			for gate:String in [String(spec.gate),"electrical_generators","steam_propulsion","workshop_standards"]:
+			for gate:String in [String(spec.gate),"metal_grain_size_measurement","electrical_generators","steam_propulsion","workshop_standards"]:
 				state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
 			for field:String in ["materials","tooling","machine_inspection"]:
 				for resource:String in spec.get(field,{}):state.resource_stockpiles[resource]=100.0

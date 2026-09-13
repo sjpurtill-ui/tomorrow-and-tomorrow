@@ -144,7 +144,10 @@ static func entries()->Array[Dictionary]:
     "observation": "Measure representative grain structure using a defined preparation and counting method",
     "effects": {},
     "operating_contract": "Prepared samples, qualified imaging and analysts",
-    "production_contract": "Prepared samples, qualified imaging and analysts"
+    "production_contract": "Prepare and measure a destructive grain section from the retained normalized workpiece; pay preparation supplies, microscope operation and analyst work before releasing inspected steel.",
+    "inspection_items": [
+      "normalizing_steel_sections"
+    ]
   },
   {
     "id": "residual_stress_assessment",

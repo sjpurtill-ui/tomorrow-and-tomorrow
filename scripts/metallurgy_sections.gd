@@ -5,8 +5,11 @@ const Ops=preload("res://scripts/technology_operations.gd")
 const COST={"Steel Tool Bits":.002,"Graded Alumina Abrasive":.01,"Steel Section Etchant":.005,"Woven Cloth":.002,"Freshwater":.05}
 const AMOUNT:=.02
 const WORK:=.5
+static func available(spec:Dictionary)->bool:
+	var gate:=String(spec.get("inspection_gate",""))
+	return gate.is_empty() or bool(WorldSimulation.military._knowledge_gate(gate,.10).get("unlocked",false))
 static func advance(job:Dictionary,spec:Dictionary,work:float)->float:
-	if work<=0 or not job.has("metallurgy_pending"):return 0.0
+	if work<=0 or not job.has("metallurgy_pending") or not available(spec):return 0.0
 	var p:Dictionary=job.metallurgy_pending
 	if p.phase!="inspection" or float(p.run.temperature)>150:return 0.0
 	for apparatus:String in ["Metal Section Preparation Sets","Reflected-Light Metal Microscopes"]:

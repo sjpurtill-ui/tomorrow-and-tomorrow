@@ -75,6 +75,16 @@ func test_actual_normalizing_line_pays_section_and_supplies_a_shaft_consumer()->
 		assert_float(Ops.workshop_power_demand()).is_greater(0.0)
 		P.advance(WorldSimulation.military,line,6)
 		assert_float(float(state.resource_stockpiles.get(recipe.output,0))).is_equal(0.0)
+		var held:Dictionary=line.metallurgy_pending.duplicate(true)
+		var supplies:Dictionary=state.resource_stockpiles.duplicate(true)
+		assert_str(P.state(WorldSimulation.military,line)).contains("grain-size measurement")
+		P.advance(WorldSimulation.military,line,1)
+		assert_dict(line.metallurgy_pending).is_equal(held)
+		assert_dict(state.resource_stockpiles).is_equal(supplies)
+		state.known_discoveries.append("metal_grain_size_measurement")
+		state.discovery_adoption["metal_grain_size_measurement"]=.05
+		assert_bool(Sections.available(recipe)).is_false()
+		state.discovery_adoption["metal_grain_size_measurement"]=1.0
 		P.advance(WorldSimulation.military,line,.25)
 		var etchant:=float(state.resource_stockpiles["Steel Section Etchant"])
 		var restored:Dictionary=bytes_to_var(var_to_bytes(line))
