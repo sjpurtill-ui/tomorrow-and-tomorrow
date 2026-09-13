@@ -1,0 +1,261 @@
+[
+  {
+    "id": "jominy_end_quench_testing",
+    "name": "Jominy End-Quench Testing",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "hardened_edges",
+      "dimensional_metrology"
+    ],
+    "requires_any": [
+      [
+        "experimental_controls",
+        "material_phase_diagrams"
+      ]
+    ],
+    "mechanism": "Quench one end of a heated steel specimen and measure hardness along its length to characterize hardenability.",
+    "operating_requirement": "Consume a representative bar, furnace energy, controlled water jet and surface preparation; use qualified temperature, distance and indentation measurements.",
+    "consequence": "Select steel and cooling conditions for section-dependent hardening of shafts, gears and armor components; retain a distance-hardness curve tied to the sampled heat.",
+    "failure_modes": "Uneven transfer, poor jet control or invalid indentations invalidate the curve. Hardenability is not maximum attainable hardness; the test does not prove full-part performance.",
+    "distinctness": "Generic hardened edges and induction surface treatment do not measure a cooling-gradient response along a standard specimen.",
+    "sources": [
+      "https://www.mdpi.com/2227-9717/9/4/607"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "jominy_end_quench_testing",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  },
+  {
+    "id": "charpy_notched_impact_testing",
+    "name": "Charpy Notched Impact Testing",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "stress_strain_relations",
+      "dimensional_metrology",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "mechanism": "Strike a supported notched specimen with a pendulum and determine absorbed fracture energy at a recorded test temperature.",
+    "operating_requirement": "Pay specimen machining and destruction, temperature conditioning, calibrated pendulum/anvil operation and repeated observations.",
+    "consequence": "Compare notch-impact behavior for cold-service hull plate, welds and machinery; reject lots that fail the declared service-temperature requirement.",
+    "failure_modes": "Notch, striker or temperature differences prevent direct comparison. Absorbed impact energy does not supply a fracture-toughness value.",
+    "distinctness": "Distinct from precracked fracture testing: a notched high-rate pendulum test has its own measured quantity and acceptance scope.",
+    "sources": [
+      "https://www.twi-global.com/technical-knowledge/faqs/faq-what-is-charpy-testing"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "charpy_notched_impact_testing",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  },
+  {
+    "id": "steel_austempering",
+    "name": "Steel Austempering",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "metal_annealing_control",
+      "precision_thermometry"
+    ],
+    "requires_any": [
+      [
+        "experimental_controls",
+        "material_phase_diagrams"
+      ]
+    ],
+    "mechanism": "Quench suitable austenitized steel to a controlled temperature above martensite start and hold for bainitic transformation.",
+    "operating_requirement": "Pay selected feed, heating, bath control, transfer, holding time, waste handling and verification on the actual section.",
+    "consequence": "Produce qualified clips, springs and thin components with a measured hardness/toughness/distortion combination.",
+    "failure_modes": "An unsuitable alloy, excessive section thickness or missed transfer/hold conditions can produce mixed structures and rejected parts.",
+    "distinctness": "Distinct from martempering: the intermediate hold is intended to transform the structure, rather than only equalize temperature.",
+    "sources": [
+      "https://www.bodycote.com/what-we-do/precision-heat-treatment/hardening-and-tempering-atmosphere-vacuum/austempering/"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "steel_austempering",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  },
+  {
+    "id": "steel_martempering",
+    "name": "Steel Martempering",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "metal_annealing_control",
+      "precision_thermometry"
+    ],
+    "requires_any": [
+      [
+        "experimental_controls",
+        "material_phase_diagrams"
+      ]
+    ],
+    "mechanism": "Interrupt quenching near the transformation range to equalize a component temperature before subsequent cooling.",
+    "operating_requirement": "Pay a controlled bath, known material transformation behavior, transfer and equalization work, subsequent cooling, tempering where required and dimensional checks.",
+    "consequence": "Offer a distortion-control route for hardenable gears and tooling while preserving component-specific acceptance tests.",
+    "failure_modes": "Holding too long or choosing the wrong temperature can cause unwanted transformation; temperature equalization alone does not establish acceptable hardness.",
+    "distinctness": "Distinct from austempering and ordinary tempering; it controls the quench sequence rather than substituting a generic heat-treatment bonus.",
+    "sources": [
+      "https://www.bodycote.com/fr/glossaire-technique/martempering/"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "steel_martempering",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  },
+  {
+    "id": "steel_carbonitriding",
+    "name": "Steel Carbonitriding",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "hardened_edges",
+      "steel_nitriding_qualification"
+    ],
+    "requires_any": [
+      [
+        "experimental_controls",
+        "material_phase_diagrams"
+      ]
+    ],
+    "mechanism": "Diffuse carbon and nitrogen into a suitable steel surface in a controlled atmosphere and subsequently harden the case.",
+    "operating_requirement": "Pay carbon-bearing gas, ammonia supply, atmosphere control, furnace energy, quenching and case-depth/composition/hardness checks.",
+    "consequence": "Produce accepted shallow-case wear parts such as pins and small gears with separately verified core and case behavior.",
+    "failure_modes": "Incorrect gas potential, temperature or quenching can create a brittle or inadequate case; imported gases do not confer process mastery.",
+    "distinctness": "Distinct from nitriding-only treatment and induction heating: carbon and nitrogen diffusion jointly modify the case.",
+    "sources": [
+      "https://www.bodycote.com/?p=17895"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "steel_carbonitriding",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  },
+  {
+    "id": "controlled_shot_peening",
+    "name": "Controlled Shot Peening",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "stress_strain_relations",
+      "cyclic_fatigue"
+    ],
+    "requires_any": [
+      [
+        "residual_stress_assessment",
+        "experimental_controls"
+      ]
+    ],
+    "mechanism": "Use controlled repeated shot impacts to plastically deform the surface and introduce a residual compressive layer.",
+    "operating_requirement": "Pay graded media, powered delivery, coverage/intensity control, masking and part-specific qualification with retained process records.",
+    "consequence": "Treat qualified springs, shafts and airframe parts for their specified cyclic-loading conditions; record the treated surface and consumed media.",
+    "failure_modes": "Poor coverage, unsuitable media or excessive intensity can damage the surface. A visual finish alone does not certify the treatment.",
+    "distinctness": "Distinct from abrasive cleaning and residual-stress measurement: this is a controlled surface-working operation.",
+    "sources": [
+      "https://surfacetechnologies.curtisswright.com/our-services/shot-peening/controlling-the-shot-peening-process"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "controlled_shot_peening",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  },
+  {
+    "id": "electroslag_remelting",
+    "name": "Electroslag Remelting",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "electric_arc_furnaces",
+      "metal_casting_feed_design"
+    ],
+    "requires_any": [],
+    "mechanism": "Pass current through a slag bath to remelt a consumable electrode into a controlled, cooled ingot.",
+    "operating_requirement": "Pay an electrode, selected slag, electrical power, mold cooling and melt-rate control; inspect ingot chemistry and soundness.",
+    "consequence": "Produce qualified remelted stock for heavy forgings, tooling and demanding machinery while charging remelting losses and time.",
+    "failure_modes": "Slag chemistry, electrode feed or cooling failures can cause inclusions or unsound solidification; remelting never guarantees purity.",
+    "distinctness": "Distinct from vacuum arc remelting: the slag-mediated process is the defining mechanism and does not require vacuum as a common foundation.",
+    "sources": [
+      "https://www.ald-vt.com/wp-content/uploads/2017/12/general-broschure.pdf"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "electroslag_remelting",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  },
+  {
+    "id": "vacuum_arc_remelting",
+    "name": "Vacuum Arc Remelting",
+    "field": "D04",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "electric_arc_furnaces",
+      "vacuum_metal_melting",
+      "metal_casting_feed_design"
+    ],
+    "requires_any": [],
+    "mechanism": "Remelt a consumable metal electrode with an arc under vacuum while controlling the solidifying ingot.",
+    "operating_requirement": "Pay electrode preparation, vacuum pumping, arc power, mold cooling and melt-rate monitoring; inspect the resulting ingot.",
+    "consequence": "Supply qualified stock for demanding turbine, aerospace and other machinery applications with tracked remelting cost and yield.",
+    "failure_modes": "Unstable arc or melt rate, vacuum loss and solidification defects can reject the ingot; vacuum alone does not qualify its structure.",
+    "distinctness": "Distinct from ordinary vacuum melting and electroslag remelting: consumable-electrode arc remelting is a separate controlled operation.",
+    "sources": [
+      "https://www.ald-vt.com/portfolio/engineering/processes/"
+    ],
+    "branching_note": "These are proposed capability prerequisites, not claims of historical inevitability. OR members are alternative explanatory/experimental routes; common foundations remain required.",
+    "recovery_contract": {
+      "destination": "vacuum_arc_remelting",
+      "grants_instant_mastery": false,
+      "scholar_envoy": "Pay travel and board for an available specialist; local staff must reproduce the declared measurements or process on suitable equipment.",
+      "partnership": "Contribute specimens, staff and instrument or process time; exchange attributable findings after both partners complete work and pay local validation.",
+      "purchased_research": "Purchase a defined study with delivery delay and local evaluation; negative findings remain possible.",
+      "imported_processing": "Buy inspected specimens, components or finite external processing capacity; retain freight, fees and supplier interruption risk without granting domestic mastery."
+    },
+    "implementation_status": "Not implemented. No catalog registration, runtime effects, recipes, imagery, pacing or AI competence is claimed."
+  }
+]
