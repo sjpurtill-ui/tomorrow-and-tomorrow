@@ -42,6 +42,62 @@ func test_worn_waterjet_rejects_part_without_granting_accepted_stock()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.machine_reject,0))).is_equal(1.0)
 		assert_bool(line.machine_last.accepted).is_false()
 	)
+func test_saved_machine_rejects_unpaid_run_energy()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("wire_edm_qualified_parts");var spec:=I.product(line.item)
+		P.advance(WorldSimulation.military,line,1.25)
+		assert_str(M.validate_job(line,spec)).is_empty()
+		var corrupt:=line.duplicate(true)
+		corrupt.machine_pending.run.energy=0.0
+		# Still geometrically valid and monotonic, but its work was not paid.
+		assert_bool(M.Program.valid(corrupt.machine_pending.run)).is_true()
+		assert_str(M.validate_job(corrupt,spec)).is_not_empty()
+		assert_str(P.validate_saved({"equipment_queue":[corrupt]})).is_not_empty()
+	)
+
+func test_saved_machine_rejects_trace_energy_mismatch_with_correct_total()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("wire_edm_qualified_parts");var spec:=I.product(line.item)
+		P.advance(WorldSimulation.military,line,3)
+		assert_str(M.validate_job(line,spec)).is_empty()
+		var corrupt:=line.duplicate(true)
+		assert_int(corrupt.machine_pending.run.trace.size()).is_equal(1)
+		corrupt.machine_pending.run.trace[0].energy=0.0
+		assert_bool(M.Program.valid(corrupt.machine_pending.run)).is_true()
+		assert_str(M.validate_job(corrupt,spec)).is_not_empty()
+		assert_str(P.validate_saved({"equipment_queue":[corrupt]})).is_not_empty()
+	)
+
+func test_full_save_resumes_paid_partial_machine_path()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	var retained:Dictionary={}
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("wire_edm_qualified_parts")
+		P.advance(WorldSimulation.military,line,1.25)
+		retained.merge({"pending":line.machine_pending.duplicate(true),"stock":float(WorldSimulation.state.resource_stockpiles["Steel Sheets"]),"energy":Ops.service("electricity")})
+		assert_float(float(line.machine_pending.run.energy)).is_equal_approx(2.5,.000001)
+	)
+	var slot:="codex_machine_energy_%d"%Time.get_ticks_usec()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear()
+	var loaded:=SaveSystem.load_game(slot);DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(loaded.get("ok",false)).override_failure_message(str(loaded)).is_true()
+	if not loaded.get("ok",false):return
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:Dictionary=WorldSimulation.military.equipment_queue.back()
+		var spec:=I.product(line.item)
+		assert_dict(line.machine_pending).is_equal(retained.pending)
+		assert_str(M.validate_job(line,spec)).is_empty()
+		P.advance(WorldSimulation.military,line,1.75)
+		assert_str(M.validate_job(line,spec)).is_empty()
+		assert_float(float(line.machine_pending.run.energy)).is_equal_approx(6,.000001)
+		P.advance(WorldSimulation.military,line,1)
+		assert_str(M.validate_job(line,spec)).is_empty()
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Steel Sheets"])).is_equal(float(retained.stock))
+		assert_float(Ops.service("electricity")).is_equal_approx(float(retained.energy)-5.5,.000001)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal(1.0)
+	)
+
 func test_joint_witness_cannot_be_omitted_or_reused_after_partial_inspection()->void:
 	WorldSimulation.scoped("machine_parts",func()->void:
 		var line:=prepare("joining_qualified_parts");var spec:=I.product(line.item)

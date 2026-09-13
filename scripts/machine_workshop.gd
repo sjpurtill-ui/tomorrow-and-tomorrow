@@ -88,6 +88,12 @@ static func valid_piece(p:Variant,job:Dictionary,spec:Dictionary,finished:bool)-
 	if p.recipe!=job.item or p.source_job!=job.id or p.ordinal!=int(job.completed)+(0 if finished else 1) or p.reserved!=spec.materials:return false
 	if not p.site is String or p.site.length()>128 or p.phase not in ["machining","inspection"]:return false
 	if not Program.valid(p.run) or p.run.program!=spec.machine_program or not Program.finite(p.tool_wear,2) or p.tool_wear<0:return false
+	# The coordinate runner is recipe-independent; this adapter owns the paid
+	# energy rate and must verify it for both the retained total and each frame.
+	var energy_rate:=float(spec.power)/float(spec.days)
+	if absf(float(p.run.energy)-float(p.run.work)*energy_rate)>.000001:return false
+	for frame:Dictionary in p.run.trace:
+		if absf(float(frame.energy)-float(frame.work)*energy_rate)>.000001:return false
 	if Program.complete(p.run)!=(p.phase=="inspection"):return false
 	for field:String in ["film_work","filtered_work"]:
 		if not Program.finite(p.get(field,0)) or float(p.get(field,0))<0 or float(p.get(field,0))>float(p.run.work)+.000001:return false
