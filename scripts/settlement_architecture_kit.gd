@@ -12,6 +12,7 @@ static func kind(plot:Dictionary)->String:
 	var use:=String(plot.get("land_use",""))
 	if use not in ["residential_compound","mixed_household","market","civic","communal","sacred","workshop","storage","dirty_industry","hospitality"]:return ""
 	var family:="modern" if generation>=12 else ("industrial" if generation>=11 else "masonry")
+	if installed_features(plot)&1:family="timber"
 	var type:=posmod(int(plot.get("seed",plot.get("id",1))),4)
 	if use=="market":type=4
 	elif use in ["civic","communal","sacred"]:type=5
@@ -22,8 +23,8 @@ static func kind(plot:Dictionary)->String:
 static func floors(plot:Dictionary)->int:
 	return clampi(int(plot.get("storeys",1)),1,18)
 
-static func mesh_for(name:String,storeys:int=3)->ArrayMesh:
-	var key:=name+":"+str(storeys)
+static func mesh_for(name:String,storeys:int=3,features:int=0)->ArrayMesh:
+	var key:=name+":"+str(storeys)+":"+str(features)
 	if cache.has(key):return cache[key]
 	var modern:=name.begins_with("modern_")
 	var industrial:=name.begins_with("industrial_")
@@ -31,6 +32,7 @@ static func mesh_for(name:String,storeys:int=3)->ArrayMesh:
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var wall:Color=Color("d3c8b0") if not industrial else Color("a46650")
 	if modern:wall=Color("d9d9d0")
+	if name.begins_with("timber_"):wall=Color("9a7959")
 	var trim:=Color("eee0c6") if not modern else Color("eef1e9")
 	var glass:=Color("365058") if not modern else Color("658f9b")
 	var roof:=Color("655a51") if industrial else Color("976c55")
@@ -76,6 +78,7 @@ static func mesh_for(name:String,storeys:int=3)->ArrayMesh:
 	if modern and type not in ["workshop","warehouse"]:
 		# Roof gardens and raised parapets retain readable, restrained roof detail.
 		_box(surface,Vector3(-2,height+.22,-2.6),Vector3(2.2,.44,2.4),Color("6d875b"))
+	_add_installed_details(surface,height,features)
 	surface.generate_normals()
 	var mesh:=surface.commit();cache[key]=mesh;return mesh
 
@@ -111,13 +114,13 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		var name:=kind(record.plot)
 		if name=="" or String(record.plot.get("status","active")) in ["ruin","reclaimed","under_construction"]:continue
 		if float(record.plot.get("damage",{}).get("structural",0))>.65:continue
-		var key:=name+":"+str(floors(record.plot))
+		var key:=name+":"+str(floors(record.plot))+":"+str(installed_features(record.plot))
 		if not groups.has(key):groups[key]=[]
 		groups[key].append(record)
 	for key:String in groups:
 		var group:Array=groups[key];var first:Dictionary=group[0]
 		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true
-		batch.mesh=mesh_for(kind(first.plot),floors(first.plot));batch.instance_count=group.size()
+		batch.mesh=mesh_for_plot(first.plot);batch.instance_count=group.size()
 		for i in group.size():
 			var record:Dictionary=group[i];var point:Vector2=record.position+Vector2(center.x,center.z)
 			batch.set_instance_transform(i,Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y)))
@@ -125,3 +128,40 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 			var tint:Color=[Color("fff7e8"),Color("e8eee6"),Color("e7e1d9"),Color("eedbd0")][posmod(int(record.plot.get("seed",1)),4)]
 			batch.set_instance_color(i,tint.lerp(Color("554b40"),wear*.6))
 		var node:=MultiMeshInstance3D.new();node.name="SettlementArchitecture_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
+
+static func installed_features(plot:Dictionary)->int:
+	var installed:Variant=plot.get("fabric_components",{})
+	if not installed is Dictionary:return 0
+	var flags:=0
+	var mapping:Dictionary={"timber_post_beam_connections":1,"timber_splice_connections":1,"timber_lateral_bracing":2,"timber_moisture_movement_design":4,"building_drainage_coordination":8,"roof_flashing_interfaces":16,"rainscreen_wall_assemblies":32,"building_shading_design":64,"building_capillary_breaks":128}
+	for method:String in mapping:
+		if not installed.has(method):continue
+		var record:Variant=installed[method]
+		if preload("res://scripts/settlement_fabric_operations.gd").valid_record(record,int(plot.get("id",0)),true) and record.job.method==method:
+			flags|=int(mapping[method])
+	return flags
+
+static func mesh_for_plot(plot:Dictionary)->ArrayMesh:
+	return mesh_for(kind(plot),floors(plot),installed_features(plot))
+
+static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->void:
+	var wood:=Color("624831")
+	if flags&1:
+		for x in [-3.8,0.0,3.8]:_box(surface,Vector3(x,height*.5,5.12),Vector3(.18,height,.18),wood)
+		_box(surface,Vector3(0,height-.12,5.12),Vector3(8,.22,.18),wood)
+	if flags&2:
+		# Stepped diagonal timber representatives remain bounded mesh geometry.
+		for step in 8:
+			var t:=float(step)/7.0
+			_box(surface,Vector3(-3.5+t*3.0,.5+t*2.2,5.15),Vector3(.48,.35,.18),wood)
+	if flags&4:_box(surface,Vector3(0,height*.5,5.14),Vector3(.06,height,.08),Color("302e29"))
+	if flags&8:
+		_box(surface,Vector3(4.3,.1,0),Vector3(.35,.2,10.8),Color("827969"))
+		_box(surface,Vector3(4.3,height*.5,4.8),Vector3(.16,height,.16),Color("827969"))
+	if flags&16:_box(surface,Vector3(0,height+.04,5.12),Vector3(8.4,.08,.28),Color("977251"))
+	if flags&32:
+		for x in 16:_box(surface,Vector3(-3.75+float(x)*.5,height*.5,5.2),Vector3(.34,height,.12),Color("a28b6c"))
+	if flags&64:
+		for x in 9:_box(surface,Vector3(-3.6+float(x)*.9,2.5,5.65),Vector3(.18,.12,1.3),wood)
+		_box(surface,Vector3(0,2.5,6.22),Vector3(8,.12,.12),wood)
+	if flags&128:_box(surface,Vector3(0,.18,0),Vector3(8.2,.12,10.2),Color("524e46"))

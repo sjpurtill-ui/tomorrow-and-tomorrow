@@ -70,7 +70,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		plot["visual_form"]=kind(plot)
 		if kind(plot).is_empty(): continue
 		if kind(plot) in KIT or LATE.kind(plot)!="":
-			var envelope := (LATE.mesh_for(LATE.kind(plot),LATE.floors(plot)) if LATE.kind(plot)!="" else kit_mesh(kind(plot))).get_aabb()
+			var envelope := (LATE.mesh_for_plot(plot) if LATE.kind(plot)!="" else kit_mesh(kind(plot))).get_aabb()
 			var extent := envelope.position.abs().max(envelope.end.abs())
 			plot["placement_half_extent"] = Vector2(extent.x, extent.z) * .001
 		# Reuse the checked footprint/road/water solver, retaining plot identity and

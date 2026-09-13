@@ -61,6 +61,20 @@ func _initialize()->void:
   assert(resolved.state=="accepted")
   assert(ready.fabric_components.has(method))
   assert(F.valid_plot_records(ready))
+  var kit=preload("res://scripts/settlement_architecture_kit.gd")
+  ready.fabric_generation=12
+  ready.storeys=1
+  var legacy:Dictionary=ready.duplicate(true)
+  legacy.erase("fabric_components")
+  assert(kit.installed_features(legacy)==0)
+  if method in ["timber_post_beam_connections","timber_splice_connections"]:
+   assert(kit.kind(ready).begins_with("timber_"))
+   assert(kit.kind(legacy).begins_with("modern_"))
+  var mesh:ArrayMesh=kit.mesh_for_plot(ready)
+  assert(mesh==kit.mesh_for_plot(ready))
+  if method=="building_shading_design":
+   assert(mesh!=kit.mesh_for_plot(legacy))
+   assert(mesh.get_aabb().end.z>kit.mesh_for_plot(legacy).get_aabb().end.z)
   assert(F.resolve(ready,8).is_empty())
   var moved:Dictionary=ready.duplicate(true)
   moved.id=999
