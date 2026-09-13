@@ -196,7 +196,9 @@ static func _finish(ledger:Dictionary,trial:Dictionary,day:int,known:Array)->voi
 	if "plant_pathology_diagnosis" in known and methods.has("identity") and float(trial.stress_days)>=15:methods.differential={"cause":"water limitation supported; pathogen cause untested","watered_growth":float(trial.control_growth),"ambient_growth":float(trial.exposed_growth)}
 	var response:=clampf((float(trial.exposed_growth)-float(trial.reference_growth))/maxf(1,float(trial.control_growth)),0,1)
 	if "plant_resistance_trait_trials" in known and methods.has("heredity") and methods.has("differential"):methods.resistance={"candidate_growth":float(trial.exposed_growth),"reference_growth":float(trial.reference_growth),"relative_gain":response}
+	var microscopy:=preload("res://scripts/microscopy_lab.gd").field_evidence(int(trial.line.id),int(trial.start_day),day)
 	var qualified:=methods.size()==8 and "biological_reference_collections" in known
+	if not microscopy.is_empty() and float(microscopy.viable_fraction)<.3:qualified=false
 	var voucher:={"line_id":int(trial.line.id),"reference":trial.reference.duplicate(true),"line":trial.line.duplicate(true),"start_day":int(trial.start_day),"day":day,"site":String(trial.site),"qualified":qualified,"response":response,"methods":methods,"stages":trial.stages.duplicate(true),"parent":int(trial.line.parent),"generation":int(trial.line.generation),"control_water":float(trial.control_water),"exposed_water":float(trial.exposed_water),"plant_loss":float(trial.plant_loss),"blank_loss":float(trial.blank_loss),"stress_days":float(trial.stress_days)}
 	ledger.vouchers.append(voucher)
 	while ledger.vouchers.size()>MAX_RECORDS:ledger.vouchers.pop_front()

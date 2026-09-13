@@ -198,6 +198,8 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	if not preload("res://scripts/building_material_operations.gd").valid_state(state):return {"error":"Invalid building material or curing records."}
 	var grain=preload("res://scripts/grain_processing.gd")
 	if not grain.valid(state.get("grain_processing",grain.empty_state())) or not grain.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid grain processing records."}
+	var microscopy=preload("res://scripts/microscopy_samples.gd")
+	if not microscopy.valid(state.get("microscopy",microscopy.empty_state())) or not microscopy.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid microscopy records."}
 	var botany=preload("res://scripts/field_botany.gd")
 	if not botany.valid(state.get("field_botany",botany.empty_state())) or not botany.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid field botany records."}
 	if not nutrition.valid(state.get("cultivation_nutrients",nutrition.empty_state())) or not nutrition.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid cultivation nutrient reserves."}

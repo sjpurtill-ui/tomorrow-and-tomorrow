@@ -5,7 +5,7 @@ const LIMIT:=12
 const RECORD_LIMIT:=48
 const LIFE:=21
 static func empty_state()->Dictionary:
-	return {"enabled":true,"staff_share":.25,"last_day":-1,"next_id":1,"specimens":[],"records":[],"protocols":[],"tools":{},"report":{}}
+	return {"enabled":true,"staff_share":.25,"work_bank":0.0,"last_day":-1,"next_id":1,"specimens":[],"records":[],"protocols":[],"tools":{},"report":{}}
 static func add(ledger:Dictionary,kind:String,source:int,source_day:int,site:String,day:int,amount:float,profile:Dictionary,parent:int=0)->Dictionary:
 	if kind not in ["starter","plant"] or amount<=0 or ledger.specimens.size()>=LIMIT or int(ledger.next_id)>=1000000000:return {}
 	for specimen:Dictionary in ledger.specimens:
@@ -61,6 +61,9 @@ static func isolate(ledger:Dictionary,specimen:Dictionary,day:int)->Dictionary:
 	var child:=add(ledger,"starter",int(specimen.source),int(specimen.source_day),String(specimen.site),day,taken,specimen.profile,int(specimen.id))
 	if child.is_empty():specimen.amount+=taken;return {}
 	child.parent=int(specimen.id);child.generation=int(specimen.generation)+1
+	child.cells=float(specimen.cells)*.25;specimen.cells-=float(child.cells)
+	child.media=float(specimen.media)*.25;specimen.media-=float(child.media)
+	child.viability=float(specimen.viability)
 	child.line=int(child.id);child.contamination=float(specimen.contamination)*.5
 	return child
 static func expire(ledger:Dictionary,day:int)->void:
@@ -70,7 +73,7 @@ static func expire(ledger:Dictionary,day:int)->void:
 static func number(value:Variant,maximum:float=1e9)->bool:
 	return (value is int or value is float) and is_finite(float(value)) and float(value)>=0 and float(value)<=maximum
 static func valid(ledger:Variant)->bool:
-	if not ledger is Dictionary or not ledger.get("enabled") is bool or not number(ledger.get("staff_share"),.5):return false
+	if not ledger is Dictionary or not ledger.get("enabled") is bool or not number(ledger.get("staff_share"),.5) or not number(ledger.get("work_bank"),8):return false
 	if not ledger.get("last_day") is int or ledger.last_day < -1 or not ledger.get("next_id") is int or ledger.next_id<1 or ledger.next_id>=1000000000:return false
 	for key:String in ["specimens","records","protocols"]:
 		if not ledger.get(key) is Array:return false
@@ -95,4 +98,11 @@ static func valid(ledger:Variant)->bool:
 			for key:String in ["cells","contrast","contamination","tissue_order","line"]:
 				if not number(frame.get(key)):return false
 			previous=frame.day
+	return true
+
+static func valid_settlements(records:Variant)->bool:
+	if not records is Array:return false
+	for city:Variant in records:
+		if not city is Dictionary or not city.get("local_resources",{}) is Dictionary:return false
+		if not valid(city.get("local_resources",{}).get("microscopy",empty_state())):return false
 	return true
