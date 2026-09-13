@@ -2,6 +2,9 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"clay_record_tablets":{"name": "Prepared clay record tablets", "output": "Clay Record Tablets", "gate": "clay_record_tablets", "materials": {"Clay": 0.3, "Freshwater": 0.03}, "days": 1.0, "tooling": {"Timber": 1, "Stone": 1}},
+	"knotted_record_cords":{"name": "Knotted quantity record cords", "output": "Record Cords", "gate": "knotted_record_systems", "materials": {"Fiber Plants": 2}, "days": 2.0, "tooling": {"Timber": 1}},
+	"bound_record_books":{"name": "Bound paper record volumes", "output": "Bound Record Books", "gate": "bookbinding_assemblies", "materials": {"Paper": 2, "Spun Yarn": 0.1, "Timber": 0.2}, "days": 3.0, "tooling": {"Timber": 2, "Stone": 1}},
 	"laundry_soap":{"name":"Plant-oil laundry soap", "output":"Laundry Soap", "gate":"soap_manufacture", "materials":{"Drying Oil":1.0,"Caustic Soda":0.2,"Freshwater":0.5,"Timber":0.3}, "days":3.0, "tooling":{"Laboratory Glassware":1.0,"Clay":3.0,"Stone":2.0}},
 	"unfired_clay_conduits":{"name": "Formed clay conduit batches", "output": "Unfired Clay Conduits", "gate": "clay_pipe_forming", "materials": {"Prepared Clay": 2, "Freshwater": 0.2}, "days": 3, "tooling": {"Timber": 2, "Stone": 2}},
 	"fired_clay_conduits":{"name": "Qualified fired conduit batches", "output": "Fired Clay Conduits", "gate": "ceramic_pipe_firing_qualification", "materials": {"Unfired Clay Conduits": 1.25, "Timber": 2}, "days": 4, "tooling": {"Stone": 4, "Clay": 3}},

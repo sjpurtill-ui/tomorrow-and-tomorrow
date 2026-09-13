@@ -20,14 +20,21 @@ static func study_recommendation(plan_power:bool=false)->Dictionary:
 	for item:Dictionary in E.data().collections.values():
 		if int(item.returned_day)>int(state.elapsed_days):continue
 		remaining+=maxf(0.0,1.0-float(item.study))*float(item.work)
-	var printed_target:=mini(10,ceili(remaining*S.PAPER_PER_WORK/(1.0+S.PRINTED_BONUS)))
-	remaining=maxf(0.0,remaining-maxf(0.0,float(state.resource_stockpiles.get("Printed Sheets",0.0)))*(1.0+S.PRINTED_BONUS)/S.PAPER_PER_WORK)
-	if remaining<=0.0:return {}
-	var printed:=supply("Printed Sheets",printed_target,{},plan_power)
-	if not printed.is_empty():return printed
-	var target:=mini(10,ceili(remaining*S.PAPER_PER_WORK/(1.0+S.BONUS)))
-	if target<=0 or float(state.resource_stockpiles.get("Paper",0.0))>=target:return {}
-	return supply("Paper",target,{},plan_power)
+	var numeric_remaining:=0.0
+	for item:Dictionary in E.data().collections.values():
+		if int(item.returned_day)<=int(state.elapsed_days) and S.supports("Record Cords",item):numeric_remaining+=maxf(0,1.0-float(item.study))*float(item.work)
+	for resource:String in S.MEDIA:
+		var spec:Dictionary=S.MEDIA[resource]
+		var eligible:=minf(remaining,numeric_remaining) if resource=="Record Cords" else remaining
+		var target:=mini(10,ceili(eligible*float(spec.per_work)/(1.0+float(spec.bonus))))
+		var covered:=maxf(0,float(state.resource_stockpiles.get(resource,0)))*(1.0+float(spec.bonus))/float(spec.per_work)
+		remaining=maxf(0,remaining-minf(eligible,covered))
+		if remaining<=0:return {}
+		if target<=0:continue
+		if float(state.resource_stockpiles.get(resource,0))>=target:return {}
+		var candidate:=supply(resource,target,{},plan_power)
+		if not candidate.is_empty():return candidate
+	return {}
 
 static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=false)->Dictionary:
 	if path.has(resource) or path.size()>=24:return {}
