@@ -689,3 +689,31 @@ func test_copolymer_feed_requires_both_monomers_and_remains_unqualified_after_sy
 		assert_float(float(s.resource_stockpiles["Raw Propene-Ethene Copolymer"])).is_equal(1.0)
 		assert_float(float(s.resource_stockpiles.get("Molding-Grade Polypropylene",0))).is_equal(0.0)
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(8.0))
+
+func test_exposure_waits_for_full_specimen_before_first_and_subsequent_cycles()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		s.known_discoveries.append("polymer_weathering_trials");s.discovery_adoption.polymer_weathering_trials=1.0
+		var spec:=I.product("exposed_panel_sealant")
+		for resource:String in spec.tooling:s.resource_stockpiles[resource]=100.0
+		for resource:String in spec.materials:s.resource_stockpiles[resource]=spec.materials[resource]
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		assert_bool(WorldSimulation.military.start_production_line("exposed_panel_sealant",0).get("ok",false)).is_true()
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		for cycle:int in range(2):
+			for resource:String in spec.materials:s.resource_stockpiles[resource]=spec.materials[resource]
+			s.resource_stockpiles["Polybutene Panel Sealant"]=.5
+			assert_str(P.state(WorldSimulation.military,job)).contains("for full specimen")
+			assert_bool(P.eligible(WorldSimulation.military,job)).is_false()
+			var before:Dictionary=s.resource_stockpiles.duplicate()
+			P.advance(WorldSimulation.military,job,10000)
+			assert_bool(job.has("exposure_started_day")).is_false()
+			assert_bool(s.resource_stockpiles==before).is_true()
+			s.resource_stockpiles["Polybutene Panel Sealant"]=spec.materials["Polybutene Panel Sealant"]
+			assert_str(P.state(WorldSimulation.military,job)).is_equal("Working")
+			P.advance(WorldSimulation.military,job,10000)
+			assert_bool(job.has("exposure_started_day")).is_true()
+			for day:int in range(30):
+				s.elapsed_days+=1;Ops.data().last_day=int(s.elapsed_days)
+				P.advance(WorldSimulation.military,job,10000)
+			assert_int(int(job.completed)).is_equal(cycle+1))

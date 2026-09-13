@@ -155,9 +155,12 @@ static func state(host: Node, job: Dictionary) -> String:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(String(job.item))
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
+	var needs_specimen:=Industry.product(String(job.item)).has("exposure_days") and not job.has("exposure_started_day")
 	for resource in job.materials:
 		if job.has("exposure_started_day"):continue
-		if float(job.materials[resource])>0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
+		var available:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
+		if needs_specimen and available<float(job.materials[resource]):return "Missing "+WorldSimulation.resources.display_name(String(resource))+" for full specimen"
+		if float(job.materials[resource])>0 and available<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
 	if power_per_item(job)>0 and preload("res://scripts/technology_operations.gd").service("electricity")<=.000000001:return "Waiting for electricity"
 	for name:String in services_per_item(job):
 		if preload("res://scripts/technology_operations.gd").service(name)<=.000000001:return "Waiting for "+name.replace("_"," ")
