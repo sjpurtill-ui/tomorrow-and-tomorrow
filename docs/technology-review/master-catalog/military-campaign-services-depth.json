@@ -1,0 +1,498 @@
+[
+  {
+    "field": "D20",
+    "id": "military_billeting_allocation",
+    "name": "Military Billeting Allocation",
+    "foundations": "militia_muster_registers,census_rolls",
+    "mechanism": "Match actual arriving service personnel to available shelter while recording household occupancy and compensation obligations.",
+    "operating_requirement": "Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and finite compensation funds.",
+    "consequence": "Sheltered troops can recover from exposure, but occupied beds cannot also shelter civilians; overcrowding and unpaid obligations damage health and relations.",
+    "status": "authored_draft",
+    "requires_all": [
+      "militia_muster_registers",
+      "census_rolls"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Quartermaster detachments"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "military_billeting_allocation",
+      "local_demonstration": "Match actual arriving service personnel to available shelter while recording household occupancy and compensation obligations.",
+      "operating_requirements": "Dated local capacity survey, authorized quartermasters, shelter access, bedding, food and finite compensation funds.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Muster registers establish who owes service; this allocates scarce occupied shelter without creating buildings.",
+    "implementation_acceptance": [
+      "Two arriving groups cannot reserve the same beds; denied access leaves soldiers unsheltered and unpaid bills persist."
+    ],
+    "historical_horizon_proposal": "Early organized settlements",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "campaign_baggage_prioritization",
+    "name": "Campaign Baggage Prioritization",
+    "foundations": "supply_groups,material_accounting",
+    "mechanism": "Allocate finite campaign carrying capacity among subsistence, repair supplies and discretionary baggage, retaining the cost of excluded loads.",
+    "operating_requirement": "Actual loads and carriers, measured carrying limits, general-approved priorities and time to repack.",
+    "consequence": "A lighter force can move more readily but sacrifices endurance or repair capacity; stored and abandoned loads remain separate from carried inventory.",
+    "status": "authored_draft",
+    "requires_all": [
+      "supply_groups",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Baggage trains"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "campaign_baggage_prioritization",
+      "local_demonstration": "Allocate finite campaign carrying capacity among subsistence, repair supplies and discretionary baggage, retaining the cost of excluded loads.",
+      "operating_requirements": "Actual loads and carriers, measured carrying limits, general-approved priorities and time to repack.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Supply groups move goods; this resolves competing load demands before departure and exposes what the army leaves behind.",
+    "implementation_acceptance": [
+      "Reducing baggage improves movement only after unloading; omitted food cannot feed troops and no carrier exceeds its physical capacity."
+    ],
+    "historical_horizon_proposal": "Early organized campaigns",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "field_kitchen_detachments",
+    "name": "Field Kitchen Detachments",
+    "foundations": "campaign_ration_specifications,supply_groups",
+    "mechanism": "Organize movable communal meal preparation with an explicit setup, cooking, distribution and pack-down cycle.",
+    "operating_requirement": "Assigned cooks, carried vessels, suitable food, water, fuel, preparation space and transport; stove and earth-oven routes retain different equipment and setup costs.",
+    "consequence": "Turn actual provisions into served meals during halts; relocation interrupts service and draws cooks from the available workforce.",
+    "status": "authored_draft",
+    "requires_all": [
+      "campaign_ration_specifications",
+      "supply_groups"
+    ],
+    "requires_any": [
+      [
+        "earth_oven_cooking",
+        "household_cooking_stoves"
+      ]
+    ],
+    "role_design_targets": [
+      "Field cooks"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "field_kitchen_detachments",
+      "local_demonstration": "Organize movable communal meal preparation with an explicit setup, cooking, distribution and pack-down cycle.",
+      "operating_requirements": "Assigned cooks, carried vessels, suitable food, water, fuel, preparation space and transport; stove and earth-oven routes retain different equipment and setup costs.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Ration specifications describe food suitability; kitchens deliver cooked meals at a place and time. Domestic stoves alone do not provide a moving service.",
+    "implementation_acceptance": [
+      "A march during preparation preserves or spoils the actual unfinished batch under food rules; neither raw and cooked inventory nor home and army meals are double counted."
+    ],
+    "historical_horizon_proposal": "Early organized campaigns",
+    "branch_rationale": "All listed mandatory foundations remain required. Either established cooking method supports local demonstration; equipment and setup differ by route.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "campaign_equipment_salvage",
+    "name": "Campaign Equipment Salvage",
+    "foundations": "material_accounting,supply_groups",
+    "mechanism": "Recover accessible abandoned equipment into inspected custody, separating repairable items, reusable parts and scrap.",
+    "operating_requirement": "Physical access, recovery labor and transport, item provenance, inspection capacity and finite repair materials.",
+    "consequence": "Recover some lost material at the expense of time and carrying space; recovered objects remain unavailable for service until compatible and inspected.",
+    "status": "authored_draft",
+    "requires_all": [
+      "material_accounting",
+      "supply_groups"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Salvage detachments"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "campaign_equipment_salvage",
+      "local_demonstration": "Recover accessible abandoned equipment into inspected custody, separating repairable items, reusable parts and scrap.",
+      "operating_requirements": "Physical access, recovery labor and transport, item provenance, inspection capacity and finite repair materials.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Armored recovery retrieves disabled vehicles; field diagnostics identifies faults. This owns recovery custody and finite disposition across ordinary campaign equipment.",
+    "implementation_acceptance": [
+      "Revisiting the same site cannot recover an item twice; inaccessible losses stay lost and incompatible recovered equipment cannot refill a unit."
+    ],
+    "historical_horizon_proposal": "Early organized campaigns",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "strength_return_reconciliation",
+    "name": "Strength Return Reconciliation",
+    "foundations": "militia_muster_registers,material_accounting",
+    "mechanism": "Reconcile dated unit strength returns across transfers, absence, hospitalization and confirmed losses without treating nominal enrollment as available strength.",
+    "operating_requirement": "Unit clerks, delivered returns with reporting times, transfer references and time to investigate contradictions.",
+    "consequence": "Generals receive a more reliable own-force readiness estimate; unresolved absences remain uncertain rather than becoming recruits or confirmed casualties.",
+    "status": "authored_draft",
+    "requires_all": [
+      "militia_muster_registers",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Unit clerks"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "strength_return_reconciliation",
+      "local_demonstration": "Reconcile dated unit strength returns across transfers, absence, hospitalization and confirmed losses without treating nominal enrollment as available strength.",
+      "operating_requirements": "Unit clerks, delivered returns with reporting times, transfer references and time to investigate contradictions.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Muster records service obligations; this reconciles changing operational presence across units. It does not replace payroll verification or enemy-information fusion.",
+    "implementation_acceptance": [
+      "A transferred person is never available in two formations; late returns cannot reverse confirmed later events or conjure missing personnel."
+    ],
+    "historical_horizon_proposal": "Organized standing forces",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "field_telephone_line_deployment",
+    "name": "Field Telephone Line Deployment",
+    "foundations": "telephone_circuits,signals_detachment_training",
+    "mechanism": "Install, test, maintain and recover temporary wired voice links between actual field endpoints.",
+    "operating_requirement": "Compatible instruments, finite wire, power sources, line crews, accessible routes and repair time.",
+    "consequence": "Command messages travel through working field links with delay and outage; moving headquarters can strand endpoints and consumes relocation labor.",
+    "status": "authored_draft",
+    "requires_all": [
+      "telephone_circuits",
+      "signals_detachment_training"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Field telephone sections"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "field_telephone_line_deployment",
+      "local_demonstration": "Install, test, maintain and recover temporary wired voice links between actual field endpoints.",
+      "operating_requirements": "Compatible instruments, finite wire, power sources, line crews, accessible routes and repair time.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Telephone circuits supply voice transmission; exchange networks connect subscribers. This qualifies a temporary moving field installation, not encryption.",
+    "implementation_acceptance": [
+      "Broken or unpowered links stop delivery; recovering wire removes that link and cannot duplicate its inventory."
+    ],
+    "historical_horizon_proposal": "Electrical communications",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "artillery_survey_datum_control",
+    "name": "Artillery Survey Datum Control",
+    "foundations": "geometric_survey,military_cartographic_reporting",
+    "mechanism": "Relate separately produced military position reports to a checked common survey reference and retain transformation uncertainty.",
+    "operating_requirement": "Survey staff, instruments, accessible reference marks, recorded coordinate conventions and repeat checks after reference damage.",
+    "consequence": "Observation teams can compare positions consistently; mismatched or stale references remain flagged rather than silently treated as precise agreement.",
+    "status": "authored_draft",
+    "requires_all": [
+      "geometric_survey",
+      "military_cartographic_reporting"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Military survey sections"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "artillery_survey_datum_control",
+      "local_demonstration": "Relate separately produced military position reports to a checked common survey reference and retain transformation uncertainty.",
+      "operating_requirements": "Survey staff, instruments, accessible reference marks, recorded coordinate conventions and repeat checks after reference damage.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Cartographic reporting records observations on maps; datum control qualifies whether different local survey references can be compared.",
+    "implementation_acceptance": [
+      "Conflicting references do not yield a precise combined location; damaged reference marks require requalification."
+    ],
+    "historical_horizon_proposal": "Survey-supported campaigns",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "artillery_sound_ranging",
+    "name": "Artillery Sound Ranging",
+    "foundations": "artillery_survey_datum_control,acoustic_diaphragms,signals_detachment_training",
+    "mechanism": "Interpret coordinated acoustic observations as an uncertain, dated source-location report within a qualified observation envelope.",
+    "operating_requirement": "Trained observers, functioning acoustic recorders, checked timing and survey references, environmental observations and maintained communication.",
+    "consequence": "Generals gain fallible indirect observation when a detectable event occurs; noise, timing errors and missing stations can make a report unusable.",
+    "status": "authored_draft",
+    "requires_all": [
+      "artillery_survey_datum_control",
+      "acoustic_diaphragms",
+      "signals_detachment_training"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Acoustic survey sections"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "artillery_sound_ranging",
+      "local_demonstration": "Interpret coordinated acoustic observations as an uncertain, dated source-location report within a qualified observation envelope.",
+      "operating_requirements": "Trained observers, functioning acoustic recorders, checked timing and survey references, environmental observations and maintained communication.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Observation liaison carries reports; this produces an acoustic observation. It does not automatically aim weapons or reveal all enemies.",
+    "implementation_acceptance": [
+      "No event produces no location; inconsistent timing or inadequate observations withhold a location rather than providing perfect hidden state."
+    ],
+    "historical_horizon_proposal": "Industrial observation services",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "artillery_flash_spotting",
+    "name": "Artillery Flash Spotting",
+    "foundations": "artillery_survey_datum_control,signals_detachment_training",
+    "mechanism": "Associate separately observed brief optical events into a qualified, dated location estimate while retaining ambiguous associations.",
+    "operating_requirement": "Trained observers, surveyed observation positions, suitable optics, adequate visibility and an operating reporting link.",
+    "consequence": "Provide a distinct visual observation channel whose usefulness changes with visibility and obstruction; unrelated events cannot be assumed identical.",
+    "status": "authored_draft",
+    "requires_all": [
+      "artillery_survey_datum_control",
+      "signals_detachment_training"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Optical survey sections"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "artillery_flash_spotting",
+      "local_demonstration": "Associate separately observed brief optical events into a qualified, dated location estimate while retaining ambiguous associations.",
+      "operating_requirements": "Trained observers, surveyed observation positions, suitable optics, adequate visibility and an operating reporting link.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Sound ranging observes acoustics; flash spotting depends on visual event correspondence. Neither substitutes for the other under all conditions.",
+    "implementation_acceptance": [
+      "Obscured or unmatched observations do not reveal a precise source; duplicated reports of one event are not independent evidence."
+    ],
+    "historical_horizon_proposal": "Industrial observation services",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  },
+  {
+    "field": "D20",
+    "id": "military_decoy_fabrication",
+    "name": "Military Decoy Fabrication",
+    "foundations": "field_concealment_practice,material_accounting",
+    "mechanism": "Build and evaluate expendable visual representations that may be mistaken for specified equipment under limited viewing conditions.",
+    "operating_requirement": "Craft labor, actual frame and covering materials, transport, deployment time and independent visual evaluation.",
+    "consequence": "A deployed decoy may influence an observer interpretation but has no fighting strength; inspection, weather and viewpoint can expose it.",
+    "status": "authored_draft",
+    "requires_all": [
+      "field_concealment_practice",
+      "material_accounting"
+    ],
+    "requires_any": [],
+    "role_design_targets": [
+      "Decoy fabrication teams"
+    ],
+    "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+    "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "military_decoy_fabrication",
+      "local_demonstration": "Build and evaluate expendable visual representations that may be mistaken for specified equipment under limited viewing conditions.",
+      "operating_requirements": "Craft labor, actual frame and covering materials, transport, deployment time and independent visual evaluation.",
+      "grants_instant_mastery": false,
+      "outside_costs": [
+        "available competent source",
+        "payment or reciprocal contribution",
+        "actual staff, information or equipment delivery",
+        "finite training and local qualification",
+        "continuing equipment, supplies, repairs and personnel"
+      ],
+      "route_terms": {
+        "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+        "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+        "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+        "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+        "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+      }
+    },
+    "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+    "semantic_boundary": "Concealment changes exposure of real assets; this creates a separate physical false visual object. It cannot alter an opponent belief without observation.",
+    "implementation_acceptance": [
+      "A fabricated object consumes material, has zero combat capacity and only affects an observer through the same fallible sighting model as other objects."
+    ],
+    "historical_horizon_proposal": "Organized visual deception",
+    "branch_rationale": "All listed mandatory foundations remain required. No interchangeable foundation is claimed for this mechanism.",
+    "implementation_status": "Design only; no runtime capability, live unit, art binding or pacing claim."
+  }
+]
