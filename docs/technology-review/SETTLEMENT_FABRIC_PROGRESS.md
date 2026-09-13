@@ -36,3 +36,9 @@ SettlementModel._fabric_upgrade_cost uses raw ore, limestone and sand for tier 1
 ## Current status
 
 Scope and owner inspection complete. Runtime implementation, component recipes, renderer changes, acquisition validation and tests remain undone. No save changes, game launch or completed delivery claim.
+
+## First implementation checkpoint
+
+Added settlement_fabric_knowledge.gd with ten unregistered entries preserving exact authored names and ALL/OR arrays. Added ten finite intermediate recipes to CivilianIndustry. These prepare components, not installed structures; no resulting service or successful inspection is claimed. Current generic timber tooling must be reviewed against available craft tools before delivery.
+
+A Python comparison verified the ten prerequisite copies. Git whitespace check passed. First isolated headless editor import terminated with exit 139 after an engine propagate_notification caller-thread error (/tmp/tt-fabric-import.log); this is a failed import check, not passing runtime evidence. No player was launched or stopped. Installed components, measured rejection, paid retrofit/repair, rendering, save validation, acquisition and supply checks remain unfinished. Delivery remains HELD.
