@@ -1,0 +1,582 @@
+[
+  {
+    "id": "marine_waterjet_propulsion",
+    "name": "Marine Waterjet Propulsion",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "centrifugal_pump_design",
+      "ship_stability_assessment"
+    ],
+    "requires_any": [],
+    "foundations": "centrifugal_pump_design,ship_stability_assessment",
+    "mechanism": "Accelerate inlet water through a driven pump and nozzle, then redirect the jet for steering or reversal.",
+    "operating_requirement": "Pay for a matched inlet, impeller, nozzle and actuators; measure thrust, inlet losses and cavitation over the vessel envelope.",
+    "consequence": "An equipped vessel uses measured jet thrust at actual shaft power; shallow intake, debris or lost drive can reduce propulsion.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable marine waterjet propulsion instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "marine_waterjet_propulsion",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Accelerate inlet water through a driven pump and nozzle, then redirect the jet for steering or reversal.",
+      "operating_requirements": "Pay for a matched inlet, impeller, nozzle and actuators; measure thrust, inlet losses and cavitation over the vessel envelope.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local marine waterjet propulsion trials.",
+        "partnership": "Share actual samples and operator time for marine waterjet propulsion; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded marine waterjet propulsion process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external marine waterjet propulsion processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable marine waterjet propulsion machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/waterjet"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "azimuthing_marine_thrusters",
+    "name": "Azimuthing Marine Thrusters",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "screw_propeller_propulsion",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "foundations": "screw_propeller_propulsion,precision_machinery",
+    "mechanism": "Rotate an installed propulsor about a vertical axis to change the thrust direction.",
+    "operating_requirement": "Build and test a powered steering bearing, transmission and propulsor with actual electrical or mechanical supply.",
+    "consequence": "The vessel controller can direct bounded installed thrust within steering-rate and load limits; no thrust exists without power.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable azimuthing marine thrusters instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "azimuthing_marine_thrusters",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Rotate an installed propulsor about a vertical axis to change the thrust direction.",
+      "operating_requirements": "Build and test a powered steering bearing, transmission and propulsor with actual electrical or mechanical supply.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local azimuthing marine thrusters trials.",
+        "partnership": "Share actual samples and operator time for azimuthing marine thrusters; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded azimuthing marine thrusters process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external azimuthing marine thrusters processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable azimuthing marine thrusters machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/thrusters"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "tunnel_bow_thrusters",
+    "name": "Tunnel Bow Thrusters",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "screw_propeller_propulsion",
+      "watertight_subdivision"
+    ],
+    "requires_any": [],
+    "foundations": "screw_propeller_propulsion,watertight_subdivision",
+    "mechanism": "Drive water laterally through a hull tunnel to create a maneuvering force near the bow.",
+    "operating_requirement": "Install a reinforced watertight tunnel, propulsor and power supply; test crossflow losses and hull loads.",
+    "consequence": "An equipped vessel can apply measured lateral force for low-speed maneuvering, with reduced effectiveness under unfavorable through-flow.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable tunnel bow thrusters instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tunnel_bow_thrusters",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Drive water laterally through a hull tunnel to create a maneuvering force near the bow.",
+      "operating_requirements": "Install a reinforced watertight tunnel, propulsor and power supply; test crossflow losses and hull loads.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local tunnel bow thrusters trials.",
+        "partnership": "Share actual samples and operator time for tunnel bow thrusters; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded tunnel bow thrusters process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external tunnel bow thrusters processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable tunnel bow thrusters machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/thrusters"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "ducted_propeller_nozzles",
+    "name": "Ducted Propeller Nozzles",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "screw_propeller_propulsion",
+      "propeller_cavitation_assessment"
+    ],
+    "requires_any": [],
+    "foundations": "screw_propeller_propulsion,propeller_cavitation_assessment",
+    "mechanism": "Surround a matched propeller with an annular hydrofoil duct that contributes to the thrust field.",
+    "operating_requirement": "Manufacture controlled tip clearance and duct shape; compare thrust and drag across intended loading and speed.",
+    "consequence": "A specific installation uses its measured thrust/power curve, including any high-speed duct penalty rather than a universal efficiency bonus.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable ducted propeller nozzles instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ducted_propeller_nozzles",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Surround a matched propeller with an annular hydrofoil duct that contributes to the thrust field.",
+      "operating_requirements": "Manufacture controlled tip clearance and duct shape; compare thrust and drag across intended loading and speed.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local ducted propeller nozzles trials.",
+        "partnership": "Share actual samples and operator time for ducted propeller nozzles; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded ducted propeller nozzles process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external ducted propeller nozzles processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable ducted propeller nozzles machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/kort-nozzle"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "propeller_hub_vortex_fins",
+    "name": "Propeller Hub-Vortex Fins",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "screw_propeller_propulsion",
+      "propeller_cavitation_assessment"
+    ],
+    "requires_any": [],
+    "foundations": "screw_propeller_propulsion,propeller_cavitation_assessment",
+    "mechanism": "Use rotating cap fins to alter hub-vortex and rotational-flow losses behind a propeller.",
+    "operating_requirement": "Fabricate and fit a matched cap-fin assembly; measure net propulsive response, loading and balance.",
+    "consequence": "A qualified propeller uses its observed power/thrust relationship only with that fitted assembly and operating range.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable propeller hub-vortex fins instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "propeller_hub_vortex_fins",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use rotating cap fins to alter hub-vortex and rotational-flow losses behind a propeller.",
+      "operating_requirements": "Fabricate and fit a matched cap-fin assembly; measure net propulsive response, loading and balance.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local propeller hub-vortex fins trials.",
+        "partnership": "Share actual samples and operator time for propeller hub-vortex fins; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded propeller hub-vortex fins process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external propeller hub-vortex fins processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable propeller hub-vortex fins machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/docs/default-source/about-us/in-detail/in-detail---2016-issue-02.pdf?sfvrsn=d5880144_2"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "active_marine_fin_stabilizers",
+    "name": "Active Marine Fin Stabilizers",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "ship_stability_assessment",
+      "hydraulic_power_machinery",
+      "feedback_stability_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "ship_stability_assessment,hydraulic_power_machinery,feedback_stability_analysis",
+    "mechanism": "Vary hull-mounted foil incidence to create a controlled counter-rolling moment.",
+    "operating_requirement": "Install fins, roll sensing and powered actuators; test moment authority, speed dependence and actuator limits.",
+    "consequence": "A vessel with operating fins uses bounded measured roll response; the selected conventional design needs forward flow and cannot promise zero-speed control.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable active marine fin stabilizers instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "active_marine_fin_stabilizers",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Vary hull-mounted foil incidence to create a controlled counter-rolling moment.",
+      "operating_requirements": "Install fins, roll sensing and powered actuators; test moment authority, speed dependence and actuator limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local active marine fin stabilizers trials.",
+        "partnership": "Share actual samples and operator time for active marine fin stabilizers; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded active marine fin stabilizers process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external active marine fin stabilizers processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable active marine fin stabilizers machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/roll-stabilisation"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "passive_antiroll_tanks",
+    "name": "Passive Antiroll Tanks",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "ship_stability_assessment",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "foundations": "ship_stability_assessment,flow_continuity",
+    "mechanism": "Tune transverse liquid motion in connected tanks so its phase supplies a counter-rolling moment.",
+    "operating_requirement": "Construct and fill tanks and ducts; measure response over roll periods while accounting for free-surface stability and lost cargo space.",
+    "consequence": "An equipped vessel receives a tested roll response over a limited frequency band, with off-tune conditions retained.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable passive antiroll tanks instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "passive_antiroll_tanks",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Tune transverse liquid motion in connected tanks so its phase supplies a counter-rolling moment.",
+      "operating_requirements": "Construct and fill tanks and ducts; measure response over roll periods while accounting for free-surface stability and lost cargo space.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local passive antiroll tanks trials.",
+        "partnership": "Share actual samples and operator time for passive antiroll tanks; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded passive antiroll tanks process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external passive antiroll tanks processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable passive antiroll tanks machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/anti-roll-tanks-tank-stabilisers"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "marine_gyroscopic_stabilizers",
+    "name": "Marine Gyroscopic Stabilizers",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_oscillation",
+      "precision_machinery",
+      "electric_motors"
+    ],
+    "requires_any": [],
+    "foundations": "mechanical_oscillation,precision_machinery,electric_motors",
+    "mechanism": "Control the precession of a spinning flywheel to produce a bounded moment opposing vessel roll.",
+    "operating_requirement": "Pay flywheel, bearings, enclosure, drive and cooling; test angular-momentum, gimbal travel and thermal limits.",
+    "consequence": "An operating installed gyro modifies measured roll response while stored spin and travel permit; spin-up and losses require real energy.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable marine gyroscopic stabilizers instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "marine_gyroscopic_stabilizers",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Control the precession of a spinning flywheel to produce a bounded moment opposing vessel roll.",
+      "operating_requirements": "Pay flywheel, bearings, enclosure, drive and cooling; test angular-momentum, gimbal travel and thermal limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local marine gyroscopic stabilizers trials.",
+        "partnership": "Share actual samples and operator time for marine gyroscopic stabilizers; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded marine gyroscopic stabilizers process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external marine gyroscopic stabilizers processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable marine gyroscopic stabilizers machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.seakeeper.com/faqs/how-does-a-seakeeper-work/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "bilge_keel_roll_damping",
+    "name": "Bilge-Keel Roll Damping",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "ship_stability_assessment",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "ship_stability_assessment,structural_load_testing",
+    "mechanism": "Attach longitudinal bilge plates whose hydrodynamic drag and vortices dissipate rolling motion.",
+    "operating_requirement": "Build and inspect supported plates; compare roll decay, drag and attachment loads on the intended hull.",
+    "consequence": "That hull uses a measured passive damping increment with additional resistance and damage exposure; other hulls gain nothing.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable bilge-keel roll damping instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bilge_keel_roll_damping",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Attach longitudinal bilge plates whose hydrodynamic drag and vortices dissipate rolling motion.",
+      "operating_requirements": "Build and inspect supported plates; compare roll decay, drag and attachment loads on the intended hull.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local bilge-keel roll damping trials.",
+        "partnership": "Share actual samples and operator time for bilge-keel roll damping; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded bilge-keel roll damping process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external bilge-keel roll damping processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable bilge-keel roll damping machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/bilge-keels"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "bulbous_bow_wave_interference",
+    "name": "Bulbous-Bow Wave Interference",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "ship_stability_assessment",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "foundations": "ship_stability_assessment,flow_continuity",
+    "mechanism": "Shape a submerged bow bulb so its wave field interacts with the hull wave system.",
+    "operating_requirement": "Pay for hull-form trials and a structurally qualified bow at specified drafts and speeds.",
+    "consequence": "A fitted vessel uses measured wave-making resistance; partial immersion or wrong operating conditions can increase power demand.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable bulbous-bow wave interference instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bulbous_bow_wave_interference",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Shape a submerged bow bulb so its wave field interacts with the hull wave system.",
+      "operating_requirements": "Pay for hull-form trials and a structurally qualified bow at specified drafts and speeds.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local bulbous-bow wave interference trials.",
+        "partnership": "Share actual samples and operator time for bulbous-bow wave interference; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded bulbous-bow wave interference process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external bulbous-bow wave interference processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable bulbous-bow wave interference machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/encyclopedia/term/bow"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "hull_air_lubrication",
+    "name": "Hull Air Lubrication",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "flow_continuity",
+      "positive_displacement_pumps"
+    ],
+    "requires_any": [],
+    "foundations": "flow_continuity,positive_displacement_pumps",
+    "mechanism": "Distribute compressed air beneath a hull to modify the wetted interface and reduce selected frictional resistance.",
+    "operating_requirement": "Install compressors and distribution outlets; test bubble coverage and net power after compression over drafts and sea states.",
+    "consequence": "The equipped vessel may use a measured net resistance change only while the air system operates within its demonstrated envelope.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable hull air lubrication instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hull_air_lubrication",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Distribute compressed air beneath a hull to modify the wetted interface and reduce selected frictional resistance.",
+      "operating_requirements": "Install compressors and distribution outlets; test bubble coverage and net power after compression over drafts and sea states.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local hull air lubrication trials.",
+        "partnership": "Share actual samples and operator time for hull air lubrication; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded hull air lubrication process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external hull air lubrication processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable hull air lubrication machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://silverstream-tech.com/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "air_barrier_stern_tube_seals",
+    "name": "Air-Barrier Stern-Tube Seals",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "pressure_pipe_jointing",
+      "lubrication_regimes"
+    ],
+    "requires_any": [],
+    "foundations": "pressure_pipe_jointing,lubrication_regimes",
+    "mechanism": "Maintain a monitored pressurized-air barrier between seal stages around a rotating shaft.",
+    "operating_requirement": "Fit compatible seals and liner with pressure control, air supply and leakage collection; test changing external pressure and wear.",
+    "consequence": "An installed shaft line tracks bounded separation of seawater and lubricant; lost supply or failed seals require actual leakage and service consequences.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable air-barrier stern-tube seals instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "air_barrier_stern_tube_seals",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Maintain a monitored pressurized-air barrier between seal stages around a rotating shaft.",
+      "operating_requirements": "Fit compatible seals and liner with pressure control, air supply and leakage collection; test changing external pressure and wear.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local air-barrier stern-tube seals trials.",
+        "partnership": "Share actual samples and operator time for air-barrier stern-tube seals; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded air-barrier stern-tube seals process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external air-barrier stern-tube seals processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable air-barrier stern-tube seals machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.wartsila.com/docs/default-source/product-files/seals-bearings/oil-lubricated-bearing/oil-lubricated-seal/wartsila-airguard-datasheet-web.pdf?sfvrsn=23cf8044_6"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "marine_gyrocompass_heading",
+    "name": "Marine Gyrocompass Heading",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "mechanical_oscillation",
+      "electric_motors",
+      "marine_timekeeping"
+    ],
+    "requires_any": [],
+    "foundations": "mechanical_oscillation,electric_motors,marine_timekeeping",
+    "mechanism": "Use controlled gyroscopic response to the rotating Earth to determine a north-referenced heading.",
+    "operating_requirement": "Build and calibrate a powered gyro assembly, damping and repeaters; allow settling and correct demonstrated motion or latitude errors.",
+    "consequence": "A fitted vessel receives uncertain heading evidence independent of local magnetic deviation, with fault and settling states retained.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable marine gyrocompass heading instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "marine_gyrocompass_heading",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use controlled gyroscopic response to the rotating Earth to determine a north-referenced heading.",
+      "operating_requirements": "Build and calibrate a powered gyro assembly, damping and repeaters; allow settling and correct demonstrated motion or latitude errors.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local marine gyrocompass heading trials.",
+        "partnership": "Share actual samples and operator time for marine gyrocompass heading; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded marine gyrocompass heading process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external marine gyrocompass heading processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable marine gyrocompass heading machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.anschuetz.com/company/factory-tour/gyrocompass-and-clean-room"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "doppler_marine_speed_logging",
+    "name": "Doppler Marine Speed Logging",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "marine_echo_sounding",
+      "mechanical_oscillation"
+    ],
+    "requires_any": [],
+    "foundations": "marine_echo_sounding,mechanical_oscillation",
+    "mechanism": "Infer velocity from the frequency shift of returned acoustic signals along known beam directions.",
+    "operating_requirement": "Install powered transducers and processing; qualify water-track or bottom-track reference, alignment and signal quality.",
+    "consequence": "The vessel receives measured speed relative to the identified reference; missing echoes or bubbles cannot yield exact world velocity.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable doppler marine speed logging instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "doppler_marine_speed_logging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Infer velocity from the frequency shift of returned acoustic signals along known beam directions.",
+      "operating_requirements": "Install powered transducers and processing; qualify water-track or bottom-track reference, alignment and signal quality.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local doppler marine speed logging trials.",
+        "partnership": "Share actual samples and operator time for doppler marine speed logging; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded doppler marine speed logging process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external doppler marine speed logging processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable doppler marine speed logging machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.furuno.com/en/products/speedlog/ds-85/index.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "centrifugal_bilge_separation",
+    "name": "Centrifugal Bilge Separation",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "bilge_pumping_systems",
+      "industrial_heat_exchangers",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "foundations": "bilge_pumping_systems,industrial_heat_exchangers,precision_machinery",
+    "mechanism": "Separate oil and solids from collected bilge water through controlled centrifugal processing.",
+    "operating_requirement": "Pay for separator, feed handling and heat/power; measure effluent and retain oil, sludge and rejected water.",
+    "consequence": "An operating vessel processes only its actual collected volume; unqualified effluent stays held and is not converted into potable water.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable centrifugal bilge separation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "centrifugal_bilge_separation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate oil and solids from collected bilge water through controlled centrifugal processing.",
+      "operating_requirements": "Pay for separator, feed handling and heat/power; measure effluent and retain oil, sludge and rejected water.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local centrifugal bilge separation trials.",
+        "partnership": "Share actual samples and operator time for centrifugal bilge separation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded centrifugal bilge separation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external centrifugal bilge separation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable centrifugal bilge separation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.alfalaval.com/products/separation/centrifugal-separators/separators/purebilge/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "propeller_shaft_earthing",
+    "name": "Propeller-Shaft Earthing",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "lubrication_regimes"
+    ],
+    "requires_any": [],
+    "foundations": "electrical_measurement,lubrication_regimes",
+    "mechanism": "Bridge the electrical isolation of a lubricated rotating shaft using monitored sliding contacts to the hull.",
+    "operating_requirement": "Install compatible slipring and brushes; inspect wear and measure contact potential or continuity during rotation.",
+    "consequence": "A fitted shaft gains a tested current path while contact quality holds; the device does not supply missing hull corrosion protection.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable propeller-shaft earthing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "propeller_shaft_earthing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Bridge the electrical isolation of a lubricated rotating shaft using monitored sliding contacts to the hull.",
+      "operating_requirements": "Install compatible slipring and brushes; inspect wear and measure contact potential or continuity during rotation.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local propeller-shaft earthing trials.",
+        "partnership": "Share actual samples and operator time for propeller-shaft earthing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded propeller-shaft earthing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external propeller-shaft earthing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable propeller-shaft earthing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://evac.com/products/shaft-earthing/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]

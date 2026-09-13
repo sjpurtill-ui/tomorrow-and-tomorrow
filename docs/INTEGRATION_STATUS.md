@@ -1,3 +1,9 @@
+## September 13 — marine subsystem coverage
+
+Authored16 D10 mechanisms for distinct propulsors, roll-control hardware, hull-flow modifications, shaft sealing/earthing, navigation observations and centrifugal bilge treatment. Each requires paid compatible hardware, actual supply and measured limits. Propulsive benefits are installation-specific; stabilizers have finite authority; rejected bilge liquid remains held. See `technology-review/Marine Systems Review.md`.
+
+Ledger: **750 integrated +2,696 drafts =3,446 identities**, leaving **1,554 to author and4,250 to implement**. D10 now124/160 authored coverage. Parent/duplicate/reachability checks and15ledger tests pass. Runtime750/532/434/20 and art172/750 are unchanged. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/marine-systems-coverage`, initial base `3d81ef2`, updated through catalog-only NMR prerequisite `8f0487f5840eea473c852a1496af0ee36e3285c5`. Catalog/docs only; no save or runtime shared-file conflict, player launch or package rebuild.
+
 ## September 13 — polymer NMR prerequisite
 
 Authored `nuclear_magnetic_resonance_spectroscopy` for the worker's sequence-sensitive measurement gap, with mandatory atomic physics, spectroscopy, tuned circuits and precision thermometry. A calibrated magnetic field, RF probe/excitation, sensitive receiver, references, thermal control and finite acquisition are required. Bruker's benchtop composition example does not establish universal sequence resolution; ambiguous or unresolved evidence cannot certify a grade. MRI is a distinct existing proposal. See `technology-review/Polymer NMR Prerequisite.md`.

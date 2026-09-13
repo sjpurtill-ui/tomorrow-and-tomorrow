@@ -13374,6 +13374,166 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "c480ec0c6798fd2bb99570e6cfed4453dd9302c452939b2d814d28205495541f"
+    },
+    {
+      "id": "marine_waterjet_propulsion",
+      "name": "Marine Waterjet Propulsion",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "70df6bb2d992c4657626271e4cf339f7878711284bbdea5e292608786930de21"
+    },
+    {
+      "id": "azimuthing_marine_thrusters",
+      "name": "Azimuthing Marine Thrusters",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "d6c01226e7cd51fc0923648cb660480f7e4112327b61943c52f154fe1cc2511e"
+    },
+    {
+      "id": "tunnel_bow_thrusters",
+      "name": "Tunnel Bow Thrusters",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "a039ed0bbc9d538930ce4582aaf09c699a2105907eccf9391e83e0cf5474cf1f"
+    },
+    {
+      "id": "ducted_propeller_nozzles",
+      "name": "Ducted Propeller Nozzles",
+      "horizon": "H04",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f3ac044010e729ed43634281040d09238b331c591e8dfe216ecaa763510539b2"
+    },
+    {
+      "id": "propeller_hub_vortex_fins",
+      "name": "Propeller Hub-Vortex Fins",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "9dba224fc8e1f854bc24b6319907443a3f51b2834a2f6862c20ab956c2b3b99a"
+    },
+    {
+      "id": "active_marine_fin_stabilizers",
+      "name": "Active Marine Fin Stabilizers",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "9d522511dba525c79fd56d88a3021868afbe367ccbb0340967e2124901165afc"
+    },
+    {
+      "id": "passive_antiroll_tanks",
+      "name": "Passive Antiroll Tanks",
+      "horizon": "H04",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "0c7a1ea64faa07bbad0d2f90d15d554b085c33d555adc5f705b68614daff7921"
+    },
+    {
+      "id": "marine_gyroscopic_stabilizers",
+      "name": "Marine Gyroscopic Stabilizers",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "d520d4ea6daa1f440af813da70039c12640a102e4aa05adfe7c0f229c457af05"
+    },
+    {
+      "id": "bilge_keel_roll_damping",
+      "name": "Bilge-Keel Roll Damping",
+      "horizon": "H04",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "4357bcea59577889386b2b368aaaec5d5991d05bf7d057d15b1235406fe2ec3a"
+    },
+    {
+      "id": "bulbous_bow_wave_interference",
+      "name": "Bulbous-Bow Wave Interference",
+      "horizon": "H04",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "6c552be6634c2f84eacd8552608f23f308b42578dc1f315e9c1dc4a1ca12b913"
+    },
+    {
+      "id": "hull_air_lubrication",
+      "name": "Hull Air Lubrication",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "1233722e88c94aba644fea507476842769d0dc8ce45709e9b760b606f2987e41"
+    },
+    {
+      "id": "air_barrier_stern_tube_seals",
+      "name": "Air-Barrier Stern-Tube Seals",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "d6e7cccf0ba6d12fe45e86d4b554d207e1ee711ee85606ecf1f3390a8522371b"
+    },
+    {
+      "id": "marine_gyrocompass_heading",
+      "name": "Marine Gyrocompass Heading",
+      "horizon": "H04",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c5b396596ae0108f04624226d213bf81548d1dfc4701b748aed263d382ff75d5"
+    },
+    {
+      "id": "doppler_marine_speed_logging",
+      "name": "Doppler Marine Speed Logging",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "0c6845b593549fc32686348dc7717fb01f4f944b9aa8456590eb13d856388feb"
+    },
+    {
+      "id": "centrifugal_bilge_separation",
+      "name": "Centrifugal Bilge Separation",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "01ead700fdf1f919bec088ded1d8db8a0dffef973db4fe02c12d000e2ed88d90"
+    },
+    {
+      "id": "propeller_shaft_earthing",
+      "name": "Propeller-Shaft Earthing",
+      "horizon": "H05",
+      "source_file": "marine-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2c52c35dc969177797855de1e1e7d28684c9244db974245b1cb324459ae12e18"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
