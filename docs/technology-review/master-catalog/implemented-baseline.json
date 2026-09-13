@@ -1,5 +1,5 @@
 {
-  "source_commit": "997269f56922f45e8f400a8fe11fb4431da67e58",
+  "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -14993,6 +14993,218 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Stored reserve"
+      }
+    },
+    {
+      "id": "grain_parboiling",
+      "name": "Grain Parboiling",
+      "field": "D01",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "earth_oven_cooking",
+          "food_steaming_vessels"
+        ]
+      ],
+      "foundations": "cereal_dehulling, food_drying",
+      "mechanism": "Condition suitable grain with moisture and heat before drying and hulling.",
+      "operating_requirement": "Water, heating vessels, fuel and drying capacity.",
+      "consequence": "Changes milling performance; consumed water, energy and drying time limit throughput.",
+      "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+      "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "grain_parboiling",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Condition suitable grain with moisture and heat before drying and hulling.",
+        "operating_requirements": "Water, heating vessels, fuel and drying capacity.",
+        "route_terms": {
+          "scholar_envoy": "Pay travel, provisions and instructor time for grain parboiling; contribute local ingredients and lose trial batches while the method is learned.",
+          "partnership": "Share ingredients, trials and observations for grain parboiling; negotiate access to results and accept delays from shared capacity.",
+          "purchased_research": "Commission a bounded grain parboiling investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+          "licensed_or_imported_service": "Buy a compatible grain parboiling service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+          "reverse_engineering": "Analyze an acquired product, tool or record relevant to grain parboiling; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+        }
+      },
+      "evidence_sources": [
+        "https://www.fao.org/4/v5380e/v5380e06.htm"
+      ],
+      "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals.",
+      "implementation_reconciliation": {
+        "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+        "editorial_source": "food-processing-service-depth.json",
+        "previous_requires_all": [
+          "cereal_dehulling",
+          "food_drying"
+        ],
+        "previous_requires_any": [
+          [
+            "earth_oven_cooking",
+            "food_steaming_vessels"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "grain_parboiling",
+        "id": "grain_parboiling",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Grain Parboiling",
+            "missing_all": [
+              "cereal_dehulling",
+              "food_drying"
+            ],
+            "missing_any": [
+              [
+                "earth_oven_cooking",
+                "food_steaming_vessels"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cereal_dehulling",
+              "food_drying",
+              "earth_oven_cooking",
+              "food_steaming_vessels"
+            ],
+            "requires_all": [
+              "cereal_dehulling",
+              "food_drying"
+            ],
+            "requires_any": [
+              [
+                "earth_oven_cooking",
+                "food_steaming_vessels"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Grain Parboiling",
+        "observation": "Heat and moisten a suitable cereal share, then dry and dehull it in a later paid handling step. Water, fuel, vessels and finite shared handlers limit throughput; damp grain remains unavailable until finished.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "cereal_dehulling",
+          "food_drying"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "earth_oven_cooking",
+            "food_steaming_vessels"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "indirect_solar_food_drying",
+      "name": "Indirect Solar Food Drying",
+      "field": "D01",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "food_drying",
+      "mechanism": "Dry suitable foods using solar-heated air in a protected chamber.",
+      "operating_requirement": "Collector, airflow path, trays and favorable weather.",
+      "consequence": "Reduces purchased fuel demand; weather and chamber capacity constrain output.",
+      "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+      "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "indirect_solar_food_drying",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Dry suitable foods using solar-heated air in a protected chamber.",
+        "operating_requirements": "Collector, airflow path, trays and favorable weather.",
+        "route_terms": {
+          "scholar_envoy": "Pay travel, provisions and instructor time for indirect solar food drying; contribute local ingredients and lose trial batches while the method is learned.",
+          "partnership": "Share ingredients, trials and observations for indirect solar food drying; negotiate access to results and accept delays from shared capacity.",
+          "purchased_research": "Commission a bounded indirect solar food drying investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+          "licensed_or_imported_service": "Buy a compatible indirect solar food drying service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+          "reverse_engineering": "Analyze an acquired product, tool or record relevant to indirect solar food drying; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+        }
+      },
+      "evidence_sources": [
+        "https://www.fao.org/4/V5030E/V5030E0c.htm"
+      ],
+      "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals.",
+      "implementation_reconciliation": {
+        "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+        "editorial_source": "food-processing-service-depth.json",
+        "previous_requires_all": [
+          "food_drying"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "indirect_solar_food_drying",
+        "id": "indirect_solar_food_drying",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Indirect Solar Food Drying",
+            "missing_all": [
+              "food_drying"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "food_drying"
+            ],
+            "requires_all": [
+              "food_drying"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Indirect Solar Food Drying",
+        "observation": "A paid collector, air path and screened trays dry suitable plant lots using ambient warmth. Weather limits throughput; retained wet lots need later handling and cannot be issued as finished food.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "food_drying"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
       }
     },
     {
@@ -48141,6 +48353,460 @@
           "crafting",
           "materials",
           "movement"
+        ],
+        "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
+        "subcategory": "Carrying capacity"
+      }
+    },
+    {
+      "field": "D09",
+      "id": "aggregate_road_foundations",
+      "name": "Aggregate Road Foundations",
+      "foundations": "graded_roads,structural_load_testing",
+      "mechanism": "Build a load-spreading granular foundation matched to ground conditions",
+      "operating_requirement": "Graded material, compaction work, drainage and load evidence",
+      "consequence": "Support heavier repeated traffic while weak subgrade remains a constraint",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "aggregate_road_foundations",
+        "instruction": "A competent source teaches Aggregate Road Foundations through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Build a load-spreading granular foundation matched to ground conditions",
+        "retained_operating_requirements": "Graded material, compaction work, drainage and load evidence",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
+      },
+      "recovery": "For Aggregate Road Foundations: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "graded_roads",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "logistics",
+        "dynamic": "logistics",
+        "effects": {},
+        "id": "aggregate_road_foundations",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local rail service trials",
+            "missing_all": [
+              "graded_roads",
+              "structural_load_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "graded_roads",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "graded_roads",
+              "structural_load_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "movement",
+              "crafting",
+              "construction"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Aggregate Road Foundations",
+        "observation": "Build a load-spreading granular foundation matched to ground conditions.",
+        "production_contract": "Manufactures paid Track Ballast. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
+        "production_items": [
+          "track_ballast"
+        ],
+        "rail_service_method": "aggregate_road_foundations",
+        "requires": [
+          "graded_roads",
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "movement",
+          "crafting",
+          "construction"
+        ],
+        "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
+        "subcategory": "Carrying capacity"
+      }
+    },
+    {
+      "field": "D09",
+      "id": "rail_gauge_standards",
+      "name": "Rail-Gauge Standards",
+      "foundations": "standard_measures,workshop_standards",
+      "mechanism": "Specify compatible track spacing and wheel relationships for a railway",
+      "operating_requirement": "Maintained standards, gauging tools and compatible rolling stock",
+      "consequence": "Permit vehicle exchange on matching routes while incompatible gauges need transfer or adaptation",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "rail_gauge_standards",
+        "instruction": "A competent source teaches Rail-Gauge Standards through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Specify compatible track spacing and wheel relationships for a railway",
+        "retained_operating_requirements": "Maintained standards, gauging tools and compatible rolling stock",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
+      },
+      "recovery": "For Rail-Gauge Standards: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "standard_measures",
+          "workshop_standards"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "logistics",
+        "dynamic": "logistics",
+        "effects": {},
+        "id": "rail_gauge_standards",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local rail service trials",
+            "missing_all": [
+              "standard_measures",
+              "workshop_standards"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "standard_measures",
+              "workshop_standards"
+            ],
+            "requires_all": [
+              "standard_measures",
+              "workshop_standards"
+            ],
+            "requires_any": [],
+            "signals": [
+              "movement",
+              "crafting",
+              "construction"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Rail-Gauge Standards",
+        "observation": "Specify compatible track spacing and wheel relationships for a railway.",
+        "production_contract": "Manufactures paid Rail Gauge Templates, 900 mm Rail Wheelsets, 1435 mm Rail Wheelsets. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
+        "production_items": [
+          "rail_gauge_templates",
+          "rail_wheelsets_900",
+          "rail_wheelsets_1435"
+        ],
+        "rail_service_method": "rail_gauge_standards",
+        "requires": [
+          "standard_measures",
+          "workshop_standards"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "movement",
+          "crafting",
+          "construction"
+        ],
+        "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
+        "subcategory": "Carrying capacity"
+      }
+    },
+    {
+      "field": "D09",
+      "id": "rail_track_foundations",
+      "name": "Rail-Track Foundations",
+      "foundations": "aggregate_road_foundations,rail_gauge_standards",
+      "mechanism": "Support and align rails over a maintained load-spreading foundation",
+      "operating_requirement": "Rails, sleepers, ballast or equivalent support, drainage and inspections",
+      "consequence": "Carry guided rolling loads while settlement and track defects require repair",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "rail_track_foundations",
+        "instruction": "A competent source teaches Rail-Track Foundations through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Support and align rails over a maintained load-spreading foundation",
+        "retained_operating_requirements": "Rails, sleepers, ballast or equivalent support, drainage and inspections",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
+      },
+      "recovery": "For Rail-Track Foundations: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "aggregate_road_foundations",
+          "rail_gauge_standards"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "logistics",
+        "dynamic": "logistics",
+        "effects": {},
+        "id": "rail_track_foundations",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local rail service trials",
+            "missing_all": [
+              "aggregate_road_foundations",
+              "rail_gauge_standards"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "aggregate_road_foundations",
+              "rail_gauge_standards"
+            ],
+            "requires_all": [
+              "aggregate_road_foundations",
+              "rail_gauge_standards"
+            ],
+            "requires_any": [],
+            "signals": [
+              "movement",
+              "crafting",
+              "construction"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Rail-Track Foundations",
+        "observation": "Support and align rails over a maintained load-spreading foundation.",
+        "production_contract": "Manufactures paid Timber Rail Panels. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
+        "production_items": [
+          "timber_rail_panels"
+        ],
+        "rail_service_method": "rail_track_foundations",
+        "requires": [
+          "aggregate_road_foundations",
+          "rail_gauge_standards"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "movement",
+          "crafting",
+          "construction"
+        ],
+        "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
+        "subcategory": "Carrying capacity"
+      }
+    },
+    {
+      "field": "D09",
+      "id": "wagonway_haulage",
+      "name": "Wagonway Haulage",
+      "foundations": "rail_track_foundations,cart_running_gear,draft_harness_fitting",
+      "mechanism": "Use guided wagons to reduce resistance on a prepared route",
+      "operating_requirement": "Compatible wagons, maintained track, traction and crews",
+      "consequence": "Move heavier loads on fixed routes without requiring a steam engine",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "wagonway_haulage",
+        "instruction": "A competent source teaches Wagonway Haulage through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Use guided wagons to reduce resistance on a prepared route",
+        "retained_operating_requirements": "Compatible wagons, maintained track, traction and crews",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
+      },
+      "recovery": "For Wagonway Haulage: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "rail_track_foundations",
+          "cart_running_gear",
+          "draft_harness_fitting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "logistics",
+        "dynamic": "logistics",
+        "effects": {},
+        "id": "wagonway_haulage",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local rail service trials",
+            "missing_all": [
+              "rail_track_foundations",
+              "cart_running_gear"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "rail_track_foundations",
+              "cart_running_gear"
+            ],
+            "requires_all": [
+              "rail_track_foundations",
+              "cart_running_gear"
+            ],
+            "requires_any": [],
+            "signals": [
+              "movement",
+              "crafting",
+              "construction"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Wagonway Haulage",
+        "observation": "Use guided wagons to reduce resistance on a prepared route.",
+        "production_contract": "Manufactures paid 900 mm Rail Wagons, 1435 mm Rail Wagons. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
+        "production_items": [
+          "rail_wagons_900",
+          "rail_wagons_1435"
+        ],
+        "rail_service_method": "wagonway_haulage",
+        "requires": [
+          "rail_track_foundations",
+          "cart_running_gear"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "movement",
+          "crafting",
+          "construction"
+        ],
+        "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
+        "subcategory": "Route quality"
+      }
+    },
+    {
+      "field": "D09",
+      "id": "rail_vehicle_braking",
+      "name": "Rail-Vehicle Braking",
+      "foundations": "friction_measurement,rail_track_foundations",
+      "mechanism": "Control and inspect braking effort across moving rail vehicles",
+      "operating_requirement": "Qualified brakes, crew procedures and load-dependent stopping evidence",
+      "consequence": "Manage train motion while distance and adhesion limits remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "rail_vehicle_braking",
+        "instruction": "A competent source teaches Rail-Vehicle Braking through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Control and inspect braking effort across moving rail vehicles",
+        "retained_operating_requirements": "Qualified brakes, crew procedures and load-dependent stopping evidence",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
+      },
+      "recovery": "For Rail-Vehicle Braking: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "friction_measurement",
+          "rail_track_foundations"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "logistics",
+        "dynamic": "logistics",
+        "effects": {},
+        "id": "rail_vehicle_braking",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local rail service trials",
+            "missing_all": [
+              "friction_measurement",
+              "rail_track_foundations"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "friction_measurement",
+              "rail_track_foundations"
+            ],
+            "requires_all": [
+              "friction_measurement",
+              "rail_track_foundations"
+            ],
+            "requires_any": [],
+            "signals": [
+              "movement",
+              "crafting",
+              "construction"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Rail-Vehicle Braking",
+        "observation": "Control and inspect braking effort across moving rail vehicles.",
+        "production_contract": "Manufactures paid Rail Brake Sets. Installed wagonways require a surveyed owned route, compatible wagons and brakes, actual construction work and continuing supplies. Capacity and crews remain committed through the return journey; worn or occupied routes cannot dispatch. The current haulage is human-worked; engines and animals are not supplied by this discovery.",
+        "production_items": [
+          "rail_brake_sets"
+        ],
+        "rail_service_method": "rail_vehicle_braking",
+        "requires": [
+          "friction_measurement",
+          "rail_track_foundations"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "movement",
+          "crafting",
+          "construction"
         ],
         "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
         "subcategory": "Carrying capacity"

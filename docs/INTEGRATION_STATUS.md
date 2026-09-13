@@ -1,3 +1,9 @@
+## September 12 — verified rail freight and conditioned food
+
+INTEGRATED runtime merge `fbaf803`, with reviewed rail artwork at canonical `e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3`. Frozen rail `1c161ef` and food conditioning `0635688` share conserved city stocks, finite workers and existing save owners. All **94 combined runtime checks and 71 canonical runtime/atlas checks pass**; conditioning also passed 20 grain and 14 food-preparation regressions, for 128 distinct runtime cases across the worktree runs. See `RAIL_CONDITIONING_INTEGRATION.md` for paid operations, save compatibility and limits.
+
+Graph and exact canonical snapshot: **693 discoveries /475 explicit routes /329 recipes /18 facilities**. All 693 stored definitions match, and all 15 ledger-tool checks pass. Seven promotions add no identities: **693 integrated + 2,446 drafts = 3,139 identities**, with **1,861 still to author and 4,307 to implement**. Art: **115 verified /693 live**, with 578 queued. Five rail illustrations were visually reviewed and imported with 768-pixel mipmaps. Optical-instrument coverage is in isolated authoring. No player launch, package rebuild or full-history pacing claim.
+
 ## September 12 — paid mechanical drives and geared workshop
 
 INTEGRATED runtime `997269f56922f45e8f400a8fe11fb4431da67e58`: seven existing mechanical identities manufacture real clutches, ratchets, chains, bearings, aligned drives, generated gears and hobs. A paid, commissioned Geared Indexing Workshop consumes workers, generated power and replacement components through existing production services. All **54 distinct worktree cases and 28 canonical cases pass**, including binary partial-job and owned-save continuation. See `GEARED_WORKSHOP_HANDOFF.md` for behavior, compatibility and limits.

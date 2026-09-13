@@ -1,6 +1,6 @@
 # Physical rail freight — worker delivery
 
-READY for integrator review; isolated worktree `/Users/seanpurtill/Documents/Codex/tt-rail-freight`, branch `codex/rail-freight`, base `368b7718c419ff73d788e29d3bf9e5ad212a37ce`. Integrator authorized rail-only additions in shipment dispatch, optional save state, civilian recipes and investment dispatch. No player build or discovery promotion is claimed.
+INTEGRATED in runtime merge `fbaf803`, canonical verified at `e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3`; original worker delivery: isolated worktree `/Users/seanpurtill/Documents/Codex/tt-rail-freight`, branch `codex/rail-freight`, base `368b7718c419ff73d788e29d3bf9e5ad212a37ce`. Integrator authorized rail-only additions in shipment dispatch, optional save state, civilian recipes and investment dispatch. Five identities are promoted after canonical verification; see `RAIL_CONDITIONING_INTEGRATION.md`. The packaged player has not been rebuilt.
 
 Existing intercity trade debits actual source goods, occupies carrier capacity and delivers later. It has no installed track, gauge-specific rolling stock or return-trip asset commitment. Rail must become an alternative physical mode for those same shipments, preserving all water/naval supply targets and laundry power demand.
 

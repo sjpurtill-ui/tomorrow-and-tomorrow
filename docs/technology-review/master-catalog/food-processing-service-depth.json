@@ -148,46 +148,6 @@
     "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
   },
   {
-    "id": "grain_parboiling",
-    "name": "Grain Parboiling",
-    "field": "D01",
-    "status": "authored_draft",
-    "requires_all": [
-      "cereal_dehulling",
-      "food_drying"
-    ],
-    "requires_any": [
-      [
-        "earth_oven_cooking",
-        "food_steaming_vessels"
-      ]
-    ],
-    "foundations": "cereal_dehulling, food_drying",
-    "mechanism": "Condition suitable grain with moisture and heat before drying and hulling.",
-    "operating_requirement": "Water, heating vessels, fuel and drying capacity.",
-    "consequence": "Changes milling performance; consumed water, energy and drying time limit throughput.",
-    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
-    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "grain_parboiling",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Condition suitable grain with moisture and heat before drying and hulling.",
-      "operating_requirements": "Water, heating vessels, fuel and drying capacity.",
-      "route_terms": {
-        "scholar_envoy": "Pay travel, provisions and instructor time for grain parboiling; contribute local ingredients and lose trial batches while the method is learned.",
-        "partnership": "Share ingredients, trials and observations for grain parboiling; negotiate access to results and accept delays from shared capacity.",
-        "purchased_research": "Commission a bounded grain parboiling investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
-        "licensed_or_imported_service": "Buy a compatible grain parboiling service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
-        "reverse_engineering": "Analyze an acquired product, tool or record relevant to grain parboiling; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
-      }
-    },
-    "evidence_sources": [
-      "https://www.fao.org/4/v5380e/v5380e06.htm"
-    ],
-    "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
-  },
-  {
     "id": "fruit_pulp_screening",
     "name": "Fruit Pulp Screening",
     "field": "D01",
@@ -435,40 +395,6 @@
       "https://www.fao.org/fileadmin/user_upload/ags/publications/econf-proc-english.pdf"
     ],
     "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
-  },
-  {
-    "id": "indirect_solar_food_drying",
-    "name": "Indirect Solar Food Drying",
-    "field": "D01",
-    "status": "authored_draft",
-    "requires_all": [
-      "food_drying"
-    ],
-    "requires_any": [],
-    "foundations": "food_drying",
-    "mechanism": "Dry suitable foods using solar-heated air in a protected chamber.",
-    "operating_requirement": "Collector, airflow path, trays and favorable weather.",
-    "consequence": "Reduces purchased fuel demand; weather and chamber capacity constrain output.",
-    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
-    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "indirect_solar_food_drying",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Dry suitable foods using solar-heated air in a protected chamber.",
-      "operating_requirements": "Collector, airflow path, trays and favorable weather.",
-      "route_terms": {
-        "scholar_envoy": "Pay travel, provisions and instructor time for indirect solar food drying; contribute local ingredients and lose trial batches while the method is learned.",
-        "partnership": "Share ingredients, trials and observations for indirect solar food drying; negotiate access to results and accept delays from shared capacity.",
-        "purchased_research": "Commission a bounded indirect solar food drying investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
-        "licensed_or_imported_service": "Buy a compatible indirect solar food drying service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
-        "reverse_engineering": "Analyze an acquired product, tool or record relevant to indirect solar food drying; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
-      }
-    },
-    "evidence_sources": [
-      "https://www.fao.org/4/V5030E/V5030E0c.htm"
-    ],
-    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
   },
   {
     "id": "edible_oil_winterization",

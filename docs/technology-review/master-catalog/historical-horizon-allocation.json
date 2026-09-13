@@ -10279,8 +10279,8 @@
       "id": "grain_parboiling",
       "name": "Grain Parboiling",
       "horizon": "H02",
-      "source_file": "food-processing-service-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "Repeatable community food processing with modest tools and retained inputs.",
       "scope_digest": "7626f84f858a02ca210fa9e239df006b34a09d288be398baa0c4dc8873ef4ded"
@@ -10359,8 +10359,8 @@
       "id": "indirect_solar_food_drying",
       "name": "Indirect Solar Food Drying",
       "horizon": "H03",
-      "source_file": "food-processing-service-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "Specialized processing and controlled storage can develop before industrial instrumentation.",
       "scope_digest": "705dc1ed31098e5d2818ac0375471943ddc00f3ca3ffc97bbdbfea6e5816eed8"

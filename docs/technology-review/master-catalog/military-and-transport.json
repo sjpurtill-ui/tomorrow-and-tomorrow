@@ -2195,33 +2195,6 @@
   },
   {
     "field": "D09",
-    "id": "aggregate_road_foundations",
-    "name": "Aggregate Road Foundations",
-    "foundations": "graded_roads,structural_load_testing",
-    "mechanism": "Build a load-spreading granular foundation matched to ground conditions",
-    "operating_requirement": "Graded material, compaction work, drainage and load evidence",
-    "consequence": "Support heavier repeated traffic while weak subgrade remains a constraint",
-    "status": "authored_draft",
-    "requires_all": [
-      "graded_roads",
-      "structural_load_testing"
-    ],
-    "requires_any": [],
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "aggregate_road_foundations",
-      "instruction": "A competent source teaches Aggregate Road Foundations through delivered records, visiting specialists or a negotiated partnership.",
-      "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
-      "local_demonstration": "Build a load-spreading granular foundation matched to ground conditions",
-      "retained_operating_requirements": "Graded material, compaction work, drainage and load evidence",
-      "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
-      "grants_instant_mastery": false,
-      "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
-    },
-    "recovery": "For Aggregate Road Foundations: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
-  },
-  {
-    "field": "D09",
     "id": "bituminous_road_surfaces",
     "name": "Bituminous Road Surfaces",
     "foundations": "aggregate_road_foundations,bitumen_sealing",
@@ -2552,60 +2525,6 @@
   },
   {
     "field": "D09",
-    "id": "rail_gauge_standards",
-    "name": "Rail-Gauge Standards",
-    "foundations": "standard_measures,workshop_standards",
-    "mechanism": "Specify compatible track spacing and wheel relationships for a railway",
-    "operating_requirement": "Maintained standards, gauging tools and compatible rolling stock",
-    "consequence": "Permit vehicle exchange on matching routes while incompatible gauges need transfer or adaptation",
-    "status": "authored_draft",
-    "requires_all": [
-      "standard_measures",
-      "workshop_standards"
-    ],
-    "requires_any": [],
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "rail_gauge_standards",
-      "instruction": "A competent source teaches Rail-Gauge Standards through delivered records, visiting specialists or a negotiated partnership.",
-      "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
-      "local_demonstration": "Specify compatible track spacing and wheel relationships for a railway",
-      "retained_operating_requirements": "Maintained standards, gauging tools and compatible rolling stock",
-      "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
-      "grants_instant_mastery": false,
-      "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
-    },
-    "recovery": "For Rail-Gauge Standards: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
-  },
-  {
-    "field": "D09",
-    "id": "rail_track_foundations",
-    "name": "Rail-Track Foundations",
-    "foundations": "aggregate_road_foundations,rail_gauge_standards",
-    "mechanism": "Support and align rails over a maintained load-spreading foundation",
-    "operating_requirement": "Rails, sleepers, ballast or equivalent support, drainage and inspections",
-    "consequence": "Carry guided rolling loads while settlement and track defects require repair",
-    "status": "authored_draft",
-    "requires_all": [
-      "aggregate_road_foundations",
-      "rail_gauge_standards"
-    ],
-    "requires_any": [],
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "rail_track_foundations",
-      "instruction": "A competent source teaches Rail-Track Foundations through delivered records, visiting specialists or a negotiated partnership.",
-      "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
-      "local_demonstration": "Support and align rails over a maintained load-spreading foundation",
-      "retained_operating_requirements": "Rails, sleepers, ballast or equivalent support, drainage and inspections",
-      "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
-      "grants_instant_mastery": false,
-      "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
-    },
-    "recovery": "For Rail-Track Foundations: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
-  },
-  {
-    "field": "D09",
     "id": "railway_turnouts",
     "name": "Railway Turnouts",
     "foundations": "rail_track_foundations,precision_machinery",
@@ -2630,34 +2549,6 @@
       "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
     },
     "recovery": "For Railway Turnouts: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
-  },
-  {
-    "field": "D09",
-    "id": "wagonway_haulage",
-    "name": "Wagonway Haulage",
-    "foundations": "rail_track_foundations,cart_running_gear,draft_harness_fitting",
-    "mechanism": "Use guided wagons to reduce resistance on a prepared route",
-    "operating_requirement": "Compatible wagons, maintained track, traction and crews",
-    "consequence": "Move heavier loads on fixed routes without requiring a steam engine",
-    "status": "authored_draft",
-    "requires_all": [
-      "rail_track_foundations",
-      "cart_running_gear",
-      "draft_harness_fitting"
-    ],
-    "requires_any": [],
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "wagonway_haulage",
-      "instruction": "A competent source teaches Wagonway Haulage through delivered records, visiting specialists or a negotiated partnership.",
-      "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
-      "local_demonstration": "Use guided wagons to reduce resistance on a prepared route",
-      "retained_operating_requirements": "Compatible wagons, maintained track, traction and crews",
-      "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
-      "grants_instant_mastery": false,
-      "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
-    },
-    "recovery": "For Wagonway Haulage: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
   },
   {
     "field": "D09",
@@ -2686,33 +2577,6 @@
       "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
     },
     "recovery": "For Steam Rail Locomotion: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
-  },
-  {
-    "field": "D09",
-    "id": "rail_vehicle_braking",
-    "name": "Rail-Vehicle Braking",
-    "foundations": "friction_measurement,rail_track_foundations",
-    "mechanism": "Control and inspect braking effort across moving rail vehicles",
-    "operating_requirement": "Qualified brakes, crew procedures and load-dependent stopping evidence",
-    "consequence": "Manage train motion while distance and adhesion limits remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "friction_measurement",
-      "rail_track_foundations"
-    ],
-    "requires_any": [],
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "rail_vehicle_braking",
-      "instruction": "A competent source teaches Rail-Vehicle Braking through delivered records, visiting specialists or a negotiated partnership.",
-      "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
-      "local_demonstration": "Control and inspect braking effort across moving rail vehicles",
-      "retained_operating_requirements": "Qualified brakes, crew procedures and load-dependent stopping evidence",
-      "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
-      "grants_instant_mastery": false,
-      "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
-    },
-    "recovery": "For Rail-Vehicle Braking: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
   },
   {
     "field": "D09",

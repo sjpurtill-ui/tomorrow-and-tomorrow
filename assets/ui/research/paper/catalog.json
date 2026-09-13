@@ -1666,6 +1666,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/grain_parboiling.png",
+      "description": "Heat and moisten a suitable cereal share, then dry and dehull it in a later paid handling step. Water, fuel, vessels and finite shared handlers limit throughput; damp grain remains unavailable until finished.",
+      "domain": "nutrition",
+      "id": "grain_parboiling",
+      "name": "Grain Parboiling",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/indirect_solar_food_drying.png",
+      "description": "A paid collector, air path and screened trays dry suitable plant lots using ambient warmth. Weather limits throughput; retained wet lots need later handling and cannot be issued as finished food.",
+      "domain": "nutrition",
+      "id": "indirect_solar_food_drying",
+      "name": "Indirect Solar Food Drying",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/food_pounding_mortars.png",
       "description": "Break or separate suitable food material through controlled impact in a fitted receptacle. Compatible pounding tools, actual food and labor.",
       "domain": "nutrition",
@@ -4946,6 +4962,46 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/aggregate_road_foundations.png",
+      "description": "Build a load-spreading granular foundation matched to ground conditions.",
+      "domain": "logistics",
+      "id": "aggregate_road_foundations",
+      "name": "Aggregate Road Foundations",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rail_gauge_standards.png",
+      "description": "Specify compatible track spacing and wheel relationships for a railway.",
+      "domain": "logistics",
+      "id": "rail_gauge_standards",
+      "name": "Rail-Gauge Standards",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rail_track_foundations.png",
+      "description": "Support and align rails over a maintained load-spreading foundation.",
+      "domain": "logistics",
+      "id": "rail_track_foundations",
+      "name": "Rail-Track Foundations",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wagonway_haulage.png",
+      "description": "Use guided wagons to reduce resistance on a prepared route.",
+      "domain": "logistics",
+      "id": "wagonway_haulage",
+      "name": "Wagonway Haulage",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rail_vehicle_braking.png",
+      "description": "Control and inspect braking effort across moving rail vehicles.",
+      "domain": "logistics",
+      "id": "rail_vehicle_braking",
+      "name": "Rail-Vehicle Braking",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -5491,11 +5547,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 686,
+  "live_count": 693,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 576,
+  "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 110
+  "verified_count": 115
 }

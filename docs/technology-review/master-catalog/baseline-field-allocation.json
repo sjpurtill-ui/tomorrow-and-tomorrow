@@ -4925,6 +4925,55 @@
       "source_domain": "production",
       "name": "Gear Hobbing",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "grain_parboiling",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Grain Parboiling",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "indirect_solar_food_drying",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Indirect Solar Food Drying",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "aggregate_road_foundations",
+      "field": "D09",
+      "source_domain": "logistics",
+      "name": "Aggregate Road Foundations",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rail_gauge_standards",
+      "field": "D09",
+      "source_domain": "logistics",
+      "name": "Rail-Gauge Standards",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rail_track_foundations",
+      "field": "D09",
+      "source_domain": "logistics",
+      "name": "Rail-Track Foundations",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "wagonway_haulage",
+      "field": "D09",
+      "source_domain": "logistics",
+      "name": "Wagonway Haulage",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rail_vehicle_braking",
+      "field": "D09",
+      "source_domain": "logistics",
+      "name": "Rail-Vehicle Braking",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
