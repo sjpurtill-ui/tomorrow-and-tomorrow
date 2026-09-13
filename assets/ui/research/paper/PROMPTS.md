@@ -20,7 +20,7 @@ Use case: historical-scene. Create one square 1024x1024 technology-tree illustra
 
 ## Remaining queue
 
-Each queued identity needs its own scene based on the catalog observation. Use the approved apprentice image as a style reference, with the same matte gouache, warm ivory paper, restrained pigments, broad negative space and simplified silhouettes. Depict the actual technology's tools, historical stage and practice. No text or UI. Generate one image per identity with the built-in tool, inspect it, save it in this directory, then add its explicit reviewed binding. Queued descriptions are not completed illustrations.
+Each queued identity needs its own scene based on the catalog observation. Specify matte gouache, warm ivory paper, restrained pigments, broad negative space and simplified silhouettes in prose. Choose visual references from the depicted historical setting; do not reuse the ancient apprentice scene for industrial or modern subjects. Depict the actual technology's tools, historical stage and practice. No text or UI. Generate one image per identity with the built-in tool, inspect it, save it in this directory, then add its explicit reviewed binding. Queued descriptions are not completed illustrations.
 
 ## Chlor-Alkali Cells
 
@@ -62,3 +62,9 @@ Built-in image generation, using the approved apprentice image as a style refere
 - [Coke Firing](COKE_FIRING_PROMPT.md) — brick ovens and coke handling.
 
 - [Tinplate Coating and Food Retorts](CANNING_ART_PROMPTS.md) — material coating and container processing.
+
+## Historical setting review
+
+Advance architecture, clothing, infrastructure and working environment with the actual apparatus. Specify a representative period and workshop type before generation. Industrial machine tools belong in coherent machine shops, mills or laboratories; modern electrical processes need appropriate control equipment and facilities. Ancient craft scenes may retain early materials. A shared paper style does not imply a shared era. Inspect buildings and clothing as well as the central mechanism before accepting each image. Reject ancient robes or thatched-village scenery inadvertently inherited by industrial scenes.
+
+Corrected assets and exact prompts: [Industrial era corrections](INDUSTRIAL_ERA_CORRECTIONS.md).

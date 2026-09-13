@@ -83,3 +83,6 @@ Prompt: Use case: historical-scene. Asset type: square discovery-card illustrati
 Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-1c693014-aa47-4e01-adee-bdab60459d9c.png`
 
 Prompt: Use case: historical-scene. Asset type: square discovery-card illustration for Tomorrow and Tomorrow. Input is a STYLE REFERENCE ONLY; make a new distinct scene. Sparse gouache on warm ivory fibrous paper, matte dry brush texture, restrained ochre/umber/olive palette, believable small human figures and equipment concentrated in lower half, broad quiet paper above, soft unfinished vignette edges. No frame, lettering, readable text, watermark, glossy photorealism or floating diagrams. Subject: A workshop technician positions overlapping thin copper strips beneath a compact vibrating horn and anvil fixture. A completed small tab joint and controlled-pressure clamp are visible, no flame or welding arc. Twentieth-century indoor precision machine shop, technician in plain work shirt and trousers; reference supplies painting style only.
+
+
+Historical-setting correction: selected original assets have been superseded; see [Industrial era corrections](INDUSTRIAL_ERA_CORRECTIONS.md) for final prompts and native outputs.
