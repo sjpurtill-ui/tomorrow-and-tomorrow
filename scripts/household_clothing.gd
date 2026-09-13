@@ -3,12 +3,13 @@ extends RefCounted
 ## are aggregate game balances, not fabric-performance measurements.
 const K=preload("res://scripts/clothing_knowledge.gd")
 const R=preload("res://scripts/technology_requirements.gd")
+const Barriers=preload("res://scripts/textile_barriers.gd")
 const LIMIT:=48
 const QUILT_REPAIR_INPUTS:={"Plant-Fiber Quilt Batts":.08,"Woven Cloth":.08,"Spun Yarn":.03}
 const HUNTING_BYPRODUCTS:={"Pancreatic Tissue": "Selected gland tissue from actual newly hunted rations, bounded and rapidly decaying","Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay"}
 const BONE_RESOURCE:="Recovered Bone"
-const CREATION_MODES:=["knit","twill","pile","sew","fit","grade","leather","tied","quilt"]
-const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42,"leather":.32,"tied":.25,"quilt":.50}
+const CREATION_MODES:=["knit","twill","pile","sew","fit","grade","leather","tied","quilt","rain_shell"]
+const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42,"leather":.32,"tied":.25,"quilt":.50,"rain_shell":.18}
 static func empty_state()->Dictionary:return {"tools":{},"lots":[],"bone_stock":0.0,"last_day":-1,"report":{}}
 static func data()->Dictionary:return WorldSimulation.state.household_clothing
 static func available(item:String)->float:
@@ -38,6 +39,7 @@ static func leather_target(population:float)->float:
 	if int(data().tools.get(id,0))==0 and amount>0:amount+=.2
 	return minf(6,ceilf(amount))
 static func compatible_service(mode:String,lot:Dictionary)->bool:
+	if lot.kind=="rain_shell" and mode in ["layer","wick","repair","test"]:return false
 	return (lot.kind!="leather" or mode not in ["wash","machine_wash","wick","repair","test"]) and not (lot.kind=="quilt" and mode=="repair")
 static func figured_count()->float:
 	var amount:=0.0
@@ -53,7 +55,7 @@ static func figured_target(population:float)->float:
 	return 0.0
 static func quote(id:String)->Dictionary:
 	if not K.METHODS.has(id):return {"error":"Unknown clothing equipment."}
-	if float(K.METHODS[id].get("power",0))>0 and not WorldSimulation.state.resource_settlement_id.is_empty():return {"error":"This city has no connected electricity service for laundry."}
+	if float(K.METHODS[id].get("power",0))>0 and not WorldSimulation.state.resource_settlement_id.is_empty():return {"error":"This city has no connected electricity service for this equipment."}
 	if WorldSimulation.state.convoy_traveling or not WorldSimulation.state.settlement_site_committed:return {"error":"Settle before installing clothing equipment."}
 	if id not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not R.evaluate(K.METHODS[id],WorldSimulation.state.known_discoveries).ready:return {"error":"Adopt the method and its foundations first."}
 	if int(data().tools.get(id,0))>=100:return {"error":"Equipment limit reached."}
@@ -71,16 +73,19 @@ static func count()->float:
 	var n:=0.0
 	for lot:Dictionary in data().lots:n+=float(lot.amount)
 	return n
-static func add(kind:String,amount:float,condition:float=1,soil:float=0,layered:bool=false,wick:bool=false,ready:int=0,fabric:String="plain")->bool:
+static func add(kind:String,amount:float,condition:float=1,soil:float=0,layered:bool=false,wick:bool=false,ready:int=0,fabric:String="plain",barrier:Dictionary={})->bool:
 	if amount<=0 or fabric not in ["plain","figured"]:return false
+	if kind=="rain_shell" and barrier.is_empty():barrier=Barriers.fresh()
 	for lot:Dictionary in data().lots:
-		if lot.kind==kind and lot.layered==layered and lot.wick==wick and int(lot.ready)==ready and String(lot.get("fabric","plain"))==fabric:
+		if lot.kind==kind and lot.layered==layered and lot.wick==wick and int(lot.ready)==ready and String(lot.get("fabric","plain"))==fabric and (kind!="rain_shell" or lot.get("barrier",Barriers.fresh())==barrier):
 			var total:=float(lot.amount)+amount
 			lot.condition=(float(lot.condition)*float(lot.amount)+condition*amount)/total
 			lot.soil=(float(lot.soil)*float(lot.amount)+soil*amount)/total
 			lot.amount=total;return true
 	if data().lots.size()>=LIMIT:return false
-	data().lots.append({"kind":kind,"amount":amount,"condition":condition,"soil":soil,"layered":layered,"wick":wick,"ready":ready,"fabric":fabric});return true
+	var added:={"kind":kind,"amount":amount,"condition":condition,"soil":soil,"layered":layered,"wick":wick,"ready":ready,"fabric":fabric}
+	if kind=="rain_shell":added.barrier=barrier.duplicate(true)
+	data().lots.append(added);return true
 static func coverage(population:float,day:int)->Dictionary:
 	var cold:=0.0;var storm:=0.0;var worn:=0.0
 	# Bounded stock can exceed residents during replacement. Never count more
@@ -91,14 +96,16 @@ static func coverage(population:float,day:int)->Dictionary:
 		var service:=issued*float(lot.condition)*(1.0-.35*float(lot.soil))
 		var insulation:=float(INSULATION[lot.kind])
 		cold+=service*minf(.8,insulation+(.25 if lot.layered else 0))
-		storm+=service*(.30 if lot.wick else .10)
-	return {"cold":clampf(cold/maxf(1,population),0,.8),"storm":clampf(storm/maxf(1,population),0,.3),"issued":worn}
+		storm+=service*(Barriers.storm_factor(lot) if lot.kind=="rain_shell" else .30 if lot.wick else .10)
+	return {"cold":clampf(cold/maxf(1,population),0,.8),"storm":clampf(storm/maxf(1,population),0,.5),"issued":worn}
 static func power_demand()->float:
 	var state=WorldSimulation.state
+	var seam_demand:=Barriers.power_demand(load("res://scripts/household_clothing.gd"))
 	var id:="mechanical_washing_machines"
-	if not state.resource_settlement_id.is_empty() or state.convoy_traveling or not state.settlement_site_committed or id not in state.known_discoveries:return 0.0
+	if not state.resource_settlement_id.is_empty() or state.convoy_traveling or not state.settlement_site_committed or id not in state.known_discoveries:return seam_demand
 	var rate:=float(K.METHODS[id].rate)*clampf(WorldSimulation.discovery.adoption(id),0,1)
-	var amount:=minf(float(data().tools.get(id,0))*rate,maxf(0,state.effective_workers("Logistics"))*.2*rate)
+	var laundry_workers:=maxf(0,state.effective_workers("Logistics")*.2-seam_demand/.2)
+	var amount:=minf(float(data().tools.get(id,0))*rate,laundry_workers*rate)
 	var dirty:=0.0
 	var remaining_wear:=maxf(0,WorldSimulation.settlements.primary_population_exact())
 	for lot:Dictionary in data().lots:
@@ -109,14 +116,14 @@ static func power_demand()->float:
 	amount=minf(amount,dirty)
 	var inputs:=materials(id)
 	for item:String in inputs:amount=minf(amount,maxf(0,available(item))/float(inputs[item]))
-	return amount*float(K.METHODS[id].power)
+	return seam_demand+amount*float(K.METHODS[id].power)
 
 static func test_cycles(workers:float,population:float,day:int,report:Dictionary)->void:
 	var id:="textile_durability_testing"
 	if not data().has("trials"):data().trials={}
 	var before_work:=float(report.workers)
 	for kind:String in CREATION_MODES:
-		if kind=="leather":continue
+		if kind in ["leather","rain_shell"]:continue
 		var trial:Dictionary=data().trials.get(kind,{})
 		if not trial.is_empty() and (int(trial.last_day)>=day or (int(trial.cycles)>=5 and day-int(trial.last_day)<30)):continue
 		if quota(id,maxf(0,workers-(float(report.workers)-before_work)),report)<1.0-.000000001:break
@@ -159,6 +166,8 @@ static func charge(id:String,amount:float,report:Dictionary,override_inputs:Dict
 	report.workers+=amount/maxf(.000001,float(K.METHODS[id].rate)*WorldSimulation.discovery.adoption(id))
 static func operate(id:String,workers:float,population:float,day:int,report:Dictionary)->void:
 	var mode:=String(K.METHODS[id].mode)
+	if mode in ["rain_shell","seal_rain_seams"]:
+		Barriers.operate(load("res://scripts/household_clothing.gd"),id,workers,population,day,report);return
 	if mode=="test":test_cycles(workers,population,day,report);return
 	var washing:=mode in ["wash","machine_wash"]
 	if mode in CREATION_MODES:
@@ -265,14 +274,16 @@ static func valid(value:Variant)->bool:
 	for lot:Variant in value.lots:
 		if not lot is Dictionary or not lot.has_all(["kind","amount","condition","soil","layered","wick","ready"]):return false
 		if lot.kind not in CREATION_MODES or not lot.layered is bool or not lot.wick is bool:return false
+		if lot.kind=="rain_shell" and not Barriers.valid(lot.get("barrier",Barriers.fresh())):return false
 		if not lot.get("fabric","plain") is String or lot.get("fabric","plain") not in ["plain","figured"]:return false
 		for key:String in ["amount","condition","soil","ready"]:
 			if not number(lot[key]) or lot[key]<0 or lot[key]>1e12:return false
 		if lot.amount<=0 or lot.condition>1 or lot.soil>1 or lot.ready!=floorf(float(lot.ready)):return false
+	if not Barriers.valid_profile(value.get("sealing_profile",{"heat":1.0,"pressure":1.0})):return false
 	var trials:Variant=value.get("trials",{})
 	if not trials is Dictionary or trials.size()>CREATION_MODES.size():return false
 	for kind:Variant in trials:
-		if kind not in CREATION_MODES or kind=="leather" or not trials[kind] is Dictionary:return false
+		if kind not in CREATION_MODES or kind in ["leather","rain_shell"] or not trials[kind] is Dictionary:return false
 		var trial:Dictionary=trials[kind]
 		if not trial.has_all(["started","last_day","cycles","before","condition","sample"]):return false
 		for key:String in ["started","last_day","cycles","before","condition","sample"]:

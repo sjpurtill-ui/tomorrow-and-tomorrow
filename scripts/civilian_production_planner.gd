@@ -230,10 +230,15 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 				for trial:Dictionary in clothing.data().get("trials",{}).values():
 					if int(trial.cycles)<5:amount+=1.0
 			amount=minf(10,amount)
-		if amount<=.000001 and quilt_repairs<=.000001:continue
+		var barrier_method:=String(spec.mode) in ["rain_shell","seal_rain_seams"]
+		if not barrier_method and amount<=.000001 and quilt_repairs<=.000001:continue
 		var needed:Dictionary={}
 		var inputs:=clothing.materials(id)
-		for item:String in inputs:needed[item]=amount*float(inputs[item])
+		if barrier_method:
+			needed=preload("res://scripts/textile_barriers.gd").demand(clothing,id,population,int(state.elapsed_days))
+			if needed.is_empty():continue
+		else:
+			for item:String in inputs:needed[item]=amount*float(inputs[item])
 		if quilt_repairs>0:
 			for item:String in clothing.QUILT_REPAIR_INPUTS:
 				var cost:float=clothing.QUILT_REPAIR_INPUTS[item]

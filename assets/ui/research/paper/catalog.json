@@ -1842,6 +1842,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/textile_waterproofing.png",
+      "description": "Coat a compatible woven backing, assemble a rain shell and pay for three dated wet-flex checks before relying on its limited water barrier.",
+      "domain": "production",
+      "id": "textile_waterproofing",
+      "name": "Textile Waterproofing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/garment_seam_sealing.png",
+      "description": "Bond compatible tape across the stitched seams of a qualified coated shell with controlled heat and pressure, then complete three paid dated leak checks.",
+      "domain": "production",
+      "id": "garment_seam_sealing",
+      "name": "Garment Seam Sealing",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/zipper_chain_closures.png",
       "description": "Fit matched element rows, a compatible slider and end stops to reinforced tapes; cycle-check the closure and sew the checked front into a fitted garment.",
       "domain": "production",
@@ -6571,11 +6587,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 821,
+  "live_count": 823,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 260
+  "verified_count": 262
 }
