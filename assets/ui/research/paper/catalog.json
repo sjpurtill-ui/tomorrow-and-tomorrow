@@ -1786,6 +1786,54 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/knitted_loop_fabrics.png",
+      "description": "Build a fabric from intermeshed yarn loops. Suitable yarn, tools and skilled work",
+      "domain": "production",
+      "id": "knitted_loop_fabrics",
+      "name": "Knitted-Loop Fabrics",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/twill_weave_structures.png",
+      "description": "Arrange interlacings in repeated offset sequences. Suitable loom, yarn and practiced weaver",
+      "domain": "production",
+      "id": "twill_weave_structures",
+      "name": "Twill-Weave Structures",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pile_fabric_weaving.png",
+      "description": "Form raised loops or cut surfaces over a supporting woven ground. Compatible yarn, loom arrangement and finishing",
+      "domain": "production",
+      "id": "pile_fabric_weaving",
+      "name": "Pile-Fabric Weaving",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/layered_clothing_design.png",
+      "description": "Arrange worn materials around observed thermal, moisture and movement needs. Suitable clothing, fit and actual wearing conditions",
+      "domain": "production",
+      "id": "layered_clothing_design",
+      "name": "Layered-Clothing Design",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_laundering_practice.png",
+      "description": "Clean selected textiles while respecting material and contamination conditions. Usable water, labor, suitable agents where needed and drying access",
+      "domain": "production",
+      "id": "textile_laundering_practice",
+      "name": "Textile-Laundering Practice",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_moisture_transport.png",
+      "description": "Characterize and shape movement of moisture through a textile assembly. Suitable fibers, structures and representative tests",
+      "domain": "production",
+      "id": "textile_moisture_transport",
+      "name": "Textile Moisture Transport",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/root_cellars.png",
       "description": "Below-ground stores buffer temperature swings while drainage keeps stored roots away from standing water.",
       "domain": "nutrition",
@@ -5211,9 +5259,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 651,
+  "live_count": 657,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 545,
+  "queued_count": 551,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

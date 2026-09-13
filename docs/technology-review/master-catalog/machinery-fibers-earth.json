@@ -1981,37 +1981,6 @@
   },
   {
     "field": "D07",
-    "id": "layered_clothing_design",
-    "name": "Layered-Clothing Design",
-    "foundations": "fiber_grading,seasonal_patterns",
-    "mechanism": "Arrange worn materials around observed thermal, moisture and movement needs",
-    "operating_requirement": "Suitable clothing, fit and actual wearing conditions",
-    "consequence": "Improve supported comfort or protection without universal insulation benefits",
-    "status": "authored_draft",
-    "requires_all": [
-      "fiber_grading",
-      "seasonal_patterns"
-    ],
-    "requires_any": [],
-    "recovery": "For Layered-Clothing Design: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "layered_clothing_design",
-      "local_demonstration": "Arrange worn materials around observed thermal, moisture and movement needs",
-      "operating_requirements": "Suitable clothing, fit and actual wearing conditions",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
     "id": "felt_fabric_making",
     "name": "Felt-Fabric Making",
     "foundations": "fiber_grading",
@@ -2043,41 +2012,6 @@
   },
   {
     "field": "D07",
-    "id": "knitted_loop_fabrics",
-    "name": "Knitted-Loop Fabrics",
-    "foundations": "drop_spindles",
-    "mechanism": "Build a fabric from intermeshed yarn loops",
-    "operating_requirement": "Suitable yarn, tools and skilled work",
-    "consequence": "Provide stretchable structures with snagging and shape-retention limits",
-    "status": "authored_draft",
-    "requires_all": [
-      "drop_spindles"
-    ],
-    "requires_any": [
-      [
-        "bone_needle_sewing",
-        "cordage"
-      ]
-    ],
-    "recovery": "For Knitted-Loop Fabrics: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "knitted_loop_fabrics",
-      "local_demonstration": "Build a fabric from intermeshed yarn loops",
-      "operating_requirements": "Suitable yarn, tools and skilled work",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
     "id": "net_fabric_construction",
     "name": "Net-Fabric Construction",
     "foundations": "cordage,standard_measures",
@@ -2096,67 +2030,6 @@
       "destination": "net_fabric_construction",
       "local_demonstration": "Join strands into a maintained open mesh with declared spacing",
       "operating_requirements": "Suitable cord, knots or equivalent joints and skilled labor",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "twill_weave_structures",
-    "name": "Twill-Weave Structures",
-    "foundations": "plain_weaving",
-    "mechanism": "Arrange interlacings in repeated offset sequences",
-    "operating_requirement": "Suitable loom, yarn and practiced weaver",
-    "consequence": "Change fabric drape, surface and wear behavior through structure",
-    "status": "authored_draft",
-    "requires_all": [
-      "plain_weaving"
-    ],
-    "requires_any": [],
-    "recovery": "For Twill-Weave Structures: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "twill_weave_structures",
-      "local_demonstration": "Arrange interlacings in repeated offset sequences",
-      "operating_requirements": "Suitable loom, yarn and practiced weaver",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "pile_fabric_weaving",
-    "name": "Pile-Fabric Weaving",
-    "foundations": "plain_weaving",
-    "mechanism": "Form raised loops or cut surfaces over a supporting woven ground",
-    "operating_requirement": "Compatible yarn, loom arrangement and finishing",
-    "consequence": "Provide textured or insulating surfaces with added material and wear demands",
-    "status": "authored_draft",
-    "requires_all": [
-      "plain_weaving"
-    ],
-    "requires_any": [],
-    "branching_note": "Raised fabric surfaces do not require garment pattern cutting.",
-    "recovery": "For Pile-Fabric Weaving: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "pile_fabric_weaving",
-      "local_demonstration": "Form raised loops or cut surfaces over a supporting woven ground",
-      "operating_requirements": "Compatible yarn, loom arrangement and finishing",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",
@@ -2384,37 +2257,6 @@
       "destination": "soap_manufacture",
       "local_demonstration": "Produce a qualified cleaning material from compatible feedstocks",
       "operating_requirements": "Suitable fats or oils, processing equipment and quality control",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "textile_laundering_practice",
-    "name": "Textile-Laundering Practice",
-    "foundations": "clean_water,fiber_grading",
-    "mechanism": "Clean selected textiles while respecting material and contamination conditions",
-    "operating_requirement": "Usable water, labor, suitable agents where needed and drying access",
-    "consequence": "Restore some usability while wear, water demand and incomplete cleaning remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "clean_water",
-      "fiber_grading"
-    ],
-    "requires_any": [],
-    "recovery": "For Textile-Laundering Practice: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "textile_laundering_practice",
-      "local_demonstration": "Clean selected textiles while respecting material and contamination conditions",
-      "operating_requirements": "Usable water, labor, suitable agents where needed and drying access",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",
@@ -2788,37 +2630,6 @@
       "destination": "textile_waterproofing",
       "local_demonstration": "Apply or integrate a qualified water-resistant barrier with a textile",
       "operating_requirements": "Compatible materials, preparation and durability tests",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "textile_moisture_transport",
-    "name": "Textile Moisture Transport",
-    "foundations": "fiber_grading,experimental_controls",
-    "mechanism": "Characterize and shape movement of moisture through a textile assembly",
-    "operating_requirement": "Suitable fibers, structures and representative tests",
-    "consequence": "Manage some wetness while conditions and use determine comfort",
-    "status": "authored_draft",
-    "requires_all": [
-      "fiber_grading",
-      "experimental_controls"
-    ],
-    "requires_any": [],
-    "recovery": "For Textile Moisture Transport: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "textile_moisture_transport",
-      "local_demonstration": "Characterize and shape movement of moisture through a textile assembly",
-      "operating_requirements": "Suitable fibers, structures and representative tests",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",

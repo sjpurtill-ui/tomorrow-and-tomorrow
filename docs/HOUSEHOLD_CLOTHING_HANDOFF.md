@@ -1,6 +1,6 @@
 # Household clothing service
 
-Worker checkout: `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`; branch `codex/household-clothing-service`; base `2bcd799a103328887836c503b576caedaf4651c6`. READY for canonical integration after focused validation.
+Worker checkout: `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`; branch `codex/household-clothing-service`; base `2bcd799a103328887836c503b576caedaf4651c6`. INTEGRATED as runtime `3dce8a70fbc537cce2b0743d1d1e4d167da7d079`; all 15 canonical clothing cases pass.
 
 Six existing authored identities gain operating consumers: `knitted_loop_fabrics`, `twill_weave_structures`, `pile_fabric_weaving`, `layered_clothing_design`, `textile_laundering_practice`, `textile_moisture_transport`. The first three use existing plant yarn to produce knitted garments or woven wraps. No wool, hide or bone supply is invented. Knitting's supported cordage route is retained; the unavailable bone-needle route remains in its editorial history.
 

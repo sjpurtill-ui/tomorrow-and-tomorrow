@@ -1,5 +1,14 @@
 ## September 12 — grain equipment quotas and two construction illustrations
 
+## September 12 — supplied household clothing
+
+INTEGRATED runtime `3dce8a70fbc537cce2b0743d1d1e4d167da7d079` from `2bcd799`: six authored textile methods now produce and maintain finite garments and woven wraps. Paid tools, material inputs and remaining Logistics work constrain production, layering and laundering; only issued condition/coverage reduces cold health and cold/storm mortality costs. Save state is owner- and city-local. See `HOUSEHOLD_CLOTHING_HANDOFF.md`.
+
+All **101 worktree cases across six suites and 15 canonical clothing cases pass**, including full-file legacy save loading, secondary-city use, shared quotas and actual daily exposure consumers. Graph: **657 discoveries /439 explicit routes /303 civilian recipes /17 facilities**; no graph/dependency errors. Headless normal boot is clean. Water conveyance remains HELD in its worker checkout pending a complete delivery.
+
+The reconciled ledger has **657 integrated + 2,399 authored drafts = 3,056 distinct identities**, leaving **1,944 to author and 4,343 to implement** toward 5,000. All 657 stored runtime definitions exactly match `/tmp/tt-657-canonical-snapshot.json`; 15 ledger-tool tests pass. Art: 106 verified /657 live, 551 queued. No player/editor launch or interruption; this does not update the previously packaged 559 build or establish full historical pacing. Canonical evidence: `/tmp/tt-clothing-canonical.log`.
+
+
 INTEGRATED grain fix `b7d35a857da79d410e7eaca13608ac6bd3079828`: installed mill capacity is shared across every grain input stock for the day. Paid handmills can handle the same remaining stock after powered capacity is used. All 59 focused worktree checks pass, including the final 20-case grain rerun; no discovery IDs or save fields change. See `GRAIN_MACHINE_CAPACITY_HANDOFF.md`.
 
 Reviewed art source `e4fd8ee` is integrated as `a228f0e`, adding roof tiles and rammed-earth construction while retaining thatching and all other subject bindings. Both use the approved paper style, mipmaps and 768-pixel runtime textures. The refreshed inventory is **106 verified /651 live**, with 545 queued. Runtime remains **651 discoveries /433 routes /303 recipes /17 facilities**. Water conveyance is in isolated development; no new player launch.

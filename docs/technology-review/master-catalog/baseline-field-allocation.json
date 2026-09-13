@@ -4680,6 +4680,48 @@
       "source_domain": "infrastructure",
       "name": "Concrete Formwork Systems",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "knitted_loop_fabrics",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Knitted-Loop Fabrics",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "twill_weave_structures",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Twill-Weave Structures",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "pile_fabric_weaving",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Pile-Fabric Weaving",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "layered_clothing_design",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Layered-Clothing Design",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_laundering_practice",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile-Laundering Practice",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_moisture_transport",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile Moisture Transport",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
