@@ -16,11 +16,12 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 		if Ops.service("electricity")<=0:return
 		job.metallurgy_pending={"recipe":String(job.item),"source_job":int(job.id),
 			"ordinal":int(job.completed)+1,"site":String(state.resource_settlement_id),
-			"reserved":spec.materials.duplicate(true),"phase":"thermal",
+			"reserved":spec.materials.duplicate(true),"phase":"thermal","last_day":int(state.elapsed_days),"idle_days":0,
 			"run":Thermal.start(spec.thermal_program,float(spec.thermal_capacity))}
 		for resource:String in spec.materials:
 			state.resource_stockpiles[resource]-=float(spec.materials[resource])
 			job.last_consumed[resource]=float(job.last_consumed.get(resource,0))+float(spec.materials[resource])
+	synchronize_idle(job,work)
 	var pending:Dictionary=job.metallurgy_pending
 	if pending.site!=state.resource_settlement_id:return
 	if pending.phase=="inspection":
@@ -52,6 +53,7 @@ static func validate_piece(job:Dictionary,spec:Dictionary,pending:Variant,finish
 	if not spec.has("thermal_program") or not pending is Dictionary:return "Unexpected metallurgy workpiece."
 	if not pending.has_all(["recipe","source_job","ordinal","site","reserved","phase","run"]):return "Incomplete metallurgy workpiece."
 	if pending.recipe!=job.item or pending.source_job!=job.id or pending.ordinal!=int(job.completed)+(0 if finished else 1) or pending.reserved!=spec.materials:return "Wrong metallurgy source."
+	if not pending.get("last_day") is int or pending.last_day<0 or not pending.get("idle_days") is int or pending.idle_days<0 or pending.idle_days>pending.last_day:return "Invalid metallurgy calendar."
 	if not pending.site is String or pending.site.length()>128:return "Invalid metallurgy site."
 	if not Thermal.valid(pending.run) or pending.run.program!=spec.thermal_program or pending.run.capacity!=spec.thermal_capacity:return "Invalid metallurgy thermal history."
 	if pending.phase!=("inspection" if Thermal.complete(pending.run) else "thermal"):return "Inconsistent metallurgy stage."
@@ -77,3 +79,21 @@ static func clear(job:Dictionary)->void:
 	# Retooling discards the retained piece; reserved material is not refunded.
 	job.erase("metallurgy_pending")
 	job.erase("metallurgy_last")
+
+static func synchronize_idle(job:Dictionary,work:float)->void:
+	if not job.has("metallurgy_pending"):return
+	var p:Dictionary=job.metallurgy_pending
+	var state=WorldSimulation.state
+	var today:=int(state.elapsed_days)
+	var delta:=maxi(0,today-int(p.last_day))
+	if delta==0:return
+	var requires_power:bool=p.phase=="inspection" or float(p.run.program[int(p.run.stage)].power)>0
+	var unavailable:bool=work<=0 or bool(job.get("paused",false)) or p.site!=state.resource_settlement_id or (requires_power and Ops.service("electricity")<=0)
+	var missed:=delta if unavailable else maxi(0,delta-1)
+	if missed>0:
+		# Idle cooling is not paid treatment time and does not satisfy a hot hold.
+		var stage:=mini(int(p.run.stage),p.run.program.size()-1)
+		var loss:=float(p.run.program[stage].loss)
+		p.run.temperature=20.0+(float(p.run.temperature)-20.0)*exp(-loss*float(missed)/float(p.run.capacity))
+		p.idle_days+=missed
+	p.last_day=today

@@ -258,6 +258,7 @@ static func workforce() -> Dictionary:
 static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
 	var can_run:=eligible(host,job)
+	Metallurgy.synchronize_idle(job,work if can_run else 0.0)
 	Induction.synchronize_idle(job,work if can_run else 0.0)
 	Weld.synchronize_idle(job,work if can_run else 0.0)
 	Vacuum.synchronize_idle(job,work if can_run else 0.0)

@@ -105,3 +105,31 @@ func test_actual_normalizing_line_pays_section_and_supplies_a_shaft_consumer()->
 		assert_float(float(state.resource_stockpiles[recipe.output])).is_equal(0.0)
 		assert_float(float(state.resource_stockpiles[consumer.output])).is_equal(1.0)
 	)
+
+func test_idle_calendar_cools_without_paying_or_satisfying_hot_work()->void:
+	WorldSimulation.scoped("thermal_workshop",func()->void:
+		var state=WorldSimulation.state
+		state.resource_stockpiles.Steel=1.0
+		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":3000.0}
+		var line:=job();var recipe:=spec()
+		M.advance(line,recipe,3)
+		var before:Dictionary=line.metallurgy_pending.run.duplicate(true)
+		line.paused=true;state.elapsed_days+=100
+		M.synchronize_idle(line,0)
+		assert_float(float(line.metallurgy_pending.run.temperature)).is_less(30.0)
+		for field:String in ["work","energy","coolant","hot_work"]:
+			assert_float(float(line.metallurgy_pending.run[field])).is_equal(float(before[field]))
+		var idle:Dictionary=line.duplicate(true)
+		M.synchronize_idle(line,0)
+		assert_dict(line).is_equal(idle)
+		line=bytes_to_var(var_to_bytes(line));line.paused=false
+		assert_str(M.validate_job(line,recipe)).is_empty()
+		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":3000.0}
+		M.advance(line,recipe,4)
+		assert_str(line.metallurgy_pending.phase).is_equal("inspection")
+		assert_float(float(line.metallurgy_pending.run.hot_work)).is_equal(float(before.hot_work))
+		var uninterrupted:=T.start(recipe.thermal_program)
+		T.advance(uninterrupted,7,3000,0)
+		assert_float(float(line.metallurgy_pending.run.hot_work)).is_less(float(uninterrupted.hot_work))
+		assert_str(M.validate_job(line,recipe)).is_empty()
+	)
