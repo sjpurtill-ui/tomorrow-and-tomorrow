@@ -66,3 +66,15 @@ static func valid(value:Variant)->bool:
 	for key:String in ["shift_error","half_width","snr"]:
 		if not (ref.get(key) is int or ref.get(key) is float) or not is_finite(float(ref[key])):return false
 	return float(ref.half_width)>=0 and float(ref.snr)>=0 and (value.status!="qualified" or (absf(float(ref.shift_error))<=.05 and float(ref.half_width)<=.3 and float(ref.snr)>=20))
+
+static func consume(amount:float)->float:
+	if not usable() or not is_finite(amount) or amount<=0:return 0.0
+	var state:=data();var day:=floori(WorldSimulation.state.elapsed_days)
+	if day<int(state.last_day):return 0.0
+	if day>int(state.last_day):state.last_day=day;state.day_work=0.0
+	var used:float=load("res://scripts/technology_operations.gd").consume_service("nmr_unqualified_time",minf(amount,1.0-float(state.day_work)))
+	state.day_work=float(state.day_work)+used
+	return used
+static func snapshot()->Dictionary:
+	if not usable():return {}
+	return {"checked_day":data().checked_day,"shift_error":data().reference.shift_error,"temperature_drift":.1}

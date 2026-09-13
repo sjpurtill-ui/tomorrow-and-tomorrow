@@ -1964,5 +1964,38 @@
     },
     "power": 1,
     "daily_power": 0.5
+  },
+  "dried_characterized_copolymer": {
+    "name": "Recover the characterized copolymer microbatch",
+    "output": "Characterized Copolymer Microbatches",
+    "gate": "copolymer_sequence_control",
+    "materials": {
+      "Sequence-Characterized Copolymer Specimens": 1,
+      "Freshwater": 0.1
+    },
+    "days": 2,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Pressure Vessels": 1
+    },
+    "power": 1,
+    "daily_power": 0.5
+  },
+  "injected_copolymer_microclosure": {
+    "name": "Mold and leak-test a characterized copolymer closure",
+    "output": "PP Wash Bottle Closures",
+    "gate": "polymer_injection_molding",
+    "materials": {
+      "Characterized Copolymer Microbatches": 1,
+      "Freshwater": 0.1
+    },
+    "days": 1,
+    "tooling": {
+      "Electric Motors": 1,
+      "Steel": 3,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 1,
+    "daily_power": 1
   }
 }

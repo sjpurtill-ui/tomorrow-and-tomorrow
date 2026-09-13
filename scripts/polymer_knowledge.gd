@@ -327,7 +327,8 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "injected_telephone_covers",
       "injected_wash_bottle_closures",
-      "injected_pp_wash_closures"
+      "injected_pp_wash_closures",
+      "injected_copolymer_microclosure"
     ]
   },
   {
@@ -1618,7 +1619,8 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_contract": "Metered mixed monomers supply a separate copolymer synthesis route. Raw composition alone does not establish sequence: sequence-sensitive analytical qualification and an application consumer remain required before family acceptance.",
     "production_items": [
-      "metered_propene_ethene_feed"
+      "metered_propene_ethene_feed",
+      "dried_characterized_copolymer"
     ]
   },
   {
