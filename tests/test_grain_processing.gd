@@ -217,3 +217,26 @@ func test_legacy_owner_without_grain_field_receives_empty_processing_state()->vo
 	WorldSimulation.actors.grain.systems.GameState.grain_processing.stocks.grain=123.0
 	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
 	assert_dict(WorldSimulation.actors.grain.systems.GameState.grain_processing).is_equal(G.empty_state())
+func test_one_handmill_shares_daily_capacity_across_all_grain_stocks()->void:
+	WorldSimulation.scoped("grain",func()->void:
+		prepare();equip("grain_milling")
+		for key:String in ["dry","tested","clean"]:G.data().stocks[key]=100.0
+		var before:=energy();var result:=tick(1,0,100)
+		assert_float(float(result.methods.grain_milling)).is_equal(10.0)
+		assert_float(float(G.data().stocks.flour)).is_equal_approx(9.7,.000001)
+		assert_float(energy()+float(result.loss)).is_equal_approx(before,.000001)
+		result=tick(2,0,100)
+		assert_float(float(result.methods.grain_milling)).is_equal(10.0)
+	)
+func test_exhausted_roller_capacity_can_fall_back_to_a_paid_handmill()->void:
+	WorldSimulation.scoped("grain",func()->void:
+		prepare();equip("roller_grain_milling");equip("grain_milling")
+		G.data().stocks.dry=300.0
+		WorldSimulation.state.technology_operations.last_day=1;WorldSimulation.state.technology_operations.services.electricity=100.0
+		var before:=energy();var result:=tick(1,0,100)
+		assert_float(float(result.methods.roller_grain_milling)).is_equal(35.0)
+		assert_float(float(result.methods.grain_milling)).is_equal(10.0)
+		assert_float(float(result.electricity)).is_equal_approx(1.4,.000001)
+		assert_float(float(G.data().stocks.flour)).is_equal_approx(45*.97,.000001)
+		assert_float(energy()+float(result.loss)).is_equal_approx(before,.000001)
+	)

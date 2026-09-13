@@ -58,8 +58,8 @@ static func capacity(id:String,workers:float)->float:
 	if int(data().tools.get(id,0))<=0 or id not in WorldSimulation.state.known_discoveries:return 0.0
 	var spec:=definition(id)
 	return minf(maxf(0,workers),float(data().tools[id]))*float(spec.rate)*clampf(WorldSimulation.discovery.adoption(id),0,1)
-static func supplied_amount(id:String,requested:float,workers:float)->float:
-	var amount:=minf(maxf(0,requested),capacity(id,workers));var spec:=definition(id)
+static func supplied_amount(id:String,requested:float,workers:float,usage:Dictionary={})->float:
+	var amount:=minf(minf(maxf(0,requested),capacity(id,workers)),maxf(0,capacity(id,10000)-float(usage.get(id,0))));var spec:=definition(id)
 	for item:String in spec.inputs:
 		amount=minf(amount,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
 	if float(spec.power)>0:amount=minf(amount,preload("res://scripts/technology_operations.gd").service("electricity")/float(spec.power))
@@ -76,7 +76,7 @@ static func charge(id:String,amount:float,report:Dictionary)->float:
 	report.workers+=work;report.methods[id]=float(report.methods.get(id,0))+amount
 	return work
 static func transform(id:String,source:String,outputs:Dictionary,workers:float,report:Dictionary)->float:
-	var amount:=supplied_amount(id,float(data().stocks[source]),workers)
+	var amount:=supplied_amount(id,float(data().stocks[source]),workers,report.methods)
 	if amount<=0:return 0.0
 	data().stocks[source]-=amount
 	var returned:=0.0
@@ -113,11 +113,13 @@ static func advance(cultivated:float,logistics:float,demand:float,traveling:bool
 	workers-=transform("flour_sifting","flour",{"fine":.75,"bran":.23},workers,report)
 	workers-=transform("forced_air_grain_drying","tested",{"dry":.995},workers,report)
 	for source:String in ["dry","tested","clean"]:
-		var mill:="roller_grain_milling" if capacity("roller_grain_milling",workers)>0 and preload("res://scripts/technology_operations.gd").service("electricity")>0 else "grain_milling"
-		workers-=transform(mill,source,{"flour":.97},workers,report)
+		# Both tools share their own daily quota across every feedstock. A paid
+		# handmill can handle the same stock after powered capacity is exhausted.
+		for mill:String in ["roller_grain_milling","grain_milling"]:
+			workers-=transform(mill,source,{"flour":.97},workers,report)
 	# Germination may tie up only surplus; never reserve the last week's rations.
 	var surplus:=maxf(0,WorldSimulation.food._stock_total()-maxf(0,demand)*7)
-	var malt:=supplied_amount("grain_malting",minf(float(ledger.stocks.clean),surplus*.1),workers)
+	var malt:=supplied_amount("grain_malting",minf(float(ledger.stocks.clean),surplus*.1),workers,report.methods)
 	if malt>0 and ledger.batches.size()<32:
 		ledger.stocks.clean-=malt;ledger.batches.append({"amount":malt,"ready_day":day+4});report.committed=malt
 		workers-=charge("grain_malting",malt,report)
@@ -125,7 +127,7 @@ static func advance(cultivated:float,logistics:float,demand:float,traveling:bool
 	workers-=transform("winnowing_practice","grain",{"clean":.98},workers,report)
 	# Reclassify only a cereal share of today's cultivation, never old mixed
 	# stores, wild dried plants, or incoming trade/occupation rations.
-	var routed:=supplied_amount("threshing_frames",maxf(0,cultivated)*.25,workers)
+	var routed:=supplied_amount("threshing_frames",maxf(0,cultivated)*.25,workers,report.methods)
 	if routed>0:
 		ledger.stocks.grain+=routed*.98;report.routed=routed;report.loss+=routed*.02
 		charge("threshing_frames",routed,report)
