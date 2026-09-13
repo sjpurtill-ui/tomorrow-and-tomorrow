@@ -1,5 +1,5 @@
 {
-  "source_commit": "638629a669cb62946f88fa51761793941df07e61",
+  "source_commit": "b363f6c6aceaf42515e020281934cef26cb217fd",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -47010,6 +47010,198 @@
         ],
         "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
         "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D10",
+      "id": "dry_dock_services",
+      "name": "Dry Dock Services",
+      "foundations": "mine_drainage,structural_load_testing",
+      "mechanism": "Support a vessel out of water for inspected hull access",
+      "operating_requirement": "Suitable dock or lift, blocking, pumping or lifting capacity and skilled crews",
+      "consequence": "Permit submerged-hull work within facility size and support limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "mine_drainage",
+          "compound_pulleys"
+        ]
+      ],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "dry_dock_services",
+        "instruction": "A competent source teaches Dry-Dock Services through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Support a vessel out of water for inspected hull access",
+        "retained_operating_requirements": "Suitable dock or lift, blocking, pumping or lifting capacity and skilled crews",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
+      },
+      "recovery": "For Dry-Dock Services: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "b363f6c6aceaf42515e020281934cef26cb217fd",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "mine_drainage",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "logistics",
+        "dynamic": "logistics",
+        "effects": {},
+        "id": "dry_dock_services",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local hull service trials",
+            "missing_all": [
+              "structural_load_testing"
+            ],
+            "missing_any": [
+              [
+                "mine_drainage",
+                "compound_pulleys"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "structural_load_testing",
+              "mine_drainage",
+              "compound_pulleys"
+            ],
+            "requires_all": [
+              "structural_load_testing"
+            ],
+            "requires_any": [
+              [
+                "mine_drainage",
+                "compound_pulleys"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "movement"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Dry Dock Services",
+        "naval_service_method": "dry_dock_services",
+        "observation": "Qualified support permits work below the waterline without treating every port as a dry dock.",
+        "production_contract": "Paid lift-access construction shares port labor. Completed facilities provide limited, maintained access for War Canoes and Ram Galleys; other hull classes receive no unsupported capacity. Dock use consumes supplies and onboard repair crew work; ordinary repair material remains required.",
+        "requires": [
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "mine_drainage",
+            "compound_pulleys"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "movement"
+        ],
+        "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
+        "subcategory": "Carrying capacity"
+      }
+    },
+    {
+      "field": "D10",
+      "id": "hull_condition_surveys",
+      "name": "Hull Condition Surveys",
+      "foundations": "hull_seam_caulking,measurement_uncertainty",
+      "mechanism": "Record hull wear, damage and material condition through repeatable inspection",
+      "operating_requirement": "Qualified surveyors, access and dated evidence",
+      "consequence": "Identify repair needs without equating a certificate with permanent seaworthiness",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "hull_condition_surveys",
+        "instruction": "A competent source teaches Hull-Condition Surveys through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Record hull wear, damage and material condition through repeatable inspection",
+        "retained_operating_requirements": "Qualified surveyors, access and dated evidence",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
+      },
+      "recovery": "For Hull-Condition Surveys: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "b363f6c6aceaf42515e020281934cef26cb217fd",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "hull_seam_caulking",
+          "measurement_uncertainty"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "logistics",
+        "dynamic": "logistics",
+        "effects": {},
+        "id": "hull_condition_surveys",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local hull service trials",
+            "missing_all": [
+              "hull_seam_caulking",
+              "measurement_uncertainty"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "hull_seam_caulking",
+              "measurement_uncertainty"
+            ],
+            "requires_all": [
+              "hull_seam_caulking",
+              "measurement_uncertainty"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "movement"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Hull Condition Surveys",
+        "naval_service_method": "hull_condition_surveys",
+        "observation": "Repeatable inspections distinguish observed hull condition from an undated assumption.",
+        "production_contract": "Qualified dock inspections consume actual access and repair crew work, recording date and observed condition. Fresh inspections improve the effectiveness of subsequent allocated dock repair work; inspection alone restores no condition.",
+        "requires": [
+          "hull_seam_caulking",
+          "measurement_uncertainty"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "movement"
+        ],
+        "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
+        "subcategory": "Carrying capacity"
       }
     },
     {

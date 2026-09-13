@@ -4850,6 +4850,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/dry_dock_services.png",
+      "description": "Qualified support permits work below the waterline without treating every port as a dry dock.",
+      "domain": "logistics",
+      "id": "dry_dock_services",
+      "name": "Dry Dock Services",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hull_condition_surveys.png",
+      "description": "Repeatable inspections distinguish observed hull condition from an undated assumption.",
+      "domain": "logistics",
+      "id": "hull_condition_surveys",
+      "name": "Hull Condition Surveys",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -5371,11 +5387,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 671,
+  "live_count": 673,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 563,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 108
+  "verified_count": 110
 }
