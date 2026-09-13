@@ -390,3 +390,32 @@ func test_blow_molding_needs_air_and_completed_bottles_equip_real_assay()->void:
 		P.advance(WorldSimulation.military,job,10000)
 		assert_int(int(job.completed)).is_equal(1)
 		assert_float(float(s.resource_stockpiles["Bating Protease"])).is_equal(1.0))
+func test_solution_binder_recovery_has_finite_water_yield_and_operating_catalyst_output()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		for resource:String in ["PEG Diol","Alumina Catalyst Supports","Refined Silver","Polymer-Grade Ethene","Oxygen","Timber"]:s.resource_stockpiles[resource]=100.0
+		var items:Array[String]=["qualified_peg_binder","aqueous_peg_binder","dried_peg_alumina_granules","formed_alumina_supports","formed_ethene_catalyst","separated_ethylene_oxide"]
+		var targets:Array[int]=[1,2,2,2,1,1]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(s.resource_stockpiles["Ethylene Oxide"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["Ethene Oxidation Catalyst"])).is_equal_approx(.98,.000001)
+		assert_float(float(s.resource_stockpiles["PEG Dryer Condensate"])).is_equal(1.6)
+		var water_before:float=float(s.resource_stockpiles["Freshwater"])
+		assert_int(int(run_batch("recovered_peg_process_water",1).get("completed",0))).is_equal(1)
+		assert_float(float(s.resource_stockpiles["PEG Dryer Condensate"])).is_equal_approx(.35,.000001)
+		assert_float(float(s.resource_stockpiles["Recovered PEG Process Water"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["Freshwater"])).is_equal(water_before)
+		assert_int(int(run_batch("recovered_water_peg_binder",1).get("completed",0))).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Recovered PEG Process Water"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["Freshwater"])).is_equal(water_before)
+		assert_float(float(s.resource_stockpiles["Binder-Grade PEG"])).is_equal_approx(.7,.000001))
+func test_recovery_does_not_accept_fresh_water_as_process_condensate()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		s.known_discoveries.append("polymer_solvent_recovery");s.discovery_adoption.polymer_solvent_recovery=1.0
+		for resource:String in I.product("recovered_peg_process_water").tooling:s.resource_stockpiles[resource]=100.0
+		s.resource_stockpiles["Timber"]=100.0
+		var started:Dictionary=WorldSimulation.military.start_production_line("recovered_peg_process_water",1)
+		assert_bool(started.get("ok",false)).is_false()
+		assert_str(String(started.get("error",""))).contains("PEG Dryer Condensate"))

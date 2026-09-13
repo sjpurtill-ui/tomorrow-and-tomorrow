@@ -404,7 +404,9 @@ static func entries()->Array[Dictionary]:
       "silver_oxidation_catalyst",
       "alumina_catalyst_support",
       "ethene_oxidation_catalyst",
-      "qualified_nickel_hydrogenation_catalyst"
+      "qualified_nickel_hydrogenation_catalyst",
+      "formed_alumina_supports",
+      "formed_ethene_catalyst"
     ]
   },
   {
@@ -1136,6 +1138,77 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "blown_wash_bottle_bodies",
       "assembled_water_wash_bottles"
+    ]
+  },
+  {
+    "id": "polymer_solution_processing",
+    "name": "Polymer Solution Processing",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_chain_models",
+      "chemical_distillation"
+    ],
+    "requires_all": [
+      "polymer_chain_models",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Solution Processing",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Form and recover qualified polymer material through controlled dissolution and solvent handling",
+    "effects": {},
+    "production_contract": "Qualified water-soluble PEG binder is dissolved, applied to alumina powder and dried into pressable granules. Condensate remains a typed process stream, not potable water. Paid forming, binder removal and catalyst qualification supply real oxidation operations.",
+    "production_items": [
+      "qualified_peg_binder",
+      "aqueous_peg_binder",
+      "recovered_water_peg_binder",
+      "dried_peg_alumina_granules"
+    ]
+  },
+  {
+    "id": "polymer_solvent_recovery",
+    "name": "Polymer Solvent Recovery",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_solution_processing",
+      "fractional_distillation"
+    ],
+    "requires_all": [
+      "polymer_solution_processing",
+      "fractional_distillation"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Solvent Recovery",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Recover suitable solvent from a characterized polymer-process stream",
+    "effects": {},
+    "production_contract": "Separates a typed PEG dryer condensate with finite yield, fuel, power and quality-control work. Recovered water can only replace make-up water in the compatible binder recipe; it does not grant drinking-water or general solvent stock.",
+    "production_items": [
+      "recovered_peg_process_water"
     ]
   }
 ]

@@ -1003,5 +1003,127 @@
       "Water Wash Bottles": 1,
       "Clay": 2
     }
+  },
+  "qualified_peg_binder": {
+    "name": "Solubility and binding-tested PEG",
+    "output": "Binder-Grade PEG",
+    "gate": "polymer_solution_processing",
+    "materials": {
+      "PEG Diol": 1.05,
+      "Freshwater": 0.1,
+      "Alumina Catalyst Supports": 0.02
+    },
+    "days": 3,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Steel": 2
+    },
+    "power": 1,
+    "daily_power": 0.3333333333333333
+  },
+  "aqueous_peg_binder": {
+    "name": "Dissolved aqueous PEG binder",
+    "output": "Aqueous PEG Binder",
+    "gate": "polymer_solution_processing",
+    "materials": {
+      "Binder-Grade PEG": 0.1,
+      "Freshwater": 1
+    },
+    "days": 2,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Pressure Vessels": 1
+    },
+    "power": 1,
+    "daily_power": 0.5
+  },
+  "recovered_water_peg_binder": {
+    "name": "PEG binder with recovered process water",
+    "output": "Aqueous PEG Binder",
+    "gate": "polymer_solution_processing",
+    "materials": {
+      "Binder-Grade PEG": 0.1,
+      "Recovered PEG Process Water": 1
+    },
+    "days": 2,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Pressure Vessels": 1
+    },
+    "power": 1,
+    "daily_power": 0.5
+  },
+  "dried_peg_alumina_granules": {
+    "name": "Solution-bound dried alumina granules",
+    "output": "PEG-Bound Alumina Granules",
+    "gate": "polymer_solution_processing",
+    "materials": {
+      "Alumina Catalyst Supports": 1.1,
+      "Aqueous PEG Binder": 1
+    },
+    "days": 4,
+    "tooling": {
+      "Electric Motors": 1,
+      "Pressure Vessels": 2,
+      "Laboratory Glassware": 2
+    },
+    "power": 3,
+    "daily_power": 0.75,
+    "co_products": {
+      "PEG Dryer Condensate": 0.8
+    }
+  },
+  "formed_alumina_supports": {
+    "name": "Pressed and binder-burned alumina supports",
+    "output": "Formed Alumina Supports",
+    "gate": "industrial_catalyst_design",
+    "materials": {
+      "PEG-Bound Alumina Granules": 1,
+      "Timber": 1,
+      "Oxygen": 0.1
+    },
+    "days": 5,
+    "tooling": {
+      "Steel": 5,
+      "Refractory Bricks": 6,
+      "Laboratory Glassware": 2
+    },
+    "power": 3,
+    "daily_power": 0.6
+  },
+  "formed_ethene_catalyst": {
+    "name": "Qualified formed ethene-oxidation catalyst",
+    "output": "Ethene Oxidation Catalyst",
+    "gate": "industrial_catalyst_design",
+    "materials": {
+      "Formed Alumina Supports": 1,
+      "Refined Silver": 0.2,
+      "Polymer-Grade Ethene": 0.05,
+      "Oxygen": 0.02
+    },
+    "days": 5,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Pressure Vessels": 3,
+      "Steel": 3
+    },
+    "power": 1,
+    "daily_power": 0.2
+  },
+  "recovered_peg_process_water": {
+    "name": "Separated and checked PEG-process water",
+    "output": "Recovered PEG Process Water",
+    "gate": "polymer_solvent_recovery",
+    "materials": {
+      "PEG Dryer Condensate": 1.25,
+      "Timber": 0.3
+    },
+    "days": 3,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Pressure Vessels": 2
+    },
+    "power": 2,
+    "daily_power": 0.6666666666666666
   }
 }
