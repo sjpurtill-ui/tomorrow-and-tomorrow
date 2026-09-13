@@ -1,3 +1,9 @@
+## September 13 — polymer oxide prerequisites
+
+Authored worker-requested ethylene_oxide_synthesis and ethylene_glycol_hydrolysis with exact requested mandatory foundations. Separate supported-catalyst oxidation and paid hydrolysis/separation retain named feeds, competing products and grade limits. The silver catalyst is reaction-specific. See `technology-review/Polymer Oxide Prerequisites.md`.
+
+Ledger: **740 integrated +2,661 drafts =3,401 identities**, leaving **1,599 to author and 4,260 to implement**. Parent/duplicate checks and 15 ledger tests pass. Runtime 740/522/402/20 and art 162/740 remain unchanged. The two rows were authored in the integrator worktree on `codex/precision-component-processes`, based on `61403ea`, while its separate five-discovery runtime changes remain uncommitted and unintegrated. This commit contains catalog/docs only, with no save-format impact. No player launch or package rebuild.
+
 ## September 13 — textile assembly coverage
 
 Reviewed twelve distinct textile and garment mechanisms: braiding, tufting, elastic-yarn covering, quilting, reinforced button openings, zipper/hook-loop/snap closures, seam taping, leather skiving/finishing and needle lace. Each proposal requires real materials, paid work and component-specific acceptance. Filling controls quilt warmth; closures and coatings do not imply universal strength or sealing. See `technology-review/Textile Assembly Review.md`.

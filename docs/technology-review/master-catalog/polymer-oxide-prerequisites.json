@@ -1,0 +1,75 @@
+[
+  {
+    "id": "ethylene_oxide_synthesis",
+    "name": "Ethylene Oxide Synthesis",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_catalyst_design",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "industrial_catalyst_design,chemical_distillation,experimental_controls",
+    "mechanism": "Oxidize qualified ethene over a separately qualified supported silver catalyst and separate ethylene oxide from competing reaction products.",
+    "operating_requirement": "Pay named ethene and oxygen feeds, reaction/cooling capacity, catalyst preparation and replacement, separation work and product checks; retain competing oxidation and rejected fractions.",
+    "consequence": "Supply a specified ethylene-oxide feed to known glycol or ring-opening polymer processes; a methanol-conversion catalyst or generic olefin stream is not interchangeable.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable ethylene oxide synthesis instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ethylene_oxide_synthesis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Oxidize qualified ethene over a separately qualified supported silver catalyst and separate ethylene oxide from competing reaction products.",
+      "operating_requirements": "Pay named ethene and oxygen feeds, reaction/cooling capacity, catalyst preparation and replacement, separation work and product checks; retain competing oxidation and rejected fractions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local ethylene oxide synthesis trials.",
+        "partnership": "Share actual samples and operator time for ethylene oxide synthesis; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded ethylene oxide synthesis process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external ethylene oxide synthesis processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable ethylene oxide synthesis machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://essentialchemicalindustry.org/chemicals/epoxyethane.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "ethylene_glycol_hydrolysis",
+    "name": "Ethylene Glycol Hydrolysis",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "chemical_distillation,experimental_controls",
+    "mechanism": "React a defined ethylene-oxide feed with water and separate monoethylene glycol from the resulting product mixture.",
+    "operating_requirement": "Pay actual oxide, water, controlled reaction and separation work, heat/cooling and grade checks; retain higher-glycol fractions and losses rather than claiming complete selective conversion.",
+    "consequence": "Supply qualified glycol to the specified polymer initiation or formulation consumer; imported oxide permits this known process without teaching oxide synthesis, and generic alcohol cannot substitute.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable ethylene glycol hydrolysis instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ethylene_glycol_hydrolysis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "React a defined ethylene-oxide feed with water and separate monoethylene glycol from the resulting product mixture.",
+      "operating_requirements": "Pay actual oxide, water, controlled reaction and separation work, heat/cooling and grade checks; retain higher-glycol fractions and losses rather than claiming complete selective conversion.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local ethylene glycol hydrolysis trials.",
+        "partnership": "Share actual samples and operator time for ethylene glycol hydrolysis; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded ethylene glycol hydrolysis process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external ethylene glycol hydrolysis processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable ethylene glycol hydrolysis machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://chemicals.basf.com/global/en/Petrochemicals/alkylene-oxides-and-glycols/products"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]

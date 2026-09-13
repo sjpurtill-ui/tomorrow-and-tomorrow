@@ -13064,6 +13064,26 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "1312a0ba4f88f08114249898982ac545da5f832801f37b9605b2aa0c0dbb95cd"
+    },
+    {
+      "id": "ethylene_oxide_synthesis",
+      "name": "Ethylene Oxide Synthesis",
+      "horizon": "H04",
+      "source_file": "polymer-oxide-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "ac2b5f23e1afaf1c8f3436c5abfb7ad7b5d7aab4ab9002ea1cab88ea94823b37"
+    },
+    {
+      "id": "ethylene_glycol_hydrolysis",
+      "name": "Ethylene Glycol Hydrolysis",
+      "horizon": "H04",
+      "source_file": "polymer-oxide-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f6f302a1089260bb58205a791f765786bb385521a114ac6471261528b0805296"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
