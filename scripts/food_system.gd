@@ -9,6 +9,7 @@ var _forecast_climate_cache:Dictionary={}
 # displayed as roughly 2,400 kcal. Demand is calculated from numeric age,
 # labor, pregnancy, lactation, travel, military, and climate cohorts.
 
+const Botany=preload("res://scripts/field_botany.gd")
 const Batches=preload("res://scripts/food_batches.gd")
 const Grain=preload("res://scripts/grain_processing.gd")
 const Operations=preload("res://scripts/technology_operations.gd")
@@ -67,7 +68,8 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var nutrient_report:Dictionary={}
 	var selected_access:float=military_campaign.siege_home_food_access() if military_campaign!=null else 1.0
 	var selected:=preload("res://scripts/selected_food_processing.gd").harvest(context,workers,labor_efficiency,ecology,float(demand_breakdown.total),selected_access)
-	var harvest:=_produce(maxf(0,workers-float(selected.workers)),labor_efficiency,ecology,traveling,true,nutrient_report)
+	var botany:=Botany.advance(maxf(0,workers-float(selected.workers)),traveling,maxf(0,1.0-_weather_yield_factor(_environment_mix(),WorldSimulation.state.elapsed_days))*4.0)
+	var harvest:=_produce(maxf(0,workers-float(selected.workers)-float(botany.workers)),labor_efficiency,ecology,traveling,true,nutrient_report)
 	if WorldSimulation.state.resource_settlement_id.is_empty() and not traveling:
 		var access:=WorldSimulation.military.siege_home_food_access()
 		for food_type in harvest: harvest[food_type]*=access
@@ -75,6 +77,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 			if nutrient_report.has(key):nutrient_report[key]=float(nutrient_report[key])*access
 	for food_type in harvest:
 		WorldSimulation.state.food_stocks[food_type]=float(WorldSimulation.state.food_stocks.get(food_type,0.0))+float(harvest[food_type])
+	if not traveling and "habitat_observation_records" in WorldSimulation.state.known_discoveries:
+		var retained:=Botany.retain_seed(WorldSimulation.state.field_botany,float(nutrient_report.get("cultivated_harvest",0)),Botany.site_key(),int(WorldSimulation.state.elapsed_days))
+		WorldSimulation.state.food_stocks["Dry staples"]=maxf(0,float(WorldSimulation.state.food_stocks.get("Dry staples",0))-retained)
 	var meal_plan:=preload("res://scripts/food_preparation.gd").plan(logistics,float(demand_breakdown.total),traveling)
 	var grain:=Grain.advance(float(nutrient_report.get("cultivated_harvest",0)),maxf(0,logistics-float(meal_plan.workers)),float(demand_breakdown.total),traveling)
 	WorldSimulation.state.food_stocks["Dry staples"]=maxf(0,float(WorldSimulation.state.food_stocks.get("Dry staples",0))-float(grain.routed))
@@ -312,6 +317,12 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 			var nutrition:=preload("res://scripts/crop_nutrition.gd").cultivation(float(result["Dry staples"]),commit_nutrients)
 			nutrient_report.merge(nutrition,true)
 			result["Dry staples"]=float(nutrition.harvest)
+	var botany_base:=float(result["Dry staples"])
+	var botany_land:=Botany.land_quote(WorldSimulation.state.field_botany,Botany.site_key(),int(WorldSimulation.state.elapsed_days)) if not traveling else 0.0
+	var botany_gain:=Botany.application_quote(WorldSimulation.state.field_botany,Botany.site_key(),int(WorldSimulation.state.elapsed_days),botany_base,maxf(0,1.0-weather_factor)*4.0) if not traveling else 0.0
+	result["Dry staples"]=botany_base*(1.0-botany_land)+botany_gain
+	nutrient_report["botany_base"]=botany_base
+	nutrient_report["botany_delta"]=-botany_base*botany_land+botany_gain
 	nutrient_report["cultivated_harvest"]=float(result["Dry staples"])
 	result["Dry staples"]+=occupation_transfer
 	return result
@@ -526,6 +537,12 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 				var scale:=future_season/current_season*future_weather_type/current_weather_type
 				var nutrition:=preload("res://scripts/crop_nutrition.gd").projection(float(nutrient_report.base_harvest)*scale,projected_inputs,projected_nutrients,float(nutrient_report.adoption))
 				future_yield=future_yield-float(nutrient_report.bonus)*scale+float(nutrition.bonus)
+			if food_type=="Dry staples":
+				var botany_scale:=future_season/current_season*future_weather_type/current_weather_type
+				future_yield-=float(nutrient_report.get("botany_delta",0))*botany_scale
+				var projected_botany_base:=float(nutrient_report.get("botany_base",0))*botany_scale
+				future_yield-=projected_botany_base*Botany.land_quote(WorldSimulation.state.field_botany,Botany.site_key(),int(future_day)) if not traveling else 0.0
+				future_yield+=Botany.application_quote(WorldSimulation.state.field_botany,Botany.site_key(),int(future_day),projected_botany_base,maxf(0,1.0-_weather_yield_factor(environment,future_day))*4.0) if not traveling else 0.0
 			projected_stocks[food_type]=float(projected_stocks.get(food_type,0.0))+future_yield
 			total_produced+=future_yield
 		var season_wave:=sin(fmod(future_day,365.0)/365.0*TAU)
