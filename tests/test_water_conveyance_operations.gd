@@ -1,6 +1,10 @@
 extends GdUnitTestSuite
 const Water=preload("res://scripts/water_conveyance.gd")
 const State=preload("res://scripts/water_conveyance_state.gd")
+class IntakeTerrain extends "res://scripts/local_terrain.gd":
+	func _height_at(_x:float,z:float)->float:return 1.0-z/3.0
+	func _surface_water_sources(origin:Vector3,_limit:float=INF)->Array[Dictionary]:
+		return [{"kind":"River","position":Vector3(0,_height_at(0,origin.z),origin.z),"distance_km":absf(origin.x)}]
 func before_test()->void:
 	WorldSimulation.clear();WorldSimulation.create_actor("water_builders",611)
 func after_test()->void:WorldSimulation.clear()
@@ -71,3 +75,121 @@ func test_repairs_are_material_bounded_and_do_not_spend_another_actor_stock()->v
 		assert_bool(State.valid_state({})).is_true()
 	)
 	WorldSimulation.scoped("neighbor",func()->void:assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(9.0))
+
+func test_full_save_restores_unfinished_work_and_paid_inventory()->void:
+	GameState.reset_for_new_world(611);CivilizationSystem.reset_for_new_world()
+	WorldSimulation.create_actor("water_builders",611)
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	WorldSimulation.scoped("water_builders",func()->void:
+		prepare();install();Water.construction_work(12,1))
+	var slot:="water_conveyance_%d" % OS.get_process_id()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.scoped("water_builders",func()->void:
+		Water.data().lines.clear();WorldSimulation.state.resource_stockpiles["Wooden Conduits"]=99.0)
+	var restored:=SaveSystem.load_game(slot)
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+	WorldSimulation.scoped("water_builders",func()->void:
+		assert_float(float(Water.data().lines[0].work_done)).is_equal(12.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+		assert_float(Water.construction_work(100,2)).is_equal(28.0)
+		assert_float(Water.delivery(context(),3,100)).is_greater(0.0))
+	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
+
+func test_secondary_city_conserves_its_own_water_and_local_drinking_demand()->void:
+	WorldSimulation.scoped("water_builders",func()->void:
+		var state=WorldSimulation.state;var model=WorldSimulation.settlements
+		state.ensure_population_total(1000);state.settlement_completed.assign(["Hearth Circle"])
+		model.ensure_founded()
+		state.player_settlements.append({"id":"second","name":"Rivermeet","position":Vector2(1,0),"primary":false,"population_share":.2,"founded_day":20})
+		state.resource_stockpiles["Freshwater"]=700.0
+		model.with_city_resources("second",func()->void:
+			prepare();install();Water.construction_work(100,1)
+			state.elapsed_days=2
+			WorldSimulation.resources.process_day(context())
+			assert_float(float(state.water_metrics.required_today)).is_equal(200.0)
+			assert_float(float(state.water_metrics.conveyed_today)).is_greater(0.0)
+			assert_int(Water.data().lines.size()).is_equal(1))
+		assert_float(float(state.resource_stockpiles.Freshwater)).is_equal(700.0)
+		assert_int(Water.data().lines.size()).is_equal(0)
+		var city:Dictionary=model.settlement_record("second")
+		assert_int(city.local_resources.water_conveyance.lines.size()).is_equal(1)
+		assert_bool(State.valid_state({"player_settlements":state.player_settlements})).is_true())
+
+func test_clay_workshop_chain_consumes_unfired_sections_and_fuel()->void:
+	WorldSimulation.scoped("water_builders",func()->void:
+		var industry=preload("res://scripts/civilian_industry.gd")
+		var production=preload("res://scripts/persistent_production.gd")
+		var state=WorldSimulation.state
+		state.resource_stockpiles={"Prepared Clay":10.0,"Freshwater":10.0,"Timber":20.0,"Stone":20.0,"Clay":20.0}
+		for item:String in ["unfired_clay_conduits","fired_clay_conduits"]:
+			var spec:Dictionary=industry.product(item)
+			state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
+			var quantity:=2 if item=="unfired_clay_conduits" else 1
+			assert_bool(WorldSimulation.military.start_production_line(item,quantity).get("ok",false)).is_true()
+			var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+			production.advance(WorldSimulation.military,job,float(spec.days)*quantity)
+			assert_int(int(job.completed)).is_equal(quantity)
+			WorldSimulation.military.cancel_equipment_job(int(job.id))
+		assert_float(float(state.resource_stockpiles["Fired Clay Conduits"])).is_equal(1.0)
+		assert_float(float(state.resource_stockpiles["Unfired Clay Conduits"])).is_equal(.75)
+		assert_float(float(state.resource_stockpiles["Prepared Clay"])).is_equal(6.0))
+
+func test_player_control_uses_the_same_paid_installation_action()->void:
+	WorldSimulation.scoped("water_builders",func()->void:
+		prepare()
+		var panel:=VBoxContainer.new();auto_free(panel)
+		var ctx:=context();ctx.terrain_height_at=height
+		preload("res://scripts/hud/water_conveyance_controls.gd").build(panel,ctx)
+		var enabled:Array[Button]=[]
+		for child in panel.get_children():
+			if child is Button and not child.disabled:enabled.append(child)
+		assert_int(enabled.size()).is_equal(1)
+		if not enabled.is_empty():enabled[0].pressed.emit()
+		assert_int(Water.data().lines.size()).is_equal(1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0))
+
+func test_local_source_search_finds_upstream_head_and_stays_bounded()->void:
+	var terrain:=IntakeTerrain.new();auto_free(terrain)
+	var sources:=terrain._water_conveyance_sources(Vector3(1,1,0))
+	assert_int(sources.size()).is_greater(0)
+	assert_int(sources.size()).is_less_equal(4)
+	assert_bool(sources[0].gravity_feasible).is_true()
+	assert_float(float(sources[0].position.z)).is_less(0.0)
+	for candidate:Dictionary in sources:
+		assert_float(float(candidate.distance_km)).is_less_equal(6.0)
+		assert_bool(candidate.revealed).is_true()
+
+func test_rival_investment_uses_the_paid_installation_path()->void:
+	var old_provider:Callable=WorldSimulation.context_provider
+	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:
+		var ctx:=context();ctx.terrain_height_at=height;ctx.environment_profile={};return ctx
+	WorldSimulation.scoped("water_builders",func()->void:
+		prepare()
+		WorldSimulation.state.population_allocations.Construction=20
+		WorldSimulation.state.population_health=1.0
+		WorldSimulation.state.simulation_metrics.labor_efficiency=1.0
+		WorldSimulation.state.water_metrics={"intake_ratio":.5,"source_distance_km":1.0}
+		preload("res://scripts/water_conveyance_investment.gd").recommendation()
+		assert_int(Water.data().lines.size()).is_equal(1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Wooden Conduits"])).is_equal(0.0))
+	WorldSimulation.context_provider=old_provider
+
+func test_secondary_control_callback_keeps_the_city_scope_after_panel_build()->void:
+	WorldSimulation.scoped("water_builders",func()->void:
+		prepare()
+		var state=WorldSimulation.state;var model=WorldSimulation.settlements
+		state.settlement_completed.assign(["Hearth Circle"]);model.ensure_founded()
+		state.player_settlements.append({"id":"second","name":"Rivermeet","position":Vector2(1,0),"primary":false,"population_share":.2,"founded_day":20})
+		var panel:=VBoxContainer.new();auto_free(panel)
+		var ctx:=context();ctx.terrain_height_at=height
+		model.with_city_resources("second",func()->void:
+			state.resource_stockpiles={"Wooden Conduits":10.0,"Clay":2.0}
+			preload("res://scripts/hud/water_conveyance_controls.gd").build(panel,ctx,"second","Rivermeet"))
+		for child in panel.get_children():
+			if child is Button and not child.disabled:child.pressed.emit();break
+		assert_int(Water.data().lines.size()).is_equal(0)
+		assert_float(float(state.resource_stockpiles["Wooden Conduits"])).is_equal(10.0)
+		var city:Dictionary=model.settlement_record("second")
+		assert_int(city.local_resources.water_conveyance.lines.size()).is_equal(1)
+		assert_float(float(city.local_resources.resource_stockpiles["Wooden Conduits"])).is_equal(0.0))
