@@ -401,7 +401,8 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "silver_oxidation_catalyst",
       "alumina_catalyst_support",
-      "ethene_oxidation_catalyst"
+      "ethene_oxidation_catalyst",
+      "qualified_nickel_hydrogenation_catalyst"
     ]
   },
   {
@@ -720,5 +721,383 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "ring_opened_peg_diol"
     ]
+  },
+  {
+    "id": "metallurgical_mass_balances",
+    "name": "Metallurgical Mass Balances",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "material_accounting",
+      "ore_assaying"
+    ],
+    "requires_all": [
+      "material_accounting",
+      "ore_assaying"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Metallurgical Mass Balances",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Account for useful material and losses across a metallurgical process",
+    "effects": {},
+    "production_contract": "Measured feeds, products, residues and sampling; consume named material lots, samples, installed tooling, work and specified power through real downstream production.",
+    "production_items": [
+      "balanced_nickel_feed"
+    ]
+  },
+  {
+    "id": "nickel_metal_recovery",
+    "name": "Nickel Metal Recovery",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "ore_assaying",
+      "metallurgical_mass_balances"
+    ],
+    "requires_all": [
+      "ore_assaying",
+      "metallurgical_mass_balances"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Nickel Metal Recovery",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Separate and refine nickel from a characterized feed through a qualified process",
+    "effects": {},
+    "production_contract": "Suitable plant, reagents or heat, energy and controlled residues; consume named material lots, samples, installed tooling, work and specified power through real downstream production.",
+    "production_items": [
+      "prepared_nickel_oxide",
+      "reduced_nickel"
+    ]
+  },
+  {
+    "id": "biomass_gasification",
+    "name": "Biomass Gasification",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "charcoal",
+      "gas_composition_analysis"
+    ],
+    "requires_all": [
+      "charcoal",
+      "gas_composition_analysis"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Biomass Gasification",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Convert biomass into a characterized combustible gas through controlled partial conversion",
+    "effects": {},
+    "production_contract": "Prepared feedstock, qualified reactor, gas cleaning and operators; consume named material lots, samples, installed tooling, work and specified power through real downstream production.",
+    "production_items": [
+      "biomass_producer_gas"
+    ]
+  },
+  {
+    "id": "gas_composition_analysis",
+    "name": "Gas Composition Analysis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "spectroscopy",
+      "chemical_distillation"
+    ],
+    "requires_all": [
+      "spectroscopy",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Gas Composition Analysis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Measure components of a gas mixture using calibrated separation or spectral response",
+    "effects": {},
+    "production_contract": "Sampling equipment, references and trained analysts; consume named material lots, samples, installed tooling, work and specified power through real downstream production.",
+    "production_items": [
+      "assayed_producer_gas"
+    ]
+  },
+  {
+    "id": "additive_step_polymerization",
+    "name": "Additive Step Polymerization",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_monomer_purification"
+    ],
+    "requires_all": [
+      "polymer_monomer_purification"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Additive Step Polymerization",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Join functional molecules through qualified step reactions without a required small-molecule elimination",
+    "effects": {},
+    "production_items": [
+      "addition_cured_belt_web"
+    ],
+    "production_contract": "Consumes separately produced polyol and diisocyanate feeds, cloth reinforcement, reaction work and cooling to form a dry-interior belt web. Cutting/splicing under belt-transmission knowledge supplies actual workshop maintenance belts; no universal resin or free strength effect."
+  },
+  {
+    "id": "ethylene_oxide_synthesis",
+    "name": "Ethylene Oxide Synthesis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "industrial_catalyst_design",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "industrial_catalyst_design",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Ethylene Oxide Synthesis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Oxidize qualified ethene over a separately qualified supported silver catalyst and separate ethylene oxide from competing reaction products.",
+    "effects": {},
+    "production_items": [
+      "separated_ethylene_oxide"
+    ],
+    "production_contract": "Pay named ethene and oxygen feeds, reaction/cooling capacity, catalyst preparation and replacement, separation work and product checks; retain competing oxidation and rejected fractions.; named feedstocks and finite paid operating inputs are required. Imported material does not confer synthesis mastery."
+  },
+  {
+    "id": "ethylene_glycol_hydrolysis",
+    "name": "Ethylene Glycol Hydrolysis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Ethylene Glycol Hydrolysis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "React a defined ethylene-oxide feed with water and separate monoethylene glycol from the resulting product mixture.",
+    "effects": {},
+    "production_items": [
+      "separated_ethylene_glycol"
+    ],
+    "production_contract": "Pay actual oxide, water, controlled reaction and separation work, heat/cooling and grade checks; retain higher-glycol fractions and losses rather than claiming complete selective conversion.; named feedstocks and finite paid operating inputs are required. Imported material does not confer synthesis mastery."
+  },
+  {
+    "id": "coal_light_oil_recovery",
+    "name": "Coal Light-oil Recovery",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "coke_firing",
+      "fractional_distillation"
+    ],
+    "requires_all": [
+      "coke_firing",
+      "fractional_distillation"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Coal Light-oil Recovery",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Capture coke-making byproduct streams and separate a light aromatic fraction from other condensates and gas.",
+    "effects": {},
+    "production_items": [
+      "coal_light_oil",
+      "separated_toluene"
+    ],
+    "production_contract": "Pay suitable coal, capture and separation equipment, cooling, heat and work; conserve paid coal across coke and recovered fractions with unrecovered residues.; named feedstocks and finite paid operating inputs are required. Imported material does not confer synthesis mastery."
+  },
+  {
+    "id": "aromatic_nitration",
+    "name": "Aromatic Nitration",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Aromatic Nitration",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Convert a specified aromatic feed through a controlled nitration pathway and qualify its intended intermediate fraction.",
+    "effects": {},
+    "production_items": [
+      "controlled_aromatic_nitration"
+    ],
+    "production_contract": "Pay named aromatic feed, prepared acid reagents, contained reaction/cooling capacity, separation and assay work; retain spent reagents and rejected fractions.; named feedstocks and finite paid operating inputs are required. Imported material does not confer synthesis mastery."
+  },
+  {
+    "id": "aromatic_amine_hydrogenation",
+    "name": "Aromatic Amine Hydrogenation",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "industrial_catalyst_design",
+      "pressure_vessels"
+    ],
+    "requires_all": [
+      "industrial_catalyst_design",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Aromatic Amine Hydrogenation",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Reduce a named nitroaromatic intermediate with supplied hydrogen and a reaction-qualified catalyst into its corresponding amine feed.",
+    "effects": {},
+    "production_items": [
+      "aromatic_amine_feed"
+    ],
+    "production_contract": "Pay characterized feed, hydrogen, catalyst preparation/replacement, controlled reactor capacity, separation and sample work; retain side products and grade failures.; named feedstocks and finite paid operating inputs are required. Imported material does not confer synthesis mastery."
+  },
+  {
+    "id": "isocyanate_synthesis",
+    "name": "Isocyanate Synthesis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "chemical_distillation",
+      "pressure_vessels",
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "chemical_distillation",
+      "pressure_vessels",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Isocyanate Synthesis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Convert a defined amine with separately prepared industrial carbonylation feeds into the selected isocyanate product and separate residual material.",
+    "effects": {},
+    "production_items": [
+      "qualified_isocyanate_feed"
+    ],
+    "production_contract": "Pay named amine and compatible carbonylation inputs, contained conversion and cooling capacity, separation, quality checks and residue handling; retain finite yield and losses.; named feedstocks and finite paid operating inputs are required. Imported material does not confer synthesis mastery."
   }
 ]

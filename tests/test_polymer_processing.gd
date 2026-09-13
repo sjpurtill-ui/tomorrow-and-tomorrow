@@ -186,28 +186,30 @@ func test_silver_has_geographic_potential_and_old_ore_keys_keep_order()->void:
 	var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(100,200))
 	assert_bool(profile.resource_potentials.has("Silver Ore")).is_true()
 	assert_float(float(profile.resource_potentials["Silver Ore"])).is_between(0.0,1.0)
-	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Silver Ore")
+	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Nickel Ore")
 	assert_bool(bool(ResourceSystem.catalog["Silver Ore"].renewable)).is_false()
 func test_appended_silver_does_not_change_existing_generated_deposits()->void:
 	WorldSimulation.scoped("polymers",func()->void:
 		var resource=WorldSimulation.resources
 		var silver:Dictionary=resource.catalog["Silver Ore"].duplicate(true)
+		var nickel:Dictionary=resource.catalog["Nickel Ore"].duplicate(true)
 		var potentials:Dictionary={}
 		for key:String in resource.catalog:potentials[key]=.8
 		var profile:={"resource_potentials":potentials,"signature":"silver-regression"}
 		var seen_silver:=false
 		for seed_value:int in range(10,18):
 			WorldSimulation.state.world_seed=seed_value
-			resource.catalog.erase("Silver Ore")
+			resource.catalog.erase("Silver Ore");resource.catalog.erase("Nickel Ore")
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var old: Array=WorldSimulation.state.resource_deposits.duplicate(true)
-			resource.catalog["Silver Ore"]=silver
+			resource.catalog["Silver Ore"]=silver;resource.catalog["Nickel Ore"]=nickel
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var unchanged:Array=[]
 			for deposit:Dictionary in WorldSimulation.state.resource_deposits:
 				if deposit.resource=="Silver Ore":seen_silver=true
+				elif deposit.resource=="Nickel Ore":pass
 				else:unchanged.append(deposit)
 			assert_array(unchanged).is_equal(old)
 		assert_bool(seen_silver).is_true())
@@ -218,6 +220,7 @@ func test_silver_deposit_and_stock_survive_full_save_load()->void:
 		var deposit:Dictionary=WorldSimulation.resources._deposit("Silver Ore",Vector3(1,0,1),.8,500,0)
 		deposit.stage="recognized"
 		WorldSimulation.state.resource_deposits.assign([deposit])
+		WorldSimulation.state.resource_stockpiles["Nickel Ore"]=5.5
 		WorldSimulation.state.resource_stockpiles["Silver Ore"]=3.5
 		WorldSimulation.state.resource_stockpiles["Bating Protease"]=2.0)
 	var slot:="polymer_silver_%d"%OS.get_process_id()
@@ -227,6 +230,7 @@ func test_silver_deposit_and_stock_survive_full_save_load()->void:
 	assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
 	if not result.get("ok",false):return
 	WorldSimulation.scoped("polymers",func()->void:
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Nickel Ore"])).is_equal(5.5)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Silver Ore"])).is_equal(3.5)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Bating Protease"])).is_equal(2.0)
 		var deposit:Dictionary=WorldSimulation.state.resource_deposits[0]
@@ -306,3 +310,23 @@ func test_ring_opening_uses_typed_oxide_and_paid_cooling_without_radical_mastery
 		assert_float(float(s.resource_stockpiles["Ethylene Oxide"])).is_equal_approx(9.77,.000001)
 		assert_float(float(s.resource_stockpiles.get("PEG Diol",0))).is_equal(0.0)
 		assert_bool("radical_chain_polymerization" in s.known_discoveries).is_false())
+func test_isocyanate_chain_and_addition_cured_web_supply_operating_belt_maintenance()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state;s.resource_stockpiles={}
+		for resource:String in ["Coal","Timber","Freshwater","Nickel Ore","Sulfuric Acid","Caustic Soda","Charcoal","Hydrogen","Alumina Catalyst Supports","Nitrates","Oxygen","Carbon Dioxide","Chlorine","PEG Diol","Ethylene Glycol","Woven Cloth","Spun Yarn"]:s.resource_stockpiles[resource]=1000.0
+		Ops.data().last_day=0;Ops.data().services={"electricity":10000.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
+		var items:Array[String]=["coal_light_oil","separated_toluene","balanced_nickel_feed","prepared_nickel_oxide","reduced_nickel","qualified_nickel_hydrogenation_catalyst","controlled_aromatic_nitration","aromatic_amine_feed","biomass_producer_gas","assayed_producer_gas","separated_carbon_monoxide","qualified_isocyanate_feed","addition_cured_belt_web","polyurethane_drive_belts"]
+		var targets:Array[int]=[8,4,7,2,1,1,3,2,6,5,2,1,1,1]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(s.resource_stockpiles.get("Drive Belts",0))).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["Nickel Ore"])).is_equal_approx(992.65,.00001)
+		assert_float(float(s.resource_stockpiles["PU-Coated Belt Web"])).is_equal(0.0)
+		provision_plants()
+		for gate:String in ["belt_power_transmission","electric_motors"]:
+			if gate not in s.known_discoveries:s.known_discoveries.append(gate)
+			s.discovery_adoption[gate]=1.0
+		for item:String in Ops.PLANTS.belt_workshop.cost:s.resource_stockpiles[item]=100.0
+		assert_bool(Ops.install("belt_workshop").get("ok",false)).is_true()
+		for day:int in range(1,22):s.elapsed_days=day;Ops.advance(day)
+		assert_float(float(s.resource_stockpiles["Drive Belts"])).is_less(1.0)
+		assert_float(float(Ops.data().plants.belt_workshop.running_units)).is_greater(0.0))

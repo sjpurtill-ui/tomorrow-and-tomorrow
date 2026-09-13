@@ -6,6 +6,7 @@ var initialized := false
 # Identification follows observations and existing methods, never campaign age.
 # These gates apply to unknown occurrences only; saved recognition is retained.
 const RECOGNITION_RULES={
+	"Nickel Ore":{"requires_all":["ore_assaying"]},
 	"Silver Ore":{"requires_all":["ore_assaying"]},
 	"Deep Aquifer":{"requires_all":["well_siting"]},
 	"Refractory Clay":{"requires_all":["pit_firing"]},
@@ -66,7 +67,8 @@ var catalog := {
 	"Phosphate Rock":{"family":"Mineral","renewable":false,"recognition_year":125,"access":["mine","specialists","logistics"],"processing":["standard_measures"],"signals":["sustenance","nature"],"base":0.0009},
 	"Uranium Ore":{"family":"Metal Ore","renewable":false,"recognition_year":250,"access":["mine","specialists","logistics"],"processing":["atomic_physics","reactor_engineering"],"signals":["materials","knowledge"],"base":0.0006},
 	"Graphite":{"family":"Mineral","renewable":false,"recognition_year":145,"access":["mine","specialists"],"processing":["standard_measures"],"signals":["materials","information"],"base":0.0008},
-	"Silver Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","lead_smelting"],"signals":["materials","trade"],"base":0.0012}
+	"Silver Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","lead_smelting"],"signals":["materials","trade"],"base":0.0012},
+	"Nickel Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","nickel_metal_recovery"],"signals":["materials","crafting"],"base":0.0010}
 }
 
 func initialize() -> void:
