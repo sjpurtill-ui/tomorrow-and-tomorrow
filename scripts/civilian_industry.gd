@@ -2,6 +2,19 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	# Glass batch preparation, controlled cooling and ceramic forming/firing.
+	"graded_glass_cullet":{"name": "Weighed and recorded compatible cullet", "output": "Graded Glass Cullet", "gate": "glass_batch_composition_control", "materials": {"Glass": 1.25, "Clay Record Tablets": 0.02}, "days": 2, "tooling": {"Stone": 3, "Refined Copper": 1}},
+	"cullet_glass":{"name": "Remelted graded glass", "output": "Glass", "gate": "glassmaking", "materials": {"Graded Glass Cullet": 1, "Timber": 1.8}, "days": 2, "tooling": {"Refractory Bricks": 6, "Ceramic Crucibles": 1}},
+	"annealed_glass_blanks":{"name": "Annealed glass blanks", "output": "Annealed Glass Blanks", "gate": "glass_annealing_schedules", "materials": {"Glass": 1.1, "Timber": 0.5}, "days": 3, "tooling": {"Refractory Bricks": 6, "Stone": 3}},
+	"annealed_optical_lenses":{"name": "Lenses from annealed blanks", "output": "Optical Lenses", "gate": "optical_lenses", "materials": {"Annealed Glass Blanks": 1, "Fine Sand": 0.2}, "days": 3, "tooling": {"Timber": 5, "Stone": 5}},
+	"pottery_plaster_molds":{"name": "Absorbent pottery plaster molds", "output": "Pottery Plaster Molds", "gate": "ceramic_slip_casting", "materials": {"Gypsum": 2, "Timber": 0.25, "Freshwater": 1}, "days": 3, "tooling": {"Timber": 3, "Clay": 2}},
+	"stoneware_body":{"name": "Trial-qualified stoneware body", "output": "Stoneware Body", "gate": "high_fire_stoneware", "materials": {"Prepared Clay": 2, "Fine Sand": 0.25, "Freshwater": 1, "Timber": 0.5}, "days": 3, "tooling": {"Refractory Bricks": 6, "Stone": 3}},
+	"formed_stoneware_vessels":{"name": "Hand-formed fired stoneware vessels", "output": "Stoneware Vessels", "gate": "high_fire_stoneware", "materials": {"Stoneware Body": 1.2, "Timber": 3}, "days": 4, "tooling": {"Refractory Bricks": 8, "Stone": 3}},
+	"slip_cast_stoneware":{"name": "Dried slip-cast stoneware forms", "output": "Dry Cast Stoneware", "gate": "ceramic_slip_casting", "materials": {"Stoneware Body": 1.1, "Freshwater": 1, "Pottery Plaster Molds": 0.02}, "days": 2, "tooling": {"Pottery Plaster Molds": 2, "Timber": 4}},
+	"fired_cast_stoneware":{"name": "Fired cast stoneware vessels", "output": "Stoneware Vessels", "gate": "high_fire_stoneware", "materials": {"Dry Cast Stoneware": 1, "Timber": 3}, "days": 2, "tooling": {"Refractory Bricks": 8, "Stone": 3}},
+	"glazed_stoneware_vessels":{"name": "Fit-tested glazed stoneware vessels", "output": "Glazed Stoneware Vessels", "gate": "ceramic_glaze_formulation", "materials": {"Stoneware Vessels": 1.1, "Glass": 0.2, "Prepared Clay": 0.1, "Limestone": 0.05, "Timber": 1.5, "Freshwater": 0.5}, "days": 3, "tooling": {"Refractory Bricks": 8, "Stone": 4}},
+	"stoneware_purified_brine":{"name": "Brine in glazed stoneware vessels", "output": "Purified Brine", "gate": "brine_purification", "materials": {"Salt": 1, "Freshwater": 3}, "days": 2.5, "tooling": {"Glazed Stoneware Vessels": 2, "Stone": 2}},
+
 	"annealed_copper":{"name": "Soft-annealed copper stock", "output": "Annealed Copper", "gate": "metal_annealing_control", "materials": {"Refined Copper": 1, "Charcoal": 0.25}, "days": 2, "tooling": {"Clay": 3, "Stone": 2}},
 	"annealed_copper_wire":{"name": "Wire from annealed copper", "output": "Copper Wire", "gate": "wire_drawing", "materials": {"Annealed Copper": 1}, "days": 0.8, "tooling": {"Wrought Iron": 3, "Timber": 5}},
 	"case_hardened_gears":{"name": "Carburized iron gear sets", "output": "Gear Sets", "gate": "surface_carburization", "materials": {"Wrought Iron": 2, "Charcoal": 0.8, "Freshwater": 0.5}, "days": 5, "tooling": {"Steel": 4, "Timber": 4, "Clay": 2}},
