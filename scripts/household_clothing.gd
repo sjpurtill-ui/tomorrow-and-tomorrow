@@ -14,15 +14,35 @@ static func available(item:String)->float:
 static func spend(item:String,amount:float)->void:
 	if item==BONE_RESOURCE:data().bone_stock=maxf(0,available(item)-amount)
 	else:WorldSimulation.state.resource_stockpiles[item]=maxf(0,available(item)-amount)
+static func materials(id:String,installation:bool=false)->Dictionary:
+	var result:Dictionary=K.METHODS[id].cost.duplicate() if installation else K.METHODS[id].inputs.duplicate()
+	# Existing sewing/cutting skills can use an imported figured fabric. Pattern
+	# origin is retained in the garment lot; it grants no insulation multiplier.
+	if String(K.METHODS[id].mode) in ["sew","fit","grade"] and result.has("Woven Cloth") and available("Figured Cloth")>=float(result["Woven Cloth"]):
+		result["Figured Cloth"]=result["Woven Cloth"];result.erase("Woven Cloth")
+	return result
+static func figured_count()->float:
+	var amount:=0.0
+	for lot:Dictionary in data().lots:
+		if String(lot.get("fabric","plain"))=="figured":amount+=float(lot.amount)
+	return amount
+static func figured_target(population:float)->float:
+	var state=WorldSimulation.state
+	if state.convoy_traveling or not state.settlement_site_committed or count()>=population*1.1:return 0.0
+	for id:String in ["bone_needle_sewing","garment_pattern_cutting","garment_size_grading"]:
+		if id in state.known_discoveries and WorldSimulation.discovery.adoption(id)>=.1 and R.evaluate(K.METHODS[id],state.known_discoveries).ready:
+			return minf(6,ceilf(maxf(0,population*.25-figured_count())*.7))
+	return 0.0
 static func quote(id:String)->Dictionary:
 	if not K.METHODS.has(id):return {"error":"Unknown clothing equipment."}
 	if float(K.METHODS[id].get("power",0))>0 and not WorldSimulation.state.resource_settlement_id.is_empty():return {"error":"This city has no connected electricity service for laundry."}
 	if WorldSimulation.state.convoy_traveling or not WorldSimulation.state.settlement_site_committed:return {"error":"Settle before installing clothing equipment."}
 	if id not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not R.evaluate(K.METHODS[id],WorldSimulation.state.known_discoveries).ready:return {"error":"Adopt the method and its foundations first."}
 	if int(data().tools.get(id,0))>=100:return {"error":"Equipment limit reached."}
-	for item:String in K.METHODS[id].cost:
-		if available(item)<float(K.METHODS[id].cost[item]):return {"error":"Installation needs %.1f %s."%[float(K.METHODS[id].cost[item]),item]}
-	return {"ok":true,"cost":K.METHODS[id].cost.duplicate(),"message":"Install %s; ongoing supplies and shared Logistics work are required."%K.METHODS[id].name}
+	var costs:=materials(id,true)
+	for item:String in costs:
+		if available(item)<float(costs[item]):return {"error":"Installation needs %.1f %s."%[float(costs[item]),item]}
+	return {"ok":true,"cost":costs,"message":"Install %s; ongoing supplies and shared Logistics work are required."%K.METHODS[id].name}
 static func install(id:String)->Dictionary:
 	var terms:=quote(id)
 	if terms.has("error"):return terms
@@ -33,16 +53,16 @@ static func count()->float:
 	var n:=0.0
 	for lot:Dictionary in data().lots:n+=float(lot.amount)
 	return n
-static func add(kind:String,amount:float,condition:float=1,soil:float=0,layered:bool=false,wick:bool=false,ready:int=0)->bool:
-	if amount<=0:return false
+static func add(kind:String,amount:float,condition:float=1,soil:float=0,layered:bool=false,wick:bool=false,ready:int=0,fabric:String="plain")->bool:
+	if amount<=0 or fabric not in ["plain","figured"]:return false
 	for lot:Dictionary in data().lots:
-		if lot.kind==kind and lot.layered==layered and lot.wick==wick and int(lot.ready)==ready:
+		if lot.kind==kind and lot.layered==layered and lot.wick==wick and int(lot.ready)==ready and String(lot.get("fabric","plain"))==fabric:
 			var total:=float(lot.amount)+amount
 			lot.condition=(float(lot.condition)*float(lot.amount)+condition*amount)/total
 			lot.soil=(float(lot.soil)*float(lot.amount)+soil*amount)/total
 			lot.amount=total;return true
 	if data().lots.size()>=LIMIT:return false
-	data().lots.append({"kind":kind,"amount":amount,"condition":condition,"soil":soil,"layered":layered,"wick":wick,"ready":ready});return true
+	data().lots.append({"kind":kind,"amount":amount,"condition":condition,"soil":soil,"layered":layered,"wick":wick,"ready":ready,"fabric":fabric});return true
 static func coverage(population:float,day:int)->Dictionary:
 	var cold:=0.0;var storm:=0.0;var worn:=0.0
 	# Bounded stock can exceed residents during replacement. Never count more
@@ -69,7 +89,8 @@ static func power_demand()->float:
 		var new_soil:=.025*used/maxf(.000001,float(lot.amount)) if int(data().last_day)<int(state.elapsed_days) else 0.0
 		if float(lot.soil)+new_soil>=.35:dirty+=float(lot.amount)
 	amount=minf(amount,dirty)
-	for item:String in K.METHODS[id].inputs:amount=minf(amount,maxf(0,available(item))/float(K.METHODS[id].inputs[item]))
+	var inputs:=materials(id)
+	for item:String in inputs:amount=minf(amount,maxf(0,available(item))/float(inputs[item]))
 	return amount*float(K.METHODS[id].power)
 
 static func test_cycles(workers:float,population:float,day:int,report:Dictionary)->void:
@@ -100,13 +121,15 @@ static func quota(id:String,workers:float,report:Dictionary)->float:
 	if id not in WorldSimulation.state.known_discoveries:return 0
 	var rate:=float(K.METHODS[id].rate)*clampf(WorldSimulation.discovery.adoption(id),0,1)
 	var amount:=minf(maxf(0,workers)*rate,maxf(0,float(data().tools.get(id,0))*rate-float(report.methods.get(id,0))))
-	for item:String in K.METHODS[id].inputs:amount=minf(amount,maxf(0,available(item))/float(K.METHODS[id].inputs[item]))
+	var inputs:=materials(id)
+	for item:String in inputs:amount=minf(amount,maxf(0,available(item))/float(inputs[item]))
 	var power:=float(K.METHODS[id].get("power",0))
 	if power>0:amount=minf(amount,preload("res://scripts/technology_operations.gd").service("electricity")/power)
 	return amount
 static func charge(id:String,amount:float,report:Dictionary)->void:
-	for item:String in K.METHODS[id].inputs:
-		var used:=float(K.METHODS[id].inputs[item])*amount
+	var inputs:=materials(id)
+	for item:String in inputs:
+		var used:=float(inputs[item])*amount
 		spend(item,used)
 		report.inputs[item]=float(report.inputs.get(item,0))+used
 	var power:=float(K.METHODS[id].get("power",0))*amount
@@ -121,7 +144,8 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 	var washing:=mode in ["wash","machine_wash"]
 	if mode in CREATION_MODES:
 		var amount:=minf(quota(id,workers,report),maxf(0,population*1.1-count()))
-		if amount>0 and add(mode,amount):charge(id,amount,report)
+		var fabric:="figured" if materials(id).has("Figured Cloth") else "plain"
+		if amount>0 and add(mode,amount,1,0,false,false,0,fabric):charge(id,amount,report)
 		return
 	var used_before:=float(report.workers)
 	for lot:Dictionary in data().lots.duplicate():
@@ -141,7 +165,7 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 		if mode=="layer":amount=minf(amount,maxf(0,count()-population))
 		if amount<=.000001:continue
 		# Admit output before withdrawing or charging; a full ledger waits safely.
-		if not add(String(lot.kind),amount,maxf(0,float(lot.condition)-(.002 if mode=="machine_wash" else 0)),0 if washing else float(lot.soil),bool(lot.layered) or mode=="layer",bool(lot.wick) or mode=="wick",day+1 if washing else 0):continue
+		if not add(String(lot.kind),amount,maxf(0,float(lot.condition)-(.002 if mode=="machine_wash" else 0)),0 if washing else float(lot.soil),bool(lot.layered) or mode=="layer",bool(lot.wick) or mode=="wick",day+1 if washing else 0,String(lot.get("fabric","plain"))):continue
 		lot.amount-=amount*multiplier
 		charge(id,amount,report)
 	for i in range(data().lots.size()-1,-1,-1):
@@ -173,8 +197,9 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 			if int(data().tools.get(id,0))>0:continue
 			if K.METHODS[id].mode=="test" and count()-population<.25:continue
 			var supplied:=true
-			for item:String in K.METHODS[id].inputs:
-				if available(item)<float(K.METHODS[id].inputs[item]):supplied=false
+			var inputs:=materials(id)
+			for item:String in inputs:
+				if available(item)<float(inputs[item]):supplied=false
 			if budget>0 and supplied and (count()>0 or K.METHODS[id].mode in CREATION_MODES) and not quote(id).has("error"):
 				install(id);break
 		for id:String in K.METHODS:
@@ -192,6 +217,7 @@ static func valid(value:Variant)->bool:
 	for lot:Variant in value.lots:
 		if not lot is Dictionary or not lot.has_all(["kind","amount","condition","soil","layered","wick","ready"]):return false
 		if lot.kind not in CREATION_MODES or not lot.layered is bool or not lot.wick is bool:return false
+		if not lot.get("fabric","plain") is String or lot.get("fabric","plain") not in ["plain","figured"]:return false
 		for key:String in ["amount","condition","soil","ready"]:
 			if not number(lot[key]) or lot[key]<0 or lot[key]>1e12:return false
 		if lot.amount<=0 or lot.condition>1 or lot.soil>1 or lot.ready!=floorf(float(lot.ready)):return false

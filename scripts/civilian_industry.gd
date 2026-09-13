@@ -2,6 +2,17 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"measured_yarn":{"name": "Sampled standard-count yarn", "output": "Measured Yarn", "gate": "yarn_count_standards", "materials": {"Spun Yarn": 1.05, "Clay": 0.02}, "days": 0.4, "tooling": {"Stone": 4, "Timber": 2}},
+	"tensioned_woven_cloth":{"name": "Tension-regulated plain cloth", "output": "Woven Cloth", "gate": "yarn_tension_control", "materials": {"Measured Yarn": 1.8}, "days": 2.5, "tooling": {"Mechanical Governors": 1, "Loom Weights": 2, "Crank Assemblies": 1, "Timber": 6}},
+	"hand_ring_yarn":{"name": "Hand-driven ring-spun yarn", "output": "Spun Yarn", "gate": "ring_spinning_systems", "materials": {"Combed Fibers": 0.75}, "days": 1.2, "tooling": {"Shaft Bearings": 2, "Steel": 4, "Timber": 6}},
+	"electric_ring_yarn":{"name": "Motor-driven ring-spun yarn", "output": "Spun Yarn", "gate": "ring_spinning_systems", "materials": {"Combed Fibers": 0.75}, "days": 0.45, "tooling": {"Electric Motors": 1, "Shaft Bearings": 2, "Steel": 4, "Timber": 6}, "power": 1.5, "daily_power": 1.0},
+	"rotor_spun_yarn":{"name": "Rotor-spun staple yarn", "output": "Spun Yarn", "gate": "rotor_spinning_systems", "materials": {"Prepared Fibers": 1.1}, "days": 0.4, "tooling": {"Electric Motors": 1, "Shaft Bearings": 3, "Steel": 6}, "power": 2.0, "daily_power": 1.0},
+	"drawloom_figured_cloth":{"name": "Manually selected figured cloth", "output": "Figured Cloth", "gate": "drawloom_pattern_control", "materials": {"Spun Yarn": 2.5}, "days": 5.0, "tooling": {"Timber": 10, "Loom Weights": 4, "Fiber Plants": 2}},
+	"measured_drawloom_cloth":{"name": "Count-matched drawloom cloth", "output": "Figured Cloth", "gate": "drawloom_pattern_control", "materials": {"Measured Yarn": 2.2}, "days": 4.5, "tooling": {"Timber": 10, "Loom Weights": 4, "Fiber Plants": 2}},
+	"loom_pattern_cards":{"name": "Punched and laced loom pattern cards", "output": "Loom Pattern Cards", "gate": "punched_card_loom_control", "materials": {"Paper": 0.5, "Fiber Plants": 0.1}, "days": 1.2, "tooling": {"Wrought Iron": 1, "Timber": 2}},
+	"card_figured_cloth":{"name": "Card-selected figured cloth", "output": "Figured Cloth", "gate": "punched_card_loom_control", "materials": {"Spun Yarn": 2.4, "Loom Pattern Cards": 0.05}, "days": 2.5, "tooling": {"Timber": 12, "Loom Weights": 4, "Wrought Iron": 4}},
+	"measured_card_cloth":{"name": "Count-matched card-selected cloth", "output": "Figured Cloth", "gate": "punched_card_loom_control", "materials": {"Measured Yarn": 2.1, "Loom Pattern Cards": 0.05}, "days": 2.3, "tooling": {"Timber": 12, "Loom Weights": 4, "Wrought Iron": 4}},
+
 	"annealed_copper":{"name": "Soft-annealed copper stock", "output": "Annealed Copper", "gate": "metal_annealing_control", "materials": {"Refined Copper": 1, "Charcoal": 0.25}, "days": 2, "tooling": {"Clay": 3, "Stone": 2}},
 	"annealed_copper_wire":{"name": "Wire from annealed copper", "output": "Copper Wire", "gate": "wire_drawing", "materials": {"Annealed Copper": 1}, "days": 0.8, "tooling": {"Wrought Iron": 3, "Timber": 5}},
 	"case_hardened_gears":{"name": "Carburized iron gear sets", "output": "Gear Sets", "gate": "surface_carburization", "materials": {"Wrought Iron": 2, "Charcoal": 0.8, "Freshwater": 0.5}, "days": 5, "tooling": {"Steel": 4, "Timber": 4, "Clay": 2}},
