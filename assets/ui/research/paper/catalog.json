@@ -1666,6 +1666,46 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/nut_kernel_shelling.png",
+      "description": "Separate edible kernels from hard shells with controlled breakage. Known suitable nuts, fitted tools and sorting labor.",
+      "domain": "nutrition",
+      "id": "nut_kernel_shelling",
+      "name": "Nut Kernel Shelling",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/acorn_leaching.png",
+      "description": "Apply locally qualified leaching to identified acorn meal. Suitable acorns, clean water, retained meal and established preparation practice.",
+      "domain": "nutrition",
+      "id": "acorn_leaching",
+      "name": "Acorn Leaching",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/root_grating_dewatering.png",
+      "description": "Disrupt root tissue and press liquid from the resulting pulp. Suitable roots, grating surfaces, pressable containers and qualified subsequent processing.",
+      "domain": "nutrition",
+      "id": "root_grating_dewatering",
+      "name": "Root Grating and Dewatering",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/pulse_splitting.png",
+      "description": "Separate pulse skins and divide suitable cotyledons with controlled treatment. Identified pulses, conditioning capacity and sorting tools.",
+      "domain": "nutrition",
+      "id": "pulse_splitting",
+      "name": "Pulse Splitting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+      "description": "Separate usable fruit pulp from coarse skins and seeds. Suitable fruit, screens, collection vessels and cleaning work.",
+      "domain": "nutrition",
+      "id": "fruit_pulp_screening",
+      "name": "Fruit Pulp Screening",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/grain_parboiling.png",
       "description": "Heat and moisten a suitable cereal share, then dry and dehull it in a later paid handling step. Water, fuel, vessels and finite shared handlers limit throughput; damp grain remains unavailable until finished.",
       "domain": "nutrition",
@@ -1864,6 +1904,14 @@
       "id": "textile_moisture_transport",
       "name": "Textile Moisture Transport",
       "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sewing_machine_mechanisms.png",
+      "description": "Coordinate needle, shuttle and cloth feed using a paid manual treadle mechanism.",
+      "domain": "production",
+      "id": "sewing_machine_mechanisms",
+      "name": "Sewing-Machine Mechanisms",
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/bone_needle_sewing.png",
@@ -5346,6 +5394,14 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/edible_resource_recognition.png",
+      "description": "Distinguish locally known food resources through transmitted observations and verified identification",
+      "domain": "nutrition",
+      "id": "edible_resource_recognition",
+      "name": "Edible Resource Recognition",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
       "description": "Repeated wet beating separates and fibrillates prepared plant fibers so they bond into a sheet.",
       "domain": "production",
@@ -5867,11 +5923,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 733,
+  "live_count": 740,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 155
+  "verified_count": 162
 }

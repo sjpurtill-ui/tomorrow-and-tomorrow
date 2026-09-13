@@ -5254,6 +5254,55 @@
       "source_domain": "knowledge",
       "name": "Movable-Type Composition",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "nut_kernel_shelling",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Nut Kernel Shelling",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "acorn_leaching",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Acorn Leaching",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "root_grating_dewatering",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Root Grating and Dewatering",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "pulse_splitting",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Pulse Splitting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "fruit_pulp_screening",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Fruit Pulp Screening",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "sewing_machine_mechanisms",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Sewing-Machine Mechanisms",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "edible_resource_recognition",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Edible Resource Recognition",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

@@ -1,3 +1,13 @@
+## September 12 — 740 verified operating discoveries
+
+Selected food source `6731829793b0eb5b65dbb8f0fb94b36d622b4600` and sewing source `8201718` are combined in `43e073253e78fc99b4ab87fee632e63116f843eb`; canonical runtime/art acceptance is `c1f13057d6dee1e53cce319d16fc7fc112c5820c`. Six food identities retain their original predicates. Stable compatible local resource opportunities require recognition, matching adopted preparation and finite collection work; that work is subtracted from the existing food workforce. Raw and unfinished lots are unavailable as food. Shelling, screening, leaching, grating and splitting spend equipment, materials and shared Logistics work; selected intermediates require later paid cooking. No generic plant stock is relabeled into selected species.
+
+Treadle sewing retains bone needle sewing AND cam motion. Two paid recipes supply actual machines and replacement parts; installed machines consume cloth, yarn, parts and the existing clothing workforce to make ordinary sewn garments. No free power, extra insulation or second daily labor owner.
+
+**166 combined runtime cases and98 canonical cases pass**, plus12 atlas cases on both. Graph: **740 discoveries /522 routes /402 recipes /20 facilities**, no errors and all declared production reachable. Exact740-definition canonical snapshot,15 ledger tests and normal headless boot pass. Ledger: **740 integrated +2,521 drafts =3,261 identities**, leaving **1,739 to author and4,260 to implement**.
+
+Selected-food art source `0ac75db` is integrated as `e63aaaa`; sewing art is `c1f1305`. Seven illustrations were personally reviewed and pass canonical768px/mipmap loading. Art: **162 verified /740 live,578 queued**. Selected resources use bounded procedural compatible classes and existing gathering health, not surveyed botanical species or a new regional depletion model. Optional lot provenance and a collection-day stamp use the existing bounded food-batch/save owner; old ordinary cereal lots remain valid. No player launch or package rebuild. See `SELECTED_FOOD_PROCESSING_HANDOFF.md` and `SEWING_MECHANISMS_HANDOFF.md`. The other task is starting a larger coherent polymer family from this verifiedmain.
+
 ## September 12 — mathematical structures coverage
 
 Reviewed24 distinct mathematical-structure proposals, including exact algebraic domains, coordinate/shape structure, integration assumptions and weak equation formulations. Each has a primary mechanism reference, finite analytical-work contract, explicit failure limits and a proposed downstream consumer. Existing arithmetic, matrix/vector methods, optimization and PDE solvers are excluded from duplicate counting.

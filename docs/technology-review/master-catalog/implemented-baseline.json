@@ -1,5 +1,5 @@
 {
-  "source_commit": "17430c9d498830b348709a0e0fbc2e523c8d133e",
+  "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -14996,6 +14996,547 @@
       }
     },
     {
+      "id": "nut_kernel_shelling",
+      "name": "Nut Kernel Shelling",
+      "field": "D01",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "food_pounding_mortars",
+          "controlled_flaking"
+        ]
+      ],
+      "foundations": "edible_resource_recognition",
+      "mechanism": "Separate edible kernels from hard shells with controlled breakage.",
+      "operating_requirement": "Known suitable nuts, fitted tools and sorting labor.",
+      "consequence": "Adds recovered kernels and shell waste; breakage reduces usable yield.",
+      "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+      "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "nut_kernel_shelling",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Separate edible kernels from hard shells with controlled breakage.",
+        "operating_requirements": "Known suitable nuts, fitted tools and sorting labor.",
+        "route_terms": {
+          "scholar_envoy": "Pay travel, provisions and instructor time for nut kernel shelling; contribute local ingredients and lose trial batches while the method is learned.",
+          "partnership": "Share ingredients, trials and observations for nut kernel shelling; negotiate access to results and accept delays from shared capacity.",
+          "purchased_research": "Commission a bounded nut kernel shelling investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+          "licensed_or_imported_service": "Buy a compatible nut kernel shelling service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+          "reverse_engineering": "Analyze an acquired product, tool or record relevant to nut kernel shelling; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+        }
+      },
+      "evidence_sources": [
+        "https://www.fao.org/4/X5043E/x5043E03.htm"
+      ],
+      "historical_scope": "H01 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals.",
+      "implementation_reconciliation": {
+        "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+        "editorial_source": "food-processing-service-depth.json",
+        "previous_requires_all": [
+          "edible_resource_recognition"
+        ],
+        "previous_requires_any": [
+          [
+            "food_pounding_mortars",
+            "controlled_flaking"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "nut_kernel_shelling",
+        "id": "nut_kernel_shelling",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Nut Kernel Shelling",
+            "missing_all": [
+              "edible_resource_recognition"
+            ],
+            "missing_any": [
+              [
+                "food_pounding_mortars",
+                "controlled_flaking"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "edible_resource_recognition",
+              "food_pounding_mortars",
+              "controlled_flaking"
+            ],
+            "requires_all": [
+              "edible_resource_recognition"
+            ],
+            "requires_any": [
+              [
+                "food_pounding_mortars",
+                "controlled_flaking"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Nut Kernel Shelling",
+        "observation": "Separate edible kernels from hard shells with controlled breakage. Known suitable nuts, fitted tools and sorting labor.",
+        "production_contract": "Processes only identified compatible ingredient lots with paid equipment, water, handling losses and shared Logistics time. Leached acorn meal, grated root pulp and split pulses still require their adopted cooking step before they become edible rations.",
+        "requires": [
+          "edible_resource_recognition"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "food_pounding_mortars",
+            "controlled_flaking"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "acorn_leaching",
+      "name": "Acorn Leaching",
+      "field": "D01",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "edible_resource_recognition, food_pounding_mortars",
+      "mechanism": "Apply locally qualified leaching to identified acorn meal.",
+      "operating_requirement": "Suitable acorns, clean water, retained meal and established preparation practice.",
+      "consequence": "Makes an additional seasonal resource usable at water and labor cost; it is not universal plant detoxification.",
+      "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+      "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "acorn_leaching",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Apply locally qualified leaching to identified acorn meal.",
+        "operating_requirements": "Suitable acorns, clean water, retained meal and established preparation practice.",
+        "route_terms": {
+          "scholar_envoy": "Pay travel, provisions and instructor time for acorn leaching; contribute local ingredients and lose trial batches while the method is learned.",
+          "partnership": "Share ingredients, trials and observations for acorn leaching; negotiate access to results and accept delays from shared capacity.",
+          "purchased_research": "Commission a bounded acorn leaching investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+          "licensed_or_imported_service": "Buy a compatible acorn leaching service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+          "reverse_engineering": "Analyze an acquired product, tool or record relevant to acorn leaching; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+        }
+      },
+      "evidence_sources": [
+        "https://home.nps.gov/articles/000/recipes-acorn-bread-chia-pudding.htm"
+      ],
+      "historical_scope": "H01 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals.",
+      "implementation_reconciliation": {
+        "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+        "editorial_source": "food-processing-service-depth.json",
+        "previous_requires_all": [
+          "edible_resource_recognition",
+          "food_pounding_mortars"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "acorn_leaching",
+        "id": "acorn_leaching",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Acorn Leaching",
+            "missing_all": [
+              "edible_resource_recognition",
+              "food_pounding_mortars"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "edible_resource_recognition",
+              "food_pounding_mortars"
+            ],
+            "requires_all": [
+              "edible_resource_recognition",
+              "food_pounding_mortars"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Acorn Leaching",
+        "observation": "Apply locally qualified leaching to identified acorn meal. Suitable acorns, clean water, retained meal and established preparation practice.",
+        "production_contract": "Processes only identified compatible ingredient lots with paid equipment, water, handling losses and shared Logistics time. Leached acorn meal, grated root pulp and split pulses still require their adopted cooking step before they become edible rations.",
+        "requires": [
+          "edible_resource_recognition",
+          "food_pounding_mortars"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "root_grating_dewatering",
+      "name": "Root Grating and Dewatering",
+      "field": "D01",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "controlled_flaking",
+          "food_pounding_mortars"
+        ]
+      ],
+      "foundations": "edible_resource_recognition",
+      "mechanism": "Disrupt root tissue and press liquid from the resulting pulp.",
+      "operating_requirement": "Suitable roots, grating surfaces, pressable containers and qualified subsequent processing.",
+      "consequence": "Supplies pulp for further preparation; pressing alone does not establish edibility or recover every constituent.",
+      "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+      "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "root_grating_dewatering",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Disrupt root tissue and press liquid from the resulting pulp.",
+        "operating_requirements": "Suitable roots, grating surfaces, pressable containers and qualified subsequent processing.",
+        "route_terms": {
+          "scholar_envoy": "Pay travel, provisions and instructor time for root grating and dewatering; contribute local ingredients and lose trial batches while the method is learned.",
+          "partnership": "Share ingredients, trials and observations for root grating and dewatering; negotiate access to results and accept delays from shared capacity.",
+          "purchased_research": "Commission a bounded root grating and dewatering investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+          "licensed_or_imported_service": "Buy a compatible root grating and dewatering service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+          "reverse_engineering": "Analyze an acquired product, tool or record relevant to root grating and dewatering; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+        }
+      },
+      "evidence_sources": [
+        "https://www.fao.org/4/x5415e/x5415e05.htm"
+      ],
+      "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals.",
+      "implementation_reconciliation": {
+        "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+        "editorial_source": "food-processing-service-depth.json",
+        "previous_requires_all": [
+          "edible_resource_recognition"
+        ],
+        "previous_requires_any": [
+          [
+            "controlled_flaking",
+            "food_pounding_mortars"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "root_grating_dewatering",
+        "id": "root_grating_dewatering",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Root Grating and Dewatering",
+            "missing_all": [
+              "edible_resource_recognition"
+            ],
+            "missing_any": [
+              [
+                "controlled_flaking",
+                "food_pounding_mortars"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "edible_resource_recognition",
+              "controlled_flaking",
+              "food_pounding_mortars"
+            ],
+            "requires_all": [
+              "edible_resource_recognition"
+            ],
+            "requires_any": [
+              [
+                "controlled_flaking",
+                "food_pounding_mortars"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Root Grating and Dewatering",
+        "observation": "Disrupt root tissue and press liquid from the resulting pulp. Suitable roots, grating surfaces, pressable containers and qualified subsequent processing.",
+        "production_contract": "Processes only identified compatible ingredient lots with paid equipment, water, handling losses and shared Logistics time. Leached acorn meal, grated root pulp and split pulses still require their adopted cooking step before they become edible rations.",
+        "requires": [
+          "edible_resource_recognition"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "controlled_flaking",
+            "food_pounding_mortars"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "pulse_splitting",
+      "name": "Pulse Splitting",
+      "field": "D01",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "food_pounding_mortars, edible_resource_recognition",
+      "mechanism": "Separate pulse skins and divide suitable cotyledons with controlled treatment.",
+      "operating_requirement": "Identified pulses, conditioning capacity and sorting tools.",
+      "consequence": "Produces cooking-ready split fractions with paid handling and broken-material losses.",
+      "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+      "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "pulse_splitting",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Separate pulse skins and divide suitable cotyledons with controlled treatment.",
+        "operating_requirements": "Identified pulses, conditioning capacity and sorting tools.",
+        "route_terms": {
+          "scholar_envoy": "Pay travel, provisions and instructor time for pulse splitting; contribute local ingredients and lose trial batches while the method is learned.",
+          "partnership": "Share ingredients, trials and observations for pulse splitting; negotiate access to results and accept delays from shared capacity.",
+          "purchased_research": "Commission a bounded pulse splitting investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+          "licensed_or_imported_service": "Buy a compatible pulse splitting service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+          "reverse_engineering": "Analyze an acquired product, tool or record relevant to pulse splitting; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+        }
+      },
+      "evidence_sources": [
+        "https://www.icar-iipr.org.in/wp-content/themes/ICAR-wp/images/pdf/postbulletins2may13.pdf"
+      ],
+      "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals.",
+      "implementation_reconciliation": {
+        "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+        "editorial_source": "food-processing-service-depth.json",
+        "previous_requires_all": [
+          "food_pounding_mortars",
+          "edible_resource_recognition"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "pulse_splitting",
+        "id": "pulse_splitting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Pulse Splitting",
+            "missing_all": [
+              "food_pounding_mortars",
+              "edible_resource_recognition"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "food_pounding_mortars",
+              "edible_resource_recognition"
+            ],
+            "requires_all": [
+              "food_pounding_mortars",
+              "edible_resource_recognition"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Pulse Splitting",
+        "observation": "Separate pulse skins and divide suitable cotyledons with controlled treatment. Identified pulses, conditioning capacity and sorting tools.",
+        "production_contract": "Processes only identified compatible ingredient lots with paid equipment, water, handling losses and shared Logistics time. Leached acorn meal, grated root pulp and split pulses still require their adopted cooking step before they become edible rations.",
+        "requires": [
+          "food_pounding_mortars",
+          "edible_resource_recognition"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "fruit_pulp_screening",
+      "name": "Fruit Pulp Screening",
+      "field": "D01",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "basketry",
+          "flour_sifting"
+        ]
+      ],
+      "foundations": "edible_resource_recognition",
+      "mechanism": "Separate usable fruit pulp from coarse skins and seeds.",
+      "operating_requirement": "Suitable fruit, screens, collection vessels and cleaning work.",
+      "consequence": "Supplies pulp for preserves or drying while retaining a real waste fraction.",
+      "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+      "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "fruit_pulp_screening",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Separate usable fruit pulp from coarse skins and seeds.",
+        "operating_requirements": "Suitable fruit, screens, collection vessels and cleaning work.",
+        "route_terms": {
+          "scholar_envoy": "Pay travel, provisions and instructor time for fruit pulp screening; contribute local ingredients and lose trial batches while the method is learned.",
+          "partnership": "Share ingredients, trials and observations for fruit pulp screening; negotiate access to results and accept delays from shared capacity.",
+          "purchased_research": "Commission a bounded fruit pulp screening investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+          "licensed_or_imported_service": "Buy a compatible fruit pulp screening service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+          "reverse_engineering": "Analyze an acquired product, tool or record relevant to fruit pulp screening; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+        }
+      },
+      "evidence_sources": [
+        "https://www.fao.org/4/v5030e/V5030E0y.htm"
+      ],
+      "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals.",
+      "implementation_reconciliation": {
+        "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+        "editorial_source": "food-processing-service-depth.json",
+        "previous_requires_all": [
+          "edible_resource_recognition"
+        ],
+        "previous_requires_any": [
+          [
+            "basketry",
+            "flour_sifting"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "fruit_pulp_screening",
+        "id": "fruit_pulp_screening",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Fruit Pulp Screening",
+            "missing_all": [
+              "edible_resource_recognition"
+            ],
+            "missing_any": [
+              [
+                "basketry",
+                "flour_sifting"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "edible_resource_recognition",
+              "basketry",
+              "flour_sifting"
+            ],
+            "requires_all": [
+              "edible_resource_recognition"
+            ],
+            "requires_any": [
+              [
+                "basketry",
+                "flour_sifting"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Fruit Pulp Screening",
+        "observation": "Separate usable fruit pulp from coarse skins and seeds. Suitable fruit, screens, collection vessels and cleaning work.",
+        "production_contract": "Processes only identified compatible ingredient lots with paid equipment, water, handling losses and shared Logistics time. Leached acorn meal, grated root pulp and split pulses still require their adopted cooking step before they become edible rations.",
+        "requires": [
+          "edible_resource_recognition"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "basketry",
+            "flour_sifting"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
       "id": "grain_parboiling",
       "name": "Grain Parboiling",
       "field": "D01",
@@ -17388,6 +17929,99 @@
         "requires": [
           "fiber_grading",
           "experimental_controls"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "sewing_machine_mechanisms",
+      "name": "Sewing-Machine Mechanisms",
+      "foundations": "bone_needle_sewing,cam_motion_design",
+      "mechanism": "Coordinate needle, thread and material feed in a qualified machine stitch",
+      "operating_requirement": "Suitable mechanism, thread, power or human drive and maintenance",
+      "consequence": "Increase repeatable sewing throughput while setup and material limits remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Sewing-Machine Mechanisms: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "sewing_machine_mechanisms",
+        "local_demonstration": "Coordinate needle, thread and material feed in a qualified machine stitch",
+        "operating_requirements": "Suitable mechanism, thread, power or human drive and maintenance",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "bone_needle_sewing",
+          "cam_motion_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "sewing_machine_mechanisms",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "sewing_machine_mechanisms",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Sewing-Machine Mechanisms",
+            "missing_all": [
+              "bone_needle_sewing",
+              "cam_motion_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "bone_needle_sewing",
+              "cam_motion_design"
+            ],
+            "requires_all": [
+              "bone_needle_sewing",
+              "cam_motion_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Sewing-Machine Mechanisms",
+        "observation": "Coordinate needle, shuttle and cloth feed using a paid manual treadle mechanism.",
+        "production_contract": "Paid parts and trial-fitted treadle machines support faster ordinary sewing through existing finite Logistics work and equipment quotas. Actual cloth, both sewing threads and replacement needle/feed parts are consumed. Garments keep existing sewn quality, figured-fabric identity, wear, care and save behavior; no electricity, free work, new insulation bonus or arbitrary fabric qualification is granted.",
+        "production_items": [
+          "sewing_service_parts",
+          "treadle_sewing_machines"
+        ],
+        "requires": [
+          "bone_needle_sewing",
+          "cam_motion_design"
         ],
         "requires_all": [],
         "requires_any": [],
@@ -52809,6 +53443,89 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "edible_resource_recognition",
+      "name": "Edible Resource Recognition",
+      "foundations": "",
+      "mechanism": "Distinguish locally known food resources through transmitted observations and verified identification",
+      "operating_requirement": "Competent local knowledge, actual accessible resources and careful handling",
+      "consequence": "Expand recognized food opportunities without treating unknown organisms as safe",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "edible_resource_recognition",
+        "local_demonstration": "Distinguish locally known food resources through transmitted observations and verified identification",
+        "operating_requirements": "Competent local knowledge, actual accessible resources and careful handling",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "branching_note": "Repeated local recognition and transmitted experience form an early root practice; a complete seasonal calendar is not required. Unknown resources are not assumed safe.",
+      "implementation_reconciliation": {
+        "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.003,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "id": "edible_resource_recognition",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local food identification",
+            "missing_all": [],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": true,
+            "requires": [],
+            "requires_all": [],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "foraging",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Edible Resource Recognition",
+        "observation": "Distinguish locally known food resources through transmitted observations and verified identification",
+        "production_contract": "Qualified local source classes are surveyed and collected with finite Food workers, replacing that share of ordinary harvest. Only compatible curated source classes create identified ingredient lots; unknown plants and generic Fresh plants cannot be converted into them.",
+        "requires": [],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "foraging",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
       }
     },
     {

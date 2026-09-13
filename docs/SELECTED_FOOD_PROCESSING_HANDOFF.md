@@ -144,3 +144,5 @@ Mechanism references (not invention dates or unlock rules):
   treatments; grating and pressing alone do not establish universal edibility.
 - [FAO: fruit and vegetable process flows](https://www.fao.org/4/v5030e/V5030E0y.htm)
   supplies context for screening and subsequent food-processing routes.
+
+Canonical combined acceptance `c1f13057d6dee1e53cce319d16fc7fc112c5820c`:166 runtime worktree and98 canonical cases pass, plus12 atlas on both. Seven new textures768/mips; clean740/522/402/20 graph, boot, exact snapshot and15ledger tests. Art162/740; no player launch or package rebuild. See latest integration status for combined sources and limits.

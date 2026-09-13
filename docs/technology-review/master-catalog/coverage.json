@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 733,
+  "verified_baseline_discoveries": 740,
   "pending_communications": 0,
-  "new_authored_drafts": 2528,
+  "new_authored_drafts": 2521,
   "distinct_accounted_identities": 3261,
   "remaining_identities_to_author": 1739,
   "target": 5000,
@@ -2292,9 +2292,9 @@
         "target": 600,
         "assigned": 25,
         "target_slots_not_yet_assigned": 575,
-        "implemented_baseline": 5,
+        "implemented_baseline": 8,
         "pending_communications": 0,
-        "authored_drafts": 20
+        "authored_drafts": 17
       },
       {
         "id": "H02",
@@ -2302,9 +2302,9 @@
         "target": 700,
         "assigned": 74,
         "target_slots_not_yet_assigned": 626,
-        "implemented_baseline": 13,
+        "implemented_baseline": 16,
         "pending_communications": 0,
-        "authored_drafts": 61
+        "authored_drafts": 58
       },
       {
         "id": "H03",
@@ -2349,16 +2349,16 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 459,
+  "branch_alternatives": 456,
   "draft_reachability_rounds": 13,
   "draft_fields": {
-    "D01": 115,
+    "D01": 109,
     "D02": 99,
     "D03": 97,
     "D04": 107,
     "D05": 156,
     "D06": 53,
-    "D07": 39,
+    "D07": 38,
     "D08": 95,
     "D09": 79,
     "D10": 79,
@@ -2382,9 +2382,9 @@
       "id": "D01",
       "name": "Food and agriculture",
       "target": 280,
-      "implemented_baseline": 69,
+      "implemented_baseline": 75,
       "pending_communications": 0,
-      "authored_drafts": 115,
+      "authored_drafts": 109,
       "accounted": 184,
       "remaining_to_target": 96
     },
@@ -2442,9 +2442,9 @@
       "id": "D07",
       "name": "Fibers and domestic technologies",
       "target": 120,
-      "implemented_baseline": 37,
+      "implemented_baseline": 38,
       "pending_communications": 0,
-      "authored_drafts": 39,
+      "authored_drafts": 38,
       "accounted": 76,
       "remaining_to_target": 44
     },
