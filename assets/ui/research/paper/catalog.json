@@ -5303,7 +5303,7 @@
       "domain": "production",
       "id": "bow_drill_drive",
       "name": "Bow-Drill Drive",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/treadle_lathe_drive.png",
@@ -5311,7 +5311,7 @@
       "domain": "production",
       "id": "treadle_lathe_drive",
       "name": "Treadle-Lathe Drive",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/water_powered_hammers.png",
@@ -5319,7 +5319,7 @@
       "domain": "production",
       "id": "water_powered_hammers",
       "name": "Water-Powered Hammers",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/mechanical_screw_presses.png",
@@ -5327,7 +5327,7 @@
       "domain": "production",
       "id": "mechanical_screw_presses",
       "name": "Mechanical Screw Presses",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/cam_motion_design.png",
@@ -5335,7 +5335,7 @@
       "domain": "production",
       "id": "cam_motion_design",
       "name": "Cam-Motion Design",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/belt_power_transmission.png",
@@ -5343,7 +5343,7 @@
       "domain": "production",
       "id": "belt_power_transmission",
       "name": "Belt-Power Transmission",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
@@ -5407,6 +5407,22 @@
       "domain": "knowledge",
       "id": "parchment_record_preparation",
       "name": "Parchment Record Preparation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/metal_type_casting.png",
+      "description": "Produce repeatable durable printing characters through qualified casting",
+      "domain": "knowledge",
+      "id": "metal_type_casting",
+      "name": "Metal-Type Casting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/movable_type_composition.png",
+      "description": "Arrange reusable characters into a qualified page form",
+      "domain": "knowledge",
+      "id": "movable_type_composition",
+      "name": "Movable-Type Composition",
       "status": "verified"
     },
     {
@@ -5851,11 +5867,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 731,
+  "live_count": 733,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 584,
+  "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 147
+  "verified_count": 155
 }
