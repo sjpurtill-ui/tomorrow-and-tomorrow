@@ -130,4 +130,3 @@ func test_all_fabric_scholar_visits_pay_for_temporary_subject_specific_teaching(
 		assert_float(provider.population_exact).is_equal(population)
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_array(MilitaryCampaign.equipment_queue).is_empty()
-
