@@ -26,7 +26,7 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 		if recipe.has("abrasive_inspection") and recipe.get("abrasive_reject") is String and not recipe.abrasive_reject.is_empty():sources[recipe.abrasive_reject]=true
 	var conditional_quality:Array[String]=[]
 	for id:String in products:
-		if products[id].has("abrasive_inspection"):conditional_quality.append(id)
+		if products[id].has("abrasive_inspection") or products[id].has("machine_program"):conditional_quality.append(id)
 	var service_sources:Dictionary={}
 	for plant:Dictionary in plants.values():
 		for name:String in plant.get("services",{}):service_sources[name]=true
@@ -40,7 +40,7 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 		for name:String in recipe.get("services",{}):
 			if not numeric(recipe.services[name],true):errors.append(id+": invalid service requirement for "+name)
 			if not service_sources.has(name):errors.append(id+": no service source for "+name)
-		for field:String in ["materials","tooling","co_products"]:
+		for field:String in ["materials","tooling","machine_inspection","machine_inspection_tools","co_products"]:
 			for item:String in recipe.get(field,{}):
 				var quantity:Variant=recipe[field][item]
 				if not numeric(quantity,true):errors.append(id+": invalid "+field+" quantity for "+item)
@@ -69,6 +69,7 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 			if made.has(id):continue
 			var recipe:Dictionary=products[id]
 			if not missing(recipe.materials,available).is_empty() or not missing(recipe.get("tooling",{}),available).is_empty():continue
+			if not missing(recipe.get("machine_inspection",{}),available).is_empty() or not missing(recipe.get("machine_inspection_tools",{}),available).is_empty():continue
 			if float(recipe.get("power",0))>0 and not services.has("electricity"):continue
 			if not missing(recipe.get("services",{}),services).is_empty():continue
 			made[id]=true;available[String(recipe.output)]=true;changed=true

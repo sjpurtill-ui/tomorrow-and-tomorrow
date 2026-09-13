@@ -1,41 +1,5 @@
 [
   {
-    "id": "gear_power_skiving",
-    "name": "Gear Power Skiving",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "gear_tooth_generation",
-      "numerical_machine_control"
-    ],
-    "requires_any": [],
-    "foundations": "gear_tooth_generation,numerical_machine_control",
-    "mechanism": "Synchronized crossed-axis rotation creates a continuous gear cutting action.",
-    "operating_requirement": "Spend compatible cutter, blank, drive energy and synchronization setup; check tooth geometry and collision clearance.",
-    "consequence": "Supply inspected gears to machinery production within the qualified axis and tool envelope.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable gear power skiving instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "gear_power_skiving",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Synchronized crossed-axis rotation creates a continuous gear cutting action.",
-      "operating_requirements": "Spend compatible cutter, blank, drive energy and synchronization setup; check tooth geometry and collision clearance.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local gear power skiving trials.",
-        "partnership": "Share actual samples and operator time for gear power skiving; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded gear power skiving process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external gear power skiving processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable gear power skiving machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://videos.sandvik.coromant.com/power-skiving-machining-of-internal-1"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
     "id": "honed_bore_finishing",
     "name": "Honed Bore Finishing",
     "field": "D06",
@@ -108,150 +72,6 @@
     "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   },
   {
-    "id": "wire_electrical_discharge_machining",
-    "name": "Wire Electrical-Discharge Machining",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "electrical_measurement",
-      "numerical_machine_control"
-    ],
-    "requires_any": [],
-    "foundations": "electrical_measurement,numerical_machine_control",
-    "mechanism": "A traveling electrode wire erodes conductive stock by discharges.",
-    "operating_requirement": "Consume wire, dielectric service, electrical energy and machining work; retain access, kerf and surface-integrity checks.",
-    "consequence": "Supply cut tool profiles to die assembly; insulating feed and blind enclosed contours are incompatible with this route.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable wire electrical-discharge machining instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "wire_electrical_discharge_machining",
-      "grants_instant_mastery": false,
-      "local_demonstration": "A traveling electrode wire erodes conductive stock by discharges.",
-      "operating_requirements": "Consume wire, dielectric service, electrical energy and machining work; retain access, kerf and surface-integrity checks.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local wire electrical-discharge machining trials.",
-        "partnership": "Share actual samples and operator time for wire electrical-discharge machining; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded wire electrical-discharge machining process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external wire electrical-discharge machining processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable wire electrical-discharge machining machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.gfms.com/com/en/about-us/newsroom/media-release/newsdetail.html/content/dam/content-fragments/gfms/gfms/2024/en/gf-machining-solutions-celebrates-70-years-of-pioneering-edm-technology"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "sinker_electrical_discharge_machining",
-    "name": "Sinker Electrical-Discharge Machining",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "electrical_measurement",
-      "precision_machinery"
-    ],
-    "requires_any": [],
-    "foundations": "electrical_measurement,precision_machinery",
-    "mechanism": "A shaped electrode erodes a matching conductive cavity.",
-    "operating_requirement": "Pay electrode manufacture, dielectric handling, power and gap-control work; measure electrode wear and cavity finish.",
-    "consequence": "Supply qualified mold cavities to production; knowledge alone creates neither the electrode nor a finished mold.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable sinker electrical-discharge machining instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "sinker_electrical_discharge_machining",
-      "grants_instant_mastery": false,
-      "local_demonstration": "A shaped electrode erodes a matching conductive cavity.",
-      "operating_requirements": "Pay electrode manufacture, dielectric handling, power and gap-control work; measure electrode wear and cavity finish.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local sinker electrical-discharge machining trials.",
-        "partnership": "Share actual samples and operator time for sinker electrical-discharge machining; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded sinker electrical-discharge machining process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external sinker electrical-discharge machining processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable sinker electrical-discharge machining machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.gfms.com/com/en/about-us/newsroom/media-release/newsdetail.html/content/dam/content-fragments/gfms/gfms/2024/en/gf-machining-solutions-celebrates-70-years-of-pioneering-edm-technology"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "electrochemical_machining",
-    "name": "Electrochemical Machining",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "electrochemical_cells",
-      "precision_machinery"
-    ],
-    "requires_any": [],
-    "foundations": "electrochemical_cells,precision_machinery",
-    "mechanism": "Controlled anodic dissolution removes conductive workpiece material.",
-    "operating_requirement": "Consume electrical charge, electrolyte circulation and tool-gap work; qualify chemistry and account for dissolved material.",
-    "consequence": "Supply selected profiles to finishing with dimensional acceptance; conductivity does not guarantee material compatibility.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable electrochemical machining instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "electrochemical_machining",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Controlled anodic dissolution removes conductive workpiece material.",
-      "operating_requirements": "Consume electrical charge, electrolyte circulation and tool-gap work; qualify chemistry and account for dissolved material.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local electrochemical machining trials.",
-        "partnership": "Share actual samples and operator time for electrochemical machining; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded electrochemical machining process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external electrochemical machining processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable electrochemical machining machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.emag.com/products-services/machines/ecm-pecm-machines/"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "abrasive_waterjet_cutting",
-    "name": "Abrasive Waterjet Cutting",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "pressure_vessels",
-      "numerical_machine_control"
-    ],
-    "requires_any": [],
-    "foundations": "pressure_vessels,numerical_machine_control",
-    "mechanism": "Pressurized water carries abrasive through a cutting jet.",
-    "operating_requirement": "Pay pumping energy, water, abrasive, nozzle wear and traverse work; retain kerf taper and entry damage limits.",
-    "consequence": "Supply cut blanks to machinery assembly; spent abrasive and kerf waste cannot become free stock.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable abrasive waterjet cutting instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "abrasive_waterjet_cutting",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Pressurized water carries abrasive through a cutting jet.",
-      "operating_requirements": "Pay pumping energy, water, abrasive, nozzle wear and traverse work; retain kerf taper and entry damage limits.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local abrasive waterjet cutting trials.",
-        "partnership": "Share actual samples and operator time for abrasive waterjet cutting; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded abrasive waterjet cutting process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external abrasive waterjet cutting processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable abrasive waterjet cutting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.flowwaterjet.com/getmedia/d0f7a30d-97ea-47fd-9349-e89f697b621e/flow-overview-brochure.pdf"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
     "id": "laser_sheet_cutting",
     "name": "Laser Sheet Cutting",
     "field": "D06",
@@ -283,42 +103,6 @@
     },
     "evidence_sources": [
       "https://www.trumpf.com/en_INT/solutions/applications/laser-cutting/"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "ultrasonic_abrasive_machining",
-    "name": "Ultrasonic Abrasive Machining",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "mechanical_oscillation",
-      "precision_machinery"
-    ],
-    "requires_any": [],
-    "foundations": "mechanical_oscillation,precision_machinery",
-    "mechanism": "A vibrating tool drives loose abrasive against brittle material.",
-    "operating_requirement": "Pay shaped tools, slurry, energy and feed work; retain tool wear and edge-chipping checks.",
-    "consequence": "Supply qualified ceramic or glass features to assembly; unsupported edges and excessive damage cause rejection.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable ultrasonic abrasive machining instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "ultrasonic_abrasive_machining",
-      "grants_instant_mastery": false,
-      "local_demonstration": "A vibrating tool drives loose abrasive against brittle material.",
-      "operating_requirements": "Pay shaped tools, slurry, energy and feed work; retain tool wear and edge-chipping checks.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local ultrasonic abrasive machining trials.",
-        "partnership": "Share actual samples and operator time for ultrasonic abrasive machining; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded ultrasonic abrasive machining process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external ultrasonic abrasive machining processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable ultrasonic abrasive machining machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.bullentech.com/ultrasonic-machining/"
     ],
     "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
     "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
@@ -432,42 +216,6 @@
     "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   },
   {
-    "id": "incremental_sheet_forming",
-    "name": "Incremental Sheet Forming",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "numerical_machine_control",
-      "sheet_steel_rolling"
-    ],
-    "requires_any": [],
-    "foundations": "numerical_machine_control,sheet_steel_rolling",
-    "mechanism": "Localized tool passes gradually shape a supported sheet.",
-    "operating_requirement": "Pay fixture, toolpath generation, work and thickness measurements; retain compliance and springback errors.",
-    "consequence": "Supply inspected low-volume formed panels; extra passes consume real capacity and cannot erase rupture.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable incremental sheet forming instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "incremental_sheet_forming",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Localized tool passes gradually shape a supported sheet.",
-      "operating_requirements": "Pay fixture, toolpath generation, work and thickness measurements; retain compliance and springback errors.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local incremental sheet forming trials.",
-        "partnership": "Share actual samples and operator time for incremental sheet forming; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded incremental sheet forming process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external incremental sheet forming processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable incremental sheet forming machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.nist.gov/publications/high-fidelity-simulation-double-sided-incremental-forming-improving-accuracy"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
     "id": "stretch_sheet_forming",
     "name": "Stretch Sheet Forming",
     "field": "D06",
@@ -502,42 +250,6 @@
     ],
     "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
     "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
-    "id": "ultrasonic_metal_joining",
-    "name": "Ultrasonic Metal Joining",
-    "field": "D06",
-    "status": "authored_draft",
-    "requires_all": [
-      "mechanical_oscillation",
-      "precision_machinery"
-    ],
-    "requires_any": [],
-    "foundations": "mechanical_oscillation,precision_machinery",
-    "mechanism": "Vibration under pressure creates a solid-state metal joint.",
-    "operating_requirement": "Pay compatible contacting parts, sonotrode wear, clamping and energy; retain joint-area and destructive-sample acceptance.",
-    "consequence": "Supply qualified electrical tabs or thin assemblies; dissimilar combinations need separate evidence.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable ultrasonic metal joining instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "ultrasonic_metal_joining",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Vibration under pressure creates a solid-state metal joint.",
-      "operating_requirements": "Pay compatible contacting parts, sonotrode wear, clamping and energy; retain joint-area and destructive-sample acceptance.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local ultrasonic metal joining trials.",
-        "partnership": "Share actual samples and operator time for ultrasonic metal joining; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded ultrasonic metal joining process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external ultrasonic metal joining processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable ultrasonic metal joining machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.twi-global.com/technical-knowledge/faqs/what-is-ultrasonic-welding"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   },
   {
     "id": "diffusion_bonding_process",

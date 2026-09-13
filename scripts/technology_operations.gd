@@ -79,6 +79,11 @@ static func workshop_power_demand()->float:
 		if float(recipe.get("power",0))<=0:continue
 		if (recipe.gate not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(String(recipe.gate))<.10) and not preload("res://scripts/research_licenses.gd").active(String(recipe.gate)):continue
 		if int(job.get("target_stock",0))>0 and float(WorldSimulation.state.resource_stockpiles.get(recipe.output,0))>=int(job.target_stock):continue
+		# Reserved machine feed is already inside this local unfinished workpiece.
+		# Free-stock exhaustion must not cancel the next day's generation request.
+		if recipe.has("machine_program") and job.has("machine_pending"):
+			if job.machine_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
 		var supplied:=true
 		for item:String in recipe.materials:
 			if float(recipe.materials[item])>0 and float(WorldSimulation.state.resource_stockpiles.get(item,0))<=.000000001:supplied=false

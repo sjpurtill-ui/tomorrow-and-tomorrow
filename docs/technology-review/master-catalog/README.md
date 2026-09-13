@@ -4,10 +4,11 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 
 ## Authoritative baselines
 
-- Verified canonical runtime `2d0048225faccc4fc1f7563a510e74c8c6565aa9`: **716 discoveries,498 learning routes,365 civilian recipes and18 facilities**. Earthen/textile integration passes110 combined worktree and61 canonical cases. Earlier acceptance and limitations remain in integration handoffs.
-- Eight existing identities are promoted from the exact loaded canonical snapshot. The ledger contains **716 integrated +2,497 drafts =3,213 identities**, leaving **1,787 to author and4,284 to implement**. Verified subject art: **131;585 remain queued**.
-- `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
-- New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
+- Verified canonical runtime/art `cab79f9c037b1235a24bb2c231c6e3b30b5030fb`: **856 discoveries, 638 learning routes, 666 civilian workshop recipes plus five analyses, and 27 facilities**. See `../../INTEGRATION_STATUS.md` for the current integration checkpoint and acceptance limits.
+- The reconciled ledger contains **856 integrated + 2,614 drafts = 3,470 identities**, leaving **1,530 to author and 4,144 to implement**. Verified subject art: **295; 561 remain queued**.
+- `../candidate-atlas.json` contains 600 review subjects, not additional discovery identities. Coverage currently maps 475 subjects (469 fully mapped authored scopes and six partial), leaving 125 unmapped. This is authoring reconciliation, not gameplay acceptance.
+- New records remain `authored_draft` until operating implementation is independently verified and promoted from a committed canonical snapshot. Historical dates are not unlock gates.
+- Earlier sections below retain their publication checkpoints. `coverage.json` and the current integration record provide the live totals.
 
 ## Rail and food-processing authoring follow-up
 
@@ -90,9 +91,9 @@ Review sections:
 
 - [Electronic Control and Computation Depth Review](Electronic%20Control%20and%20Computation%20Depth%20Review.md): 60 further proposals after two overlap exclusions and two early-computation additions, fourteen alternative groups and 25 atlas mappings. Three new atlas scopes remain partial. D21 accounts for 228/300 identities.
 
-Current atlas reconciliation: 450 candidates mapped, including eight partial subjects. The remaining 150 candidates are unmapped. Earlier section summaries retain their publication counts.
+Current atlas reconciliation: 475 candidates mapped, including six partial subjects. The remaining 125 candidates are unmapped. Earlier section summaries retain their publication counts.
 
-JSON draft records preserve proposed relationships. `implemented-baseline.json` now records the verified 614-discovery runtime snapshot, including operating metadata and the previous prerequisites for promoted drafts. `communications-pending.json` is empty. Promotion moves records between buckets without adding IDs and updates field/horizon references. Run `tools/technology-review/check_master_catalog.py` for identity and reachability accounting; this is not a gameplay acceptance test.
+JSON draft records preserve proposed relationships. `implemented-baseline.json` records the latest verified canonical runtime snapshot, including operating metadata and the previous prerequisites for promoted drafts. `communications-pending.json` is empty. Promotion moves records between buckets without adding IDs and updates field/horizon references. Run `tools/technology-review/check_master_catalog.py` for identity and reachability accounting; this is not a gameplay acceptance test.
 
 Section handoff counts describe their publication checkpoints. This README and `coverage.json` hold the current combined count; initial coverage does not mean a field is complete.
 

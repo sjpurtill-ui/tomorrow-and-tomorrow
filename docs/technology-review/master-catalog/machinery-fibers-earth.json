@@ -1,37 +1,6 @@
 [
   {
     "field": "D06",
-    "id": "fluid_film_bearings",
-    "name": "Fluid-Film Bearings",
-    "foundations": "viscous_resistance,lubrication_regimes",
-    "mechanism": "Support moving surfaces through a maintained fluid film",
-    "operating_requirement": "Qualified geometry, lubricant supply and suitable operating conditions",
-    "consequence": "Carry supported loads while loss of film can cause rapid damage",
-    "status": "authored_draft",
-    "requires_all": [
-      "viscous_resistance",
-      "lubrication_regimes"
-    ],
-    "requires_any": [],
-    "recovery": "For Fluid-Film Bearings: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "fluid_film_bearings",
-      "local_demonstration": "Support moving surfaces through a maintained fluid film",
-      "operating_requirements": "Qualified geometry, lubricant supply and suitable operating conditions",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
-    }
-  },
-  {
-    "field": "D06",
     "id": "mechanical_seal_design",
     "name": "Mechanical-Seal Design",
     "foundations": "packed_piston_seals,friction_measurement",
@@ -50,68 +19,6 @@
       "destination": "mechanical_seal_design",
       "local_demonstration": "Limit leakage across a moving interface with a qualified seal arrangement",
       "operating_requirements": "Compatible surfaces, materials and maintenance",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
-    }
-  },
-  {
-    "field": "D06",
-    "id": "cutting_fluid_management",
-    "name": "Cutting-Fluid Management",
-    "foundations": "calorimetry,lubrication_regimes",
-    "mechanism": "Maintain a qualified fluid supply for a machining duty",
-    "operating_requirement": "Compatible fluid, delivery, filtration and maintenance",
-    "consequence": "Control some heat and wear while contamination and disposal remain costs",
-    "status": "authored_draft",
-    "requires_all": [
-      "calorimetry",
-      "lubrication_regimes"
-    ],
-    "requires_any": [],
-    "recovery": "For Cutting-Fluid Management: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "cutting_fluid_management",
-      "local_demonstration": "Maintain a qualified fluid supply for a machining duty",
-      "operating_requirements": "Compatible fluid, delivery, filtration and maintenance",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
-    }
-  },
-  {
-    "field": "D06",
-    "id": "machine_tool_stiffness_assessment",
-    "name": "Machine-Tool Stiffness Assessment",
-    "foundations": "stress_strain_relations,dimensional_metrology",
-    "mechanism": "Measure machine deformation under representative working loads",
-    "operating_requirement": "Qualified tests, instruments and workholding",
-    "consequence": "Predict some dimensional error under load rather than relying on unloaded accuracy",
-    "status": "authored_draft",
-    "requires_all": [
-      "stress_strain_relations",
-      "dimensional_metrology"
-    ],
-    "requires_any": [],
-    "recovery": "For Machine-Tool Stiffness Assessment: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "machine_tool_stiffness_assessment",
-      "local_demonstration": "Measure machine deformation under representative working loads",
-      "operating_requirements": "Qualified tests, instruments and workholding",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",
@@ -653,37 +560,6 @@
   },
   {
     "field": "D06",
-    "id": "machine_condition_monitoring",
-    "name": "Machine-Condition Monitoring",
-    "foundations": "mechanical_oscillation,statistical_sampling",
-    "mechanism": "Track observed machine behavior against a maintained condition baseline",
-    "operating_requirement": "Sensors or inspections, records and qualified review",
-    "consequence": "Detect some deterioration before failure while unobserved faults remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "mechanical_oscillation",
-      "statistical_sampling"
-    ],
-    "requires_any": [],
-    "recovery": "For Machine-Condition Monitoring: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "machine_condition_monitoring",
-      "local_demonstration": "Track observed machine behavior against a maintained condition baseline",
-      "operating_requirements": "Sensors or inspections, records and qualified review",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
-    }
-  },
-  {
-    "field": "D06",
     "id": "maintenance_work_planning",
     "name": "Maintenance-Work Planning",
     "foundations": "machine_condition_monitoring,material_accounting",
@@ -702,37 +578,6 @@
       "destination": "maintenance_work_planning",
       "local_demonstration": "Schedule qualified work around observed condition, risk and real resources",
       "operating_requirements": "Maintainers, parts, access and downtime allocation",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
-    }
-  },
-  {
-    "field": "D06",
-    "id": "numerical_machine_control",
-    "name": "Numerical Machine Control",
-    "foundations": "electronic_machine_control,coordinate_geometry",
-    "mechanism": "Drive qualified machine motion from a defined numerical program",
-    "operating_requirement": "Compatible machine, program, tools and setup verification",
-    "consequence": "Produce repeatable paths while bad programs or setup can damage work",
-    "status": "authored_draft",
-    "requires_all": [
-      "electronic_machine_control",
-      "coordinate_geometry"
-    ],
-    "requires_any": [],
-    "recovery": "For Numerical Machine Control: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "numerical_machine_control",
-      "local_demonstration": "Drive qualified machine motion from a defined numerical program",
-      "operating_requirements": "Compatible machine, program, tools and setup verification",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",
