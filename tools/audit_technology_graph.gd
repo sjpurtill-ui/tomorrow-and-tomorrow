@@ -57,6 +57,7 @@ func run()->void:
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/machine_tool_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/fastener_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/communications_knowledge.gd").entries(),discovery.technology_catalog))
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/metallurgy_process_knowledge.gd").entries(),discovery.technology_catalog))
 	var discovery_ids:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:discovery_ids.append(entry.id)
 	var production:Dictionary=load("res://tools/production_dependency_audit.gd").audit(load("res://scripts/civilian_industry.gd").PRODUCTS,load("res://scripts/technology_operations.gd").PLANTS,root.get_node("ResourceSystem").catalog.keys()+load("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),discovery_ids,load("res://tools/production_dependency_audit.gd").operating_routes(),load("res://scripts/sec_specialist_supply.gd").RESERVE)

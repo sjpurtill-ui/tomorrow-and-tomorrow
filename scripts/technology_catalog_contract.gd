@@ -67,6 +67,11 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		for item:Variant in products:
 			var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(item))
 			if recipe.is_empty() or recipe.gate!=id:errors.append(id+": no implemented recipe for production item")
+		var inspections:Variant=entry.get("inspection_items",[])
+		if not inspections is Array:errors.append(id+": inspection items must be an array");continue
+		for item:Variant in inspections:
+			var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product(String(item))
+			if recipe.is_empty() or recipe.get("inspection_gate","")!=id:errors.append(id+": no implemented inspection for item")
 		var plants:Variant=entry.get("operating_plants",[])
 		if not plants is Array:errors.append(id+": operating plants must be an array");continue
 		for plant:Variant in plants:
@@ -107,5 +112,5 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		if not medical.is_empty() and (medical!=id or not preload("res://scripts/field_medicine.gd").METHODS.has(medical)):errors.append(id+": no implemented medical method")
 		var doctrine:=String(entry.get("doctrine",""))
 		if not doctrine.is_empty() and (doctrine!=id or not preload("res://scripts/combined_arms_doctrine.gd").RULES.has(doctrine)):errors.append(id+": no implemented doctrine")
-		if clinical.is_empty() and naval.is_empty() and clothing.is_empty() and conveyance.is_empty() and building.is_empty() and batch.is_empty() and grain.is_empty() and meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
+		if clinical.is_empty() and naval.is_empty() and clothing.is_empty() and conveyance.is_empty() and building.is_empty() and batch.is_empty() and grain.is_empty() and meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and inspections.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
 	return errors

@@ -1,5 +1,5 @@
 extends SceneTree
-## Isolated structural audit only; does not register prototype discoveries.
+## Structural audit of registered entries or isolated candidates; no registration writes.
 func _initialize()->void:call_deferred("run")
 func run()->void:
 	for id:String in ["GameState","CivilizationSystem","MilitaryCampaign"]:root.get_node(id).set_process(false)
@@ -7,9 +7,11 @@ func run()->void:
 	var ids:Array=[]
 	var catalog:Array=discovery.technology_catalog.duplicate(true)
 	var proposed:Array=preload("res://scripts/metallurgy_process_knowledge.gd").entries()
-	catalog.append_array(proposed)
+	for entry:Dictionary in proposed:
+		if not discovery.catalog_by_id.has(entry.id):catalog.append(entry)
 	for entry:Dictionary in discovery.technology_catalog:ids.append(entry.id)
-	for entry:Dictionary in proposed:ids.append(entry.id)
+	for entry:Dictionary in proposed:
+		if entry.id not in ids:ids.append(entry.id)
 	var products:Dictionary=load("res://scripts/civilian_industry.gd").PRODUCTS.duplicate(true)
 	for recipe:Dictionary in products.values():
 		if recipe.has("thermal_program"):recipe.machine_inspection=load("res://scripts/metallurgy_sections.gd").COST
@@ -28,6 +30,11 @@ func run()->void:
 		var records:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://docs/technology-review/master-catalog/"+filename))
 		if not records is Array:result.errors.append("Cannot read authored source: "+filename);continue
 		for entry:Dictionary in records:authored[entry.id]=entry
+	var baseline:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://docs/technology-review/master-catalog/implemented-baseline.json"))
+	for row:Dictionary in baseline.get("items",[]):
+		var reconciliation:Dictionary=row.get("implementation_reconciliation",{})
+		if reconciliation.get("editorial_source","") not in ["materials-construction-flight.json","materials-process-depth.json","manufacturing-process-depth.json"]:continue
+		if not authored.has(row.id):authored[row.id]={"id":row.id,"name":row.name,"requires_all":reconciliation.get("previous_requires_all",[]),"requires_any":reconciliation.get("previous_requires_any",[])}
 	for entry:Dictionary in proposed:
 		if not authored.has(entry.id):result.errors.append("Missing authored identity: "+String(entry.id));continue
 		for field:String in ["name","requires_all","requires_any"]:
@@ -40,8 +47,8 @@ func run()->void:
 		var gate:=String(products[item].get("inspection_gate",""))
 		if not gate.is_empty() and gate not in ids:result.errors.append(item+": unresolved inspection gate "+gate)
 	result.integrated_definitions=discovery.technology_catalog.size()
-	result.unregistered_candidates=proposed.size()
+	result.unregistered_candidates=catalog.size()-discovery.technology_catalog.size()
 	result.candidate_graph_definitions=catalog.size()
-	result.assumptions="Structural sources only; all knowledge and raw resources assumed available. The twelve metallurgy IDs are supplied locally to this audit without registration. Quality success, actual quantities, calendar, labor, capital qualification and acquisition are not proved. Includes deferred section/induction inspection inputs."
+	result.assumptions="Structural sources only; all knowledge and raw resources assumed available. Any not-yet-registered metallurgy IDs are supplied locally; registered entries are used directly. Quality success, actual quantities, calendar, labor, capital qualification and acquisition are not proved. Includes deferred section/induction inspection inputs."
 	print(JSON.stringify(result))
 	quit(0 if result.errors.is_empty() and result.blocked_products.is_empty() and result.blocked_plants.is_empty() else 1)

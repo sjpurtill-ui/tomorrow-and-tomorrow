@@ -6848,14 +6848,110 @@
       "id": "ultrasonic_metal_joining",
       "name": "Ultrasonic Metal Joining",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/material_phase_diagrams.png",
+      "description": "Map stable or observed phase relations against declared composition and conditions",
+      "domain": "production",
+      "id": "material_phase_diagrams",
+      "name": "Material Phase Diagrams",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/steel_normalizing_control.png",
+      "description": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
+      "domain": "production",
+      "id": "steel_normalizing_control",
+      "name": "Steel Normalizing Control",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/induction_surface_hardening.png",
+      "description": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
+      "domain": "production",
+      "id": "induction_surface_hardening",
+      "name": "Induction Surface Hardening",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/metal_grain_size_measurement.png",
+      "description": "Measure representative grain structure using a defined preparation and counting method",
+      "domain": "production",
+      "id": "metal_grain_size_measurement",
+      "name": "Metal Grain Size Measurement",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/residual_stress_assessment.png",
+      "description": "Estimate retained internal stresses through qualified measurement and model assumptions",
+      "domain": "production",
+      "id": "residual_stress_assessment",
+      "name": "Residual Stress Assessment",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/metal_fracture_toughness_testing.png",
+      "description": "Measure resistance to crack extension under a defined qualified specimen condition",
+      "domain": "production",
+      "id": "metal_fracture_toughness_testing",
+      "name": "Metal Fracture Toughness Testing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/welding_metallurgy.png",
+      "description": "Relate joining thermal history to local microstructure and mechanical performance",
+      "domain": "production",
+      "id": "welding_metallurgy",
+      "name": "Welding Metallurgy",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/vacuum_metal_melting.png",
+      "description": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
+      "domain": "production",
+      "id": "vacuum_metal_melting",
+      "name": "Vacuum Metal Melting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/investment_casting_process.png",
+      "description": "An expendable pattern creates a refractory casting mold.",
+      "domain": "production",
+      "id": "investment_casting_process",
+      "name": "Investment Casting Process",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lost_foam_casting.png",
+      "description": "Molten metal replaces an expendable foam pattern in a prepared mold.",
+      "domain": "production",
+      "id": "lost_foam_casting",
+      "name": "Lost-Foam Casting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/honed_bore_finishing.png",
+      "description": "Abrasive contact and controlled motion refine bore geometry.",
+      "domain": "production",
+      "id": "honed_bore_finishing",
+      "name": "Honed Bore Finishing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/short_stroke_superfinishing.png",
+      "description": "Light abrasive oscillation removes surface peaks.",
+      "domain": "production",
+      "id": "short_stroke_superfinishing",
+      "name": "Short-Stroke Superfinishing",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
-  "live_count": 856,
+  "live_count": 868,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 295
+  "verified_count": 307
 }

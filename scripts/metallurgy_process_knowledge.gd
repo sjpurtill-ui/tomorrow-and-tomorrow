@@ -1,5 +1,5 @@
 extends RefCounted
-## Unregistered until paid processes, inspection, consumers and acquisition pass.
+## Selected paid metallurgy processes, inspections and downstream consumers.
 static func entries()->Array[Dictionary]:
 	return [
   {

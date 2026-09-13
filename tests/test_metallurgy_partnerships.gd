@@ -24,8 +24,9 @@ func before_test()->void:
 		E.policy("balanced","open"))
 	CivilizationSystem.civilizations.clear();CivilizationSystem.civilizations.append({"id":"neighbor","name":"Neighbor","world_position":Vector2(30,0),"strategic_regions":[],"player_relation":{"opinion":.3,"at_war":false}})
 	DiscoverySystem.initialize()
+	# Exercise actual registered, normalized entries rather than test-injected definitions.
 	for entry:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
-		DiscoverySystem.catalog_by_id[entry.id]=entry
+		assert_bool(DiscoverySystem.catalog_by_id.has(entry.id)).is_true()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 
 func after_test()->void:

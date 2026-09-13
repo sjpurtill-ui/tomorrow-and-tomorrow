@@ -24,8 +24,9 @@ func before_test()->void:
 		E.policy("balanced","open"))
 	CivilizationSystem.civilizations.clear();CivilizationSystem.civilizations.append({"id":"neighbor","name":"Neighbor","world_position":Vector2(30,0),"strategic_regions":[],"player_relation":{"opinion":.3,"at_war":false}})
 	DiscoverySystem.initialize()
+	# Exercise actual registered, normalized entries rather than test-injected definitions.
 	for entry:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
-		DiscoverySystem.catalog_by_id[entry.id]=entry
+		assert_bool(DiscoverySystem.catalog_by_id.has(entry.id)).is_true()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 
 func after_test()->void:
@@ -123,3 +124,12 @@ func test_all_metallurgy_scholar_visits_pay_for_temporary_subject_specific_teach
 		assert_float(provider.population_exact).is_equal(population)
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_array(MilitaryCampaign.equipment_queue).is_empty()
+
+func test_registered_inspection_contract_rejects_unrelated_recipes()->void:
+	var contract=preload("res://scripts/technology_catalog_contract.gd")
+	var entries:=preload("res://scripts/metallurgy_process_knowledge.gd").entries()
+	assert_array(contract.validate(entries,DiscoverySystem.technology_catalog)).is_empty()
+	for entry:Dictionary in entries:
+		if entry.id!="metal_grain_size_measurement":continue
+		entry.inspection_items=["induction_hardened_shafts"]
+		assert_array(contract.validate([entry],DiscoverySystem.technology_catalog)).contains(["metal_grain_size_measurement: no implemented inspection for item"])

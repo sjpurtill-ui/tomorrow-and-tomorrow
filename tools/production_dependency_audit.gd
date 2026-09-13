@@ -26,7 +26,7 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 		if recipe.has("abrasive_inspection") and recipe.get("abrasive_reject") is String and not recipe.abrasive_reject.is_empty():sources[recipe.abrasive_reject]=true
 	var conditional_quality:Array[String]=[]
 	for id:String in products:
-		if products[id].has("abrasive_inspection") or products[id].has("machine_program"):conditional_quality.append(id)
+		if products[id].has("abrasive_inspection") or products[id].has("machine_program") or products[id].has("thermal_program") or products[id].has("induction_frequency") or products[id].has("casting_stages") or products[id].get("alloy_phase_trial",false) or products[id].get("fracture_trial",false) or products[id].has("slitting_curvature") or products[id].get("weld_trial",false) or products[id].has("vacuum_leak") or products[id].get("pattern_trial",false):conditional_quality.append(id)
 	var service_sources:Dictionary={}
 	for plant:Dictionary in plants.values():
 		for name:String in plant.get("services",{}):service_sources[name]=true
