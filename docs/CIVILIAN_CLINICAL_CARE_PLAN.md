@@ -87,3 +87,18 @@ Shared changes will be narrow additions in GameState, SettlementModel, SaveSyste
 WorldSimulation, ConsequenceEngine, discovery registration and the health inspector.
 Preserve record media, geared workshops, rail, food conditioning and current clinical
 foundations. Coordinate any resupply planner/controller changes with the integrator.
+
+## Foundation checkpoint
+
+The integrator accepted the three-identity scope and narrow owner/resupply changes.
+`civilian_care_fabric.gd` now models up to 32 aggregate episodes, population-bound
+admission, dated paid observations, pulse-informed prioritization, shared observation
+and nursing time, local record clay/water/cloth expenditure, broken or sustained
+continuity, and a 30-entry report history. A repeated service call on the same day
+returns the existing report. This helper is not registered or called by gameplay.
+
+Next: owner-local daily admission and recovery accounting, nonrecursive Knowledge
+reservation before research, optional local state validation/save connections,
+ConsequenceEngine and health inspector integration, then coherent operating tests.
+The fabric must still be compiled and tested after connection; this checkpoint is
+HELD and is not evidence of live clinical service or discovery promotion.
