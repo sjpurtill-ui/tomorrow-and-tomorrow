@@ -1,5 +1,5 @@
 {
-  "source_commit": "991ef0778aafced0bac3af208daf7262009128f8",
+  "source_commit": "d51889615deb6145c6e3bdb7129c9c198a931012",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -17207,6 +17207,200 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Daily supply"
+      }
+    },
+    {
+      "id": "textile_braiding",
+      "name": "Textile Braiding",
+      "field": "D07",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "cordage,yarn_tension_control",
+      "mechanism": "Interlace yarns along crossing carrier paths to form a braid with a defined pattern and take-up geometry.",
+      "operating_requirement": "Pay yarn, guides or carriers, tension control, take-up work and specimen tests; retain broken strands, uneven coverage and waste.",
+      "consequence": "Supply qualified garment drawcord or protective textile sleeving; braid geometry is distinct from twisted cord and grants no automatic lifting or safety rating.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable textile braiding instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_braiding",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Interlace yarns along crossing carrier paths to form a braid with a defined pattern and take-up geometry.",
+        "operating_requirements": "Pay yarn, guides or carriers, tension control, take-up work and specimen tests; retain broken strands, uneven coverage and waste.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local textile braiding trials.",
+          "partnership": "Share actual samples and operator time for textile braiding; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded textile braiding process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external textile braiding processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable textile braiding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://herzog-online.com/cms/wp-content/uploads/2023/05/Datasheet-SE-1-12-266.pdf"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "d51889615deb6145c6e3bdb7129c9c198a931012",
+        "editorial_source": "textile-assembly-depth.json",
+        "previous_requires_all": [
+          "cordage",
+          "yarn_tension_control"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "textile_braiding",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_braiding",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile Braiding",
+            "missing_all": [
+              "cordage",
+              "yarn_tension_control"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cordage",
+              "yarn_tension_control"
+            ],
+            "requires_all": [
+              "cordage",
+              "yarn_tension_control"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile Braiding",
+        "observation": "Interlace yarn paths under controlled tension to make garment cords, then use actual cords to fasten woven wraps.",
+        "production_contract": "Finite Crafting work and yarn make distinct braided garment cords. Paid fitting equipment, real cloth/cords and shared Logistics work supply tied wraps. Twisted rope cannot substitute; braid knowledge gives no lifting rating or insulation bonus. Imported cord stock never adds discovery mastery.",
+        "production_items": [
+          "braided_garment_cords"
+        ],
+        "requires": [
+          "cordage",
+          "yarn_tension_control"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "quilted_layer_assembly",
+      "name": "Quilted Layer Assembly",
+      "field": "D07",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "bone_needle_sewing,layered_clothing_design",
+      "mechanism": "Join outer fabrics and a filling layer with distributed stitches that restrain filling movement.",
+      "operating_requirement": "Pay actual fabric, filling, thread, alignment and sewing work; test filling migration, seams and compression after use or washing.",
+      "consequence": "Supply a quilted garment or bedding layer whose measured insulation depends on its real filling and condition; decorative stitching alone adds no warmth.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable quilted layer assembly instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "quilted_layer_assembly",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Join outer fabrics and a filling layer with distributed stitches that restrain filling movement.",
+        "operating_requirements": "Pay actual fabric, filling, thread, alignment and sewing work; test filling migration, seams and compression after use or washing.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local quilted layer assembly trials.",
+          "partnership": "Share actual samples and operator time for quilted layer assembly; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded quilted layer assembly process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external quilted layer assembly processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable quilted layer assembly machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.vam.ac.uk/articles/an-introduction-to-quilting-and-patchwork"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "d51889615deb6145c6e3bdb7129c9c198a931012",
+        "editorial_source": "textile-assembly-depth.json",
+        "previous_requires_all": [
+          "bone_needle_sewing",
+          "layered_clothing_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "quilted_layer_assembly",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "quilted_layer_assembly",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Quilted Layer Assembly",
+            "missing_all": [
+              "bone_needle_sewing",
+              "layered_clothing_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "bone_needle_sewing",
+              "layered_clothing_design"
+            ],
+            "requires_all": [
+              "bone_needle_sewing",
+              "layered_clothing_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Quilted Layer Assembly",
+        "observation": "Stitch cloth faces around actual prepared plant-fiber filling so it stays distributed in an insulated garment.",
+        "production_contract": "Paid preparation makes finite plant-fiber batts. Needles, cloth, filling, thread and shared Logistics work make quilted garments whose issued condition controls bounded insulation. Decorative stitching alone supplies no warmth. Quilt repair consumes replacement filling as well as cloth/thread; ordinary cloth repair cannot restore it. Coefficients represent a selected plant-fiber assembly, not a measured thermal certification.",
+        "production_items": [
+          "plant_fiber_quilt_batts"
+        ],
+        "requires": [
+          "bone_needle_sewing",
+          "layered_clothing_design"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {

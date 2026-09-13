@@ -1,3 +1,11 @@
+## September 13 — 752 verified operating discoveries
+
+Braided/quilted clothing runtime/art commit `d51889615deb6145c6e3bdb7129c9c198a931012` is integrated and verified. Two original identities retain exact predicates. Paid braids fasten actual woven wraps; prepared plant-fiber filling, cloth faces and thread make quilt garments. Worn quilts require replacement filling during repair, including planner demand when clothing counts already meet population needs. Existing daily labor, issue, wear and save owners remain in use.
+
+**129 isolated runtime cases and90 canonical runtime cases pass**, plus12atlas cases on each checkout. Graph: **752 discoveries /534 routes /436 recipes /20 facilities**, no errors or blocked products. Both new illustrations load at768pixels with mipmaps; art **174 verified /752 live,578 queued**. Clean thirty-frame startup, exact752-definition snapshot comparison and15ledger tests pass.
+
+Ledger: **752 integrated +2,694 drafts =3,446 identities**, leaving **1,554 to author and4,248 to implement**. Old methods/lots remain valid; binary partial-production save recovery and actor isolation pass. Insulation is a bounded game coefficient for actual supplied filling and condition, not a thermal certification. Full historical bootstrap/pacing remains unverified. No player launch or package rebuild. See `BRAIDED_QUILTED_CLOTHING_HANDOFF.md`. Polymer remains isolated for analytical acceptance; root owns five of its pending illustrations.
+
 ## September 13 — marine subsystem coverage
 
 Authored16 D10 mechanisms for distinct propulsors, roll-control hardware, hull-flow modifications, shaft sealing/earthing, navigation observations and centrifugal bilge treatment. Each requires paid compatible hardware, actual supply and measured limits. Propulsive benefits are installation-specific; stabilizers have finite authority; rejected bilge liquid remains held. See `technology-review/Marine Systems Review.md`.

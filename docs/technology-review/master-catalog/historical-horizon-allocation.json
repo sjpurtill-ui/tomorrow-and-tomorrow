@@ -12949,8 +12949,8 @@
       "id": "textile_braiding",
       "name": "Textile Braiding",
       "horizon": "H04",
-      "source_file": "textile-assembly-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "2d746e12e6736f11adcffdbe225754c357ea5984a620d7b891479a69e110e38e"
@@ -12979,8 +12979,8 @@
       "id": "quilted_layer_assembly",
       "name": "Quilted Layer Assembly",
       "horizon": "H03",
-      "source_file": "textile-assembly-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "3b625e179a093b5f7db27c54803a2b295ef136f527581a033d83df301b0e3550"

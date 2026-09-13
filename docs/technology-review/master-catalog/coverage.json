@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 750,
+  "verified_baseline_discoveries": 752,
   "pending_communications": 0,
-  "new_authored_drafts": 2696,
+  "new_authored_drafts": 2694,
   "distinct_accounted_identities": 3446,
   "remaining_identities_to_author": 1554,
   "target": 5000,
@@ -2312,9 +2312,9 @@
         "target": 800,
         "assigned": 220,
         "target_slots_not_yet_assigned": 580,
-        "implemented_baseline": 8,
+        "implemented_baseline": 9,
         "pending_communications": 0,
-        "authored_drafts": 212
+        "authored_drafts": 211
       },
       {
         "id": "H04",
@@ -2322,9 +2322,9 @@
         "target": 700,
         "assigned": 297,
         "target_slots_not_yet_assigned": 403,
-        "implemented_baseline": 14,
+        "implemented_baseline": 15,
         "pending_communications": 0,
-        "authored_drafts": 283
+        "authored_drafts": 282
       },
       {
         "id": "H05",
@@ -2358,7 +2358,7 @@
     "D04": 117,
     "D05": 157,
     "D06": 75,
-    "D07": 82,
+    "D07": 80,
     "D08": 95,
     "D09": 111,
     "D10": 95,
@@ -2442,9 +2442,9 @@
       "id": "D07",
       "name": "Fibers and domestic technologies",
       "target": 120,
-      "implemented_baseline": 38,
+      "implemented_baseline": 40,
       "pending_communications": 0,
-      "authored_drafts": 82,
+      "authored_drafts": 80,
       "accounted": 120,
       "remaining_to_target": 0
     },

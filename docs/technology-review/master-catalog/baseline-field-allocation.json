@@ -5373,6 +5373,20 @@
       "source_domain": "production",
       "name": "Centrifugal Tube Casting",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_braiding",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile Braiding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "quilted_layer_assembly",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Quilted Layer Assembly",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
