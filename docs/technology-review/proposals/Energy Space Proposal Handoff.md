@@ -593,4 +593,3 @@ Change exposed radiating area through temperature-responsive shutters. Pay louve
 **Semantic neighbors:** `space_radiators`, `multilayer_space_insulation`. Mechanically variable radiative exposure differs from fixed radiator area and reflective insulation layers.
 
 **Source:** [supporting source 1](https://www.nasa.gov/wp-content/uploads/2021/10/7.soa_thermal_2021_0.pdf) — passive bimetallic louver.
-
