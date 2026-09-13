@@ -24,10 +24,17 @@ func run()->void:
   state.resource_stockpiles["Building Shade Lattices"]=1.0
   var plot:Dictionary=state.settlement_plots[0]
   plot.status="active"
-  assert(model.start_fabric_retrofit(int(plot.id),method).ok)
+  # Let the real monthly owner select a supplied job without a direct start call.
+  state.elapsed_days=30
+  model.process_month()
+  var found:=false
+  for candidate:Dictionary in state.settlement_plots:
+   if candidate.get("fabric_job",{}).is_empty():continue
+   plot=candidate;found=true;break
+  assert(found)
   assert(state.resource_stockpiles["Building Shade Lattices"]==0.0)
   assert(B.valid_plot(plot))
-  state.elapsed_days=30
+  state.elapsed_days=60
   model.process_month()
   assert(float(plot.fabric_job.work)>0)
   var work:float=float(plot.fabric_job.work)
@@ -37,7 +44,16 @@ func run()->void:
   assert(B.valid_plot(saved))
   saved.fabric_job.required_work=0
   assert(not B.valid_plot(saved))
+  state.resource_stockpiles["Timber"]=1.0
+  state.resource_stockpiles["Fiber Plants"]=1.0
+  for day in range(90,361,30):
+   state.elapsed_days=day
+   model.process_month()
+   if plot.get("fabric_components",{}).has(method):break
+  assert(plot.get("fabric_components",{}).has(method))
+  assert(float(state.resource_stockpiles["Fiber Plants"])<1.0)
+  assert(B.valid_plot(plot))
  )
  WorldSimulation.clear()
- print("PASS: actual settlement retrofit start, payment, monthly work, duplicate-month guard and plot validation")
+ print("PASS: autonomous settlement start, paid assembly/trial, installed result, duplicate-month guard and plot validation")
  quit()

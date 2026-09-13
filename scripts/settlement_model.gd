@@ -1336,6 +1336,11 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
 	var builders:=WorldSimulation.state.effective_workers("Construction")
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
+	if builders>0:
+		for plot:Dictionary in WorldSimulation.state.settlement_plots:
+			if String(plot.get("fabric_job",{}).get("state",""))=="awaiting_inspection":
+				preload("res://scripts/settlement_fabric_operations.gd").start_trial(plot,WorldSimulation.state.resource_stockpiles,month_day)
+
 	var water_sites:=0
 	for line:Dictionary in WorldSimulation.state.water_conveyance.lines:
 		if String(line.status)=="under_construction":water_sites+=1
@@ -1387,6 +1392,9 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	for action_index in available_household_starts:
 		if not _attempt_household_growth(month_day,events,context,action_index): break
 	_attempt_field_growth(month_day,events,context)
+	if builders>0:
+		var choice:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").choose_retrofit(WorldSimulation.state.settlement_plots,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries,WorldSimulation.state.discovery_adoption)
+		if not choice.is_empty():start_fabric_retrofit(int(choice.plot_id),String(choice.method))
 	_bound_morphology_state()
 	rebuild_summary()
 	return events

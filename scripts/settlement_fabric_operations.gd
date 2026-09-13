@@ -159,6 +159,11 @@ static func resolve(plot:Dictionary,day:int)->Dictionary:
   var installed:Dictionary=plot.get("fabric_components",{})
   installed[String(job.method)]=record
   plot.fabric_components=installed
+  if plot.has("fabric_failed"):plot.fabric_failed.erase(String(job.method))
+ else:
+  var failures:Dictionary=plot.get("fabric_failed",{})
+  failures[String(job.method)]=record
+  plot.fabric_failed=failures
  # One retained last result bounds unsuccessful history. No material refund.
  plot.fabric_last_result=record
  plot.erase("fabric_job")
@@ -181,6 +186,12 @@ static func valid_plot_records(plot:Dictionary)->bool:
   if not method is String or not COMPONENTS.has(method):return false
   if not valid_record(installed[method],int(plot.get("id",0)),true):return false
   if installed[method].job.method!=method:return false
+ var failures:Variant=plot.get("fabric_failed",{})
+ if not failures is Dictionary or failures.size()>COMPONENTS.size():return false
+ for method:Variant in failures:
+  if not method is String or not COMPONENTS.has(method):return false
+  if not valid_record(failures[method],int(plot.get("id",0))):return false
+  if failures[method].job.method!=method or verified_result(failures[method].job).state=="accepted":return false
  if plot.has("fabric_last_result") and not valid_record(plot.fabric_last_result,int(plot.get("id",0))):return false
  return true
 
@@ -241,3 +252,26 @@ static func affordable_repair(plot:Dictionary,work:float,stock:Dictionary)->floa
 
 static func pay_repair(plot:Dictionary,work:float,stock:Dictionary)->void:
  for item:String in repair_bill(plot,work):stock[item]=maxf(0,float(stock.get(item,0))-float(repair_bill(plot,work)[item]))
+
+static func choose_retrofit(plots:Array,stock:Dictionary,known:Array,adoption:Dictionary)->Dictionary:
+ var pending:=0
+ for plot:Dictionary in plots:
+  if not plot.get("fabric_job",{}).is_empty():pending+=1
+ if pending>=2:return {}
+ var best:Dictionary={}
+ var best_score:float=-INF
+ for plot:Dictionary in plots:
+  if not plot.get("fabric_job",{}).is_empty() or String(plot.get("status","")) not in ["active","stressed","damaged"]:continue
+  var condition:float=float(plot.get("condition",0))
+  if condition<.35:continue # Stabilize a failing building before incremental retrofits.
+  for method:String in COMPONENTS:
+   if plot.get("fabric_components",{}).has(method) or method not in known:continue
+   if not compatible(plot,method) or not foundations_met(method,known) or float(adoption.get(method,0))<.25:continue
+   if float(stock.get(COMPONENTS[method],0))<1:continue
+   var previous:Dictionary=plot.get("fabric_failed",{}).get(method,{})
+   if not previous.is_empty() and condition<=float(previous.job.assembly.support_condition)+.05:continue
+   var weather:bool=method in ["building_drainage_coordination","roof_flashing_interfaces","rainscreen_wall_assemblies","building_capillary_breaks"]
+   var score:float=(1.0-condition)+(.5+float(plot.get("hazard_exposure",0)) if weather else .25)
+   if score>best_score:
+    best_score=score;best={"plot_id":int(plot.id),"method":method}
+ return best
