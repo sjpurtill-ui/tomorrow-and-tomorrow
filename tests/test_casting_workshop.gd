@@ -1,0 +1,59 @@
+extends GdUnitTestSuite
+const I=preload("res://scripts/civilian_industry.gd")
+const P=preload("res://scripts/persistent_production.gd")
+const C=preload("res://scripts/casting_workshop.gd")
+const Ops=preload("res://scripts/technology_operations.gd")
+func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("casting_work",1223)
+func after_test()->void:WorldSimulation.clear()
+func prepare(item:String)->Dictionary:
+	var state=WorldSimulation.state;var spec:=I.product(item)
+	state.settlement_site_committed=true;state.convoy_traveling=false
+	state.population_allocations.Crafting=100;state.population_allocations.Logistics=100
+	state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
+	for resource:String in spec.materials:state.resource_stockpiles[resource]=float(spec.materials[resource])
+	for resource:String in spec.tooling:state.resource_stockpiles[resource]=10.0
+	state.resource_stockpiles[spec.output]=0.0
+	Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":100.0}
+	assert_bool(WorldSimulation.military.start_production_line(item,1).get("ok",false)).is_true()
+	return WorldSimulation.military.equipment_queue.back()
+func test_distinct_casting_routes_resume_paid_molds_and_supply_machined_bearings()->void:
+	WorldSimulation.scoped("casting_work",func()->void:
+		for kind:String in ["investment","lost_foam"]:
+			WorldSimulation.military.equipment_queue.clear()
+			var line:=prepare(kind+"_copper_brackets");var spec:=I.product(line.item)
+			P.advance(WorldSimulation.military,line,.75)
+			assert_float(float(WorldSimulation.state.resource_stockpiles["EPS Casting Patterns"])).is_equal(0.0)
+			var restored:Dictionary=bytes_to_var(var_to_bytes(line))
+			assert_str(P.validate_saved({"equipment_queue":[restored]})).is_empty()
+			P.advance(WorldSimulation.military,restored,float(spec.days)-.75)
+			assert_str(C.validate_job(restored,spec)).is_empty()
+			assert_bool(restored.casting_last.accepted).is_true()
+			assert_float(float(restored.casting_last.pour_pattern_mass)).is_equal(0.0 if kind=="investment" else 1.0)
+			assert_int(restored.casting_last.shell_layers).is_equal(3 if kind=="investment" else 1)
+			var state=WorldSimulation.state
+			assert_float(float(state.resource_stockpiles[spec.output])).is_equal(1.0)
+			var consumer:=I.product("cast_bracket_bearings")
+			state.known_discoveries.append(consumer.gate);state.discovery_adoption[consumer.gate]=1.0
+			for resource:String in consumer.tooling:state.resource_stockpiles[resource]=10.0
+			state.resource_stockpiles["Steel Tool Bits"]=1.0;state.resource_stockpiles[consumer.output]=0.0
+			WorldSimulation.military.equipment_queue.clear()
+			assert_bool(WorldSimulation.military.start_production_line("cast_bracket_bearings",1).get("ok",false)).is_true()
+			P.advance(WorldSimulation.military,WorldSimulation.military.equipment_queue.back(),3)
+			assert_float(float(state.resource_stockpiles[spec.output])).is_equal(0.0)
+			assert_float(float(state.resource_stockpiles[consumer.output])).is_equal(1.0)
+	)
+func test_worn_casting_setup_rejects_and_underpaid_stage_cannot_advance()->void:
+	WorldSimulation.scoped("casting_work",func()->void:
+		var line:=prepare("investment_copper_brackets");var spec:=I.product(line.item)
+		line.casting_wear=2.0
+		P.advance(WorldSimulation.military,line,4.5)
+		assert_int(line.casting_pending.stage).is_equal(6)
+		Ops.data().services.electricity=0.0
+		P.advance(WorldSimulation.military,line,2)
+		assert_int(line.casting_pending.stage).is_equal(6)
+		Ops.data().services.electricity=100.0
+		P.advance(WorldSimulation.military,line,float(spec.days)-4.5)
+		assert_bool(line.casting_last.accepted).is_false()
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal(0.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles[spec.casting_reject])).is_equal(1.0)
+	)

@@ -81,6 +81,9 @@ static func workshop_power_demand()->float:
 		if int(job.get("target_stock",0))>0 and float(WorldSimulation.state.resource_stockpiles.get(recipe.output,0))>=int(job.target_stock):continue
 		# Reserved machine feed is already inside this local unfinished workpiece.
 		# Free-stock exhaustion must not cancel the next day's generation request.
+		if recipe.has("casting_stages") and job.has("casting_pending"):
+			if job.casting_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
 		if recipe.get("alloy_phase_trial",false) and job.has("alloy_trial"):
 			if job.alloy_trial.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
 			continue

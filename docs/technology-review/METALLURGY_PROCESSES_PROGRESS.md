@@ -84,6 +84,25 @@ reload, composition selection from observations and chart-consuming solder
 production. Initial run caught a GDScript type inference error, corrected.
 The twelve definitions remain unregistered; overall completion is unproven.
 
+Casting now has two retained staged workshop paths for selected copper
+bearing brackets. Investment builds and dries three shell layers and removes
+the pattern in a separately powered burnout before pouring. Lost-foam uses
+a coated/dried sand-supported pattern present during the pour. Stage charges,
+thermal work, moisture removal, remaining pattern units and paid inspection
+persist with the original job. Worn setups reject; accepted blanks enter an
+actual shaft-bearing machining recipe. This is a normalized small-bracket
+process model, not a general mold-flow or solidification solver.
+
+Six additional recipes supply molding apparatus, expanded pattern production,
+ventilation apparatus, the two casting routes and the bearing consumer.
+`test_casting_workshop.gd` passes 2/2, zero errors/failures/skips/orphans
+(`/tmp/tt-casting-tests.log`): distinct pattern-at-pour states, three versus one
+coat, partial paid-mold reload, real consumer debit, powerless-burnout stall
+and worn-setup rejection. Still pending: source-qualified EPS density/residue
+trials (current recipe is not sufficient evidence of that), full precursor
+closure, stronger aggregate history validation, actual calendar solidification
+and daily generation tests. Neither casting method is registered yet.
+
 The twelve definitions in `metallurgy_process_knowledge.gd` preserve the exact
 authored AND/OR predicates. They remain unregistered until their actual
 processes, observations, acquisition and downstream consumers are working.
