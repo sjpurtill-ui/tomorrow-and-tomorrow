@@ -27,8 +27,8 @@ static func prepare_station(ledger:Dictionary,stocks:Dictionary,known:Array,day:
 		if pay(ledger,stocks,{"Glass Tubes":1.0,"Copper Wire":.1,"Glass Vessels":1.0},.5):ledger.tools.thermometry=true
 	if "instrument_sterilization" in known and bool(ledger.tools.get("thermometry",false)) and int(ledger.tools.get("sterile_until",-1))<day:
 		if pay(ledger,stocks,{"Charcoal":.05,"Freshwater":.2},.1):
+			ledger.tools.heat_steps=(int(ledger.tools.get("heat_steps",0))+1) if int(ledger.tools.get("heat_day",-2))==day-1 else 1
 			ledger.tools.heat_day=day
-			ledger.tools.heat_steps=int(ledger.tools.get("heat_steps",0))+1
 			if int(ledger.tools.heat_steps)>=2:
 				ledger.tools.sterile_until=day+1;ledger.tools.sterile_uses=2;ledger.tools.heat_steps=0
 static func collect_starter(ledger:Dictionary,stocks:Dictionary,day:int)->void:
@@ -47,7 +47,7 @@ static func collect_starter(ledger:Dictionary,stocks:Dictionary,day:int)->void:
 		return
 static func collect_plant(ledger:Dictionary,stocks:Dictionary,day:int)->void:
 	for trial:Dictionary in WorldSimulation.state.field_botany.trials:
-		if int(trial.age)<15 or trial.site!=site() or float(trial.seed)<.001:continue
+		if int(trial.age)<15 or trial.site!=site() or float(trial.seed)<.001 or day<int(trial.start_day)+int(trial.age):continue
 		var exists:=false
 		for sample:Dictionary in ledger.specimens:
 			if sample.kind=="plant" and int(sample.source)==int(trial.line.id) and int(sample.source_day)==int(trial.start_day):exists=true
@@ -78,10 +78,10 @@ static func advance(traveling:bool)->Dictionary:
 	for sample:Dictionary in ledger.specimens.duplicate():
 		if sample.site!=site():continue
 		var aseptic:bool="aseptic_laboratory_practice" in known and protocol_ready(ledger,String(sample.kind)) and int(ledger.tools.get("sterile_until",-1))>=day and int(ledger.tools.get("sterile_uses",0))>0
-		if "cell_culture_methods" in known and day>int(sample.last_day) and float(state.food_stocks.get("Dry staples",0))>=.02:
+		if "cell_culture_methods" in known and day>int(sample.last_day) and float(state.food_stocks.get("Dry staples",0))>=.03:
 			if pay(ledger,stocks,{"Freshwater":.05,"Laboratory Glassware":.002},.05):
 				if Samples.grow(sample,day,.02,aseptic):
-					state.food_stocks["Dry staples"]-=.02
+					state.food_stocks["Dry staples"]-=.03
 					if aseptic:ledger.tools.sterile_uses-=1
 					Samples.record(ledger,sample,day,"culture",{"media":float(sample.media),"aseptic":aseptic,"line":int(sample.line)})
 					report.cultured+=1
@@ -92,7 +92,10 @@ static func advance(traveling:bool)->Dictionary:
 		if "microbial_growth_measurement" in known and sample.line>0 and sample.history.size()>=2:
 			var first:Dictionary=sample.history[0];var last:Dictionary=sample.history[-1]
 			Samples.record(ledger,sample,day,"growth",{"line":int(sample.line),"elapsed":int(last.day)-int(first.day),"initial":float(first.cells),"final":float(last.cells)})
-		if "microbial_isolation_methods" in known and sample.kind=="starter" and sample.parent==0 and pay(ledger,stocks,{"Laboratory Glassware":.005,"Freshwater":.02},.05):
+		var already_isolated:=false
+		for candidate:Dictionary in ledger.specimens:
+			if int(candidate.parent)==int(sample.id):already_isolated=true
+		if "microbial_isolation_methods" in known and sample.kind=="starter" and sample.parent==0 and not already_isolated and pay(ledger,stocks,{"Laboratory Glassware":.005,"Freshwater":.02},.05):
 			var child:=Samples.isolate(ledger,sample,day)
 			if not child.is_empty():Samples.record(ledger,child,day,"isolation",{"parent":int(sample.id),"mixed_fraction":float(child.contamination)})
 	interpret(ledger,stocks,known,day)
@@ -109,18 +112,21 @@ static func interpret(ledger:Dictionary,stocks:Dictionary,known:Array,day:int)->
 				if sample.methods.has("cells"):Samples.record(ledger,sample,day,"cellular_model",{"comparisons":kinds.duplicate(),"interpretation":"cellular units across crop tissue and starter material"})
 	# A published method requires two separately taken samples and comparable
 	# dated observations, not a copy of a result within the same sample lineage.
-	if "experimental_protocol_publication" not in known or ledger.protocols.size()>=8:return
+	if "experimental_protocol_publication" not in known:return
 	for first:Dictionary in ledger.specimens:
 		if not first.methods.has("notebook") or first.history.size()<2:continue
 		for second:Dictionary in ledger.specimens:
 			if second.id==first.id or second.source==first.source or second.kind!=first.kind or not second.methods.has("notebook") or second.history.size()<2:continue
 			var exists:=false
 			for protocol:Dictionary in ledger.protocols:
-				if protocol.kind==first.kind:exists=true
+				if protocol.kind==first.kind and (bool(protocol.repeatable) or (mini(int(protocol.first_source),int(protocol.second_source))==mini(int(first.source),int(second.source)) and maxi(int(protocol.first_source),int(protocol.second_source))==maxi(int(first.source),int(second.source)))):exists=true
 			if exists:continue
 			var repeatable:=absf(float(first.viability)-float(second.viability))<=.25
 			if not pay(ledger,stocks,{"Printed Sheets":.1},.2):return
-			ledger.protocols.append({"kind":String(first.kind),"first":int(first.id),"second":int(second.id),"day":day,"repeatable":repeatable,"first_source":int(first.source),"second_source":int(second.source)})
+			if ledger.protocols.size()>=8:
+				for index:int in range(ledger.protocols.size()):
+					if not bool(ledger.protocols[index].repeatable):ledger.protocols.remove_at(index);break
+			ledger.protocols.append({"kind":String(first.kind),"first":int(first.id),"second":int(second.id),"day":day,"repeatable":repeatable,"first_source":int(first.source),"second_source":int(second.source),"procedure":first.methods.notebook.observation.duplicate(true),"replication":second.methods.notebook.observation.duplicate(true),"first_viability":float(first.viability),"second_viability":float(second.viability)})
 			return
 static func starter_usable(lot:Dictionary,day:int)->bool:
 	var ledger:Dictionary=WorldSimulation.state.microscopy
@@ -129,14 +135,18 @@ static func starter_usable(lot:Dictionary,day:int)->bool:
 		if day-int(sample.history[-1].day)>3:continue
 		# A mixed parent alone is not sufficient: require an isolated line with
 		# measured growth before rejecting this particular source starter.
-		if sample.methods.has("growth") and float(sample.contamination)>.35:return false
+		if not sample.methods.has("growth"):continue
+		for parent:Dictionary in ledger.specimens:
+			if int(parent.id)!=int(sample.parent) or parent.site!=sample.site or int(parent.source)!=int(sample.source) or not parent.methods.has("microbes"):continue
+			var observed:Dictionary=parent.methods.microbes.observation
+			if day-int(parent.methods.microbes.day)<=3 and float(observed.mixed_fraction)>.35:return false
 	return true
 static func field_evidence(cohort:int,start_day:int,day:int)->Dictionary:
 	for sample:Dictionary in WorldSimulation.state.microscopy.specimens:
 		if sample.kind!="plant" or sample.site!=site() or int(sample.source)!=cohort or int(sample.source_day)!=start_day:continue
 		if not sample.methods.has("tissue") or not sample.methods.has("cellular_model") or not sample.methods.has("time_lapse"):continue
 		if day-int(sample.methods.tissue.day)>7:continue
-		return {"sample":int(sample.id),"day":int(sample.methods.tissue.day),"viable_fraction":float(sample.viability),"tissue_order":float(sample.profile.tissue_order)}
+		return {"sample":int(sample.id),"cohort":int(sample.source),"source_day":int(sample.source_day),"day":int(sample.methods.tissue.day),"viable_fraction":float(sample.viability),"tissue_order":float(sample.profile.tissue_order)}
 	return {}
 
 static func protocol_ready(ledger:Dictionary,kind:String)->bool:

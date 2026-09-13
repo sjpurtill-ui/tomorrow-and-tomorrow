@@ -11,7 +11,7 @@ static func add(ledger:Dictionary,kind:String,source:int,source_day:int,site:Str
 	for specimen:Dictionary in ledger.specimens:
 		if specimen.kind==kind and int(specimen.source)==source and specimen.site==site and int(specimen.source_day)==source_day and int(specimen.parent)==parent:return {}
 	var viability:=clampf(float(profile.get("viability",1)),0,1)
-	var sample:={"id":int(ledger.next_id),"kind":kind,"source":source,"source_day":source_day,"site":site,"day":day,"last_day":day,"amount":amount,"profile":profile.duplicate(true),"cells":amount*100.0,"viability":viability,"contamination":clampf(float(profile.get("contamination",0)),0,1),"media":0.0,"line":0,"generation":0,"parent":parent,"history":[],"methods":{},"status":"fresh"}
+	var sample:={"id":int(ledger.next_id),"kind":kind,"source":source,"source_day":source_day,"site":site,"day":day,"last_day":day,"amount":amount,"profile":profile.duplicate(true),"cells":amount*100.0,"viability":viability,"contamination":clampf(float(profile.get("contamination",0)),0,1),"blank_contamination":0.0,"blank_media":0.0,"media":0.0,"line":0,"generation":0,"parent":parent,"history":[],"methods":{},"status":"fresh"}
 	ledger.next_id+=1;ledger.specimens.append(sample)
 	return sample
 static func record(ledger:Dictionary,specimen:Dictionary,day:int,method:String,observation:Dictionary)->void:
@@ -25,13 +25,13 @@ static func measure(ledger:Dictionary,specimen:Dictionary,day:int,stained:bool,k
 	var contrast:=.85 if stained else .45
 	# Microscopic visibility distinguishes aggregate structures from reliably
 	# separated cellular units. Staining is optional and material-paid by owner.
-	var view:={"day":day,"cells":float(specimen.cells)*float(specimen.viability),"contrast":contrast,"contamination":float(specimen.contamination),"tissue_order":float(specimen.profile.get("tissue_order",0)),"line":int(specimen.line)}
+	var view:={"day":day,"cells":float(specimen.cells)*float(specimen.viability),"contrast":contrast,"contamination":float(specimen.contamination),"blank_contamination":float(specimen.blank_contamination),"tissue_order":float(specimen.profile.get("tissue_order",0)),"line":int(specimen.line)}
 	specimen.history.append(view)
 	while specimen.history.size()>8:specimen.history.pop_front()
 	if "laboratory_notebooks" in known:record(ledger,specimen,day,"notebook",{"kind":String(specimen.kind),"preparation":"stained" if stained else "unstained","elapsed":day-int(specimen.day),"view":view})
 	if "microscopic_cell_observation" in known:record(ledger,specimen,day,"cells",view)
 	if stained and "biological_staining" in known:record(ledger,specimen,day,"contrast",{"contrast":contrast,"unstained_reference":.45})
-	if specimen.kind=="starter" and "microbial_observation" in known:record(ledger,specimen,day,"microbes",{"count":view.cells,"mixed_fraction":view.contamination,"identity":"unassigned local culture"})
+	if specimen.kind=="starter" and "microbial_observation" in known:record(ledger,specimen,day,"microbes",{"count":view.cells,"mixed_fraction":maxf(0,float(view.contamination)-float(view.blank_contamination)),"blank_fraction":float(view.blank_contamination),"identity":"unassigned local culture"})
 	if "cell_division_observation" in known and specimen.history.size()>=2:
 		var previous:Dictionary=specimen.history[-2]
 		if day>int(previous.day) and float(view.cells)>float(previous.cells):record(ledger,specimen,day,"division",{"before":float(previous.cells),"after":float(view.cells),"elapsed":day-int(previous.day)})
@@ -49,6 +49,8 @@ static func grow(specimen:Dictionary,day:int,media:float,aseptic:bool)->bool:
 	var growth:=food*100.0*float(specimen.viability)*(1.0-float(specimen.contamination))
 	specimen.cells=minf(1000000,float(specimen.cells)+growth)
 	specimen.media+=food
+	specimen.blank_media+=.01
+	specimen.blank_contamination=clampf(float(specimen.blank_contamination)+(.002 if aseptic else .04),0,1)
 	specimen.contamination=clampf(float(specimen.contamination)+(.002 if aseptic else .04),0,1)
 	specimen.viability=clampf(float(specimen.viability)-float(specimen.contamination)*.02,0,1)
 	return true
@@ -65,6 +67,7 @@ static func isolate(ledger:Dictionary,specimen:Dictionary,day:int)->Dictionary:
 	child.media=float(specimen.media)*.25;specimen.media-=float(child.media)
 	child.viability=float(specimen.viability)
 	child.line=int(child.id);child.contamination=float(specimen.contamination)*.5
+	child.blank_contamination=float(specimen.blank_contamination)*.5
 	return child
 static func expire(ledger:Dictionary,day:int)->void:
 	for index:int in range(ledger.specimens.size()-1,-1,-1):
@@ -79,6 +82,19 @@ static func valid(ledger:Variant)->bool:
 		if not ledger.get(key) is Array:return false
 	if ledger.specimens.size()>LIMIT or ledger.records.size()>RECORD_LIMIT or ledger.protocols.size()>8:return false
 	if not ledger.get("tools") is Dictionary or not ledger.get("report") is Dictionary:return false
+	for key:Variant in ledger.tools:
+		if key in ["bench","thermometry"]:
+			if not ledger.tools[key] is bool:return false
+		elif key in ["heat_day","sterile_until","sterile_uses","heat_steps"]:
+			if not ledger.tools[key] is int or ledger.tools[key]<0:return false
+		else:return false
+	if int(ledger.tools.get("sterile_uses",0))>2 or int(ledger.tools.get("heat_steps",0))>1:return false
+	for key:Variant in ledger.report:
+		if key not in ["staff","observed","cultured","expired"] or not number(ledger.report[key]):return false
+	for row:Variant in ledger.records:
+		if not valid_record(row):return false
+	for protocol:Variant in ledger.protocols:
+		if not valid_protocol(protocol):return false
 	var ids:Dictionary={}
 	for sample:Variant in ledger.specimens:
 		if not sample is Dictionary:return false
@@ -87,14 +103,20 @@ static func valid(ledger:Variant)->bool:
 		if sample.id<1 or sample.id>=ledger.next_id or ids.has(sample.id) or sample.parent>=sample.id or sample.day<sample.source_day or sample.last_day<sample.day:return false
 		ids[sample.id]=true
 		if sample.get("kind") not in ["starter","plant"] or not sample.get("site") is String or sample.get("status") not in ["fresh","cultured","expired"]:return false
-		for key:String in ["amount","cells","media"]:
+		for key:String in ["amount","cells","media","blank_media"]:
 			if not number(sample.get(key)):return false
-		for key:String in ["viability","contamination"]:
+		for key:String in ["viability","contamination","blank_contamination"]:
 			if not number(sample.get(key),1):return false
 		if not sample.get("profile") is Dictionary or not sample.get("methods") is Dictionary or not sample.get("history") is Array or sample.history.size()>8:return false
+		for key:Variant in sample.profile:
+			if key not in ["viability","contamination","tissue_order","stage","leaf_ratio"] or not number(sample.profile[key],180 if key=="stage" else 1):return false
+		if sample.methods.size()>12:return false
+		for method:Variant in sample.methods:
+			var row:Variant=sample.methods[method]
+			if not valid_record(row) or row.method!=method or row.sample!=sample.id or row.source!=sample.source or row.source_day!=sample.source_day or row.site!=sample.site or row.day<sample.day:return false
 		var previous:=int(sample.day)-1
 		for frame:Variant in sample.history:
-			if not frame is Dictionary or not frame.get("day") is int or frame.day<=previous:return false
+			if not valid_frame(frame) or frame.day<=previous:return false
 			for key:String in ["cells","contrast","contamination","tissue_order","line"]:
 				if not number(frame.get(key)):return false
 			previous=frame.day
@@ -105,4 +127,50 @@ static func valid_settlements(records:Variant)->bool:
 	for city:Variant in records:
 		if not city is Dictionary or not city.get("local_resources",{}) is Dictionary:return false
 		if not valid(city.get("local_resources",{}).get("microscopy",empty_state())):return false
+	return true
+
+static func valid_frame(frame:Variant)->bool:
+	if not frame is Dictionary or not frame.get("day") is int or frame.day<0 or not frame.get("line") is int or frame.line<0:return false
+	for key:String in ["cells","contrast","contamination","blank_contamination","tissue_order"]:
+		if not number(frame.get(key),1000000 if key=="cells" else 1):return false
+	return true
+static func valid_record(row:Variant)->bool:
+	if not row is Dictionary:return false
+	for key:String in ["sample","source","source_day","day"]:
+		if not row.get(key) is int or row[key]<0:return false
+	if row.sample<1 or row.source<1 or row.day<row.source_day or not row.get("site") is String or row.site.length()>128 or not row.get("observation") is Dictionary:return false
+	var o:Dictionary=row.observation
+	match row.get("method",""):
+		"notebook":return o.get("kind") in ["starter","plant"] and o.get("preparation") in ["stained","unstained"] and number(o.get("elapsed")) and valid_frame(o.get("view")) and o.view.day==row.day
+		"cells":return valid_frame(o) and o.day==row.day
+		"contrast":return o.get("contrast")==.85 and o.get("unstained_reference")==.45
+		"microbes":return number(o.get("count")) and number(o.get("mixed_fraction"),1) and number(o.get("blank_fraction"),1) and o.get("identity")=="unassigned local culture"
+		"division":return number(o.get("before")) and number(o.get("after")) and o.after>o.before and o.get("elapsed") is int and o.elapsed>0
+		"tissue":return number(o.get("organized_fraction"),1) and number(o.get("viable_fraction"),1) and o.get("cohort")==row.source and o.get("sampled_stage") is int and o.sampled_stage>=0
+		"time_lapse":
+			if not o.get("frames") is Array or o.frames.size()<3 or o.frames.size()>8 or not o.get("source_line") is int:return false
+			var previous:=-1
+			for frame:Variant in o.frames:
+				if not valid_frame(frame) or frame.day<=previous or frame.day>row.day or frame.line!=o.source_line:return false
+				previous=frame.day
+			return true
+		"culture":return number(o.get("media")) and o.get("aseptic") is bool and o.get("line") is int and o.line>=0
+		"growth":return o.get("line") is int and o.line>0 and o.get("elapsed") is int and o.elapsed>0 and number(o.get("initial")) and number(o.get("final"))
+		"isolation":return o.get("parent") is int and o.parent>0 and o.parent<row.sample and number(o.get("mixed_fraction"),1)
+		"cellular_model":
+			if not o.get("comparisons") is Dictionary or o.comparisons.size()!=2:return false
+			for key:String in ["starter","plant"]:
+				if not o.comparisons.get(key) is int or o.comparisons[key]<1:return false
+			return o.get("interpretation")=="cellular units across crop tissue and starter material"
+	return false
+static func valid_protocol(protocol:Variant)->bool:
+	if not protocol is Dictionary or protocol.get("kind") not in ["starter","plant"] or not protocol.get("repeatable") is bool:return false
+	for key:String in ["first","second","day","first_source","second_source"]:
+		if not protocol.get(key) is int or protocol[key]<0:return false
+	if protocol.first<1 or protocol.second<1 or protocol.first==protocol.second or protocol.first_source==protocol.second_source:return false
+	if not number(protocol.get("first_viability"),1) or not number(protocol.get("second_viability"),1):return false
+	if protocol.repeatable!=(absf(float(protocol.first_viability)-float(protocol.second_viability))<=.25):return false
+	for key:String in ["procedure","replication"]:
+		var o:Variant=protocol.get(key)
+		if not o is Dictionary or o.get("kind")!=protocol.kind or o.get("preparation") not in ["stained","unstained"] or not valid_frame(o.get("view")) or o.view.day>protocol.day:return false
 	return true

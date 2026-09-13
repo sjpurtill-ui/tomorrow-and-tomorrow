@@ -57,3 +57,91 @@ func test_paid_local_lab_reserves_after_care_and_observes_real_starter_lots_once
 		assert_bool(S.valid(state.microscopy)).is_true()
 	)
 	WorldSimulation.clear()
+func controlled_starter(ledger:Dictionary,mixed:float)->void:
+	var parent:=S.add(ledger,"starter",1,0,"home",0,.04,{"viability":.9,"contamination":mixed})
+	S.measure(ledger,parent,0,false,["microbial_observation"])
+	var child:=S.isolate(ledger,parent,0)
+	for day:int in range(1,11):
+		S.grow(parent,day,.02,false);S.measure(ledger,parent,day,false,["microbial_observation"])
+		S.grow(child,day,.02,false);S.measure(ledger,child,day,false,["microbial_observation"])
+	S.record(ledger,child,10,"growth",{"line":int(child.line),"elapsed":9,"initial":float(child.history[0].cells),"final":float(child.history[-1].cells)})
+func test_blank_control_separates_lab_contamination_from_source_starter_decision()->void:
+	WorldSimulation.clear();WorldSimulation.create_actor("controls",91420)
+	WorldSimulation.scoped("controls",func()->void:
+		var ledger:Dictionary=WorldSimulation.state.microscopy
+		controlled_starter(ledger,0.0)
+		assert_float(float(ledger.specimens[0].contamination)).is_greater(.35)
+		assert_bool(preload("res://scripts/microscopy_lab.gd").starter_usable({"id":1,"created":0},10)).is_true()
+		WorldSimulation.state.microscopy=S.empty_state();ledger=WorldSimulation.state.microscopy
+		controlled_starter(ledger,.6)
+		assert_bool(preload("res://scripts/microscopy_lab.gd").starter_usable({"id":1,"created":0},10)).is_false()
+		var batches=preload("res://scripts/food_batches.gd")
+		var lot:=batches.add_lot("starter",1.0,0)
+		assert_float(batches.starter_available(10)).is_equal(0.0)
+		batches.consume_starter(.5,10)
+		assert_float(float(lot.amount)).is_equal(1.0)
+		assert_bool(preload("res://scripts/microscopy_lab.gd").starter_usable({"id":2,"created":0},10)).is_true()
+		assert_bool(preload("res://scripts/microscopy_lab.gd").starter_usable({"id":1,"created":0},14)).is_true()
+		assert_bool(S.valid(ledger)).is_true()
+		var bad:=ledger.duplicate(true);bad.specimens[1].methods.growth.source=99
+		assert_bool(S.valid(bad)).is_false()
+	)
+	WorldSimulation.clear()
+func test_failed_replication_can_retry_new_sources_and_heat_does_not_accumulate_across_gaps()->void:
+	var ledger:=S.empty_state();ledger.work_bank=8.0
+	var known:Array=["laboratory_notebooks","experimental_protocol_publication"]
+	for id:int in [1,2]:
+		var sample:=S.add(ledger,"starter",id,0,"home",0,.04,{"viability":1.0 if id==1 else .2})
+		S.measure(ledger,sample,0,false,known);S.measure(ledger,sample,1,false,known)
+	var stocks:={"Printed Sheets":2.0,"Charcoal":2.0,"Freshwater":2.0}
+	var lab=preload("res://scripts/microscopy_lab.gd")
+	lab.interpret(ledger,stocks,known,1)
+	assert_bool(lab.protocol_ready(ledger,"starter")).is_false()
+	var third:=S.add(ledger,"starter",3,0,"home",0,.04,{"viability":.95})
+	S.measure(ledger,third,0,false,known);S.measure(ledger,third,1,false,known)
+	lab.interpret(ledger,stocks,known,1)
+	assert_bool(lab.protocol_ready(ledger,"starter")).is_true()
+	assert_float(float(stocks["Printed Sheets"])).is_equal_approx(1.8,.00001)
+	ledger.tools={"bench":true,"thermometry":true}
+	lab.prepare_station(ledger,stocks,["instrument_sterilization"],2)
+	assert_int(int(ledger.tools.get("sterile_uses",0))).is_equal(0)
+	lab.prepare_station(ledger,stocks,["instrument_sterilization"],5)
+	assert_int(int(ledger.tools.get("sterile_uses",0))).is_equal(0)
+	lab.prepare_station(ledger,stocks,["instrument_sterilization"],6)
+	assert_int(int(ledger.tools.get("sterile_uses",0))).is_equal(2)
+func test_real_crop_trial_rejects_recent_cellular_tissue_failure()->void:
+	WorldSimulation.clear();WorldSimulation.create_actor("crop_lab",91420)
+	WorldSimulation.scoped("crop_lab",func()->void:
+		var state=WorldSimulation.state
+		var botany=preload("res://scripts/field_botany.gd")
+		var lab=preload("res://scripts/microscopy_lab.gd")
+		var known:Array=[]
+		for entry:Dictionary in preload("res://scripts/field_botany_knowledge.gd").entries():known.append(entry.id)
+		for entry:Dictionary in preload("res://scripts/microscopy_knowledge.gd").entries():known.append(entry.id)
+		var field:=botany.empty_state();field.balance=true
+		botany.retain_seed(field,100,"home",0);field.lines[0].drought_tolerance=.28
+		botany.sow_trial(field,0,"home",0)
+		for day:int in range(1,91):botany.observe(field,day,"home",known,1,1,1)
+		botany.sow_trial(field,1,"home",90)
+		for day:int in range(91,177):botany.observe(field,day,"home",known,1,1,1)
+		var comparison:=field.duplicate(true)
+		for day:int in range(177,181):botany.observe(comparison,day,"home",known,1,1,1)
+		assert_bool(comparison.vouchers[-1].qualified).is_true()
+		state.field_botany=field
+		state.resource_stockpiles={"Specimen Slides":1.0,"Freshwater":1.0}
+		state.microscopy.work_bank=1.0
+		botany.observe(field,177,"home",known,1,1,1)
+		lab.collect_plant(state.microscopy,state.resource_stockpiles,177)
+		var sample:Dictionary=state.microscopy.specimens[0]
+		for day:int in range(177,180):
+			if day>177:botany.observe(field,day,"home",known,1,1,1)
+			if S.grow(sample,day,.02,true):S.record(state.microscopy,sample,day,"culture",{"media":float(sample.media),"aseptic":true,"line":0})
+			S.measure(state.microscopy,sample,day,true,known)
+		var starter:=S.add(state.microscopy,"starter",3,177,"home",177,.01,{"viability":1.0})
+		S.measure(state.microscopy,starter,179,false,known)
+		lab.interpret(state.microscopy,{},known,179)
+		assert_dict(lab.field_evidence(int(field.trials[0].line.id),90,180)).is_not_empty()
+		botany.observe(field,180,"home",known,1,1,1)
+		assert_bool(field.vouchers[-1].qualified).is_false()
+	)
+	WorldSimulation.clear()
