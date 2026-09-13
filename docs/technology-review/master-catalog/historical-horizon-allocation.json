@@ -12014,6 +12014,256 @@
       "classification_status": "editorial_review",
       "rationale": "Qualified industrial thermal cracking is the authored scope; no invention date or runtime gate is asserted.",
       "scope_digest": "aaf57ac61bc02e2ae5c08b49acc49406941bb0bdf789a06867d4fe8b61c983df"
+    },
+    {
+      "id": "radar_interferometric_deformation",
+      "name": "Radar Interferometric Deformation",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "f9d2b4e1251a3c73c59b64ca1755b6dc1a456cdc63b040cf97e8d5c24d6202c8"
+    },
+    {
+      "id": "polarimetric_radar_classification",
+      "name": "Polarimetric Radar Classification",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "41e78fdd995150579497ae967bdf4e93b8f41fb36711797f03f34dc204afccfc"
+    },
+    {
+      "id": "hyperspectral_material_unmixing",
+      "name": "Hyperspectral Material Unmixing",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "de48e7faf961ea029c03de0d4566cb75c9a293da79d23c3536daf548dd09b1a6"
+    },
+    {
+      "id": "satellite_radar_altimetry",
+      "name": "Satellite Radar Altimetry",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "d74d2105b490eb1da602b732658fdf6d55ea99576295de171cffd6fd5a5e8505"
+    },
+    {
+      "id": "scatterometer_wind_retrieval",
+      "name": "Scatterometer Wind Retrieval",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "4dff18104ad77402f698203d6ac18b05cdc53827a3b2c1d8cf549d41c59164ba"
+    },
+    {
+      "id": "passive_microwave_radiometry",
+      "name": "Passive Microwave Radiometry",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "040c2b0994f0a9055489f3225d958fe8ffce25e8570ce5eb39d063cefc40d872"
+    },
+    {
+      "id": "gnss_radio_occultation",
+      "name": "GNSS Radio Occultation",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "ff56edff7fdf5038dbb6939beeeed03209903872bdd48d5f1b34ab6c8c5e8963"
+    },
+    {
+      "id": "aerosol_optical_depth_retrieval",
+      "name": "Aerosol Optical-Depth Retrieval",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "70a82b474cc6d979893f74ee3c3ea6bf56e7b276b3db7a90ee09f5b8880295c1"
+    },
+    {
+      "id": "atmospheric_lidar_profiling",
+      "name": "Atmospheric Lidar Profiling",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "b50d33c418bcabed23e5fa97d25520bcf7a87ee80a7016b6a31b43b3a888a725"
+    },
+    {
+      "id": "ozone_absorption_retrieval",
+      "name": "Ozone Absorption Retrieval",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "5e44c9cfc157520d93f76330da5e90754236fbba6456d73c14e6a336ae6d36ca"
+    },
+    {
+      "id": "cloud_microphysical_models",
+      "name": "Cloud Microphysical Models",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "f6158bc229db9d55f31ccd2f1c5a697d5c03a33b0351308fcc00b8154e29fdaa"
+    },
+    {
+      "id": "precipitation_drop_size_measurement",
+      "name": "Precipitation Drop-Size Measurement",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "3be86cc7ab324f9d39d6e3df74110a7c1ff9377bf98e2e44081f509fb9f7ff9c"
+    },
+    {
+      "id": "snow_water_equivalent_surveys",
+      "name": "Snow Water-Equivalent Surveys",
+      "horizon": "H04",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "48e8ed23c43025362e1291b7b1171546c6b12e94744d151c07f3ef060c1638e6"
+    },
+    {
+      "id": "glacier_mass_balance_accounts",
+      "name": "Glacier Mass-Balance Accounts",
+      "horizon": "H04",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "af68d5f28a3cdc4f2df7f65ad97cc8880cbf73c7a5c1c0ce8791fdb8b40d2c81"
+    },
+    {
+      "id": "permafrost_temperature_profiles",
+      "name": "Permafrost Temperature Profiles",
+      "horizon": "H04",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "b0bd39faaa5ef4f64ec5db2dbb01e49e02b9920e2feb497870a5fcbbab47264f"
+    },
+    {
+      "id": "sea_ice_thickness_retrieval",
+      "name": "Sea-Ice Thickness Retrieval",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "8ac0e2e8c04a6491c915b8042d8634d7a357093018c90667900aef9e84cb98f3"
+    },
+    {
+      "id": "directional_wave_spectra",
+      "name": "Directional Wave Spectra",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "474891871404a6a2d198b2c5906d70a8b190b4017a6efcc41bb089dc7a8cd19f"
+    },
+    {
+      "id": "ocean_mixed_layer_budget",
+      "name": "Ocean Mixed-Layer Budget",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "f824ef0b6a9e05571977f2b994d67a29d406ab0129f7dcc2ca14ff9e39501142"
+    },
+    {
+      "id": "seawater_carbonate_system_measurement",
+      "name": "Seawater Carbonate-System Measurement",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "78b64b02cc632fc8f04fd7b492bab5feb23681685085508fbad3101babd65088"
+    },
+    {
+      "id": "eddy_covariance_flux_measurement",
+      "name": "Eddy-Covariance Flux Measurement",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "b1f8c35d9124d169da300668104774b2af559abc3cd204a01fb492bbb883f11f"
+    },
+    {
+      "id": "atmospheric_emissions_inversion",
+      "name": "Atmospheric Emissions Inversion",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "3da7a928c65c58223720edf4e7306e8e23cd7599828d3e0cb38ef493d8176b81"
+    },
+    {
+      "id": "surface_energy_balance_closure",
+      "name": "Surface Energy-Balance Closure",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "117d16e2a026e4957505a397a1fb82533f652d97babf1d3fe432e9d97d9a8f23"
+    },
+    {
+      "id": "infrasound_source_monitoring",
+      "name": "Infrasound Source Monitoring",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "e399a6a3511fcdd0d5ba0d3b55450c98b0cf821a1e10da545ac529b40a146a12"
+    },
+    {
+      "id": "tsunami_wave_propagation",
+      "name": "Tsunami Wave Propagation",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "9b321404c92cc3b8b036575b301ea6cbbcec599a6b13fab0fba97e162ba9ff79"
+    },
+    {
+      "id": "ocean_dissolved_oxygen_profiles",
+      "name": "Ocean Dissolved-Oxygen Profiles",
+      "horizon": "H05",
+      "source_file": "earth-observation-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
+      "scope_digest": "f3bcd88c24938eb03351720f07dea0ec6c05c7ca35a22c1f114cf73f86fe2955"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

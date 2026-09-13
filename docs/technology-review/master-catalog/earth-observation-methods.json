@@ -1,0 +1,911 @@
+[
+  {
+    "id": "radar_interferometric_deformation",
+    "name": "Radar Interferometric Deformation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "satellite_earth_observation",
+      "pulse_radar_observation",
+      "geodetic_reference_frames"
+    ],
+    "requires_any": [],
+    "foundations": "satellite_earth_observation,pulse_radar_observation,geodetic_reference_frames",
+    "mechanism": "Phase differences between coherent radar passes constrain surface displacement.",
+    "operating_requirement": "Pay for repeat acquisitions, orbit correction and analysis; retain coherence masks, geometry and atmospheric uncertainty.",
+    "consequence": "Supply dated displacement evidence to ground-instability review; decorrelated areas remain unknown.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable radar interferometric deformation instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radar_interferometric_deformation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Phase differences between coherent radar passes constrain surface displacement.",
+      "operating_requirements": "Pay for repeat acquisitions, orbit correction and analysis; retain coherence masks, geometry and atmospheric uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local radar interferometric deformation calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to radar interferometric deformation comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite radar interferometric deformation work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated radar interferometric deformation observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible radar interferometric deformation equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://science.nasa.gov/mission/nisar/interferometry/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "polarimetric_radar_classification",
+    "name": "Polarimetric Radar Classification",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "pulse_radar_observation",
+      "remote_sensing_calibration"
+    ],
+    "requires_any": [],
+    "foundations": "pulse_radar_observation,remote_sensing_calibration",
+    "mechanism": "Polarization-dependent returns distinguish scattering behavior.",
+    "operating_requirement": "Use calibrated multichannel radar observations and paid ground validation; mixed or ambiguous returns retain uncertain classes.",
+    "consequence": "Supply qualified surface-structure evidence to land assessment without revealing hidden deposits or species.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable polarimetric radar classification instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polarimetric_radar_classification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Polarization-dependent returns distinguish scattering behavior.",
+      "operating_requirements": "Use calibrated multichannel radar observations and paid ground validation; mixed or ambiguous returns retain uncertain classes.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local polarimetric radar classification calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to polarimetric radar classification comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite polarimetric radar classification work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated polarimetric radar classification observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible polarimetric radar classification equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://nisar.jpl.nasa.gov/mission/get-to-know-sar/polarimetry/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "hyperspectral_material_unmixing",
+    "name": "Hyperspectral Material Unmixing",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "multispectral_surface_mapping",
+      "spectroscopy",
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "multispectral_surface_mapping,spectroscopy,matrix_algebra",
+    "mechanism": "Spectral mixtures are fitted to reference endmembers.",
+    "operating_requirement": "Pay for calibrated spectra, an attributable reference library and constrained fitting; report residuals and library gaps.",
+    "consequence": "Guide field sampling from candidate material fractions; a fitted spectrum is not an ore reserve.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable hyperspectral material unmixing instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hyperspectral_material_unmixing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Spectral mixtures are fitted to reference endmembers.",
+      "operating_requirements": "Pay for calibrated spectra, an attributable reference library and constrained fitting; report residuals and library gaps.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local hyperspectral material unmixing calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to hyperspectral material unmixing comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite hyperspectral material unmixing work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated hyperspectral material unmixing observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible hyperspectral material unmixing equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://seadas.gsfc.nasa.gov/help-9.0.0/unmixing/SpectralUnmixingTool.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "satellite_radar_altimetry",
+    "name": "Satellite Radar Altimetry",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "satellite_earth_observation",
+      "pulse_radar_observation",
+      "geodetic_reference_frames"
+    ],
+    "requires_any": [],
+    "foundations": "satellite_earth_observation,pulse_radar_observation,geodetic_reference_frames",
+    "mechanism": "Radar travel time and orbital position determine surface height.",
+    "operating_requirement": "Pay acquisition and correction work; retain range, orbit, atmospheric and tidal references with uncertainty.",
+    "consequence": "Supply dated sea-height observations to ocean analysis; track coverage gaps instead of inventing continuous measurements.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable satellite radar altimetry instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "satellite_radar_altimetry",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Radar travel time and orbital position determine surface height.",
+      "operating_requirements": "Pay acquisition and correction work; retain range, orbit, atmospheric and tidal references with uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local satellite radar altimetry calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to satellite radar altimetry comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite satellite radar altimetry work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated satellite radar altimetry observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible satellite radar altimetry equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.ngs.noaa.gov/PUBS_LIB/GeoLay.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "scatterometer_wind_retrieval",
+    "name": "Scatterometer Wind Retrieval",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "satellite_earth_observation",
+      "pulse_radar_observation"
+    ],
+    "requires_any": [],
+    "foundations": "satellite_earth_observation,pulse_radar_observation",
+    "mechanism": "Ocean radar backscatter constrains near-surface winds.",
+    "operating_requirement": "Pay calibrated viewing geometries, sea-state screening and retrieval work; retain rain contamination and direction ambiguity.",
+    "consequence": "Feed qualified offshore wind evidence to forecast and voyage planning; land and invalid cells stay masked.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable scatterometer wind retrieval instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "scatterometer_wind_retrieval",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Ocean radar backscatter constrains near-surface winds.",
+      "operating_requirements": "Pay calibrated viewing geometries, sea-state screening and retrieval work; retain rain contamination and direction ambiguity.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local scatterometer wind retrieval calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to scatterometer wind retrieval comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite scatterometer wind retrieval work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated scatterometer wind retrieval observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible scatterometer wind retrieval equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://sos.noaa.gov/catalog/datasets/ocean-surface-winds/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "passive_microwave_radiometry",
+    "name": "Passive Microwave Radiometry",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "remote_sensing_calibration",
+      "electromagnetic_wave_theory"
+    ],
+    "requires_any": [],
+    "foundations": "remote_sensing_calibration,electromagnetic_wave_theory",
+    "mechanism": "Microwave brightness temperatures constrain atmosphere and surface properties.",
+    "operating_requirement": "Install maintained receivers or buy finite observations; pay channel calibration and inversion using declared emissivity assumptions.",
+    "consequence": "Supply qualified temperature/moisture evidence to weather analysis; mixed footprints retain uncertainty.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable passive microwave radiometry instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "passive_microwave_radiometry",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Microwave brightness temperatures constrain atmosphere and surface properties.",
+      "operating_requirements": "Install maintained receivers or buy finite observations; pay channel calibration and inversion using declared emissivity assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local passive microwave radiometry calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to passive microwave radiometry comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite passive microwave radiometry work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated passive microwave radiometry observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible passive microwave radiometry equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.earthdata.nasa.gov/data/catalog/ghrc-daac-amsua16sp-1"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "gnss_radio_occultation",
+    "name": "GNSS Radio Occultation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "satellite_navigation",
+      "atmospheric_profile_sounding"
+    ],
+    "requires_any": [],
+    "foundations": "satellite_navigation,atmospheric_profile_sounding",
+    "mechanism": "Signal bending along limb paths constrains refractivity profiles.",
+    "operating_requirement": "Pay receiver observations, precise geometry and profile inversion; retain sampling height, ambiguity and retrieval assumptions.",
+    "consequence": "Supply atmospheric soundings to numerical prediction; no immediate local forecast or free satellite fleet is created.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable gnss radio occultation instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "gnss_radio_occultation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Signal bending along limb paths constrains refractivity profiles.",
+      "operating_requirements": "Pay receiver observations, precise geometry and profile inversion; retain sampling height, ambiguity and retrieval assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local gnss radio occultation calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to gnss radio occultation comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite gnss radio occultation work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated gnss radio occultation observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible gnss radio occultation equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.cosmic.ucar.edu/what-we-do/gnss-radio-occultation"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "aerosol_optical_depth_retrieval",
+    "name": "Aerosol Optical-Depth Retrieval",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "spectroscopy",
+      "remote_sensing_calibration"
+    ],
+    "requires_any": [],
+    "foundations": "spectroscopy,remote_sensing_calibration",
+    "mechanism": "Spectral light attenuation constrains column aerosol optical depth.",
+    "operating_requirement": "Pay calibrated photometry and cloud screening; preserve gas corrections, timestamps and uncertainty.",
+    "consequence": "Supply aerosol-loading evidence to radiation assessment; column attenuation does not identify surface exposure or particle species.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable aerosol optical-depth retrieval instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aerosol_optical_depth_retrieval",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Spectral light attenuation constrains column aerosol optical depth.",
+      "operating_requirements": "Pay calibrated photometry and cloud screening; preserve gas corrections, timestamps and uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local aerosol optical-depth retrieval calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to aerosol optical-depth retrieval comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite aerosol optical-depth retrieval work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated aerosol optical-depth retrieval observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible aerosol optical-depth retrieval equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://gmd-prod.cmdl.noaa.gov/grad/instruments.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "atmospheric_lidar_profiling",
+    "name": "Atmospheric Lidar Profiling",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "laser_light_generation",
+      "remote_sensing_calibration"
+    ],
+    "requires_any": [],
+    "foundations": "laser_light_generation,remote_sensing_calibration",
+    "mechanism": "Range-resolved laser returns reveal cloud and aerosol layers.",
+    "operating_requirement": "Pay installed optics, power, alignment and retrieval; retain attenuation limits and the chosen scattering assumptions.",
+    "consequence": "Supply observed layer profiles to cloud assessment; opaque layers mask higher returns rather than reveal them.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable atmospheric lidar profiling instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "atmospheric_lidar_profiling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Range-resolved laser returns reveal cloud and aerosol layers.",
+      "operating_requirements": "Pay installed optics, power, alignment and retrieval; retain attenuation limits and the chosen scattering assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local atmospheric lidar profiling calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to atmospheric lidar profiling comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite atmospheric lidar profiling work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated atmospheric lidar profiling observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible atmospheric lidar profiling equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.arm.gov/capabilities/instruments/hsrl"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "ozone_absorption_retrieval",
+    "name": "Ozone Absorption Retrieval",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "spectroscopy",
+      "remote_sensing_calibration"
+    ],
+    "requires_any": [],
+    "foundations": "spectroscopy,remote_sensing_calibration",
+    "mechanism": "Differential spectral absorption constrains total-column ozone.",
+    "operating_requirement": "Pay calibrated wavelength observations and air-path correction; retain instrument drift and cloud flags.",
+    "consequence": "Supply dated ozone-column evidence to atmospheric review; do not equate a column with ground-level concentration.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable ozone absorption retrieval instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ozone_absorption_retrieval",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Differential spectral absorption constrains total-column ozone.",
+      "operating_requirements": "Pay calibrated wavelength observations and air-path correction; retain instrument drift and cloud flags.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local ozone absorption retrieval calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to ozone absorption retrieval comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite ozone absorption retrieval work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated ozone absorption retrieval observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible ozone absorption retrieval equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://gml.noaa.gov/ozwv/dobson/index.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "cloud_microphysical_models",
+    "name": "Cloud Microphysical Models",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "atmospheric_profile_sounding",
+      "numerical_weather_prediction"
+    ],
+    "requires_any": [],
+    "foundations": "atmospheric_profile_sounding,numerical_weather_prediction",
+    "mechanism": "Droplet growth, collision and phase transitions evolve cloud populations.",
+    "operating_requirement": "Spend computation on supplied moisture, aerosol and dynamical conditions; retain conservation residuals and parameter assumptions.",
+    "consequence": "Evaluate precipitation scenarios within a weather model; the calculation does not observe an actual future storm.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable cloud microphysical models instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cloud_microphysical_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Droplet growth, collision and phase transitions evolve cloud populations.",
+      "operating_requirements": "Spend computation on supplied moisture, aerosol and dynamical conditions; retain conservation residuals and parameter assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local cloud microphysical models calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to cloud microphysical models comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite cloud microphysical models work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated cloud microphysical models observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible cloud microphysical models equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://arxiv.org/abs/1310.1905"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "precipitation_drop_size_measurement",
+    "name": "Precipitation Drop-Size Measurement",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "rainfall_gauge_networks",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "rainfall_gauge_networks,electrical_measurement",
+    "mechanism": "Individual drop responses estimate a precipitation size distribution.",
+    "operating_requirement": "Pay maintained disdrometers, timed collection and processing; filter wind noise, test pulses and coincident-drop limits.",
+    "consequence": "Calibrate rainfall retrievals from dated samples; a point sample cannot establish regional rain coverage.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable precipitation drop-size measurement instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "precipitation_drop_size_measurement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Individual drop responses estimate a precipitation size distribution.",
+      "operating_requirements": "Pay maintained disdrometers, timed collection and processing; filter wind noise, test pulses and coincident-drop limits.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local precipitation drop-size measurement calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to precipitation drop-size measurement comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite precipitation drop-size measurement work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated precipitation drop-size measurement observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible precipitation drop-size measurement equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.arm.gov/publications/tech_reports/handbooks/disdrometer_handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "snow_water_equivalent_surveys",
+    "name": "Snow Water-Equivalent Surveys",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "standard_measures",
+      "weather_observation_logs"
+    ],
+    "requires_any": [],
+    "foundations": "standard_measures,weather_observation_logs",
+    "mechanism": "Snow depth and density determine stored water per area.",
+    "operating_requirement": "Pay field access, cores, weighing and representative sampling; retain slope, date and density uncertainty.",
+    "consequence": "Supply sampled snow storage to runoff planning; unvisited terrain remains an estimate with stated support.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable snow water-equivalent surveys instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "snow_water_equivalent_surveys",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Snow depth and density determine stored water per area.",
+      "operating_requirements": "Pay field access, cores, weighing and representative sampling; retain slope, date and density uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local snow water-equivalent surveys calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to snow water-equivalent surveys comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite snow water-equivalent surveys work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated snow water-equivalent surveys observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible snow water-equivalent surveys equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/sim/3155/pdf/SIM11-3155.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H04 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "glacier_mass_balance_accounts",
+    "name": "Glacier Mass-Balance Accounts",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "snow_water_equivalent_surveys",
+      "geodetic_reference_frames"
+    ],
+    "requires_any": [],
+    "foundations": "snow_water_equivalent_surveys,geodetic_reference_frames",
+    "mechanism": "Measured accumulation and ablation constrain glacier mass change.",
+    "operating_requirement": "Pay repeated stakes, snow measurements, mapped area and interpolation; distinguish point balances from glacier-wide estimates.",
+    "consequence": "Feed retained seasonal balances to water-resource assessment; sparse samples cannot certify every ice surface.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable glacier mass-balance accounts instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "glacier_mass_balance_accounts",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measured accumulation and ablation constrain glacier mass change.",
+      "operating_requirements": "Pay repeated stakes, snow measurements, mapped area and interpolation; distinguish point balances from glacier-wide estimates.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local glacier mass-balance accounts calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to glacier mass-balance accounts comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite glacier mass-balance accounts work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated glacier mass-balance accounts observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible glacier mass-balance accounts equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/of/2004/1069/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H04 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "permafrost_temperature_profiles",
+    "name": "Permafrost Temperature Profiles",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "temperature_station_networks",
+      "borehole_deviation_surveys"
+    ],
+    "requires_any": [],
+    "foundations": "temperature_station_networks,borehole_deviation_surveys",
+    "mechanism": "Depth-resolved ground temperatures track freezing and thawing.",
+    "operating_requirement": "Pay installed thermistors, borehole geometry, calibration and repeat readings; retain equilibration and seasonal coverage limits.",
+    "consequence": "Guide foundation and land-use review from observed ground conditions; a short warm record cannot prove permanent thaw.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable permafrost temperature profiles instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "permafrost_temperature_profiles",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Depth-resolved ground temperatures track freezing and thawing.",
+      "operating_requirements": "Pay installed thermistors, borehole geometry, calibration and repeat readings; retain equilibration and seasonal coverage limits.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local permafrost temperature profiles calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to permafrost temperature profiles comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite permafrost temperature profiles work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated permafrost temperature profiles observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible permafrost temperature profiles equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/sim/3155/pdf/SIM11-3155.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H04 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "sea_ice_thickness_retrieval",
+    "name": "Sea-Ice Thickness Retrieval",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "satellite_radar_altimetry",
+      "hydrostatic_pressure"
+    ],
+    "requires_any": [],
+    "foundations": "satellite_radar_altimetry,hydrostatic_pressure",
+    "mechanism": "Freeboard and density assumptions constrain floating ice thickness.",
+    "operating_requirement": "Pay ice/lead classification, snow estimates and hydrostatic inversion; retain snow depth, density and roughness uncertainty.",
+    "consequence": "Supply regional ice-condition evidence to route review; uncertain thickness is not a guaranteed safe crossing.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable sea-ice thickness retrieval instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sea_ice_thickness_retrieval",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Freeboard and density assumptions constrain floating ice thickness.",
+      "operating_requirements": "Pay ice/lead classification, snow estimates and hydrostatic inversion; retain snow depth, density and roughness uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local sea-ice thickness retrieval calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to sea-ice thickness retrieval comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite sea-ice thickness retrieval work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated sea-ice thickness retrieval observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible sea-ice thickness retrieval equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://icesat-2.gsfc.nasa.gov/sites/default/files/page_files/ICESat2_ATL07_ATL10_ATBD_r006.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "directional_wave_spectra",
+    "name": "Directional Wave Spectra",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "ocean_current_observation",
+      "mechanical_oscillation"
+    ],
+    "requires_any": [],
+    "foundations": "ocean_current_observation,mechanical_oscillation",
+    "mechanism": "Buoy motion resolves wave energy by frequency and direction.",
+    "operating_requirement": "Pay maintained motion sensors, sampling and spectral analysis; preserve duration, directional ambiguity and missing bins.",
+    "consequence": "Supply sea-state evidence to marine operations; unresolved components remain unavailable rather than calm.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable directional wave spectra instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "directional_wave_spectra",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Buoy motion resolves wave energy by frequency and direction.",
+      "operating_requirements": "Pay maintained motion sensors, sampling and spectral analysis; preserve duration, directional ambiguity and missing bins.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local directional wave spectra calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to directional wave spectra comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite directional wave spectra work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated directional wave spectra observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible directional wave spectra equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.ndbc.noaa.gov/faq/wave.shtml"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "ocean_mixed_layer_budget",
+    "name": "Ocean Mixed-Layer Budget",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "ocean_temperature_salinity_profiles",
+      "ocean_circulation_models",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "foundations": "ocean_temperature_salinity_profiles,ocean_circulation_models,calorimetry",
+    "mechanism": "Heat storage is compared with surface fluxes, advection and entrainment.",
+    "operating_requirement": "Pay collocated profiles, current/flux observations and diagnostic work; retain mixed-layer depth and unmeasured terms.",
+    "consequence": "Assess surface warming mechanisms for ocean forecasts; residual heat imbalance is not silently assigned to one cause.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable ocean mixed-layer budget instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ocean_mixed_layer_budget",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Heat storage is compared with surface fluxes, advection and entrainment.",
+      "operating_requirements": "Pay collocated profiles, current/flux observations and diagnostic work; retain mixed-layer depth and unmeasured terms.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local ocean mixed-layer budget calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to ocean mixed-layer budget comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite ocean mixed-layer budget work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated ocean mixed-layer budget observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible ocean mixed-layer budget equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.pmel.noaa.gov/pubs/outstand/haye1160/haye1160.shtml"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "seawater_carbonate_system_measurement",
+    "name": "Seawater Carbonate-System Measurement",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "ocean_temperature_salinity_profiles",
+      "spectroscopy",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "ocean_temperature_salinity_profiles,spectroscopy,experimental_controls",
+    "mechanism": "Measured carbon-system variables constrain seawater carbonate chemistry.",
+    "operating_requirement": "Pay preserved samples, calibrated reference materials, analytical reagents and temperature/salinity corrections; retain pair consistency and uncertainty.",
+    "consequence": "Supply acidification evidence to marine ecosystem assessment; unmeasured biology and future impacts remain separate.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable seawater carbonate-system measurement instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "seawater_carbonate_system_measurement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measured carbon-system variables constrain seawater carbonate chemistry.",
+      "operating_requirements": "Pay preserved samples, calibrated reference materials, analytical reagents and temperature/salinity corrections; retain pair consistency and uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local seawater carbonate-system measurement calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to seawater carbonate-system measurement comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite seawater carbonate-system measurement work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated seawater carbonate-system measurement observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible seawater carbonate-system measurement equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.pmel.noaa.gov/research-group/ocean-carbon"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "eddy_covariance_flux_measurement",
+    "name": "Eddy-Covariance Flux Measurement",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "wind_profile_observation",
+      "gas_composition_analysis",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "foundations": "wind_profile_observation,gas_composition_analysis,statistical_inference",
+    "mechanism": "Correlated wind and scalar fluctuations estimate turbulent exchange.",
+    "operating_requirement": "Pay fast synchronized sensors, calibration and footprint analysis; reject nonstationary or poorly sampled intervals.",
+    "consequence": "Supply local carbon/water/heat flux evidence to land budgets; gaps and advection uncertainty remain explicit.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable eddy-covariance flux measurement instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "eddy_covariance_flux_measurement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Correlated wind and scalar fluctuations estimate turbulent exchange.",
+      "operating_requirements": "Pay fast synchronized sensors, calibration and footprint analysis; reject nonstationary or poorly sampled intervals.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local eddy-covariance flux measurement calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to eddy-covariance flux measurement comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite eddy-covariance flux measurement work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated eddy-covariance flux measurement observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible eddy-covariance flux measurement equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://ameriflux.lbl.gov/wp-content/uploads/2018/01/AmeriFluxNetworkFlyer2016.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "atmospheric_emissions_inversion",
+    "name": "Atmospheric Emissions Inversion",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "carbon_cycle_measurement",
+      "atmospheric_circulation_models",
+      "bayesian_inference"
+    ],
+    "requires_any": [],
+    "foundations": "carbon_cycle_measurement,atmospheric_circulation_models,bayesian_inference",
+    "mechanism": "Transport-model fits constrain surface sources from atmospheric observations.",
+    "operating_requirement": "Pay measured concentrations, transport ensembles, prior construction and computation; retain posterior uncertainty and coverage limits.",
+    "consequence": "Compare source scenarios for emissions accounting; inferred regional flux does not establish individual liability or exact source identity.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable atmospheric emissions inversion instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "atmospheric_emissions_inversion",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Transport-model fits constrain surface sources from atmospheric observations.",
+      "operating_requirements": "Pay measured concentrations, transport ensembles, prior construction and computation; retain posterior uncertainty and coverage limits.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local atmospheric emissions inversion calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to atmospheric emissions inversion comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite atmospheric emissions inversion work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated atmospheric emissions inversion observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible atmospheric emissions inversion equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gml.noaa.gov/ccgg/carbontracker/CT2022_doc.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "surface_energy_balance_closure",
+    "name": "Surface Energy-Balance Closure",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "eddy_covariance_flux_measurement",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "foundations": "eddy_covariance_flux_measurement,calorimetry",
+    "mechanism": "Radiative, turbulent and ground heat terms are compared.",
+    "operating_requirement": "Pay collocated radiometers, soil sensors and flux analysis; align sampling footprints and retain the measured residual.",
+    "consequence": "Evaluate land-surface model and irrigation assumptions; imbalance is neither erased nor turned into free available energy.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable surface energy-balance closure instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "surface_energy_balance_closure",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Radiative, turbulent and ground heat terms are compared.",
+      "operating_requirements": "Pay collocated radiometers, soil sensors and flux analysis; align sampling footprints and retain the measured residual.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local surface energy-balance closure calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to surface energy-balance closure comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite surface energy-balance closure work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated surface energy-balance closure observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible surface energy-balance closure equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://armgov.svcs.arm.gov/capabilities/instruments/sebs"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "infrasound_source_monitoring",
+    "name": "Infrasound Source Monitoring",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "acoustic_diaphragms",
+      "seismic_source_location"
+    ],
+    "requires_any": [],
+    "foundations": "acoustic_diaphragms,seismic_source_location",
+    "mechanism": "Coherent low-frequency pressure signals constrain a source direction.",
+    "operating_requirement": "Pay calibrated arrays, timing and propagation analysis; retain wind noise and alternative-source hypotheses.",
+    "consequence": "Add evidence to volcano monitoring alongside seismic records; silence does not certify inactivity.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable infrasound source monitoring instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "infrasound_source_monitoring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Coherent low-frequency pressure signals constrain a source direction.",
+      "operating_requirements": "Pay calibrated arrays, timing and propagation analysis; retain wind noise and alternative-source hypotheses.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local infrasound source monitoring calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to infrasound source monitoring comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite infrasound source monitoring work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated infrasound source monitoring observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible infrasound source monitoring equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/infrasound-volcano-monitoring"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "tsunami_wave_propagation",
+    "name": "Tsunami Wave Propagation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "seismic_source_location",
+      "ocean_circulation_models",
+      "lidar_terrain_surveying"
+    ],
+    "requires_any": [],
+    "foundations": "seismic_source_location,ocean_circulation_models,lidar_terrain_surveying",
+    "mechanism": "A source disturbance is propagated across bathymetry into coastal water levels.",
+    "operating_requirement": "Pay source ensembles, surveyed seabed/coast grids and numerical work; preserve resolution and source uncertainty.",
+    "consequence": "Supply conditional arrival/inundation scenarios to existing warning planning; no observation or evacuation occurs automatically.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable tsunami wave propagation instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tsunami_wave_propagation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A source disturbance is propagated across bathymetry into coastal water levels.",
+      "operating_requirements": "Pay source ensembles, surveyed seabed/coast grids and numerical work; preserve resolution and source uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local tsunami wave propagation calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to tsunami wave propagation comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite tsunami wave propagation work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated tsunami wave propagation observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible tsunami wave propagation equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://nctr.pmel.noaa.gov/model.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  },
+  {
+    "id": "ocean_dissolved_oxygen_profiles",
+    "name": "Ocean Dissolved-Oxygen Profiles",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "ocean_temperature_salinity_profiles",
+      "electrochemical_cells",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "ocean_temperature_salinity_profiles,electrochemical_cells,experimental_controls",
+    "mechanism": "Depth-resolved oxygen measurements characterize water-column oxygenation.",
+    "operating_requirement": "Pay maintained probes, calibration samples and profile collection; retain sensor response, drift and depth/time support.",
+    "consequence": "Supply hypoxia evidence to marine monitoring; oxygen alone cannot identify organisms or prove ecosystem recovery.",
+    "branching_note": "All listed foundations define the selected game method. Imported measurements can be consumed under a known analysis method but do not confer instrument-manufacturing knowledge or global observation coverage.",
+    "recovery": "Obtain attributable ocean dissolved-oxygen profiles instrument or analysis evidence, then pay for local calibration and reproduction.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ocean_dissolved_oxygen_profiles",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Depth-resolved oxygen measurements characterize water-column oxygenation.",
+      "operating_requirements": "Pay maintained probes, calibration samples and profile collection; retain sensor response, drift and depth/time support.",
+      "route_terms": {
+        "scholar_envoy": "Fund specialist travel, instrument access and local ocean dissolved-oxygen profiles calibration or reconstruction.",
+        "partnership": "Contribute actual observations and analyst time to ocean dissolved-oxygen profiles comparisons; retain provider, place and date.",
+        "purchased_research": "Commission finite ocean dissolved-oxygen profiles work with declared observation support, residuals and uncertainty.",
+        "licensed_or_imported_service": "Purchase bounded dated ocean dissolved-oxygen profiles observations or analysis; gaps and continued supplier costs remain.",
+        "reverse_engineering": "Inspect accessible ocean dissolved-oxygen profiles equipment or worked records and pay to reproduce a result; inaccessible calibration and inputs can prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.pmel.noaa.gov/research-group/ocean-carbon"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid acquisition or computation, maintained equipment where applicable, actual dated/location-scoped observations, bounded saved provenance/uncertainty and the stated downstream consumer. Hidden world state cannot substitute for unobserved evidence. No global forecast or resource bonus proves this method works.",
+    "historical_scope": "H05 classifies the specified observational or analytical capability, not a precise origin date or calendar unlock. Sources support mechanisms; prerequisite choices, paid contracts and game record limits are design inferences."
+  }
+]

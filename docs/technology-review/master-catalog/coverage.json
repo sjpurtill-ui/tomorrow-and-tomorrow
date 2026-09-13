@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 740,
   "pending_communications": 0,
-  "new_authored_drafts": 2554,
-  "distinct_accounted_identities": 3294,
-  "remaining_identities_to_author": 1706,
+  "new_authored_drafts": 2579,
+  "distinct_accounted_identities": 3319,
+  "remaining_identities_to_author": 1681,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1198,
+    "assigned_identities": 1223,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2320,21 +2320,21 @@
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 240,
-        "target_slots_not_yet_assigned": 460,
+        "assigned": 243,
+        "target_slots_not_yet_assigned": 457,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 235
+        "authored_drafts": 238
       },
       {
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 604,
-        "target_slots_not_yet_assigned": 296,
+        "assigned": 626,
+        "target_slots_not_yet_assigned": 274,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 599
+        "authored_drafts": 621
       },
       {
         "id": "H06",
@@ -2373,7 +2373,7 @@
     "D19": 95,
     "D20": 107,
     "D21": 196,
-    "D22": 90,
+    "D22": 115,
     "D23": 135,
     "D24": 56
   },
@@ -2594,9 +2594,9 @@
       "target": 160,
       "implemented_baseline": 17,
       "pending_communications": 0,
-      "authored_drafts": 90,
-      "accounted": 107,
-      "remaining_to_target": 53
+      "authored_drafts": 115,
+      "accounted": 132,
+      "remaining_to_target": 28
     },
     {
       "id": "D23",

@@ -1,3 +1,9 @@
+## September 13 — Earth observation method coverage
+
+Reviewed25 distinct observational and analytical methods covering radar/optical retrievals, atmospheric layers, cryosphere measurements, ocean budgets and flux/source inference. Each requires attributable observations, paid acquisition or computation, uncertainty and a downstream consumer. Existing broad observation networks and forecasting services are not recounted; inferred or missing measurements cannot disclose hidden world state.
+
+Ledger: **740 integrated +2,579 drafts =3,319 identities**, leaving **1,681 to author and4,260 to implement**. D22 accounts for132/160 planned identities. All parents resolve, names are distinct and15 catalog-tool tests pass. Runtime remains740/522/402/20, art162/740. No player launch or package rebuild. See `technology-review/Earth Observation Methods Review.md`. Polymer implementation remains isolated in the other task.
+
 ## September 13 — polymer feedstock prerequisite
 
 Authored hydrocarbon_steam_cracking as a distinct thermal process with fuel_refining, pressure_vessels and precision_thermometry foundations. Steam dilution, quench, separation, paid heat/feed/water and mixed yields remain required operating behavior. It is not promoted; the polymer worker is implementing its typed upstream and downstream connections. See `technology-review/Polymer Feedstock Closure.md`.
