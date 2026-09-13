@@ -21,3 +21,7 @@ Limits: insulation, soil and moisture-response values are aggregate game balance
 ## Verification
 
 Worktree: 101 cases across six suites pass: household clothing15, food batches23, grain20, civilization ownership19, city resources12 and Research Atlas12. The final clothing rerun fixes day-end service telemetry replacement and verifies the actual cold health consumer, not just helper formulas. Graph audit has657 discoveries/439 explicit routes/303 civilian recipes/17 facilities, no graph or dependency errors. Logs: `/tmp/tt-clothing-final.log`, `/tmp/tt-clothing-results.json` (the initial clothing row is superseded by the final rerun), `/tmp/tt-clothing-graph-final.log`. No terrain suite expansion or live player/editor launch.
+
+## Automatic input supply follow-up
+
+The civilian planner now requests bounded yarn/cloth and manufactured-tool inputs when adopted clothing methods have real unmet stock or care demand. It follows existing paid upstream recipes, respects paused lines, missing raw materials and travel, and uses the normal controller/workforce. A causal test runs plant fiber → retted fiber → spun yarn → paid garment production, without injected yarn. All10 civilian-planner cases pass (`/tmp/tt-clothing-planner.log`). This follow-up is primary-settlement production; it does not claim finished-garment or yarn trade between cities. Equipment and per-unit input costs are also shown in the selected clothing inspector.

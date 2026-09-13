@@ -8,6 +8,8 @@ const S=preload("res://scripts/paper_study.gd")
 static func recommendation(plan_power:bool=false)->Dictionary:
 	var research:=study_recommendation(plan_power)
 	if not research.is_empty():return research
+	var clothing:=clothing_recommendation(plan_power)
+	if not clothing.is_empty():return clothing
 	var nutrients:=nutrient_recommendation(plan_power)
 	return nutrients if not nutrients.is_empty() else operating_input_recommendation(plan_power)
 
@@ -143,3 +145,40 @@ static func operating_input_recommendation(plan_power:bool=false)->Dictionary:
 		if not candidate.is_empty():choices.append({"order":candidate,"coverage":float(need.available)/float(need.daily)})
 	choices.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.coverage)<float(b.coverage))
 	return {} if choices.is_empty() else choices[0].order
+
+## A bounded supply target follows actual clothing needs. This requests an
+## ordinary paid civilian line; it grants neither yarn nor textile mastery.
+static func clothing_recommendation(plan_power:bool=false)->Dictionary:
+	var state=WorldSimulation.state
+	if state.convoy_traveling or not state.settlement_site_committed or not state.resource_settlement_id.is_empty():return {}
+	if state.effective_workers("Logistics")<=0 or state.effective_workers("Crafting")<=0:return {}
+	var clothing=preload("res://scripts/household_clothing.gd")
+	var knowledge=preload("res://scripts/clothing_knowledge.gd")
+	var requirements=preload("res://scripts/technology_requirements.gd")
+	var population:=WorldSimulation.settlements.primary_population_exact()
+	var deficit:=maxf(0,population*1.1-clothing.count())
+	var best:Dictionary={};var best_work:=INF
+	for id:String in knowledge.METHODS:
+		var spec:Dictionary=knowledge.METHODS[id]
+		if id not in state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not requirements.evaluate(spec,state.known_discoveries).ready:continue
+		var amount:=minf(10,deficit)
+		if spec.mode not in ["knit","twill","pile"]:
+			amount=0.0
+			for lot:Dictionary in clothing.data().lots:
+				if int(lot.ready)>int(state.elapsed_days):continue
+				if (spec.mode=="wash" and float(lot.soil)>=.35) or (spec.mode=="wick" and not lot.wick):amount+=float(lot.amount)
+			amount=minf(10,amount)
+		if amount<=.000001:continue
+		var needed:Dictionary={}
+		for item:String in spec.inputs:needed[item]=amount*float(spec.inputs[item])
+		if int(clothing.data().tools.get(id,0))==0:
+			for item:String in spec.cost:needed[item]=float(needed.get(item,0))+float(spec.cost[item])
+		var first:Dictionary={};var possible:=true;var work:=0.0
+		for item:String in needed:
+			if float(state.resource_stockpiles.get(item,0))>=float(needed[item]):continue
+			var order:=supply(item,ceili(float(needed[item])),{},plan_power)
+			if order.is_empty():possible=false;break
+			if first.is_empty():first=order
+			work+=float(order.get("work",0))
+		if possible and not first.is_empty() and work<best_work:best=first;best_work=work
+	return best

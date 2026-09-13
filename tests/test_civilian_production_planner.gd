@@ -113,3 +113,40 @@ func test_unpowered_machine_does_not_displace_workable_hand_pulp_route()->void:
 			state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
 		assert_str(F.recommendation().item).is_equal("beaten_pulp")
 	)
+func clothing_setup()->void:
+	var state=WorldSimulation.state
+	state.ensure_population_total(100);state.settlement_site_committed=true;state.convoy_traveling=false
+	state.population_allocations.Logistics=20;state.population_allocations.Crafting=20
+	state.resource_stockpiles={"Freshwater":100.0,"Clay":30.0,"Stone":30.0,"Timber":100.0,"Fiber Plants":100.0}
+	for gate:String in ["cordage","drop_spindles","knitted_loop_fabrics","fiber_retting"]:
+		state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
+func test_clothing_requests_actual_upstream_yarn_and_then_pays_for_garments()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup();var state=WorldSimulation.state
+		var clothing=preload("res://scripts/household_clothing.gd")
+		var initial_fibers:=float(state.resource_stockpiles["Fiber Plants"])
+		for item:String in ["retted_fibers","spun_yarn"]:
+			var order:=F.clothing_recommendation()
+			assert_str(String(order.get("item",""))).is_equal(item)
+			C.civilian_orders("paper_ruler",{})
+			var job:Dictionary=WorldSimulation.military.equipment_queue[0]
+			assert_str(String(job.item)).is_equal(item)
+			for step in 10:preload("res://scripts/persistent_production.gd").advance(WorldSimulation.military,job,20.0)
+		assert_float(float(state.resource_stockpiles["Fiber Plants"])).is_less(initial_fibers)
+		assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(10.0)
+		assert_float(clothing.count()).is_equal(0.0)
+		clothing.advance(100,100,false)
+		assert_float(clothing.count()).is_equal(2.0);assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(8.0)
+	)
+func test_clothing_supply_respects_absence_pause_travel_and_sufficient_stocks()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup();var state=WorldSimulation.state
+		state.resource_stockpiles.Freshwater=0.0;assert_dict(F.clothing_recommendation()).is_empty()
+		state.resource_stockpiles.Freshwater=100.0;state.convoy_traveling=true;assert_dict(F.clothing_recommendation()).is_empty()
+		state.convoy_traveling=false;C.civilian_orders("paper_ruler",{});WorldSimulation.military.equipment_queue[0].paused=true
+		assert_dict(F.clothing_recommendation()).is_empty()
+		WorldSimulation.military.equipment_queue[0].paused=false;state.resource_stockpiles["Spun Yarn"]=10.0
+		assert_dict(F.clothing_recommendation()).is_empty()
+		state.resource_stockpiles["Spun Yarn"]=0.0;preload("res://scripts/household_clothing.gd").add("knit",110)
+		assert_dict(F.clothing_recommendation()).is_empty()
+	)
