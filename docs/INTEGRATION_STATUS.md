@@ -1,3 +1,9 @@
+## September 13 — textile assembly coverage
+
+Reviewed twelve distinct textile and garment mechanisms: braiding, tufting, elastic-yarn covering, quilting, reinforced button openings, zipper/hook-loop/snap closures, seam taping, leather skiving/finishing and needle lace. Each proposal requires real materials, paid work and component-specific acceptance. Filling controls quilt warmth; closures and coatings do not imply universal strength or sealing. See `technology-review/Textile Assembly Review.md`.
+
+Ledger: **740 integrated +2,659 drafts =3,399 identities**, leaving **1,601 to author and 4,260 to implement**. D07 fills its 120 planned identities as authored coverage, not runtime completion. Parent and normalized-name checks and 15 ledger tests pass. Runtime 740/522/402/20 and art 162/740 are unchanged. No player launch or package rebuild. Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/textile-assembly-coverage`, base `b59e888`. Catalog-only changes have no save-format impact or runtime shared-file conflict.
+
 ## September 13 — road vehicle and infrastructure coverage
 
 Reviewed 32 distinct drivetrain, vehicle control, tire, impact-evidence, emissions and road/bridge assessment proposals. Each requires compatible paid equipment or actual observations, finite work, operating limits and a downstream consumer. Existing broad vehicle/transmission/brake knowledge is not recounted. Grip, injury prevention, emissions control and road condition remain bounded by actual equipment and test evidence rather than global bonuses. See `technology-review/Road Vehicle Review.md`.

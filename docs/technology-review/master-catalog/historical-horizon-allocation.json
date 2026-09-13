@@ -12944,6 +12944,126 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "a612e460315d43dddb80c6fee221fc99b07efb168f234b2eec9c0557f34065c1"
+    },
+    {
+      "id": "textile_braiding",
+      "name": "Textile Braiding",
+      "horizon": "H04",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2d746e12e6736f11adcffdbe225754c357ea5984a620d7b891479a69e110e38e"
+    },
+    {
+      "id": "pile_tufting",
+      "name": "Pile Tufting",
+      "horizon": "H04",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f23124e6d1896e226970f824cb7cc17077fdcc4487f6393550e41dfbadd7e017"
+    },
+    {
+      "id": "elastic_yarn_covering",
+      "name": "Elastic Yarn Covering",
+      "horizon": "H05",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "692673e15774ad7e06e46a8706f643c8a1259e24b9cd48c3b5259a2373af8df7"
+    },
+    {
+      "id": "quilted_layer_assembly",
+      "name": "Quilted Layer Assembly",
+      "horizon": "H03",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3b625e179a093b5f7db27c54803a2b295ef136f527581a033d83df301b0e3550"
+    },
+    {
+      "id": "buttonhole_edge_reinforcement",
+      "name": "Buttonhole Edge Reinforcement",
+      "horizon": "H03",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "5e35bfa43d820a4ae6108e56035a607974a4ca5153cf57fdc7a2c48beb1efb88"
+    },
+    {
+      "id": "zipper_chain_closures",
+      "name": "Zipper Chain Closures",
+      "horizon": "H04",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "d065fa313a143de996888a5a2545af911bb82c6034a14e1220d2059c02ddb25d"
+    },
+    {
+      "id": "hook_loop_fastening",
+      "name": "Hook-and-loop Fastening",
+      "horizon": "H04",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "5fccac5a82cb9874ae06f5e739fd5fc5df2088538c59206747439c35d7b76f10"
+    },
+    {
+      "id": "snap_fastener_closures",
+      "name": "Snap Fastener Closures",
+      "horizon": "H04",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "812d5826bdc3befe8438a67e1cb25958e1d0f276e8667ba714601edebe662fc4"
+    },
+    {
+      "id": "garment_seam_sealing",
+      "name": "Garment Seam Sealing",
+      "horizon": "H05",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f76ce32d89d027e2c40b39807b6be9cabb454e8c3edca9ca86af279163cdb1d1"
+    },
+    {
+      "id": "leather_thickness_skiving",
+      "name": "Leather Thickness Skiving",
+      "horizon": "H04",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e33ce7ee2bee2256862239e084c7a3c9623257bc44fd7c79958dc007de2e3d5f"
+    },
+    {
+      "id": "leather_surface_finishing",
+      "name": "Leather Surface Finishing",
+      "horizon": "H04",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e26dd6c0a20dbffbeb037ab4953b534e9e20c9a41b87c15913a70b3d59cc413c"
+    },
+    {
+      "id": "needle_lace_mesh",
+      "name": "Needle Lace Mesh",
+      "horizon": "H03",
+      "source_file": "textile-assembly-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "1312a0ba4f88f08114249898982ac545da5f832801f37b9605b2aa0c0dbb95cd"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

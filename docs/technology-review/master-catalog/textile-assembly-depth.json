@@ -1,0 +1,434 @@
+[
+  {
+    "id": "textile_braiding",
+    "name": "Textile Braiding",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "cordage",
+      "yarn_tension_control"
+    ],
+    "requires_any": [],
+    "foundations": "cordage,yarn_tension_control",
+    "mechanism": "Interlace yarns along crossing carrier paths to form a braid with a defined pattern and take-up geometry.",
+    "operating_requirement": "Pay yarn, guides or carriers, tension control, take-up work and specimen tests; retain broken strands, uneven coverage and waste.",
+    "consequence": "Supply qualified garment drawcord or protective textile sleeving; braid geometry is distinct from twisted cord and grants no automatic lifting or safety rating.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable textile braiding instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "textile_braiding",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Interlace yarns along crossing carrier paths to form a braid with a defined pattern and take-up geometry.",
+      "operating_requirements": "Pay yarn, guides or carriers, tension control, take-up work and specimen tests; retain broken strands, uneven coverage and waste.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local textile braiding trials.",
+        "partnership": "Share actual samples and operator time for textile braiding; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded textile braiding process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external textile braiding processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable textile braiding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://herzog-online.com/cms/wp-content/uploads/2023/05/Datasheet-SE-1-12-266.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "pile_tufting",
+    "name": "Pile Tufting",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "plain_weaving",
+      "sewing_machine_mechanisms"
+    ],
+    "requires_any": [],
+    "foundations": "plain_weaving,sewing_machine_mechanisms",
+    "mechanism": "Insert pile yarn through an existing backing with repeated needle and loop-forming action, then secure the inserted tufts.",
+    "operating_requirement": "Pay backing, pile yarn, needles, drive work and compatible anchoring finish; test tuft retention and reject damaged backing or loose pile.",
+    "consequence": "Produce actual tufted domestic floor or furnishing textile; insertion alone is not a woven pile structure or a durable finished carpet.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable pile tufting instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pile_tufting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Insert pile yarn through an existing backing with repeated needle and loop-forming action, then secure the inserted tufts.",
+      "operating_requirements": "Pay backing, pile yarn, needles, drive work and compatible anchoring finish; test tuft retention and reject damaged backing or loose pile.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local pile tufting trials.",
+        "partnership": "Share actual samples and operator time for pile tufting; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded pile tufting process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external pile tufting processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable pile tufting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://mpo.gov.cz/assets/cz/prumysl/ippc-integrovana-prevence-a-omezovani-znecisteni/referencni-dokumenty-bref/2023/1/BREF---Textiles-industry-2_Optimized.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "elastic_yarn_covering",
+    "name": "Elastic Yarn Covering",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "synthetic_elastomers",
+      "yarn_tension_control"
+    ],
+    "requires_any": [],
+    "foundations": "synthetic_elastomers,yarn_tension_control",
+    "mechanism": "Combine an elastomeric core with covering filament through controlled air intermingling while maintaining core extension and feed balance.",
+    "operating_requirement": "Pay named elastic core and cover yarn, compressed air, guides and processing work; measure recovery and reject broken or uneven coverage.",
+    "consequence": "Supply a qualified covered elastic yarn to garment knitting or cuff assembly; covering does not synthesize the elastomer or guarantee indefinite stretch recovery.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable elastic yarn covering instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "elastic_yarn_covering",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Combine an elastomeric core with covering filament through controlled air intermingling while maintaining core extension and feed balance.",
+      "operating_requirements": "Pay named elastic core and cover yarn, compressed air, guides and processing work; measure recovery and reject broken or uneven coverage.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local elastic yarn covering trials.",
+        "partnership": "Share actual samples and operator time for elastic yarn covering; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded elastic yarn covering process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external elastic yarn covering processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable elastic yarn covering machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.ssm.ch/products/yarn-processing-solutions/air-covering-machines"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "quilted_layer_assembly",
+    "name": "Quilted Layer Assembly",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "bone_needle_sewing",
+      "layered_clothing_design"
+    ],
+    "requires_any": [],
+    "foundations": "bone_needle_sewing,layered_clothing_design",
+    "mechanism": "Join outer fabrics and a filling layer with distributed stitches that restrain filling movement.",
+    "operating_requirement": "Pay actual fabric, filling, thread, alignment and sewing work; test filling migration, seams and compression after use or washing.",
+    "consequence": "Supply a quilted garment or bedding layer whose measured insulation depends on its real filling and condition; decorative stitching alone adds no warmth.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable quilted layer assembly instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "quilted_layer_assembly",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Join outer fabrics and a filling layer with distributed stitches that restrain filling movement.",
+      "operating_requirements": "Pay actual fabric, filling, thread, alignment and sewing work; test filling migration, seams and compression after use or washing.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local quilted layer assembly trials.",
+        "partnership": "Share actual samples and operator time for quilted layer assembly; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded quilted layer assembly process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external quilted layer assembly processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable quilted layer assembly machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.vam.ac.uk/articles/an-introduction-to-quilting-and-patchwork"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "buttonhole_edge_reinforcement",
+    "name": "Buttonhole Edge Reinforcement",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "bone_needle_sewing",
+      "garment_pattern_cutting"
+    ],
+    "requires_any": [],
+    "foundations": "bone_needle_sewing,garment_pattern_cutting",
+    "mechanism": "Bind and reinforce a cut fabric opening with edge stitches and end reinforcement matched to a closure button.",
+    "operating_requirement": "Pay fabric, thread, marking/cutting and stitch work; check button clearance and repeated pull resistance without fraying or slit extension.",
+    "consequence": "Produce a qualified button opening in an actual garment panel for a paid button closure; a pattern mark is not a completed reinforced opening.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable buttonhole edge reinforcement instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "buttonhole_edge_reinforcement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Bind and reinforce a cut fabric opening with edge stitches and end reinforcement matched to a closure button.",
+      "operating_requirements": "Pay fabric, thread, marking/cutting and stitch work; check button clearance and repeated pull resistance without fraying or slit extension.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local buttonhole edge reinforcement trials.",
+        "partnership": "Share actual samples and operator time for buttonhole edge reinforcement; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded buttonhole edge reinforcement process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external buttonhole edge reinforcement processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable buttonhole edge reinforcement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.juki.co.jp/industrial_e/products_e/appareljin_e/button_hole_jin/detail_jin.php?cd=B-1E_E"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "zipper_chain_closures",
+    "name": "Zipper Chain Closures",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "sewing_machine_mechanisms",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "sewing_machine_mechanisms,dimensional_metrology",
+    "mechanism": "Guide two compatible rows of fastening elements through a slider so the rows interlock or separate along their tapes.",
+    "operating_requirement": "Pay matched elements, tapes, slider and stops, attachment work and cycling tests; reject misaligned pitch, jammed travel and weak tape joints.",
+    "consequence": "Supply a replaceable tested closure for a specified garment or textile bag; ordinary zipper engagement does not certify waterproof sealing.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable zipper chain closures instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "zipper_chain_closures",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Guide two compatible rows of fastening elements through a slider so the rows interlock or separate along their tapes.",
+      "operating_requirements": "Pay matched elements, tapes, slider and stops, attachment work and cycling tests; reject misaligned pitch, jammed travel and weak tape joints.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local zipper chain closures trials.",
+        "partnership": "Share actual samples and operator time for zipper chain closures; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded zipper chain closures process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external zipper chain closures processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable zipper chain closures machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.ykk.com/english/ykk/tech/01.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "hook_loop_fastening",
+    "name": "Hook-and-loop Fastening",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "pile_fabric_weaving",
+      "textile_durability_testing"
+    ],
+    "requires_any": [],
+    "foundations": "pile_fabric_weaving,textile_durability_testing",
+    "mechanism": "Engage an array of small hooks with compatible textile loops, permitting repeated peel separation and reattachment.",
+    "operating_requirement": "Pay hook and loop material, attachment to the actual substrate and peel/shear cycling tests; retain lint contamination, wear and direction-dependent holding limits.",
+    "consequence": "Provide a tested adjustable garment cuff or removable textile attachment; closure area and condition bound load rather than granting universal adhesion.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable hook-and-loop fastening instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hook_loop_fastening",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Engage an array of small hooks with compatible textile loops, permitting repeated peel separation and reattachment.",
+      "operating_requirements": "Pay hook and loop material, attachment to the actual substrate and peel/shear cycling tests; retain lint contamination, wear and direction-dependent holding limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local hook-and-loop fastening trials.",
+        "partnership": "Share actual samples and operator time for hook-and-loop fastening; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded hook-and-loop fastening process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external hook-and-loop fastening processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable hook-and-loop fastening machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.velcro.com/news-and-blog/2023/02/how-do-velcro-brand-fasteners-work/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "snap_fastener_closures",
+    "name": "Snap Fastener Closures",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "leather_goods_patterning",
+      "elastic_deformation"
+    ],
+    "requires_any": [],
+    "foundations": "leather_goods_patterning,elastic_deformation",
+    "mechanism": "Mate a shaped stud and resilient socket whose deformation permits engagement and release while retaining the closure.",
+    "operating_requirement": "Pay compatible stud/socket parts, backing support, installation tooling and pull/cycle trials; reject loose attachment, damaged springs and inappropriate substrate thickness.",
+    "consequence": "Install a qualified releasable closure in a garment or leather pouch; successful engagement does not certify the surrounding material against tearing.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable snap fastener closures instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "snap_fastener_closures",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Mate a shaped stud and resilient socket whose deformation permits engagement and release while retaining the closure.",
+      "operating_requirements": "Pay compatible stud/socket parts, backing support, installation tooling and pull/cycle trials; reject loose attachment, damaged springs and inappropriate substrate thickness.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local snap fastener closures trials.",
+        "partnership": "Share actual samples and operator time for snap fastener closures; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded snap fastener closures process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external snap fastener closures processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable snap fastener closures machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://ykkamericas.com/wp-content/uploads/2021/10/fastening-catalog-compressed-1.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "garment_seam_sealing",
+    "name": "Garment Seam Sealing",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "textile_waterproofing",
+      "sewing_machine_mechanisms"
+    ],
+    "requires_any": [],
+    "foundations": "textile_waterproofing,sewing_machine_mechanisms",
+    "mechanism": "Bond a compatible sealing tape across a stitched seam to cover needle penetrations and connected leakage paths.",
+    "operating_requirement": "Pay actual seamed textile, compatible tape, controlled heat/pressure work and leak tests; retain skipped adhesion, heat damage, washing effects and repair demand.",
+    "consequence": "Supply a tested sealed seam for a specified protective outer garment; a waterproof fabric alone does not establish seam integrity or total garment sealing.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable garment seam sealing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "garment_seam_sealing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Bond a compatible sealing tape across a stitched seam to cover needle penetrations and connected leakage paths.",
+      "operating_requirements": "Pay actual seamed textile, compatible tape, controlled heat/pressure work and leak tests; retain skipped adhesion, heat damage, washing effects and repair demand.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local garment seam sealing trials.",
+        "partnership": "Share actual samples and operator time for garment seam sealing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded garment seam sealing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external garment seam sealing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable garment seam sealing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.pfaff-industrial.com/en/portfolio/welding-machines/hot-air-tape-welding-machine/8333_e_new"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "leather_thickness_skiving",
+    "name": "Leather Thickness Skiving",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "leather_goods_patterning",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "leather_goods_patterning,dimensional_metrology",
+    "mechanism": "Remove a controlled thin layer from selected leather edges to produce a specified thickness transition for folding or joining.",
+    "operating_requirement": "Pay actual leather, sharp blade or skiving machine, supports, measuring and cutting work; retain offcuts and reject cuts that weaken the remaining edge.",
+    "consequence": "Provide a graded thinned edge for a known pouch, shoe-upper or garment seam; skiving does not tan hide or improve the untouched leather grade.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable leather thickness skiving instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "leather_thickness_skiving",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Remove a controlled thin layer from selected leather edges to produce a specified thickness transition for folding or joining.",
+      "operating_requirements": "Pay actual leather, sharp blade or skiving machine, supports, measuring and cutting work; retain offcuts and reject cuts that weaken the remaining edge.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local leather thickness skiving trials.",
+        "partnership": "Share actual samples and operator time for leather thickness skiving; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded leather thickness skiving process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external leather thickness skiving processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable leather thickness skiving machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fortuna-gmbh.de/EN/PRODUCTS/SKIVING_MACHINES/SM_50/content.php"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "leather_surface_finishing",
+    "name": "Leather Surface Finishing",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "hide_tanning",
+      "textile_chemical_residue_control"
+    ],
+    "requires_any": [],
+    "foundations": "hide_tanning,textile_chemical_residue_control",
+    "mechanism": "Apply a compatible flexible surface finish to prepared leather and consolidate it into an adherent coating with defined appearance and wear behavior.",
+    "operating_requirement": "Pay tanned leather, named binder/pigment system, preparation and drying work, plus rub/adhesion/flex checks; retain coating waste, cracking and substrate incompatibility.",
+    "consequence": "Supply qualified finished leather for an interior furnishing or garment component; a coating neither replaces tanning nor makes every leather waterproof or structurally stronger.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable leather surface finishing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "leather_surface_finishing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Apply a compatible flexible surface finish to prepared leather and consolidate it into an adherent coating with defined appearance and wear behavior.",
+      "operating_requirements": "Pay tanned leather, named binder/pigment system, preparation and drying work, plus rub/adhesion/flex checks; retain coating waste, cracking and substrate incompatibility.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local leather surface finishing trials.",
+        "partnership": "Share actual samples and operator time for leather surface finishing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded leather surface finishing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external leather surface finishing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable leather surface finishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://patents.google.com/patent/US2204520A/en"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "needle_lace_mesh",
+    "name": "Needle Lace Mesh",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "bone_needle_sewing",
+      "net_fabric_construction"
+    ],
+    "requires_any": [],
+    "foundations": "bone_needle_sewing,net_fabric_construction",
+    "mechanism": "Build an open textile structure from connected needle-worked thread loops over a temporary pattern/support and release the completed mesh.",
+    "operating_requirement": "Pay suitable thread, needles, temporary support, pattern preparation and substantial stitching work; verify joins and remove support without tearing the mesh.",
+    "consequence": "Supply a completed lace insert or trim to a garment assembly with its own repair requirements; mesh construction differs from embroidered decoration on permanent ground cloth.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable needle lace mesh instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "needle_lace_mesh",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Build an open textile structure from connected needle-worked thread loops over a temporary pattern/support and release the completed mesh.",
+      "operating_requirements": "Pay suitable thread, needles, temporary support, pattern preparation and substantial stitching work; verify joins and remove support without tearing the mesh.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local needle lace mesh trials.",
+        "partnership": "Share actual samples and operator time for needle lace mesh; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded needle lace mesh process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external needle lace mesh processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable needle lace mesh machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://maas-website-media.s3.amazonaws.com/maas.museum/uploads/2021/11/Glossary-Of-Lace-Terms.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]
