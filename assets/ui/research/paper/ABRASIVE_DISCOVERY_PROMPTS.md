@@ -31,3 +31,6 @@ Use case: historical-scene. Asset type: square discovery-card illustration for T
 Native source: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-c7235c22-8a38-4eac-a04a-82a8109cf662.png`
 
 Use case: historical-scene. Asset type: square discovery-card illustration for Tomorrow and Tomorrow. Input is a STYLE REFERENCE ONLY; make a new distinct scene. Sparse gouache on warm ivory fibrous paper, matte dry brush texture, restrained ochre/umber/olive palette, believable small human figures and equipment concentrated in lower half, broad quiet paper above, soft unfinished vignette edges. No frame, lettering, readable text, watermark, glossy photorealism or floating diagrams. Subject: A modest industrial workshop with a narrow dry abrasive belt running over two aligned pulleys on a guarded stand, a small formed sheet-steel motor housing supported on a rest while a worker lightly deburrs one edge against the belt. Nearby are spare cloth-backed abrasive belt loops and one unworked housing. Fine dry dust caught in a shallow tray, no coolant on this hide-glue bonded dry-service belt, no heavy stock removal or shower of sparks. Hands clear of belt contact, no lettering.
+
+
+Selected original images superseded for historical setting: see [Industrial era corrections](INDUSTRIAL_ERA_CORRECTIONS.md).

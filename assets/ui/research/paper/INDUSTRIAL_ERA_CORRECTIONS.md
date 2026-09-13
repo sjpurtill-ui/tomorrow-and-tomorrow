@@ -33,3 +33,45 @@ Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918
 Exact edit prompt:
 
 Edit this machine stiffness discovery illustration into an early twentieth-century engineering metrology laboratory interior. Replace thatched shelter, rural hills, trees, dirt and ancient robes with masonry factory walls, tall glazed windows, clean level floor, fitted work shirts and trousers with closed work shoes. Preserve experiment: rigid machine-tool slide on stout engineering bench, dial indicator on independent support touching slide, measured weights applying load through fixture to slide so deflection can be measured. Use secure compact steel loading frame instead of rustic wooden crane; operator keeps clear of suspended weights. Two technicians compare indicator before and after loading. No ancient village scenery. Keep square warm ivory fibrous paper, matte gouache dry brush, restrained umber/ochre/olive/steel gray, equipment in lower half, broad quiet upper paper and soft unfinished edges. No readable text or watermark.
+
+
+## polymer_chain_models
+
+Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-512af1d0-6c6e-4ccd-b9ad-fb7ef94a4ad3.png`
+
+Exact edit prompt:
+
+Edit this polymer science illustration into a coherent mid-twentieth-century chemistry teaching laboratory INTERIOR. Remove thatched roof, ancient robes, hills and outdoor setting. Two scientists wear plain white laboratory coats over shirts and trousers, beside a proper smooth laboratory bench with drawers; glazed windows, plaster walls, specimen cabinets and electrical lighting imply a twentieth-century research building. Preserve tabletop three distinct physical bead-and-stick models: linear, branched and connected network, and solid polymer sample strips with one being flexed. Replace pottery stationery holders with simple lab glassware and instrument storage. Keep square matte gouache on warm ivory fibrous paper, restrained ochre/umber/olive, quiet broad paper above, lower-half activity and dry-brush vignette edges. No readable text, formula, watermark or floating molecules. Buildings and dress must match modern polymer science.
+
+## polymer_melt_rheology
+
+Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-2f7d5d66-482e-4446-89b3-99b0fc69e143.png`
+
+Exact edit prompt:
+
+Edit this polymer rheology image into a coherent mid-twentieth-century polymer laboratory INTERIOR. Scientists wear white laboratory coats over shirts and trousers, safety spectacles; remove ancient tunics, pottery containers and rustic furnace. Smooth laboratory bench, glazed windows, plaster walls, metal cabinets, electric task light and power connections. Preserve recognizable weight-driven piston in electrically heated vertical metal capillary rheometer, short polymer strand extruding downward onto metal collection dish, adjacent analytical balance and cooled sample strands being compared. Small electrically controlled heated barrel, no open flame or medieval forge. Keep square illustration, matte gouache drybrush on warm ivory fibrous paper, restrained ochre/umber/olive and gray, broad quiet upper paper, grounded lower-half vignette, no text or watermark.
+
+## cylindrical_grinding
+
+Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-1031e738-f8ba-4c75-9598-62c3f9da191b.png`
+
+Exact edit prompt:
+
+Edit only the environment and worker details of this cylindrical grinder discovery illustration into a coherent mid-twentieth-century precision machine shop interior. Replace outdoor hills, vegetation and timber shelter with factory masonry walls, tall glazed windows, steel roof supports fading into paper, level concrete floor, proper metal parts rack. Worker wears fitted work shirt/trousers, closed shoes and safety spectacles. Preserve the ENTIRE MACHINE GEOMETRY: horizontal uninterrupted steel shaft between headstock and tailstock pointed centers, separate fully guarded olive grinding-wheel head behind the shaft retracted for setup, no wheel intersecting shaft, electric drive, handwheel and coolant nozzle. Keep square spare matte gouache drybrush on warm ivory fibrous paper, muted ochre/umber/olive/steel gray, broad quiet paper above and soft vignette edges. No text or watermark. No rural or ancient scenery.
+
+
+## polymer_monomer_purification
+
+Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-0586fa40-8767-46a9-bff7-9bc46ed87087.png`
+
+Exact edit prompt:
+
+Edit this polymer monomer purification scene to a coherent mid-twentieth-century chemical pilot-plant laboratory INTERIOR. Remove all thatched roofs, rural landscape, ancient robes, pottery jars and crude outdoor bench. Two technicians wear lab coats over shirts/trousers and safety spectacles. Metal laboratory benches, level sealed concrete floor, industrial glazed windows, metal racks, ventilation duct and electrical cabinets. Preserve the two vertical fractional distillation columns with connected condensers and closed receivers, sampled sealed vials and balance; condenser coils enclosed in proper water-cooling jackets with supply/return hoses, contained heating, no open flame. Keep apparatus readable and modest in scale. Square matte gouache on warm ivory textured paper, restrained ochre/umber/olive/steel gray, broad quiet upper space, softly unfinished lower-half scene, no lettering or watermark. Architecture and clothing must match industrial chemistry.
+
+## polymer_reaction_heat_management
+
+Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-e139817f-d52b-448a-9707-8b5909151371.png`
+
+Exact edit prompt:
+
+Edit this reactor heat-management discovery scene into a coherent mid-twentieth-century chemical pilot-plant interior. Remove ancient robes, thatched shelter, hills, trees, earthen pots and dirt floor. Technicians in fitted industrial coveralls, closed shoes and safety spectacles operate from beside the apparatus. Industrial glazed windows, masonry walls, metal service piping, electric control cabinet, level concrete floor with containment curb. Preserve central closed stirred jacketed metal reactor with motor and gauges, connected heat exchanger, pump and finite cooling-water reservoir with visible supply/return plumbing. All equipment mounted on proper steel supports. Clear cooling circuit, no open reactor, no flames. Preserve square matte gouache drybrush on warm ivory fibrous paper, subdued ochre/umber/olive/steel gray, broad quiet upper paper, small lower-half scene and soft vignette edges. No text or watermark. Show a real industrial working environment matching this reactor technology.

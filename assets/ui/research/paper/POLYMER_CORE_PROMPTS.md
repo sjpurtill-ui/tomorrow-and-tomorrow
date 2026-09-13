@@ -23,3 +23,6 @@ Original: /Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-591
 Prompt: Use case: historical-scene. Asset type: square discovery-card illustration for Tomorrow and Tomorrow. Input is a STYLE REFERENCE ONLY; make a new distinct scene. Sparse gouache on warm ivory fibrous paper, matte dry brush texture, restrained ochre/umber/olive palette, believable small human figures and equipment concentrated in lower half, broad quiet paper above, soft unfinished vignette edges. No frame, lettering, readable text, watermark, glossy photorealism or floating diagrams. Subject: A compact early industrial polymer laboratory with a closed pressure reaction vessel, small metering pump connected from a sealed reagent receiver, and an overhead stirrer drive. Two researchers inspect a translucent solid polymer strip and a little weighed sealed reagent bottle on a side table. Modest restrained industrial scene suggesting controlled initiated chain reaction, no floating molecules, formulas, flame or open vat.
 
 Validation: Godot 4.7.2 headless import completed without errors. All five direct texture loads pass at 768 × 768 with mipmaps. Runtime bindings remain with the polymer worker.
+
+
+Selected original images superseded for historical setting: see [Industrial era corrections](INDUSTRIAL_ERA_CORRECTIONS.md).
