@@ -70,6 +70,11 @@ func _initialize()->void:
   if method in ["timber_post_beam_connections","timber_splice_connections"]:
    assert(kit.kind(ready).begins_with("timber_"))
    assert(kit.kind(legacy).begins_with("modern_"))
+  if method=="building_shading_design":
+   var base_bounds:=AABB(Vector3(-2,0,-3),Vector3(4,3,6))
+   var overlay:ArrayMesh=kit.detail_mesh(base_bounds,kit.installed_features(ready))
+   assert(overlay.get_aabb().end.z>base_bounds.end.z)
+   assert(overlay==kit.detail_mesh(base_bounds,kit.installed_features(ready)))
   var mesh:ArrayMesh=kit.mesh_for_plot(ready)
   assert(mesh==kit.mesh_for_plot(ready))
   if method=="building_shading_design":

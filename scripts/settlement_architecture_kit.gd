@@ -165,3 +165,16 @@ static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->
 		for x in 9:_box(surface,Vector3(-3.6+float(x)*.9,2.5,5.65),Vector3(.18,.12,1.3),wood)
 		_box(surface,Vector3(0,2.5,6.22),Vector3(8,.12,.12),wood)
 	if flags&128:_box(surface,Vector3(0,.18,0),Vector3(8.2,.12,10.2),Color("524e46"))
+
+static func detail_mesh(bounds:AABB,features:int)->ArrayMesh:
+	var key:="details:"+str(bounds)+":"+str(features)
+	if cache.has(key):return cache[key]
+	var raw:=SurfaceTool.new();raw.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_add_installed_details(raw,maxf(.5,bounds.size.y*.8),features)
+	raw.generate_normals()
+	var source:=raw.commit()
+	var baked:=SurfaceTool.new()
+	var scale:=Vector3(maxf(.1,bounds.size.x)/8.0,1.0,maxf(.1,bounds.size.z)/10.0)
+	var origin:=Vector3(bounds.get_center().x,bounds.position.y,bounds.get_center().z)
+	baked.append_from(source,0,Transform3D(Basis.from_scale(scale),origin))
+	var result:=baked.commit();cache[key]=result;return result
