@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 693,
   "pending_communications": 0,
-  "new_authored_drafts": 2446,
-  "distinct_accounted_identities": 3139,
-  "remaining_identities_to_author": 1861,
+  "new_authored_drafts": 2468,
+  "distinct_accounted_identities": 3161,
+  "remaining_identities_to_author": 1839,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1043,
+    "assigned_identities": 1065,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2310,31 +2310,31 @@
         "id": "H03",
         "name": "Complex societies and learned traditions",
         "target": 800,
-        "assigned": 210,
-        "target_slots_not_yet_assigned": 590,
+        "assigned": 211,
+        "target_slots_not_yet_assigned": 589,
         "implemented_baseline": 8,
         "pending_communications": 0,
-        "authored_drafts": 202
+        "authored_drafts": 203
       },
       {
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 197,
-        "target_slots_not_yet_assigned": 503,
+        "assigned": 203,
+        "target_slots_not_yet_assigned": 497,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 192
+        "authored_drafts": 198
       },
       {
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 498,
-        "target_slots_not_yet_assigned": 402,
+        "assigned": 513,
+        "target_slots_not_yet_assigned": 387,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 493
+        "authored_drafts": 508
       },
       {
         "id": "H06",
@@ -2349,24 +2349,24 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 467,
+  "branch_alternatives": 470,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 115,
     "D02": 99,
     "D03": 97,
-    "D04": 116,
+    "D04": 119,
     "D05": 156,
-    "D06": 55,
+    "D06": 59,
     "D07": 47,
     "D08": 97,
     "D09": 79,
     "D10": 79,
     "D11": 60,
-    "D12": 60,
+    "D12": 67,
     "D13": 116,
     "D14": 176,
-    "D15": 119,
+    "D15": 127,
     "D16": 114,
     "D17": 115,
     "D18": 92,
@@ -2414,9 +2414,9 @@
       "target": 300,
       "implemented_baseline": 70,
       "pending_communications": 0,
-      "authored_drafts": 116,
-      "accounted": 186,
-      "remaining_to_target": 114
+      "authored_drafts": 119,
+      "accounted": 189,
+      "remaining_to_target": 111
     },
     {
       "id": "D05",
@@ -2434,9 +2434,9 @@
       "target": 240,
       "implemented_baseline": 78,
       "pending_communications": 0,
-      "authored_drafts": 55,
-      "accounted": 133,
-      "remaining_to_target": 107
+      "authored_drafts": 59,
+      "accounted": 137,
+      "remaining_to_target": 103
     },
     {
       "id": "D07",
@@ -2494,9 +2494,9 @@
       "target": 180,
       "implemented_baseline": 65,
       "pending_communications": 0,
-      "authored_drafts": 60,
-      "accounted": 125,
-      "remaining_to_target": 55
+      "authored_drafts": 67,
+      "accounted": 132,
+      "remaining_to_target": 48
     },
     {
       "id": "D13",
@@ -2524,9 +2524,9 @@
       "target": 200,
       "implemented_baseline": 0,
       "pending_communications": 0,
-      "authored_drafts": 119,
-      "accounted": 119,
-      "remaining_to_target": 81
+      "authored_drafts": 127,
+      "accounted": 127,
+      "remaining_to_target": 73
     },
     {
       "id": "D16",

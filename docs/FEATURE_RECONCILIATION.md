@@ -1,3 +1,9 @@
+## September 12 — optical instrument coverage
+
+Reviewed frozen optical delivery `b8873f6` is integrated as `e37aacb`: 22 distinct optical manufacturing, contrast, imaging and correction proposals, each with five paid recovery routes. Existing coronagraphy and confocal imaging identities were explicitly excluded as duplicates. All horizon mappings merge cleanly; coverage validation and 15 ledger-tool checks pass. See `technology-review/Optical Instrument Methods Review.md`.
+
+Runtime remains **693 discoveries /475 routes /329 recipes /18 facilities**; art remains **115 verified /693 live**. The authored ledger is now **693 integrated + 2,468 drafts = 3,161 identities**, leaving **1,839 to author and 4,307 to implement**. These 22 are authored scope, not working instruments. Civilian clinical-care implementation is assigned to the other isolated task, pending its bounded design and complete acceptance.
+
 ## September 12 — verified rail freight and conditioned food
 
 INTEGRATED runtime merge `fbaf803`, with reviewed rail artwork at canonical `e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3`. Frozen rail `1c161ef` and food conditioning `0635688` share conserved city stocks, finite workers and existing save owners. All **94 combined runtime checks and 71 canonical runtime/atlas checks pass**; conditioning also passed 20 grain and 14 food-preparation regressions, for 128 distinct runtime cases across the worktree runs. See `RAIL_CONDITIONING_INTEGRATION.md` for paid operations, save compatibility and limits.
