@@ -72,3 +72,19 @@ static func advance_pending()->void:
 	for sample_id:String in records:
 		if records[sample_id].status=="unmeasured":start(sample_id)
 		advance(sample_id,WORK)
+
+static func report(sample_id:String)->Dictionary:
+	var sample:=record(sample_id)
+	if sample.is_empty():return {"status":"unavailable","message":"Sample is unavailable."}
+	if sample.status=="unmeasured":return {"status":"unmeasured","message":"Prepared; awaiting supported bench time and supplies."}
+	if sample.status=="acquiring":return {"status":"acquiring","message":"Acquiring: %.1f / %.1f instrument-time units." % [float(sample.acquisition.work),WORK]}
+	var interpretation:Dictionary=load("res://scripts/nmr_trace_analysis.gd").analyze(sample.observation,sample.observation.get("reference",{}))
+	return {"status":"measured_unqualified","message":"Unqualified: "+String(interpretation.get("reason","Reference qualification remains required.")),"interpretation":interpretation}
+static func report_text()->String:
+	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
+	if records.is_empty():return "No prepared specimens. Prepare a sealed specimen through workshop production."
+	var lines:PackedStringArray=[]
+	var ids:Array=records.keys()
+	for index:int in range(maxi(0,ids.size()-6),ids.size()):
+		var id:=String(ids[index]);lines.append("Sample "+id+": "+String(report(id).message))
+	return "\n".join(lines)
