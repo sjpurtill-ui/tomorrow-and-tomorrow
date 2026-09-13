@@ -4820,6 +4820,20 @@
       "source_domain": "production",
       "name": "Textile Repair Methods",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "dry_dock_services",
+      "field": "D10",
+      "source_domain": "logistics",
+      "name": "Dry Dock Services",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "hull_condition_surveys",
+      "field": "D10",
+      "source_domain": "logistics",
+      "name": "Hull Condition Surveys",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

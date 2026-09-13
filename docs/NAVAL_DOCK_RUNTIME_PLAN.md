@@ -1,6 +1,6 @@
-# Physical naval dock and hull survey services — READY
+# Physical naval dock and hull survey services — INTEGRATED
 
-Worktree `/Users/seanpurtill/Documents/Codex/tt-naval-dock`, branch `codex/naval-dock`, base `cd6accf0cd2dc24b51842bfc3280530ec8c2b52f`. This delivery is ready for integrator review; it is not yet canonical. Integrate the complete branch range from the base, including the helper and UI commits.
+Worktree `/Users/seanpurtill/Documents/Codex/tt-naval-dock`, branch `codex/naval-dock`, base `cd6accf0cd2dc24b51842bfc3280530ec8c2b52f`. Integrated as `b363f6c6aceaf42515e020281934cef26cb217fd`, including the complete source range. See `NAVAL_SEWING_INTEGRATION.md` for combined and canonical acceptance.
 
 ## Behavior
 

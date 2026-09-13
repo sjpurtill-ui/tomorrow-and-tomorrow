@@ -3862,60 +3862,6 @@
   },
   {
     "field": "D10",
-    "id": "dry_dock_services",
-    "name": "Dry-Dock Services",
-    "foundations": "mine_drainage,structural_load_testing",
-    "mechanism": "Support a vessel out of water for inspected hull access",
-    "operating_requirement": "Suitable dock or lift, blocking, pumping or lifting capacity and skilled crews",
-    "consequence": "Permit submerged-hull work within facility size and support limits",
-    "status": "authored_draft",
-    "requires_all": [
-      "mine_drainage",
-      "structural_load_testing"
-    ],
-    "requires_any": [],
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "dry_dock_services",
-      "instruction": "A competent source teaches Dry-Dock Services through delivered records, visiting specialists or a negotiated partnership.",
-      "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
-      "local_demonstration": "Support a vessel out of water for inspected hull access",
-      "retained_operating_requirements": "Suitable dock or lift, blocking, pumping or lifting capacity and skilled crews",
-      "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
-      "grants_instant_mastery": false,
-      "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
-    },
-    "recovery": "For Dry-Dock Services: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
-  },
-  {
-    "field": "D10",
-    "id": "hull_condition_surveys",
-    "name": "Hull-Condition Surveys",
-    "foundations": "hull_seam_caulking,measurement_uncertainty",
-    "mechanism": "Record hull wear, damage and material condition through repeatable inspection",
-    "operating_requirement": "Qualified surveyors, access and dated evidence",
-    "consequence": "Identify repair needs without equating a certificate with permanent seaworthiness",
-    "status": "authored_draft",
-    "requires_all": [
-      "hull_seam_caulking",
-      "measurement_uncertainty"
-    ],
-    "requires_any": [],
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "hull_condition_surveys",
-      "instruction": "A competent source teaches Hull-Condition Surveys through delivered records, visiting specialists or a negotiated partnership.",
-      "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
-      "local_demonstration": "Record hull wear, damage and material condition through repeatable inspection",
-      "retained_operating_requirements": "Qualified surveyors, access and dated evidence",
-      "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
-      "grants_instant_mastery": false,
-      "local_operation": "Inspect the local route, facility or vehicle and qualify its operating envelope; imported designs do not supply physical infrastructure or maintained links."
-    },
-    "recovery": "For Hull-Condition Surveys: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending."
-  },
-  {
-    "field": "D10",
     "id": "marine_antifouling_practice",
     "name": "Marine Antifouling Practice",
     "foundations": "hull_condition_surveys,biological_reference_collections",

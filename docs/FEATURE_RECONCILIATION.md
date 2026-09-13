@@ -1,3 +1,9 @@
+## September 12 — verified naval access and hull surveys
+
+INTEGRATED runtime `b363f6c6aceaf42515e020281934cef26cb217fd` combines frozen naval `bcda00e` with the canonical sewing checkpoint. All **86 combined cases and 48 canonical dock/clothing/city cases pass**. Paid local construction, finite supported-hull access, dated surveys, automatic supply and delayed secondary-port deliveries share the existing labor and inventory owners. See `NAVAL_SEWING_INTEGRATION.md` for acceptance, save compatibility and the limited canoe/ram-galley handling set.
+
+The clean graph and exact canonical snapshot contain **673 discoveries /455 explicit routes /309 recipes /17 facilities**. All 673 stored definitions match; 15 ledger-tool checks pass. Ledger: **673 integrated + 2,419 drafts = 3,092 identities**, leaving **1,908 to author and 4,327 to implement**. Art: 108 verified /673 live, with 565 queued; two naval illustrations await a frozen worker delivery. Laundry scaffolding is held separately at `b107bca`; it is not live. No player launch, package rebuild or full-history pacing claim.
+
 ## September 12 — sewn garments and material-consuming repair
 
 INTEGRATED runtime `638629a669cb62946f88fa51761793941df07e61`: four existing textile identities now implement paid sewing, cutting patterns, size grading and proportional repair. Actual hunting supplies a bounded local bone reserve for needles; stored meat and forecasts cannot create bone. Real cloth, yarn, paper, tools and daily work constrain outputs. All **90 worktree cases and 35 canonical clothing/planner cases pass**; ordinary headless boot is clean. See `SEWING_REPAIR_HANDOFF.md` and `/tmp/tt-sewing-canonical-results.json`.
