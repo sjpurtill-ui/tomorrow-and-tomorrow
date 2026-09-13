@@ -1,0 +1,1619 @@
+[
+  {
+    "id": "phase_selective_steam_traps",
+    "name": "Phase-Selective Steam Traps",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "steam_condensers"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Discharge condensate while limiting live-steam escape.",
+    "operating_requirement": "Pay a sized trap, valve work and pressure/temperature checks; retain drain and leakage observations.",
+    "consequence": "A steam user receives a drained line with measured steam loss charged to its supply.",
+    "failure_modes": "Stuck-open traps waste supplied steam; blocked traps accumulate condensate.",
+    "semantic_neighbors": [
+      "condensate_return_networks",
+      "steam_condensers"
+    ],
+    "distinctness": "Automatic phase-responsive drainage differs from condensing steam or returning already separated water.",
+    "sources": [
+      "https://www.energy.gov/sites/prod/files/2014/04/f15/steam_survey_guide.pdf"
+    ],
+    "source_locator": "steam traps",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "phase_selective_steam_traps",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "condensate_flash_recovery",
+    "name": "Condensate Flash Recovery",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "steam_condensers",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Recover vapor released when hot condensate depressurizes.",
+    "operating_requirement": "Pay a flash vessel, pressure control and compatible low-pressure heat demand; retain vapor/liquid split.",
+    "consequence": "An actual lower-temperature process consumes the retained flash-steam service.",
+    "failure_modes": "No low-pressure demand means recovered vapor cannot be credited as useful heat; carryover contaminates delivery.",
+    "semantic_neighbors": [
+      "condensate_return_networks",
+      "regenerative_feed_heating"
+    ],
+    "distinctness": "Recovering pressure-drop vapor differs from returning liquid and extraction-steam feed heating.",
+    "sources": [
+      "https://www.energy.gov/sites/prod/files/2014/04/f15/steam_survey_guide.pdf"
+    ],
+    "source_locator": "flash steam recovery",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "condensate_flash_recovery",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "interstage_steam_reheating",
+    "name": "Interstage Steam Reheating",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "compound_steam_expansion",
+      "steam_superheating"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Add heat between separate steam expansion stages.",
+    "operating_requirement": "Pay reheater surfaces, extra supplied heat and pressure-loss monitoring; retain stage inlet/outlet states.",
+    "consequence": "A qualified turbine train exports measured shaft work after accounting for the extra heat.",
+    "failure_modes": "Excess pressure drop or insufficient heat prevents the expected second-stage work; moisture limits remain.",
+    "semantic_neighbors": [
+      "steam_superheating",
+      "regenerative_feed_heating"
+    ],
+    "distinctness": "Interstage reheating differs from initial superheat and heating liquid feedwater.",
+    "sources": [
+      "https://www.asme.org/codes-standards/find-codes-standards/moisture-separator-reheaters"
+    ],
+    "source_locator": "PTC 12.4 scope: reheating components between high- and low-pressure turbines; terminal temperature difference, pressure drop and heating-steam flow measurements",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "interstage_steam_reheating",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "regenerative_stirling_engines",
+    "name": "Regenerative Stirling Engines",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "mechanical_oscillation",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Cycle a sealed working gas between hot and cold spaces through a regenerator.",
+    "operating_requirement": "Pay a sealed engine, regenerator, heat source, cooling service and dynamometer time.",
+    "consequence": "Measured shaft work drives a pump or generator without consuming working gas as fuel.",
+    "failure_modes": "Seal leakage or regenerator loss reduces observed work; a stalled engine produces no shaft service.",
+    "semantic_neighbors": [
+      "compound_steam_expansion",
+      "gas_turbine_cycles"
+    ],
+    "distinctness": "An externally heated closed displacement cycle differs from steam expansion and continuous-flow gas turbines.",
+    "sources": [
+      "https://science.nasa.gov/planetary-science/programs/radioisotope-power-systems/dynamic-power/"
+    ],
+    "source_locator": "Stirling cycle development",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "regenerative_stirling_engines",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "supercritical_co2_power_cycles",
+    "name": "Supercritical CO2 Power Cycles",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "gas_turbine_cycles",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Circulate dense carbon dioxide through a closed compression and expansion cycle.",
+    "operating_requirement": "Pay pressure-rated machinery, supplied heat, recuperation and sink cooling; retain compressor and turbine work separately.",
+    "consequence": "A qualified plant exports only turbine work minus compressor and auxiliary demand.",
+    "failure_modes": "Near-critical inlet drift, leakage or excessive compression can erase net output.",
+    "semantic_neighbors": [
+      "binary_geothermal_cycles",
+      "gas_turbine_cycles"
+    ],
+    "distinctness": "A dense-fluid closed Brayton cycle differs from vaporizing a secondary fluid and open combustion turbines.",
+    "sources": [
+      "https://www.energy.gov/supercritical-co2-tech-team"
+    ],
+    "source_locator": "closed Brayton cycles",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "supercritical_co2_power_cycles",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "seebeck_power_conversion",
+    "name": "Seebeck Power Conversion",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "precision_thermometry"
+    ],
+    "requires_any": [
+      [
+        "electrochemical_cells",
+        "electromagnetic_induction"
+      ]
+    ],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Convert a maintained temperature difference across thermoelectric elements into electrical output.",
+    "operating_requirement": "Pay qualified elements, contacts, hot-side heat and cold-side rejection; measure delivered current and voltage under load.",
+    "consequence": "Remote instruments consume measured electricity while most supplied heat still reaches the sink.",
+    "failure_modes": "Lost temperature difference yields no useful output; contact damage raises losses.",
+    "semantic_neighbors": [
+      "photovoltaic_conversion",
+      "thermionic_emission"
+    ],
+    "distinctness": "Solid thermoelectric transport differs from photon absorption and electron emission into a gap.",
+    "sources": [
+      "https://science.nasa.gov/planetary-science/programs/radioisotope-power-systems/power-radioisotope-thermoelectric-generators/"
+    ],
+    "source_locator": "thermocouples and heat-to-electric conversion",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery. Electrical load/measurement practice may come from cells or induction; electrochemistry does not cause the Seebeck effect.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "seebeck_power_conversion",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "thermal_emitter_photovoltaics",
+    "name": "Thermal-Emitter Photovoltaics",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "photovoltaic_conversion",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern/research",
+    "mechanism": "Convert radiation from a hot emitter using matched photovoltaic cells.",
+    "operating_requirement": "Pay emitter heating, cells, optical enclosure and cell cooling; measure absorbed radiant energy and load output.",
+    "consequence": "A charged thermal store can supply a qualified electrical load through the converter.",
+    "failure_modes": "Spectral mismatch or excessive cell heat reduces net useful energy; no solar or storage energy is created.",
+    "semantic_neighbors": [
+      "photovoltaic_array_matching",
+      "concentrated_solar_power"
+    ],
+    "distinctness": "Thermal-source radiation and spectral recovery differ from sunlight array matching and turbine-based solar power.",
+    "sources": [
+      "https://news.mit.edu/2022/thermal-heat-engine-0413"
+    ],
+    "source_locator": "reported TPV experiment; scale-up remains separate",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "thermal_emitter_photovoltaics",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "vacuum_thermionic_power_conversion",
+    "name": "Vacuum Thermionic Power Conversion",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "thermionic_emission",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern/research",
+    "mechanism": "Collect thermally emitted electrons across a maintained gap to deliver power.",
+    "operating_requirement": "Pay emitter heat, collector cooling, gap control and vacuum apparatus; retain current-voltage and heat measurements.",
+    "consequence": "A qualified converter supplies an actual electrical load from paid heat.",
+    "failure_modes": "Space charge, contamination or excessive return heat can defeat net output.",
+    "semantic_neighbors": [
+      "thermionic_emission",
+      "seebeck_power_conversion"
+    ],
+    "distinctness": "A power-producing emitter/collector heat engine adds load and heat closure beyond observing emission.",
+    "sources": [
+      "https://arxiv.org/abs/1304.3060"
+    ],
+    "source_locator": "original collector-optimization study",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "vacuum_thermionic_power_conversion",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "absorption_heat_pumping",
+    "name": "Absorption Heat Pumping",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "heat_pump_cycles"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Use heat-driven absorption and desorption to circulate a refrigerant.",
+    "operating_requirement": "Pay working solution, generator heat, liquid pumping and cooling surfaces; measure heat moved between actual loads.",
+    "consequence": "A building or process receives measured heating/cooling with thermal input and pump demand charged.",
+    "failure_modes": "Crystallization, leaks or inadequate source heat interrupts circulation.",
+    "semantic_neighbors": [
+      "heat_pump_cycles",
+      "ground_source_heat_pumps"
+    ],
+    "distinctness": "Solution absorption replaces the principal vapor compressor; the source location alone does not define this cycle.",
+    "sources": [
+      "https://www.energy.gov/energysaver/heat-pump-systems"
+    ],
+    "source_locator": "absorption heat pumps",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "absorption_heat_pumping",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "steam_ejector_refrigeration",
+    "name": "Steam-Ejector Refrigeration",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "steam_condensers",
+      "thermal_plant_heat_balances"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial",
+    "mechanism": "Use a motive steam jet to entrain vapor from a low-pressure evaporator.",
+    "operating_requirement": "Pay steam, an ejector, condenser cooling and working water; measure entrainment and evaporation.",
+    "consequence": "A qualified cold process consumes measured cooling without a mechanical vapor compressor.",
+    "failure_modes": "Excess backpressure breaks entrainment and cooling; uncondensed discharge remains an energy cost.",
+    "semantic_neighbors": [
+      "heat_pump_cycles",
+      "absorption_heat_pumping"
+    ],
+    "distinctness": "Jet entrainment differs from mechanical compression and solution absorption.",
+    "sources": [
+      "https://www.sciencedirect.com/science/article/abs/pii/S0894177711000021"
+    ],
+    "source_locator": "Ruangtrakoon et al., Experimental Thermal and Fluid Science 35 (2011), 676-683, abstract and ejector background",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "steam_ejector_refrigeration",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "tidal_basin_impoundment_generation",
+    "name": "Tidal-Basin Impoundment Generation",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "hydroelectric_generation",
+      "tidal_port_planning"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Retain tidal water behind gates and generate across the resulting head.",
+    "operating_requirement": "Pay a basin barrier, gates, turbines, maintenance and scheduled passage obligations; track both water levels.",
+    "consequence": "A local grid receives generation only during permitted head/flow intervals.",
+    "failure_modes": "Insufficient head supplies no power; blocked gates and ecological restrictions limit operation.",
+    "semantic_neighbors": [
+      "tidal_stream_generation",
+      "millpond_storage"
+    ],
+    "distinctness": "A gated tidal head reservoir differs from extracting kinetic energy from an unimpounded current.",
+    "sources": [
+      "https://www.eia.gov/energyexplained/hydropower/tidal-power.php"
+    ],
+    "source_locator": "tidal barrages",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "tidal_basin_impoundment_generation",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "hinged_wave_surge_generation",
+    "name": "Hinged Wave-Surge Generation",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "mechanical_oscillation"
+    ],
+    "requires_any": [
+      [
+        "hydroelectric_generation",
+        "wind_generator_conversion"
+      ]
+    ],
+    "historical_horizon": "modern",
+    "mechanism": "Drive a power takeoff from wave-driven angular motion about a fixed reaction point.",
+    "operating_requirement": "Pay a hinged flap, seabed support, power takeoff and inspections; measure angle, torque and exported work.",
+    "consequence": "A coastal electrical or pumping load uses qualified fluctuating output.",
+    "failure_modes": "Storm overload or a jammed hinge requires shutdown; no wave input means no work.",
+    "semantic_neighbors": [
+      "wave_point_absorbers",
+      "wave_oscillating_water_columns"
+    ],
+    "distinctness": "Selected seabed-reacted surge rotation differs from heaving-body response and oscillating air chambers.",
+    "sources": [
+      "https://www.energy.gov/cmei/water/marine-energy-glossary"
+    ],
+    "source_locator": "oscillating wave surge converter",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery. A heaving point absorber is a semantic neighbor, not a mandatory prior invention. Existing generator experience can come from either water or wind.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "hinged_wave_surge_generation",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "wave_overtopping_reservoirs",
+    "name": "Wave Overtopping Reservoirs",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "hydroelectric_generation"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Collect wave overtopping above mean water level and release it through a turbine.",
+    "operating_requirement": "Pay a collector ramp, reservoir, turbine and support; measure captured water and changing head.",
+    "consequence": "A local load consumes electricity bounded by captured water's potential energy.",
+    "failure_modes": "Spillage, low waves or structural damage reduces recoverable output.",
+    "semantic_neighbors": [
+      "wave_point_absorbers",
+      "millpond_storage"
+    ],
+    "distinctness": "Waves lift water into a reservoir instead of directly driving a moving absorber.",
+    "sources": [
+      "https://www.energy.gov/cmei/water/marine-energy-glossary"
+    ],
+    "source_locator": "overtopping device",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "wave_overtopping_reservoirs",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "pressure_retarded_osmotic_power",
+    "name": "Pressure-Retarded Osmotic Power",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "salinity_gradient_power"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern/research",
+    "mechanism": "Admit low-salinity water through a membrane into a pressurized concentrated stream.",
+    "operating_requirement": "Pay two finite feed streams, pretreatment, membranes and pressure recovery; measure added pressurized flow.",
+    "consequence": "A turbine supplies only net recovered work after pumping and replaces both discharged feed inventories.",
+    "failure_modes": "Fouling or pump losses can make net output nonpositive; diluted feed cannot be reused as unchanged brine.",
+    "semantic_neighbors": [
+      "salinity_gradient_power",
+      "reverse_osmosis_desalination"
+    ],
+    "distinctness": "Uses osmotic water flux to produce hydraulic work; desalination spends work to oppose that flux.",
+    "sources": [
+      "https://www.energy.gov/sites/prod/files/2015/10/f27/epwrr_workshop_report.pdf"
+    ],
+    "source_locator": "pressure-retarded osmosis",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "pressure_retarded_osmotic_power",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "reverse_electrodialytic_power",
+    "name": "Reverse-Electrodialytic Power",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "salinity_gradient_power"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern/research",
+    "mechanism": "Pass ions through alternating selective membranes to generate stack voltage.",
+    "operating_requirement": "Pay contrasting feed streams, membrane pairs, electrode service and pumping; retain stack current and discharged salinities.",
+    "consequence": "An actual electrical load consumes measured net stack power from depleted salinity gradients.",
+    "failure_modes": "Membrane leakage and internal resistance can exceed useful generation.",
+    "semantic_neighbors": [
+      "salinity_gradient_power",
+      "pressure_retarded_osmotic_power"
+    ],
+    "distinctness": "Selective ion transport generates voltage rather than pressure-driven turbine work.",
+    "sources": [
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC8415203/"
+    ],
+    "source_locator": "original high-concentration stack experiments",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "reverse_electrodialytic_power",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "superconducting_magnetic_storage",
+    "name": "Superconducting Magnetic Storage",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "electromagnetic_induction",
+      "power_semiconductor_switching"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Store supplied electrical energy in a superconducting coil's magnetic field.",
+    "operating_requirement": "Pay a qualified coil, cryogenic service, converter and quench protection; retain charge/discharge energy.",
+    "consequence": "An electrical load receives a bounded pulse or short reserve service with actual auxiliary losses.",
+    "failure_modes": "Loss of cooling or a quench forces controlled energy dissipation; refrigeration is never free.",
+    "semantic_neighbors": [
+      "flywheel_energy_storage",
+      "electrochemical_double_layer_storage"
+    ],
+    "distinctness": "Magnetic field storage differs from rotor momentum and electrostatic interface charge.",
+    "sources": [
+      "https://www.sandia.gov/app/uploads/sites/163/2021/09/SAND2010-0815.pdf"
+    ],
+    "source_locator": "SMES coil and power conditioning",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "superconducting_magnetic_storage",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "nickel_iron_cell_cycling",
+    "name": "Nickel-Iron Cell Cycling",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "electrochemical_cells",
+      "nickel_metal_recovery"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Cycle alkaline nickel/iron electrodes as a rechargeable cell.",
+    "operating_requirement": "Pay qualified electrodes, electrolyte, case, charging electricity and water maintenance; retain capacity and self-discharge measurements.",
+    "consequence": "A stationary load uses inspected cells with measured usable capacity, not a generic chemistry bonus.",
+    "failure_modes": "Gassing, water loss and charge inefficiency reduce delivered energy.",
+    "semantic_neighbors": [
+      "lead_acid_cells",
+      "lithium_intercalation_cells"
+    ],
+    "distinctness": "Alkaline nickel/iron conversion has different maintenance and charging behavior from lead-acid and lithium host insertion.",
+    "sources": [
+      "https://www.sandia.gov/app/uploads/sites/163/2021/09/SAND2014-17462.pdf"
+    ],
+    "source_locator": "selected battery tests",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "nickel_iron_cell_cycling",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "molten_sodium_sulfur_cells",
+    "name": "Molten Sodium-Sulfur Cells",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "solid_electrolyte_cells",
+      "battery_thermal_management"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Cycle molten reactants across a sodium-ion-conducting ceramic separator.",
+    "operating_requirement": "Pay qualified cells, heat-up energy, insulation and containment inspection; retain temperature and charge history.",
+    "consequence": "A grid storage installation supplies measured energy after continuous thermal overhead.",
+    "failure_modes": "A cracked separator or failed thermal control isolates the cell; cooling below operating conditions withholds output.",
+    "semantic_neighbors": [
+      "sodium_intercalation_cells",
+      "solid_electrolyte_cells"
+    ],
+    "distinctness": "Molten reactants and a ceramic separator differ from sodium insertion into host electrodes.",
+    "sources": [
+      "https://www.sandia.gov/app/uploads/sites/163/2021/09/SAND2013-5131.pdf"
+    ],
+    "source_locator": "sodium-sulfur chemistry and beta alumina",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "molten_sodium_sulfur_cells",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "reversible_metal_hydride_storage",
+    "name": "Reversible Metal-Hydride Storage",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "hydrogen_storage_systems",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Absorb hydrogen into a qualified solid and release it by controlled heating.",
+    "operating_requirement": "Pay finite hydrogen, alloy bed, heat exchange, valves and cycling work; retain gas mass and thermal receipts.",
+    "consequence": "A fuel-cell user consumes only hydrogen actually released at its required pressure.",
+    "failure_modes": "Poor heat rejection limits charging; insufficient heat or contamination limits release.",
+    "semantic_neighbors": [
+      "hydrogen_storage_systems",
+      "thermochemical_heat_storage"
+    ],
+    "distinctness": "Hydrogen-bearing solid storage with coupled heat flows differs from a compressed tank or heat-only storage claim.",
+    "sources": [
+      "https://www.energy.gov/cmei/fuels/july-h2iq-hour-aries-flatirons-campus-mw-scale-hydrogen-system-research-text-version"
+    ],
+    "source_locator": "ARIES metal-hydride storage thermal management",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "reversible_metal_hydride_storage",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "molten_salt_freeze_protection",
+    "name": "Molten-Salt Freeze Protection",
+    "field": "D05",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "thermal_storage_tanks",
+      "insulated_process_heat_piping"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Maintain or restore liquid flow through a salt heat loop during cold conditions.",
+    "operating_requirement": "Pay tracing heat, circulation, temperature sensing and scheduled drain capacity; retain minimum segment temperatures.",
+    "consequence": "A solar thermal loop resumes usable heat delivery only after monitored flow recovery.",
+    "failure_modes": "An unheated isolated segment can freeze and block delivery; thawing consumes additional heat and time.",
+    "semantic_neighbors": [
+      "thermal_storage_tanks",
+      "phase_change_heat_storage"
+    ],
+    "distinctness": "Preventing unwanted solid blockage in a transport loop differs from deliberately storing latent heat.",
+    "sources": [
+      "https://www.nrel.gov/docs/fy03osti/40028.pdf"
+    ],
+    "source_locator": "freeze-protection methods",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "molten_salt_freeze_protection",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "meridian_transit_timing",
+    "name": "Meridian Transit Timing",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "angular_sky_catalogs"
+    ],
+    "requires_any": [
+      [
+        "pendulum_timekeeping",
+        "marine_timekeeping"
+      ],
+      [
+        "refracting_telescopes",
+        "reflecting_telescopes"
+      ]
+    ],
+    "historical_horizon": "early-modern/industrial",
+    "mechanism": "Time a star's passage across an aligned meridian instrument.",
+    "operating_requirement": "Pay instrument alignment, clock comparison and observers on actual clear nights; retain crossing times.",
+    "consequence": "An observatory updates qualified time and right-ascension observations.",
+    "failure_modes": "Clock drift, axis tilt or a missed transit invalidates the claimed precision.",
+    "semantic_neighbors": [
+      "angular_sky_catalogs",
+      "celestial_reference_frames"
+    ],
+    "distinctness": "A fixed transit instrument and timing procedure differ from generic angular catalogs and coordinate conventions.",
+    "sources": [
+      "https://www.rmg.co.uk/collections/objects/rmgc-object-11148"
+    ],
+    "source_locator": "portable transit telescope",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "meridian_transit_timing",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "adjustable_armillary_dials",
+    "name": "Adjustable Armillary Dials",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "angular_sky_catalogs",
+      "geometric_survey"
+    ],
+    "requires_any": [],
+    "historical_horizon": "early/classical-to-early-modern",
+    "mechanism": "Set latitude and celestial rings to represent local solar hour geometry.",
+    "operating_requirement": "Pay graduated rings, stand alignment and local shadow comparisons; retain dial settings and observed residuals.",
+    "consequence": "Local time demonstrations and astronomy teaching use the qualified physical model.",
+    "failure_modes": "Wrong latitude or warped rings makes the displayed hour disagree with observations.",
+    "semantic_neighbors": [
+      "celestial_reference_frames",
+      "planetary_motion_tables"
+    ],
+    "distinctness": "A physically adjusted solar dial tests local projection geometry rather than defining a reference frame or fitting planetary motion.",
+    "sources": [
+      "https://www.rmg.co.uk/collections/objects/rmgc-object-10392"
+    ],
+    "source_locator": "latitude adjustment, equinoctial ring and meridian gnomon",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "adjustable_armillary_dials",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "stellar_doppler_velocimetry",
+    "name": "Stellar Doppler Velocimetry",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "spectroscopy",
+      "celestial_reference_frames"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Infer line-of-sight stellar motion from calibrated spectral shifts.",
+    "operating_requirement": "Pay telescope time, stable spectrograph, wavelength references and repeated reductions.",
+    "consequence": "Orbit investigators consume a dated velocity series with uncertainty.",
+    "failure_modes": "Instrument drift or stellar activity remains an alternate explanation; a shift alone proves no planet.",
+    "semantic_neighbors": [
+      "exoplanet_transit_inference",
+      "gas_composition_analysis"
+    ],
+    "distinctness": "Spectral displacement measures motion rather than transit dimming or identifying gas components.",
+    "sources": [
+      "https://www.eso.org/sci/facilities/lasilla/instruments/harps/inst/performance.html"
+    ],
+    "source_locator": "HARPS wavelength calibration and errors",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "stellar_doppler_velocimetry",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "occultation_chord_reconstruction",
+    "name": "Occultation Chord Reconstruction",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "eclipse_geometry_models",
+      "orbit_determination"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Combine timed stellar disappearances from separated sites into a projected body profile.",
+    "operating_requirement": "Pay observer deployment, clock checks, optics and data return; retain positive and negative stations.",
+    "consequence": "Navigation and size studies use the bounded projected outline at the event epoch.",
+    "failure_modes": "Clouded or mistimed reports remain uncertain; one chord cannot prove an entire shape.",
+    "semantic_neighbors": [
+      "eclipse_geometry_models",
+      "angular_image_calibration"
+    ],
+    "distinctness": "Measures occulting-body cross sections from multiple timed chords rather than predicting eclipse geometry.",
+    "sources": [
+      "https://pds.nasa.gov/ds-view/pds/viewProfile.jsp?dsid=EAR-A-3-RDR-OCCULTATIONS-V6.0"
+    ],
+    "source_locator": "asteroid occultation observations",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "occultation_chord_reconstruction",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "meteor_track_triangulation",
+    "name": "Meteor-Track Triangulation",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "angular_image_calibration",
+      "celestial_reference_frames"
+    ],
+    "requires_any": [],
+    "historical_horizon": "industrial/modern",
+    "mechanism": "Intersect simultaneous sky tracks from separated observers.",
+    "operating_requirement": "Pay surveyed station positions, timed imaging and correspondence review; retain each original view.",
+    "consequence": "Meteor studies receive trajectory, speed and radiant estimates with uncertainty.",
+    "failure_modes": "Unsynchronized or misidentified tracks fail the intersection check.",
+    "semantic_neighbors": [
+      "orbit_determination",
+      "angular_sky_catalogs"
+    ],
+    "distinctness": "A short atmospheric luminous trajectory needs simultaneous multi-site geometry rather than a long orbital arc.",
+    "sources": [
+      "https://www.nasa.gov/blogs/watch-the-skies/2013/04/23/lyrid-meteor-over-georgia/"
+    ],
+    "source_locator": "two-station Lyrid observation",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "meteor_track_triangulation",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "astronomical_adaptive_optics",
+    "name": "Astronomical Adaptive Optics",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "angular_image_calibration",
+      "reflecting_telescopes"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Measure wavefront distortion and command a deformable mirror.",
+    "operating_requirement": "Pay a wavefront sensor, reference source, mirror actuators and real-time computing; retain correction residuals.",
+    "consequence": "An actual observing session receives a measured corrected field within its angular limits.",
+    "failure_modes": "Dim references, actuator saturation or lag leaves a degraded image.",
+    "semantic_neighbors": [
+      "coronagraphic_starlight_suppression",
+      "angular_image_calibration"
+    ],
+    "distinctness": "Corrects time-varying atmospheric phase distortion rather than masking a bright source or mapping pixels to angles.",
+    "sources": [
+      "https://www.eso.org/sci/facilities/develop/ao/what_ao.html"
+    ],
+    "source_locator": "adaptive versus active optics",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "astronomical_adaptive_optics",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "lucky_imaging_selection",
+    "name": "Lucky-Imaging Selection",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "angular_image_calibration",
+      "photographic_image_capture"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Select and align the sharpest short exposures from a recorded burst.",
+    "operating_requirement": "Pay a fast detector, observing time, storage and comparison work; preserve rejected-frame counts.",
+    "consequence": "A qualified composite supports angular measurements while reporting lost exposure and selection limits.",
+    "failure_modes": "Insufficient photons or biased selection withholds a reliable composite.",
+    "semantic_neighbors": [
+      "astronomical_adaptive_optics",
+      "photographic_reproduction"
+    ],
+    "distinctness": "Post-selects existing exposures without changing the wavefront during capture.",
+    "sources": [
+      "https://www.eso.org/sci/publications/messenger/archive/no.137-sep09/messenger-no137.pdf"
+    ],
+    "source_locator": "AstraLux Sur original instrument report",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "lucky_imaging_selection",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "xray_pulsar_navigation",
+    "name": "X-Ray Pulsar Navigation",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "orbit_determination",
+      "atomic_timekeeping"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern/research",
+    "mechanism": "Fit measured pulsar pulse arrivals to a spacecraft navigation state.",
+    "operating_requirement": "Pay an X-ray detector, pointing time, clock service, catalog updates and computation.",
+    "consequence": "A navigator receives an independent uncertain position solution for later route correction.",
+    "failure_modes": "Sparse photons or clock/catalog errors leave a broad or ambiguous position estimate.",
+    "semantic_neighbors": [
+      "deep_space_clock_navigation",
+      "deep_space_tracking"
+    ],
+    "distinctness": "Uses astrophysical pulse arrivals rather than a ground radio ranging signal or the onboard clock alone.",
+    "sources": [
+      "https://www.nasa.gov/universe/nasa-team-first-to-demonstrate-x-ray-navigation-in-space/"
+    ],
+    "source_locator": "SEXTANT demonstration",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "xray_pulsar_navigation",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "magnetic_momentum_unloading",
+    "name": "Magnetic Momentum Unloading",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "reaction_wheel_control",
+      "electromagnetic_induction"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Exchange stored spacecraft angular momentum with an ambient magnetic field.",
+    "operating_requirement": "Pay torquer coils, magnetometers, electrical power and control time; retain field and wheel-speed histories.",
+    "consequence": "Attitude control regains wheel margin within actual orbital field geometry.",
+    "failure_modes": "Weak or unfavorably oriented fields delay unloading; no field means no promised torque.",
+    "semantic_neighbors": [
+      "reaction_wheel_control",
+      "electrodynamic_tether_exchange"
+    ],
+    "distinctness": "Local magnetic dipoles unload attitude momentum without a long conducting tether or propellant impulse.",
+    "sources": [
+      "https://ntrs.nasa.gov/citations/20080004328"
+    ],
+    "source_locator": "controlled magnetic torques",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "magnetic_momentum_unloading",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "control_moment_gyro_steering",
+    "name": "Control-Moment Gyro Steering",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "reaction_wheel_control",
+      "inertial_navigation_platforms"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Steer gimballed flywheel momentum while avoiding unsupported torque directions.",
+    "operating_requirement": "Pay gimbals, flywheel spin energy, bearings and controller work; retain commanded/achieved torque and margin.",
+    "consequence": "A spacecraft executes only attitude slews the retained actuator state can deliver.",
+    "failure_modes": "Approaching a singular geometry limits maneuver authority and may require a different path.",
+    "semantic_neighbors": [
+      "reaction_wheel_control",
+      "marine_gyroscopic_stabilizers"
+    ],
+    "distinctness": "Gimbal steering and multi-axis singularities differ from changing wheel speed or resisting ship roll.",
+    "sources": [
+      "https://ntrs.nasa.gov/citations/19720024010"
+    ],
+    "source_locator": "Original NASA study: gimbal-angle and gimbal-rate control laws with singularity avoidance",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "control_moment_gyro_steering",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "passive_nutation_damping",
+    "name": "Passive Nutation Damping",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "spacecraft_attitude_sensing",
+      "mechanical_oscillation"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Dissipate wobble energy through a qualified internal damper.",
+    "operating_requirement": "Pay a tuned fluid-ring or mechanical damper, installation and spin tests; retain wobble decay measurements.",
+    "consequence": "A spinning instrument platform can enter its qualified observation envelope.",
+    "failure_modes": "Wrong tuning or fluid behavior can leave unacceptable wobble; lost energy becomes heat.",
+    "semantic_neighbors": [
+      "reaction_wheel_control",
+      "spacecraft_thruster_control"
+    ],
+    "distinctness": "Passive dissipation reduces wobble without commanding reaction-wheel or thruster corrections.",
+    "sources": [
+      "https://ntrs.nasa.gov/citations/19840006160"
+    ],
+    "source_locator": "AMPTE-IRM fluid damper test report",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "passive_nutation_damping",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "rocket_pogo_suppression",
+    "name": "Rocket Pogo Suppression",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "rocket_propellant_feed",
+      "ascent_load_envelope_models"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Decouple feed-system pressure oscillations from longitudinal vehicle motion.",
+    "operating_requirement": "Pay suppression hardware, instrumented firings and coupled pressure/acceleration analysis.",
+    "consequence": "A qualified ascent configuration retains a tested oscillation envelope.",
+    "failure_modes": "A resonance persisting in the measured operating range prevents flight qualification.",
+    "semantic_neighbors": [
+      "propellant_slosh_models",
+      "rocket_engine_turbopumps"
+    ],
+    "distinctness": "Coupled feed/thrust/structural feedback differs from lateral liquid slosh and pump pressure generation.",
+    "sources": [
+      "https://www.nasa.gov/history/50-years-ago-solving-the-pogo-effect/"
+    ],
+    "source_locator": "Saturn V suppression development",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "rocket_pogo_suppression",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "repeated_pass_aerobraking",
+    "name": "Repeated-Pass Aerobraking",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "planetary_entry_aerodynamics",
+      "orbit_determination"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Reduce an already captured orbit through controlled repeated atmospheric passes.",
+    "operating_requirement": "Pay navigation, thermal monitoring, attitude work and correction propellant; retain each pass's density and energy loss.",
+    "consequence": "A planetary orbiter trades elapsed mission time for qualified propellant savings.",
+    "failure_modes": "Unexpected density or heating triggers a raised periapsis or abort; no instant target orbit.",
+    "semantic_neighbors": [
+      "controlled_reentry",
+      "orbital_transfer_planning"
+    ],
+    "distinctness": "Repeated shallow passes retain an orbit rather than ending flight at a surface.",
+    "sources": [
+      "https://mgs-mager.gsfc.nasa.gov/overview/aerobraking.html"
+    ],
+    "source_locator": "Mars Global Surveyor aerobraking",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "repeated_pass_aerobraking",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "single_pass_aerocapture",
+    "name": "Single-Pass Aerocapture",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "planetary_entry_aerodynamics",
+      "orbit_determination"
+    ],
+    "requires_any": [
+      [
+        "ablative_heat_shields",
+        "reusable_thermal_protection"
+      ]
+    ],
+    "historical_horizon": "evaluated future mission concept",
+    "mechanism": "Use one atmospheric passage to convert an arrival trajectory into a bound orbit.",
+    "operating_requirement": "Pay a qualified aeroshell, navigation precision, thermal margin and post-pass correction reserves; test sampled atmosphere errors.",
+    "consequence": "Only a successful bounded capture creates the intended orbital mission state.",
+    "failure_modes": "Skip-out leaves an unbound trajectory; excessive penetration can destroy the craft; no success guarantee.",
+    "semantic_neighbors": [
+      "repeated_pass_aerobraking",
+      "controlled_reentry"
+    ],
+    "distinctness": "Captures an incoming unbound vehicle in one pass instead of shrinking an existing orbit or landing.",
+    "sources": [
+      "https://robotics.jpl.nasa.gov/what-we-do/research-tasks/aerocapture-systems-definition/"
+    ],
+    "source_locator": "JPL aerocapture definition and demonstration limits",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "single_pass_aerocapture",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "differential_drag_formation_control",
+    "name": "Differential-Drag Formation Control",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "formation_flying_control",
+      "spacecraft_attitude_sensing"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Change relative orbital spacing by selecting different atmospheric drag areas.",
+    "operating_requirement": "Pay attitude-control work and monitored drag estimates; retain individual orbit losses and available area.",
+    "consequence": "A constellation adjusts along-track spacing within measured drag authority.",
+    "failure_modes": "Low density slows control; excess drag spends altitude and mission lifetime.",
+    "semantic_neighbors": [
+      "formation_flying_control",
+      "collision_avoidance_maneuvers"
+    ],
+    "distinctness": "A specific low-thrust atmospheric control mechanism consumes orbital altitude instead of propellant.",
+    "sources": [
+      "https://www.nasa.gov/cara/step-3-close-approach-risk-mitigation/"
+    ],
+    "source_locator": "CARA frontal-area reorientation",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "differential_drag_formation_control",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "passive_drag_sail_disposal",
+    "name": "Passive Drag-Sail Disposal",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "orbit_disposal_design",
+      "deployable_orbital_structures"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Deploy additional area to accelerate atmospheric orbital decay.",
+    "operating_requirement": "Pay membrane, booms, release mechanism and deployment verification; update disposal prediction from actual area.",
+    "consequence": "The disposal owner tracks a slowly decaying craft rather than instantly deleting debris.",
+    "failure_modes": "A torn or jammed sail retains the old disposal problem; sparse atmosphere can leave long decay times.",
+    "semantic_neighbors": [
+      "solar_sail_navigation",
+      "differential_drag_formation_control"
+    ],
+    "distinctness": "A drag-augmentation disposal surface differs from radiation-pressure propulsion and reversible spacing control.",
+    "sources": [
+      "https://www.esa.int/Space_Safety/Clean_Space/Tacking_sails_to_a_satellite"
+    ],
+    "source_locator": "deployable drag augmentation",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "passive_drag_sail_disposal",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "radioisotope_thermoelectric_power",
+    "name": "Radioisotope Thermoelectric Power",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "seebeck_power_conversion",
+      "nuclear_waste_characterization"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Couple a qualified decay-heat source to thermoelectric conversion for spacecraft power.",
+    "operating_requirement": "Pay a finite qualified sealed heat-source module, converter, integration and rejection surfaces; track declining thermal output.",
+    "consequence": "A spacecraft receives sunlight-independent but finite and declining electrical service.",
+    "failure_modes": "Converter degradation or insufficient heat rejection reduces usable power; source production is not granted.",
+    "semantic_neighbors": [
+      "fission_electric_space_power",
+      "seebeck_power_conversion"
+    ],
+    "distinctness": "A decaying heat source and flight containment differ from sustained reactor fission and a generic converter.",
+    "sources": [
+      "https://science.nasa.gov/planetary-science/programs/radioisotope-power-systems/power-radioisotope-thermoelectric-generators/"
+    ],
+    "source_locator": "spacecraft RTG heat source and conversion",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "radioisotope_thermoelectric_power",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "lunar_laser_roundtrip_ranging",
+    "name": "Lunar Laser Round-Trip Ranging",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "laser_light_generation",
+      "atomic_timekeeping",
+      "orbit_determination"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Time laser returns from a known lunar reflector.",
+    "operating_requirement": "Pay a laser station, pointing, detector time and an actually placed reflector; retain photon returns and delays.",
+    "consequence": "Orbit models ingest qualified Earth-Moon range observations.",
+    "failure_modes": "Clouds, missed pointing or background events leave no accepted range.",
+    "semantic_neighbors": [
+      "deep_space_tracking",
+      "stellar_parallax_distance"
+    ],
+    "distinctness": "Two-way optical time of flight to a physical reflector differs from radio links and angular baseline parallax.",
+    "sources": [
+      "https://earth.gsfc.nasa.gov/geo/networks/sgp/techniques/slr"
+    ],
+    "source_locator": "SLR and lunar reflector ranging",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "lunar_laser_roundtrip_ranging",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "autonomous_star_pattern_identification",
+    "name": "Autonomous Star-Pattern Identification",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "spacecraft_attitude_sensing",
+      "angular_sky_catalogs"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Match observed star patterns against a catalog without an initial attitude guess.",
+    "operating_requirement": "Pay a camera, catalog storage, processor cycles and validation against known fields.",
+    "consequence": "Attitude recovery receives a checked orientation estimate after loss of pointing knowledge.",
+    "failure_modes": "False stars or ambiguous matches withhold a confident attitude; no arbitrary best match becomes truth.",
+    "semantic_neighbors": [
+      "spacecraft_attitude_sensing",
+      "angular_image_calibration"
+    ],
+    "distinctness": "Lost-in-space catalog matching solves identification before attitude estimation rather than only measuring angles.",
+    "sources": [
+      "https://arxiv.org/abs/1808.08686"
+    ],
+    "source_locator": "original subgraph-matching study",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "autonomous_star_pattern_identification",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  },
+  {
+    "id": "passive_radiator_louvers",
+    "name": "Passive Radiator Louvers",
+    "field": "D23",
+    "status": "authored_proposal_unreconciled",
+    "requires_all": [
+      "space_radiators",
+      "spacecraft_thermal_balance"
+    ],
+    "requires_any": [],
+    "historical_horizon": "modern",
+    "mechanism": "Change exposed radiating area through temperature-responsive shutters.",
+    "operating_requirement": "Pay louver blades, bimetal actuators, vacuum cycling and thermal measurement.",
+    "consequence": "Thermal control varies measured rejection without continuous actuator electricity.",
+    "failure_modes": "A stuck shutter can overcool or overheat the spacecraft; it supplies no new heat source.",
+    "semantic_neighbors": [
+      "space_radiators",
+      "multilayer_space_insulation"
+    ],
+    "distinctness": "Mechanically variable radiative exposure differs from fixed radiator area and reflective insulation layers.",
+    "sources": [
+      "https://www.nasa.gov/wp-content/uploads/2021/10/7.soa_thermal_2021_0.pdf"
+    ],
+    "source_locator": "passive bimetallic louver",
+    "source_checked_date": "2026-09-13",
+    "source_scope": "Source supports the mechanism or declared research concept. Paid resources, retained state and failure transitions are proposed game design; source figures are not universal game efficiencies.",
+    "branching_note": "Require every ALL parent and one member of every OR group. Foundations express learnable capability, not inevitable historical order. Imported operation never awards local mastery.",
+    "scope_boundary": "Selected physical apparatus, material response or measurement under declared conditions. Energy, mass, momentum, time and uncertainty stay explicit; no universal solver, free resource, instant travel or guaranteed research success.",
+    "operating_resources_note": "Named apparatus, consumables and services are proposal inputs, not asserted existing stock IDs. Bind finite paid local/imported sources and actual consumers before counting this discovery as operating.",
+    "recovery_contract": {
+      "destination": "passive_radiator_louvers",
+      "grants_instant_mastery": false,
+      "foundations_preserved": true,
+      "scholar_envoy": "Pay specialist travel, board, access and local demonstration time; retain the same equipment and observation requirements.",
+      "partnership": "Both participants pay apparatus or specimen access and staff work; return attributable findings with delay and local validation.",
+      "purchased_research": "Commission a specified design or measurement, pay delivery and evaluation; negative findings remain possible.",
+      "imported_service": "Buy finite externally operated apparatus or processing time with delivery, compatibility and interruption costs; local capability remains absent until demonstrated."
+    },
+    "implementation_status": "Authoring proposal only. No registration, ledger promotion, runtime operation, supply closure, AI behavior, imagery or campaign pacing proof."
+  }
+]
