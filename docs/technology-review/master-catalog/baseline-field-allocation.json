@@ -4834,6 +4834,27 @@
       "source_domain": "logistics",
       "name": "Hull Condition Surveys",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "mechanical_washing_machines",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Mechanical Washing Machines",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_durability_testing",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile Durability Testing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "soap_manufacture",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Soap Manufacture",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

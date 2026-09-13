@@ -1818,6 +1818,14 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/mechanical_washing_machines.png",
+      "description": "A supplied motor drives a washing vessel; water, cleaning agent and operators remain necessary.",
+      "domain": "production",
+      "id": "mechanical_washing_machines",
+      "name": "Mechanical Washing Machines",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/textile_laundering_practice.png",
       "description": "Clean selected textiles while respecting material and contamination conditions. Usable water, labor, suitable agents where needed and drying access",
       "domain": "production",
@@ -1863,6 +1871,14 @@
       "domain": "production",
       "id": "textile_repair_methods",
       "name": "Textile Repair Methods",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_durability_testing.png",
+      "description": "Removed garment samples undergo five dated paid wear-and-wash cycles; their observed condition is recorded separately from issued stock.",
+      "domain": "production",
+      "id": "textile_durability_testing",
+      "name": "Textile Durability Testing",
       "status": "queued"
     },
     {
@@ -2647,6 +2663,14 @@
       "domain": "production",
       "id": "hydrogen_chloride_synthesis",
       "name": "Hydrogen Chloride Synthesis",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/soap_manufacture.png",
+      "description": "Controlled processing converts an existing plant oil and alkali into a cleaning material for supplied washing.",
+      "domain": "production",
+      "id": "soap_manufacture",
+      "name": "Soap Manufacture",
       "status": "queued"
     },
     {
@@ -5387,9 +5411,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 673,
+  "live_count": 676,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 563,
+  "queued_count": 566,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

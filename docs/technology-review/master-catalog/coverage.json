@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 673,
+  "verified_baseline_discoveries": 676,
   "pending_communications": 0,
-  "new_authored_drafts": 2466,
+  "new_authored_drafts": 2463,
   "distinct_accounted_identities": 3139,
   "remaining_identities_to_author": 1861,
   "target": 5000,
@@ -2349,7 +2349,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 471,
+  "branch_alternatives": 469,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 117,
@@ -2358,7 +2358,7 @@
     "D04": 116,
     "D05": 156,
     "D06": 62,
-    "D07": 50,
+    "D07": 47,
     "D08": 97,
     "D09": 84,
     "D10": 79,
@@ -2442,9 +2442,9 @@
       "id": "D07",
       "name": "Fibers and domestic technologies",
       "target": 120,
-      "implemented_baseline": 26,
+      "implemented_baseline": 29,
       "pending_communications": 0,
-      "authored_drafts": 50,
+      "authored_drafts": 47,
       "accounted": 76,
       "remaining_to_target": 44
     },

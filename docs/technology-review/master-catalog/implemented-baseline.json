@@ -1,5 +1,5 @@
 {
-  "source_commit": "b363f6c6aceaf42515e020281934cef26cb217fd",
+  "source_commit": "368b7718c419ff73d788e29d3bf9e5ad212a37ce",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -16822,6 +16822,106 @@
     },
     {
       "field": "D07",
+      "id": "mechanical_washing_machines",
+      "name": "Mechanical Washing Machines",
+      "foundations": "textile_laundering_practice,crank_linkages",
+      "mechanism": "Provide controlled mechanical working for a qualified washing task",
+      "operating_requirement": "Suitable appliance, water, drive and maintenance",
+      "consequence": "Reduce some manual washing labor while material damage and water demand remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "branching_note": "A qualified human, water or electrical drive can power washing; electric power is not universal.",
+      "recovery": "For Mechanical Washing Machines: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "mechanical_washing_machines",
+        "local_demonstration": "Provide controlled mechanical working for a qualified washing task",
+        "operating_requirements": "Suitable appliance, water, drive and maintenance",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "368b7718c419ff73d788e29d3bf9e5ad212a37ce",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "textile_laundering_practice",
+          "crank_linkages"
+        ],
+        "previous_requires_any": [
+          [
+            "treadle_lathe_drive",
+            "water_mills",
+            "electric_motors"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "mechanical_washing_machines",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "mechanical_washing_machines",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Mechanical Washing Machines",
+            "missing_all": [
+              "textile_laundering_practice",
+              "crank_linkages",
+              "electric_motors"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "textile_laundering_practice",
+              "crank_linkages",
+              "electric_motors"
+            ],
+            "requires_all": [
+              "textile_laundering_practice",
+              "crank_linkages",
+              "electric_motors"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Mechanical Washing Machines",
+        "observation": "A supplied motor drives a washing vessel; water, cleaning agent and operators remain necessary.",
+        "production_contract": "The implemented electrical appliance consumes generated electricity, manufactured laundry soap, water and Logistics work. Daily installed capacity is shared across lots. Wet garments remain unavailable until the following day and mechanical washing causes a small condition loss. Human and water drives remain future alternatives.",
+        "requires": [
+          "textile_laundering_practice",
+          "crank_linkages",
+          "electric_motors"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
       "id": "textile_laundering_practice",
       "name": "Textile-Laundering Practice",
       "foundations": "clean_water,fiber_grading",
@@ -17352,6 +17452,95 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Tool quality"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "textile_durability_testing",
+      "name": "Textile Durability Testing",
+      "foundations": "textile_repair_methods,measurement_uncertainty",
+      "mechanism": "Compare fabric or garment performance under declared wear and cleaning cycles",
+      "operating_requirement": "Representative samples, test equipment and review",
+      "consequence": "Specify a supported service expectation while actual use varies",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Textile Durability Testing: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_durability_testing",
+        "local_demonstration": "Compare fabric or garment performance under declared wear and cleaning cycles",
+        "operating_requirements": "Representative samples, test equipment and review",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "368b7718c419ff73d788e29d3bf9e5ad212a37ce",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "textile_repair_methods",
+          "measurement_uncertainty"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "textile_durability_testing",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_durability_testing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile Durability Testing",
+            "missing_all": [
+              "textile_repair_methods",
+              "measurement_uncertainty"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "textile_repair_methods",
+              "measurement_uncertainty"
+            ],
+            "requires_all": [
+              "textile_repair_methods",
+              "measurement_uncertainty"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile Durability Testing",
+        "observation": "Removed garment samples undergo five dated paid wear-and-wash cycles; their observed condition is recorded separately from issued stock.",
+        "production_contract": "A quarter-garment sample is removed from usable inventory for five daily test cycles. Each cycle needs installed equipment, water, paper and shared Logistics time. Recorded condition loss describes this game test only; no garment, repair or global durability bonus is created.",
+        "requires": [
+          "textile_repair_methods",
+          "measurement_uncertainty"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {
@@ -24940,6 +25129,104 @@
           "chloralkali_cells",
           "pressure_vessels",
           "chemical_distillation"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research",
+          "materials"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "soap_manufacture",
+      "name": "Soap Manufacture",
+      "foundations": "experimental_controls",
+      "mechanism": "Produce a qualified cleaning material from compatible feedstocks",
+      "operating_requirement": "Suitable fats or oils, processing equipment and quality control",
+      "consequence": "Supply a cleaning agent whose usefulness depends on water and application",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "branching_note": "Qualified plant or animal feedstocks provide different supply routes; actual suitable fats and processing inputs are mandatory.",
+      "recovery": "For Soap Manufacture: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "soap_manufacture",
+        "local_demonstration": "Produce a qualified cleaning material from compatible feedstocks",
+        "operating_requirements": "Suitable fats or oils, processing equipment and quality control",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "368b7718c419ff73d788e29d3bf9e5ad212a37ce",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "experimental_controls"
+        ],
+        "previous_requires_any": [
+          [
+            "seed_oil_pressing",
+            "hide_tanning"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "soap_manufacture",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Soap manufacture trials",
+            "missing_all": [
+              "experimental_controls",
+              "seed_oil_pressing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "experimental_controls",
+              "seed_oil_pressing"
+            ],
+            "requires_all": [
+              "experimental_controls",
+              "seed_oil_pressing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Soap Manufacture",
+        "observation": "Controlled processing converts an existing plant oil and alkali into a cleaning material for supplied washing.",
+        "production_contract": "Completed civilian batches consume drying seed oil, caustic soda, water and fuel with paid vessels and labor. This implements the plant-oil route only. Laundry appliances consume the actual product; no animal fat, clinical qualification or global sanitation bonus is granted.",
+        "production_items": [
+          "laundry_soap"
+        ],
+        "requires": [
+          "experimental_controls",
+          "seed_oil_pressing"
         ],
         "requires_all": [],
         "requires_any": [],

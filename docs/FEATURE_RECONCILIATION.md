@@ -1,3 +1,9 @@
+## September 12 — supplied laundry and broader rail/food coverage
+
+INTEGRATED runtime `368b7718c419ff73d788e29d3bf9e5ad212a37ce`: three authored identities now implement manufactured soap, electric laundry and dated garment wear trials. Actual supplies, generated power, worker time and sampled garments are consumed. All **109 distinct worktree cases and 61 canonical cases pass**; the final demand/investment checks include fuel-consuming generation and the daily dirt threshold. See `LAUNDRY_SUPPLY_HANDOFF.md` for save compatibility, primary-city electricity scope and the limited game wear protocol.
+
+Graph and exact canonical snapshot: **676 discoveries /458 explicit routes /310 civilian recipes /17 facilities**. All 676 stored definitions match `/tmp/tt-676-canonical-snapshot.json`; 15 ledger-tool checks pass. Reviewed rail `412d360` and food-processing `3079243` add 47 authored drafts, not live features. The ledger is **676 integrated + 2,463 drafts = 3,139 distinct identities**, leaving **1,861 to author and 4,324 to implement**. Art: **110 verified /676 live**, with 566 queued. No player launch, package rebuild or full-history pacing claim. Physical rail freight is now in an isolated worker design/implementation scope.
+
 ## September 12 — verified naval access and hull surveys
 
 INTEGRATED runtime `b363f6c6aceaf42515e020281934cef26cb217fd` combines frozen naval `bcda00e` with the canonical sewing checkpoint. All **86 combined cases and 48 canonical dock/clothing/city cases pass**. Paid local construction, finite supported-hull access, dated surveys, automatic supply and delayed secondary-port deliveries share the existing labor and inventory owners. See `NAVAL_SEWING_INTEGRATION.md` for acceptance, save compatibility and the limited canoe/ram-galley handling set.

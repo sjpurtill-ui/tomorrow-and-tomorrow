@@ -2172,42 +2172,6 @@
   },
   {
     "field": "D07",
-    "id": "soap_manufacture",
-    "name": "Soap Manufacture",
-    "foundations": "experimental_controls",
-    "mechanism": "Produce a qualified cleaning material from compatible feedstocks",
-    "operating_requirement": "Suitable fats or oils, processing equipment and quality control",
-    "consequence": "Supply a cleaning agent whose usefulness depends on water and application",
-    "status": "authored_draft",
-    "requires_all": [
-      "experimental_controls"
-    ],
-    "requires_any": [
-      [
-        "seed_oil_pressing",
-        "hide_tanning"
-      ]
-    ],
-    "branching_note": "Qualified plant or animal feedstocks provide different supply routes; actual suitable fats and processing inputs are mandatory.",
-    "recovery": "For Soap Manufacture: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "soap_manufacture",
-      "local_demonstration": "Produce a qualified cleaning material from compatible feedstocks",
-      "operating_requirements": "Suitable fats or oils, processing equipment and quality control",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
     "id": "cloth_fulling",
     "name": "Cloth Fulling",
     "foundations": "felt_fabric_making,plain_weaving",
@@ -3106,44 +3070,6 @@
   },
   {
     "field": "D07",
-    "id": "mechanical_washing_machines",
-    "name": "Mechanical Washing Machines",
-    "foundations": "textile_laundering_practice,crank_linkages",
-    "mechanism": "Provide controlled mechanical working for a qualified washing task",
-    "operating_requirement": "Suitable appliance, water, drive and maintenance",
-    "consequence": "Reduce some manual washing labor while material damage and water demand remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "textile_laundering_practice",
-      "crank_linkages"
-    ],
-    "requires_any": [
-      [
-        "treadle_lathe_drive",
-        "water_mills",
-        "electric_motors"
-      ]
-    ],
-    "branching_note": "A qualified human, water or electrical drive can power washing; electric power is not universal.",
-    "recovery": "For Mechanical Washing Machines: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "mechanical_washing_machines",
-      "local_demonstration": "Provide controlled mechanical working for a qualified washing task",
-      "operating_requirements": "Suitable appliance, water, drive and maintenance",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
     "id": "household_drying_appliances",
     "name": "Household Drying Appliances",
     "foundations": "textile_laundering_practice,calorimetry",
@@ -3354,37 +3280,6 @@
       "destination": "textile_chemical_residue_control",
       "local_demonstration": "Assess and control specified retained process substances in a textile",
       "operating_requirements": "Qualified tests, traceable processes and handling controls",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "textile_durability_testing",
-    "name": "Textile Durability Testing",
-    "foundations": "textile_repair_methods,measurement_uncertainty",
-    "mechanism": "Compare fabric or garment performance under declared wear and cleaning cycles",
-    "operating_requirement": "Representative samples, test equipment and review",
-    "consequence": "Specify a supported service expectation while actual use varies",
-    "status": "authored_draft",
-    "requires_all": [
-      "textile_repair_methods",
-      "measurement_uncertainty"
-    ],
-    "requires_any": [],
-    "recovery": "For Textile Durability Testing: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "textile_durability_testing",
-      "local_demonstration": "Compare fabric or garment performance under declared wear and cleaning cycles",
-      "operating_requirements": "Representative samples, test equipment and review",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",
