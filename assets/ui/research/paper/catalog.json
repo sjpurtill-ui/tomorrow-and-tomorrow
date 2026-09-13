@@ -4210,6 +4210,46 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/metal_spinning_forming.png",
+      "description": "A roller forms a rotating blank around a mandrel.",
+      "domain": "production",
+      "id": "metal_spinning_forming",
+      "name": "Metal Spinning Forming",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rotary_swaging.png",
+      "description": "Repeated radial die blows reduce a rod or tube profile.",
+      "domain": "production",
+      "id": "rotary_swaging",
+      "name": "Rotary Swaging",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tube_rotary_draw_bending.png",
+      "description": "A rotating bend die draws tubing around a fixed radius.",
+      "domain": "production",
+      "id": "tube_rotary_draw_bending",
+      "name": "Tube Rotary-Draw Bending",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/roll_formed_sections.png",
+      "description": "Successive roll stands progressively bend a strip profile.",
+      "domain": "production",
+      "id": "roll_formed_sections",
+      "name": "Roll-Formed Sections",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/centrifugal_tube_casting.png",
+      "description": "Rotation distributes molten alloy along a tubular mold wall.",
+      "domain": "production",
+      "id": "centrifugal_tube_casting",
+      "name": "Centrifugal Tube Casting",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/metal_annealing_control.png",
       "description": "Relate controlled thermal treatment to measured metal hardness and workability. Suitable metal, heating equipment, skilled handling and property checks.",
       "domain": "production",
@@ -5963,11 +6003,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 745,
+  "live_count": 750,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 167
+  "verified_count": 172
 }
