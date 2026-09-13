@@ -159,7 +159,7 @@
       "domain": "institutions",
       "id": "customary_law",
       "name": "Customary Law",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/public_stores.png",
@@ -167,7 +167,7 @@
       "domain": "institutions",
       "id": "public_stores",
       "name": "Public Stores",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/watch_rotation.png",
@@ -175,7 +175,7 @@
       "domain": "security",
       "id": "watch_rotation",
       "name": "Organized Watch",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/formation_drill.png",
@@ -183,7 +183,7 @@
       "domain": "security",
       "id": "formation_drill",
       "name": "Formation Drill",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/supply_groups.png",
@@ -6453,9 +6453,9 @@
   "live_art_complete": false,
   "live_count": 806,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 565,
+  "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 241
+  "verified_count": 245
 }

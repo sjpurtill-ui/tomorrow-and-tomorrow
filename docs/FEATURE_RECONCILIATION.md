@@ -1,3 +1,9 @@
+## September 13 — four early institution illustrations
+
+Added reviewed paper artwork for customary law, public stores, organized watch and formation drill. Native originals and built-in imagegen prompts are retained in `assets/ui/research/paper/EARLY_INSTITUTION_PROMPTS.md`. Four textures pass 768-pixel/mipmap checks and 12 isolated atlas tests pass. Art is **245 verified / 806 live, 561 queued**. Runtime definitions, ledger counts and save behavior are unchanged.
+
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/early-institutions-art`, base `1709da22f661eacb60122cbfc3a58c8e8b01467b`. Owns four images/imports, bindings and art records only. No shared conflicts, player launch or package rebuild. Canonical verification follows integration.
+
 ## September 13 — military horizon evidence review
 
 Integrated evidence-only source `83d2c4f6d39d5060c1789c77ece59e99eccdd088` as `7d6db84`. Seven existing military identities have proposed broad historical placements, with unsuccessful full-page fetches explicitly marked provisional. No horizon mappings, prerequisite edits, new identities or runtime changes are included. See `technology-review/MILITARY_HORIZON_EVIDENCE.md`.
