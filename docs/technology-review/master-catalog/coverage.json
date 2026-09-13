@@ -183,8 +183,8 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1359,
-    "unassigned_identities": 2105,
+    "assigned_identities": 1366,
+    "unassigned_identities": 2098,
     "unassigned_ids": [
       "abrasive_grinding_control",
       "absolute_position_encoders",
@@ -283,7 +283,6 @@
       "artillery_observation_liaison",
       "artillery_prime_mover_services",
       "artillery_recoil_systems",
-      "artillery_sound_ranging",
       "artillery_towing_interfaces",
       "arts_patronage_agreements",
       "aseptic_laboratory_practice",
@@ -439,8 +438,6 @@
       "cardiac_pacing_systems",
       "cardiopulmonary_bypass_services",
       "cargo_seals",
-      "carrier_aircraft_launch_systems",
-      "carrier_aircraft_recovery_systems",
       "carrier_aviation",
       "carrier_timing_recovery",
       "cart_bed_framing",
@@ -581,7 +578,6 @@
       "complex_numbers",
       "component_reuse_certification",
       "composite_airframes",
-      "composite_bow_design",
       "composite_damage_inspection",
       "composite_floor_shear_connection",
       "compound_microscopy",
@@ -841,7 +837,6 @@
       "field_information_fusion",
       "field_kitchen_detachments",
       "field_maintenance_diagnostics",
-      "field_telephone_line_deployment",
       "field_variety_trials",
       "field_veterinary_support",
       "field_workshop_transportability",
@@ -1359,7 +1354,6 @@
       "motor_transport_columns",
       "mountain_field_school",
       "mountain_pass_engineering",
-      "mounted_archery_training",
       "mounted_firearms",
       "mounted_remount_school",
       "mounted_scouts",
@@ -1388,7 +1382,6 @@
       "mycorrhizal_exchange_measurement",
       "natural_rubber_processing",
       "nautical_almanac_compilation",
-      "naval_aircraft_deck_handling",
       "naval_arsenals",
       "naval_aviation",
       "naval_aviation_maintenance_shops",
@@ -2319,11 +2312,11 @@
         "id": "H03",
         "name": "Complex societies and learned traditions",
         "target": 800,
-        "assigned": 220,
-        "target_slots_not_yet_assigned": 580,
+        "assigned": 222,
+        "target_slots_not_yet_assigned": 578,
         "implemented_baseline": 10,
         "pending_communications": 0,
-        "authored_drafts": 210
+        "authored_drafts": 212
       },
       {
         "id": "H04",
@@ -2339,11 +2332,11 @@
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 701,
-        "target_slots_not_yet_assigned": 199,
+        "assigned": 706,
+        "target_slots_not_yet_assigned": 194,
         "implemented_baseline": 7,
         "pending_communications": 0,
-        "authored_drafts": 694
+        "authored_drafts": 699
       },
       {
         "id": "H06",

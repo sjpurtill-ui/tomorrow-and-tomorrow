@@ -1,3 +1,9 @@
+## September 13 — seven reviewed military horizon assignments
+
+Applied two H03 and five H05 editorial assignments to existing identities after direct Met, GCHQ, National Army Museum and Navy source review. Updated the earlier provisional sound-ranging and carrier evidence with accessible institutional pages. Current source names, statuses and scope digests reconcile; parent, duplicate, reachability and horizon checks and 15 ledger tests pass. See `technology-review/MILITARY_HORIZON_EVIDENCE.md`.
+
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/military-horizon-review`, base `902c05bc2fd8f2fcd748ddab788aebcd96b50976`. Catalog/docs only: 1,366 of 3,464 identities have editorial horizon assignments; no calendar gates, first-invention claims or runtime additions. Runtime remains 806, art 245/806, and save behavior is unchanged. No shared conflicts, player launch or package rebuild.
+
 ## September 13 — four early institution illustrations
 
 Added reviewed paper artwork for customary law, public stores, organized watch and formation drill. Native originals and built-in imagegen prompts are retained in `assets/ui/research/paper/EARLY_INSTITUTION_PROMPTS.md`. Four textures pass 768-pixel/mipmap checks and 12 isolated atlas tests pass. Art is **245 verified / 806 live, 561 queued**. Runtime definitions, ledger counts and save behavior are unchanged.

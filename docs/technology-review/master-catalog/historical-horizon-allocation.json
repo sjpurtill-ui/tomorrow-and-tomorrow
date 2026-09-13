@@ -13624,6 +13624,76 @@
       "classification_status": "editorial_review",
       "rationale": "Qualified natural chronologies or analytical dating require retained observations and assessed references; no first-invention date or runtime time gate is implied.",
       "scope_digest": "0c3dde9885c0f6a7dd1f135e901cf505246288c2665abed1478b7e5eae91c41a"
+    },
+    {
+      "id": "composite_bow_design",
+      "name": "Composite-Bow Design",
+      "horizon": "H03",
+      "source_file": "military-and-transport.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Surviving Egyptian wood-and-horn bow sections support preindustrial composite construction; no earliest-use date is asserted. https://www.metmuseum.org/art/collection/search/545561 Editorial historical grouping only; no calendar unlock or runtime certification.",
+      "scope_digest": "d6773380982364e59e69ca8c1b699660f16d8565d0611759ed88569d5ca00a67"
+    },
+    {
+      "id": "mounted_archery_training",
+      "name": "Mounted-Archery Training",
+      "horizon": "H03",
+      "source_file": "military-and-transport.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The Met describes mounted archery as practiced skill in its historical account of Mongol cavalry and a sixteenth-century image. https://www.metmuseum.org/art/collection/search/450585 Editorial historical grouping only; no calendar unlock or runtime certification.",
+      "scope_digest": "65fac7fd70ea5598774d8ccb6e0e3374aa5a3133b3575ad21e77a11fe05a537a"
+    },
+    {
+      "id": "field_telephone_line_deployment",
+      "name": "Field Telephone Line Deployment",
+      "horizon": "H05",
+      "source_file": "military-campaign-services-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "GCHQ documents operational field telephone links and interception during the First World War. https://www.gchq.gov.uk/information/communications-security-in-1916-the-la-boisselle-find Editorial historical grouping only; no calendar unlock or runtime certification.",
+      "scope_digest": "3584b88107b0c3bd81e252db322cb034907eee54b110924e23b1f6992eb20486"
+    },
+    {
+      "id": "artillery_sound_ranging",
+      "name": "Artillery Sound Ranging",
+      "horizon": "H05",
+      "source_file": "military-campaign-services-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The National Army Museum describes sound ranging among First World War observation methods. https://www.nam.ac.uk/explore/weapons-western-front Editorial historical grouping only; no calendar unlock or runtime certification.",
+      "scope_digest": "191e6afb8f41271465d3f905664fa08a9935235c173edf479a3459ab01eb185b"
+    },
+    {
+      "id": "naval_aircraft_deck_handling",
+      "name": "Naval Aircraft Deck Handling",
+      "horizon": "H05",
+      "source_file": "military-equipment-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Navy carrier history describes aircraft assembly, storage, elevators and handling aboard Langley; broad service placement does not backdate every later procedure. https://navalaviationnews.navy.mil/Home/Evolution-of-Aircraft-Carriers/ Editorial historical grouping only; no calendar unlock or runtime certification.",
+      "scope_digest": "18d27e55775a7251eccd8244f86aabd8a5d3a61a74fd5c4cad7629cd29af9659"
+    },
+    {
+      "id": "carrier_aircraft_recovery_systems",
+      "name": "Carrier Aircraft Recovery Systems",
+      "horizon": "H05",
+      "source_file": "military-equipment-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Navy history records experimental arresting arrangements on Langley during the 1920s; this does not equate early gear to later aircraft recovery performance. https://navalaviationnews.navy.mil/Home/Evolution-of-Aircraft-Carriers/ Editorial historical grouping only; no calendar unlock or runtime certification.",
+      "scope_digest": "810a276b426812f1685ee27abdeda8cc8b51cd657f7a39cb6c9f561cc82edd68"
+    },
+    {
+      "id": "carrier_aircraft_launch_systems",
+      "name": "Carrier Aircraft Launch Systems",
+      "horizon": "H05",
+      "source_file": "military-equipment-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Navy history describes deck takeoff and catapult experimentation during the 1920s, without implying that every carrier launch needs a powered catapult. https://navalaviationnews.navy.mil/Home/Evolution-of-Aircraft-Carriers/ Editorial historical grouping only; no calendar unlock or runtime certification.",
+      "scope_digest": "91bd75de7956ea66131c7ffb0fae2a6dd3f82d210cf1ede063e2517df5ec8b32"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
