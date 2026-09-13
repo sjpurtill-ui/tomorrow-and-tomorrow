@@ -1842,6 +1842,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/zipper_chain_closures.png",
+      "description": "Fit matched element rows, a compatible slider and end stops to reinforced tapes; cycle-check the closure and sew the checked front into a fitted garment.",
+      "domain": "production",
+      "id": "zipper_chain_closures",
+      "name": "Zipper Chain Closures",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/leather_thickness_skiving.png",
+      "description": "Gauge actual leather blanks, remove controlled edge layers, check remaining material and fold the thinned edges into sewn garment seams.",
+      "domain": "production",
+      "id": "leather_thickness_skiving",
+      "name": "Leather Thickness Skiving",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/buttonhole_edge_reinforcement.png",
       "description": "Bind cut cloth openings with edge stitches and reinforced ends, fit matched buttons, and check the closure before joining fronts into fitted garments.",
       "domain": "production",
@@ -6483,11 +6499,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 810,
+  "live_count": 812,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 249
+  "verified_count": 251
 }
