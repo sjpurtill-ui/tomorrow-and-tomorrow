@@ -5354,6 +5354,14 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/parchment_record_preparation.png",
+      "description": "Clean, scrape and stretch suitable untanned skins into a writing surface.",
+      "domain": "knowledge",
+      "id": "parchment_record_preparation",
+      "name": "Parchment Record Preparation",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/core_formed_glass.png",
       "description": "A removable core supports hot glass while a hollow vessel is built around it.",
       "domain": "production",
@@ -5795,11 +5803,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 724,
+  "live_count": 725,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 146
+  "verified_count": 147
 }
