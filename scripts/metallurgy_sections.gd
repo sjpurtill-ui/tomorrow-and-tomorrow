@@ -12,7 +12,7 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->float:
 	if work<=0 or not job.has("metallurgy_pending") or not available(spec):return 0.0
 	var p:Dictionary=job.metallurgy_pending
 	if p.phase!="inspection" or float(p.run.temperature)>150:return 0.0
-	for apparatus:String in ["Metal Section Preparation Sets","Reflected-Light Metal Microscopes"]:
+	for apparatus:String in ["Metal Section Preparation Sets","Reflected-Light Metal Microscopes","Microscope Scale Slides"]:
 		if not bool(job.get("tooling_paid",false)) or float(job.get("tooling",{}).get(apparatus,0))<1:return 0.0
 	var state=WorldSimulation.state
 	if p.site!=state.resource_settlement_id:return 0.0
@@ -71,9 +71,11 @@ static func frame(p:Dictionary)->Dictionary:
 			var boundary:bool=(x>0 and labels[y][x]!=labels[y][x-1]) or (y>0 and labels[y][x]!=labels[y-1][x])
 			row.append(.1 if boundary else .9)
 		pixels.append(row)
+	var reference:=preload("res://scripts/metallurgy_scale.gd").reference_image()
+	var scale:=preload("res://scripts/metallurgy_scale.gd").measure(reference)
 	return {"source_id":"%s:%d:%d"%[p.site,p.source_job,p.ordinal],"section_id":1,
 		"illumination":"reflected","preparation":"polished_etched",
-		"micrometres_per_pixel":1.0,"calibration_uncertainty":.05,"pixels":pixels}
+		"scale_reference":reference,"micrometres_per_pixel":scale.micrometres_per_pixel,"calibration_uncertainty":scale.calibration_uncertainty,"pixels":pixels}
 static func valid(p:Dictionary,spec:Dictionary)->bool:
 	if not p.has("section"):return true
 	var s:Variant=p.section

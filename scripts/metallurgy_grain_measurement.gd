@@ -1,6 +1,7 @@
 extends RefCounted
 ## Measures resolved boundary bands in a retained calibrated reflected-light field.
 ## No access to the source material's latent grain-size parameter.
+const Scale=preload("res://scripts/metallurgy_scale.gd")
 const MIN_SIZE:=16
 const MAX_SIZE:=64
 static func finite(v:Variant,low:float,high:float)->bool:
@@ -12,6 +13,9 @@ static func valid_frame(frame:Variant)->bool:
 	if not frame.get("section_id") is int or frame.section_id<=0:return false
 	if not finite(frame.get("micrometres_per_pixel"),.01,1000):return false
 	if not finite(frame.get("calibration_uncertainty"),0,.2):return false
+	if not frame.get("scale_reference") is Dictionary:return false
+	var calibration:=Scale.measure(frame.scale_reference)
+	if calibration.is_empty() or frame.micrometres_per_pixel!=calibration.micrometres_per_pixel or frame.calibration_uncertainty!=calibration.calibration_uncertainty:return false
 	var rows:Variant=frame.get("pixels")
 	if not rows is Array or rows.size()<MIN_SIZE or rows.size()>MAX_SIZE:return false
 	if not rows[0] is Array or rows[0].size()<MIN_SIZE or rows[0].size()>MAX_SIZE:return false

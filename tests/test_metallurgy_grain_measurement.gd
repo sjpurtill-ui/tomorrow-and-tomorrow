@@ -6,9 +6,11 @@ func field(spacing:int)->Dictionary:
 		var row:Array=[]
 		for x:int in range(32):row.append(.1 if (x>0 and x%spacing==0) or (y>0 and y%spacing==0) else .9)
 		pixels.append(row)
-	return {"source_id":"steel_lot_1","section_id":1,"illumination":"reflected",
+	var reference:=preload("res://scripts/metallurgy_scale.gd").reference_image(40.0,.5)
+	var scale:=preload("res://scripts/metallurgy_scale.gd").measure(reference)
+	return {"scale_reference":reference,"source_id":"steel_lot_1","section_id":1,"illumination":"reflected",
 		"preparation":"polished_etched","micrometres_per_pixel":2.0,
-		"calibration_uncertainty":.02,"pixels":pixels}
+		"calibration_uncertainty":scale.calibration_uncertainty,"pixels":pixels}
 func test_visible_boundary_spacing_changes_measured_intercept_without_latent_parameters()->void:
 	var fine:=G.measure(field(8));var coarse:=G.measure(field(12))
 	assert_bool(fine.qualified).is_true()
@@ -31,3 +33,17 @@ func test_unprepared_transmitted_or_unresolved_fields_cannot_qualify()->void:
 	assert_float(float(G.measure(frame).mean_intercept_um)).is_equal(0.0)
 	frame=field(8);frame.pixels[0][0]=NAN
 	assert_bool(G.valid_frame(frame)).is_false()
+
+func test_reference_marks_control_scale_and_missing_or_ambiguous_reference_rejects()->void:
+	var frame:=field(8)
+	frame.erase("scale_reference")
+	assert_bool(G.valid_frame(frame)).is_false()
+	frame=field(8);frame.scale_reference.pixels[15]=.1
+	assert_bool(G.valid_frame(frame)).is_false()
+	frame=field(8);frame.micrometres_per_pixel=1.0
+	assert_bool(G.valid_frame(frame)).is_false()
+	var calibration=preload("res://scripts/metallurgy_scale.gd")
+	var reference:=calibration.reference_image(20.0,.5)
+	assert_float(float(calibration.measure(reference).micrometres_per_pixel)).is_equal(1.0)
+	reference.interval_uncertainty_um=10.0
+	assert_dict(calibration.measure(reference)).is_empty()
