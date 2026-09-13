@@ -21,6 +21,7 @@ static func number(value:Variant)->bool:return (value is int or value is float) 
 static func valid(value:Variant)->bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return false
+	if not preload("res://scripts/sec_specialist_supply.gd").valid(value.get("sec_specialist_archive",{})):return false
 	if not preload("res://scripts/scholar_visits.gd").valid(value.get("scholar_visits",{})):return false
 	if not value.has_all(empty_state().keys()):return false
 	if not preload("res://scripts/research_licenses.gd").valid(value.get("production_licenses",{})):return false
@@ -461,6 +462,7 @@ static func advance(day:int)->void:
 	if day<=int(data().last_day):return
 	var elapsed:=mini(7,maxi(1,day-int(data().last_day))) if int(data().last_day)>=0 else 1
 	data().last_day=day
+	preload("res://scripts/sec_specialist_supply.gd").advance(day)
 	preload("res://scripts/scholar_visits.gd").advance(day)
 	for id:String in data().connections:
 		var view_id:="human" if id=="player" and WorldSimulation.actor_id!="player" else id

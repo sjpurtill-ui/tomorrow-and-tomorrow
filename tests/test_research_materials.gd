@@ -225,3 +225,94 @@ func test_furnace_experiments_have_a_metallurgical_route_without_local_aquifers(
 	assert_str(String(P.chosen(entry,0).id)).is_equal("mine_supported")
 	GameState.known_discoveries.erase("refractory_furnaces")
 	assert_bool(DiscoverySystem._discovery_is_eligible(entry,0)).is_false()
+
+func sec_setup()->void:
+	prepare()
+	var supply=preload("res://scripts/sec_specialist_supply.gd")
+	GameState.known_discoveries.assign(["material_accounting","standard_measures","size_exclusion_chromatography"])
+	GameState.known_discoveries.append_array(supply.FOUNDATIONS)
+	WorldSimulation.scoped("neighbor",func()->void:
+		var s=WorldSimulation.state
+		s.elapsed_days=100000;s.population_allocations.Knowledge=20;s.population_allocations.Logistics=8
+		s.known_discoveries.assign(supply.FOUNDATIONS)
+		for id:String in supply.FOUNDATIONS:s.discovery_adoption[id]=1.0
+		E.advance(100000))
+func test_sec_archive_is_endowed_by_daily_eligibility_once_and_never_by_a_quote()->void:
+	prepare()
+	var supply=preload("res://scripts/sec_specialist_supply.gd")
+	WorldSimulation.scoped("neighbor",func()->void:
+		E.advance(99999)
+		assert_bool(E.data().has("sec_specialist_archive")).is_false())
+	sec_setup()
+	var provider:=E.owner_state("neighbor")
+	assert_str(provider.society_exchange.sec_specialist_archive.origin).is_equal(supply.ORIGIN)
+	for item:String in supply.RESERVE:assert_float(float(provider.resource_stockpiles[item])).is_equal(float(supply.RESERVE[item]))
+	provider.resource_stockpiles["Qualified Aqueous SEC Packing"]=0.0
+	var before:Dictionary=provider.resource_stockpiles.duplicate(true)
+	assert_bool(M.quote("neighbor",supply.SUBJECT,"Stone").get("ok",false)).is_true()
+	WorldSimulation.scoped("neighbor",func()->void:E.advance(100001))
+	assert_dict(provider.resource_stockpiles).is_equal(before)
+	assert_bool(E.valid(provider.society_exchange)).is_true()
+	var damaged:Dictionary=provider.society_exchange.duplicate(true);damaged.sec_specialist_archive.endowed_day=-1
+	assert_bool(E.valid(damaged)).is_false()
+	for id:String in supply.FOUNDATIONS:GameState.discovery_adoption[id]=1.0
+	GameState.population_allocations.Knowledge=20;GameState.population_allocations.Logistics=8
+	supply.advance(100002)
+	assert_bool(GameState.society_exchange.has("sec_specialist_archive")).is_false()
+func test_sec_known_subject_can_purchase_finite_delivered_replenishment_without_synthesis()->void:
+	sec_setup()
+	var supply=preload("res://scripts/sec_specialist_supply.gd")
+	var paid_before:=float(GameState.resource_stockpiles.Stone)
+	assert_bool(M.dispatch("neighbor",supply.SUBJECT,"Stone").get("ok",false)).is_true()
+	var mission:=CivilizationSystem.diplomatic_mission
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(paid_before)
+	arrive(mission)
+	assert_bool(mission.research_refused).is_false()
+	for item:String in supply.CONSIGNMENT:
+		assert_float(float(GameState.resource_stockpiles.get(item,0))).is_equal(0.0)
+		assert_float(float(E.owner_state("neighbor").resource_stockpiles[item])).is_equal(float(supply.RESERVE[item])-1.0)
+	receive(mission);receive(mission)
+	for item:String in supply.CONSIGNMENT:assert_float(float(GameState.resource_stockpiles[item])).is_equal(1.0)
+	assert_bool(M.quote("neighbor",supply.SUBJECT,"Stone").has("error")).is_true()
+	CivilizationSystem._process_diplomatic_mission(int(mission.return_day))
+	GameState.resource_stockpiles["Qualified Aqueous SEC Packing"]=0.0
+	var quote:=M.quote("neighbor",supply.SUBJECT,"Stone")
+	assert_bool(quote.get("ok",false)).is_true()
+	assert_int(quote.materials_requested.size()).is_equal(1)
+	assert_str(quote.message).contains("finite external laboratory reserve")
+	assert_bool(preload("res://scripts/hud/research_purchase_panel.gd").visible_for(supply.SUBJECT,true,true)).is_true()
+func test_sec_exhaustion_and_serialized_actor_restore_do_not_reendow_specialist_stock()->void:
+	sec_setup()
+	var supply=preload("res://scripts/sec_specialist_supply.gd")
+	for item:String in supply.RESERVE:E.owner_state("neighbor").resource_stockpiles[item]=0.0
+	# Exercise the same curated actor payload carried by whole-game saves.
+	var saved:Dictionary=bytes_to_var(var_to_bytes(WorldSimulation.export_state()))
+	WorldSimulation.clear();var restored:=WorldSimulation.import_state(saved)
+	assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+	if not restored.get("ok",false):return
+	WorldSimulation.scoped("neighbor",func()->void:E.advance(100001))
+	for item:String in supply.RESERVE:assert_float(float(E.owner_state("neighbor").resource_stockpiles[item])).is_equal(0.0)
+	var payment_before:=float(GameState.resource_stockpiles.Stone)
+	assert_bool(M.dispatch("neighbor",supply.SUBJECT,"Stone").get("ok",false)).is_true()
+	var mission:=CivilizationSystem.diplomatic_mission;arrive(mission)
+	assert_bool(mission.research_refused).is_true()
+	receive(mission)
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(payment_before)
+	for item:String in supply.RESERVE:assert_float(float(GameState.resource_stockpiles.get(item,0))).is_equal(0.0)
+
+func test_sec_archive_survives_whole_game_save_after_exhaustion()->void:
+	sec_setup()
+	var supply=preload("res://scripts/sec_specialist_supply.gd")
+	for item:String in supply.RESERVE:E.owner_state("neighbor").resource_stockpiles[item]=0.0
+	# Embassy unit fixtures use a deliberately abbreviated contact record. Use
+	# the ordinary complete world roster for whole-game persistence validation.
+	CivilizationSystem.reset_for_new_world()
+	var slot:="sec_archive_%d"%OS.get_process_id()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear();var restored:=SaveSystem.load_game(slot)
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+	if not restored.get("ok",false):return
+	WorldSimulation.scoped("neighbor",func()->void:E.advance(100001))
+	assert_str(E.owner_state("neighbor").society_exchange.sec_specialist_archive.origin).is_equal(supply.ORIGIN)
+	for item:String in supply.RESERVE:assert_float(float(E.owner_state("neighbor").resource_stockpiles[item])).is_equal(0.0)

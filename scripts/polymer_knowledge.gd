@@ -1665,5 +1665,65 @@ static func entries()->Array[Dictionary]:
       "nmr_methanol_reference"
     ],
     "production_contract": "Physical field and RF/thermal assemblies consume real capital, work and energy. The installed bench supplies unqualified instrument time only; reference qualification, sample-specific resolved spectra and downstream grade acceptance remain required."
+  },
+  {
+    "id": "size_exclusion_chromatography",
+    "name": "Size-Exclusion Chromatography",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_solution_processing",
+      "glass_tube_drawing",
+      "optical_lenses",
+      "experimental_controls",
+      "measurement_uncertainty"
+    ],
+    "requires_all": [
+      "polymer_solution_processing",
+      "glass_tube_drawing",
+      "optical_lenses",
+      "experimental_controls",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Size-Exclusion Chromatography",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Separate compatible dissolved chains by their access to a qualified porous stationary phase and measure a calibrated elution profile within a finite size range.",
+    "effects": {},
+    "production_items": [],
+    "production_contract": "Pay for compatible porous column medium, stable pump flow, concentration-sensitive detection, sample preparation, eluent, reference standards and finite acquisition; establish retention calibration, recovery and separation resolution before interpreting the trace. Distribution measurement and process consumer remain under implementation; external standards do not grant local synthesis.",
+    "resource_requirements": [
+      {
+        "resource": "Qualified Aqueous SEC Packing",
+        "stage": "recognized",
+        "minimum_stock": 1.0
+      },
+      {
+        "resource": "Narrow PEG DP10 Standards",
+        "stage": "recognized",
+        "minimum_stock": 1.0
+      },
+      {
+        "resource": "Narrow PEG DP40 Standards",
+        "stage": "recognized",
+        "minimum_stock": 1.0
+      },
+      {
+        "resource": "Narrow PEG DP160 Standards",
+        "stage": "recognized",
+        "minimum_stock": 1.0
+      }
+    ]
   }
 ]

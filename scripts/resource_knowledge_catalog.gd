@@ -6,6 +6,7 @@ extends RefCounted
 # by the resource, food, settlement, health, and state simulations.
 
 const EXPERIMENTAL_SUPPLIES={
+  "size_exclusion_chromatography": preload("res://scripts/sec_specialist_supply.gd").CONSIGNMENT,
   "lime_burning": {
     "Limestone": 5.0
   },

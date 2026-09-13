@@ -6,7 +6,7 @@ Worktree: `/Users/seanpurtill/Documents/Codex/tt-polymer-processing`
 Branch: `codex/polymer-processing`  
 Base: `6d89ae93ada82b4d12e70a7211dd820dff44a6c5`
 
-The branch adds 46 discovery identities, polymer production and operating
+The branch registers 47 discovery identities (including the unfinished SEC prerequisite), polymer production and operating
 installations, retained-sample analysis, and downstream civilian consumers.
 These identities are already counted in the authored catalog; integrating them
 must not increase the distinct authored total a second time. Canonical coverage
@@ -25,11 +25,11 @@ or the complete technology overhaul.
   released batch. Repeated same-day work earns no progress and no second material
   reservation. Damaged nested PEG evidence or PP noise metadata is rejected by
   the full load boundary. Integration suite 3/3, zero errors/failures/orphans.
-- `6cd8663`: 30 of 46 discovery-specific paper/gouache illustrations are bound.
+- `6cd8663`: 30 of 47 discovery-specific paper/gouache illustrations are bound.
   The sixth batch uses square source images with Godot import size limit 768 and
   mipmaps. Headless import completed without script/import errors; the atlas
   suite passed 12/12, including loading every bound subject texture and checking
-  its square dimensions and card path. Remaining 16 illustrations are not yet
+  its square dimensions and card path. Remaining 17 illustrations are not yet
   bound here.
 
 ## Outstanding before family handoff
@@ -40,9 +40,11 @@ or the complete technology overhaul.
    is being authored; it must have real instrument, calibration, sample and
    material costs and a distribution-dependent operating consequence.
 2. Resolve reachable supply of qualified column packing and reference standards.
-   Existing exchange deducts real supplier stocks; no current production route
-   supplies these materials. Merely adding stock names or assuming a supplier
-   already has them is insufficient. No invented supplier inventory is accepted.
+   The integrator approved a finite preexisting external laboratory boundary.
+   `SEC_SPECIALIST_SUPPLY.md` specifies the implemented daily eligibility, one-time
+   saved endowment, finite embassy cargo and exhaustion behavior. This is not
+   local synthesis or a full historical bootstrap. Instrument preparation and
+   consumption of these supplies remain unfinished.
 3. Finish the remaining subject art and verify imported assets and bindings.
 4. Review final combined production/branching and UI evidence after the remaining
    changes. Prior passing tests cover their stated cases, not the whole campaign.

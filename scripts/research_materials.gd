@@ -7,6 +7,11 @@ static func available(subject:String="")->bool:
 	return "material_accounting" in WorldSimulation.state.known_discoveries and "standard_measures" in WorldSimulation.state.known_discoveries and (subject.is_empty() or Catalog.EXPERIMENTAL_SUPPLIES.has(subject))
 static func needed(subject:String)->Dictionary:
 	var result:Dictionary={}
+	if subject=="size_exclusion_chromatography":
+		for item:String in Catalog.EXPERIMENTAL_SUPPLIES[subject]:
+			var shortage:=maxf(0.0,float(Catalog.EXPERIMENTAL_SUPPLIES[subject][item])-float(WorldSimulation.state.resource_stockpiles.get(item,0)))
+			if shortage>0:result[item]=shortage
+		return result
 	var entry:=WorldSimulation.discovery.discovery_definition(subject)
 	for requirement:Dictionary in entry.get("resource_requirements",[]):
 		if WorldSimulation.discovery._resource_requirements_met([requirement]):continue
@@ -22,7 +27,7 @@ static func describe(cargo:Dictionary)->String:
 static func quote(source:String,subject:String,payment:String)->Dictionary:
 	if not available(subject):return {"error":"Experimental consignments need material accounting, standard measures and a supported material investigation."}
 	var entry:=WorldSimulation.discovery.discovery_definition(subject)
-	if entry.is_empty() or subject in WorldSimulation.state.known_discoveries or not P.ready(entry,int(WorldSimulation.state.elapsed_days)):return {"error":"Choose an unresolved investigation with its local knowledge foundations in place."}
+	if entry.is_empty() or (subject in WorldSimulation.state.known_discoveries and subject!="size_exclusion_chromatography") or not P.ready(entry,int(WorldSimulation.state.elapsed_days)):return {"error":"Choose an unresolved investigation with its local knowledge foundations in place."}
 	var cargo:=needed(subject)
 	if cargo.is_empty():return {"error":"The material basis for this investigation is already available locally."}
 	var terms:Dictionary=WorldSimulation.world.diplomatic_mission_quote(source,payment,"goodwill")
@@ -30,6 +35,7 @@ static func quote(source:String,subject:String,payment:String)->Dictionary:
 	terms["materials_requested"]=cargo
 	terms["purpose_label"]="REQUEST EXPERIMENTAL MATERIALS"
 	terms["message"]="Offer %s for %s. Travel provisions: %.1f Food; expected round trip: %d days. The supplier must have the actual stock and may refuse. Materials become available only on return; they grant no discovery, mine or production facility. Local research and later replenishment remain necessary." % [terms.gift.label,describe(cargo),float(terms.provisions),int(terms.total_days)]
+	if subject=="size_exclusion_chromatography":terms.message+=" Qualified packing and assigned narrow PEG standards come from a finite external laboratory reserve; replacements are not manufactured locally. Requests can be refused when that reserve is exhausted."
 	return terms
 static func dispatch(source:String,subject:String,payment:String)->Dictionary:
 	var terms:=quote(source,subject,payment)
