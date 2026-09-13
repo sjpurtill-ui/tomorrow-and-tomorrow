@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
-const CASES=[
+const CASES=[["expanded_casting_patterns",1.5],
 	["normalizing_steel_sections",1.0],["induction_hardened_shafts",.01],
 	["investment_copper_brackets",.75],["lost_foam_copper_brackets",.75],
 	["lead_tin_phase_survey",7.0],["honing_qualified_parts",1.0],

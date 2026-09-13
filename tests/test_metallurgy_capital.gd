@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
-const ITEMS=["vacuum_melting_chambers", "fracture_loading_frames", "fracture_reference_stations", "slitting_measurement_sets", "calibrated_slitting_stations", "induction_shaft_stations", "section_indentation_sets", "foam_pattern_molding_sets", "casting_ventilation_sets", "alloy_phase_trial_sets", "surface_trace_comparators", "honing_head_sets", "superfinishing_head_sets", "metal_treatment_furnace", "reflected_metal_microscope", "metal_section_preparation_sets", "material_vacuum_pump_sets"]
+const ITEMS=["pattern_measurement_sets","vacuum_melting_chambers", "fracture_loading_frames", "fracture_reference_stations", "slitting_measurement_sets", "calibrated_slitting_stations", "induction_shaft_stations", "section_indentation_sets", "foam_pattern_molding_sets", "casting_ventilation_sets", "alloy_phase_trial_sets", "surface_trace_comparators", "honing_head_sets", "superfinishing_head_sets", "metal_treatment_furnace", "reflected_metal_microscope", "metal_section_preparation_sets", "material_vacuum_pump_sets"]
 func test_apparatus_fabrication_uses_daily_generator_and_paid_inputs()->void:
 	for item:String in ITEMS:
 		WorldSimulation.clear();WorldSimulation.create_actor("capital",1834)

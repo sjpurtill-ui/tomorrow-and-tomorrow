@@ -93,6 +93,9 @@ static func workshop_power_demand()->float:
 		if recipe.get("vacuum_trial",false) and job.has("vacuum_pending"):
 			if job.vacuum_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
 			continue
+		if recipe.get("pattern_trial",false) and job.has("pattern_pending"):
+			if job.pattern_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
 		if recipe.get("weld_trial",false) and job.has("weld_pending"):
 			if job.weld_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
 			continue

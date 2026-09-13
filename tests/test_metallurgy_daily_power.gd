@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
-const ITEMS=["normalizing_steel_sections","induction_hardened_shafts","investment_copper_brackets","lost_foam_copper_brackets","lead_tin_phase_survey","honing_qualified_parts","superfinishing_qualified_parts","residual_slitting_surveys","precracked_fracture_trials","welded_strap_qualification","vacuum_copper_casting"]
+const ITEMS=["expanded_casting_patterns","normalizing_steel_sections","induction_hardened_shafts","investment_copper_brackets","lost_foam_copper_brackets","lead_tin_phase_survey","honing_qualified_parts","superfinishing_qualified_parts","residual_slitting_surveys","precracked_fracture_trials","welded_strap_qualification","vacuum_copper_casting"]
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)

@@ -5,6 +5,7 @@ const Industry=preload("res://scripts/civilian_industry.gd")
 const Machine=preload("res://scripts/machine_workshop.gd")
 const Formed=preload("res://scripts/formed_workpiece.gd")
 const Vacuum=preload("res://scripts/vacuum_workshop.gd")
+const Pattern=preload("res://scripts/pattern_workshop.gd")
 const Weld=preload("res://scripts/weld_workshop.gd")
 const Fracture=preload("res://scripts/fracture_workshop.gd")
 const Slitting=preload("res://scripts/slitting_workshop.gd")
@@ -155,6 +156,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		Machine.clear(job)
 		Formed.clear(job)
 		Vacuum.clear(job)
+		Pattern.clear(job)
 		Weld.clear(job)
 		Fracture.clear(job)
 		Slitting.clear(job)
@@ -192,6 +194,8 @@ static func state(host: Node, job: Dictionary) -> String:
 	if inspection.get("vacuum_trial",false) and job.has("vacuum_pending"):
 		if job.vacuum_pending.site!=WorldSimulation.state.resource_settlement_id:return "Melt belongs to another store"
 		return "Working"
+	if inspection.get("pattern_trial",false) and job.has("pattern_pending"):
+		return "Working" if job.pattern_pending.site==WorldSimulation.state.resource_settlement_id else "Pattern belongs to another store"
 	if inspection.get("weld_trial",false) and job.has("weld_pending"):
 		if job.weld_pending.site!=WorldSimulation.state.resource_settlement_id:return "Joint belongs to another store"
 		return "Working"
@@ -262,6 +266,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	AlloyTrials.synchronize_idle(job,work if can_run else 0.0)
 	Metallurgy.synchronize_idle(job,work if can_run else 0.0)
 	Induction.synchronize_idle(job,work if can_run else 0.0)
+	Pattern.synchronize_idle(job,work if can_run else 0.0)
 	Weld.synchronize_idle(job,work if can_run else 0.0)
 	Vacuum.synchronize_idle(job,work if can_run else 0.0)
 	if not can_run or work<=0:
@@ -273,6 +278,9 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		return
 	if exposure_spec.get("vacuum_trial",false):
 		Vacuum.advance(job,exposure_spec,work)
+		return
+	if exposure_spec.get("pattern_trial",false):
+		Pattern.advance(job,exposure_spec,work)
 		return
 	if exposure_spec.get("weld_trial",false):
 		Weld.advance(job,exposure_spec,work)
@@ -407,6 +415,8 @@ static func validate_saved(payload: Dictionary) -> String:
 		if not formed_error.is_empty():return formed_error
 		var vacuum_error:=Vacuum.validate_job(job,Industry.product(String(job.item)))
 		if not vacuum_error.is_empty():return vacuum_error
+		var pattern_error:=Pattern.validate_job(job,Industry.product(String(job.item)))
+		if not pattern_error.is_empty():return pattern_error
 		var weld_error:=Weld.validate_job(job,Industry.product(String(job.item)))
 		if not weld_error.is_empty():return weld_error
 		var fracture_error:=Fracture.validate_job(job,Industry.product(String(job.item)))
