@@ -399,7 +399,9 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_contract": "Uses named chemical feeds, paid sample qualification, consumed materials and shared workshop work. Interior bonded wood is restricted to indoor equipment panels; adhesive is not interchangeable across substrates or exterior structural uses.",
     "production_items": [
-      "silver_oxidation_catalyst"
+      "silver_oxidation_catalyst",
+      "alumina_catalyst_support",
+      "ethene_oxidation_catalyst"
     ]
   },
   {
@@ -681,5 +683,42 @@ static func entries()->Array[Dictionary]:
       "enzyme_bated_hides"
     ],
     "production_contract": "Separate a finite rapidly decaying pancreatic fraction from actual hunted gland tissue, qualify its activity on hide samples, and spend specific protease in hide bating. Biological stocks lose activity daily; imported enzyme does not teach extraction."
+  },
+  {
+    "id": "ring_opening_polymerization",
+    "name": "Ring Opening Polymerization",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "industrial_catalyst_design"
+    ],
+    "requires_all": [
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [
+      [
+        "polymer_chain_models",
+        "experimental_controls"
+      ]
+    ],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Ring Opening Polymerization",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Convert suitable cyclic monomers into a qualified polymer through ring-opening reactions",
+    "effects": {},
+    "production_contract": "Consumes named cyclic oxide and glycol initiation feed through paid stirred-reactor and cooling capacity into a distinct PEG diol. No isocyanate, polyurethane or universal resin is granted.",
+    "production_items": [
+      "ring_opened_peg_diol"
+    ]
   }
 ]

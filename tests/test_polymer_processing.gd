@@ -288,3 +288,21 @@ func test_tissue_cap_and_activity_loss_stay_local_to_secondary_city()->void:
 			assert_float(float(s.resource_stockpiles["Bating Protease"])).is_equal(1.96))
 		assert_float(float(s.resource_stockpiles.get("Pancreatic Tissue",0))).is_equal(0.0)
 		assert_float(float(s.resource_stockpiles["Bating Protease"])).is_equal(10.0))
+func test_ring_opening_uses_typed_oxide_and_paid_cooling_without_radical_mastery()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		s.known_discoveries.erase("radical_chain_polymerization");s.discovery_adoption.erase("radical_chain_polymerization")
+		s.known_discoveries.append("calorimetry");s.discovery_adoption.calorimetry=1.0
+		for item:String in Ops.PLANTS.polymer_passive_cooling.cost:s.resource_stockpiles[item]=100.0
+		assert_bool(Ops.install("polymer_passive_cooling").get("ok",false)).is_true()
+		for day:int in range(1,14):s.elapsed_days=day;Ops.advance(day)
+		assert_float(Ops.service("polymer_heat_removal")).is_equal(.2)
+		Ops.data().services.polymer_stirred_work=1.0;Ops.data().services.electricity=10.0
+		for item:String in ["Ethylene Oxide","Ethylene Glycol","Caustic Soda","Sulfuric Acid"]:s.resource_stockpiles[item]=10.0
+		var job:=run_batch("ring_opened_peg_diol",1)
+		assert_float(float(job.progress_days)).is_equal(1.0)
+		assert_float(Ops.service("polymer_heat_removal")).is_equal(0.0)
+		assert_float(Ops.service("polymer_stirred_work")).is_equal(.8)
+		assert_float(float(s.resource_stockpiles["Ethylene Oxide"])).is_equal_approx(9.77,.000001)
+		assert_float(float(s.resource_stockpiles.get("PEG Diol",0))).is_equal(0.0)
+		assert_bool("radical_chain_polymerization" in s.known_discoveries).is_false())

@@ -5,6 +5,8 @@ const LIMIT:=1000
 const WaterDrive=preload("res://scripts/water_hammer_site.gd")
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"polymer_stirred_reactor":{"name": "Stirred polymer reactor", "gate": "pressure_vessels", "requires": ["precision_thermometry"], "cost": {"Polymer Stirred Reactors": 1, "Steel": 2}, "work": 18, "workers": 1, "inputs": {"Brazed Steel Fittings": 0.005}, "power": 2, "services": {"polymer_stirred_work": 1}},
+	"polymer_passive_cooling":{"name": "Low-throughput polymer cooling bath", "gate": "calorimetry", "requires": ["pressure_vessels"], "cost": {"Pressure Vessels": 1, "Refined Copper": 2, "Steel": 2}, "work": 12, "workers": 0.5, "inputs": {"Freshwater": 2}, "power": 0, "services": {"polymer_heat_removal": 0.2}},
 	"polymer_pressure_reactor":{"name": "High-pressure polymer reactor", "gate": "radical_chain_polymerization", "requires": ["pressure_vessels", "precision_thermometry"], "cost": {"Polymer Pressure Reactors": 1, "Steel": 4}, "work": 30, "workers": 2, "inputs": {"Brazed Steel Fittings": 0.01}, "power": 4, "services": {"polymer_reactor_work": 1}},
 	"polymer_cooling_circuit":{"name": "Polymer heat-removal circuit", "gate": "polymer_reaction_heat_management", "requires": ["electric_motors"], "cost": {"Polymer Cooling Circuits": 1, "Steel": 2}, "work": 15, "workers": 0.5, "inputs": {"Freshwater": 4, "Pressure Pipe Fittings": 0.005}, "power": 2, "services": {"polymer_heat_removal": 2}},
 	"water_hammer":{"name":"River-driven forge hammer","gate":"water_powered_hammers","requires":[],"cost":{"Water Hammer Drives":1.0,"Stone":8.0},"work":24.0,"workers":1.0,"inputs":{"Rope Coils":0.005},"power":0.0,"services":{"hammer_work":4.0}},
