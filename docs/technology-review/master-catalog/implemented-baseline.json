@@ -1,5 +1,5 @@
 {
-  "source_commit": "d912f933562439b97dd53de690d06952bdef575a",
+  "source_commit": "446e926489b55599bee99c5122473cd96519298d",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -17207,6 +17207,199 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "textile_waterproofing",
+      "name": "Textile Waterproofing",
+      "foundations": "plain_weaving,adhesive_bond_design",
+      "mechanism": "Apply or integrate a qualified water-resistant barrier with a textile",
+      "operating_requirement": "Compatible materials, preparation and durability tests",
+      "consequence": "Limit selected water entry while comfort, seams and aging remain constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Textile Waterproofing: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_waterproofing",
+        "local_demonstration": "Apply or integrate a qualified water-resistant barrier with a textile",
+        "operating_requirements": "Compatible materials, preparation and durability tests",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "446e926489b55599bee99c5122473cd96519298d",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "plain_weaving",
+          "adhesive_bond_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "textile_waterproofing",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_waterproofing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile Waterproofing",
+            "missing_all": [
+              "plain_weaving",
+              "adhesive_bond_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "plain_weaving",
+              "adhesive_bond_design"
+            ],
+            "requires_all": [
+              "plain_weaving",
+              "adhesive_bond_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile Waterproofing",
+        "observation": "Coat a compatible woven backing, assemble a rain shell and pay for three dated wet-flex checks before relying on its limited water barrier.",
+        "production_contract": "A selected polyethylene-coated woven shell consumes actual coating stock, machinery, power and shared Logistics work. Three paid observed wet-flex cycles qualify the actual garment lot; missing water or work cannot advance them. The non-breathable shell has modest insulation and limited storm protection, with unsealed needle holes remaining a separate weakness. Wear and washing remove qualification; compatible paid repairs and retesting are needed. No chemical, pathogen, immersion or universal waterproof rating is granted.",
+        "production_items": [
+          "textile_coating_machine",
+          "textile_coating_grade",
+          "polyethylene_coated_textile",
+          "stitched_rain_shell_panels"
+        ],
+        "requires": [
+          "plain_weaving",
+          "adhesive_bond_design"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "garment_seam_sealing",
+      "name": "Garment Seam Sealing",
+      "field": "D07",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "textile_waterproofing,sewing_machine_mechanisms",
+      "mechanism": "Bond a compatible sealing tape across a stitched seam to cover needle penetrations and connected leakage paths.",
+      "operating_requirement": "Pay actual seamed textile, compatible tape, controlled heat/pressure work and leak tests; retain skipped adhesion, heat damage, washing effects and repair demand.",
+      "consequence": "Supply a tested sealed seam for a specified protective outer garment; a waterproof fabric alone does not establish seam integrity or total garment sealing.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable garment seam sealing instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "garment_seam_sealing",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Bond a compatible sealing tape across a stitched seam to cover needle penetrations and connected leakage paths.",
+        "operating_requirements": "Pay actual seamed textile, compatible tape, controlled heat/pressure work and leak tests; retain skipped adhesion, heat damage, washing effects and repair demand.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local garment seam sealing trials.",
+          "partnership": "Share actual samples and operator time for garment seam sealing; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded garment seam sealing process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external garment seam sealing processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable garment seam sealing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.pfaff-industrial.com/en/portfolio/welding-machines/hot-air-tape-welding-machine/8333_e_new"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "446e926489b55599bee99c5122473cd96519298d",
+        "editorial_source": "textile-assembly-depth.json",
+        "previous_requires_all": [
+          "textile_waterproofing",
+          "sewing_machine_mechanisms"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "garment_seam_sealing",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "garment_seam_sealing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Garment Seam Sealing",
+            "missing_all": [
+              "textile_waterproofing",
+              "sewing_machine_mechanisms"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "textile_waterproofing",
+              "sewing_machine_mechanisms"
+            ],
+            "requires_all": [
+              "textile_waterproofing",
+              "sewing_machine_mechanisms"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Garment Seam Sealing",
+        "observation": "Bond compatible tape across the stitched seams of a qualified coated shell with controlled heat and pressure, then complete three paid dated leak checks.",
+        "production_contract": "Only an actual qualified coated rain-shell lot can receive compatible sealing tape. Paid equipment, electricity and Logistics work control the selected heat/pressure profile; insufficient adhesion fails and excess heat damages the shell. Three later paid wet-flex observations qualify those seams. Washing, wear and repair invalidate qualification. Seam sealing reduces a bounded rain-exposure loss, never establishes total garment sealing or chemical protection. Ordinary cloth and loose tape receive no benefit.",
+        "production_items": [
+          "textile_heat_sealing_tools",
+          "compatible_polyethylene_seam_tape"
+        ],
+        "requires": [
+          "textile_waterproofing",
+          "sewing_machine_mechanisms"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {

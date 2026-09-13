@@ -1769,37 +1769,6 @@
   },
   {
     "field": "D07",
-    "id": "textile_waterproofing",
-    "name": "Textile Waterproofing",
-    "foundations": "plain_weaving,adhesive_bond_design",
-    "mechanism": "Apply or integrate a qualified water-resistant barrier with a textile",
-    "operating_requirement": "Compatible materials, preparation and durability tests",
-    "consequence": "Limit selected water entry while comfort, seams and aging remain constraints",
-    "status": "authored_draft",
-    "requires_all": [
-      "plain_weaving",
-      "adhesive_bond_design"
-    ],
-    "requires_any": [],
-    "recovery": "For Textile Waterproofing: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "textile_waterproofing",
-      "local_demonstration": "Apply or integrate a qualified water-resistant barrier with a textile",
-      "operating_requirements": "Compatible materials, preparation and durability tests",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
     "id": "flame_resistant_textiles",
     "name": "Flame-Resistant Textiles",
     "foundations": "polymer_chain_models,experimental_controls",

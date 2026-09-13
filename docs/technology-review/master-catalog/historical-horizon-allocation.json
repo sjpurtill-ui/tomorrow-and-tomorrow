@@ -13029,8 +13029,8 @@
       "id": "garment_seam_sealing",
       "name": "Garment Seam Sealing",
       "horizon": "H05",
-      "source_file": "textile-assembly-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "f76ce32d89d027e2c40b39807b6be9cabb454e8c3edca9ca86af279163cdb1d1"

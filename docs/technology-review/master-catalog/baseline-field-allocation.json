@@ -5870,6 +5870,20 @@
       "source_domain": "nutrition",
       "name": "Plant Resistance Trait Trials",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_waterproofing",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile Waterproofing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "garment_seam_sealing",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Garment Seam Sealing",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

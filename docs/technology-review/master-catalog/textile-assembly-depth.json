@@ -108,42 +108,6 @@
     "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
   },
   {
-    "id": "garment_seam_sealing",
-    "name": "Garment Seam Sealing",
-    "field": "D07",
-    "status": "authored_draft",
-    "requires_all": [
-      "textile_waterproofing",
-      "sewing_machine_mechanisms"
-    ],
-    "requires_any": [],
-    "foundations": "textile_waterproofing,sewing_machine_mechanisms",
-    "mechanism": "Bond a compatible sealing tape across a stitched seam to cover needle penetrations and connected leakage paths.",
-    "operating_requirement": "Pay actual seamed textile, compatible tape, controlled heat/pressure work and leak tests; retain skipped adhesion, heat damage, washing effects and repair demand.",
-    "consequence": "Supply a tested sealed seam for a specified protective outer garment; a waterproof fabric alone does not establish seam integrity or total garment sealing.",
-    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
-    "recovery": "Acquire attributable garment seam sealing instruction or working samples, then pay for local setup and acceptance trials.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "garment_seam_sealing",
-      "grants_instant_mastery": false,
-      "local_demonstration": "Bond a compatible sealing tape across a stitched seam to cover needle penetrations and connected leakage paths.",
-      "operating_requirements": "Pay actual seamed textile, compatible tape, controlled heat/pressure work and leak tests; retain skipped adhesion, heat damage, washing effects and repair demand.",
-      "route_terms": {
-        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local garment seam sealing trials.",
-        "partnership": "Share actual samples and operator time for garment seam sealing; independently inspect the partner output.",
-        "purchased_research": "Fund a bounded garment seam sealing process trial with recorded materials, failures and output checks.",
-        "licensed_or_imported_service": "Pay for finite external garment seam sealing processing; delivered material does not grant local manufacture.",
-        "reverse_engineering": "Inspect an attributable garment seam sealing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
-      }
-    },
-    "evidence_sources": [
-      "https://www.pfaff-industrial.com/en/portfolio/welding-machines/hot-air-tape-welding-machine/8333_e_new"
-    ],
-    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
-    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
-  },
-  {
     "id": "leather_surface_finishing",
     "name": "Leather Surface Finishing",
     "field": "D07",
