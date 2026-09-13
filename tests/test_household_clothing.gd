@@ -18,7 +18,7 @@ func equip(id:String)->void:
 func report()->Dictionary:return {"workers":0.0,"inputs":{},"methods":{},"discarded":0.0}
 func test_sixteen_methods_have_real_inputs_and_graph_contracts()->void:
 	WorldSimulation.scoped("clothes",func()->void:
-		assert_int(K.entries().size()).is_equal(16)
+		assert_int(K.entries().size()).is_equal(18)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 		var outputs:Array=WorldSimulation.resources.catalog.keys();outputs.append(C.BONE_RESOURCE)
 		for product:Dictionary in preload("res://scripts/civilian_industry.gd").PRODUCTS.values():outputs.append(product.output)
