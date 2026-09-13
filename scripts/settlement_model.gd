@@ -336,7 +336,11 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if not String(city.get("occupied_by","")).is_empty():continue
 		water_targets[String(city.id)]=with_city_resources(String(city.id),func()->Dictionary:
-			return with_local_population(func()->Dictionary:return preload("res://scripts/water_conveyance_investment.gd").targets(conduit_supply)))
+			return with_local_population(func()->Dictionary:
+				var needs:=preload("res://scripts/water_conveyance_investment.gd").targets(conduit_supply)
+				var dock_needs:=preload("res://scripts/naval_dock_investment.gd").targets()
+				for item:String in dock_needs:needs[item]=float(needs.get(item,0))+float(dock_needs[item])
+				return needs))
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
 		if not String(source.get("occupied_by","")).is_empty():continue
