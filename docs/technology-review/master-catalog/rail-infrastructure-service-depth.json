@@ -1,0 +1,851 @@
+[
+  {
+    "id": "rail_fastening_load_transfer",
+    "name": "Rail Fastening Load Transfer",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_track_foundations",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "rail_track_foundations, structural_load_testing",
+    "mechanism": "Qualify rail restraint through sleepers and fasteners.",
+    "operating_requirement": "Compatible fittings, load trials and renewal stock.",
+    "consequence": "Poor restraint reduces usable axle load; replacements consume fittings and closures.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_fastening_load_transfer",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Qualify rail restraint through sleepers and fasteners.",
+      "operating_requirements": "Compatible fittings, load trials and renewal stock.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail fastening load transfer locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail fastening load transfer trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail fastening load transfer question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail fastening load transfer service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail fastening load transfer sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2022-05/FTA-Report-No-0215.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "ballast_tamping",
+    "name": "Ballast Tamping",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_track_foundations",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "foundations": "rail_track_foundations, standard_measures",
+    "mechanism": "Restore track support by packing ballast beneath sleepers.",
+    "operating_requirement": "Ballast, tamping tools and protected work time.",
+    "consequence": "Corrects settlement at labor cost; mechanized equipment raises throughput without granting new ballast.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ballast_tamping",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Restore track support by packing ballast beneath sleepers.",
+      "operating_requirements": "Ballast, tamping tools and protected work time.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise ballast tamping locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint ballast tamping trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded ballast tamping question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible ballast tamping service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired ballast tamping sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2022-05/FTA-Report-No-0215.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "ballast_fines_removal",
+    "name": "Ballast Fines Removal",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_track_foundations",
+      "drainage"
+    ],
+    "requires_any": [],
+    "foundations": "rail_track_foundations, drainage",
+    "mechanism": "Remove fouling particles from the ballast bed.",
+    "operating_requirement": "Excavation, sorting, replacement aggregate and access.",
+    "consequence": "Restores drainage; dirty ballast disposal and traffic interruption remain costs.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ballast_fines_removal",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Remove fouling particles from the ballast bed.",
+      "operating_requirements": "Excavation, sorting, replacement aggregate and access.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise ballast fines removal locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint ballast fines removal trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded ballast fines removal question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible ballast fines removal service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired ballast fines removal sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2022-05/FTA-Report-No-0215.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_profile_restoration",
+    "name": "Rail Profile Restoration",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_gauge_standards",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "foundations": "rail_gauge_standards, standard_measures",
+    "mechanism": "Remove worn surface material to recover a qualified rail profile.",
+    "operating_requirement": "Grinding tools, templates and remaining rail thickness.",
+    "consequence": "Extends service within wear limits; each treatment consumes rail material and work.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_profile_restoration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Remove worn surface material to recover a qualified rail profile.",
+      "operating_requirements": "Grinding tools, templates and remaining rail thickness.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail profile restoration locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail profile restoration trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail profile restoration question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail profile restoration service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail profile restoration sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2022-05/FTA-Report-No-0215.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_thermal_stress_management",
+    "name": "Rail Thermal Stress Management",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_track_foundations",
+      "stress_strain_relations",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "rail_track_foundations, stress_strain_relations, precision_thermometry",
+    "mechanism": "Manage restrained rail expansion relative to installation and maintenance conditions.",
+    "operating_requirement": "Temperature records, restrained track, qualified release and fastening work.",
+    "consequence": "Supports long welded rail service; disturbed restraint can require speed restrictions and requalification.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_thermal_stress_management",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Manage restrained rail expansion relative to installation and maintenance conditions.",
+      "operating_requirements": "Temperature records, restrained track, qualified release and fastening work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail thermal stress management locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail thermal stress management trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail thermal stress management question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail thermal stress management service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail thermal stress management sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://railroads.fra.dot.gov/safety-data/forms-guides-publications/continuous-welded-rail"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_internal_flaw_inspection",
+    "name": "Rail Internal Flaw Inspection",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_track_foundations",
+      "nondestructive_inspection_qualification"
+    ],
+    "requires_any": [
+      [
+        "ultrasonic_flaw_mapping",
+        "electromagnetic_induction"
+      ]
+    ],
+    "foundations": "rail_track_foundations, nondestructive_inspection_qualification",
+    "mechanism": "Locate internal rail defects with qualified acoustic or magnetic inspection.",
+    "operating_requirement": "Calibrated inspection equipment, coverage records and access.",
+    "consequence": "Findings target repairs; unexamined orientations remain uncertain and inspection does not repair cracks.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_internal_flaw_inspection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Locate internal rail defects with qualified acoustic or magnetic inspection.",
+      "operating_requirements": "Calibrated inspection equipment, coverage records and access.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail internal flaw inspection locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail internal flaw inspection trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail internal flaw inspection question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail internal flaw inspection service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail internal flaw inspection sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2022-05/FTA-Report-No-0215.pdf"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_geometry_recording",
+    "name": "Rail Geometry Recording",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_gauge_standards",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "rail_gauge_standards, measurement_uncertainty",
+    "mechanism": "Record route-located gauge, level and alignment measurements.",
+    "operating_requirement": "Reference gauges, position records and repeat surveys.",
+    "consequence": "Enables targeted maintenance and restrictions; missing surveys cannot prove track condition.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_geometry_recording",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Record route-located gauge, level and alignment measurements.",
+      "operating_requirements": "Reference gauges, position records and repeat surveys.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail geometry recording locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail geometry recording trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail geometry recording question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail geometry recording service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail geometry recording sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://railroads.dot.gov/program-areas/track-and-structures/inspection-techniques"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "wheel_rail_profile_qualification",
+    "name": "Wheel Rail Profile Qualification",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_gauge_standards",
+      "friction_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "rail_gauge_standards, friction_measurement",
+    "mechanism": "Evaluate the contact behavior of paired wheel and rail shapes.",
+    "operating_requirement": "Measured profiles, representative loading and running trials.",
+    "consequence": "Qualifies compatible rolling stock; changed wear or profiles require renewed trials rather than a universal speed bonus.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wheel_rail_profile_qualification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Evaluate the contact behavior of paired wheel and rail shapes.",
+      "operating_requirements": "Measured profiles, representative loading and running trials.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise wheel rail profile qualification locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint wheel rail profile qualification trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded wheel rail profile qualification question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible wheel rail profile qualification service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired wheel rail profile qualification sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://railroads.dot.gov/elibrary/survey-wheelrail-friction"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "wheel_rail_friction_management",
+    "name": "Wheel Rail Friction Management",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "friction_measurement",
+      "rail_vehicle_braking"
+    ],
+    "requires_any": [],
+    "foundations": "friction_measurement, rail_vehicle_braking",
+    "mechanism": "Manage friction at distinct wheel and rail contact surfaces.",
+    "operating_requirement": "Condition observations, controlled applicators and consumables.",
+    "consequence": "Balances traction, braking and wear; indiscriminate lubrication can reduce adhesion and force slower service.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wheel_rail_friction_management",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Manage friction at distinct wheel and rail contact surfaces.",
+      "operating_requirements": "Condition observations, controlled applicators and consumables.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise wheel rail friction management locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint wheel rail friction management trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded wheel rail friction management question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible wheel rail friction management service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired wheel rail friction management sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://railroads.dot.gov/elibrary/survey-wheelrail-friction"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "wayside_bearing_heat_detection",
+    "name": "Wayside Bearing Heat Detection",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "precision_thermometry",
+      "rail_timetable_coordination"
+    ],
+    "requires_any": [],
+    "foundations": "precision_thermometry, rail_timetable_coordination",
+    "mechanism": "Associate measured bearing heat with passing vehicles.",
+    "operating_requirement": "Calibrated detectors, vehicle identification and response crews.",
+    "consequence": "Triggers inspection or withdrawal of suspect stock; detection gaps and false alarms constrain service.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wayside_bearing_heat_detection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Associate measured bearing heat with passing vehicles.",
+      "operating_requirements": "Calibrated detectors, vehicle identification and response crews.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise wayside bearing heat detection locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint wayside bearing heat detection trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded wayside bearing heat detection question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible wayside bearing heat detection service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired wayside bearing heat detection sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://railroads.dot.gov/elibrary/implementation-guide-wayside-detector-systems"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "wheel_impact_load_monitoring",
+    "name": "Wheel Impact Load Monitoring",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "piezoresistive_strain_sensing",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "piezoresistive_strain_sensing, structural_load_testing",
+    "mechanism": "Measure localized wheel impacts during train passage.",
+    "operating_requirement": "Instrumented track, calibration and vehicle-linked records.",
+    "consequence": "Identifies stock needing examination; detection consumes maintenance capacity and does not identify every defect cause.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wheel_impact_load_monitoring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure localized wheel impacts during train passage.",
+      "operating_requirements": "Instrumented track, calibration and vehicle-linked records.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise wheel impact load monitoring locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint wheel impact load monitoring trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded wheel impact load monitoring question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible wheel impact load monitoring service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired wheel impact load monitoring sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://railroads.dot.gov/elibrary/implementation-guide-wayside-detector-systems"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_track_circuit_detection",
+    "name": "Rail Track Circuit Detection",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_block_signaling",
+      "electromagnetic_relays"
+    ],
+    "requires_any": [],
+    "foundations": "railway_block_signaling, electromagnetic_relays",
+    "mechanism": "Use rail-circuit electrical response to establish section occupancy.",
+    "operating_requirement": "Bonding, insulation, power and qualified vehicle shunting.",
+    "consequence": "Supports automatic block information; uncertain detection holds permission and requires slower supervised working.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_track_circuit_detection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use rail-circuit electrical response to establish section occupancy.",
+      "operating_requirements": "Bonding, insulation, power and qualified vehicle shunting.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail track circuit detection locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail track circuit detection trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail track circuit detection question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail track circuit detection service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail track circuit detection sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.networkrail.co.uk/stories/track-circuits-explained/"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_axle_count_detection",
+    "name": "Rail Axle Count Detection",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_block_signaling",
+      "electromagnetic_induction",
+      "relay_logic"
+    ],
+    "requires_any": [],
+    "foundations": "railway_block_signaling, electromagnetic_induction, relay_logic",
+    "mechanism": "Reconcile axles entering and leaving a bounded track section.",
+    "operating_requirement": "Detection heads, counters and protected reset procedures.",
+    "consequence": "Offers occupancy detection without rail shunting; a count mismatch withholds clearance until checked.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_axle_count_detection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Reconcile axles entering and leaving a bounded track section.",
+      "operating_requirements": "Detection heads, counters and protected reset procedures.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail axle count detection locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail axle count detection trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail axle count detection question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail axle count detection service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail axle count detection sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.networkrail.co.uk/wp-content/uploads/2016/12/2027-Network-Statement.pdf"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "turnout_position_proving",
+    "name": "Turnout Position Proving",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_turnouts",
+      "railway_interlocking"
+    ],
+    "requires_any": [],
+    "foundations": "railway_turnouts, railway_interlocking",
+    "mechanism": "Verify switch closure and locking before releasing a route.",
+    "operating_requirement": "Position detection, locks and correspondence tests.",
+    "consequence": "Unproved points block route permission; cleaning, adjustment and rechecking consume maintenance time.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "turnout_position_proving",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Verify switch closure and locking before releasing a route.",
+      "operating_requirements": "Position detection, locks and correspondence tests.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise turnout position proving locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint turnout position proving trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded turnout position proving question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible turnout position proving service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired turnout position proving sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.networkrail.co.uk/rail-travel/delays-explained/signals-and-points-failure/"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "overhead_contact_tensioning",
+    "name": "Overhead Contact Tensioning",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_electric_traction",
+      "stress_strain_relations"
+    ],
+    "requires_any": [],
+    "foundations": "railway_electric_traction, stress_strain_relations",
+    "mechanism": "Maintain overhead wire geometry through tensioned supports.",
+    "operating_requirement": "Conductors, anchors, insulators and inspection access.",
+    "consequence": "Enables reliable collection within a qualified envelope; worn wire requires paid renewal.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "overhead_contact_tensioning",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Maintain overhead wire geometry through tensioned supports.",
+      "operating_requirements": "Conductors, anchors, insulators and inspection access.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise overhead contact tensioning locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint overhead contact tensioning trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded overhead contact tensioning question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible overhead contact tensioning service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired overhead contact tensioning sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2020-09/TAM-Systems-Handbook.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "pantograph_contact_qualification",
+    "name": "Pantograph Contact Qualification",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "overhead_contact_tensioning",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "overhead_contact_tensioning, measurement_uncertainty",
+    "mechanism": "Qualify moving collector contact against the installed wire.",
+    "operating_requirement": "Instrumented runs and replaceable contact strips.",
+    "consequence": "Limits arcing and interruptions within tested speeds; worn components reduce availability.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pantograph_contact_qualification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Qualify moving collector contact against the installed wire.",
+      "operating_requirements": "Instrumented runs and replaceable contact strips.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise pantograph contact qualification locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint pantograph contact qualification trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded pantograph contact qualification question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible pantograph contact qualification service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired pantograph contact qualification sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2020-09/TAM-Systems-Handbook.pdf"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "traction_substation_conversion",
+    "name": "Traction Substation Conversion",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_electric_traction",
+      "electromagnetic_induction"
+    ],
+    "requires_any": [],
+    "foundations": "railway_electric_traction, electromagnetic_induction",
+    "mechanism": "Convert supplied electricity to the traction system requirements.",
+    "operating_requirement": "Compatible conversion equipment, cooling and protection.",
+    "consequence": "Provides bounded traction power; faults or undersized capacity restrict departures.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "traction_substation_conversion",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Convert supplied electricity to the traction system requirements.",
+      "operating_requirements": "Compatible conversion equipment, cooling and protection.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise traction substation conversion locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint traction substation conversion trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded traction substation conversion question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible traction substation conversion service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired traction substation conversion sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2020-09/TAM-Systems-Handbook.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_return_current_control",
+    "name": "Rail Return Current Control",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_electric_traction",
+      "cable_insulation"
+    ],
+    "requires_any": [],
+    "foundations": "railway_electric_traction, cable_insulation",
+    "mechanism": "Provide monitored traction-current return paths.",
+    "operating_requirement": "Bonds, return conductors and insulation checks.",
+    "consequence": "Reduces uncontrolled current paths; damaged bonds require repairs and can interrupt electric service.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_return_current_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Provide monitored traction-current return paths.",
+      "operating_requirements": "Bonds, return conductors and insulation checks.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail return current control locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail return current control trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail return current control question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail return current control service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail return current control sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.transit.dot.gov/sites/fta.dot.gov/files/2020-09/TAM-Systems-Handbook.pdf"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "regenerative_rail_energy_reception",
+    "name": "Regenerative Rail Energy Reception",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_electric_traction",
+      "continuous_train_brakes",
+      "electromagnetic_induction"
+    ],
+    "requires_any": [],
+    "foundations": "railway_electric_traction, continuous_train_brakes, electromagnetic_induction",
+    "mechanism": "Accept braking energy through qualified storage or a receptive electrical network.",
+    "operating_requirement": "Compatible traction control and an available energy sink.",
+    "consequence": "Reduces net energy demand when reception exists; saturation requires other braking and prevents imaginary energy credit.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "regenerative_rail_energy_reception",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Accept braking energy through qualified storage or a receptive electrical network.",
+      "operating_requirements": "Compatible traction control and an available energy sink.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise regenerative rail energy reception locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint regenerative rail energy reception trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded regenerative rail energy reception question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible regenerative rail energy reception service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired regenerative rail energy reception sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://arxiv.org/abs/1808.05938"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_vehicle_clearance_assessment",
+    "name": "Rail Vehicle Clearance Assessment",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_gauge_standards",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "foundations": "rail_gauge_standards, standard_measures",
+    "mechanism": "Compare the moving vehicle envelope with route structures.",
+    "operating_requirement": "Vehicle dimensions, route surveys and movement allowances.",
+    "consequence": "Permits compatible loads; oversized cargo needs another route or paid infrastructure changes.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_vehicle_clearance_assessment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compare the moving vehicle envelope with route structures.",
+      "operating_requirements": "Vehicle dimensions, route surveys and movement allowances.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail vehicle clearance assessment locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail vehicle clearance assessment trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail vehicle clearance assessment question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail vehicle clearance assessment service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail vehicle clearance assessment sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.networkrail.co.uk/wp-content/uploads/2016/12/2027-Network-Statement.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_route_axle_load_qualification",
+    "name": "Rail Route Axle Load Qualification",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_track_foundations",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "rail_track_foundations, structural_load_testing",
+    "mechanism": "Assess axle and distributed loads against route structures.",
+    "operating_requirement": "Vehicle weights, bridge records and load evidence.",
+    "consequence": "Bounds train loading by the weakest qualified section; stronger locomotives cannot erase bridge limits.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_route_axle_load_qualification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Assess axle and distributed loads against route structures.",
+      "operating_requirements": "Vehicle weights, bridge records and load evidence.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail route axle load qualification locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail route axle load qualification trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail route axle load qualification question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail route axle load qualification service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail route axle load qualification sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.networkrail.co.uk/wp-content/uploads/2016/12/2027-Network-Statement.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "platform_train_gap_assessment",
+    "name": "Platform Train Gap Assessment",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "rail_vehicle_clearance_assessment",
+      "accessible_transport_design"
+    ],
+    "requires_any": [],
+    "foundations": "rail_vehicle_clearance_assessment, accessible_transport_design",
+    "mechanism": "Assess stepping gaps for specific platform and vehicle combinations.",
+    "operating_requirement": "Surveyed interfaces and boarding trials.",
+    "consequence": "Targets assistance or modifications; boarding capacity remains limited where interfaces are incompatible.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "platform_train_gap_assessment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Assess stepping gaps for specific platform and vehicle combinations.",
+      "operating_requirements": "Surveyed interfaces and boarding trials.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise platform train gap assessment locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint platform train gap assessment trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded platform train gap assessment question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible platform train gap assessment service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired platform train gap assessment sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.networkrail.co.uk/wp-content/uploads/2016/12/2027-Network-Statement.pdf"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "train_braking_curve_supervision",
+    "name": "Train Braking Curve Supervision",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "continuous_train_brakes",
+      "electronic_machine_control",
+      "railway_block_signaling"
+    ],
+    "requires_any": [],
+    "foundations": "continuous_train_brakes, electronic_machine_control, railway_block_signaling",
+    "mechanism": "Supervise speed and position against a qualified stopping envelope.",
+    "operating_requirement": "Brake evidence, localization, movement authority and working actuators.",
+    "consequence": "Intervenes before authority limits; uncertain localization or degraded brakes require a more restrictive operating envelope.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "train_braking_curve_supervision",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Supervise speed and position against a qualified stopping envelope.",
+      "operating_requirements": "Brake evidence, localization, movement authority and working actuators.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise train braking curve supervision locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint train braking curve supervision trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded train braking curve supervision question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible train braking curve supervision service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired train braking curve supervision sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.era.europa.eu/mt/node/1831"
+    ],
+    "historical_scope": "H05 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  },
+  {
+    "id": "rail_worksite_possession_control",
+    "name": "Rail Worksite Possession Control",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "railway_block_signaling",
+      "agreed_signal_codes"
+    ],
+    "requires_any": [],
+    "foundations": "railway_block_signaling, agreed_signal_codes",
+    "mechanism": "Reserve track access for protected maintenance and verified handback.",
+    "operating_requirement": "Accountable dispatcher, work limits and crew communications.",
+    "consequence": "Allows work without conflicting train permissions; possessions reduce service capacity until the route is returned.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. These are proposed learning dependencies, not date or civilization gates. Compatible finished equipment may be imported without its manufacturing discovery.",
+    "recovery": "A reachable specialist or supplier can provide delayed evidence, equipment or service for payment, trade or shared trials. Local qualification remains required; scarce external capacity is a disadvantage.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rail_worksite_possession_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Reserve track access for protected maintenance and verified handback.",
+      "operating_requirements": "Accountable dispatcher, work limits and crew communications.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel and specialist time to supervise rail worksite possession control locally; the home service waits while expertise and access are unavailable.",
+        "partnership": "Contribute route access, vehicle time or measurements to joint rail worksite possession control trials; negotiate shared results and wait for partner capacity.",
+        "purchased_research": "Commission a bounded rail worksite possession control question; delivery has cost, delay and possible failure, followed by local acceptance.",
+        "licensed_or_imported_service": "Buy a compatible rail worksite possession control service or equipment package; pay recurring supplier costs and maintain local staff and infrastructure. No manufacture or automatic mastery is granted.",
+        "reverse_engineering": "Analyze an acquired rail worksite possession control sample or record with paid testing; inaccessible tolerances and operating evidence must still be established."
+      }
+    },
+    "evidence_sources": [
+      "https://www.networkrail.co.uk/our-work/looking-after-the-railway/track/"
+    ],
+    "historical_scope": "H04 is an editorial capability horizon, not an unlock date. Sources establish mechanisms; dependencies, recovery terms and consequences are proposed game design."
+  }
+]
