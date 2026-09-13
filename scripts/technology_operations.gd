@@ -221,6 +221,7 @@ static func valid(value:Variant)->bool:
 	if not value is Dictionary or not value.has_all(["last_day","plants","services","workers","inputs"]):return false
 	if value.has("sec_column") and not preload("res://scripts/sec_acquisition.gd").valid_column(value.sec_column):return false
 	if value.has("nmr_calibration") and not preload("res://scripts/nmr_calibration.gd").valid(value.nmr_calibration):return false
+	if value.has("abrasive_lots") and not preload("res://scripts/abrasive_inspection.gd").valid(value.abrasive_lots):return false
 	if value.has("polymer_samples") and not preload("res://scripts/polymer_samples.gd").valid(value.polymer_samples):return false
 	if not value.plants is Dictionary or value.plants.size()>PLANTS.size():return false
 	for field:String in ["last_day","workers"]:

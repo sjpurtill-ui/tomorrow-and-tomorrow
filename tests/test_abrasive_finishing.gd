@@ -36,6 +36,10 @@ func provision(item:String)->Dictionary:
 		for r:String in spec[field]:WorldSimulation.state.resource_stockpiles[r]=100.0
 	WorldSimulation.state.resource_stockpiles[spec.output]=0.0
 	Ops.data().last_day=int(WorldSimulation.state.elapsed_days);Ops.data().services={"electricity":1000.0}
+	if spec.has("abrasive_inspection"):
+		for candidate:String in ITEMS:
+			if I.product(candidate).get("output")==spec.abrasive_inspection:
+				preload("res://scripts/abrasive_inspection.gd").record({"item":candidate,"id":100,"completed":20},20)
 	return start(item,1)
 func start(item:String,target:int)->Dictionary:
 	var result:=WorldSimulation.military.start_production_line(item,target)
@@ -67,7 +71,10 @@ func test_all_recipes_pay_work_material_and_power_across_partial_save()->void:
 			var saved:Dictionary=bytes_to_var(var_to_bytes(job))
 			assert_str(P.validate_saved({"equipment_queue":[saved]})).is_empty()
 			P.advance(WorldSimulation.military,saved,float(spec.days)/2)
-			assert_float(float(WorldSimulation.state.resource_stockpiles[spec.output])).is_equal(1.0)
+			assert_int(int(saved.completed)).is_equal(1)
+			if spec.has("abrasive_inspection"):
+				assert_bool(saved.has("abrasive_last")).is_true()
+			else:assert_float(float(WorldSimulation.state.resource_stockpiles[spec.output])).is_equal(1.0)
 			for r:String in spec.materials:assert_float(float(before[r])-float(WorldSimulation.state.resource_stockpiles[r])).is_equal_approx(float(spec.materials[r]),.000001)
 			assert_float(power-Ops.service("electricity")).is_equal_approx(float(spec.get("power",0)),.000001)
 			WorldSimulation.military.cancel_equipment_job(int(job.id)))
@@ -109,3 +116,104 @@ func test_paid_abrasive_chain_reaches_motor_without_granted_intermediates()->voi
 		assert_float(float(state.resource_stockpiles["20 mm Interchangeable Bearing Assemblies"])).is_equal(0.0)
 		assert_float(float(state.resource_stockpiles["Ground Motor Mount Plates"])).is_equal(1.0)
 		assert_float(float(state.resource_stockpiles["Deburred Motor Housings"])).is_equal(1.0))
+func test_traceable_batch_has_stable_acceptance_and_paid_rejected_output()->void:
+	WorldSimulation.scoped("abrasive",func()->void:
+		var raw:=provision("fired_abrasive_wheels")
+		raw.target_stock=20;P.advance(WorldSimulation.military,raw,100)
+		WorldSimulation.military.cancel_equipment_job(int(raw.id))
+		var spec:=I.product("checked_abrasive_wheels");learn(spec.gate)
+		for r:String in spec.tooling:WorldSimulation.state.resource_stockpiles[r]=100.0
+		WorldSimulation.state.resource_stockpiles["Fired Abrasive Wheels"]=20.0
+		WorldSimulation.state.resource_stockpiles["Checked Abrasive Wheels"]=0.0
+		WorldSimulation.state.resource_stockpiles["Rejected Abrasive Wheels"]=0.0
+		var job:=start("checked_abrasive_wheels",20)
+		P.advance(WorldSimulation.military,job,60)
+		assert_int(int(job.completed)).is_equal(20)
+		var state=WorldSimulation.state
+		assert_float(float(state.resource_stockpiles["Checked Abrasive Wheels"])+float(state.resource_stockpiles["Rejected Abrasive Wheels"])).is_equal(20.0)
+		assert_float(float(state.resource_stockpiles["Rejected Abrasive Wheels"])).is_greater(0.0)
+		assert_float(float(state.resource_stockpiles["Fired Abrasive Wheels"])).is_equal(0.0)
+		assert_str(P.validate_saved({"equipment_queue":[job]})).is_empty()
+		var forged:Dictionary=job.duplicate(true);forged.abrasive_last.report.surface_ratio=0.0
+		assert_str(P.validate_saved({"equipment_queue":[forged]})).is_not_empty())
+func test_legacy_candidate_stock_cannot_gain_free_provenance()->void:
+	WorldSimulation.scoped("abrasive",func()->void:
+		var spec:=I.product("checked_ground_mounts");learn(spec.gate)
+		for field:String in ["materials","tooling"]:
+			for r:String in spec[field]:WorldSimulation.state.resource_stockpiles[r]=100.0
+		var before:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		assert_bool(WorldSimulation.military.start_production_line("checked_ground_mounts",1).has("error")).is_true()
+		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(before))
+func test_inspection_pending_is_store_bound_and_cancel_consumes_candidate_once()->void:
+	WorldSimulation.scoped("abrasive",func()->void:
+		var job:=provision("checked_abrasive_wheels")
+		var state=WorldSimulation.state;var before:=float(state.resource_stockpiles["Fired Abrasive Wheels"])
+		P.advance(WorldSimulation.military,job,1)
+		assert_float(float(state.resource_stockpiles["Fired Abrasive Wheels"])).is_equal(before-1)
+		var pending:Dictionary=job.abrasive_pending.duplicate(true)
+		var store:String=state.resource_settlement_id
+		state.resource_settlement_id="secondary"
+		P.advance(WorldSimulation.military,job,100)
+		assert_dict(job.abrasive_pending).is_equal(pending)
+		assert_int(int(job.completed)).is_equal(0)
+		state.resource_settlement_id=store
+		WorldSimulation.military.cancel_equipment_job(int(job.id))
+		assert_float(float(state.resource_stockpiles["Fired Abrasive Wheels"])).is_equal(before-1)
+		var next:=start("checked_abrasive_wheels",1);P.advance(WorldSimulation.military,next,1)
+		assert_int(int(next.abrasive_pending.ordinal)).is_equal(int(pending.ordinal)+1))
+func test_full_save_restores_reserved_inspection_and_actor_separation()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	WorldSimulation.create_actor("other_abrasive",1310)
+	WorldSimulation.scoped("other_abrasive",func()->void:
+		WorldSimulation.state.resource_stockpiles["Checked Abrasive Wheels"]=7.0
+		assert_bool(WorldSimulation.state.technology_operations.has("abrasive_lots")).is_false())
+	WorldSimulation.scoped("abrasive",func()->void:
+		var job:=provision("checked_abrasive_wheels");P.advance(WorldSimulation.military,job,1))
+	var slot:="abrasive_inspection_%d"%OS.get_process_id()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear();var loaded:=SaveSystem.load_game(slot);DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(loaded.get("ok",false)).override_failure_message(str(loaded)).is_true()
+	if not loaded.get("ok",false):return
+	WorldSimulation.scoped("abrasive",func()->void:
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		assert_float(float(job.progress_days)).is_equal(1.0)
+		var before:=float(WorldSimulation.state.resource_stockpiles["Fired Abrasive Wheels"])
+		P.advance(WorldSimulation.military,job,2)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Fired Abrasive Wheels"])).is_equal(before)
+		assert_int(int(job.completed)).is_equal(1)
+		var stocks:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		P.advance(WorldSimulation.military,job,100)
+		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(stocks))
+	WorldSimulation.scoped("other_abrasive",func()->void:
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Checked Abrasive Wheels"])).is_equal(7.0)
+		assert_bool(WorldSimulation.state.technology_operations.has("abrasive_lots")).is_false())
+func test_rejected_metal_recovery_pays_energy_and_loses_material()->void:
+	WorldSimulation.scoped("abrasive",func()->void:
+		var spec:=I.product("abrasive_steel_scrap_recovery");learn(spec.gate)
+		for field:String in ["materials","tooling"]:
+			for r:String in spec[field]:WorldSimulation.state.resource_stockpiles[r]=100.0
+		WorldSimulation.state.resource_stockpiles["Steel"]=3.0
+		Ops.data().last_day=int(WorldSimulation.state.elapsed_days);Ops.data().services={"electricity":100.0}
+		var job:=start("abrasive_steel_scrap_recovery",1)
+		var before:=float(WorldSimulation.state.resource_stockpiles["Rejected Ground Steel Parts"])
+		var power:=Ops.service("electricity")
+		P.advance(WorldSimulation.military,job,4)
+		assert_float(before-float(WorldSimulation.state.resource_stockpiles["Rejected Ground Steel Parts"])).is_equal(2.5)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Steel"])).is_equal(1.0)
+		assert_float(power-Ops.service("electricity")).is_equal(3.0)
+		# Smallest supported rejected form starts with .5 Steel Sheets per housing;
+		# 2.5 rejected forms therefore return less steel than their 1.25 input.
+		assert_float(1.0).is_less(2.5*.5))
+func test_lot_capacity_blocks_admission_and_malformed_lots_reject()->void:
+	WorldSimulation.scoped("abrasive",func()->void:
+		var Q=preload("res://scripts/abrasive_inspection.gd")
+		for n:int in range(Q.LIMIT):Q.record({"item":"fired_abrasive_wheels","id":n+1,"completed":1},1)
+		var spec:=I.product("fired_abrasive_wheels");learn(spec.gate)
+		for field:String in ["materials","tooling"]:
+			for r:String in spec[field]:WorldSimulation.state.resource_stockpiles[r]=1000.0
+		var before:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		assert_bool(WorldSimulation.military.start_production_line("fired_abrasive_wheels",1).has("error")).is_true()
+		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(before)
+		assert_bool(Q.valid(Q.data())).is_true()
+		var malformed:Dictionary=Q.data().duplicate(true);malformed.records["1"].remaining=-1
+		assert_bool(Q.valid(malformed)).is_false())
