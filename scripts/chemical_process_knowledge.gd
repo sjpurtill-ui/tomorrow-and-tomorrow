@@ -87,5 +87,39 @@ static func entries()->Array[Dictionary]:
 	      "hydrogen_chloride"
 	    ],
 	    "production_contract": "Enables a physical batch-production line with consumed feedstocks, installed tooling, shared Crafting labor and any specified electricity. Products exist only after completed work; quantities are abstract game batches."
-	  }
+	  },
+{
+  "id": "soap_manufacture",
+  "name": "Soap Manufacture",
+  "direction": "Materials",
+  "day": 0,
+  "chance": 0.002,
+  "requires": [
+    "experimental_controls",
+    "seed_oil_pressing"
+  ],
+  "requires_all": [
+    "experimental_controls",
+    "seed_oil_pressing"
+  ],
+  "requires_any": [],
+  "learning_routes": [
+    {
+      "id": "local",
+      "label": "Soap manufacture trials",
+      "requires_all": []
+    }
+  ],
+  "signals": [
+    "crafting",
+    "research",
+    "materials"
+  ],
+  "observation": "Controlled processing converts an existing plant oil and alkali into a cleaning material for supplied washing.",
+  "effects": {},
+  "production_items": [
+    "laundry_soap"
+  ],
+  "production_contract": "Completed civilian batches consume drying seed oil, caustic soda, water and fuel with paid vessels and labor. This implements the plant-oil route only. Laundry appliances consume the actual product; no animal fat, clinical qualification or global sanitation bonus is granted."
+}
 	]

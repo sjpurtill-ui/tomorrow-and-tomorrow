@@ -70,6 +70,29 @@ const METHODS := {
     "mode": "layer",
     "observation": "Arrange worn materials around observed thermal, moisture and movement needs. Suitable clothing, fit and actual wearing conditions"
   },
+  "mechanical_washing_machines": {
+    "name": "Mechanical Washing Machines",
+    "requires_all": [
+        "textile_laundering_practice",
+        "crank_linkages",
+        "electric_motors"
+    ],
+    "requires_any": [],
+    "rate": 24.0,
+    "cost": {
+        "Electric Motors": 1,
+        "Wrought Iron": 3,
+        "Timber": 4
+    },
+    "inputs": {
+        "Freshwater": 0.3,
+        "Laundry Soap": 0.02
+    },
+    "power": 0.05,
+    "mode": "machine_wash",
+    "observation": "A supplied motor drives a washing vessel; water, cleaning agent and operators remain necessary.",
+    "production_contract": "The implemented electrical appliance consumes generated electricity, manufactured laundry soap, water and Logistics work. Daily installed capacity is shared across lots. Wet garments remain unavailable until the following day and mechanical washing causes a small condition loss. Human and water drives remain future alternatives."
+},
   "textile_laundering_practice": {
     "name": "Textile-Laundering Practice",
     "requires_all": [
@@ -192,7 +215,28 @@ const METHODS := {
     "mode": "repair",
     "observation": "Restore selected damaged textile structures through compatible repair. Suitable material, tools and practiced workers",
     "production_contract": "Actual post-siege hunting harvest supplies bounded recovered bone for paid needles. Cloth and yarn are consumed to sew garments; cutting templates reduce cloth offcuts, and graded patterns support repeated fitted work. Repairs consume compatible cloth, yarn and shared Logistics time to restore the treated share of existing garment condition, never new garment quantity. Supply, equipment and daily quotas constrain operation."
-  }
+  },
+  "textile_durability_testing": {
+    "name": "Textile Durability Testing",
+    "requires_all": [
+        "textile_repair_methods",
+        "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "rate": 2.0,
+    "cost": {
+        "Timber": 2,
+        "Stone": 2,
+        "Paper": 2
+    },
+    "inputs": {
+        "Freshwater": 0.1,
+        "Paper": 0.02
+    },
+    "mode": "test",
+    "observation": "Removed garment samples undergo five dated paid wear-and-wash cycles; their observed condition is recorded separately from issued stock.",
+    "production_contract": "A quarter-garment sample is removed from usable inventory for five daily test cycles. Each cycle needs installed equipment, water, paper and shared Logistics time. Recorded condition loss describes this game test only; no garment, repair or global durability bonus is created."
+}
 }
 
 static func entries()->Array[Dictionary]:
