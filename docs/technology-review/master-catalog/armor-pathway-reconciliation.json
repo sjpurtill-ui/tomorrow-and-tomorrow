@@ -1,0 +1,40 @@
+{
+  "status": "reviewed_causal_correction",
+  "changes": [
+    {
+      "id": "articulated_plate_armor",
+      "original_predicate": {
+        "requires_all": [
+          "hardened_edges",
+          "surgical_anatomy"
+        ],
+        "requires_any": [
+          [
+            "sheet_steel_rolling",
+            "structural_load_testing"
+          ]
+        ],
+        "foundations": "hardened_edges,surgical_anatomy",
+        "branching_note": "Hand-formed and assessed armor need not wait for industrial sheet rolling; actual forming and fit remain mandatory."
+      },
+      "reconciled_predicate": {
+        "requires_all": [
+          "hardened_edges",
+          "standard_measures"
+        ],
+        "requires_any": [
+          [
+            "sheet_steel_rolling",
+            "structural_load_testing"
+          ]
+        ],
+        "foundations": "hardened_edges,standard_measures",
+        "branching_note": "Armor fitting requires measured dimensions and practical movement trials, not surgical practice. Hand-formed and assessed armor need not wait for industrial sheet rolling; actual forming and fit remain mandatory."
+      },
+      "reason": "Fitting protective garments needs measurement and physical fit assessment. Surgical intervention is not a causal prerequisite. The actual plate recipes retain paid forming, underlayers, fit labor and tooling.",
+      "evidence": "https://www.metmuseum.org/essays/the-function-of-armor-in-medieval-and-renaissance-europe",
+      "evidence_scope": "Museum account supports fitted garments and mixed construction; the graph correction is an explicit causal design inference.",
+      "identity_count_change": 0
+    }
+  ]
+}

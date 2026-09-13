@@ -66,6 +66,12 @@ const UNIT_TYPES := {
 }
 
 const WEAPONS := {
+	"shield_spear":preload("res://scripts/armor_equipment.gd").KITS.shield_spear,
+	"padded_spear":preload("res://scripts/armor_equipment.gd").KITS.padded_spear,
+	"lamellar_spear":preload("res://scripts/armor_equipment.gd").KITS.lamellar_spear,
+	"scale_spear":preload("res://scripts/armor_equipment.gd").KITS.scale_spear,
+	"mail_spear":preload("res://scripts/armor_equipment.gd").KITS.mail_spear,
+	"plate_spear":preload("res://scripts/armor_equipment.gd").KITS.plate_spear,
 	"repair_kit":{"name":"Armorer tools","attack":0.0,"defense":0.5,"armor":0.0,"penetration":0.0},
 	"medical_kit":{"name":"Medical care equipment","attack":0.0,"defense":0.6,"armor":0.0,"penetration":0.0},
 	"improvised": {"name": "Improvised Arms", "attack": 0.65, "defense": 0.70, "armor": 0.00, "penetration": 0.10},
@@ -206,8 +212,8 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 		attack_total += count * float(unit.attack) * float(weapon.attack)*training_factor*experience_factor
 		defense_total += count * float(unit.defense) * float(weapon.defense)*training_factor*experience_factor
 		organization_total += count * float(unit.organization)*training_factor*(0.92+experience*0.12)
-		armor_total += count * float(weapon.armor)
-		penetration_total += count * float(weapon.penetration)
+		armor_total += count * float(weapon.armor) * issued_equipment_ratio(formation)
+		penetration_total += count * float(weapon.penetration) * issued_equipment_ratio(formation)
 		normalized.append({"id":int(formation.get("id",-1)),"unit":unit_id,"weapon":weapon_id,"count":count,"authorized_count":authorized_count,"equipment":equipment,"equipment_required":equipment_required,"ammunition":ammunition,"ammunition_required":ammunition_required,"training":training,"experience":experience,"personnel_condition":clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0),"readiness":clampf(float(formation.get("readiness",readiness)),0.0,1.5),"prototype":bool(formation.get("prototype",false)),"wear_accumulator":float(formation.get("wear_accumulator",0.0))})
 		normalized[-1]["doctrines"]=preload("res://scripts/combined_arms_doctrine.gd").clean(formation.get("doctrines",{}))
 		normalized[-1]["visual_model"] = String(formation.get("visual_model", ""))
@@ -385,7 +391,7 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var matchup := _weighted_matchup(unit_id, enemy_formations)
 		matchup=1.0+(matchup-1.0)*(0.65+tactics*0.70)
 		var doctrine_defense:=preload("res://scripts/combined_arms_doctrine.gd").defense(formation,formations,enemy_formations)
-		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) - _enemy_penetration(enemy_formations)) * 0.35
+		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) * equipment_ratio - _enemy_penetration(enemy_formations)) * 0.35
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
 			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
@@ -526,6 +532,13 @@ func _weighted_matchup(unit_id: String, enemy_formations: Array) -> float:
 	return weighted / float(enemy_total) if enemy_total > 0 else 1.0
 
 
+func issued_equipment_ratio(formation:Dictionary)->float:
+	var count:=maxi(0,int(formation.get("count",0)))
+	var authorized:=maxi(0,int(formation.get("authorized_count",count)))
+	var required:=maxi(1,int(formation.get("equipment_required",equipment_required_for_weapon(String(formation.get("weapon","improvised")),authorized))))
+	return clampf(float(formation.get("equipment",count))/float(required),0,1)
+
+
 func _enemy_penetration(enemy_formations: Array) -> float:
 	var total := 0
 	var weighted := 0.0
@@ -533,7 +546,7 @@ func _enemy_penetration(enemy_formations: Array) -> float:
 		var count := maxi(0, int(enemy.get("count", 0)))
 		var weapon: Dictionary = WEAPONS.get(String(enemy.get("weapon", "improvised")), WEAPONS.improvised)
 		total += count
-		weighted += count * float(weapon.penetration)
+		weighted += count * float(weapon.penetration) * issued_equipment_ratio(enemy)
 	return weighted / float(total) if total > 0 else 0.0
 
 

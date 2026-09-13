@@ -35,6 +35,12 @@ const ARCHETYPES:Dictionary={
 		"gate": "shield_wall",
 		"training_days": 30,
 		"equipment": [
+			"shield_spear",
+			"padded_spear",
+			"lamellar_spear",
+			"scale_spear",
+			"mail_spear",
+			"plate_spear",
 			"spear",
 			"sword_shield"
 		],
@@ -186,6 +192,12 @@ const ARCHETYPES:Dictionary={
 		"era": "early states",
 		"gate": "hafted_weapons",
 		"equipment": [
+			"shield_spear",
+			"padded_spear",
+			"lamellar_spear",
+			"scale_spear",
+			"mail_spear",
+			"plate_spear",
 			"spear"
 		],
 		"training_days": 18,
@@ -806,6 +818,12 @@ const ARCHETYPES:Dictionary={
 }
 
 const EQUIPMENT_GATES:Dictionary={
+	"shield_spear":"shield_equipment_fitting",
+	"padded_spear":"textile_armor_layering",
+	"lamellar_spear":"lamellar_armor_assembly",
+	"scale_spear":"scale_armor_attachment",
+	"mail_spear":"mail_armor_fabrication",
+	"plate_spear":"articulated_plate_armor",
 	"repair_kit":"field_armorer_teams",
 	"medical_kit":"litter_bearer_drill",
 	"improvised": "",

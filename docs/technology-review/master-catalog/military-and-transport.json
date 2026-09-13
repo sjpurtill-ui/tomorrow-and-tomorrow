@@ -221,14 +221,14 @@
     "field": "D20",
     "id": "articulated_plate_armor",
     "name": "Articulated Plate Armor",
-    "foundations": "hardened_edges,surgical_anatomy",
+    "foundations": "hardened_edges,standard_measures",
     "mechanism": "Fit shaped protective plates so joints retain useful movement",
     "operating_requirement": "Forming capability, tailored fitting, attendants and maintenance",
     "consequence": "Increase selected protection while imposing weight, cost and fit constraints",
     "status": "authored_draft",
     "requires_all": [
       "hardened_edges",
-      "surgical_anatomy"
+      "standard_measures"
     ],
     "requires_any": [
       [
@@ -236,7 +236,7 @@
         "structural_load_testing"
       ]
     ],
-    "branching_note": "Hand-formed and assessed armor need not wait for industrial sheet rolling; actual forming and fit remain mandatory.",
+    "branching_note": "Armor fitting requires measured dimensions and practical movement trials, not surgical practice. Hand-formed and assessed armor need not wait for industrial sheet rolling; actual forming and fit remain mandatory.",
     "role_design_targets": [
       "Armored close-combat troops"
     ],

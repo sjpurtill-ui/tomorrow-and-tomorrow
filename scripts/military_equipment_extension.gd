@@ -1,5 +1,11 @@
 extends RefCounted
 const ITEMS:Dictionary={
+	"shield_spear":preload("res://scripts/armor_equipment.gd").KITS.shield_spear,
+	"padded_spear":preload("res://scripts/armor_equipment.gd").KITS.padded_spear,
+	"lamellar_spear":preload("res://scripts/armor_equipment.gd").KITS.lamellar_spear,
+	"scale_spear":preload("res://scripts/armor_equipment.gd").KITS.scale_spear,
+	"mail_spear":preload("res://scripts/armor_equipment.gd").KITS.mail_spear,
+	"plate_spear":preload("res://scripts/armor_equipment.gd").KITS.plate_spear,
 	"repair_kit":{"name":"Armorer tools","gate":"field_armorer_teams","materials":{"Timber":2.0,"Stone":2.0},"days":3.0,"crew":1,"ammo":"","ammo_per":0,"attack":0.0,"defense":0.5,"armor":0.0,"penetration":0.0,"delivery":1.0},
 	"medical_kit":{"name": "Medical care equipment", "gate": "litter_bearer_drill", "materials": {"Timber": 1.0, "Fiber Plants": 2.0}, "days": 2.0, "crew": 1, "ammo": "", "ammo_per": 0, "attack": 0.0, "defense": 0.6, "armor": 0.0, "penetration": 0.0, "delivery": 1.0},
 	"axe": {
