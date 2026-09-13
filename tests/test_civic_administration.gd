@@ -3,6 +3,9 @@ const C=preload("res://scripts/civic_administration.gd")
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(1902)
+	CivilizationSystem.reset_for_new_world()
+	MilitaryCampaign.reset_for_new_world()
+	DiscoverySystem.reset_for_new_world()
 	GovernmentPeopleSystem.reset_for_new_world()
 	GameState.initialize_population_model()
 	GameState.settlement_site_committed=true
@@ -78,3 +81,67 @@ func test_replacement_transfers_actual_pending_duty_after_paid_handover()->void:
 	assert_bool(C.can_review(GovernmentPeopleSystem,followup)).is_true()
 	C.process_handovers(GovernmentPeopleSystem)
 	assert_float(float(GovernmentPeopleSystem.administration_records.work)).is_equal(before-.5)
+
+func test_petition_conversation_changes_work_and_requires_observed_resolution()->void:
+	GameState.known_discoveries.append("petition_registers")
+	var site:Dictionary=GameState.player_settlements[0]
+	var person:=int(site.leader_person_id)
+	GameState.housing_capacity=ceili(GameState.population_exact)
+	GameState.water_metrics={"intake_ratio":.5}
+	GameState.simulation_metrics["food_intake_ratio"]=1.0
+	C.register_jurisdiction(GovernmentPeopleSystem,site.id,["water"])
+	C.issue_mandate(GovernmentPeopleSystem,site.id,person,["water"],90)
+	C.observe_petitions(GovernmentPeopleSystem)
+	var petitions:Array=GovernmentPeopleSystem.administration_records.petitions
+	assert_int(petitions.size()).is_equal(1)
+	C.observe_petitions(GovernmentPeopleSystem)
+	assert_int(petitions.size()).is_equal(1)
+	var p:Dictionary=petitions[0]
+	var leader:=GovernmentPeopleSystem.settlement_leader(site.id)
+	var text:="address petition %d" % int(p.id)
+	var order:=AdvisorSystem.begin_civic_directive(text,site.id,leader)
+	var result:=AdvisorSystem.resolve_civic_directive(text,{},order,site.id,person)
+	assert_bool(result.administrative_result.ok).is_true()
+	assert_str(String(site.management_focus)).is_equal("water")
+	assert_str(String(p.state)).is_equal("addressing")
+	assert_bool(C.dispose_petition(GovernmentPeopleSystem,site.id,person,int(p.id),"resolve").has("error")).is_true()
+	GameState.water_metrics.intake_ratio=1.0
+	assert_bool(C.dispose_petition(GovernmentPeopleSystem,site.id,person,int(p.id),"resolve").get("ok",false)).is_true()
+	assert_bool(C.valid(GovernmentPeopleSystem.administration_records)).is_true()
+	var forged:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	forged.petitions[0].dispositions.back().observation.active=true
+	assert_bool(C.valid(forged)).is_false()
+func test_invalid_ledger_and_legacy_absence()->void:
+	assert_bool(C.valid(C.empty_state())).is_true()
+	var bad:=C.empty_state();bad.work=-1
+	assert_bool(C.valid(bad)).is_false()
+	bad=C.empty_state();bad.mandates={"foreign":{"settlement_id":"foreign","person_id":-2,"subjects":["water"],"issued_day":1,"expires_day":10}}
+	assert_bool(C.valid(bad)).is_false()
+
+func test_four_discoveries_keep_exact_foundations()->void:
+	DiscoverySystem.initialize()
+	var expected:={"jurisdiction_boundaries":["regional_maps","customary_law"],"official_mandate_registers":["professional_service","jurisdiction_boundaries"],"public_office_handover":["professional_service","formal_archives"],"petition_registers":["phonetic_notation","professional_service"]}
+	var entries:=preload("res://scripts/civic_administration_knowledge.gd").entries()
+	assert_int(entries.size()).is_equal(4)
+	for entry:Dictionary in entries:
+		assert_array(entry.requires_all).is_equal(expected[entry.id])
+		assert_array(entry.requires_any).is_empty()
+		for parent:String in entry.requires_all:
+			assert_dict(DiscoverySystem.discovery_definition(parent)).is_not_empty()
+func test_full_save_restores_civic_register_without_granting_new_authority()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	var site:Dictionary=GameState.player_settlements[0]
+	var place:=String(site.id);var person:=int(site.leader_person_id)
+	C.register_jurisdiction(GovernmentPeopleSystem,place,["water"])
+	C.issue_mandate(GovernmentPeopleSystem,place,person,["water"],30)
+	var before:=GovernmentPeopleSystem.administration_records.duplicate(true)
+	var slot:="codex_civic_test_%d" % Time.get_ticks_usec()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	GovernmentPeopleSystem.administration_records=C.empty_state()
+	var restored:=SaveSystem.load_game(slot)
+	assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+	assert_dict(GovernmentPeopleSystem.administration_records).is_equal(before)
+	assert_bool(C.authorized(GovernmentPeopleSystem,place,person,"water")).is_true()
+	assert_bool(C.authorized(GovernmentPeopleSystem,place,person,"shelter")).is_false()
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)

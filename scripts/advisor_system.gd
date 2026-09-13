@@ -756,6 +756,13 @@ func resolve_civic_directive(text:String,interpretation:Dictionary,existing_orde
 		order["parameters"]={"text":text,"interpretation":interpretation.duplicate(true)}
 		_append_leader_reply(settlement_id,leader,unavailable,order,"unavailable")
 		return order
+	var administrative:=preload("res://scripts/civic_administration.gd").conversation(WorldSimulation.government,settlement_id,leader_person_id,text)
+	if administrative.get("handled",false):
+		order["status"]="discussion"
+		order["leader_reply"]=String(administrative.message)
+		order["administrative_result"]=administrative.duplicate(true)
+		_append_leader_reply(settlement_id,leader,String(administrative.message),order,"administrative_record")
+		return order
 	var prior_context:=_pending_civic_context(settlement_id,leader_person_id)
 	var result:=contextualize_civic_followup(text,interpretation,settlement_id,leader_person_id)
 	var disposition:Dictionary=WorldSimulation.government.leader_disposition(leader)

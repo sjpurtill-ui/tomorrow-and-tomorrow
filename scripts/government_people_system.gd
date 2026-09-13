@@ -162,6 +162,7 @@ func process_day(day:int)->Array[Dictionary]:
 	if people.is_empty(): return []
 	WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/civic_administration.gd").credit_day(self,day))
 	preload("res://scripts/civic_administration.gd").process_handovers(self)
+	preload("res://scripts/civic_administration.gd").observe_petitions(self)
 	var month:=day/MONTH_DAYS
 	# Local leaders rebalance ordinary labor every day. Mortality, succession and
 	# institutional expansion remain monthly, but survival cannot wait up to thirty
