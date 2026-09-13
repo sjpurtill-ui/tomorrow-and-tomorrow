@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 708,
+  "verified_baseline_discoveries": 716,
   "pending_communications": 0,
-  "new_authored_drafts": 2474,
+  "new_authored_drafts": 2466,
   "distinct_accounted_identities": 3182,
   "remaining_identities_to_author": 1818,
   "target": 5000,
@@ -2349,7 +2349,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 462,
+  "branch_alternatives": 461,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 115,
@@ -2358,8 +2358,8 @@
     "D04": 107,
     "D05": 156,
     "D06": 59,
-    "D07": 47,
-    "D08": 97,
+    "D07": 41,
+    "D08": 95,
     "D09": 79,
     "D10": 79,
     "D11": 60,
@@ -2442,9 +2442,9 @@
       "id": "D07",
       "name": "Fibers and domestic technologies",
       "target": 120,
-      "implemented_baseline": 29,
+      "implemented_baseline": 35,
       "pending_communications": 0,
-      "authored_drafts": 47,
+      "authored_drafts": 41,
       "accounted": 76,
       "remaining_to_target": 44
     },
@@ -2452,9 +2452,9 @@
       "id": "D08",
       "name": "Buildings and settlements",
       "target": 220,
-      "implemented_baseline": 32,
+      "implemented_baseline": 34,
       "pending_communications": 0,
-      "authored_drafts": 97,
+      "authored_drafts": 95,
       "accounted": 129,
       "remaining_to_target": 91
     },

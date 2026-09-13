@@ -15,3 +15,7 @@ Limitations: climate is sampled at the existing monthly building step, not recon
 Save compatibility: existing optional building-material profiles and curing fields are reused. Legacy plots are unchanged. New earthen completion markers require sufficient recorded drying and consistent dates. Whole actor save/load preserves partially dried units and subsequent assembly; human and secondary-city records use the same validation path.
 
 Initial acceptance:9 new cases and11 existing building-material cases pass. Initial test setup failures were corrected (typed settlement array, full city identity and actor recreation after world reset). A malformed completion-marker test verifies the new narrow validation. Combined textile/city/owned-world checks and canonical acceptance pending.
+
+## Canonical acceptance
+
+INTEGRATED at `2d0048225faccc4fc1f7563a510e74c8c6565aa9`. All110 combined worktree cases and61 canonical cases pass. Canonical suites: earthen9, textile12, clothing27, city13. Clean graph716/498 routes/365 recipes/18 facilities, exact716-definition snapshot and15 catalog-tool tests pass. Logs `/tmp/tt-earthen-textile-results.json`, `/tmp/tt-earthen-textile-canonical-canonical-results.json`. Headless boot reaches the direction screen with exit-time resource cleanup warnings; full pacing and new subject art remain outstanding. No player launch/package rebuild.

@@ -1,5 +1,13 @@
 ## September 12 — reviewed civilian response coverage
 
+## September 12 — 716 verified operating discoveries
+
+Integrated six textile methods from `6d749d4` and two earthen building methods from `9f03bbd` as canonical `2d0048225faccc4fc1f7563a510e74c8c6565aa9`. Paid measured yarn and powered/manual spinning feed actual cloth and garments; imported figured cloth retains its identity through use, care and saves. Actual city trade pays and delays delivery. Adobe units dry before wall assembly, while wattle infill dries after application; local weather delays housing and upkeep spends real materials.
+
+**110 combined worktree and61 canonical cases pass**, with zero errors/failures/skips/orphans. Graph: **716 discoveries /498 routes /365 recipes /18 facilities**, no dependency errors. All716 canonical definitions match the ledger;15 ledger-tool tests pass. Ledger: **716 integrated +2,466 drafts =3,182 identities**, leaving **1,818 to author and4,284 to implement**. Art: **125 verified /716 live,591 queued**. Six textile illustrations are being prepared separately.
+
+Existing stock, labor, plot and save owners remain authoritative; older garment lots default to plain fabric. Textile patterns and earth materials are bounded compatible classes, not arbitrary specifications; climate drying uses the existing monthly sample. Normal headless boot reaches the direction screen but again emits an exit-time ObjectDB/resource cleanup warning. No player/package launch or full historical pacing claim. Details: `EARTHEN_TEXTILE_INTEGRATION.md` and individual handoffs.
+
 ## September 12 — 708 verified operating discoveries
 
 Integrated glass and ceramic processes at `5449d0f3bbdb7c691cfe30e869549f92b22454bb`: five existing identities and eleven paid recipes. Compatible cullet remelts with losses; annealed blanks supply actual lenses; plaster molds and prepared bodies produce green forms that need firing and compatible glazing before entering the brine workshop. Original prerequisite predicates remain intact.

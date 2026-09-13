@@ -1,5 +1,5 @@
 {
-  "source_commit": "5449d0f3bbdb7c691cfe30e869549f92b22454bb",
+  "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -47848,6 +47848,224 @@
       }
     },
     {
+      "field": "D08",
+      "id": "adobe_wall_construction",
+      "name": "Adobe-Wall Construction",
+      "foundations": "clay_testing",
+      "mechanism": "Assemble dried earthen units into protected load-bearing walls",
+      "operating_requirement": "Suitable soil, water, forming labor, drying weather and moisture protection",
+      "consequence": "Provide local wall construction with weathering and load limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "framed_construction",
+          "structural_load_testing"
+        ]
+      ],
+      "recovery": "For Adobe-Wall Construction: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "adobe_wall_construction",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Adobe-Wall Construction",
+        "local_demonstration": "Assemble dried earthen units into protected load-bearing walls",
+        "operating_requirements": "Suitable soil, water, forming labor, drying weather and moisture protection",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "clay_testing"
+        ],
+        "previous_requires_any": [
+          [
+            "framed_construction",
+            "structural_load_testing"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "building_method": "adobe_wall_construction",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "adobe_wall_construction",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Adobe-Wall Construction",
+            "missing_all": [
+              "clay_testing"
+            ],
+            "missing_any": [
+              [
+                "framed_construction",
+                "structural_load_testing"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "clay_testing",
+              "framed_construction",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "clay_testing"
+            ],
+            "requires_any": [
+              [
+                "framed_construction",
+                "structural_load_testing"
+              ]
+            ],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Adobe-Wall Construction",
+        "observation": "Assemble dried earthen units into protected load-bearing walls",
+        "production_contract": "Pays for local earth mix, reinforcement, roof protection and construction. Adobe units dry at the building site before wall assembly; wattle infill dries after application. Cold or wet local conditions delay usable housing, and weather-exposed fabric requires real repair supplies. Existing plot capacity, workforce and maintenance owners remain authoritative.",
+        "production_items": [
+          "adobe_mix"
+        ],
+        "requires": [
+          "clay_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "framed_construction",
+            "structural_load_testing"
+          ]
+        ],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "wattle_and_daub_walls",
+      "name": "Wattle-and-Daub Walls",
+      "foundations": "basketry,clay_tempering,framed_construction",
+      "mechanism": "Combine a woven framework with a compatible earthen infill",
+      "operating_requirement": "Suitable fibers or branches, framing, earth mix and upkeep",
+      "consequence": "Enclose framed shelters with locally available materials and repair demands",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Wattle-and-Daub Walls: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "wattle_and_daub_walls",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Wattle-and-Daub Walls",
+        "local_demonstration": "Combine a woven framework with a compatible earthen infill",
+        "operating_requirements": "Suitable fibers or branches, framing, earth mix and upkeep",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "basketry",
+          "clay_tempering",
+          "framed_construction"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "wattle_and_daub_walls",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "wattle_and_daub_walls",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Wattle-and-Daub Walls",
+            "missing_all": [
+              "basketry",
+              "clay_tempering",
+              "framed_construction"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "basketry",
+              "clay_tempering",
+              "framed_construction"
+            ],
+            "requires_all": [
+              "basketry",
+              "clay_tempering",
+              "framed_construction"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Wattle-and-Daub Walls",
+        "observation": "Combine a woven framework with a compatible earthen infill",
+        "production_contract": "Pays for local earth mix, reinforcement, roof protection and construction. Adobe units dry at the building site before wall assembly; wattle infill dries after application. Cold or wet local conditions delay usable housing, and weather-exposed fabric requires real repair supplies. Existing plot capacity, workforce and maintenance owners remain authoritative.",
+        "production_items": [
+          "earthen_daub",
+          "wattle_lattices"
+        ],
+        "requires": [
+          "basketry",
+          "clay_tempering",
+          "framed_construction"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
       "field": "D02",
       "id": "clay_pipe_forming",
       "name": "Clay Pipe Forming",
@@ -50705,6 +50923,573 @@
           "flying_shuttles",
           "crank_linkages",
           "electric_motors"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "fiber",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "yarn_count_standards",
+      "name": "Yarn-Count Standards",
+      "foundations": "standard_measures,drop_spindles",
+      "mechanism": "Describe and compare yarn linear density through maintained conventions",
+      "operating_requirement": "Qualified measures, samples and trained workers",
+      "consequence": "Match yarn to intended processing without making all yarn properties equivalent",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Yarn-Count Standards: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "yarn_count_standards",
+        "local_demonstration": "Describe and compare yarn linear density through maintained conventions",
+        "operating_requirements": "Qualified measures, samples and trained workers",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "standard_measures",
+          "drop_spindles"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "yarn_count_standards",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Yarn-Count Standards",
+            "missing_all": [
+              "standard_measures",
+              "drop_spindles"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "standard_measures",
+              "drop_spindles"
+            ],
+            "requires_all": [
+              "standard_measures",
+              "drop_spindles"
+            ],
+            "requires_any": [],
+            "signals": [
+              "fiber",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Yarn-Count Standards",
+        "observation": "Describe and compare yarn linear density through maintained conventions",
+        "production_contract": "Sample and measure a declared yarn-count class using a maintained length reel and balance, consuming sample yarn, clay records and work. Measured Yarn supports matched-feed weaving; this does not certify every yarn property.",
+        "production_items": [
+          "measured_yarn"
+        ],
+        "requires": [
+          "standard_measures",
+          "drop_spindles"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "fiber",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Standardization"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "yarn_tension_control",
+      "name": "Yarn-Tension Control",
+      "foundations": "plain_weaving,feedback_governors",
+      "mechanism": "Manage yarn loading through a qualified textile process",
+      "operating_requirement": "Suitable controls, guides and monitored material",
+      "consequence": "Reduce some breakage or variation while fibers and machine conditions differ",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Yarn-Tension Control: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "yarn_tension_control",
+        "local_demonstration": "Manage yarn loading through a qualified textile process",
+        "operating_requirements": "Suitable controls, guides and monitored material",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "plain_weaving",
+          "feedback_governors"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "yarn_tension_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Yarn-Tension Control",
+            "missing_all": [
+              "plain_weaving",
+              "feedback_governors"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "plain_weaving",
+              "feedback_governors"
+            ],
+            "requires_all": [
+              "plain_weaving",
+              "feedback_governors"
+            ],
+            "requires_any": [],
+            "signals": [
+              "fiber",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Yarn-Tension Control",
+        "observation": "Manage yarn loading through a qualified textile process",
+        "production_contract": "Use installed mechanical tension control and actual Measured Yarn in a distinct weaving route with lower modeled feed loss. Governors and loom tooling are paid; knowledge alone does not improve other workshops.",
+        "production_items": [
+          "tensioned_woven_cloth"
+        ],
+        "requires": [
+          "plain_weaving",
+          "feedback_governors"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "fiber",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "ring_spinning_systems",
+      "name": "Ring-Spinning Systems",
+      "foundations": "flyer_spinning,rotational_dynamics",
+      "mechanism": "Form and wind yarn through a qualified rotating spindle and traveler arrangement",
+      "operating_requirement": "Suitable machinery, prepared fiber, power and maintenance",
+      "consequence": "Provide continuous yarn production with speed and fiber limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Ring-Spinning Systems: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "ring_spinning_systems",
+        "local_demonstration": "Form and wind yarn through a qualified rotating spindle and traveler arrangement",
+        "operating_requirements": "Suitable machinery, prepared fiber, power and maintenance",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "flyer_spinning",
+          "rotational_dynamics"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "ring_spinning_systems",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Ring-Spinning Systems",
+            "missing_all": [
+              "flyer_spinning",
+              "rotational_dynamics"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "flyer_spinning",
+              "rotational_dynamics"
+            ],
+            "requires_all": [
+              "flyer_spinning",
+              "rotational_dynamics"
+            ],
+            "requires_any": [],
+            "signals": [
+              "fiber",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Ring-Spinning Systems",
+        "observation": "Form and wind yarn through a qualified rotating spindle and traveler arrangement",
+        "production_contract": "Ring-and-traveler tooling twists combed fiber into yarn. The hand-driven route remains slower; the motor route needs installed motors and generated electricity for every batch. Products serve existing weaving and sewing.",
+        "production_items": [
+          "hand_ring_yarn",
+          "electric_ring_yarn"
+        ],
+        "requires": [
+          "flyer_spinning",
+          "rotational_dynamics"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "fiber",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "rotor_spinning_systems",
+      "name": "Rotor-Spinning Systems",
+      "foundations": "drop_spindles,rotational_dynamics,electric_motors",
+      "mechanism": "Collect and twist prepared fibers in a qualified rotating chamber",
+      "operating_requirement": "Suitable equipment, feed preparation, power and cleaning",
+      "consequence": "Produce selected yarns with different fiber and structure constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Rotor-Spinning Systems: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "rotor_spinning_systems",
+        "local_demonstration": "Collect and twist prepared fibers in a qualified rotating chamber",
+        "operating_requirements": "Suitable equipment, feed preparation, power and cleaning",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "drop_spindles",
+          "rotational_dynamics",
+          "electric_motors"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "rotor_spinning_systems",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Rotor-Spinning Systems",
+            "missing_all": [
+              "drop_spindles",
+              "rotational_dynamics",
+              "electric_motors"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "drop_spindles",
+              "rotational_dynamics",
+              "electric_motors"
+            ],
+            "requires_all": [
+              "drop_spindles",
+              "rotational_dynamics",
+              "electric_motors"
+            ],
+            "requires_any": [],
+            "signals": [
+              "fiber",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Rotor-Spinning Systems",
+        "observation": "Collect and twist prepared fibers in a qualified rotating chamber",
+        "production_contract": "Open and feed prepared staple fiber into a powered rotating chamber. Rotor spinning uses its own higher material allowance and consumes real electricity; no yarn or power appears from knowledge.",
+        "production_items": [
+          "rotor_spun_yarn"
+        ],
+        "requires": [
+          "drop_spindles",
+          "rotational_dynamics",
+          "electric_motors"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "fiber",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "drawloom_pattern_control",
+      "name": "Drawloom-Pattern Control",
+      "foundations": "plain_weaving,crew_handoffs",
+      "mechanism": "Select groups of warp threads for controlled figured weaving",
+      "operating_requirement": "Suitable loom, trained operators and pattern knowledge",
+      "consequence": "Produce complex woven patterns with substantial setup and labor",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Drawloom-Pattern Control: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "drawloom_pattern_control",
+        "local_demonstration": "Select groups of warp threads for controlled figured weaving",
+        "operating_requirements": "Suitable loom, trained operators and pattern knowledge",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "plain_weaving",
+          "crew_handoffs"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "drawloom_pattern_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Drawloom-Pattern Control",
+            "missing_all": [
+              "plain_weaving",
+              "crew_handoffs"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "plain_weaving",
+              "crew_handoffs"
+            ],
+            "requires_all": [
+              "plain_weaving",
+              "crew_handoffs"
+            ],
+            "requires_any": [],
+            "signals": [
+              "fiber",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Drawloom-Pattern Control",
+        "observation": "Select groups of warp threads for controlled figured weaving",
+        "production_contract": "Pay for a drawloom and manually select warp groups while consuming yarn and work to make Figured Cloth. Measured feed reduces modeled offcuts. Imported figured cloth can be sewn without teaching loom manufacture.",
+        "production_items": [
+          "drawloom_figured_cloth",
+          "measured_drawloom_cloth"
+        ],
+        "requires": [
+          "plain_weaving",
+          "crew_handoffs"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "fiber",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "punched_card_loom_control",
+      "name": "Punched-Card Loom Control",
+      "foundations": "drawloom_pattern_control,pictographic_records",
+      "mechanism": "Use a physical sequence of encoded selections to control a compatible loom",
+      "operating_requirement": "Qualified mechanism, prepared cards and maintained loom",
+      "consequence": "Repeat selected patterns while coding and equipment errors remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Punched-Card Loom Control: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "punched_card_loom_control",
+        "local_demonstration": "Use a physical sequence of encoded selections to control a compatible loom",
+        "operating_requirements": "Qualified mechanism, prepared cards and maintained loom",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "drawloom_pattern_control",
+          "pictographic_records"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "punched_card_loom_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Punched-Card Loom Control",
+            "missing_all": [
+              "drawloom_pattern_control",
+              "pictographic_records"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "drawloom_pattern_control",
+              "pictographic_records"
+            ],
+            "requires_all": [
+              "drawloom_pattern_control",
+              "pictographic_records"
+            ],
+            "requires_any": [],
+            "signals": [
+              "fiber",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Punched-Card Loom Control",
+        "observation": "Use a physical sequence of encoded selections to control a compatible loom",
+        "production_contract": "Punch and lace physical Loom Pattern Cards, then consume a small replacement allowance while selecting warp groups in a compatible loom. The card route saves weaving work but requires actual cards and tooling. Figured Cloth serves household garment production.",
+        "production_items": [
+          "loom_pattern_cards",
+          "card_figured_cloth",
+          "measured_card_cloth"
+        ],
+        "requires": [
+          "drawloom_pattern_control",
+          "pictographic_records"
         ],
         "requires_all": [],
         "requires_any": [],

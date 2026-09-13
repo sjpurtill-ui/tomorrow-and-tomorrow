@@ -4,8 +4,8 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 
 ## Authoritative baselines
 
-- Verified canonical runtime `5449d0f3bbdb7c691cfe30e869549f92b22454bb`: **708 discoveries, 490 learning routes, 352 civilian recipes and 18 facilities**. Glass/ceramic integration passes 65 distinct worktree and 40 canonical cases. Earlier acceptance and limitations remain in integration handoffs.
-- Five existing glass/ceramic identities are promoted from the exact loaded canonical snapshot with unchanged prerequisite predicates. The ledger contains **708 integrated + 2,474 drafts = 3,182 identities**, leaving **1,818 to author and 4,292 to implement**. Verified subject art: **125; 583 remain queued**.
+- Verified canonical runtime `2d0048225faccc4fc1f7563a510e74c8c6565aa9`: **716 discoveries,498 learning routes,365 civilian recipes and18 facilities**. Earthen/textile integration passes110 combined worktree and61 canonical cases. Earlier acceptance and limitations remain in integration handoffs.
+- Eight existing identities are promoted from the exact loaded canonical snapshot. The ledger contains **716 integrated +2,466 drafts =3,182 identities**, leaving **1,818 to author and4,284 to implement**. Verified subject art: **125;591 remain queued**.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 

@@ -113,3 +113,7 @@ editor import exited 0 without script errors (`/tmp/tt-textile-process-import.lo
 Normal headless project boot with `--quit-after 2` exited 0, reaching
 `DIRECTION_SCREEN_READY` without script errors (`/tmp/tt-textile-process-boot.log`).
 No player/editor process was launched, stopped or restarted.
+
+## Canonical acceptance
+
+INTEGRATED at `2d0048225faccc4fc1f7563a510e74c8c6565aa9`. All110 combined worktree cases and61 canonical cases pass. Canonical suites: earthen9, textile12, clothing27, city13. Clean graph716/498 routes/365 recipes/18 facilities, exact716-definition snapshot and15 catalog-tool tests pass. Logs `/tmp/tt-earthen-textile-results.json`, `/tmp/tt-earthen-textile-canonical-canonical-results.json`. Headless boot reaches the direction screen with exit-time resource cleanup warnings; full pacing and new subject art remain outstanding. No player launch/package rebuild.

@@ -4922,6 +4922,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/adobe_wall_construction.png",
+      "description": "Assemble dried earthen units into protected load-bearing walls",
+      "domain": "infrastructure",
+      "id": "adobe_wall_construction",
+      "name": "Adobe-Wall Construction",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wattle_and_daub_walls.png",
+      "description": "Combine a woven framework with a compatible earthen infill",
+      "domain": "infrastructure",
+      "id": "wattle_and_daub_walls",
+      "name": "Wattle-and-Daub Walls",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/clay_pipe_forming.png",
       "description": "Shape continuous hollow clay sections with controlled walls and open ends.",
       "domain": "infrastructure",
@@ -5175,6 +5191,54 @@
       "domain": "production",
       "id": "electric_power_looms",
       "name": "Electric Power Looms",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/yarn_count_standards.png",
+      "description": "Describe and compare yarn linear density through maintained conventions",
+      "domain": "production",
+      "id": "yarn_count_standards",
+      "name": "Yarn-Count Standards",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/yarn_tension_control.png",
+      "description": "Manage yarn loading through a qualified textile process",
+      "domain": "production",
+      "id": "yarn_tension_control",
+      "name": "Yarn-Tension Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ring_spinning_systems.png",
+      "description": "Form and wind yarn through a qualified rotating spindle and traveler arrangement",
+      "domain": "production",
+      "id": "ring_spinning_systems",
+      "name": "Ring-Spinning Systems",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rotor_spinning_systems.png",
+      "description": "Collect and twist prepared fibers in a qualified rotating chamber",
+      "domain": "production",
+      "id": "rotor_spinning_systems",
+      "name": "Rotor-Spinning Systems",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/drawloom_pattern_control.png",
+      "description": "Select groups of warp threads for controlled figured weaving",
+      "domain": "production",
+      "id": "drawloom_pattern_control",
+      "name": "Drawloom-Pattern Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/punched_card_loom_control.png",
+      "description": "Use a physical sequence of encoded selections to control a compatible loom",
+      "domain": "production",
+      "id": "punched_card_loom_control",
+      "name": "Punched-Card Loom Control",
       "status": "queued"
     },
     {
@@ -5667,9 +5731,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 708,
+  "live_count": 716,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 583,
+  "queued_count": 591,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

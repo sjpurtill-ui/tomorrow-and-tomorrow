@@ -5079,6 +5079,62 @@
       "source_domain": "production",
       "name": "High-Fire Stoneware",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "adobe_wall_construction",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Adobe-Wall Construction",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "wattle_and_daub_walls",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Wattle-and-Daub Walls",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "yarn_count_standards",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Yarn-Count Standards",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "yarn_tension_control",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Yarn-Tension Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ring_spinning_systems",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Ring-Spinning Systems",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rotor_spinning_systems",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Rotor-Spinning Systems",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "drawloom_pattern_control",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Drawloom-Pattern Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "punched_card_loom_control",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Punched-Card Loom Control",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
