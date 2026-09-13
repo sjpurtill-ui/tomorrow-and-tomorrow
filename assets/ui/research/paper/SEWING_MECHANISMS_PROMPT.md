@@ -1,0 +1,7 @@
+# Treadle sewing illustration
+
+Built-in generation against apprentice_contracts style reference. Final image personally reviewed: cloth, needle, belt wheel and foot treadle are visible; native original retained.
+
+Use case: historical-scene. Asset type: square discovery-card illustration for Tomorrow and Tomorrow. Input image is a STYLE REFERENCE ONLY; create a new distinct scene. Match its sparse gouache on warm ivory fibrous paper, matte dry brush texture, restrained ochre/umber/olive palette, small believable human figures and equipment concentrated in the lower half, broad quiet paper above, soft unfinished vignette edges. No frame, lettering, readable text, watermark or glossy photorealism. Subject:  A nineteenth-century craftsperson seated at an early treadle-powered lockstitch sewing machine, guiding plain cloth under a single needle; clear wooden table, iron machine head, large belt wheel connected by a narrow drive belt to the foot treadle beneath. Feet operate the pedal, hands guide cloth, small thread spool on top and several finished folded garments nearby. Show one coherent mechanical sewing station. No electric motor, cable, industrial conveyor, decorative lettering or extra needles. Keep the mechanism legible within the restrained illustrated scene.
+
+Native: `/Users/seanpurtill/.codex/generated_images/01a0978a-39f5-7620-a77f-5918ccb1d8ba/exec-9c8d8509-6066-4ee5-bf73-16445aefebbd.png`.
