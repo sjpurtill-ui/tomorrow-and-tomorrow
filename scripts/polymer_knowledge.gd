@@ -893,7 +893,9 @@ static func entries()->Array[Dictionary]:
     "observation": "Join functional molecules through qualified step reactions without a required small-molecule elimination",
     "effects": {},
     "production_items": [
-      "addition_cured_belt_web"
+      "addition_cured_belt_web",
+      "recovered_blend_belt_web",
+      "recovered_blend_drive_belts"
     ],
     "production_contract": "Consumes separately produced polyol and diisocyanate feeds, cloth reinforcement, reaction work and cooling to form a dry-interior belt web. Cutting/splicing under belt-transmission knowledge supplies actual workshop maintenance belts; no universal resin or free strength effect."
   },
@@ -1320,6 +1322,41 @@ static func entries()->Array[Dictionary]:
     ],
     "operating_plants": [
       "foam_insulated_cold_store"
+    ]
+  },
+  {
+    "id": "selective_polymer_depolymerization",
+    "name": "Selective Polymer Depolymerization",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_chain_models",
+      "industrial_catalyst_design"
+    ],
+    "requires_all": [
+      "polymer_chain_models",
+      "industrial_catalyst_design"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Selective Polymer Depolymerization",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Deconstruct a specified polymer into qualified recoverable intermediates through a selected process",
+    "effects": {},
+    "production_contract": "Clean virgin-route PU belt offcuts undergo paid glycolysis and separation. The recovered mixture is kept distinct from virgin PEG and is qualified only as a limited blend with fresh material. Recovered-blend cutting waste is not automatically accepted by this once-recycled feed specification.",
+    "production_items": [
+      "pu_offcut_glycolysis",
+      "qualified_recovered_pu_blend"
     ]
   }
 ]

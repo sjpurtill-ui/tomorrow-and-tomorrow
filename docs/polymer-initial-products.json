@@ -920,6 +920,9 @@
     "tooling": {
       "Steel": 2,
       "Timber": 2
+    },
+    "co_products": {
+      "Clean PU Belt Offcuts": 0.08
     }
   },
   "ldpe_blow_grade": {
@@ -1283,5 +1286,81 @@
     },
     "power": 1,
     "daily_power": 0.3333333333333333
+  },
+  "pu_offcut_glycolysis": {
+    "name": "Glycolyzed and separated polyurethane offcuts",
+    "output": "Recovered PU Glycolysate",
+    "gate": "selective_polymer_depolymerization",
+    "materials": {
+      "Clean PU Belt Offcuts": 1.4,
+      "Ethylene Glycol": 0.5,
+      "Caustic Soda": 0.01,
+      "Freshwater": 0.3
+    },
+    "days": 8,
+    "tooling": {
+      "Pressure Vessels": 3,
+      "Laboratory Glassware": 3,
+      "Steel": 2
+    },
+    "power": 3,
+    "daily_power": 0.375,
+    "services": {
+      "polymer_stirred_work": 1
+    }
+  },
+  "qualified_recovered_pu_blend": {
+    "name": "Assayed limited-recovery polyol blend",
+    "output": "Qualified Recovered PU Blend",
+    "gate": "selective_polymer_depolymerization",
+    "materials": {
+      "Recovered PU Glycolysate": 0.1,
+      "PEG Diol": 0.94,
+      "Aromatic Diisocyanate Feed": 0.02,
+      "Woven Cloth": 0.02
+    },
+    "days": 4,
+    "tooling": {
+      "Laboratory Glassware": 4,
+      "Steel": 2
+    },
+    "power": 1,
+    "daily_power": 0.25
+  },
+  "recovered_blend_belt_web": {
+    "name": "Cured and tested recovered-blend belt web",
+    "output": "Recovered-Blend PU Belt Web",
+    "gate": "additive_step_polymerization",
+    "materials": {
+      "Qualified Recovered PU Blend": 1,
+      "Aromatic Diisocyanate Feed": 0.6,
+      "Ethylene Glycol": 0.05,
+      "Woven Cloth": 0.5
+    },
+    "days": 9,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Steel": 2
+    },
+    "power": 2.25,
+    "daily_power": 0.25,
+    "services": {
+      "polymer_stirred_work": 1,
+      "polymer_heat_removal": 1
+    }
+  },
+  "recovered_blend_drive_belts": {
+    "name": "Spliced qualified recovered-blend belts",
+    "output": "Drive Belts",
+    "gate": "belt_power_transmission",
+    "materials": {
+      "Recovered-Blend PU Belt Web": 1,
+      "Spun Yarn": 0.1
+    },
+    "days": 3,
+    "tooling": {
+      "Steel": 2,
+      "Timber": 2
+    }
   }
 }

@@ -461,3 +461,27 @@ func test_formulated_foam_panels_supply_paid_cold_storage_and_stop_without_power
 		assert_float(float(s.resource_stockpiles["Foam Cold-Store Panels"])).is_less(1.0)
 		s.resource_stockpiles["Coal"]=0.0;s.elapsed_days=36;Ops.advance(36)
 		assert_float(Ops.service("cold_storage")).is_equal(0.0))
+func test_selective_glycolysis_uses_completed_virgin_offcuts_and_restricted_blend()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		s.known_discoveries.append("belt_power_transmission");s.discovery_adoption.belt_power_transmission=1.0
+		for resource:String in ["Steel","Timber","Spun Yarn"]:s.resource_stockpiles[resource]=100.0
+		s.resource_stockpiles["PU-Coated Belt Web"]=20.0
+		assert_bool(WorldSimulation.military.start_production_line("polyurethane_drive_belts",20).get("ok",false)).is_true()
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		P.advance(WorldSimulation.military,job,1)
+		assert_float(float(s.resource_stockpiles.get("Clean PU Belt Offcuts",0))).is_equal(0.0)
+		P.advance(WorldSimulation.military,job,10000)
+		assert_int(int(job.completed)).is_equal(20)
+		assert_float(float(s.resource_stockpiles["Clean PU Belt Offcuts"])).is_equal_approx(1.6,.000001)
+		WorldSimulation.military.cancel_equipment_job(int(job.id))
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
+		for resource:String in ["Ethylene Glycol","Caustic Soda","PEG Diol","Aromatic Diisocyanate Feed","Woven Cloth"]:s.resource_stockpiles[resource]=100.0
+		var items:Array[String]=["pu_offcut_glycolysis","qualified_recovered_pu_blend","recovered_blend_belt_web","recovered_blend_drive_belts"]
+		var targets:Array[int]=[1,1,1,21]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Drive Belts"])).is_equal(21.0)
+		assert_float(float(s.resource_stockpiles["Clean PU Belt Offcuts"])).is_equal_approx(.2,.000001)
+		assert_float(float(s.resource_stockpiles["Recovered PU Glycolysate"])).is_equal_approx(.9,.000001)
+		assert_float(float(s.resource_stockpiles["PEG Diol"])).is_equal_approx(99.06,.000001)
+		assert_float(float(s.resource_stockpiles["Recovered-Blend PU Belt Web"])).is_equal(0.0))
