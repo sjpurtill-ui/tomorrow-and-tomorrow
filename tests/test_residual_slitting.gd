@@ -76,7 +76,7 @@ func test_independent_formed_workpieces_drive_measured_accept_or_reject()->void:
 			var spec:=I.product("external_residual_assessment")
 			state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
 			for resource:String in spec.tooling:state.resource_stockpiles[resource]=10.0
-			for resource:String in ["Steel Tool Bits","Paper","Ink"]:state.resource_stockpiles[resource]=10.0
+			for resource:String in ["Steel Tool Bits","Paper","Printing Ink"]:state.resource_stockpiles[resource]=10.0
 			assert_bool(WorldSimulation.military.start_production_line("external_residual_assessment",1).get("ok",false)).is_true()
 			var line:Dictionary=WorldSimulation.military.equipment_queue.back()
 			P.advance(WorldSimulation.military,line,2.5)
