@@ -1,0 +1,780 @@
+[
+  {
+    "id": "achromatic_doublet_matching",
+    "name": "Achromatic Doublet Matching",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_lenses",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "optical_lenses, experimental_optics",
+    "mechanism": "Pair lens elements with different dispersion to reduce chromatic focus separation.",
+    "operating_requirement": "Compatible optical blanks, measured dispersion, fitted curvatures and alignment trials.",
+    "consequence": "Produces a corrected objective for a declared wavelength range; mismatched elements require rework.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "achromatic_doublet_matching",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate achromatic doublet matching on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Compatible optical blanks, measured dispersion, fitted curvatures and alignment trials.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach achromatic doublet matching. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for achromatic doublet matching. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded achromatic doublet matching study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible achromatic doublet matching component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for achromatic doublet matching. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/knowledge-center/application-notes/optics/why-use-an-achromatic-lens"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "aspheric_surface_figuring",
+    "name": "Aspheric Surface Figuring",
+    "field": "D06",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_lenses",
+      "abrasive_grinding_control"
+    ],
+    "requires_any": [],
+    "foundations": "optical_lenses, abrasive_grinding_control",
+    "mechanism": "Shape and verify a nonspherical optical surface against its intended profile.",
+    "operating_requirement": "Controllable removal tools, qualified blank, profile measurement and repeated correction.",
+    "consequence": "Supplies aspheric elements; difficult profiles consume more workshop time and suffer rejection.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aspheric_surface_figuring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate aspheric surface figuring on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Controllable removal tools, qualified blank, profile measurement and repeated correction.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach aspheric surface figuring. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for aspheric surface figuring. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded aspheric surface figuring study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible aspheric surface figuring component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for aspheric surface figuring. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/capabilities/precision-optics/capabilities/aspheric-lenses"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "optical_surface_roughness_control",
+    "name": "Optical Surface Roughness Control",
+    "field": "D06",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_lenses",
+      "abrasive_grinding_control"
+    ],
+    "requires_any": [],
+    "foundations": "optical_lenses, abrasive_grinding_control",
+    "mechanism": "Reduce small-scale surface texture separately from overall optical figure.",
+    "operating_requirement": "Clean polishing media, surface metrology at relevant spatial scales and contamination control.",
+    "consequence": "Reduces scatter for demanding optics; a smooth surface with wrong figure still fails acceptance.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_surface_roughness_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate optical surface roughness control on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Clean polishing media, surface metrology at relevant spatial scales and contamination control.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach optical surface roughness control. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for optical surface roughness control. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded optical surface roughness control study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible optical surface roughness control component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for optical surface roughness control. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/knowledge-center/application-notes/optics/superpolished-optics/"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "antireflection_layer_design",
+    "name": "Antireflection Layer Design",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "thin_film_deposition",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "thin_film_deposition, experimental_optics",
+    "mechanism": "Select optical layer thickness and refractive index to suppress reflection over a specified band.",
+    "operating_requirement": "Clean substrate, controlled deposition and spectral transmission checks.",
+    "consequence": "Improves usable light throughput within the design band; off-band or damaged coatings can degrade it.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "antireflection_layer_design",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate antireflection layer design on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Clean substrate, controlled deposition and spectral transmission checks.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach antireflection layer design. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for antireflection layer design. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded antireflection layer design study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible antireflection layer design component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for antireflection layer design. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/knowledge-center/application-notes/lasers/anti-reflection-coatings"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "dielectric_mirror_stacks",
+    "name": "Dielectric Mirror Stacks",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "thin_film_deposition",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "thin_film_deposition, experimental_optics",
+    "mechanism": "Use multiple dielectric layers to reinforce reflection in a selected spectral and angular range.",
+    "operating_requirement": "Qualified layer materials, thickness control and reflectance inspection.",
+    "consequence": "Makes specialized reflective optics; coating stress and angle sensitivity constrain service.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dielectric_mirror_stacks",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate dielectric mirror stacks on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Qualified layer materials, thickness control and reflectance inspection.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach dielectric mirror stacks. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for dielectric mirror stacks. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded dielectric mirror stacks study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible dielectric mirror stacks component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for dielectric mirror stacks. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/capabilities/precision-optics/capabilities/optical-coatings"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "spectral_beamsplitter_coatings",
+    "name": "Spectral Beamsplitter Coatings",
+    "field": "D04",
+    "status": "authored_draft",
+    "requires_all": [
+      "thin_film_deposition",
+      "spectroscopy"
+    ],
+    "requires_any": [],
+    "foundations": "thin_film_deposition, spectroscopy",
+    "mechanism": "Separate chosen spectral bands into transmitted and reflected instrument paths.",
+    "operating_requirement": "Coatable substrate, measured bands and alignment-compatible coating design.",
+    "consequence": "Enables distinct illumination and detection channels; spectral leakage contaminates measurements.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "spectral_beamsplitter_coatings",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate spectral beamsplitter coatings on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Coatable substrate, measured bands and alignment-compatible coating design.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach spectral beamsplitter coatings. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for spectral beamsplitter coatings. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded spectral beamsplitter coatings study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible spectral beamsplitter coatings component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for spectral beamsplitter coatings. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/capabilities/precision-optics/capabilities/optical-coatings"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "ruled_diffraction_gratings",
+    "name": "Ruled Diffraction Gratings",
+    "field": "D06",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_optics",
+      "workshop_standards"
+    ],
+    "requires_any": [],
+    "foundations": "experimental_optics, workshop_standards",
+    "mechanism": "Cut a regularly spaced groove pattern that disperses incident wavelengths by diffraction.",
+    "operating_requirement": "Stable ruling mechanism, suitable substrate and measured diffraction orders.",
+    "consequence": "Supplies dispersive components; groove errors and stray orders reduce usable spectral detail.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ruled_diffraction_gratings",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate ruled diffraction gratings on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Stable ruling mechanism, suitable substrate and measured diffraction orders.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach ruled diffraction gratings. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for ruled diffraction gratings. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded ruled diffraction gratings study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible ruled diffraction gratings component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for ruled diffraction gratings. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/Knowledge-Center/application-notes/optics/all-about-diffraction-gratings/"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "holographic_grating_recording",
+    "name": "Holographic Grating Recording",
+    "field": "D06",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_interferometry"
+    ],
+    "requires_any": [],
+    "foundations": "optical_interferometry",
+    "mechanism": "Record optical interference fringes in a photosensitive layer to form a diffraction grating.",
+    "operating_requirement": "Sufficiently coherent illumination, stable exposure, fine recording medium and development controls.",
+    "consequence": "Provides a separate grating manufacturing route; exposure instability spoils batches.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "holographic_grating_recording",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate holographic grating recording on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Sufficiently coherent illumination, stable exposure, fine recording medium and development controls.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach holographic grating recording. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for holographic grating recording. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded holographic grating recording study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible holographic grating recording component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for holographic grating recording. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/Knowledge-Center/application-notes/optics/all-about-diffraction-gratings/"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "optical_polarization_analysis",
+    "name": "Optical Polarization Analysis",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "experimental_optics",
+    "mechanism": "Compare light transmission through oriented analyzers to characterize polarization.",
+    "operating_requirement": "Qualified polarizers, rotation references, light source and repeatable intensity readings.",
+    "consequence": "Distinguishes polarization-dependent specimen and instrument behavior; poor extinction limits sensitivity.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_polarization_analysis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate optical polarization analysis on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Qualified polarizers, rotation references, light source and repeatable intensity readings.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach optical polarization analysis. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for optical polarization analysis. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded optical polarization analysis study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible optical polarization analysis component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for optical polarization analysis. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edmundoptics.com/c/polarization/620/"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "birefringent_retardation_control",
+    "name": "Birefringent Retardation Control",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_polarization_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "optical_polarization_analysis",
+    "mechanism": "Introduce a controlled relative phase delay between orthogonal polarization components.",
+    "operating_requirement": "Characterized birefringent element, thickness and axis control, declared wavelength.",
+    "consequence": "Changes polarization in compatible optical paths; wavelength and alignment errors change the result.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "birefringent_retardation_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate birefringent retardation control on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Characterized birefringent element, thickness and axis control, declared wavelength.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach birefringent retardation control. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for birefringent retardation control. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded birefringent retardation control study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible birefringent retardation control component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for birefringent retardation control. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=7234&tabname=Tutorial"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "darkfield_illumination",
+    "name": "Darkfield Illumination",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "compound_microscopy"
+    ],
+    "requires_any": [],
+    "foundations": "compound_microscopy",
+    "mechanism": "Exclude direct illumination from the objective while collecting specimen-scattered light.",
+    "operating_requirement": "Matched illumination stop, condenser and objective aperture; clean specimen preparation.",
+    "consequence": "Reveals weakly scattering structures against a dark field; dust also produces misleading bright features.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "darkfield_illumination",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate darkfield illumination on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Matched illumination stop, condenser and objective aperture; clean specimen preparation.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach darkfield illumination. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for darkfield illumination. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded darkfield illumination study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible darkfield illumination component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for darkfield illumination. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.youtube.com/watch?v=I4ZQm-CAgL8"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "phase_contrast_microscopy",
+    "name": "Phase-Contrast Microscopy",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "compound_microscopy",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "compound_microscopy, experimental_optics",
+    "mechanism": "Convert specimen-induced phase differences into visible intensity contrast.",
+    "operating_requirement": "Matched condenser annulus and objective phase element with careful centering.",
+    "consequence": "Shows suitable unstained specimens; halos can obscure or exaggerate boundaries.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "phase_contrast_microscopy",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate phase-contrast microscopy on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Matched condenser annulus and objective phase element with careful centering.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach phase-contrast microscopy. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for phase-contrast microscopy. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded phase-contrast microscopy study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible phase-contrast microscopy component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for phase-contrast microscopy. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.microscopyu.com/techniques/phase-contrast/introduction-to-phase-contrast-microscopy"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "differential_interference_microscopy",
+    "name": "Differential Interference Microscopy",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "compound_microscopy",
+      "birefringent_retardation_control"
+    ],
+    "requires_any": [],
+    "foundations": "compound_microscopy, birefringent_retardation_control",
+    "mechanism": "Interfere laterally displaced polarized beams to reveal optical-path gradients.",
+    "operating_requirement": "Matched shear prisms, polarizers, aligned optics and suitable specimens.",
+    "consequence": "Improves edge contrast; apparent relief is not a measured surface height.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "differential_interference_microscopy",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate differential interference microscopy on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Matched shear prisms, polarizers, aligned optics and suitable specimens.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach differential interference microscopy. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for differential interference microscopy. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded differential interference microscopy study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible differential interference microscopy component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for differential interference microscopy. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC2762238/"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "multiphoton_excitation_imaging",
+    "name": "Multiphoton Excitation Imaging",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_fluorescence_imaging",
+      "laser_light_generation"
+    ],
+    "requires_any": [],
+    "foundations": "biological_fluorescence_imaging, laser_light_generation",
+    "mechanism": "Concentrate nonlinear fluorescence excitation near the focal volume.",
+    "operating_requirement": "Suitable pulsed source, compatible fluorophores, scanning optics and controlled specimen exposure.",
+    "consequence": "Supports imaging within suitable thick samples; scattering and exposure still limit useful depth.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "multiphoton_excitation_imaging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate multiphoton excitation imaging on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Suitable pulsed source, compatible fluorophores, scanning optics and controlled specimen exposure.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach multiphoton excitation imaging. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for multiphoton excitation imaging. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded multiphoton excitation imaging study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible multiphoton excitation imaging component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for multiphoton excitation imaging. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.microscope.healthcare.nikon.com/en_AOM/products/confocal-microscopes"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "light_sheet_illumination",
+    "name": "Light-Sheet Illumination",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_fluorescence_imaging"
+    ],
+    "requires_any": [],
+    "foundations": "biological_fluorescence_imaging",
+    "mechanism": "Illuminate a thin plane and collect fluorescence along a separate viewing axis.",
+    "operating_requirement": "Sheet-forming optics, compatible specimen mounting and registered section acquisition.",
+    "consequence": "Limits unnecessary illumination in volume imaging; shadowing and alignment create incomplete sections.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "light_sheet_illumination",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate light-sheet illumination on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Sheet-forming optics, compatible specimen mounting and registered section acquisition.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach light-sheet illumination. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for light-sheet illumination. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded light-sheet illumination study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible light-sheet illumination component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for light-sheet illumination. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.microscopyu.com/techniques/light-sheet/light-sheet-fluorescence-microscopy"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "structured_illumination_reconstruction",
+    "name": "Structured-Illumination Reconstruction",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_fluorescence_imaging"
+    ],
+    "requires_any": [
+      [
+        "charge_coupled_image_sensors",
+        "active_pixel_image_sensors"
+      ]
+    ],
+    "foundations": "biological_fluorescence_imaging",
+    "mechanism": "Recover additional spatial information from images acquired under known illumination patterns.",
+    "operating_requirement": "Pattern control, stable specimen, calibrated image acquisition and reconstruction computation.",
+    "consequence": "Improves resolved detail on qualified samples; motion and model mismatch create artifacts.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "structured_illumination_reconstruction",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate structured-illumination reconstruction on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Pattern control, stable specimen, calibrated image acquisition and reconstruction computation.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach structured-illumination reconstruction. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for structured-illumination reconstruction. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded structured-illumination reconstruction study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible structured-illumination reconstruction component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for structured-illumination reconstruction. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nikon.com/company/technology/technology_fields/optics/super-resolution_microscopic/"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "single_molecule_localization_imaging",
+    "name": "Single-Molecule Localization Imaging",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "biological_fluorescence_imaging"
+    ],
+    "requires_any": [
+      [
+        "charge_coupled_image_sensors",
+        "active_pixel_image_sensors"
+      ]
+    ],
+    "foundations": "biological_fluorescence_imaging",
+    "mechanism": "Estimate isolated emitter positions across many sparse fluorescence frames.",
+    "operating_requirement": "Switchable or sparse emitters, sensitive camera, drift control and statistical reconstruction.",
+    "consequence": "Maps labeled features below ordinary image resolution; crowding and sparse sampling distort reconstructions.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "single_molecule_localization_imaging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate single-molecule localization imaging on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Switchable or sparse emitters, sensitive camera, drift control and statistical reconstruction.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach single-molecule localization imaging. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for single-molecule localization imaging. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded single-molecule localization imaging study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible single-molecule localization imaging component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for single-molecule localization imaging. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.microscope.healthcare.nikon.com/en_EU/products/super-resolution-microscopes/n-storm-super-resolution"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "wavefront_sensor_calibration",
+    "name": "Wavefront Sensor Calibration",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_optics"
+    ],
+    "requires_any": [
+      [
+        "charge_coupled_image_sensors",
+        "active_pixel_image_sensors"
+      ]
+    ],
+    "foundations": "experimental_optics",
+    "mechanism": "Relate measured sensor response to departures from a reference optical wavefront.",
+    "operating_requirement": "Reference illumination, calibrated detector geometry and a reconstruction model.",
+    "consequence": "Produces bounded optical-error estimates; noise and unsensed modes remain explicit uncertainty.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wavefront_sensor_calibration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate wavefront sensor calibration on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Reference illumination, calibrated detector geometry and a reconstruction model.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach wavefront sensor calibration. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for wavefront sensor calibration. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded wavefront sensor calibration study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible wavefront sensor calibration component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for wavefront sensor calibration. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://opg.optica.org/ao/abstract.cfm?uri=ao-44-30-6419",
+      "https://www.thorlabs.com/images/Catalog/V21/V21_7_LightAnalysis.pdf"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "deformable_mirror_correction",
+    "name": "Deformable Mirror Correction",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "wavefront_sensor_calibration",
+      "feedback_stability_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "wavefront_sensor_calibration, feedback_stability_analysis",
+    "mechanism": "Command mirror actuators to reduce measured wavefront error within available stroke and bandwidth.",
+    "operating_requirement": "Powered actuator array, response calibration, working sensor and stable control loop.",
+    "consequence": "Corrects supported optical aberrations; actuator limits and delayed feedback leave residual error.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "deformable_mirror_correction",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate deformable mirror correction on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Powered actuator array, response calibration, working sensor and stable control loop.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach deformable mirror correction. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for deformable mirror correction. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded deformable mirror correction study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible deformable mirror correction component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for deformable mirror correction. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://arxiv.org/abs/2309.05748"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "optical_stray_light_baffling",
+    "name": "Optical Stray-Light Baffling",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "experimental_optics",
+    "mechanism": "Block unintended light paths before they reach an instrument detector or eyepiece.",
+    "operating_requirement": "Defined field of view, fitted internal stops or shields and stray-light trials.",
+    "consequence": "Improves contrast under bright surroundings; poorly placed baffles vignette the desired field.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_stray_light_baffling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate optical stray-light baffling on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Defined field of view, fitted internal stops or shields and stray-light trials.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach optical stray-light baffling. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for optical stray-light baffling. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded optical stray-light baffling study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible optical stray-light baffling component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for optical stray-light baffling. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19730014804.pdf"
+    ],
+    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "immersion_objective_matching",
+    "name": "Immersion Objective Matching",
+    "field": "D15",
+    "status": "authored_draft",
+    "requires_all": [
+      "compound_microscopy",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "compound_microscopy, experimental_optics",
+    "mechanism": "Match objective design, immersion medium and specimen interface to the intended optical path.",
+    "operating_requirement": "Compatible objective, clean specified medium and controlled cover-glass and specimen geometry.",
+    "consequence": "Preserves useful numerical aperture and correction; mismatched media introduce aberrations.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "immersion_objective_matching",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate immersion objective matching on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Compatible objective, clean specified medium and controlled cover-glass and specimen geometry.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach immersion objective matching. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for immersion objective matching. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded immersion objective matching study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible immersion objective matching component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for immersion objective matching. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.microscopyu.com/microscopy-basics/water-immersion-objectives"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  },
+  {
+    "id": "optical_spatial_filtering",
+    "name": "Optical Spatial Filtering",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "optical_lenses",
+      "experimental_optics"
+    ],
+    "requires_any": [],
+    "foundations": "optical_lenses, experimental_optics",
+    "mechanism": "Pass a focused beam through a selected spatial aperture to reject unwanted beam structure.",
+    "operating_requirement": "Aligned focusing optics, suitable pinhole, stable illumination and power monitoring.",
+    "consequence": "Supplies a cleaner beam for compatible experiments; misalignment loses light and can damage the aperture.",
+    "branching_note": "Require every mandatory parent and one member of each alternative group. Sibling optical methods are not a mandatory ladder. Finished compatible instruments may be imported without granting manufacture. Horizon and culture never grant mastery.",
+    "recovery": "A reachable capable provider can offer paid instruction, shared research or limited instrument service. Local demonstration, calibration and operating supplies remain necessary; results arrive through finite transport and provider capacity.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optical_spatial_filtering",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Demonstrate optical spatial filtering on a local reference target and retain the measured limitations.",
+      "operating_requirements": "Aligned focusing optics, suitable pinhole, stable illumination and power monitoring.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and specialist time to teach optical spatial filtering. Reserve a local bench, reference samples and supervised trial time.",
+        "partnership": "Share instrument time, reference specimens and observations for optical spatial filtering. Partner queues and negotiated access delay local adoption.",
+        "purchased_research": "Commission a bounded optical spatial filtering study. Pay for prototypes and evaluation; an unsuccessful trial consumes resources without mastery.",
+        "licensed_or_imported_service": "Purchase a compatible optical spatial filtering component or instrument service. Shipping, calibration, maintenance and supplier dependence remain; manufacture is not unlocked.",
+        "reverse_engineering": "Study acquired hardware and records for optical spatial filtering. Dismantling and repeated measurement consume equipment and skilled time; hidden calibration and process details must be reconstructed."
+      }
+    },
+    "evidence_sources": [
+      "https://www.newport.com/c/spatial-filters",
+      "https://www.newport.com.cn/n/spatial-filters"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support physical principles; learning dependencies, costs and game consequences are design proposals."
+  }
+]

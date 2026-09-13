@@ -10464,6 +10464,226 @@
       "classification_status": "editorial_review",
       "rationale": "Laboratory-qualified processing, sensing or controlled industrial treatment.",
       "scope_digest": "f707ba78a4a29dda1c790d67339455d17db1e8a08afcbb94cf5040a21372c3be"
+    },
+    {
+      "id": "achromatic_doublet_matching",
+      "name": "Achromatic Doublet Matching",
+      "horizon": "H04",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "86a3a14299f25931810e8ee18843c58bedac85ec77972335bd2f0d12910d97e7"
+    },
+    {
+      "id": "aspheric_surface_figuring",
+      "name": "Aspheric Surface Figuring",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "3043f5657e060dc6472f2fe225487949742897fb120b8016bdc64048992d3f8b"
+    },
+    {
+      "id": "optical_surface_roughness_control",
+      "name": "Optical Surface Roughness Control",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "824721944df6e2eb7051bc4358e44e0abe24dcaf996049225d9f7f8242140d27"
+    },
+    {
+      "id": "antireflection_layer_design",
+      "name": "Antireflection Layer Design",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "3c514fd05c6ff794f63b3e42ab22db13a2eb7d86812ee0544c54c4c9b85dcf1e"
+    },
+    {
+      "id": "dielectric_mirror_stacks",
+      "name": "Dielectric Mirror Stacks",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "1f40f6f941226db66ebfe0f4aacd3ccdd092d1a36bb89a5cc23519230030e9c4"
+    },
+    {
+      "id": "spectral_beamsplitter_coatings",
+      "name": "Spectral Beamsplitter Coatings",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "81adee9bb45d2342487b03cd793d24390b2a514dc295e67d197204264f500522"
+    },
+    {
+      "id": "ruled_diffraction_gratings",
+      "name": "Ruled Diffraction Gratings",
+      "horizon": "H04",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "69044c7261b92d78b71bbc2c2a3f9c90b72faef5532315988d7dd83d06a155d5"
+    },
+    {
+      "id": "holographic_grating_recording",
+      "name": "Holographic Grating Recording",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "3fdb7821aef4ba823a544b09427f6288089accc24bb35700d1c1256ad912302d"
+    },
+    {
+      "id": "optical_polarization_analysis",
+      "name": "Optical Polarization Analysis",
+      "horizon": "H04",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "2e885165e694d869860c99ee57eb3ff1acf1114ca0eeb213edd1e2af21161043"
+    },
+    {
+      "id": "birefringent_retardation_control",
+      "name": "Birefringent Retardation Control",
+      "horizon": "H04",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "3ad2e4efa76e78b8bd2903ca4856444a488831a65758d0955a1e88f7f391661d"
+    },
+    {
+      "id": "darkfield_illumination",
+      "name": "Darkfield Illumination",
+      "horizon": "H04",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "73808eaf2254f7c26e1570bdd5cb915776f4a6206a7cd48e48bf4a4d72831872"
+    },
+    {
+      "id": "phase_contrast_microscopy",
+      "name": "Phase-Contrast Microscopy",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "56b2d6a46e04e9bb4f78fd12568f4d7f142b142b6d0ea9b60808f06f21ac3817"
+    },
+    {
+      "id": "differential_interference_microscopy",
+      "name": "Differential Interference Microscopy",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "8c6714c4398c4f2d3fa8fc2ec3890a4b4ec09e934a86ae51829d54ce1218227d"
+    },
+    {
+      "id": "multiphoton_excitation_imaging",
+      "name": "Multiphoton Excitation Imaging",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "64690aedbd9698414f75435fe3d43812a5e5bd341560f545d339fa8b390473af"
+    },
+    {
+      "id": "light_sheet_illumination",
+      "name": "Light-Sheet Illumination",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "46f6cfc2485acf96fb27ceefb3e13f4585d23074017d2f78a1f3f9ff99a4195c"
+    },
+    {
+      "id": "structured_illumination_reconstruction",
+      "name": "Structured-Illumination Reconstruction",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "ce054460688bb0c3d22b201d45f8e169fc88091c3df98ea39ebf53d13c1e9bee"
+    },
+    {
+      "id": "single_molecule_localization_imaging",
+      "name": "Single-Molecule Localization Imaging",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "7a9b5438f39ba7654bffd8658faf00ebd1d545cf9a49bf58bcbd58d3ba11de90"
+    },
+    {
+      "id": "wavefront_sensor_calibration",
+      "name": "Wavefront Sensor Calibration",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "3b7b58b13ddb1b999dc454a0e7d77ee362c9c7f7c54f50eae76887869d735da2"
+    },
+    {
+      "id": "deformable_mirror_correction",
+      "name": "Deformable Mirror Correction",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "cb87589bcd704b351407a89bbef6880c7e645befd0beffa9f95586b919dfbaab"
+    },
+    {
+      "id": "optical_stray_light_baffling",
+      "name": "Optical Stray-Light Baffling",
+      "horizon": "H03",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "de3d92044572626521cf3db421d5e69786b1046e75e8336e65bb2832b05de09f"
+    },
+    {
+      "id": "immersion_objective_matching",
+      "name": "Immersion Objective Matching",
+      "horizon": "H04",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "9bd2e54e48c0da6a410dd55c972705e1d5e1a3d4c6ffe8ae08c9bf7219db58f0"
+    },
+    {
+      "id": "optical_spatial_filtering",
+      "name": "Optical Spatial Filtering",
+      "horizon": "H05",
+      "source_file": "optical-instrument-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Classifies the stated optical method and its required instrumentation; it does not date its invention or gate discovery by calendar.",
+      "scope_digest": "dd9e160a3906f93d1940d837c70d7e640910335d1bfc6b5bfc7503ce70ae3879"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
