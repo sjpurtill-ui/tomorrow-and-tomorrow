@@ -1375,13 +1375,14 @@ func adjust_population_role_percentage(role:String,delta:float) -> void:
 	population_allocation_percentages[role]=target
 	synchronize_population_allocations()
 
-func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false)->float:
+func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false,include_civic_records:bool=false)->float:
 	var civilian_workers:=0.0
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
 	if role=="Construction" and not include_military_construction and WorldSimulation.military.joint_operations!=null:capacity*=1.0-WorldSimulation.military.joint_operations.construction_share(resource_settlement_id)
 	if role=="Knowledge":capacity=maxf(0,capacity-preload("res://scripts/scholar_visits.gd").absent(self,int(elapsed_days)))
 	if role=="Knowledge" and not include_clinical_care:capacity=maxf(0,capacity-preload("res://scripts/civilian_care.gd").reserved(self,capacity))
+	if role=="Administration" and not include_civic_records:capacity=maxf(0,capacity-preload("res://scripts/civic_administration.gd").reserved(self,capacity))
 	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/technology_operations.gd").reserved_workers(self))
 	return capacity
 

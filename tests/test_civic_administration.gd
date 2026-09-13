@@ -44,3 +44,37 @@ func test_clerical_work_is_bounded_and_cannot_be_credited_twice_today()->void:
 	assert_float(float(GovernmentPeopleSystem.administration_records.work)).is_equal(before)
 	C.credit_day(GovernmentPeopleSystem,10000)
 	assert_float(float(GovernmentPeopleSystem.administration_records.work)).is_less_equal(before*2.0)
+
+func test_clerical_reservation_reduces_other_administration_capacity()->void:
+	GameState.population_allocations.Administration=10.0
+	var raw:=GameState.effective_workers("Administration",false,false,true)
+	var ordinary:=GameState.effective_workers("Administration")
+	GovernmentPeopleSystem.administration_records.work=0.0
+	C.credit_day(GovernmentPeopleSystem,20)
+	var paid:=float(GovernmentPeopleSystem.administration_records.last_reserved_work)
+	assert_float(ordinary).is_less(raw)
+	assert_float(ordinary+paid).is_equal_approx(raw,.000001)
+	GameState.resource_settlement_id="secondary"
+	assert_float(GameState.effective_workers("Administration")).is_equal(raw)
+	GameState.resource_settlement_id=""
+func test_replacement_transfers_actual_pending_duty_after_paid_handover()->void:
+	GameState.known_discoveries.append("public_office_handover")
+	var site:Dictionary=GameState.player_settlements[0]
+	var previous:=int(site.leader_person_id)
+	var successor:=int(GovernmentPeopleSystem.people[1].person_id)
+	var followup:={"state":"pending","leader_person_id":previous,"settlement_id":site.id,"due_day":1}
+	GameState.sovereign_orders.append({"id":"custody_test","settlement_id":site.id,"implementation_followup":followup})
+	GovernmentPeopleSystem.mark_central_appointment(successor,"Steward")
+	assert_str(String(followup.handover_state)).is_equal("pending")
+	C.process_handovers(GovernmentPeopleSystem)
+	assert_bool(followup.has("custodian_person_id")).is_false()
+	C.register_jurisdiction(GovernmentPeopleSystem,site.id,["work"])
+	C.issue_mandate(GovernmentPeopleSystem,site.id,successor,["work"],30)
+	var before:=float(GovernmentPeopleSystem.administration_records.work)
+	C.process_handovers(GovernmentPeopleSystem)
+	assert_int(int(followup.custodian_person_id)).is_equal(successor)
+	assert_int(int(followup.leader_person_id)).is_equal(previous)
+	assert_float(float(GovernmentPeopleSystem.administration_records.work)).is_equal(before-.5)
+	assert_bool(C.can_review(GovernmentPeopleSystem,followup)).is_true()
+	C.process_handovers(GovernmentPeopleSystem)
+	assert_float(float(GovernmentPeopleSystem.administration_records.work)).is_equal(before-.5)
