@@ -39,3 +39,10 @@ Expected shared edits: one ResourceSystem daily service hook; civilian workshop 
 - Inspector reports match physical state. Run focused water/resource, owner/save and affected construction/production checks once after the cohesive implementation. Treat unrelated baseline failures separately and disclose them.
 
 Full treatment, wastewater networks, historical pacing, the rest of the 5,000 discoveries and their artwork remain part of the larger goal. This conveyance batch cannot stand in for completion of those requirements.
+
+
+## Working implementation checkpoint
+
+Route survey and material-quote helpers exist, with six paid workshop recipes and ten unregistered discovery definitions. Runtime registration and water delivery are intentionally still incomplete; this is not a READY handoff. Forming/firing supply actual intermediate/final products; installations can use imported final products without granting manufacture. Daily construction helpers return work used so the caller can share the existing construction budget.
+
+Three draft prerequisite corrections are required when promoting the verified runtime: ceramic socket joining uses shared measures plus lime mortar OR clay tempering, without mandatory pipe manufacture; bedding uses drainage plus joinery OR clay tempering; fit gauges use shared measures plus clay shaping OR joinery. These retain local installation competence while allowing imported sections. The old proposed predicates remain in the authored ledger until verified promotion records their reconciliation. Quantities are game batches and workload tuning, not engineering units or certified hydraulic ratings.
