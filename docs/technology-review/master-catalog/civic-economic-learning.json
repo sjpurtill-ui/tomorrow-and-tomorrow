@@ -69,22 +69,6 @@
   },
   {
     "field": "D16",
-    "id": "jurisdiction_boundaries",
-    "name": "Jurisdiction Boundaries",
-    "foundations": "regional_maps,customary_law",
-    "mechanism": "Specify which authority handles a dispute by place, party or subject",
-    "operating_requirement": "Boundary records and recognized allocation of authority",
-    "consequence": "Reduce competing claims to hear the same matter",
-    "status": "authored_draft",
-    "requires_all": [
-      "regional_maps",
-      "customary_law"
-    ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
-  },
-  {
-    "field": "D16",
     "id": "court_case_dockets",
     "name": "Court Case Dockets",
     "foundations": "specialized_courts,formal_archives",
@@ -510,38 +494,6 @@
   },
   {
     "field": "D16",
-    "id": "public_office_handover",
-    "name": "Public Office Handover",
-    "foundations": "professional_service,formal_archives",
-    "mechanism": "Transfer pending duties, records and assets when officials change",
-    "operating_requirement": "Handover time, records and successor access",
-    "consequence": "Reduce knowledge loss at office turnover",
-    "status": "authored_draft",
-    "requires_all": [
-      "professional_service",
-      "formal_archives"
-    ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
-  },
-  {
-    "field": "D16",
-    "id": "official_mandate_registers",
-    "name": "Official Mandate Registers",
-    "foundations": "professional_service,jurisdiction_boundaries",
-    "mechanism": "Record which powers each office holds and when authorization ends",
-    "operating_requirement": "Maintained registers and enforceable delegation rules",
-    "consequence": "Distinguish an official title from current authority",
-    "status": "authored_draft",
-    "requires_all": [
-      "professional_service",
-      "jurisdiction_boundaries"
-    ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
-  },
-  {
-    "field": "D16",
     "id": "ombuds_review",
     "name": "Ombuds Review",
     "foundations": "administrative_appeals,conflict_of_interest_recusal",
@@ -552,22 +504,6 @@
     "requires_all": [
       "administrative_appeals",
       "conflict_of_interest_recusal"
-    ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
-  },
-  {
-    "field": "D16",
-    "id": "petition_registers",
-    "name": "Petition Registers",
-    "foundations": "phonetic_notation,professional_service",
-    "mechanism": "Record submitted grievances and their disposition",
-    "operating_requirement": "Clerks, public access and response procedures",
-    "consequence": "Make ignored or recurring requests visible",
-    "status": "authored_draft",
-    "requires_all": [
-      "phonetic_notation",
-      "professional_service"
     ],
     "requires_any": [],
     "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."

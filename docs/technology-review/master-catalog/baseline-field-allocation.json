@@ -5765,6 +5765,34 @@
       "source_domain": "production",
       "name": "Abrasive Belt Finishing",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "jurisdiction_boundaries",
+      "field": "D16",
+      "source_domain": "Society",
+      "name": "Jurisdiction Boundaries",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "official_mandate_registers",
+      "field": "D16",
+      "source_domain": "Society",
+      "name": "Official Mandate Registers",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "public_office_handover",
+      "field": "D16",
+      "source_domain": "Society",
+      "name": "Public Office Handover",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "petition_registers",
+      "field": "D16",
+      "source_domain": "Society",
+      "name": "Petition Registers",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

@@ -1,5 +1,5 @@
 {
-  "source_commit": "11241aee7f00f49df88648536e466e34ebb06205",
+  "source_commit": "4e44916bff6de7e8ec810ef9890a9790071b4d86",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -65102,6 +65102,306 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D16",
+      "id": "jurisdiction_boundaries",
+      "name": "Jurisdiction Boundaries",
+      "foundations": "regional_maps,customary_law",
+      "mechanism": "Specify which authority handles a dispute by place, party or subject",
+      "operating_requirement": "Boundary records and recognized allocation of authority",
+      "consequence": "Reduce competing claims to hear the same matter",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "4e44916bff6de7e8ec810ef9890a9790071b4d86",
+        "editorial_source": "civic-economic-learning.json",
+        "previous_requires_all": [
+          "regional_maps",
+          "customary_law"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "Society",
+        "dynamic": "institutions",
+        "effects": {},
+        "id": "jurisdiction_boundaries",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Jurisdiction Boundaries",
+            "missing_all": [
+              "regional_maps",
+              "customary_law"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "regional_maps",
+              "customary_law"
+            ],
+            "requires_all": [
+              "regional_maps",
+              "customary_law"
+            ],
+            "requires_any": [],
+            "signals": [
+              "administration",
+              "research",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Jurisdiction Boundaries",
+        "observation": "Specify which authority handles a dispute by place, party or subject",
+        "operating_contract": "Existing appointed officials and reserved administrative work maintain local scope, finite mandates, pending-duty custody and condition-backed petition dispositions. Knowledge grants no officials, settlement ownership or instant relief.",
+        "requires": [
+          "regional_maps",
+          "customary_law"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "administration",
+          "research",
+          "information"
+        ],
+        "social_consequence": "Administrative reach grows, sharpening conflict over who controls records, obligations, and binding decisions",
+        "subcategory": "Administration"
+      }
+    },
+    {
+      "field": "D16",
+      "id": "official_mandate_registers",
+      "name": "Official Mandate Registers",
+      "foundations": "professional_service,jurisdiction_boundaries",
+      "mechanism": "Record which powers each office holds and when authorization ends",
+      "operating_requirement": "Maintained registers and enforceable delegation rules",
+      "consequence": "Distinguish an official title from current authority",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "4e44916bff6de7e8ec810ef9890a9790071b4d86",
+        "editorial_source": "civic-economic-learning.json",
+        "previous_requires_all": [
+          "professional_service",
+          "jurisdiction_boundaries"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "Society",
+        "dynamic": "institutions",
+        "effects": {},
+        "id": "official_mandate_registers",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Official Mandate Registers",
+            "missing_all": [
+              "professional_service",
+              "jurisdiction_boundaries"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "professional_service",
+              "jurisdiction_boundaries"
+            ],
+            "requires_all": [
+              "professional_service",
+              "jurisdiction_boundaries"
+            ],
+            "requires_any": [],
+            "signals": [
+              "administration",
+              "research",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Official Mandate Registers",
+        "observation": "Record which powers each office holds and when authorization ends",
+        "operating_contract": "Existing appointed officials and reserved administrative work maintain local scope, finite mandates, pending-duty custody and condition-backed petition dispositions. Knowledge grants no officials, settlement ownership or instant relief.",
+        "requires": [
+          "professional_service",
+          "jurisdiction_boundaries"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "administration",
+          "research",
+          "information"
+        ],
+        "social_consequence": "Administrative reach grows, sharpening conflict over who controls records, obligations, and binding decisions",
+        "subcategory": "Administration"
+      }
+    },
+    {
+      "field": "D16",
+      "id": "public_office_handover",
+      "name": "Public Office Handover",
+      "foundations": "professional_service,formal_archives",
+      "mechanism": "Transfer pending duties, records and assets when officials change",
+      "operating_requirement": "Handover time, records and successor access",
+      "consequence": "Reduce knowledge loss at office turnover",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "4e44916bff6de7e8ec810ef9890a9790071b4d86",
+        "editorial_source": "civic-economic-learning.json",
+        "previous_requires_all": [
+          "professional_service",
+          "formal_archives"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "Society",
+        "dynamic": "institutions",
+        "effects": {},
+        "id": "public_office_handover",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Public Office Handover",
+            "missing_all": [
+              "professional_service",
+              "formal_archives"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "professional_service",
+              "formal_archives"
+            ],
+            "requires_all": [
+              "professional_service",
+              "formal_archives"
+            ],
+            "requires_any": [],
+            "signals": [
+              "administration",
+              "research",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Public Office Handover",
+        "observation": "Transfer pending duties, records and assets when officials change",
+        "operating_contract": "Existing appointed officials and reserved administrative work maintain local scope, finite mandates, pending-duty custody and condition-backed petition dispositions. Knowledge grants no officials, settlement ownership or instant relief.",
+        "requires": [
+          "professional_service",
+          "formal_archives"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "administration",
+          "research",
+          "information"
+        ],
+        "social_consequence": "Administrative reach grows, sharpening conflict over who controls records, obligations, and binding decisions",
+        "subcategory": "Administration"
+      }
+    },
+    {
+      "field": "D16",
+      "id": "petition_registers",
+      "name": "Petition Registers",
+      "foundations": "phonetic_notation,professional_service",
+      "mechanism": "Record submitted grievances and their disposition",
+      "operating_requirement": "Clerks, public access and response procedures",
+      "consequence": "Make ignored or recurring requests visible",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "4e44916bff6de7e8ec810ef9890a9790071b4d86",
+        "editorial_source": "civic-economic-learning.json",
+        "previous_requires_all": [
+          "phonetic_notation",
+          "professional_service"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "Society",
+        "dynamic": "institutions",
+        "effects": {},
+        "id": "petition_registers",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Petition Registers",
+            "missing_all": [
+              "phonetic_notation",
+              "professional_service"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "phonetic_notation",
+              "professional_service"
+            ],
+            "requires_all": [
+              "phonetic_notation",
+              "professional_service"
+            ],
+            "requires_any": [],
+            "signals": [
+              "administration",
+              "research",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Petition Registers",
+        "observation": "Record submitted grievances and their disposition",
+        "operating_contract": "Existing appointed officials and reserved administrative work maintain local scope, finite mandates, pending-duty custody and condition-backed petition dispositions. Knowledge grants no officials, settlement ownership or instant relief.",
+        "requires": [
+          "phonetic_notation",
+          "professional_service"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "administration",
+          "research",
+          "information"
+        ],
+        "social_consequence": "Administrative reach grows, sharpening conflict over who controls records, obligations, and binding decisions",
+        "subcategory": "Administration"
       }
     }
   ]

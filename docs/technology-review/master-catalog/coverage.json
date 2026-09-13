@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 806,
+  "verified_baseline_discoveries": 810,
   "pending_communications": 0,
-  "new_authored_drafts": 2658,
+  "new_authored_drafts": 2654,
   "distinct_accounted_identities": 3464,
   "remaining_identities_to_author": 1536,
   "target": 5000,
@@ -2314,9 +2314,9 @@
         "target": 800,
         "assigned": 222,
         "target_slots_not_yet_assigned": 578,
-        "implemented_baseline": 10,
+        "implemented_baseline": 14,
         "pending_communications": 0,
-        "authored_drafts": 212
+        "authored_drafts": 208
       },
       {
         "id": "H04",
@@ -2369,7 +2369,7 @@
     "D13": 113,
     "D14": 173,
     "D15": 126,
-    "D16": 135,
+    "D16": 131,
     "D17": 115,
     "D18": 92,
     "D19": 95,
@@ -2534,9 +2534,9 @@
       "id": "D16",
       "name": "Governance",
       "target": 240,
-      "implemented_baseline": 6,
+      "implemented_baseline": 10,
       "pending_communications": 0,
-      "authored_drafts": 135,
+      "authored_drafts": 131,
       "accounted": 141,
       "remaining_to_target": 99
     },
