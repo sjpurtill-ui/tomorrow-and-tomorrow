@@ -5,7 +5,7 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 ## Authoritative baselines
 
 - Verified canonical runtime `04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8`: **667 discoveries, 449 learning routes, 309 civilian recipes and 17 facilities**. All 107 combined water/clothing checks and 42 canonical cases pass. Earlier validation and the separate river-edge fixture limitation remain documented in `../../FOOD_CONSTRUCTION_INTEGRATION.md`.
-- Water promotes ten existing authored identities. All 667 stored definitions exactly match the loaded canonical snapshot. The ledger contains 667 integrated + 2,405 drafts = 3,072 identities, leaving 1,928 to author and 4,333 to implement. Verified subject art: 108; 559 remain queued.
+- Water promotes ten existing authored identities. All 667 stored definitions exactly match the loaded canonical snapshot. The ledger contains 667 integrated + 2,425 drafts = 3,092 identities, leaving 1,908 to author and 4,333 to implement. Verified subject art: 108; 559 remain queued.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 

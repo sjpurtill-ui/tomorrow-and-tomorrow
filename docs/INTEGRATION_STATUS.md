@@ -1,5 +1,12 @@
 ## September 12 — grain equipment quotas and two construction illustrations
 
+## September 12 — sustained workshop supply and reviewed coverage
+
+INTEGRATED `cd6accf0cd2dc24b51842bfc3280530ec8c2b52f` fixes a reproduced one-workshop yarn-supply stall. Idle automatic civilian lines can make their own missing upstream inputs through ordinary paid retooling; manual unfinished, paused, reserved and in-progress jobs remain protected. All 65 worktree cases and 32 canonical planner/production cases pass. Optional saved management flags are validated; old unmarked lines remain valid. See `CIVILIAN_UPSTREAM_RESUMPTION_HANDOFF.md` and `/tmp/tt-upstream-canonical-results.json`.
+
+Reviewed maritime coverage `7c81928` adds 20 authored proposals, giving **667 integrated + 2,425 drafts = 3,092 identities**, with **1,908 still to author and 4,333 to implement**. All 15 ledger-tool checks pass; the live graph and 108-art inventory are unchanged. Pacing evidence `6b8940f` closes the older 476-catalog 250-year run and records one bounded 667-catalog early observation. Neither proves current industrial throughput or full-history pacing; no long run was restarted. See `technology-review/PACING_PROFILING.md`.
+
+
 ## September 12 — verified water conveyance, 667 live discoveries
 
 INTEGRATED runtime `04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8`, incorporating frozen water `5d08c2b` into canonical `7a5e91f`. **107 combined worktree cases across nine suites and 42 canonical water/clothing/city cases pass**. The graph is clean at **667 discoveries /449 explicit learning routes /309 civilian recipes /17 facilities**. See `WATER_CLOTHING_INTEGRATION.md` for source-bound paid installation, real secondary-city shipping, household-fetching conservation, owner/save coverage and limitations. No player/editor launch or package update occurred.
