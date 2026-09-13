@@ -4855,7 +4855,7 @@
       "domain": "logistics",
       "id": "dry_dock_services",
       "name": "Dry Dock Services",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/hull_condition_surveys.png",
@@ -4863,7 +4863,7 @@
       "domain": "logistics",
       "id": "hull_condition_surveys",
       "name": "Hull Condition Surveys",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
@@ -5389,9 +5389,9 @@
   "live_art_complete": false,
   "live_count": 673,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 565,
+  "queued_count": 563,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 108
+  "verified_count": 110
 }

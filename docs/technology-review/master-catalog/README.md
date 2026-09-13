@@ -5,7 +5,7 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 ## Authoritative baselines
 
 - Verified canonical runtime `b363f6c6aceaf42515e020281934cef26cb217fd`: **673 discoveries, 455 learning routes, 309 civilian recipes and 17 facilities**. Naval/sewing integration passes 86 combined and 48 canonical cases. Earlier validation and the separate river-edge fixture limitation remain documented in `../../FOOD_CONSTRUCTION_INTEGRATION.md`.
-- Naval access and surveys promote two existing authored identities. All 673 stored definitions exactly match the loaded canonical snapshot. The ledger contains 673 integrated + 2,419 drafts = 3,092 identities, leaving 1,908 to author and 4,327 to implement. Verified subject art: 108; 565 remain queued.
+- Naval access and surveys promote two existing authored identities. All 673 stored definitions exactly match the loaded canonical snapshot. The ledger contains 673 integrated + 2,419 drafts = 3,092 identities, leaving 1,908 to author and 4,327 to implement. Verified subject art: 110; 563 remain queued.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 
