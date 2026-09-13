@@ -110,3 +110,11 @@ Added separate MultiMesh installed-detail overlays for the early authored kit an
 Placement uses base-plus-overlay bounds for explicit early kit forms; organic-town variant selection occurs later, so its finite kit's maximum expanded extent is reserved conservatively. Late architecture continues using its own installed mesh bounds. Separate overlay cache keys include the source bounds and feature flags.
 
 Headless parsing of EarlySettlementVisual passes. Extended mesh probe verifies scaled early shade extent and overlay cache reuse; all previous job/record/mesh assertions pass, /tmp/tt-fabric-early-bounds.log, exit 0. This does not verify rendered alignment, visual quality or neighborhood clearance at actual loaded coordinates. Generic facade detail placement needs review against curved/irregular buildings before READY. Operating consequences, repairs, autonomous starts, acquisition and full supply/save/city checks remain unfinished.
+
+## Condition-dependent weather service and paid maintenance
+
+Accepted installed records now produce a service observation using the lesser of current plot condition and originally qualified support condition. Repairs cannot exceed the tested design. Flashing/rainscreen response affects only a selected 20% interface share of earthen-wall rain exposure; other exposure remains. This is a bounded game allocation, not a measured universal wall coefficient. It does not reduce unrelated hazards or give knowledge-wide bonuses.
+
+Existing supplied maintenance is capped by available installed replacement component stocks and debits them in proportion to the work actually delivered after base-fabric material payment. With no installed records its old bill remains unchanged. All ten installed component types contribute a finite aggregate replacement requirement; detailed repair methods and dismantling are not yet modeled.
+
+Headless job/service checks pass insufficient repair supply, partial repair debit, condition-dependent rain transfer and bounded protection; existing actual-owner probe passes. Logs /tmp/tt-fabric-service.log and /tmp/tt-fabric-service-owner.log, exit 0. Need broader tests of actual earthen monthly wear/repair and mixed-city save state. Structural service, runoff/capillary/shading consumers, autonomous starts, acquisition, supply closure and rendered visual QA remain incomplete. HELD.

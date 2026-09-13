@@ -195,3 +195,49 @@ static func result_matches(stored:Variant,expected:Dictionary)->bool:
    if not is_finite(float(stored[key])) or absf(float(stored[key])-float(expected[key]))>1e-9:return false
   elif stored[key]!=expected[key]:return false
  return true
+
+static func service_observation(plot:Dictionary,method:String)->Dictionary:
+ var record:Variant=plot.get("fabric_components",{}).get(method,{})
+ if not valid_record(record,int(plot.get("id",0)),true):return {}
+ if String(record.job.method)!=method:return {}
+ var assembly:Dictionary=record.job.assembly.duplicate(true)
+ # Repairs can restore service up to the qualified condition, never improve
+ # the tested design or raise its original qualified support envelope.
+ var condition:float=float(plot.get("condition",0))
+ if not is_finite(condition):return {}
+ assembly.support_condition=minf(float(assembly.support_condition),clampf(condition,.1,1.0))
+ return preload("res://scripts/settlement_fabric_response.gd").observe(assembly)
+
+static func rain_transfer(plot:Dictionary)->float:
+ var transfer:=1.0
+ # Roof flashing and rainscreen qualify separate protective interfaces. Use
+ # the better demonstrated envelope, not multiplied discovery bonuses.
+ for method:String in ["roof_flashing_interfaces","rainscreen_wall_assemblies"]:
+  var observation:Dictionary=service_observation(plot,method)
+  if observation.is_empty():continue
+  var trial:Dictionary=preload("res://scripts/settlement_fabric_inspection.gd").TRIALS[method]
+  transfer=minf(transfer,clampf(float(observation[trial.response]),0,1))
+ # Only the modeled interface share of wall exposure is protected.
+ return .8+.2*transfer
+
+static func repair_bill(plot:Dictionary,work:float)->Dictionary:
+ var bill:Dictionary={}
+ if not is_finite(work) or work<=0:return bill
+ for method:String in COMPONENTS:
+  var record:Variant=plot.get("fabric_components",{}).get(method,{})
+  if not valid_record(record,int(plot.get("id",0)),true):continue
+  var item:String=COMPONENTS[method]
+  bill[item]=float(bill.get(item,0))+work*.25
+ return bill
+
+static func affordable_repair(plot:Dictionary,work:float,stock:Dictionary)->float:
+ if not is_finite(work) or work<=0:return 0.0
+ var supported:float=work
+ for item:String in repair_bill(plot,1.0):
+  var amount:float=float(stock.get(item,0))
+  if not is_finite(amount):return 0.0
+  supported=minf(supported,maxf(0,amount)/.25)
+ return maxf(0,supported)
+
+static func pay_repair(plot:Dictionary,work:float,stock:Dictionary)->void:
+ for item:String in repair_bill(plot,work):stock[item]=maxf(0,float(stock.get(item,0))-float(repair_bill(plot,work)[item]))

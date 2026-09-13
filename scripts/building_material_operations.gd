@@ -98,11 +98,15 @@ static func decay_factor(plot:Dictionary)->float:
 	var factor:=float(profile.get("decay",1.0))
 	if String(profile.get("id","")) in ["adobe_units","wattle_daub"]:
 		var rain:=clampf(float(WorldSimulation.food.current_environment_profile().get("precipitation",.5)),0,1)
-		factor*=1.0+rain*(.6 if String(profile.id)=="adobe_units" else .35)
+		factor*=1.0+rain*preload("res://scripts/settlement_fabric_operations.gd").rain_transfer(plot)*(.6 if String(profile.id)=="adobe_units" else .35)
 	return factor
 static func supplied_maintenance(plot:Dictionary,work:float)->float:
+	work=preload("res://scripts/settlement_fabric_operations.gd").affordable_repair(plot,work,WorldSimulation.state.resource_stockpiles)
 	var profile:Dictionary=plot.get("building_materials",{})
-	if profile.is_empty() or work<=0:return work
+	if work<=0:return 0.0
+	if profile.is_empty():
+		preload("res://scripts/settlement_fabric_operations.gd").pay_repair(plot,work,WorldSimulation.state.resource_stockpiles)
+		return work
 	var spec:Dictionary=PROFILES[profile.id]
 	var material:=String(spec.repair)
 	var needed:=work*2.0
@@ -113,7 +117,9 @@ static func supplied_maintenance(plot:Dictionary,work:float)->float:
 	var stock:=float(WorldSimulation.state.resource_stockpiles.get(material,0))
 	var used:=minf(stock,needed)
 	WorldSimulation.state.resource_stockpiles[material]=stock-used
-	return work*used/needed
+	var delivered_work:=work*used/needed
+	preload("res://scripts/settlement_fabric_operations.gd").pay_repair(plot,delivered_work,WorldSimulation.state.resource_stockpiles)
+	return delivered_work
 static func valid(value:Variant)->bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return true

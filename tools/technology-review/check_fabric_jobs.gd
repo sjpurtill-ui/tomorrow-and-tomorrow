@@ -61,6 +61,18 @@ func _initialize()->void:
   assert(resolved.state=="accepted")
   assert(ready.fabric_components.has(method))
   assert(F.valid_plot_records(ready))
+  assert(F.affordable_repair(ready,.2,{})==0.0)
+  var repair_stock:Dictionary={item:.025}
+  assert(is_equal_approx(F.affordable_repair(ready,.2,repair_stock),.1))
+  F.pay_repair(ready,.1,repair_stock)
+  assert(is_zero_approx(float(repair_stock[item])))
+  if method in ["roof_flashing_interfaces","rainscreen_wall_assemblies"]:
+   ready.condition=1.0
+   var protected:float=F.rain_transfer(ready)
+   ready.condition=.1
+   assert(F.rain_transfer(ready)>protected)
+   assert(protected>=.8)
+   ready.condition=1.0
   var kit=preload("res://scripts/settlement_architecture_kit.gd")
   ready.fabric_generation=12
   ready.storeys=1
