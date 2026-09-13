@@ -84,3 +84,52 @@ func test_actual_daily_owner_stops_cooling_when_maintenance_is_missing()->void:
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(0.0)
 		assert_float(float(Ops.data().plants.polymer_cooling_circuit.running_units)).is_equal(0.0)
 		assert_float(float(Ops.data().inputs.get("Pressure Pipe Fittings",0))).is_equal(0.0))
+
+func test_missing_definition_has_no_depth_and_remains_a_graph_error()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		WorldSimulation.discovery.initialize()
+		assert_int(WorldSimulation.discovery.technology_depth("missing_polymer_parent")).is_equal(0)
+		assert_bool(WorldSimulation.discovery.catalog_by_id.has("missing_polymer_parent")).is_false()
+		var errors:=preload("res://scripts/technology_requirements.gd").validate([{"id":"dependent","requires_all":["missing_polymer_parent"]}])
+		assert_bool(errors.is_empty()).is_false())
+func run_batch(item:String,target:int)->Dictionary:
+	var spec:=I.product(item)
+	if String(spec.gate) not in WorldSimulation.state.known_discoveries:WorldSimulation.state.known_discoveries.append(spec.gate)
+	WorldSimulation.state.discovery_adoption[spec.gate]=1.0
+	for resource:String in spec.tooling:WorldSimulation.state.resource_stockpiles[resource]=1000.0
+	var started:Dictionary=WorldSimulation.military.start_production_line(item,target)
+	assert_bool(started.get("ok",false)).override_failure_message(str(started)).is_true()
+	if not started.get("ok",false):return {}
+	var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+	P.advance(WorldSimulation.military,job,10000)
+	WorldSimulation.military.cancel_equipment_job(int(job.id))
+	return job
+func test_complete_typed_chain_consumes_feed_and_produces_existing_cable()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare()
+		# Existing nonpolymer supply is the boundary fixture. Intermediates start empty.
+		WorldSimulation.state.resource_stockpiles={}
+		for resource:String in ["Bitumen","Timber","Freshwater","Quicklime","Oxygen","Copper Wire","Laboratory Glassware"]:WorldSimulation.state.resource_stockpiles[resource]=10000.0
+		Ops.data().last_day=0;Ops.data().services={"electricity":10000.0,"polymer_reactor_work":100.0,"polymer_heat_removal":200.0}
+		var items:Array[String]=["refinery_naphtha_cut","steam_cracked_ethene","purified_ethene_feed","radical_ldpe_resin","characterized_ldpe","ldpe_pelletizing","ldpe_film_grade","ldpe_film_extrusion","polyethylene_wrapped_cable"]
+		var targets:Array[int]=[128,24,16,12,10,8,6,4,2]
+		for n:int in items.size():
+			var job:=run_batch(items[n],targets[n])
+			assert_int(int(job.get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Insulated Cable"])).is_equal(2.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Bitumen"])).is_equal(9360.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["LDPE Film"])).is_equal_approx(3.2,.00001)
+		assert_float(Ops.service("polymer_reactor_work")).is_equal(88.0)
+		assert_float(Ops.service("polymer_heat_removal")).is_equal(176.0))
+func test_imported_characterized_resin_enables_adopted_forming_without_synthesis_mastery()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare()
+		WorldSimulation.state.known_discoveries.erase("radical_chain_polymerization")
+		WorldSimulation.state.discovery_adoption.erase("radical_chain_polymerization")
+		WorldSimulation.state.resource_stockpiles["Characterized LDPE"]=2.0
+		Ops.data().last_day=0;Ops.data().services={"electricity":10.0}
+		var job:=run_batch("ldpe_pelletizing",1)
+		assert_int(int(job.get("completed",0))).is_equal(1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Characterized LDPE"])).is_equal_approx(.96,.00001)
+		assert_bool("radical_chain_polymerization" in WorldSimulation.state.known_discoveries).is_false()
+		assert_bool(P.recipe(WorldSimulation.military,"radical_ldpe_resin").has("error")).is_true())
