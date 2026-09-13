@@ -25,11 +25,18 @@ func run()->void:
 		row["requires_all"]=row.get("requires_all",row.get("requires",[]))
 		row["requires_any"]=row.get("requires_any",[])
 		entries.append(row)
-	var errors:Array=requirements.validate(entries)
+	# Validate a separate graph. Full exported rows intentionally retain their
+	# established normalization and source OR fields byte-for-byte in content.
+	var graph:Array=[]
+	for entry:Dictionary in discovery.technology_catalog:graph.append(pathways.graph_entry(entry))
+	var dormant_audit:Script=load("res://tools/technology-review/dormant_or_audit.gd")
+	graph=dormant_audit.factor_common(graph,discovery.technology_catalog)
+	var dormant:Array=dormant_audit.pending(graph)
+	var errors:Array=requirements.validate(graph,dormant)
 	if not errors.is_empty():push_error(str(errors));quit(1);return
 	var file:=FileAccess.open(output,FileAccess.WRITE)
 	if file==null:push_error("Cannot write snapshot");quit(2);return
-	var snapshot:={"source_commit":String(revision[0]).strip_edges(),"source_checkout":checkout,"validation_scope":"Loaded runtime graph and causal reachability; integration and behavior must be independently verified","items":entries}
+	var snapshot:={"source_commit":String(revision[0]).strip_edges(),"source_checkout":checkout,"validation_scope":"Loaded runtime graph and causal reachability; integration and behavior must be independently verified","declared_dormant_or":dormant,"items":entries}
 	file.store_string(JSON.stringify(snapshot,"  "));file.close()
 	print(JSON.stringify({"source_commit":snapshot.source_commit,"discoveries":entries.size(),"output":output}))
 	quit(0)
