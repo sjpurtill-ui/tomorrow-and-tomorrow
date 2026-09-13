@@ -6584,14 +6584,126 @@
       "id": "plant_resistance_trait_trials",
       "name": "Plant Resistance Trait Trials",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/laboratory_notebooks.png",
+      "description": "Record methods, observations, deviations and dates while work occurs",
+      "domain": "knowledge",
+      "id": "laboratory_notebooks",
+      "name": "Laboratory Notebooks",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/experimental_protocol_publication.png",
+      "description": "Publish enough method detail for another group to attempt reproduction",
+      "domain": "knowledge",
+      "id": "experimental_protocol_publication",
+      "name": "Experimental Protocol Publication",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microscopic_cell_observation.png",
+      "description": "Observe recurring small structures in suitable biological preparations",
+      "domain": "knowledge",
+      "id": "microscopic_cell_observation",
+      "name": "Microscopic Cell Observation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cell_theory.png",
+      "description": "Relate organism structure and growth to cells and their continuity",
+      "domain": "knowledge",
+      "id": "cell_theory",
+      "name": "Cell Theory",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cell_division_observation.png",
+      "description": "Compare successive cellular states during growth and reproduction",
+      "domain": "knowledge",
+      "id": "cell_division_observation",
+      "name": "Cell-Division Observation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/tissue_histology.png",
+      "description": "Compare organized cellular patterns within different tissues",
+      "domain": "knowledge",
+      "id": "tissue_histology",
+      "name": "Tissue Histology",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/biological_staining.png",
+      "description": "Use selective contrast to distinguish structures in biological preparations",
+      "domain": "knowledge",
+      "id": "biological_staining",
+      "name": "Biological Staining",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microbial_observation.png",
+      "description": "Observe microscopic organisms associated with changing biological materials",
+      "domain": "knowledge",
+      "id": "microbial_observation",
+      "name": "Microbial Observation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microbial_isolation_methods.png",
+      "description": "Separate mixed biological observations into reproducible identified laboratory subjects",
+      "domain": "knowledge",
+      "id": "microbial_isolation_methods",
+      "name": "Microbial Isolation Methods",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+      "description": "Measure changes in an identified microbial population under declared conditions",
+      "domain": "knowledge",
+      "id": "microbial_growth_measurement",
+      "name": "Microbial Growth Measurement",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/aseptic_laboratory_practice.png",
+      "description": "Maintain separation between intended biological material and contaminating sources",
+      "domain": "knowledge",
+      "id": "aseptic_laboratory_practice",
+      "name": "Aseptic Laboratory Practice",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/instrument_sterilization.png",
+      "description": "Apply and verify a validated process for reusable clinical instruments",
+      "domain": "knowledge",
+      "id": "instrument_sterilization",
+      "name": "Instrument Sterilization",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cell_culture_methods.png",
+      "description": "Maintain defined cells outside their original tissue environment",
+      "domain": "knowledge",
+      "id": "cell_culture_methods",
+      "name": "Cell-Culture Methods",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/live_cell_time_lapse.png",
+      "description": "Record qualified living-cell changes over time while monitoring observation effects",
+      "domain": "knowledge",
+      "id": "live_cell_time_lapse",
+      "name": "Live Cell Time Lapse",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
-  "live_count": 823,
+  "live_count": 837,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 262
+  "verified_count": 276
 }

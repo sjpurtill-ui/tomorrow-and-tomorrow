@@ -232,6 +232,9 @@ func select(id:String,open_detail:bool=false)->void:
 			if preload("res://scripts/clothing_knowledge.gd").METHODS.has(String(item.id)):
 				var clothing_panel:VBoxContainer=preload("res://scripts/hud/clothing_panel.gd").new()
 				clothing_panel.subject=String(item.id);detail_body.add_child(clothing_panel)
+			if preload("res://scripts/hud/microscopy_panel.gd").supports(String(item.id)):
+				var lab_panel:VBoxContainer=preload("res://scripts/hud/microscopy_panel.gd").new()
+				lab_panel.subject=String(item.id);detail_body.add_child(lab_panel)
 			if preload("res://scripts/food_batch_knowledge.gd").METHODS.has(String(item.id)):
 				var food_panel:VBoxContainer=preload("res://scripts/hud/food_batches_panel.gd").new()
 				food_panel.subject=String(item.id);detail_body.add_child(food_panel)

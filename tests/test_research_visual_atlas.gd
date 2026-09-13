@@ -136,3 +136,15 @@ func test_missing_subject_art_retains_an_explicit_field_fallback()->void:
 	var picture:=Art.paint_discovery(parent,{"id":"single_crystal_growth","domain":"production","exposed":true},104)
 	assert_bool(picture.has_node("FieldIllustrationCaption")).is_true()
 	assert_str(picture.texture.resource_path).is_equal("res://assets/ui/research/production-v1.png")
+
+func test_known_microscopy_has_one_live_panel_and_locked_method_has_none()->void:
+	GameState.known_discoveries.append("laboratory_notebooks")
+	var view:=fixture();view.set_view("known");view.select("laboratory_notebooks")
+	for cycle in range(3):
+		view.refresh(false)
+		var panels:=0
+		for child:Node in view.detail_body.get_children():
+			if child.get_script()==preload("res://scripts/hud/microscopy_panel.gd"):panels+=1
+		assert_int(panels).is_equal(1)
+	view.set_view("tree");view.show_locked=true;view.refresh(true);view.select("microscopic_cell_observation")
+	for child:Node in view.detail_body.get_children():assert_bool(child.get_script()==preload("res://scripts/hud/microscopy_panel.gd")).is_false()
