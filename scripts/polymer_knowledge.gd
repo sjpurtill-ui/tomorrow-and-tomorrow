@@ -645,5 +645,41 @@ static func entries()->Array[Dictionary]:
       "separated_urea"
     ],
     "production_contract": "Pay named Ammonia and Carbon Dioxide, maintained pressure plant, heat, cooling and separation work; bounded recycle retains makeup requirements and losses, and product qualification consumes samples.; named physical feedstocks, installed tooling, shared labor and specified energy are consumed. Imported product grants no synthesis mastery."
+  },
+  {
+    "id": "enzyme_catalysis",
+    "name": "Enzyme Catalysis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "fermentation_control",
+      "chemical_distillation"
+    ],
+    "requires_all": [
+      "fermentation_control",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Enzyme Catalysis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "research",
+      "nature"
+    ],
+    "observation": "Identify biological catalysts that alter reaction rates under suitable conditions",
+    "effects": {},
+    "production_items": [
+      "pancreatic_enzyme_fraction",
+      "qualified_bating_protease",
+      "enzyme_bated_hides"
+    ],
+    "production_contract": "Separate a finite rapidly decaying pancreatic fraction from actual hunted gland tissue, qualify its activity on hide samples, and spend specific protease in hide bating. Biological stocks lose activity daily; imported enzyme does not teach extraction."
   }
 ]

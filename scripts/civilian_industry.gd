@@ -2,6 +2,10 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"pancreatic_enzyme_fraction":{"name": "Separated pancreatic enzyme fraction", "output": "Pancreatic Enzyme Fraction", "gate": "enzyme_catalysis", "materials": {"Pancreatic Tissue": 0.02, "Freshwater": 0.1, "Salt": 0.02}, "days": 2, "tooling": {"Laboratory Glassware": 2, "Woven Cloth": 0.2}},
+	"qualified_bating_protease":{"name": "Substrate-tested bating protease", "output": "Bating Protease", "gate": "enzyme_catalysis", "materials": {"Pancreatic Enzyme Fraction": 1.1, "Prepared Tanning Hides": 0.02, "Salt": 0.05, "Freshwater": 0.1}, "days": 2, "tooling": {"Laboratory Glassware": 2, "Clay": 2}},
+	"enzyme_bated_hides":{"name": "Protease-bated hides", "output": "Bated Hides", "gate": "enzyme_catalysis", "materials": {"Prepared Tanning Hides": 1.05, "Bating Protease": 0.02, "Freshwater": 1, "Ammonia": 0.01}, "days": 2, "tooling": {"Clay": 3, "Laboratory Glassware": 1}},
+	"bated_vegetable_leather":{"name": "Vegetable-tanned bated leather", "output": "Tanned Leather", "gate": "hide_tanning", "materials": {"Bated Hides": 1, "Plant Tannin Extract": 0.8, "Freshwater": 2.5}, "days": 10, "tooling": {"Timber": 6, "Clay": 4}},
 	"graded_interior_wood":{"name": "Graded and dressed interior wood elements", "output": "Graded Interior Wood", "gate": "timber_grading", "materials": {"Timber": 1.2}, "days": 2, "tooling": {"Steel": 1, "Timber": 2}},
 	"wood_chemical_condensate":{"name": "Captured hardwood carbonization condensate", "output": "Wood Chemical Condensate", "gate": "wood_methanol_recovery", "materials": {"Timber": 30, "Freshwater": 2}, "days": 12, "tooling": {"Pressure Vessels": 3, "Refractory Bricks": 6, "Laboratory Glassware": 2}, "co_products": {"Charcoal": 6}},
 	"wood_methanol_fraction":{"name": "Separated wood methanol fraction", "output": "Methanol", "gate": "wood_methanol_recovery", "materials": {"Wood Chemical Condensate": 2, "Quicklime": 0.1, "Timber": 0.5}, "days": 6, "tooling": {"Laboratory Glassware": 2, "Pressure Vessels": 2, "Steel": 3}},

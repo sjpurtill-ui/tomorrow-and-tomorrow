@@ -218,7 +218,8 @@ func test_silver_deposit_and_stock_survive_full_save_load()->void:
 		var deposit:Dictionary=WorldSimulation.resources._deposit("Silver Ore",Vector3(1,0,1),.8,500,0)
 		deposit.stage="recognized"
 		WorldSimulation.state.resource_deposits.assign([deposit])
-		WorldSimulation.state.resource_stockpiles["Silver Ore"]=3.5)
+		WorldSimulation.state.resource_stockpiles["Silver Ore"]=3.5
+		WorldSimulation.state.resource_stockpiles["Bating Protease"]=2.0)
 	var slot:="polymer_silver_%d"%OS.get_process_id()
 	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
 	WorldSimulation.clear();var result:=SaveSystem.load_game(slot)
@@ -227,7 +228,63 @@ func test_silver_deposit_and_stock_survive_full_save_load()->void:
 	if not result.get("ok",false):return
 	WorldSimulation.scoped("polymers",func()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Silver Ore"])).is_equal(3.5)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Bating Protease"])).is_equal(2.0)
 		var deposit:Dictionary=WorldSimulation.state.resource_deposits[0]
 		assert_str(String(deposit.resource)).is_equal("Silver Ore")
 		assert_str(String(deposit.stage)).is_equal("recognized")
 		assert_float(float(deposit.remaining)).is_equal(500.0))
+func test_actual_hunting_supplies_enzyme_tissue_once_and_stored_meat_does_not()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		s.ensure_population_total(400);s.settlement_completed.assign(["Hearth Circle"]);WorldSimulation.settlements.ensure_founded()
+		s.known_discoveries.append("enzyme_catalysis");s.discovery_adoption.enzyme_catalysis=1.0
+		WorldSimulation.food.initialize();s.food_stocks["Fresh meat"]=10000.0
+		s.population_allocations.Food=0;s.population_allocations.Logistics=0
+		WorldSimulation.food.process_day({"traveling":false},1,1)
+		assert_float(float(s.resource_stockpiles.get("Pancreatic Tissue",0))).is_equal(0.0)
+		s.elapsed_days=1;s.population_allocations.Food=20
+		var report:Dictionary=WorldSimulation.food.process_day({"traveling":false},1,1)
+		var tissue:=float(s.resource_stockpiles.get("Pancreatic Tissue",0))
+		assert_float(tissue).is_greater(0.0)
+		assert_float(tissue).is_equal_approx(minf(s.population_exact*.001,float(report.food_harvest["Fresh meat"])*.0002),.000001)
+		preload("res://scripts/household_clothing.gd").advance(0,400,false,100000)
+		assert_float(float(s.resource_stockpiles["Pancreatic Tissue"])).is_equal(tissue)
+		s.elapsed_days=2;preload("res://scripts/household_clothing.gd").advance(0,400,false,0)
+		assert_float(float(s.resource_stockpiles["Pancreatic Tissue"])).is_equal_approx(tissue*.25,.000001))
+func test_specific_enzyme_fraction_and_bated_hides_reach_flexible_leather()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare()
+		for resource:String in ["Salt","Freshwater","Plant Tannin Extract","Rendered Animal Fat"]:WorldSimulation.state.resource_stockpiles[resource]=100.0
+		WorldSimulation.state.resource_stockpiles["Pancreatic Tissue"]=.1
+		WorldSimulation.state.resource_stockpiles["Prepared Tanning Hides"]=3.0
+		WorldSimulation.state.resource_stockpiles["Ammonia"]=1.0
+		var items:Array[String]=["pancreatic_enzyme_fraction","qualified_bating_protease","enzyme_bated_hides","bated_vegetable_leather","finished_flexible_leather"]
+		var targets:Array[int]=[4,2,2,2,1]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Pancreatic Tissue"])).is_equal_approx(.02,.000001)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Flexible Leather"])).is_equal(1.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Bated Hides"])).is_equal(0.0))
+func test_enzyme_activity_declines_without_new_hunting_and_repeated_calls_do_not_double_decay()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare()
+		WorldSimulation.state.resource_stockpiles["Pancreatic Enzyme Fraction"]=2.0
+		WorldSimulation.state.resource_stockpiles["Bating Protease"]=2.0
+		preload("res://scripts/household_clothing.gd").advance(0,400,false,0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Pancreatic Enzyme Fraction"])).is_equal(1.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Bating Protease"])).is_equal(1.96)
+		preload("res://scripts/household_clothing.gd").advance(0,400,false,0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Bating Protease"])).is_equal(1.96))
+func test_tissue_cap_and_activity_loss_stay_local_to_secondary_city()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		s.ensure_population_total(400);s.settlement_completed.assign(["Hearth Circle"]);WorldSimulation.settlements.ensure_founded()
+		s.known_discoveries.append("enzyme_catalysis");s.discovery_adoption.enzyme_catalysis=1.0
+		s.player_settlements.append({"id":"enzyme_city","name":"Enzyme City","primary":false,"position":Vector2(10,0),"population_share":.25,"founded_day":0})
+		s.resource_stockpiles["Bating Protease"]=10.0
+		WorldSimulation.settlements.with_city_resources("enzyme_city",func()->void:
+			s.resource_stockpiles["Bating Protease"]=2.0
+			preload("res://scripts/household_clothing.gd").advance(0,100,false,100000)
+			assert_float(float(s.resource_stockpiles["Pancreatic Tissue"])).is_equal(.1)
+			assert_float(float(s.resource_stockpiles["Bating Protease"])).is_equal(1.96))
+		assert_float(float(s.resource_stockpiles.get("Pancreatic Tissue",0))).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["Bating Protease"])).is_equal(10.0))
