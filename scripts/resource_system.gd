@@ -6,6 +6,7 @@ var initialized := false
 # Identification follows observations and existing methods, never campaign age.
 # These gates apply to unknown occurrences only; saved recognition is retained.
 const RECOGNITION_RULES={
+	"Silver Ore":{"requires_all":["ore_assaying"]},
 	"Deep Aquifer":{"requires_all":["well_siting"]},
 	"Refractory Clay":{"requires_all":["pit_firing"]},
 	"Phosphate Rock":{"requires_any":[["soil_assays","chemical_distillation"]]},
@@ -39,6 +40,7 @@ func reset_for_new_world()->void:
 # not a recognition, survey or extraction eligibility gate.
 # UI receives discovered deposits and present constraints, never this catalog.
 var catalog := {
+	"Silver Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","lead_smelting"],"signals":["materials","trade"],"base":0.0012},
 	"Timber":{"family":"Organic","renewable":true,"recognition_year":0,"access":["labor"],"processing":["cordage","joinery"],"signals":["survey","construction"],"base":0.030},
 	"Freshwater":{"family":"Water","renewable":true,"recognition_year":0,"access":["labor"],"processing":["clean_water","well_siting"],"signals":["survey","food"],"base":0.035},
 	"Stone":{"family":"Mineral","renewable":false,"recognition_year":0,"access":["labor"],"processing":["joinery"],"signals":["survey","construction"],"base":0.026},

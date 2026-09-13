@@ -274,5 +274,224 @@
     },
     "power": 0,
     "daily_power": 0.0
+  },
+  "wood_chemical_condensate": {
+    "name": "Captured hardwood carbonization condensate",
+    "output": "Wood Chemical Condensate",
+    "gate": "wood_methanol_recovery",
+    "materials": {
+      "Timber": 30,
+      "Freshwater": 2
+    },
+    "days": 12,
+    "tooling": {
+      "Pressure Vessels": 3,
+      "Refractory Bricks": 6,
+      "Laboratory Glassware": 2
+    },
+    "co_products": {
+      "Charcoal": 6
+    }
+  },
+  "wood_methanol_fraction": {
+    "name": "Separated wood methanol fraction",
+    "output": "Methanol",
+    "gate": "wood_methanol_recovery",
+    "materials": {
+      "Wood Chemical Condensate": 2,
+      "Quicklime": 0.1,
+      "Timber": 0.5
+    },
+    "days": 6,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Pressure Vessels": 2,
+      "Steel": 3
+    }
+  },
+  "silver_bearing_bullion": {
+    "name": "Smelted silver-bearing bullion",
+    "output": "Silver-Bearing Bullion",
+    "gate": "lead_smelting",
+    "materials": {
+      "Silver Ore": 4,
+      "Lead Sheets": 0.5,
+      "Charcoal": 1,
+      "Limestone": 0.2
+    },
+    "days": 6,
+    "tooling": {
+      "Refractory Bricks": 4,
+      "Clay": 2
+    }
+  },
+  "cupelled_silver": {
+    "name": "Cupelled and assayed silver",
+    "output": "Refined Silver",
+    "gate": "silver_cupellation",
+    "materials": {
+      "Silver-Bearing Bullion": 1.2,
+      "Charcoal": 0.5,
+      "Clay": 0.3
+    },
+    "days": 5,
+    "tooling": {
+      "Refractory Bricks": 3,
+      "Laboratory Glassware": 1
+    }
+  },
+  "silver_oxidation_catalyst": {
+    "name": "Trial-qualified silver oxidation catalyst",
+    "output": "Silver Oxidation Catalyst",
+    "gate": "industrial_catalyst_design",
+    "materials": {
+      "Refined Silver": 1.02,
+      "Methanol": 0.05,
+      "Oxygen": 0.02
+    },
+    "days": 4,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Pressure Vessels": 2,
+      "Steel": 3
+    },
+    "power": 1,
+    "daily_power": 0.25
+  },
+  "formaldehyde_solution": {
+    "name": "Separated formaldehyde solution",
+    "output": "Formaldehyde Solution",
+    "gate": "formaldehyde_synthesis",
+    "materials": {
+      "Methanol": 1.1,
+      "Oxygen": 0.4,
+      "Freshwater": 2,
+      "Silver Oxidation Catalyst": 0.01
+    },
+    "days": 5,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Pressure Vessels": 2,
+      "Steel": 3
+    },
+    "power": 2,
+    "daily_power": 0.4
+  },
+  "captured_calcination_carbon_dioxide": {
+    "name": "Captured and washed calcination gas",
+    "output": "Carbon Dioxide",
+    "gate": "chemical_distillation",
+    "materials": {
+      "Limestone": 2,
+      "Timber": 1,
+      "Freshwater": 0.5
+    },
+    "days": 4,
+    "tooling": {
+      "Pressure Vessels": 2,
+      "Refractory Bricks": 4,
+      "Laboratory Glassware": 1
+    },
+    "co_products": {
+      "Quicklime": 0.7
+    }
+  },
+  "separated_urea": {
+    "name": "Reacted and separated urea",
+    "output": "Urea",
+    "gate": "urea_synthesis",
+    "materials": {
+      "Ammonia": 1.2,
+      "Carbon Dioxide": 1,
+      "Freshwater": 0.5
+    },
+    "days": 6,
+    "tooling": {
+      "Pressure Vessels": 5,
+      "Steel": 5,
+      "Laboratory Glassware": 2
+    },
+    "power": 4,
+    "daily_power": 0.6666666666666666
+  },
+  "urea_formaldehyde_resin": {
+    "name": "Condensed urea-formaldehyde resin",
+    "output": "UF Resin",
+    "gate": "condensative_step_polymerization",
+    "materials": {
+      "Urea": 0.6,
+      "Formaldehyde Solution": 1.1,
+      "Sulfuric Acid": 0.02
+    },
+    "days": 4,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Pressure Vessels": 2,
+      "Steel": 3
+    },
+    "power": 1,
+    "daily_power": 0.25,
+    "services": {
+      "polymer_heat_removal": 1
+    }
+  },
+  "qualified_uf_wood_adhesive": {
+    "name": "Sample-tested interior wood adhesive",
+    "output": "Interior UF Wood Adhesive",
+    "gate": "adhesive_bond_design",
+    "materials": {
+      "UF Resin": 1.06,
+      "Timber": 0.1,
+      "Freshwater": 0.1
+    },
+    "days": 3,
+    "tooling": {
+      "Mechanical Screw Presses": 1,
+      "Steel": 1
+    }
+  },
+  "laminated_interior_panels": {
+    "name": "Pressed dry-interior wood panels",
+    "output": "Interior Bonded Wood Panels",
+    "gate": "engineered_wood_lamination",
+    "materials": {
+      "Interior UF Wood Adhesive": 0.2,
+      "Graded Interior Wood": 3
+    },
+    "days": 5,
+    "tooling": {
+      "Mechanical Screw Presses": 1,
+      "Steel": 2
+    }
+  },
+  "panel_switchboards": {
+    "name": "Interior panel-mounted switchboard",
+    "output": "Telephone Switchboards",
+    "gate": "manual_switchboards",
+    "materials": {
+      "Telephone Sets": 2,
+      "Insulated Cable": 4,
+      "Refined Copper": 1,
+      "Interior Bonded Wood Panels": 1,
+      "Timber": 0.5
+    },
+    "days": 6,
+    "tooling": {
+      "Timber": 2,
+      "Wrought Iron": 1
+    }
+  },
+  "graded_interior_wood": {
+    "name": "Graded and dressed interior wood elements",
+    "output": "Graded Interior Wood",
+    "gate": "timber_grading",
+    "materials": {
+      "Timber": 1.2
+    },
+    "days": 2,
+    "tooling": {
+      "Steel": 1,
+      "Timber": 2
+    }
   }
 }

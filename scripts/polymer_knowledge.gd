@@ -361,5 +361,148 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "formed_telephone_covers"
     ]
+  },
+  {
+    "id": "industrial_catalyst_design",
+    "name": "Industrial Catalyst Design",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "experimental_controls",
+      "chemical_distillation"
+    ],
+    "requires_all": [
+      "experimental_controls",
+      "chemical_distillation"
+    ],
+    "requires_any": [
+      [
+        "iron_ammonia_catalysts",
+        "enzyme_catalysis",
+        "sulfuric_acid_production"
+      ]
+    ],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Industrial Catalyst Design",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Relate a catalyst's composition and accessible structure to a declared process reaction",
+    "effects": {},
+    "production_contract": "Uses named chemical feeds, paid sample qualification, consumed materials and shared workshop work. Interior bonded wood is restricted to indoor equipment panels; adhesive is not interchangeable across substrates or exterior structural uses.",
+    "production_items": [
+      "silver_oxidation_catalyst"
+    ]
+  },
+  {
+    "id": "condensative_step_polymerization",
+    "name": "Condensative Step Polymerization",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_monomer_purification"
+    ],
+    "requires_all": [
+      "polymer_monomer_purification"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Condensative Step Polymerization",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Join functional molecules through qualified step reactions that release small-molecule products",
+    "effects": {},
+    "production_contract": "Uses named chemical feeds, paid sample qualification, consumed materials and shared workshop work. Interior bonded wood is restricted to indoor equipment panels; adhesive is not interchangeable across substrates or exterior structural uses.",
+    "production_items": [
+      "urea_formaldehyde_resin"
+    ]
+  },
+  {
+    "id": "adhesive_bond_design",
+    "name": "Adhesive-Bond Design",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "experimental_controls"
+    ],
+    "requires_any": [
+      [
+        "joinery",
+        "elastic_deformation"
+      ]
+    ],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Adhesive-Bond Design",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Join prepared surfaces with a qualified bonding material and load-bearing interface",
+    "effects": {},
+    "production_contract": "Uses named chemical feeds, paid sample qualification, consumed materials and shared workshop work. Interior bonded wood is restricted to indoor equipment panels; adhesive is not interchangeable across substrates or exterior structural uses.",
+    "production_items": [
+      "qualified_uf_wood_adhesive"
+    ]
+  },
+  {
+    "id": "engineered_wood_lamination",
+    "name": "Engineered Wood Lamination",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "adhesive_bond_design",
+      "timber_grading"
+    ],
+    "requires_all": [
+      "adhesive_bond_design",
+      "timber_grading"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Engineered Wood Lamination",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Bond graded wood elements into a qualified structural product",
+    "effects": {},
+    "production_contract": "Uses named chemical feeds, paid sample qualification, consumed materials and shared workshop work. Interior bonded wood is restricted to indoor equipment panels; adhesive is not interchangeable across substrates or exterior structural uses.",
+    "production_items": [
+      "laminated_interior_panels"
+    ]
   }
 ]

@@ -148,3 +148,18 @@ func test_injection_grade_and_formed_sheet_reach_real_telephone_assembly()->void
 		assert_int(int(run_batch("polymer_cased_telephones",2).get("completed",0))).is_equal(2)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Polyethylene Telephone Covers"])).is_equal(0.0)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Telephone Sets"])).is_equal(2.0))
+func test_condensation_supply_chain_reaches_an_indoor_switchboard()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();WorldSimulation.state.resource_stockpiles={}
+		# Boundary inputs are existing supply and a separately identified silver ore.
+		for resource:String in ["Timber","Freshwater","Quicklime","Silver Ore","Lead Sheets","Charcoal","Limestone","Clay","Oxygen","Ammonia","Sulfuric Acid","Telephone Sets","Insulated Cable","Refined Copper"]:WorldSimulation.state.resource_stockpiles[resource]=1000.0
+		Ops.data().last_day=0;Ops.data().services={"electricity":1000.0,"polymer_heat_removal":100.0}
+		var items:Array[String]=["wood_chemical_condensate","wood_methanol_fraction","silver_bearing_bullion","cupelled_silver","silver_oxidation_catalyst","formaldehyde_solution","captured_calcination_carbon_dioxide","separated_urea","urea_formaldehyde_resin","qualified_uf_wood_adhesive","graded_interior_wood","laminated_interior_panels","panel_switchboards"]
+		var targets:Array[int]=[8,4,4,2,1,3,2,2,2,1,6,2,2]
+		for n:int in items.size():
+			var job:=run_batch(items[n],targets[n])
+			assert_int(int(job.get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get("Telephone Switchboards",0))).is_equal(2.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get("Interior Bonded Wood Panels",0))).is_equal(0.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Silver Ore"])).is_equal(984.0)
+		assert_float(Ops.service("polymer_heat_removal")).is_equal(98.0))
