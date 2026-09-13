@@ -1,0 +1,144 @@
+{
+  "schema": 11,
+  "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange",
+  "seed": 91420,
+  "target_days": 36500,
+  "simulated_days": 2307,
+  "stop_reason": "wall-time budget reached",
+  "wall_seconds": 60.032,
+  "live_catalog": 667,
+  "target_reached": false,
+  "full_campaign_verified": false,
+  "initial": {
+    "active_inquiries": 3,
+    "army_provision_delivery_ratio": 1,
+    "army_provisions_delivered": 0,
+    "army_provisions_required": 0,
+    "completed_buildings": 0,
+    "day": 0,
+    "food_consumption": 0,
+    "food_days": 30.0,
+    "food_demand_breakdown": {},
+    "food_eaten": 0,
+    "food_intake_ratio": 1,
+    "food_security": 0.82,
+    "knowledge_workers": 4,
+    "known": 0,
+    "material_stocks": {
+      "Clay": 0.0,
+      "Fiber Plants": 10.0,
+      "Stone": 0.0,
+      "Timber": 12.0
+    },
+    "plot_history_records": 0,
+    "population": 120,
+    "production": {
+      "available_civilian_recipes": 0,
+      "civilian_lines": 0,
+      "delivery_shortage": false,
+      "food_shortage": false,
+      "installed_units": 0,
+      "manufactured_stock_kinds": 0,
+      "operations_ledger_current": false,
+      "production_food_blocked": false,
+      "remaining_daily_services": {},
+      "units_under_construction": 0
+    },
+    "resource_deposits": 0,
+    "settled": false,
+    "settlement_count": 0,
+    "settlement_plots": 0,
+    "year": 0.0
+  },
+  "final": {
+    "active_inquiries": 4,
+    "army_provision_delivery_ratio": 0.646487862706387,
+    "army_provisions_delivered": 3.62033203115577,
+    "army_provisions_required": 5.6,
+    "completed_buildings": 5,
+    "day": 2307,
+    "food_consumption": 84.2540881977421,
+    "food_days": 85.2815449392493,
+    "food_demand_breakdown": {
+      "adults": 51.5063344511196,
+      "army_field": 5.6,
+      "base": 75.9302089834195,
+      "children": 17.7320810197263,
+      "climate": 0.0,
+      "elders": 6.69179351257358,
+      "labor": 7.74,
+      "lactation": 0.223879214322562,
+      "mission_absent": 0.0,
+      "occupation_relief": 0.0,
+      "pregnancy": 0.36,
+      "prisoner_custody": 0.0,
+      "rationing": 0.0,
+      "total": 84.2540881977421,
+      "travel": 0.0
+    },
+    "food_eaten": 82.2744202288979,
+    "food_intake_ratio": 0.976503597496682,
+    "food_security": 0.979999999999999,
+    "knowledge_workers": 4,
+    "known": 3,
+    "material_stocks": {
+      "Clay": 0.0,
+      "Fiber Plants": 130.441415087418,
+      "Stone": 84.4396298985156,
+      "Timber": 268.96365582049
+    },
+    "plot_history_records": 42,
+    "population": 131,
+    "production": {
+      "available_civilian_recipes": 0,
+      "civilian_lines": 0,
+      "delivery_shortage": true,
+      "food_shortage": false,
+      "installed_units": 0,
+      "manufactured_stock_kinds": 0,
+      "operations_ledger_current": true,
+      "production_food_blocked": false,
+      "remaining_daily_services": {},
+      "units_under_construction": 0
+    },
+    "resource_deposits": 52,
+    "settled": true,
+    "settlement_count": 2,
+    "settlement_plots": 19,
+    "year": 6.32054794520548
+  },
+  "discoveries": [
+    {
+      "day": 1194,
+      "id": "seasonal_patterns",
+      "year": 3.27123287671233
+    },
+    {
+      "day": 1383,
+      "id": "watch_rotation",
+      "year": 3.78904109589041
+    },
+    {
+      "day": 1555,
+      "id": "drainage",
+      "year": 4.26027397260274
+    }
+  ],
+  "limitations": [
+    "One isolated seat, not a full world or a player campaign",
+    "Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling",
+    "No foreign acquisition, war or dependency-recovery scenario",
+    "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+    "Short or collapsed runs do not validate millennial pacing"
+  ],
+  "source_commit": "04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8",
+  "source_sha256": "467cef16a8a18d6e4136ffe734cfbd7ee12ee4f0f5e1e02d55f5d7c61b755ba5",
+  "source_report": "/Users/seanpurtill/Documents/Codex/tt-pacing-reconciliation/artifacts/technology-pacing/catalog-667-early.json",
+  "active_investigations": {
+    "health::Injury safety": "wound_cleaning",
+    "infrastructure::Housing": "well_siting",
+    "production::Material supply": "charcoal",
+    "security::Organized defense": "field_fortifications"
+  },
+  "conclusion": "Early diagnostic only. No civilian recipe unlocked by the endpoint, so it cannot judge manufacturing bootstrap or refute older long-run production gaps."
+}

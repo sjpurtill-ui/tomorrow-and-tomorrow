@@ -88,6 +88,26 @@ Final population was 67,310 with 276 known discoveries and 17 settlements. Food 
 
 Of the accumulated outer-stage time, secondary settlements used 66.35%, city trade 15.49%, military/travel 5.58%, primary consequences 3.47% and government 2.63%. Nested secondary timings are part of the secondary-settlement total and must not be added a second time. The run shared CPU with other tests; percentages describe its recorded work, not an isolated performance benchmark. It loaded the old 16-site forecast cache; the later 256-site correction had separate parity/cache-hit evidence and was not active in this process.
 
-A new current-code run is live in session 52497, using source e1278e0, 476 discoveries, schema 10, the same seed/scenario, a 91,250-day target and the same four-hour wall limit. [Launch record](pacing/catalog-476-250-run.json). It includes the cache correction and current physical-production evidence, plus intervening gameplay changes. It is therefore a current-code acceptance attempt, not a controlled speed comparison. The first annual snapshot emitted and the handle was confirmed live. No terminal outcome is recorded yet; an observation timeout is not grounds to restart it.
+At its launch, a then-current run was live in session 52497, using source e1278e0, 476 discoveries, schema 10, the same seed/scenario, a 91,250-day target and the same four-hour wall limit. [Launch record](pacing/catalog-476-250-run.json). It includes the cache correction and current physical-production evidence, plus intervening gameplay changes. It is therefore a current-code acceptance attempt, not a controlled speed comparison. The first annual snapshot emitted and the handle was confirmed live. No terminal outcome is recorded yet; an observation timeout is not grounds to restart it.
 
-The longest completed requested horizon remains the earlier 100-year diagnostic. Neither the terminal 234-year partial run nor the new running 250-year attempt proves the required 2,500–3,000-year full-history campaign.
+The launch-time longest completed requested horizon was the earlier 100-year diagnostic. See the terminal reconciliation below for the completed 250-year result. Neither establishes the required 2,500–3,000-year full-history campaign.
+
+
+## Reconciled 476-catalog terminal result
+
+The complete source report and final log entry now prove that the old run reached all 91,250 requested days (250 years), in 12,595.441 seconds. Handle 52497 is absent and no matching audit process is running; this run is terminal and was not restarted. [Terminal evidence](pacing/catalog-476-250-terminal.json) records the original report SHA-256, source commit, final state, production observations and bottlenecks. The launch record now links this result.
+
+At the endpoint: population 130,110, 320 known discoveries, 17 settlements, 97 available civilian recipes, zero retained civilian lines and zero installed operating units. Every recorded annual production snapshot also has zero retained lines and installed units. These samples do not prove that no short-lived line ever existed; there is no lifetime manufacture ledger in this report. Timber and Stone are zero and Clay is 0.285 at the endpoint. Numerous recipe startup blockers identify missing materials. Neither causality nor a current-build defect follows from this snapshot alone.
+
+Current source 04d0dcb differs materially from e1278e0: production now distinguishes home food shortages from field delivery shortages; cart manufacture and joint military manufacturing have upstream demand planning; machine workshops, communications, building materials, water conveyance and household yarn have additional investment consumers. These changes justify an early current-source check, not another assertion that an older failure still reproduces. No current millennial or full-world acceptance exists.
+
+The next acceptance question is sustained physical output and commissioning through several historical stages, followed by full campaign pacing with geography, other civilizations and disadvantaged recovery. A completed diagnostic horizon is not a passed gameplay criterion.
+
+
+### Bounded current-source observation
+
+Source 04d0dcb, catalog 667, same isolated scenario and seed: one 60-second run reached day 2,307 (6.32 years), then stopped at its wall limit, exit 0. Population was 131 with three discoveries and four active inquiries. No civilian recipe was unlocked, so this sample cannot assess manufacturing bootstrap or sustained industrial operation. The final controller evidence distinguishes field delivery shortage from home food shortage and leaves production unblocked; that is narrower than proving a working supply chain. [Compact report](pacing/catalog-667-bounded-early.json).
+
+No long run was restarted. The original and bounded reports are diagnostic evidence with explicit synthetic geography and absent foreign exchange. Next work should address a reproduced supply-chain blocker with focused operational evidence, then test the long horizon at a substantive milestone. The separate integrator is reproducing whether an input-starved automatic workshop can switch to its own upstream supplies; this report neither assumes that result nor claims a fix.
+
+Handoff: documents-only branch `codex/pacing-reconciliation`, base `04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8`, worktree `/Users/seanpurtill/Documents/Codex/tt-pacing-reconciliation`. No game behavior or save schema changed. Recovery import and bounded diagnostic exited 0; original terminal evidence was checked against both complete JSON and final log. Do not interpret source hashes or completed targets as full-history acceptance.

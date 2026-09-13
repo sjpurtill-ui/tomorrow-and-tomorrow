@@ -1,0 +1,5871 @@
+{
+  "schema": 10,
+  "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange",
+  "seed": 91420,
+  "target_days": 91250,
+  "simulated_days": 91250,
+  "stop_reason": "target reached",
+  "wall_seconds": 12595.441,
+  "live_catalog": 476,
+  "target_reached": true,
+  "full_campaign_verified": false,
+  "initial": {
+    "active_inquiries": 3,
+    "army_provision_delivery_ratio": 1,
+    "army_provisions_delivered": 0,
+    "army_provisions_required": 0,
+    "completed_buildings": 0,
+    "day": 0,
+    "food_consumption": 0,
+    "food_days": 30.0,
+    "food_demand_breakdown": {},
+    "food_eaten": 0,
+    "food_intake_ratio": 1,
+    "food_security": 0.82,
+    "knowledge_workers": 4,
+    "known": 0,
+    "material_stocks": {
+      "Clay": 0.0,
+      "Fiber Plants": 10.0,
+      "Stone": 0.0,
+      "Timber": 12.0
+    },
+    "plot_history_records": 0,
+    "population": 120,
+    "production": {
+      "available_civilian_recipes": 0,
+      "civilian_lines": 0,
+      "installed_units": 0,
+      "manufactured_stock_kinds": 0,
+      "operations_ledger_current": false,
+      "remaining_daily_services": {},
+      "units_under_construction": 0
+    },
+    "resource_deposits": 0,
+    "settled": false,
+    "settlement_count": 0,
+    "settlement_plots": 0,
+    "year": 0.0
+  },
+  "final": {
+    "active_inquiries": 1,
+    "army_provision_delivery_ratio": 0.885836616158485,
+    "army_provisions_delivered": 3654.04060818911,
+    "army_provisions_required": 4124.96,
+    "completed_buildings": 5,
+    "day": 91250,
+    "food_consumption": 23651.2399020704,
+    "food_days": 90.5620611068825,
+    "food_demand_breakdown": {
+      "adults": 14419.4830152422,
+      "army_field": 4124.96,
+      "base": 21338.0007510725,
+      "children": 5937.45565321214,
+      "climate": 0.0,
+      "elders": 981.062082618105,
+      "labor": 2143.01,
+      "lactation": 64.1491509979452,
+      "mission_absent": 0.0,
+      "occupation_relief": 0.0,
+      "pregnancy": 106.08,
+      "prisoner_custody": 0.0,
+      "rationing": 0.0,
+      "total": 23651.2399020704,
+      "travel": 0.0
+    },
+    "food_eaten": 23180.3205102595,
+    "food_intake_ratio": 0.980089018852256,
+    "food_security": 0.979999999999999,
+    "knowledge_workers": 4501,
+    "known": 320,
+    "material_stocks": {
+      "Clay": 0.284924367947882,
+      "Fiber Plants": 546.450608504748,
+      "Stone": 0.0,
+      "Timber": 0.0
+    },
+    "plot_history_records": 3468,
+    "population": 130110,
+    "production": {
+      "available_civilian_recipes": 97,
+      "civilian_lines": 0,
+      "installed_units": 0,
+      "manufactured_stock_kinds": 1,
+      "operations_ledger_current": true,
+      "remaining_daily_services": {},
+      "units_under_construction": 0
+    },
+    "resource_deposits": 52,
+    "settled": true,
+    "settlement_count": 17,
+    "settlement_plots": 740,
+    "year": 250.0
+  },
+  "bottlenecks": {
+    "active_investigations": {
+      "knowledge::Observers": "electron_physics"
+    },
+    "allocations": {
+      "Administration": 3779,
+      "Construction": 7372,
+      "Crafting": 4691,
+      "Defense": 2681,
+      "Extraction": 7372,
+      "Food": 31287,
+      "Knowledge": 4501,
+      "Logistics": 5952,
+      "Survey": 5558
+    },
+    "causally_ready_questions": [
+      {
+        "domain": "production",
+        "eligible": false,
+        "id": "peat_drying",
+        "missing_materials": [
+          {
+            "minimum_stock": 0.0,
+            "resource": "Peat",
+            "stage": "recognized"
+          }
+        ],
+        "progress": 0,
+        "score": 81.7269494162713,
+        "subcategory": "Material supply"
+      },
+      {
+        "domain": "production",
+        "eligible": false,
+        "id": "bronze_alloying",
+        "missing_materials": [
+          {
+            "minimum_stock": 3.0,
+            "resource": "Tin Ore",
+            "stage": "accessible"
+          }
+        ],
+        "progress": 0,
+        "score": 168.965788205818,
+        "subcategory": "Material supply"
+      },
+      {
+        "domain": "ecology",
+        "eligible": false,
+        "id": "nitrate_cultivation",
+        "missing_materials": [
+          {
+            "minimum_stock": 0.0,
+            "resource": "Nitrates",
+            "stage": "recognized"
+          }
+        ],
+        "progress": 0,
+        "score": 110.748238693546,
+        "subcategory": "Land health"
+      },
+      {
+        "domain": "nutrition",
+        "eligible": false,
+        "id": "crop_rotation",
+        "missing_materials": [
+          {
+            "resource": "Fertile Soil",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 65.3400232103092,
+        "subcategory": "Land productivity"
+      },
+      {
+        "domain": "health",
+        "eligible": false,
+        "id": "public_baths",
+        "missing_materials": [
+          {
+            "resource": "Freshwater",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 121.944837111505,
+        "subcategory": "Water & sanitation"
+      },
+      {
+        "domain": "health",
+        "eligible": false,
+        "id": "civic_infirmaries",
+        "missing_materials": [
+          {
+            "resource": "Medicinal Plants",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 59.3189533303823,
+        "subcategory": "General health"
+      },
+      {
+        "domain": "health",
+        "eligible": false,
+        "id": "contagion_mapping",
+        "missing_materials": [
+          {
+            "resource": "Freshwater",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 63.6775587929475,
+        "subcategory": "Water & sanitation"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "phonetic_notation",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 71.5028375461482,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "infrastructure",
+        "eligible": false,
+        "id": "canal_locks",
+        "missing_materials": [
+          {
+            "resource": "Freshwater",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 141.500613035612,
+        "subcategory": "Housing"
+      },
+      {
+        "domain": "infrastructure",
+        "eligible": false,
+        "id": "water_mills",
+        "missing_materials": [
+          {
+            "resource": "Freshwater",
+            "stage": "developed"
+          }
+        ],
+        "progress": 0,
+        "score": 78.0664319700223,
+        "subcategory": "Housing"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "electron_physics",
+        "missing_materials": [],
+        "progress": 0.379180390305772,
+        "score": 71.658413261392,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "structural_load_testing",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 100.373624414422,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "crystallography",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 79.2694086289406,
+        "subcategory": "Preserved knowledge"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "photoconductivity",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 108.476862684705,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "logarithms",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 83.850516528108,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "differential_equations",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 85.7554318012975,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "matrix_algebra",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 91.4658130707525,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "numerical_root_finding",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 92.240554243543,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "numerical_integration",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 105.112742036798,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "harmonic_analysis",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 73.9229714127563,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "dimensional_metrology",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 112.141175717332,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "crank_linkages",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 96.4172771873258,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "flywheel_smoothing",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 88.0675463678621,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "lubrication_regimes",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 100.288527339914,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "hydrostatic_pressure",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 111.576666563966,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "cyclic_fatigue",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 92.1709528865598,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "mechanical_oscillation",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 105.165447920778,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "fine_focus_stages",
+        "missing_materials": [],
+        "progress": 0,
+        "score": 116.078018025377,
+        "subcategory": "Observers"
+      },
+      {
+        "domain": "knowledge",
+        "eligible": true,
+        "id": "illumination_apertures",
+        "missing_materials": [],
+        "progress": 0.00195744378661603,
+        "score": 118.092966453054,
+        "subcategory": "Observers"
+      }
+    ],
+    "controller_plan": {
+      "ambition": "military",
+      "at_war": false,
+      "capacity_share": 0.810664078593254,
+      "delivery_shortage": false,
+      "deploy_share": 0.679773208498955,
+      "expansion_food": 48.9996595680714,
+      "food_shortage": false,
+      "goals": [
+        {
+          "accord": "routes",
+          "id": "growth",
+          "strategy": "growth",
+          "title": "Make room for the next generation"
+        },
+        {
+          "accord": "restraint",
+          "id": "security",
+          "strategy": "fortification",
+          "title": "Keep our homeland independent"
+        },
+        {
+          "accord": "exchange",
+          "id": "learning",
+          "strategy": "inquiry",
+          "title": "Bring useful knowledge home"
+        }
+      ],
+      "hungry": false,
+      "offensive": true,
+      "peace_food": 22.2371687293053,
+      "personality": {
+        "assertiveness": 0.686591804027557,
+        "discipline": 0.806791067123413,
+        "empathy": 0.429149121046066,
+        "openness": 0.466497719287872,
+        "risk_tolerance": 0.790626287460327
+      },
+      "recruit_share": 0.0982297798991203,
+      "research_weights": {
+        "culture": 0.644088560342789,
+        "demography": 1.63623420894146,
+        "ecology": 0.466397903859615,
+        "health": 0.593319296836853,
+        "infrastructure": 2.27441419363022,
+        "institutions": 0.724414193630219,
+        "knowledge": 0.709797263145447,
+        "labor": 0.684074640274048,
+        "logistics": 0.689226400852203,
+        "nutrition": 0.620301586389542,
+        "production": 1.33999462127686,
+        "security": 1.10266897678375
+      },
+      "scout_days": 30,
+      "scout_food": 28.2812113761902,
+      "settle_distance": 40.4625463485718,
+      "trade_opinion": 0.029823149740696,
+      "training": "intensive",
+      "war_food": 40.4686856269836,
+      "war_opinion": -0.515939979255199
+    },
+    "known_ids": [
+      "seasonal_patterns",
+      "watch_rotation",
+      "drainage",
+      "charcoal",
+      "wound_cleaning",
+      "field_fortifications",
+      "well_siting",
+      "labor_rotations",
+      "clay_shaping",
+      "household_councils",
+      "formation_drill",
+      "herbal_classification",
+      "birth_attendants",
+      "route_memory",
+      "wayfinding_stars",
+      "graded_roads",
+      "customary_law",
+      "pit_firing",
+      "clean_water",
+      "work_rest_limits",
+      "lampblack_capture",
+      "standard_measures",
+      "seed_selection",
+      "basketry",
+      "food_drying",
+      "tallies",
+      "stone_sorting",
+      "water_settling_basins",
+      "joinery",
+      "controlled_flaking",
+      "supply_groups",
+      "cordage",
+      "public_stores",
+      "hafted_tools",
+      "shared_childcare",
+      "bow_craft",
+      "hafted_weapons",
+      "seed_oil_pressing",
+      "maternal_recovery",
+      "quarry_reading",
+      "oil_based_printing_inks",
+      "wedges_and_levers",
+      "river_craft",
+      "pictographic_records",
+      "timber_grading",
+      "grog_preparation",
+      "census_rolls",
+      "crossbow_mechanism",
+      "timber_seasoning",
+      "framed_construction",
+      "coastal_watercraft",
+      "caravanserais",
+      "case_records",
+      "hide_floats",
+      "fractional_quantities",
+      "drop_spindles",
+      "public_levies",
+      "protected_wellheads",
+      "galley_navigation",
+      "place_value",
+      "warp_weighted_looms",
+      "water_service_inspections",
+      "clay_levigation",
+      "litter_bearer_drill",
+      "displacement_buoyancy",
+      "plain_weaving",
+      "range_estimation_drill",
+      "animal_taming",
+      "fiber_grading",
+      "pack_animals",
+      "domesticated_mounts",
+      "mounted_scouts",
+      "crop_calendars",
+      "straightedge_compass",
+      "fiber_retting",
+      "ratio_proportion",
+      "war_chariots",
+      "fiber_pulp_beating",
+      "woven_dressings",
+      "surgical_anatomy",
+      "professional_corps",
+      "symbolic_algebra",
+      "flying_shuttles",
+      "isolation_practice",
+      "mountain_field_school",
+      "fiber_combing",
+      "latrine_siting",
+      "cavalry_infantry_liaison",
+      "geometric_survey",
+      "shield_wall",
+      "textile_rag_pulping",
+      "trained_midwives",
+      "apprentice_contracts",
+      "crew_handoffs",
+      "polynomial_equations",
+      "spinning_wheels",
+      "clay_testing",
+      "clay_tempering",
+      "oral_epics",
+      "kiln_control",
+      "sealed_vessels",
+      "elephant_training",
+      "ore_assaying",
+      "rainwater_cisterns",
+      "coordinate_geometry",
+      "bitumen_sealing",
+      "casualty_transfer_records",
+      "chemical_distillation",
+      "child_growth_records",
+      "fortified_stores",
+      "material_accounting",
+      "cargo_seals",
+      "refractory_body_trials",
+      "workshop_standards",
+      "separate_clean_water_storage",
+      "ceramic_crucibles",
+      "pike_drill",
+      "multi_spindle_spinning",
+      "public_theatre",
+      "tin_smelting",
+      "field_armorer_teams",
+      "civic_games",
+      "copper_smelting",
+      "skirmisher_infantry_screens",
+      "copper_casting",
+      "festival_calendar",
+      "lime_burning",
+      "household_space_planning",
+      "lime_mortar",
+      "lead_smelting",
+      "refractory_brick_firing",
+      "naval_arsenals",
+      "iron_assaying",
+      "bloomery_smelting",
+      "salt_working",
+      "amphibious_operations",
+      "bloomery_charge_control",
+      "mounted_remount_school",
+      "brine_purification",
+      "experimental_controls",
+      "skirmish_pair_drill",
+      "glassmaking",
+      "casualty_collection_posts",
+      "forge_welding",
+      "graphite_marking",
+      "plunger_pressed_glass",
+      "evacuation_relays",
+      "seed_reserves",
+      "measured_kinematics",
+      "slow_sand_filtration",
+      "crucible_glass_melting",
+      "field_aid_stations",
+      "glass_blowing",
+      "glass_tube_drawing",
+      "medical_resupply_packing",
+      "combinatorics",
+      "hydrogen_flame_glassworking",
+      "fermentation_control",
+      "work_motion_studies",
+      "triage_registers",
+      "hardened_edges",
+      "lead_oxide_preparation",
+      "convalescent_duty_reviews",
+      "precision_thermometry",
+      "regional_granaries",
+      "grain_milling",
+      "pressure_vessels",
+      "charcoal_retorts",
+      "mold_blown_glass",
+      "pressure_pipe_jointing",
+      "mineral_cleavage",
+      "probability_theory",
+      "contour_cultivation",
+      "iron_ammonia_catalysts",
+      "core_formed_glass",
+      "lever_moments",
+      "relative_stratigraphy",
+      "sulfur_purification",
+      "phosphate_dressing",
+      "elastic_deformation",
+      "raised_granaries",
+      "sulfur_dioxide_recovery",
+      "comparative_mineral_hardness",
+      "sulfuric_acid_production",
+      "wire_drawing",
+      "mineral_streak_tests",
+      "mass_seed_selection",
+      "copperplate_preparation",
+      "regional_maps",
+      "woven_carriers",
+      "rope_rigging",
+      "siege_engineering",
+      "counterweight_cranes",
+      "fractional_distillation",
+      "mechanical_work_energy",
+      "mine_shoring",
+      "progeny_rows",
+      "managed_fallow",
+      "similar_triangles",
+      "ocean_sailing",
+      "urban_street_plans",
+      "stress_strain_relations",
+      "counterweight_engines",
+      "mine_drainage",
+      "engineer_demonstration_ranges",
+      "compound_pulleys",
+      "complex_numbers",
+      "germination_trials",
+      "timber_bridges",
+      "food_retorts",
+      "aerostat_observation",
+      "brine_fermentation",
+      "bearing_surfaces",
+      "siege_crew_rehearsals",
+      "mine_airways",
+      "flyer_spinning",
+      "friction_measurement",
+      "sowing_depth_trials",
+      "inertial_motion",
+      "lithologic_correlation",
+      "blast_furnace",
+      "finery_forges",
+      "momentum_balance",
+      "lead_sheet_rolling",
+      "stock_rotation",
+      "precision_machinery",
+      "gear_ratios",
+      "seed_cleaning",
+      "fuel_refining",
+      "structural_steel",
+      "mule_spinning",
+      "centers_of_mass",
+      "reinforced_concrete",
+      "geologic_cross_sections",
+      "controlled_pollination",
+      "mineral_specific_gravity",
+      "statistical_sampling",
+      "curtain_wall_systems",
+      "vinegar_pickling",
+      "vacuum_pumps",
+      "differential_calculus",
+      "cylinder_boring",
+      "root_cellars",
+      "sediment_provenance",
+      "integral_calculus",
+      "irrigation_schedules",
+      "vacuum_experiments",
+      "grade_tonnage_models",
+      "trigonometry",
+      "irrigation_loss_accounts",
+      "systematic_channel_sampling",
+      "calorimetry",
+      "heat_engine_cycles",
+      "field_variety_trials",
+      "structural_geologic_mapping",
+      "steam_propulsion",
+      "electrochemical_cells",
+      "internal_combustion",
+      "electrical_measurement",
+      "safety_lifts",
+      "naval_torpedoes",
+      "carbon_resistors",
+      "row_spacing_trials",
+      "resistive_sensing",
+      "electromagnetic_induction",
+      "naval_logistics",
+      "specimen_slide_mounting",
+      "electric_motors",
+      "regional_seed_trials",
+      "mechanical_refrigeration",
+      "electrical_generators",
+      "rotational_dynamics",
+      "geochemical_baselines",
+      "smoking",
+      "compressed_air_systems",
+      "curing_regimens",
+      "electromagnetic_relays",
+      "directional_air_valves",
+      "measurement_uncertainty",
+      "relay_logic",
+      "crop_residue_cover",
+      "chloralkali_cells",
+      "hermetic_grain_storage",
+      "vector_analysis",
+      "hydrogen_chloride_synthesis",
+      "geochemical_anomaly_mapping",
+      "electric_pulp_beating",
+      "column_buckling",
+      "relay_registers",
+      "seedbed_firming",
+      "cryogenic_air_separation",
+      "coal_grading",
+      "dimensional_analysis",
+      "coke_firing",
+      "semiconductor_doping",
+      "steel_refining",
+      "refractory_furnaces",
+      "graphite_crucibles",
+      "catalytic_ammonia_synthesis",
+      "sheet_steel_rolling",
+      "tinplate_coating",
+      "memory_address_decoding",
+      "can_body_forming",
+      "water_electrolysis",
+      "double_seaming",
+      "electric_arc_furnaces",
+      "read_write_memory",
+      "thermal_process_validation",
+      "binary_adders",
+      "statistical_inference",
+      "silicon_smelting",
+      "chlorosilane_purification",
+      "optical_lenses",
+      "spatial_variograms",
+      "cable_insulation",
+      "wound_transformers",
+      "experimental_optics",
+      "lens_centering",
+      "eyepiece_design",
+      "spectroscopy"
+    ],
+    "material_states": {
+      "Bitumen": [
+        {
+          "access": 1.01106208922834,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00074683894874
+        }
+      ],
+      "Clay": [
+        {
+          "access": 1.00972892352873,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0039124793027
+        },
+        {
+          "access": 1.00972892352873,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00271504626273
+        },
+        {
+          "access": 1.00972892352873,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00285055596763
+        },
+        {
+          "access": 1.00972892352873,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00387128578231
+        }
+      ],
+      "Coal": [
+        {
+          "access": 1.1894,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00020632777539
+        },
+        {
+          "access": 1.1894,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00010067881701
+        }
+      ],
+      "Copper Ore": [
+        {
+          "access": 1.47980628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00091500307595
+        },
+        {
+          "access": 1.47980628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00038616661168
+        },
+        {
+          "access": 1.47980628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00041368715211
+        }
+      ],
+      "Deep Aquifer": [
+        {
+          "access": 1.1894,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0001734515043
+        },
+        {
+          "access": 1.1894,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00005400851352
+        }
+      ],
+      "Fertile Soil": [
+        {
+          "access": 1.01154973435816,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00649639276776
+        },
+        {
+          "access": 1.01154973435816,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00314323473482
+        },
+        {
+          "access": 1.01154973435816,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00640791923502
+        }
+      ],
+      "Fiber Plants": [
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "developed",
+          "survey": 0.0
+        }
+      ],
+      "Fine Sand": [
+        {
+          "access": 1.02100089784091,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00005078902441
+        },
+        {
+          "access": 1.02100089784091,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00024622000763
+        }
+      ],
+      "Flint": [
+        {
+          "access": 1.00763261424702,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00023768541589
+        },
+        {
+          "access": 1.00763261424702,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00024385770298
+        }
+      ],
+      "Freshwater": [
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "accessible",
+          "survey": 1.0
+        }
+      ],
+      "Game": [
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00375521794344
+        },
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00280078748388
+        },
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00263761187291
+        },
+        {
+          "access": 1.0136055272234,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00415862932539
+        }
+      ],
+      "Graphite": [
+        {
+          "access": 1.17056080337832,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00007946043112
+        },
+        {
+          "access": 1.17056080337832,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00027851831757
+        }
+      ],
+      "Iron Ore": [
+        {
+          "access": 1.49420628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00059917066061
+        },
+        {
+          "access": 1.49420628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00016328642125
+        },
+        {
+          "access": 1.49420628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00002602344876
+        },
+        {
+          "access": 1.49420628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00079453976367
+        },
+        {
+          "access": 1.49420628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00071407905573
+        }
+      ],
+      "Limestone": [
+        {
+          "access": 1.02100089784091,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0012085631027
+        },
+        {
+          "access": 1.02100089784091,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00069299487768
+        }
+      ],
+      "Medicinal Plants": [
+        {
+          "access": 1.01704775362919,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.0002781394243
+        },
+        {
+          "access": 1.01704775362919,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "accessible",
+          "survey": 1.00045435171284
+        }
+      ],
+      "Phosphate Rock": [
+        {
+          "access": 1.08808840090144,
+          "blockers": [],
+          "route": 0.808213628249826,
+          "stage": "developed",
+          "survey": 1.00129007885335
+        }
+      ],
+      "Refractory Clay": [
+        {
+          "access": 1.20140628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00049416879739
+        },
+        {
+          "access": 1.20140628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00041744627756
+        },
+        {
+          "access": 1.20140628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00007541981392
+        },
+        {
+          "access": 1.20140628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00004171884031
+        },
+        {
+          "access": 1.20140628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00032724121428
+        },
+        {
+          "access": 1.20140628956203,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00056324243225
+        }
+      ],
+      "Salt": [
+        {
+          "access": 1.00977419938073,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00033126296206
+        },
+        {
+          "access": 1.00977419938073,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00250538498031
+        }
+      ],
+      "Stone": [
+        {
+          "access": 1.02458782143298,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00296038468424
+        },
+        {
+          "access": 1.02458782143298,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.0057535277617
+        },
+        {
+          "access": 1.02458782143298,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00532503175548
+        },
+        {
+          "access": 1.02458782143298,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00412173541781
+        },
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "developed",
+          "survey": 0.0
+        }
+      ],
+      "Sulfur": [
+        {
+          "access": 1.16336080337832,
+          "blockers": [],
+          "route": 1.0,
+          "stage": "developed",
+          "survey": 1.00012974059498
+        }
+      ],
+      "Timber": [
+        {
+          "access": 1.0,
+          "blockers": [],
+          "route": 0.0,
+          "stage": "developed",
+          "survey": 0.0
+        }
+      ]
+    },
+    "production": {
+      "available_civilian_recipes": 97,
+      "civilian_lines": 0,
+      "installed_units": 0,
+      "limits": "Stocks may be acquired rather than produced. Completed counts cover retained current lines only. Reported line state is not guaranteed throughput. New-line blockers exclude electricity dispatch and line-slot capacity. Remaining daily services exclude work already consumed.",
+      "lines": [],
+      "manufactured_stock_kinds": 1,
+      "manufactured_stocks": {
+        "Refractory Clay": 73.4773219375653
+      },
+      "operations_ledger_current": true,
+      "plants": [],
+      "recipes": [
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "tin_smelting",
+          "item": "refined_tin",
+          "new_line_blockers": [
+            "Tin Ore: 0.00 in stores; 2.00 needed for one item.",
+            "Charcoal: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 5.0 Clay.",
+            "Line setup needs 5.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "sheet_steel_rolling",
+          "item": "steel_sheet",
+          "new_line_blockers": [
+            "Steel: 0.00 in stores; 5.00 needed for one item.",
+            "Line setup needs 2.0 Shaft Bearings."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "tinplate_coating",
+          "item": "tinplate",
+          "new_line_blockers": [
+            "Steel Sheets: 0.00 in stores; 1.00 needed for one item.",
+            "Refined Tin: 0.00 in stores; 0.10 needed for one item.",
+            "Line setup needs 3.0 Wrought Iron.",
+            "Line setup needs 3.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "can_body_forming",
+          "item": "food_can_sets",
+          "new_line_blockers": [
+            "Tinplate: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Steel.",
+            "Line setup needs 1.0 Shaft Bearings."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "double_seaming",
+          "item": "seaming_head",
+          "new_line_blockers": [
+            "Steel: 0.00 in stores; 5.00 needed for one item.",
+            "Shaft Bearings: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "food_retorts",
+          "item": "food_retort",
+          "new_line_blockers": [
+            "Pressure Vessels: 0.00 in stores; 2.00 needed for one item.",
+            "Wrought Iron: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 2.0 Steel.",
+            "Line setup needs 1.0 Glass."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "charcoal",
+          "item": "wood_charcoal",
+          "new_line_blockers": [
+            "Timber: 0.00 in stores; 4.00 needed for one item.",
+            "Line setup needs 2.0 Clay.",
+            "Line setup needs 2.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "charcoal_retorts",
+          "item": "retort_charcoal",
+          "new_line_blockers": [
+            "Timber: 0.00 in stores; 3.00 needed for one item.",
+            "Line setup needs 2.0 Pressure Vessels.",
+            "Line setup needs 6.0 Refractory Bricks.",
+            "Line setup needs 2.0 Wrought Iron."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "bloomery_charge_control",
+          "item": "charged_bloomery_iron",
+          "new_line_blockers": [
+            "Charcoal: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 18.0 Stone.",
+            "Line setup needs 12.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "finery_forges",
+          "item": "charcoal_finery_iron",
+          "new_line_blockers": [
+            "Pig Iron: 0.00 in stores; 1.20 needed for one item.",
+            "Charcoal: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 8.0 Stone.",
+            "Line setup needs 6.0 Clay.",
+            "Line setup needs 2.0 Wrought Iron."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "blast_furnace",
+          "item": "charcoal_pig_iron",
+          "new_line_blockers": [
+            "Charcoal: 0.00 in stores; 1.00 needed for one item.",
+            "Limestone: 0.00 in stores; 0.30 needed for one item.",
+            "Line setup needs 12.0 Refractory Bricks.",
+            "Line setup needs 4.0 Wrought Iron.",
+            "Line setup needs 4.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "coke_firing",
+          "item": "metallurgical_coke",
+          "new_line_blockers": [
+            "Line setup needs 8.0 Stone.",
+            "Line setup needs 6.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "blast_furnace",
+          "item": "blast_pig_iron",
+          "new_line_blockers": [
+            "Coke: 0.00 in stores; 1.00 needed for one item.",
+            "Limestone: 0.00 in stores; 0.30 needed for one item.",
+            "Line setup needs 12.0 Refractory Bricks.",
+            "Line setup needs 4.0 Wrought Iron.",
+            "Line setup needs 4.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "finery_forges",
+          "item": "finery_iron",
+          "new_line_blockers": [
+            "Pig Iron: 0.00 in stores; 1.20 needed for one item.",
+            "Timber: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 8.0 Stone.",
+            "Line setup needs 6.0 Clay.",
+            "Line setup needs 2.0 Wrought Iron."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "clay_levigation",
+          "item": "prepared_clay",
+          "new_line_blockers": [
+            "Clay: 0.28 in stores; 2.00 needed for one item.",
+            "Line setup needs 2.0 Timber.",
+            "Line setup needs 2.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "grog_preparation",
+          "item": "ceramic_grog",
+          "new_line_blockers": [
+            "Clay: 0.28 in stores; 1.00 needed for one item.",
+            "Timber: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "refractory_body_trials",
+          "item": "refractory_clay",
+          "new_line_blockers": [
+            "Prepared Clay: 0.00 in stores; 2.00 needed for one item.",
+            "Ceramic Grog: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 3.0 Stone.",
+            "Line setup needs 3.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "refractory_brick_firing",
+          "item": "refractory_brick",
+          "new_line_blockers": [
+            "Timber: 0.00 in stores; 4.00 needed for one item.",
+            "Line setup needs 4.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "ceramic_crucibles",
+          "item": "ceramic_crucible",
+          "new_line_blockers": [
+            "Timber: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 3.0 Stone.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "crucible_glass_melting",
+          "item": "crucible_glass",
+          "new_line_blockers": [
+            "Limestone: 0.00 in stores; 0.30 needed for one item.",
+            "Timber: 0.00 in stores; 2.50 needed for one item.",
+            "Ceramic Crucibles: 0.00 in stores; 0.05 needed for one item.",
+            "Line setup needs 8.0 Refractory Bricks.",
+            "Line setup needs 4.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "lens_centering",
+          "item": "centered_lens_mount",
+          "new_line_blockers": [
+            "Optical Lenses: 0.00 in stores; 1.00 needed for one item.",
+            "Refined Copper: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 2.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "eyepiece_design",
+          "item": "microscope_eyepiece",
+          "new_line_blockers": [
+            "Optical Lenses: 0.00 in stores; 1.00 needed for one item.",
+            "Centered Lens Mounts: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Timber.",
+            "Line setup needs 1.0 Wrought Iron."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "specimen_slide_mounting",
+          "item": "specimen_slides",
+          "new_line_blockers": [
+            "Glass: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Stone.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "pressure_pipe_jointing",
+          "item": "pressure_pipe_fittings",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 5.00 needed for one item.",
+            "Line setup needs 3.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "cylinder_boring",
+          "item": "bored_cylinders",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 2.0 Steel.",
+            "Line setup needs 1.0 Shaft Bearings."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "directional_air_valves",
+          "item": "directional_air_valve",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 1.00 needed for one item.",
+            "Piston Packings: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 1.0 Steel.",
+            "Line setup needs 2.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "lead_smelting",
+          "item": "refined_lead",
+          "new_line_blockers": [
+            "Lead Ore: 0.00 in stores; 2.00 needed for one item.",
+            "Timber: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 5.0 Clay.",
+            "Line setup needs 5.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "lead_sheet_rolling",
+          "item": "lead_electrode_sheets",
+          "new_line_blockers": [
+            "Refined Lead: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Wrought Iron.",
+            "Line setup needs 1.0 Shaft Bearings."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "lead_oxide_preparation",
+          "item": "lead_oxide",
+          "new_line_blockers": [
+            "Refined Lead: 0.00 in stores; 1.00 needed for one item.",
+            "Timber: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Clay.",
+            "Line setup needs 2.0 Glass."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "phosphate_dressing",
+          "item": "ground_phosphate_fertilizer",
+          "new_line_blockers": [
+            "Phosphate Rock: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 5.0 Stone.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "sulfur_dioxide_recovery",
+          "item": "recovered_sulfur_dioxide",
+          "new_line_blockers": [
+            "Sulfur: 0.00 in stores; 1.00 needed for one item.",
+            "Timber: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Glass.",
+            "Line setup needs 3.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "sulfuric_acid_production",
+          "item": "sulfuric_acid",
+          "new_line_blockers": [
+            "Sulfur Dioxide: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 1.0 Pressure Vessels.",
+            "Line setup needs 4.0 Glass.",
+            "Line setup needs 2.0 Wrought Iron."
+          ]
+        },
+        {
+          "electricity_per_batch": 2.0,
+          "gate": "compressed_air_systems",
+          "item": "compressed_air",
+          "new_line_blockers": [
+            "Line setup needs 1.0 Electric Motors.",
+            "Line setup needs 2.0 Pressure Vessels.",
+            "Line setup needs 1.0 Insulated Cable."
+          ]
+        },
+        {
+          "electricity_per_batch": 4.0,
+          "gate": "cryogenic_air_separation",
+          "item": "separated_air",
+          "new_line_blockers": [
+            "Compressed Air: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Electric Motors.",
+            "Line setup needs 3.0 Pressure Vessels.",
+            "Line setup needs 2.0 Insulated Cable."
+          ]
+        },
+        {
+          "electricity_per_batch": 5.0,
+          "gate": "water_electrolysis",
+          "item": "electrolytic_hydrogen",
+          "new_line_blockers": [
+            "Line setup needs 2.0 Pressure Vessels.",
+            "Line setup needs 2.0 Insulated Cable.",
+            "Line setup needs 1.0 Graphite."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "iron_ammonia_catalysts",
+          "item": "ammonia_catalysts",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Glass.",
+            "Line setup needs 3.0 Clay.",
+            "Line setup needs 2.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 4.0,
+          "gate": "catalytic_ammonia_synthesis",
+          "item": "synthetic_ammonia",
+          "new_line_blockers": [
+            "Nitrogen: 0.00 in stores; 1.00 needed for one item.",
+            "Hydrogen: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 1.0 Ammonia Catalysts.",
+            "Line setup needs 4.0 Pressure Vessels.",
+            "Line setup needs 3.0 Steel.",
+            "Line setup needs 2.0 Insulated Cable."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "relay_registers",
+          "item": "relay_register_units",
+          "new_line_blockers": [
+            "Relays: 0.00 in stores; 4.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "memory_address_decoding",
+          "item": "memory_decoders",
+          "new_line_blockers": [
+            "Logic Modules: 0.00 in stores; 3.00 needed for one item.",
+            "Relays: 0.00 in stores; 2.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "memory_address_decoding",
+          "item": "electronic_memory_decoders",
+          "new_line_blockers": [
+            "Logic Modules: 0.00 in stores; 2.00 needed for one item.",
+            "Inverter Modules: 0.00 in stores; 1.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 2.0 Steel.",
+            "Line setup needs 1.0 Optical Lenses."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "read_write_memory",
+          "item": "relay_memory_units",
+          "new_line_blockers": [
+            "Relay Registers: 0.00 in stores; 2.00 needed for one item.",
+            "Memory Decoders: 0.00 in stores; 1.00 needed for one item.",
+            "Relays: 0.00 in stores; 2.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "read_write_memory",
+          "item": "electronic_memory_units",
+          "new_line_blockers": [
+            "Register Banks: 0.00 in stores; 2.00 needed for one item.",
+            "Memory Decoders: 0.00 in stores; 1.00 needed for one item.",
+            "Inverter Modules: 0.00 in stores; 1.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 2.0 Steel.",
+            "Line setup needs 1.0 Optical Lenses."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "copperplate_preparation",
+          "item": "prepared_copperplates",
+          "new_line_blockers": [
+            "Refined Copper: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Stone.",
+            "Line setup needs 2.0 Wrought Iron."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "seed_oil_pressing",
+          "item": "pressed_seed_oil",
+          "new_line_blockers": [
+            "Line setup needs 4.0 Stone.",
+            "Line setup needs 3.0 Timber.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "lampblack_capture",
+          "item": "captured_lampblack",
+          "new_line_blockers": [
+            "Timber: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 3.0 Clay.",
+            "Line setup needs 2.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "oil_based_printing_inks",
+          "item": "oil_printing_ink",
+          "new_line_blockers": [
+            "Drying Oil: 0.00 in stores; 0.50 needed for one item.",
+            "Lampblack: 0.00 in stores; 0.50 needed for one item.",
+            "Timber: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 2.0 Stone.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "relay_logic",
+          "item": "relay_logic_modules",
+          "new_line_blockers": [
+            "Relays: 0.00 in stores; 3.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "binary_adders",
+          "item": "relay_adders",
+          "new_line_blockers": [
+            "Logic Modules: 0.00 in stores; 5.00 needed for one item.",
+            "Relays: 0.00 in stores; 2.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Wrought Iron.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "binary_adders",
+          "item": "semiconductor_adders",
+          "new_line_blockers": [
+            "Logic Modules: 0.00 in stores; 3.00 needed for one item.",
+            "Inverter Modules: 0.00 in stores; 1.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 2.0 Steel.",
+            "Line setup needs 1.0 Optical Lenses."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "carbon_resistors",
+          "item": "carbon_resistors",
+          "new_line_blockers": [
+            "Graphite: 0.00 in stores; 0.10 needed for one item.",
+            "Clay: 0.28 in stores; 2.20 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.10 needed for one item.",
+            "Line setup needs 1.0 Refined Copper."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "electromagnetic_relays",
+          "item": "electromagnetic_relays",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 3.50 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.30 needed for one item.",
+            "Insulated Cable: 0.00 in stores; 0.10 needed for one item.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "wound_transformers",
+          "item": "wound_transformers",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 4.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.50 needed for one item.",
+            "Insulated Cable: 0.00 in stores; 0.20 needed for one item.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "resistive_sensing",
+          "item": "resistive_sensors",
+          "new_line_blockers": [
+            "Resistors: 0.00 in stores; 1.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 0.30 needed for one item.",
+            "Glass: 0.00 in stores; 0.20 needed for one item.",
+            "Line setup needs 2.0 Steel.",
+            "Line setup needs 1.0 Optical Lenses."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "core_formed_glass",
+          "item": "core_glass_vessels",
+          "new_line_blockers": [
+            "Glass: 0.00 in stores; 1.00 needed for one item.",
+            "Clay: 0.28 in stores; 4.20 needed for one item.",
+            "Timber: 0.00 in stores; 3.00 needed for one item.",
+            "Line setup needs 4.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "glass_blowing",
+          "item": "blown_glass_vessels",
+          "new_line_blockers": [
+            "Glass: 0.00 in stores; 0.80 needed for one item.",
+            "Timber: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 4.0 Clay.",
+            "Line setup needs 4.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "mold_blown_glass",
+          "item": "mold_glass_vessels",
+          "new_line_blockers": [
+            "Glass: 0.00 in stores; 0.80 needed for one item.",
+            "Timber: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 8.0 Clay.",
+            "Line setup needs 4.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "plunger_pressed_glass",
+          "item": "pressed_glass_vessels",
+          "new_line_blockers": [
+            "Glass: 0.00 in stores; 1.00 needed for one item.",
+            "Timber: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 8.0 Wrought Iron.",
+            "Line setup needs 6.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "glass_tube_drawing",
+          "item": "drawn_glass_tubes",
+          "new_line_blockers": [
+            "Glass: 0.00 in stores; 1.00 needed for one item.",
+            "Timber: 0.00 in stores; 5.00 needed for one item.",
+            "Line setup needs 2.0 Wrought Iron.",
+            "Line setup needs 4.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "hydrogen_flame_glassworking",
+          "item": "hydrogen_worked_glassware",
+          "new_line_blockers": [
+            "Glass Tubes: 0.00 in stores; 1.00 needed for one item.",
+            "Glass Vessels: 0.00 in stores; 0.50 needed for one item.",
+            "Hydrogen: 0.00 in stores; 0.20 needed for one item.",
+            "Line setup needs 2.0 Refined Copper.",
+            "Line setup needs 3.0 Clay.",
+            "Line setup needs 1.0 Pressure Vessels."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "brine_purification",
+          "item": "vessel_purified_brine",
+          "new_line_blockers": [
+            "Salt: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Glass Vessels.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 3.0,
+          "gate": "chlorosilane_purification",
+          "item": "apparatus_refined_silicon",
+          "new_line_blockers": [
+            "Metallurgical Silicon: 0.00 in stores; 1.00 needed for one item.",
+            "Hydrogen Chloride: 0.00 in stores; 0.50 needed for one item.",
+            "Hydrogen: 0.00 in stores; 0.25 needed for one item.",
+            "Line setup needs 3.0 Laboratory Glassware.",
+            "Line setup needs 3.0 Pressure Vessels.",
+            "Line setup needs 5.0 Steel."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "fiber_pulp_beating",
+          "item": "beaten_pulp",
+          "new_line_blockers": [
+            "Prepared Fibers: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Timber.",
+            "Line setup needs 3.0 Stone.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "textile_rag_pulping",
+          "item": "rag_pulp",
+          "new_line_blockers": [
+            "Woven Cloth: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 3.0 Timber.",
+            "Line setup needs 3.0 Stone.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 2.0,
+          "gate": "electric_pulp_beating",
+          "item": "electric_pulp",
+          "new_line_blockers": [
+            "Prepared Fibers: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 1.0 Electric Motors.",
+            "Line setup needs 1.0 Shaft Bearings.",
+            "Line setup needs 4.0 Steel."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "spinning_wheels",
+          "item": "wheel_spun_yarn",
+          "new_line_blockers": [
+            "Prepared Fibers: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 4.0 Timber.",
+            "Line setup needs 1.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "flyer_spinning",
+          "item": "flyer_spun_yarn",
+          "new_line_blockers": [
+            "Prepared Fibers: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 1.0 Shaft Bearings.",
+            "Line setup needs 4.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "multi_spindle_spinning",
+          "item": "frame_spun_yarn",
+          "new_line_blockers": [
+            "Combed Fibers: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 8.0 Timber.",
+            "Line setup needs 2.0 Wrought Iron."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "mule_spinning",
+          "item": "hand_mule_yarn",
+          "new_line_blockers": [
+            "Combed Fibers: 0.00 in stores; 0.90 needed for one item.",
+            "Line setup needs 4.0 Wrought Iron.",
+            "Line setup needs 1.0 Gear Sets.",
+            "Line setup needs 1.0 Shaft Bearings."
+          ]
+        },
+        {
+          "electricity_per_batch": 2.0,
+          "gate": "mule_spinning",
+          "item": "electric_mule_yarn",
+          "new_line_blockers": [
+            "Combed Fibers: 0.00 in stores; 0.90 needed for one item.",
+            "Line setup needs 1.0 Electric Motors.",
+            "Line setup needs 2.0 Gear Sets.",
+            "Line setup needs 2.0 Shaft Bearings.",
+            "Line setup needs 5.0 Steel."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "flying_shuttles",
+          "item": "shuttle_woven_cloth",
+          "new_line_blockers": [
+            "Spun Yarn: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 2.0 Loom Weights.",
+            "Line setup needs 6.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "fiber_retting",
+          "item": "retted_fibers",
+          "new_line_blockers": [
+            "Line setup needs 3.0 Clay.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "fiber_combing",
+          "item": "combed_fibers",
+          "new_line_blockers": [
+            "Prepared Fibers: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Timber.",
+            "Line setup needs 1.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "drop_spindles",
+          "item": "spun_yarn",
+          "new_line_blockers": [
+            "Prepared Fibers: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 1.0 Clay.",
+            "Line setup needs 1.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "drop_spindles",
+          "item": "combed_yarn",
+          "new_line_blockers": [
+            "Combed Fibers: 0.00 in stores; 0.75 needed for one item.",
+            "Line setup needs 1.0 Clay.",
+            "Line setup needs 1.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "warp_weighted_looms",
+          "item": "loom_weights",
+          "new_line_blockers": [
+            "Clay: 0.28 in stores; 1.00 needed for one item.",
+            "Timber: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 2.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "plain_weaving",
+          "item": "woven_cloth",
+          "new_line_blockers": [
+            "Spun Yarn: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 2.0 Loom Weights.",
+            "Line setup needs 4.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "woven_dressings",
+          "item": "woven_dressings",
+          "new_line_blockers": [
+            "Woven Cloth: 0.00 in stores; 0.20 needed for one item.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "gear_ratios",
+          "item": "gear_sets",
+          "new_line_blockers": [
+            "Steel: 0.00 in stores; 6.00 needed for one item.",
+            "Line setup needs 4.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "bearing_surfaces",
+          "item": "shaft_bearings",
+          "new_line_blockers": [
+            "Refined Copper: 0.00 in stores; 1.00 needed for one item.",
+            "Steel: 0.00 in stores; 3.50 needed for one item.",
+            "Graphite: 0.00 in stores; 0.05 needed for one item.",
+            "Line setup needs 2.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "electrical_generators",
+          "item": "governed_generators",
+          "new_line_blockers": [
+            "Mechanical Governors: 0.00 in stores; 1.00 needed for one item.",
+            "Crank Assemblies: 0.00 in stores; 1.00 needed for one item.",
+            "Flywheels: 0.00 in stores; 1.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 5.00 needed for one item.",
+            "Insulated Cable: 0.00 in stores; 2.00 needed for one item.",
+            "Steel: 0.00 in stores; 8.00 needed for one item.",
+            "Line setup needs 8.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "brine_purification",
+          "item": "purified_brine",
+          "new_line_blockers": [
+            "Salt: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Glass.",
+            "Line setup needs 4.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 4.0,
+          "gate": "chloralkali_cells",
+          "item": "chloralkali_batch",
+          "new_line_blockers": [
+            "Purified Brine: 0.00 in stores; 1.00 needed for one item.",
+            "Graphite: 0.00 in stores; 0.02 needed for one item.",
+            "Line setup needs 3.0 Pressure Vessels.",
+            "Line setup needs 4.0 Glass.",
+            "Line setup needs 4.0 Insulated Cable."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "hydrogen_chloride_synthesis",
+          "item": "hydrogen_chloride",
+          "new_line_blockers": [
+            "Chlorine: 0.00 in stores; 1.00 needed for one item.",
+            "Hydrogen: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 2.0 Pressure Vessels.",
+            "Line setup needs 3.0 Glass."
+          ]
+        },
+        {
+          "electricity_per_batch": 3.0,
+          "gate": "chlorosilane_purification",
+          "item": "reagent_refined_silicon",
+          "new_line_blockers": [
+            "Metallurgical Silicon: 0.00 in stores; 1.00 needed for one item.",
+            "Hydrogen Chloride: 0.00 in stores; 0.50 needed for one item.",
+            "Hydrogen: 0.00 in stores; 0.25 needed for one item.",
+            "Line setup needs 3.0 Pressure Vessels.",
+            "Line setup needs 3.0 Glass.",
+            "Line setup needs 5.0 Steel."
+          ]
+        },
+        {
+          "electricity_per_batch": 6.0,
+          "gate": "silicon_smelting",
+          "item": "silicon_feedstock",
+          "new_line_blockers": [
+            "Graphite: 0.00 in stores; 0.10 needed for one item.",
+            "Line setup needs 8.0 Steel.",
+            "Line setup needs 4.0 Insulated Cable."
+          ]
+        },
+        {
+          "electricity_per_batch": 4.0,
+          "gate": "chlorosilane_purification",
+          "item": "purified_silicon",
+          "new_line_blockers": [
+            "Metallurgical Silicon: 0.00 in stores; 1.00 needed for one item.",
+            "Salt: 0.00 in stores; 0.50 needed for one item.",
+            "Line setup needs 3.0 Pressure Vessels.",
+            "Line setup needs 3.0 Glass.",
+            "Line setup needs 5.0 Steel."
+          ]
+        },
+        {
+          "electricity_per_batch": 6.0,
+          "gate": "electric_arc_furnaces",
+          "item": "electric_arc_steel",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 2.00 needed for one item.",
+            "Limestone: 0.00 in stores; 0.20 needed for one item.",
+            "Graphite: 0.00 in stores; 0.10 needed for one item.",
+            "Line setup needs 8.0 Steel.",
+            "Line setup needs 4.0 Insulated Cable."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "glassmaking",
+          "item": "glass_batch",
+          "new_line_blockers": [
+            "Limestone: 0.00 in stores; 0.30 needed for one item.",
+            "Timber: 0.00 in stores; 3.00 needed for one item.",
+            "Line setup needs 12.0 Stone.",
+            "Line setup needs 8.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "copper_smelting",
+          "item": "refined_copper",
+          "new_line_blockers": [
+            "Copper Ore: 0.00 in stores; 2.00 needed for one item.",
+            "Timber: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 12.0 Stone.",
+            "Line setup needs 8.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "bloomery_smelting",
+          "item": "wrought_iron",
+          "new_line_blockers": [
+            "Timber: 0.00 in stores; 4.00 needed for one item.",
+            "Line setup needs 18.0 Stone.",
+            "Line setup needs 12.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "steel_refining",
+          "item": "steel_stock",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 2.00 needed for one item.",
+            "Limestone: 0.00 in stores; 0.20 needed for one item.",
+            "Line setup needs 24.0 Stone.",
+            "Line setup needs 16.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "wire_drawing",
+          "item": "copper_wire",
+          "new_line_blockers": [
+            "Refined Copper: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 3.0 Wrought Iron.",
+            "Line setup needs 5.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "cable_insulation",
+          "item": "insulated_cable",
+          "new_line_blockers": [
+            "Copper Wire: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 8.0 Timber.",
+            "Line setup needs 2.0 Clay."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "optical_lenses",
+          "item": "optical_lens",
+          "new_line_blockers": [
+            "Glass: 0.00 in stores; 1.00 needed for one item.",
+            "Line setup needs 5.0 Timber.",
+            "Line setup needs 5.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "pressure_vessels",
+          "item": "pressure_vessel",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 8.00 needed for one item.",
+            "Line setup needs 10.0 Stone."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "electrical_generators",
+          "item": "electrical_generator",
+          "new_line_blockers": [
+            "Refined Copper: 0.00 in stores; 5.00 needed for one item.",
+            "Wrought Iron: 0.00 in stores; 16.00 needed for one item.",
+            "Insulated Cable: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 10.0 Timber."
+          ]
+        },
+        {
+          "electricity_per_batch": 0.0,
+          "gate": "electric_motors",
+          "item": "electric_motor",
+          "new_line_blockers": [
+            "Wrought Iron: 0.00 in stores; 10.00 needed for one item.",
+            "Copper Wire: 0.00 in stores; 3.00 needed for one item.",
+            "Insulated Cable: 0.00 in stores; 2.00 needed for one item.",
+            "Line setup needs 8.0 Timber."
+          ]
+        }
+      ],
+      "remaining_daily_services": {},
+      "units_under_construction": 0
+    },
+    "research_allocations": {
+      "culture": 0,
+      "demography": 0,
+      "ecology": 0,
+      "health": 0,
+      "infrastructure": 0,
+      "institutions": 0,
+      "knowledge": 4,
+      "labor": 0,
+      "logistics": 0,
+      "nutrition": 0,
+      "production": 0,
+      "security": 0
+    },
+    "research_subcategory_allocations": {
+      "culture": {
+        "Collective memory": 0,
+        "Inquiry breadth": 0,
+        "Shared legitimacy": 0,
+        "Social cohesion": 0
+      },
+      "demography": {
+        "Child survival": 0,
+        "Fertility conditions": 0,
+        "Maternal safety": 0,
+        "Shelter capacity": 0
+      },
+      "ecology": {
+        "Land health": 0,
+        "Natural recovery": 0,
+        "Pollution control": 0,
+        "Resource sustainability": 0
+      },
+      "health": {
+        "Disease control": 0,
+        "General health": 0,
+        "Injury safety": 0,
+        "Water & sanitation": 0
+      },
+      "infrastructure": {
+        "Construction": 0,
+        "Housing": 0,
+        "Public works": 0,
+        "Resilience": 0
+      },
+      "institutions": {
+        "Administration": 0,
+        "Institutional flexibility": 0,
+        "Legitimacy": 0,
+        "State capacity": 0
+      },
+      "knowledge": {
+        "Communication": 0,
+        "Directed attention": 0,
+        "Observers": 4,
+        "Preserved knowledge": 0
+      },
+      "labor": {
+        "Able workforce": 0,
+        "Coordination": 0,
+        "Work efficiency": 0,
+        "Workload balance": 0
+      },
+      "logistics": {
+        "Carrying capacity": 0,
+        "Route quality": 0,
+        "Storage system": 0,
+        "Trade reach": 0
+      },
+      "nutrition": {
+        "Daily supply": 0,
+        "Diet quality": 0,
+        "Land productivity": 0,
+        "Stored reserve": 0
+      },
+      "production": {
+        "Craft capacity": 0,
+        "Material supply": 0,
+        "Standardization": 0,
+        "Tool quality": 0
+      },
+      "security": {
+        "Crisis resilience": 0,
+        "Military readiness": 0,
+        "Organized defense": 0,
+        "Public safety": 0
+      }
+    },
+    "settlements": [
+      {
+        "id": "settlement_001",
+        "last_resource_day": -1,
+        "occupied": false,
+        "plots": 740,
+        "population": 25458.0517431825,
+        "primary": true
+      },
+      {
+        "id": "settlement_002",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 568,
+        "population": 21314.7154711723,
+        "primary": false
+      },
+      {
+        "id": "settlement_003",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 440,
+        "population": 14794.0356190087,
+        "primary": false
+      },
+      {
+        "id": "settlement_004",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 433,
+        "population": 15659.6700542586,
+        "primary": false
+      },
+      {
+        "id": "settlement_005",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 339,
+        "population": 8733.37757874419,
+        "primary": false
+      },
+      {
+        "id": "settlement_006",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 312,
+        "population": 8418.83049438024,
+        "primary": false
+      },
+      {
+        "id": "settlement_007",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 297,
+        "population": 5953.33430540643,
+        "primary": false
+      },
+      {
+        "id": "settlement_008",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 187,
+        "population": 3057.06371032617,
+        "primary": false
+      },
+      {
+        "id": "settlement_009",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 221,
+        "population": 3953.88480777103,
+        "primary": false
+      },
+      {
+        "id": "settlement_010",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 185,
+        "population": 4025.65593530504,
+        "primary": false
+      },
+      {
+        "id": "settlement_011",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 184,
+        "population": 3789.01787587918,
+        "primary": false
+      },
+      {
+        "id": "settlement_012",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 140,
+        "population": 2502.51442680084,
+        "primary": false
+      },
+      {
+        "id": "settlement_013",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 193,
+        "population": 3542.37428919646,
+        "primary": false
+      },
+      {
+        "id": "settlement_014",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 188,
+        "population": 3490.90854617752,
+        "primary": false
+      },
+      {
+        "id": "settlement_015",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 171,
+        "population": 2877.2001690031,
+        "primary": false
+      },
+      {
+        "id": "settlement_016",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 85,
+        "population": 1362.4482481668,
+        "primary": false
+      },
+      {
+        "id": "settlement_017",
+        "last_resource_day": 91250,
+        "occupied": false,
+        "plots": 76,
+        "population": 1176.97045020307,
+        "primary": false
+      }
+    ]
+  },
+  "limitations": [
+    "One isolated seat, not a full world or a player campaign",
+    "Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling",
+    "No foreign acquisition, war or dependency-recovery scenario",
+    "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+    "Short or collapsed runs do not validate millennial pacing"
+  ],
+  "timings": {
+    "city_trade": {
+      "calls": 91250,
+      "microseconds": 2034133294
+    },
+    "civics": {
+      "calls": 91250,
+      "microseconds": 652091
+    },
+    "consequences": {
+      "calls": 91250,
+      "microseconds": 428739272
+    },
+    "construction": {
+      "calls": 91250,
+      "microseconds": 9039089
+    },
+    "context": {
+      "calls": 91250,
+      "microseconds": 4617643
+    },
+    "controller": {
+      "calls": 91250,
+      "microseconds": 90187428
+    },
+    "convoy": {
+      "calls": 91250,
+      "microseconds": 419975
+    },
+    "discovery": {
+      "calls": 91250,
+      "microseconds": 286733421
+    },
+    "economy": {
+      "calls": 91250,
+      "microseconds": 88771839
+    },
+    "enabled": true,
+    "government": {
+      "calls": 91250,
+      "microseconds": 343401453
+    },
+    "military_and_travel": {
+      "calls": 91250,
+      "microseconds": 698892911
+    },
+    "operations": {
+      "calls": 91250,
+      "microseconds": 9745745
+    },
+    "progression": {
+      "calls": 91250,
+      "microseconds": 88489902
+    },
+    "resources": {
+      "calls": 91250,
+      "microseconds": 213480576
+    },
+    "secondary_settlements": {
+      "calls": 91250,
+      "microseconds": 8185172957
+    },
+    "settlement_morphology": {
+      "calls": 91250,
+      "microseconds": 108135945
+    }
+  },
+  "source_commit": "e1278e01ab8874770739e52594f392f735a7d109",
+  "source_report": "/Users/seanpurtill/Documents/Codex/tt-technology-implementation/artifacts/technology-pacing/catalog-476-250-profile.json",
+  "source_sha256": "8da7f707e819eca779585ff86dfcd07bdc79d29e743c2baa8d99a9d1b9729757",
+  "annual_production_observations": [
+    {
+      "year": 0.0,
+      "known": 0,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": false,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 0.00273972602739726,
+      "known": 0,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 1.0,
+      "known": 0,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 2.0,
+      "known": 0,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 3.0,
+      "known": 0,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 4.0,
+      "known": 2,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 5.0,
+      "known": 3,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 6.0,
+      "known": 3,
+      "production": {
+        "available_civilian_recipes": 0,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 7.0,
+      "known": 4,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 8.0,
+      "known": 5,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 9.0,
+      "known": 5,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 10.0,
+      "known": 7,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 11.0,
+      "known": 7,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 12.0,
+      "known": 8,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 13.0,
+      "known": 9,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 14.0,
+      "known": 9,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 15.0,
+      "known": 9,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 16.0,
+      "known": 9,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 17.0,
+      "known": 10,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 18.0,
+      "known": 10,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 19.0,
+      "known": 12,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 20.0,
+      "known": 13,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 21.0,
+      "known": 14,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 22.0,
+      "known": 14,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 23.0,
+      "known": 15,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 24.0,
+      "known": 15,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 25.0,
+      "known": 15,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 26.0,
+      "known": 16,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 27.0,
+      "known": 18,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 28.0,
+      "known": 19,
+      "production": {
+        "available_civilian_recipes": 1,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 29.0,
+      "known": 21,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 30.0,
+      "known": 21,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 31.0,
+      "known": 23,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 32.0,
+      "known": 24,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 33.0,
+      "known": 26,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 34.0,
+      "known": 27,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 35.0,
+      "known": 27,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 36.0,
+      "known": 29,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 37.0,
+      "known": 30,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 38.0,
+      "known": 33,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 39.0,
+      "known": 34,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 40.0,
+      "known": 34,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 41.0,
+      "known": 35,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 42.0,
+      "known": 36,
+      "production": {
+        "available_civilian_recipes": 2,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 43.0,
+      "known": 38,
+      "production": {
+        "available_civilian_recipes": 3,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 44.0,
+      "known": 39,
+      "production": {
+        "available_civilian_recipes": 3,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 45.0,
+      "known": 40,
+      "production": {
+        "available_civilian_recipes": 3,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 46.0,
+      "known": 40,
+      "production": {
+        "available_civilian_recipes": 3,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 47.0,
+      "known": 44,
+      "production": {
+        "available_civilian_recipes": 4,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 48.0,
+      "known": 45,
+      "production": {
+        "available_civilian_recipes": 4,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 49.0,
+      "known": 45,
+      "production": {
+        "available_civilian_recipes": 4,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 50.0,
+      "known": 45,
+      "production": {
+        "available_civilian_recipes": 4,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 51.0,
+      "known": 46,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 52.0,
+      "known": 48,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 53.0,
+      "known": 49,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 54.0,
+      "known": 49,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 55.0,
+      "known": 50,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 56.0,
+      "known": 51,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 57.0,
+      "known": 51,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 58.0,
+      "known": 51,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 59.0,
+      "known": 51,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 60.0,
+      "known": 53,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 61.0,
+      "known": 54,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 62.0,
+      "known": 55,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 63.0,
+      "known": 55,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 64.0,
+      "known": 55,
+      "production": {
+        "available_civilian_recipes": 5,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 65.0,
+      "known": 56,
+      "production": {
+        "available_civilian_recipes": 7,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 66.0,
+      "known": 57,
+      "production": {
+        "available_civilian_recipes": 7,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 67.0,
+      "known": 57,
+      "production": {
+        "available_civilian_recipes": 7,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 68.0,
+      "known": 60,
+      "production": {
+        "available_civilian_recipes": 7,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 69.0,
+      "known": 61,
+      "production": {
+        "available_civilian_recipes": 8,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 70.0,
+      "known": 61,
+      "production": {
+        "available_civilian_recipes": 8,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 71.0,
+      "known": 63,
+      "production": {
+        "available_civilian_recipes": 9,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 72.0,
+      "known": 63,
+      "production": {
+        "available_civilian_recipes": 9,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 73.0,
+      "known": 65,
+      "production": {
+        "available_civilian_recipes": 9,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 74.0,
+      "known": 65,
+      "production": {
+        "available_civilian_recipes": 9,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 75.0,
+      "known": 66,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 76.0,
+      "known": 67,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 77.0,
+      "known": 68,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 78.0,
+      "known": 69,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 79.0,
+      "known": 70,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 80.0,
+      "known": 70,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 81.0,
+      "known": 70,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 82.0,
+      "known": 71,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 83.0,
+      "known": 71,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 84.0,
+      "known": 72,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 85.0,
+      "known": 73,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 86.0,
+      "known": 74,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 87.0,
+      "known": 74,
+      "production": {
+        "available_civilian_recipes": 10,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 88.0,
+      "known": 75,
+      "production": {
+        "available_civilian_recipes": 11,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 89.0,
+      "known": 75,
+      "production": {
+        "available_civilian_recipes": 11,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 90.0,
+      "known": 77,
+      "production": {
+        "available_civilian_recipes": 11,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 91.0,
+      "known": 78,
+      "production": {
+        "available_civilian_recipes": 12,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 92.0,
+      "known": 80,
+      "production": {
+        "available_civilian_recipes": 13,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 93.0,
+      "known": 80,
+      "production": {
+        "available_civilian_recipes": 13,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 94.0,
+      "known": 81,
+      "production": {
+        "available_civilian_recipes": 13,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 95.0,
+      "known": 82,
+      "production": {
+        "available_civilian_recipes": 13,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 96.0,
+      "known": 84,
+      "production": {
+        "available_civilian_recipes": 14,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 97.0,
+      "known": 85,
+      "production": {
+        "available_civilian_recipes": 14,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 98.0,
+      "known": 86,
+      "production": {
+        "available_civilian_recipes": 15,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 99.0,
+      "known": 87,
+      "production": {
+        "available_civilian_recipes": 15,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 100.0,
+      "known": 89,
+      "production": {
+        "available_civilian_recipes": 15,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 101.0,
+      "known": 90,
+      "production": {
+        "available_civilian_recipes": 15,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 102.0,
+      "known": 93,
+      "production": {
+        "available_civilian_recipes": 16,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 103.0,
+      "known": 93,
+      "production": {
+        "available_civilian_recipes": 16,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 104.0,
+      "known": 96,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 105.0,
+      "known": 98,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 106.0,
+      "known": 100,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 107.0,
+      "known": 101,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 108.0,
+      "known": 103,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 109.0,
+      "known": 104,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 110.0,
+      "known": 105,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 111.0,
+      "known": 108,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 112.0,
+      "known": 109,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 113.0,
+      "known": 111,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 114.0,
+      "known": 111,
+      "production": {
+        "available_civilian_recipes": 17,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 115.0,
+      "known": 113,
+      "production": {
+        "available_civilian_recipes": 18,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 116.0,
+      "known": 115,
+      "production": {
+        "available_civilian_recipes": 18,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 117.0,
+      "known": 116,
+      "production": {
+        "available_civilian_recipes": 19,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 118.0,
+      "known": 116,
+      "production": {
+        "available_civilian_recipes": 19,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 119.0,
+      "known": 117,
+      "production": {
+        "available_civilian_recipes": 19,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 120.0,
+      "known": 119,
+      "production": {
+        "available_civilian_recipes": 20,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 121.0,
+      "known": 120,
+      "production": {
+        "available_civilian_recipes": 21,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 122.0,
+      "known": 123,
+      "production": {
+        "available_civilian_recipes": 22,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 123.0,
+      "known": 124,
+      "production": {
+        "available_civilian_recipes": 22,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 124.0,
+      "known": 126,
+      "production": {
+        "available_civilian_recipes": 22,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 125.0,
+      "known": 127,
+      "production": {
+        "available_civilian_recipes": 22,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 126.0,
+      "known": 129,
+      "production": {
+        "available_civilian_recipes": 22,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 127.0,
+      "known": 130,
+      "production": {
+        "available_civilian_recipes": 23,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 128.0,
+      "known": 130,
+      "production": {
+        "available_civilian_recipes": 23,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 129.0,
+      "known": 132,
+      "production": {
+        "available_civilian_recipes": 24,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 130.0,
+      "known": 133,
+      "production": {
+        "available_civilian_recipes": 24,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 131.0,
+      "known": 133,
+      "production": {
+        "available_civilian_recipes": 24,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 132.0,
+      "known": 135,
+      "production": {
+        "available_civilian_recipes": 25,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 133.0,
+      "known": 137,
+      "production": {
+        "available_civilian_recipes": 26,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 134.0,
+      "known": 137,
+      "production": {
+        "available_civilian_recipes": 26,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 135.0,
+      "known": 139,
+      "production": {
+        "available_civilian_recipes": 28,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 136.0,
+      "known": 140,
+      "production": {
+        "available_civilian_recipes": 28,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 137.0,
+      "known": 141,
+      "production": {
+        "available_civilian_recipes": 28,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 138.0,
+      "known": 142,
+      "production": {
+        "available_civilian_recipes": 29,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 139.0,
+      "known": 143,
+      "production": {
+        "available_civilian_recipes": 29,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 140.0,
+      "known": 145,
+      "production": {
+        "available_civilian_recipes": 29,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 141.0,
+      "known": 147,
+      "production": {
+        "available_civilian_recipes": 30,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 142.0,
+      "known": 148,
+      "production": {
+        "available_civilian_recipes": 30,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 143.0,
+      "known": 151,
+      "production": {
+        "available_civilian_recipes": 31,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 144.0,
+      "known": 153,
+      "production": {
+        "available_civilian_recipes": 32,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 145.0,
+      "known": 153,
+      "production": {
+        "available_civilian_recipes": 32,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 146.0,
+      "known": 155,
+      "production": {
+        "available_civilian_recipes": 33,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 147.0,
+      "known": 159,
+      "production": {
+        "available_civilian_recipes": 34,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 148.0,
+      "known": 160,
+      "production": {
+        "available_civilian_recipes": 34,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 149.0,
+      "known": 161,
+      "production": {
+        "available_civilian_recipes": 34,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 150.0,
+      "known": 164,
+      "production": {
+        "available_civilian_recipes": 35,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 151.0,
+      "known": 165,
+      "production": {
+        "available_civilian_recipes": 35,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 152.0,
+      "known": 166,
+      "production": {
+        "available_civilian_recipes": 35,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 153.0,
+      "known": 167,
+      "production": {
+        "available_civilian_recipes": 36,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 154.0,
+      "known": 168,
+      "production": {
+        "available_civilian_recipes": 36,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 155.0,
+      "known": 170,
+      "production": {
+        "available_civilian_recipes": 39,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 156.0,
+      "known": 173,
+      "production": {
+        "available_civilian_recipes": 39,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 157.0,
+      "known": 174,
+      "production": {
+        "available_civilian_recipes": 40,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 158.0,
+      "known": 176,
+      "production": {
+        "available_civilian_recipes": 41,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 159.0,
+      "known": 177,
+      "production": {
+        "available_civilian_recipes": 41,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 160.0,
+      "known": 179,
+      "production": {
+        "available_civilian_recipes": 41,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 161.0,
+      "known": 180,
+      "production": {
+        "available_civilian_recipes": 42,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 162.0,
+      "known": 183,
+      "production": {
+        "available_civilian_recipes": 43,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 163.0,
+      "known": 183,
+      "production": {
+        "available_civilian_recipes": 43,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 164.0,
+      "known": 184,
+      "production": {
+        "available_civilian_recipes": 44,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 165.0,
+      "known": 186,
+      "production": {
+        "available_civilian_recipes": 45,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 166.0,
+      "known": 188,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 167.0,
+      "known": 189,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 168.0,
+      "known": 190,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 169.0,
+      "known": 191,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 170.0,
+      "known": 192,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 171.0,
+      "known": 195,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 172.0,
+      "known": 196,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 173.0,
+      "known": 197,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 174.0,
+      "known": 198,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 175.0,
+      "known": 200,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 176.0,
+      "known": 200,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 177.0,
+      "known": 202,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 178.0,
+      "known": 203,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 179.0,
+      "known": 204,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 180.0,
+      "known": 207,
+      "production": {
+        "available_civilian_recipes": 46,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 181.0,
+      "known": 210,
+      "production": {
+        "available_civilian_recipes": 47,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 182.0,
+      "known": 212,
+      "production": {
+        "available_civilian_recipes": 47,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 183.0,
+      "known": 214,
+      "production": {
+        "available_civilian_recipes": 48,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 184.0,
+      "known": 214,
+      "production": {
+        "available_civilian_recipes": 48,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 185.0,
+      "known": 216,
+      "production": {
+        "available_civilian_recipes": 49,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 186.0,
+      "known": 217,
+      "production": {
+        "available_civilian_recipes": 49,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 187.0,
+      "known": 217,
+      "production": {
+        "available_civilian_recipes": 49,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 188.0,
+      "known": 221,
+      "production": {
+        "available_civilian_recipes": 51,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 189.0,
+      "known": 222,
+      "production": {
+        "available_civilian_recipes": 53,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 190.0,
+      "known": 224,
+      "production": {
+        "available_civilian_recipes": 54,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 191.0,
+      "known": 225,
+      "production": {
+        "available_civilian_recipes": 54,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 192.0,
+      "known": 226,
+      "production": {
+        "available_civilian_recipes": 54,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 193.0,
+      "known": 226,
+      "production": {
+        "available_civilian_recipes": 54,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 194.0,
+      "known": 228,
+      "production": {
+        "available_civilian_recipes": 55,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 195.0,
+      "known": 230,
+      "production": {
+        "available_civilian_recipes": 55,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 196.0,
+      "known": 232,
+      "production": {
+        "available_civilian_recipes": 57,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 197.0,
+      "known": 233,
+      "production": {
+        "available_civilian_recipes": 57,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 198.0,
+      "known": 234,
+      "production": {
+        "available_civilian_recipes": 57,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 199.0,
+      "known": 235,
+      "production": {
+        "available_civilian_recipes": 57,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 200.0,
+      "known": 238,
+      "production": {
+        "available_civilian_recipes": 57,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 201.0,
+      "known": 241,
+      "production": {
+        "available_civilian_recipes": 57,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 202.0,
+      "known": 244,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 203.0,
+      "known": 245,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 204.0,
+      "known": 247,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 205.0,
+      "known": 248,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 206.0,
+      "known": 249,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 207.0,
+      "known": 250,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 208.0,
+      "known": 252,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 209.0,
+      "known": 252,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 210.0,
+      "known": 254,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 211.0,
+      "known": 255,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 212.0,
+      "known": 257,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 213.0,
+      "known": 257,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 214.0,
+      "known": 259,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 215.0,
+      "known": 262,
+      "production": {
+        "available_civilian_recipes": 58,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 216.0,
+      "known": 264,
+      "production": {
+        "available_civilian_recipes": 60,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 217.0,
+      "known": 265,
+      "production": {
+        "available_civilian_recipes": 60,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 218.0,
+      "known": 268,
+      "production": {
+        "available_civilian_recipes": 62,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 219.0,
+      "known": 268,
+      "production": {
+        "available_civilian_recipes": 62,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 220.0,
+      "known": 272,
+      "production": {
+        "available_civilian_recipes": 64,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 221.0,
+      "known": 275,
+      "production": {
+        "available_civilian_recipes": 64,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 222.0,
+      "known": 277,
+      "production": {
+        "available_civilian_recipes": 66,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 223.0,
+      "known": 280,
+      "production": {
+        "available_civilian_recipes": 68,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 224.0,
+      "known": 282,
+      "production": {
+        "available_civilian_recipes": 69,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 225.0,
+      "known": 286,
+      "production": {
+        "available_civilian_recipes": 70,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 226.0,
+      "known": 287,
+      "production": {
+        "available_civilian_recipes": 71,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 227.0,
+      "known": 290,
+      "production": {
+        "available_civilian_recipes": 72,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 228.0,
+      "known": 292,
+      "production": {
+        "available_civilian_recipes": 73,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 229.0,
+      "known": 293,
+      "production": {
+        "available_civilian_recipes": 73,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 230.0,
+      "known": 294,
+      "production": {
+        "available_civilian_recipes": 74,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 231.0,
+      "known": 296,
+      "production": {
+        "available_civilian_recipes": 75,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 232.0,
+      "known": 297,
+      "production": {
+        "available_civilian_recipes": 75,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 233.0,
+      "known": 297,
+      "production": {
+        "available_civilian_recipes": 75,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 234.0,
+      "known": 298,
+      "production": {
+        "available_civilian_recipes": 75,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 235.0,
+      "known": 299,
+      "production": {
+        "available_civilian_recipes": 76,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 236.0,
+      "known": 300,
+      "production": {
+        "available_civilian_recipes": 77,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 237.0,
+      "known": 301,
+      "production": {
+        "available_civilian_recipes": 78,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 238.0,
+      "known": 302,
+      "production": {
+        "available_civilian_recipes": 80,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 239.0,
+      "known": 304,
+      "production": {
+        "available_civilian_recipes": 82,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 240.0,
+      "known": 306,
+      "production": {
+        "available_civilian_recipes": 84,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 241.0,
+      "known": 307,
+      "production": {
+        "available_civilian_recipes": 86,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 242.0,
+      "known": 310,
+      "production": {
+        "available_civilian_recipes": 88,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 243.0,
+      "known": 311,
+      "production": {
+        "available_civilian_recipes": 89,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 244.0,
+      "known": 314,
+      "production": {
+        "available_civilian_recipes": 93,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 245.0,
+      "known": 315,
+      "production": {
+        "available_civilian_recipes": 94,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 246.0,
+      "known": 317,
+      "production": {
+        "available_civilian_recipes": 95,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 247.0,
+      "known": 318,
+      "production": {
+        "available_civilian_recipes": 96,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 248.0,
+      "known": 319,
+      "production": {
+        "available_civilian_recipes": 97,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 249.0,
+      "known": 319,
+      "production": {
+        "available_civilian_recipes": 97,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "year": 250.0,
+      "known": 320,
+      "production": {
+        "available_civilian_recipes": 97,
+        "civilian_lines": 0,
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "operations_ledger_current": true,
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    }
+  ]
+}
