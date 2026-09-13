@@ -2,7 +2,7 @@
 
 Added reviewed paper illustrations for seasonal patterns, smoke preservation, drainage, route memory and labor rotations. Native originals and exact prompts are retained in `assets/ui/research/paper/EARLY_FOUNDATION_PROMPTS.md`; five imported textures pass 768-pixel/mipmap checks and 12 isolated atlas cases pass. Art: **236 verified / 801 live, 565 queued**. No new runtime identities or save behavior.
 
-Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/early-foundation-art`, base `5907991b6b3a74d34363f3851ea65ebb292a2bd9`. Owns only five images/imports, prompt record, bindings and catalog/docs. No shared conflicts, player launch or package rebuild. Canonical texture and atlas verification follows integration.
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/early-foundation-art`, base `5907991b6b3a74d34363f3851ea65ebb292a2bd9`. Owns only five images/imports, prompt record, bindings and catalog/docs. No shared conflicts, player launch or package rebuild. Canonical import, five texture checks and 12 atlas cases also pass at integrated art commit `5e0b13ef5ff75fee25aa2a494b78d861f617ae8f`.
 
 ## September 13 — early illustrations and observed pacing export
 
