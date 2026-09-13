@@ -5982,6 +5982,48 @@
       "source_domain": "knowledge",
       "name": "Live Cell Time Lapse",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_dye_fixation",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile-Dye Fixation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "resist_dye_patterning",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Resist-Dye Patterning",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_printing",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile Printing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_calendering",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile Calendering",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "mineral_pigment_preparation",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Mineral-Pigment Preparation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_dye_extraction",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile-Dye Extraction",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

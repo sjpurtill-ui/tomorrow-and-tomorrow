@@ -1,38 +1,6 @@
 [
   {
     "field": "D04",
-    "id": "mineral_pigment_preparation",
-    "name": "Mineral-Pigment Preparation",
-    "foundations": "stone_sorting,clay_testing",
-    "mechanism": "Separate and prepare mineral colorants with observed consistency and compatibility",
-    "operating_requirement": "Suitable mineral sources, grinding tools and handling knowledge",
-    "consequence": "Supply durable colors whose suitability depends on the surface and binder",
-    "status": "authored_draft",
-    "requires_all": [
-      "stone_sorting",
-      "clay_testing"
-    ],
-    "requires_any": [],
-    "recovery": "For Mineral-Pigment Preparation: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "mineral_pigment_preparation",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Mineral-Pigment Preparation",
-      "local_demonstration": "Separate and prepare mineral colorants with observed consistency and compatibility",
-      "operating_requirements": "Suitable mineral sources, grinding tools and handling knowledge",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
-    }
-  },
-  {
-    "field": "D04",
     "id": "ore_comminution",
     "name": "Ore Comminution",
     "foundations": "ore_assaying,wedges_and_levers",

@@ -1,5 +1,5 @@
 {
-  "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+  "source_commit": "22d57eaa902f4306f96da1feb90fcbefa61690d3",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -17207,6 +17207,383 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "textile_dye_fixation",
+      "name": "Textile-Dye Fixation",
+      "foundations": "textile_dye_extraction,experimental_controls",
+      "mechanism": "Qualify a dyeing process that retains intended color on a specific fiber",
+      "operating_requirement": "Compatible fibers, agents, water and process control",
+      "consequence": "Produce selected lasting color while washing and light can alter it",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Textile-Dye Fixation: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_dye_fixation",
+        "local_demonstration": "Qualify a dyeing process that retains intended color on a specific fiber",
+        "operating_requirements": "Compatible fibers, agents, water and process control",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "22d57eaa902f4306f96da1feb90fcbefa61690d3",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "textile_dye_extraction",
+          "experimental_controls"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "textile_dye_fixation",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_dye_fixation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile-Dye Fixation",
+            "missing_all": [
+              "textile_dye_extraction",
+              "experimental_controls"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "textile_dye_extraction",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "textile_dye_extraction",
+              "experimental_controls"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile-Dye Fixation",
+        "observation": "Qualify a dyeing process that retains intended color on a specific fiber",
+        "production_contract": "Selected compatible plant-fiber material and actual colorants, water, fuel, equipment and work produce distinct finished cloth. Five-percent destructive batch allowance represents nominal wash/appearance checks, not instrument telemetry or universal colorfastness certification. Garments retain their finish identity while use and washing fade it. Decoration adds no cold, storm, strength or health bonus.",
+        "production_items": [
+          "scoured_plant_cloth",
+          "textile_ferrous_mordant",
+          "tannin_mordanted_cloth",
+          "checked_tannin_cloth"
+        ],
+        "requires": [
+          "textile_dye_extraction",
+          "experimental_controls"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "resist_dye_patterning",
+      "name": "Resist-Dye Patterning",
+      "foundations": "textile_dye_fixation,cordage",
+      "mechanism": "Prevent dye access to selected areas through a qualified resist method",
+      "operating_requirement": "Suitable cloth, resist materials and skilled sequence control",
+      "consequence": "Create patterned textiles with labor and registration demands",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Resist-Dye Patterning: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "resist_dye_patterning",
+        "local_demonstration": "Prevent dye access to selected areas through a qualified resist method",
+        "operating_requirements": "Suitable cloth, resist materials and skilled sequence control",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "22d57eaa902f4306f96da1feb90fcbefa61690d3",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "textile_dye_fixation",
+          "cordage"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "resist_dye_patterning",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "resist_dye_patterning",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Resist-Dye Patterning",
+            "missing_all": [
+              "textile_dye_fixation",
+              "cordage"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "textile_dye_fixation",
+              "cordage"
+            ],
+            "requires_all": [
+              "textile_dye_fixation",
+              "cordage"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Resist-Dye Patterning",
+        "observation": "Prevent dye access to selected areas through a qualified resist method",
+        "production_contract": "Selected compatible plant-fiber material and actual colorants, water, fuel, equipment and work produce distinct finished cloth. Five-percent destructive batch allowance represents nominal wash/appearance checks, not instrument telemetry or universal colorfastness certification. Garments retain their finish identity while use and washing fade it. Decoration adds no cold, storm, strength or health bonus.",
+        "production_items": [
+          "bound_resist_cloth",
+          "resist_tannin_bath",
+          "checked_resist_cloth"
+        ],
+        "requires": [
+          "textile_dye_fixation",
+          "cordage"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "textile_printing",
+      "name": "Textile Printing",
+      "foundations": "textile_dye_fixation,printing_process",
+      "mechanism": "Apply qualified color patterns to a textile surface through repeatable printing",
+      "operating_requirement": "Compatible cloth, colorants, forms and fixation",
+      "consequence": "Produce repeated surface patterns while wash fastness and fabric variation remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Textile Printing: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_printing",
+        "local_demonstration": "Apply qualified color patterns to a textile surface through repeatable printing",
+        "operating_requirements": "Compatible cloth, colorants, forms and fixation",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "22d57eaa902f4306f96da1feb90fcbefa61690d3",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "textile_dye_fixation",
+          "printing_process"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "textile_printing",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_printing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile Printing",
+            "missing_all": [
+              "textile_dye_fixation",
+              "printing_process"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "textile_dye_fixation",
+              "printing_process"
+            ],
+            "requires_all": [
+              "textile_dye_fixation",
+              "printing_process"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile Printing",
+        "observation": "Apply qualified color patterns to a textile surface through repeatable printing",
+        "production_contract": "Selected compatible plant-fiber material and actual colorants, water, fuel, equipment and work produce distinct finished cloth. Five-percent destructive batch allowance represents nominal wash/appearance checks, not instrument telemetry or universal colorfastness certification. Garments retain their finish identity while use and washing fade it. Decoration adds no cold, storm, strength or health bonus.",
+        "production_items": [
+          "textile_printing_blocks",
+          "tannin_printing_paste",
+          "printed_tannin_cloth",
+          "checked_printed_cloth"
+        ],
+        "requires": [
+          "textile_dye_fixation",
+          "printing_process"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "textile_calendering",
+      "name": "Textile Calendering",
+      "foundations": "plain_weaving,mechanical_screw_presses",
+      "mechanism": "Finish a qualified fabric through controlled pressure and surface contact",
+      "operating_requirement": "Suitable rollers or presses, cloth and process control",
+      "consequence": "Alter surface and thickness while excessive treatment can damage material",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Textile Calendering: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_calendering",
+        "local_demonstration": "Finish a qualified fabric through controlled pressure and surface contact",
+        "operating_requirements": "Suitable rollers or presses, cloth and process control",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "22d57eaa902f4306f96da1feb90fcbefa61690d3",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "plain_weaving",
+          "mechanical_screw_presses"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "textile_calendering",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_calendering",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile Calendering",
+            "missing_all": [
+              "plain_weaving",
+              "mechanical_screw_presses"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "plain_weaving",
+              "mechanical_screw_presses"
+            ],
+            "requires_all": [
+              "plain_weaving",
+              "mechanical_screw_presses"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile Calendering",
+        "observation": "Finish a qualified fabric through controlled pressure and surface contact",
+        "production_contract": "Selected compatible plant-fiber material and actual colorants, water, fuel, equipment and work produce distinct finished cloth. Five-percent destructive batch allowance represents nominal wash/appearance checks, not instrument telemetry or universal colorfastness certification. Garments retain their finish identity while use and washing fade it. Decoration adds no cold, storm, strength or health bonus.",
+        "production_items": [
+          "textile_finishing_rolls",
+          "calendered_plant_cloth"
+        ],
+        "requires": [
+          "plain_weaving",
+          "mechanical_screw_presses"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {
@@ -67920,6 +68297,215 @@
         ],
         "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
         "subcategory": "Preserved knowledge"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "mineral_pigment_preparation",
+      "name": "Mineral-Pigment Preparation",
+      "foundations": "stone_sorting,clay_testing",
+      "mechanism": "Separate and prepare mineral colorants with observed consistency and compatibility",
+      "operating_requirement": "Suitable mineral sources, grinding tools and handling knowledge",
+      "consequence": "Supply durable colors whose suitability depends on the surface and binder",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Mineral-Pigment Preparation: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "mineral_pigment_preparation",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Mineral-Pigment Preparation",
+        "local_demonstration": "Separate and prepare mineral colorants with observed consistency and compatibility",
+        "operating_requirements": "Suitable mineral sources, grinding tools and handling knowledge",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "22d57eaa902f4306f96da1feb90fcbefa61690d3",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "stone_sorting",
+          "clay_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "mineral_pigment_preparation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Mineral-Pigment Preparation",
+            "missing_all": [
+              "stone_sorting",
+              "clay_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "stone_sorting",
+              "clay_testing"
+            ],
+            "requires_all": [
+              "stone_sorting",
+              "clay_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Mineral-Pigment Preparation",
+        "observation": "Separate and prepare mineral colorants with observed consistency and compatibility",
+        "production_contract": "Finite selected feed, grinding/extraction equipment, actual water, work and trial material make prepared colorants. Ochre is a nonrenewable observed occurrence; generic clay or iron ore cannot substitute. Qualified pigment and binder feed actual printed sheets; textile tannin feeds compatible dyeing. No imported output grants local mastery or a universal pigment or dye rating.",
+        "production_items": [
+          "ochre_levigation",
+          "fine_ochre_pigment",
+          "earth_pigment_ink",
+          "ochre_relief_sheets"
+        ],
+        "requires": [
+          "stone_sorting",
+          "clay_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "textile_dye_extraction",
+      "name": "Textile-Dye Extraction",
+      "foundations": "fiber_grading",
+      "mechanism": "Prepare characterized colorants from suitable sources for textile use",
+      "operating_requirement": "Compatible feed, extraction equipment and skilled handling",
+      "consequence": "Supply dye materials whose behavior depends on fiber and process",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "herbal_classification",
+          "mineral_pigment_preparation"
+        ]
+      ],
+      "branching_note": "Preparing textile colorants does not universally require distillation; actual compatible extraction or preparation equipment remains necessary.",
+      "recovery": "For Textile-Dye Extraction: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_dye_extraction",
+        "local_demonstration": "Prepare characterized colorants from suitable sources for textile use",
+        "operating_requirements": "Compatible feed, extraction equipment and skilled handling",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "22d57eaa902f4306f96da1feb90fcbefa61690d3",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "fiber_grading"
+        ],
+        "previous_requires_any": [
+          [
+            "herbal_classification",
+            "mineral_pigment_preparation"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_dye_extraction",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile-Dye Extraction",
+            "missing_all": [
+              "fiber_grading"
+            ],
+            "missing_any": [
+              [
+                "herbal_classification",
+                "mineral_pigment_preparation"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "fiber_grading",
+              "herbal_classification",
+              "mineral_pigment_preparation"
+            ],
+            "requires_all": [
+              "fiber_grading"
+            ],
+            "requires_any": [
+              [
+                "herbal_classification",
+                "mineral_pigment_preparation"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile-Dye Extraction",
+        "observation": "Prepare characterized colorants from suitable sources for textile use",
+        "production_contract": "Finite selected feed, grinding/extraction equipment, actual water, work and trial material make prepared colorants. Ochre is a nonrenewable observed occurrence; generic clay or iron ore cannot substitute. Qualified pigment and binder feed actual printed sheets; textile tannin feeds compatible dyeing. No imported output grants local mastery or a universal pigment or dye rating.",
+        "production_items": [
+          "textile_tannin_colorant"
+        ],
+        "requires": [
+          "fiber_grading"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "herbal_classification",
+            "mineral_pigment_preparation"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     }
   ]
