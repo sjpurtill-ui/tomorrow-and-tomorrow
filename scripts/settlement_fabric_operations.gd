@@ -40,6 +40,7 @@ static func start(plot:Dictionary,method:String,stock:Dictionary,known:Array,ado
 static func advance(plot:Dictionary,work:float,day:int)->float:
  var job:Dictionary=plot.get("fabric_job",{})
  if job.is_empty() or not valid_job(job) or not is_finite(work) or work<=0:return 0.0
+ if String(job.state)=="testing":return advance_trial(plot,work,day)
  if day<=int(job.last_day) or String(job.state)!="assembling":return 0.0
  if String(plot.get("status","")) not in ["active","stressed","damaged"]:return 0.0
  var used:float=minf(work,float(job.required_work)-float(job.work))
@@ -60,12 +61,17 @@ static func valid_job(value:Variant)->bool:
  if float(value.work)<0 or float(value.work)>float(value.required_work):return false
  if float(value.started_day)<0 or float(value.started_day)!=floorf(float(value.started_day)):return false
  if float(value.last_day)<float(value.started_day) or float(value.last_day)!=floorf(float(value.last_day)):return false
- if value.get("state") not in ["assembling","awaiting_inspection"]:return false
- return (String(value.state)=="awaiting_inspection")==is_equal_approx(float(value.work),float(value.required_work))
+ if value.get("state") not in ["assembling","awaiting_inspection","testing","awaiting_observations"]:return false
+ if String(value.state)=="assembling":return float(value.work)<float(value.required_work) and not value.has("trial")
+ if float(value.work)!=float(value.required_work):return false
+ if String(value.state)=="awaiting_inspection":return not value.has("trial")
+ if not valid_trial(value.get("trial"),method):return false
+ if int(value.trial.started_day)<int(value.last_day):return false
+ return (String(value.state)=="awaiting_observations")==is_equal_approx(float(value.trial.work),1.0)
 
 static func needs_work(plot:Dictionary)->bool:
  var job:Variant=plot.get("fabric_job",{})
- return valid_job(job) and not job.is_empty() and String(job.state)=="assembling" and String(plot.get("status","")) in ["active","stressed","damaged"]
+ return valid_job(job) and not job.is_empty() and String(job.state) in ["assembling","testing"] and String(plot.get("status","")) in ["active","stressed","damaged"]
 
 static func foundations_met(method:String,known:Array)->bool:
  for entry:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
@@ -89,3 +95,45 @@ static func compatible(plot:Dictionary,method:String)->bool:
   return family in ["organic","timber"]
  if method=="building_capillary_breaks":return family in ["stone","earth"]
  return family in ["organic","timber","stone","earth"]
+
+static func trial_cost(method:String)->Dictionary:
+ if not COMPONENTS.has(method):return {}
+ if method in ["building_drainage_coordination","building_capillary_breaks","roof_flashing_interfaces","rainscreen_wall_assemblies","timber_moisture_movement_design"]:
+  return {"Freshwater":1.0,"Fiber Plants":.1}
+ if method=="building_shading_design":return {"Timber":.1,"Fiber Plants":.1}
+ return {"Stone":1.0,"Timber":.2}
+
+static func start_trial(plot:Dictionary,stock:Dictionary,day:int)->Dictionary:
+ var job:Dictionary=plot.get("fabric_job",{})
+ if job.is_empty() or not valid_job(job) or String(job.state)!="awaiting_inspection":return {"ok":false,"reason":"Assembly is not awaiting inspection."}
+ if day<int(job.last_day):return {"ok":false,"reason":"Invalid inspection date."}
+ if String(plot.get("status","")) not in ["active","stressed","damaged"]:return {"ok":false,"reason":"Plot is unavailable."}
+ var cost:Dictionary=trial_cost(String(job.method))
+ for item:String in cost:
+  var amount:float=float(stock.get(item,0))
+  if not is_finite(amount) or amount<float(cost[item]):return {"ok":false,"reason":"Missing trial materials."}
+ for item:String in cost:stock[item]=float(stock[item])-float(cost[item])
+ job.trial={"paid":cost.duplicate(),"work":0.0,"started_day":day,"last_day":day}
+ job.state="testing"
+ return {"ok":true}
+
+static func advance_trial(plot:Dictionary,work:float,day:int)->float:
+ var job:Dictionary=plot.get("fabric_job",{})
+ if job.is_empty() or not valid_job(job) or String(job.state)!="testing":return 0.0
+ if not is_finite(work) or work<=0 or day<=int(job.trial.last_day):return 0.0
+ if String(plot.get("status","")) not in ["active","stressed","damaged"]:return 0.0
+ var used:float=minf(work,1.0-float(job.trial.work))
+ job.trial.work=float(job.trial.work)+used
+ job.trial.last_day=day
+ if float(job.trial.work)>=1.0:job.state="awaiting_observations"
+ return used
+
+static func valid_trial(value:Variant,method:String)->bool:
+ if not value is Dictionary or not value.get("paid") is Dictionary:return false
+ if value.paid!=trial_cost(method):return false
+ for key:String in ["work","started_day","last_day"]:
+  if not value.get(key) is int and not value.get(key) is float:return false
+  if not is_finite(float(value[key])):return false
+ if float(value.work)<0 or float(value.work)>1:return false
+ if float(value.started_day)<0 or float(value.last_day)<float(value.started_day):return false
+ return float(value.started_day)==floorf(float(value.started_day)) and float(value.last_day)==floorf(float(value.last_day))

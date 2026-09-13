@@ -72,3 +72,11 @@ Added separate method-specific observation contracts for joint slip, splice open
 Thresholds are explicitly original bounded game specifications in normalized measurement units, not universal engineering recommendations. This classifier consumes observations; it does not produce them, prove their provenance, or install components. Paid site-trial production and retained physical geometry remain required before runtime acceptance. No caller-provided result is currently sufficient to grant building service.
 
 Ten-method headless classifier probe passes acceptance/rejection/uncertainty, insufficient and out-of-envelope exposure, NaN and missing measurements. /tmp/tt-fabric-inspection.log, exit 0. Whole gameplay, inspections under city work budgets, physical failure consequences and visuals remain unfinished. HELD.
+
+## Paid inspection labor
+
+Added explicit trial start after assembly, finite method-group material bills, retained paid trial state and one unit of inspection work supplied through the existing retrofit builder allocation. Water trials require freshwater/absorbent material; selected load trials reserve stone/timber; shading trials reserve timber/fiber apparatus. Costs are game batches and will need apparatus/source refinement before acceptance. No automatic inspection acceptance exists.
+
+Testing jobs share the scheduler denominator through needs_work; finished trials become awaiting_observations and release the builder slot. City-scoped start_fabric_trial pays from that city's stores. Job validation covers trial payment, date ordering, work bounds and assembly completion. Ten-method module probe passes missing-material rejection, exact payment, same-day guard, partial-trial serialization, final observation hold and duplicate trial rejection. Existing owner probe passes after these changes; logs /tmp/tt-fabric-paid-trials.log and /tmp/tt-fabric-owner-trials.log, exit 0.
+
+Still required: actual selected site response production, evidence-to-installed linkage, rejection/rework and repair, automatic construction choices, renderer behavior, all acquisition routes, supply closure and full save/city tests. HELD, not a physical operating delivery.

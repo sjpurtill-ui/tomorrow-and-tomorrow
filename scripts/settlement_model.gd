@@ -3093,3 +3093,11 @@ func start_fabric_retrofit(plot_id:int,method:String)->Dictionary:
 			WorldSimulation.state.morphology_revision+=1
 		return result
 	return {"ok":false,"reason":"Plot is absent from this city."}
+
+func start_fabric_trial(plot_id:int)->Dictionary:
+	for plot:Dictionary in WorldSimulation.state.settlement_plots:
+		if int(plot.get("id",0))!=plot_id:continue
+		var result:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").start_trial(plot,WorldSimulation.state.resource_stockpiles,int(WorldSimulation.state.elapsed_days))
+		if bool(result.get("ok",false)):WorldSimulation.state.morphology_revision+=1
+		return result
+	return {"ok":false,"reason":"Plot is absent from this city."}
