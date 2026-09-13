@@ -4,6 +4,10 @@ extends RefCounted
 const I=preload("res://scripts/civilian_industry.gd")
 const LIMIT=256
 const MAX=1000000000
+static func unfinished(resource:String)->bool:
+	for spec:Dictionary in I.PRODUCTS.values():
+		if spec.get("abrasive_candidate",false) and spec.output==resource:return true
+	return false
 static func data()->Dictionary:
 	var owner:Dictionary=WorldSimulation.state.technology_operations
 	if not owner.has("abrasive_lots"):owner.abrasive_lots={"next_id":1,"records":{}}

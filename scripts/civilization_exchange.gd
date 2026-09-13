@@ -52,6 +52,7 @@ static func settle(day:int)->void:
 			for incoming:String in buy.needs:
 				for outgoing:String in sell.needs:
 					if incoming==outgoing:continue
+					if preload("res://scripts/abrasive_inspection.gd").unfinished(incoming) or preload("res://scripts/abrasive_inspection.gd").unfinished(outgoing):continue
 					var in_price:=float(sell.prices.get(incoming,1));var out_price:=float(buy.prices.get(outgoing,1))
 					var value:=minf(minf(float(buy.budget),float(sell.budget)),minf(minf(float(buy.needs[incoming]),float(sell.offers.get(incoming,0)))*in_price,minf(float(sell.needs[outgoing]),float(buy.offers.get(outgoing,0)))*out_price))
 					if value<=.0001:continue

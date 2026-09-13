@@ -405,6 +405,7 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 	return result
 
 func _remove_trade_resource(resource_name:String,requested:float)->float:
+	if preload("res://scripts/abrasive_inspection.gd").unfinished(resource_name):return 0.0
 	if resource_name=="Food": return WorldSimulation.food.issue_for_obligation(requested,"trade","Food export")
 	var available:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0)))
 	var removed:=minf(available,maxf(0.0,requested))
@@ -412,6 +413,7 @@ func _remove_trade_resource(resource_name:String,requested:float)->float:
 	return removed
 
 func _receive_trade_resource(resource_name:String,requested:float)->float:
+	if preload("res://scripts/abrasive_inspection.gd").unfinished(resource_name):return 0.0
 	var received:=maxf(0.0,requested)
 	if resource_name=="Food": return WorldSimulation.food.receive_external_food(received)
 	WorldSimulation.state.resource_stockpiles[resource_name]=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))+received

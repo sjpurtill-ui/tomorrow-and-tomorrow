@@ -238,3 +238,21 @@ func test_planner_replaces_untraceable_stock_with_actual_local_candidates()->voi
 		WorldSimulation.military.cancel_equipment_job(int(job.id))
 		order=F.supply("Ground Motor Mount Plates",1,{})
 		assert_str(String(order.get("item",""))).is_equal("checked_ground_mounts"))
+
+func test_civilization_transfer_cannot_export_unfinished_candidates()->void:
+	WorldSimulation.scoped("abrasive",func()->void:
+		prepare()
+		var job:=provision("fired_abrasive_wheels")
+		P.advance(WorldSimulation.military,job,100.0)
+		var exchange=preload("res://scripts/civilization_exchange.gd")
+		var quality=preload("res://scripts/abrasive_inspection.gd")
+		var before:=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		var lots:=quality.data().duplicate(true)
+		assert_float(exchange.take("abrasive","Fired Abrasive Wheels",1.0)).is_equal(0.0)
+		assert_float(exchange.receive("abrasive","Fired Abrasive Wheels",1.0)).is_equal(0.0)
+		assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(before)
+		assert_dict(quality.data()).is_equal(lots)
+		WorldSimulation.state.resource_stockpiles["Checked Abrasive Wheels"]=2.0
+		assert_float(exchange.take("abrasive","Checked Abrasive Wheels",1.0)).is_equal(1.0)
+		assert_float(exchange.receive("abrasive","Checked Abrasive Wheels",1.0)).is_equal(1.0)
+	)
