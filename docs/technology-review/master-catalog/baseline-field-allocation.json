@@ -5730,6 +5730,41 @@
       "source_domain": "production",
       "name": "Snap Fastener Closures",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "abrasive_grinding_control",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Abrasive-Grinding Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "centerless_grinding",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Centerless Grinding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "cylindrical_grinding",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Cylindrical Grinding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "surface_grinding",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Surface Grinding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "abrasive_belt_finishing",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Abrasive Belt Finishing",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

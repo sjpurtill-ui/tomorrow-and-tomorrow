@@ -63,37 +63,6 @@
   },
   {
     "field": "D06",
-    "id": "abrasive_grinding_control",
-    "name": "Abrasive-Grinding Control",
-    "foundations": "comparative_mineral_hardness,precision_machinery",
-    "mechanism": "Remove material through a qualified abrasive process while controlling heat and geometry",
-    "operating_requirement": "Suitable abrasive, machine, cooling and inspection",
-    "consequence": "Finish selected parts with surface-damage and wear constraints",
-    "status": "authored_draft",
-    "requires_all": [
-      "comparative_mineral_hardness",
-      "precision_machinery"
-    ],
-    "requires_any": [],
-    "recovery": "For Abrasive-Grinding Control: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "abrasive_grinding_control",
-      "local_demonstration": "Remove material through a qualified abrasive process while controlling heat and geometry",
-      "operating_requirements": "Suitable abrasive, machine, cooling and inspection",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
-    }
-  },
-  {
-    "field": "D06",
     "id": "cutting_fluid_management",
     "name": "Cutting-Fluid Management",
     "foundations": "calorimetry,lubrication_regimes",

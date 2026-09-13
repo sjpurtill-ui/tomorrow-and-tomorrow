@@ -1,5 +1,5 @@
 {
-  "source_commit": "095266eb63b67509236153ed814a7f8d7ec218e6",
+  "source_commit": "11241aee7f00f49df88648536e466e34ebb06205",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -39631,6 +39631,508 @@
         "requires": [
           "dimensional_metrology",
           "workshop_standards"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D06",
+      "id": "abrasive_grinding_control",
+      "name": "Abrasive-Grinding Control",
+      "foundations": "comparative_mineral_hardness,precision_machinery",
+      "mechanism": "Remove material through a qualified abrasive process while controlling heat and geometry",
+      "operating_requirement": "Suitable abrasive, machine, cooling and inspection",
+      "consequence": "Finish selected parts with surface-damage and wear constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Abrasive-Grinding Control: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "abrasive_grinding_control",
+        "local_demonstration": "Remove material through a qualified abrasive process while controlling heat and geometry",
+        "operating_requirements": "Suitable abrasive, machine, cooling and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "11241aee7f00f49df88648536e466e34ebb06205",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "comparative_mineral_hardness",
+          "precision_machinery"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "abrasive_grinding_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Abrasive-Grinding Control",
+            "missing_all": [
+              "comparative_mineral_hardness",
+              "precision_machinery"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "comparative_mineral_hardness",
+              "precision_machinery"
+            ],
+            "requires_all": [
+              "comparative_mineral_hardness",
+              "precision_machinery"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Abrasive-Grinding Control",
+        "observation": "Remove material through a qualified abrasive process while controlling heat and geometry",
+        "production_contract": "Paid selected-shape abrasive tooling and inspected component production. Raw abrasive, unfinished wheels and unchecked components cannot substitute for qualified inputs; work, power, cooling and consumable wear remain physical costs.",
+        "production_items": [
+          "graded_alumina_grain",
+          "green_abrasive_wheels",
+          "checked_abrasive_wheels",
+          "abrasive_dressing_tools",
+          "dressed_abrasive_wheels",
+          "grinding_spindle_units"
+        ],
+        "requires": [
+          "comparative_mineral_hardness",
+          "precision_machinery"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "centerless_grinding",
+      "name": "Centerless Grinding",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "abrasive_grinding_control,precision_machinery",
+      "mechanism": "A regulating wheel and support locate an uncentered workpiece.",
+      "operating_requirement": "Pay grinding/regulating wheels, support setup and work; qualify part geometry and monitor lobing.",
+      "consequence": "Supply ground cylindrical stock to shafts or pins; incompatible shapes cannot use the through-feed route.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable centerless grinding instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "centerless_grinding",
+        "grants_instant_mastery": false,
+        "local_demonstration": "A regulating wheel and support locate an uncentered workpiece.",
+        "operating_requirements": "Pay grinding/regulating wheels, support setup and work; qualify part geometry and monitor lobing.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local centerless grinding trials.",
+          "partnership": "Share actual samples and operator time for centerless grinding; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded centerless grinding process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external centerless grinding processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable centerless grinding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.grinding.com/en/products-and-services/cylindrical-grinding/"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "11241aee7f00f49df88648536e466e34ebb06205",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "abrasive_grinding_control",
+          "precision_machinery"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "centerless_grinding",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Centerless Grinding",
+            "missing_all": [
+              "abrasive_grinding_control",
+              "precision_machinery"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "abrasive_grinding_control",
+              "precision_machinery"
+            ],
+            "requires_all": [
+              "abrasive_grinding_control",
+              "precision_machinery"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Centerless Grinding",
+        "observation": "A regulating wheel and support locate an uncentered workpiece.",
+        "production_contract": "Paid selected-shape abrasive tooling and inspected component production. Raw abrasive, unfinished wheels and unchecked components cannot substitute for qualified inputs; work, power, cooling and consumable wear remain physical costs.",
+        "production_items": [
+          "centerless_regulating_wheels",
+          "centerless_support_sets",
+          "centerless_ground_shaft_candidates",
+          "checked_centerless_shafts"
+        ],
+        "requires": [
+          "abrasive_grinding_control",
+          "precision_machinery"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "cylindrical_grinding",
+      "name": "Cylindrical Grinding",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "centre_lathe_assembly,abrasive_grinding_control",
+      "mechanism": "A rotating supported part is ground to a cylindrical surface.",
+      "operating_requirement": "Spend prepared shafts, grinding wheels, coolant and work; verify roundness and heat damage.",
+      "consequence": "Supply qualified shaft journals to bearing assembly; grinding allowances and rejected metal remain accounted for.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable cylindrical grinding instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "cylindrical_grinding",
+        "grants_instant_mastery": false,
+        "local_demonstration": "A rotating supported part is ground to a cylindrical surface.",
+        "operating_requirements": "Spend prepared shafts, grinding wheels, coolant and work; verify roundness and heat damage.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local cylindrical grinding trials.",
+          "partnership": "Share actual samples and operator time for cylindrical grinding; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded cylindrical grinding process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external cylindrical grinding processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable cylindrical grinding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.grinding.com/en/products-and-services/cylindrical-grinding/"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "11241aee7f00f49df88648536e466e34ebb06205",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "centre_lathe_assembly",
+          "abrasive_grinding_control"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "cylindrical_grinding",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Cylindrical Grinding",
+            "missing_all": [
+              "centre_lathe_assembly",
+              "abrasive_grinding_control"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "centre_lathe_assembly",
+              "abrasive_grinding_control"
+            ],
+            "requires_all": [
+              "centre_lathe_assembly",
+              "abrasive_grinding_control"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Cylindrical Grinding",
+        "observation": "A rotating supported part is ground to a cylindrical surface.",
+        "production_contract": "Paid selected-shape abrasive tooling and inspected component production. Raw abrasive, unfinished wheels and unchecked components cannot substitute for qualified inputs; work, power, cooling and consumable wear remain physical costs.",
+        "production_items": [
+          "cylindrical_grinding_fixtures",
+          "cylindrical_ground_shaft_candidates",
+          "checked_cylindrical_shafts"
+        ],
+        "requires": [
+          "centre_lathe_assembly",
+          "abrasive_grinding_control"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "surface_grinding",
+      "name": "Surface Grinding",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "machine_way_scraping,abrasive_grinding_control",
+      "mechanism": "An abrasive wheel traverses a fixtured surface.",
+      "operating_requirement": "Pay fixtures, wheel dressing, work and cooling; inspect flatness, thickness and burn damage.",
+      "consequence": "Supply flat machine interfaces to fitting operations; a ground surface is not automatically a metrology reference.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable surface grinding instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "surface_grinding",
+        "grants_instant_mastery": false,
+        "local_demonstration": "An abrasive wheel traverses a fixtured surface.",
+        "operating_requirements": "Pay fixtures, wheel dressing, work and cooling; inspect flatness, thickness and burn damage.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local surface grinding trials.",
+          "partnership": "Share actual samples and operator time for surface grinding; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded surface grinding process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external surface grinding processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable surface grinding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.grinding.com/en/products-and-services/surface-profile-grinding/"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "11241aee7f00f49df88648536e466e34ebb06205",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "machine_way_scraping",
+          "abrasive_grinding_control"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "surface_grinding",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Surface Grinding",
+            "missing_all": [
+              "machine_way_scraping",
+              "abrasive_grinding_control"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "machine_way_scraping",
+              "abrasive_grinding_control"
+            ],
+            "requires_all": [
+              "machine_way_scraping",
+              "abrasive_grinding_control"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Surface Grinding",
+        "observation": "An abrasive wheel traverses a fixtured surface.",
+        "production_contract": "Paid selected-shape abrasive tooling and inspected component production. Raw abrasive, unfinished wheels and unchecked components cannot substitute for qualified inputs; work, power, cooling and consumable wear remain physical costs.",
+        "production_items": [
+          "surface_grinding_fixtures",
+          "surface_ground_mount_candidates",
+          "checked_ground_mounts"
+        ],
+        "requires": [
+          "machine_way_scraping",
+          "abrasive_grinding_control"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "abrasive_belt_finishing",
+      "name": "Abrasive Belt Finishing",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "abrasive_grinding_control,belt_power_transmission",
+      "mechanism": "A moving coated abrasive works a contacted surface.",
+      "operating_requirement": "Consume belts, part handling and drive work; retain contact geometry and material removal limits.",
+      "consequence": "Supply deburred or textured parts to assembly after checks; cosmetic finishing does not establish fatigue life.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable abrasive belt finishing instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "abrasive_belt_finishing",
+        "grants_instant_mastery": false,
+        "local_demonstration": "A moving coated abrasive works a contacted surface.",
+        "operating_requirements": "Consume belts, part handling and drive work; retain contact geometry and material removal limits.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local abrasive belt finishing trials.",
+          "partnership": "Share actual samples and operator time for abrasive belt finishing; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded abrasive belt finishing process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external abrasive belt finishing processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable abrasive belt finishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.supfina.com/us/solutions-us.html"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "11241aee7f00f49df88648536e466e34ebb06205",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "abrasive_grinding_control",
+          "belt_power_transmission"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "abrasive_belt_finishing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Abrasive Belt Finishing",
+            "missing_all": [
+              "abrasive_grinding_control",
+              "belt_power_transmission"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "abrasive_grinding_control",
+              "belt_power_transmission"
+            ],
+            "requires_all": [
+              "abrasive_grinding_control",
+              "belt_power_transmission"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Abrasive Belt Finishing",
+        "observation": "A moving coated abrasive works a contacted surface.",
+        "production_contract": "Paid selected-shape abrasive tooling and inspected component production. Raw abrasive, unfinished wheels and unchecked components cannot substitute for qualified inputs; work, power, cooling and consumable wear remain physical costs.",
+        "production_items": [
+          "abrasive_maker_coated_web",
+          "abrasive_sized_web",
+          "checked_dry_abrasive_belts",
+          "abrasive_belt_stands",
+          "belt_finished_housing_candidates",
+          "checked_deburred_housings"
+        ],
+        "requires": [
+          "abrasive_grinding_control",
+          "belt_power_transmission"
         ],
         "requires_all": [],
         "requires_any": [],

@@ -12329,8 +12329,8 @@
       "id": "centerless_grinding",
       "name": "Centerless Grinding",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "f1f91a4b07b349c130d758abe9b4727d46c20bdee742e889852739e86e5a6ac7"
@@ -12339,8 +12339,8 @@
       "id": "cylindrical_grinding",
       "name": "Cylindrical Grinding",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "13562f92c47e57349408b7ed7f82c36a33c3ff486ff3202fd5e9a959f38647ee"
@@ -12349,8 +12349,8 @@
       "id": "surface_grinding",
       "name": "Surface Grinding",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "5470314e077479a89ba6823595c8dccf45627a0ad633602e9208aa282a791638"
@@ -12359,8 +12359,8 @@
       "id": "abrasive_belt_finishing",
       "name": "Abrasive Belt Finishing",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "2c4d6d3fcfd2533f006f2b7577c62ea8873beae35821eebf8b2f639cba883ff6"
