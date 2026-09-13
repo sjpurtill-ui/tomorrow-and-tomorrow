@@ -1,0 +1,35 @@
+{
+  "base": "6fed85fb93fef79b3cabd134047b010b04437150",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "generator": "built-in image_gen",
+  "entries": [
+    {
+      "id": "joinery",
+      "prompt": "One square civilization technology painting, matching the reference's exact aesthetic: warm ivory paper, matte textured gouache, flat charcoal human silhouettes, muted ochre/umber, sparse gray hills, broad dry brush shapes, abundant open upper half, quiet human activity in lower half. No letters, numerals, text, borders, UI or photography. Reference is style only, create the new requested scene. Wood Joinery: two early carpenters seated on the ground fit one squared timber's clearly cut projecting tongue into a matching rectangular socket in another timber. An unassembled wood frame and wooden mallet nearby. Main connection visible and readable. No nails, rope lashings, modern power tools or metal workshop.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-3c124a57-1859-4181-899a-75c97c530f5b.png",
+      "asset": "assets/ui/research/paper/joinery.png",
+      "mapping": "paper/joinery"
+    },
+    {
+      "id": "clean_water",
+      "prompt": "One square civilization technology painting, matching the reference's exact aesthetic: warm ivory paper, matte textured gouache, flat charcoal human silhouettes, muted ochre/umber, sparse gray hills, broad dry brush shapes, abundant open upper half, quiet human activity in lower half. No letters, numerals, text, borders, UI or photography. Reference is style only, create the new requested scene. Clean-Water Practice: a small early community carefully fills clean clay vessels from a clear spring emerging among pale rocks, keeping the vessel mouths away from muddy footprints. One crouching water carrier and one standing with a covered vessel, reed grasses and spare warm landscape. Focus on careful collection and covered transport, no modern tap, filtration apparatus or medical imagery.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-95dc0cd4-e712-49d0-8284-9074d2888f0f.png",
+      "asset": "assets/ui/research/paper/clean_water.png",
+      "mapping": "paper/clean_water"
+    },
+    {
+      "id": "standard_measures",
+      "prompt": "One square civilization technology painting, matching the reference's exact aesthetic: warm ivory paper, matte textured gouache, flat charcoal human silhouettes, muted ochre/umber, sparse gray hills, broad dry brush shapes, abundant open upper half, quiet human activity in lower half. No letters, numerals, text, borders, UI or photography. Reference is style only, create the new requested scene. Shared Measures: two early storekeepers compare grain portions using identical small wooden measuring cups on a low bench, with one reference cup set apart. A basket of grain and simple storage jars. The shared cup dimensions are the main idea; no scales, numerals, coins, writing or ruler ticks.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-6dd38eb9-19e3-4d3c-895d-dab5d00f8352.png",
+      "asset": "assets/ui/research/paper/standard_measures.png",
+      "mapping": "paper/standard_measures"
+    },
+    {
+      "id": "supply_groups",
+      "prompt": "One square civilization technology painting, matching the reference's exact aesthetic: warm ivory paper, matte textured gouache, flat charcoal human silhouettes, muted ochre/umber, sparse gray hills, broad dry brush shapes, abundant open upper half, quiet human activity in lower half. No letters, numerals, text, borders, UI or photography. Reference is style only, create the new requested scene. Organized Supply Parties: an early human supply party of three burdened carriers with woven back baskets and rolled provisions walks along a winding ochre path, while a separate unburdened scout stands on a low ridge ahead. Explicitly show carried physical supplies, modest human scale, spare broad landscape, distant pale hills. No army uniform, weapons focus, carts or modern gear.",
+      "source": "/Users/seanpurtill/.codex/generated_images/01a08e7d-a646-7131-a24e-5276075de165/exec-a7c6d380-d2b3-47e5-9927-d4ef87ac18f2.png",
+      "asset": "assets/ui/research/paper/supply_groups.png",
+      "mapping": "paper/supply_groups"
+    }
+  ]
+}
