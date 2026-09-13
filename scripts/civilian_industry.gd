@@ -2,6 +2,14 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"friction_clutches":{"name": "Fitted friction clutches", "output": "Friction Clutches", "materials": {"Steel": 1, "Refined Copper": 0.3}, "days": 4, "tooling": {"Metalworking Lathes": 1, "Gauge Blocks": 1}, "gate": "mechanical_clutches"},
+	"ratchet_indexers":{"name": "Ratchet indexers", "output": "Ratchet Indexers", "materials": {"Steel": 1}, "days": 4, "tooling": {"Horizontal Mills": 1, "Milling Cutters": 1}, "gate": "ratchet_motion_control"},
+	"drive_chains":{"name": "Matched chain drives", "output": "Drive Chains", "materials": {"Steel": 2, "Gear Sets": 0.5}, "days": 4, "tooling": {"Column Drills": 1, "Steel Tool Bits": 1}, "gate": "chain_power_transmission"},
+	"rolling_bearings":{"name": "Fitted rolling bearings", "output": "Rolling Bearings", "materials": {"Steel": 1.5, "Graphite": 0.05}, "days": 5, "tooling": {"Metalworking Lathes": 1, "Gauge Blocks": 1}, "gate": "rolling_element_bearings"},
+	"aligned_drive_assemblies":{"name": "Aligned indexing drives", "output": "Aligned Drive Assemblies", "materials": {"Steel": 2, "Rolling Bearings": 2, "Drive Chains": 1, "Friction Clutches": 1, "Ratchet Indexers": 1}, "days": 5, "tooling": {"Machinist Straightedges": 1, "Gauge Blocks": 1}, "gate": "shaft_alignment_methods"},
+	"generated_gear_sets":{"name": "Individually generated gear sets", "output": "Generated Gear Sets", "materials": {"Steel": 2}, "days": 5, "tooling": {"Dividing Heads": 1, "Horizontal Mills": 1, "Milling Cutters": 1}, "gate": "gear_tooth_generation"},
+	"gear_hobs":{"name": "Relieved gear hobs", "output": "Gear Hobs", "materials": {"Steel": 1, "Milling Cutters": 1}, "days": 5, "tooling": {"Horizontal Mills": 1, "Gauge Blocks": 1}, "gate": "gear_hobbing"},
+	"hobbed_gear_sets":{"name": "Continuously hobbed gear sets", "output": "Generated Gear Sets", "materials": {"Steel": 2}, "days": 2.5, "tooling": {"Gear Hobs": 1, "Drive Chains": 1, "Rolling Bearings": 1}, "gate": "gear_hobbing"},
 	"clay_record_tablets":{"name": "Prepared clay record tablets", "output": "Clay Record Tablets", "gate": "clay_record_tablets", "materials": {"Clay": 0.3, "Freshwater": 0.03}, "days": 1.0, "tooling": {"Timber": 1, "Stone": 1}},
 	"knotted_record_cords":{"name": "Knotted quantity record cords", "output": "Record Cords", "gate": "knotted_record_systems", "materials": {"Fiber Plants": 2}, "days": 2.0, "tooling": {"Timber": 1}},
 	"bound_record_books":{"name": "Bound paper record volumes", "output": "Bound Record Books", "gate": "bookbinding_assemblies", "materials": {"Paper": 2, "Spun Yarn": 0.1, "Timber": 0.2}, "days": 3.0, "tooling": {"Timber": 2, "Stone": 1}},

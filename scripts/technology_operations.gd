@@ -4,6 +4,7 @@ extends RefCounted
 const LIMIT:=1000
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"geared_workshop":{"name": "Geared indexing workshop", "gate": "shaft_alignment_methods", "requires": ["electric_motors"], "cost": {"Basic Machine Tool Sets": 1, "Aligned Drive Assemblies": 1, "Generated Gear Sets": 1, "Electric Motors": 1, "Insulated Cable": 2}, "work": 18.0, "workers": 1.5, "inputs": {"Rolling Bearings": 0.01, "Drive Chains": 0.01}, "power": 3.0, "services": {"mechanical_work": 5.0}},
 	"research_radio_station":{"name": "Research radio station", "gate": "radio_telegraphy", "requires": ["agreed_signal_codes"], "cost": {"Radio Telegraph Sets": 1, "Timber": 2}, "work": 14.0, "workers": 1.0, "inputs": {"Paper": 0.05}, "power": 2.0, "services": {"radio_records": 1.0}},
 	"optical_signal_bench":{"analysis_family": "optical", "name": "Optical signaling bench", "gate": "optical_telegraphy", "requires": ["experimental_controls"], "cost": {"Optical Telegraph Sets": 1, "Timber": 2}, "work": 10.0, "workers": 0.5, "inputs": {"Paper": 0.02}, "power": 0.0, "services": {"analysis_optical": 1.0}},
 	"electrical_signal_bench":{"analysis_family": "electrical", "name": "Electrical communications bench", "gate": "electrical_telegraphy", "requires": ["electrical_measurement", "telephone_circuits"], "cost": {"Electrical Telegraph Sets": 1, "Telephone Sets": 1, "Timber": 2}, "work": 14.0, "workers": 1.0, "inputs": {"Paper": 0.02}, "power": 1.0, "services": {"analysis_electrical": 3.0}},
@@ -200,10 +201,10 @@ static func valid(value:Variant)->bool:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
 			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records"]:return false
-			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape"]:return false
+			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}:
-		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":21500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":26500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":26500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]

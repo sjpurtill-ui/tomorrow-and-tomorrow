@@ -5,7 +5,7 @@ const Ops=preload("res://scripts/technology_operations.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Supply=preload("res://scripts/civilian_production_planner.gd")
 const Power=preload("res://scripts/power_investment_planner.gd")
-const TYPES=["programmable_workshop","sequenced_workshop","controlled_workshop","powered_workshop","pneumatic_workshop"]
+const TYPES=["programmable_workshop","sequenced_workshop","geared_workshop","controlled_workshop","powered_workshop","pneumatic_workshop"]
 
 static func supplied_work_days()->float:
 	var host=WorldSimulation.military
