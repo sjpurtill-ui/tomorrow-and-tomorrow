@@ -1,0 +1,9 @@
+# Civic administration runtime — HELD
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-civic-administration`; branch `codex/civic-administration`; base `cc1f931`. Four reserved existing discoveries: jurisdiction_boundaries, official_mandate_registers, public_office_handover, petition_registers. No discovery is registered/promoted yet.
+
+First implementation stores an optional administrative ledger on the existing per-civilization GovernmentPeopleSystem, with bounded settlement jurisdictions and mandate records. Authorization checks actual current settlement ownership, appointed living local official, subject membership, issuance and expiry. Changing jurisdiction cannot retain powers outside the revised subjects. Recording requires clerical work; the proposed budget is one tenth of effective Administration workers per government day, capped at30 and never backfilled for skipped days. The daily owner hook is not installed yet, so this is a callable foundation awaiting complete operation and labor review, not a live service.
+
+Jurisdiction scope is currently explicit owned settlement plus listed civic subject, not a freehand geographic boundary or a separate territorial owner. Mandates last at most365 days and do not silently renew or transfer to successors. The existing government retains all people, appointment and daily labor authority.
+
+Remaining before READY: actual duty custody transfer on replacement, condition-backed petitions and dispositions through existing leader conversation, daily owner integration, exact four knowledge predicates/learning routes, saved-ledger validation and actor/save tests, source/branch validation and artwork. CivicImplementationSystem already has a successor-report fallback; preserve it rather than counting duplicate prose as a new handover capability. No canonical changes or player launch.

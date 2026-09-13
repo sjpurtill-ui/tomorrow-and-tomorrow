@@ -115,6 +115,7 @@ const PUBLIC_DOUBTS:Dictionary={
 	"Diplomacy":"Their handling of rivals and divided loyalties remains uncertain",
 }
 
+var administration_records:Dictionary=preload("res://scripts/civic_administration.gd").empty_state()
 var people:Array[Dictionary]=[]
 var next_person_id:=1
 var last_processed_month:=-1
@@ -124,6 +125,7 @@ var initializing:=false
 
 
 func reset_for_new_world()->void:
+	administration_records=preload("res://scripts/civic_administration.gd").empty_state()
 	people=[]
 	next_person_id=1
 	last_processed_month=-1
