@@ -152,6 +152,31 @@ const METHODS := {
     "mode": "wick",
     "observation": "Characterize and shape movement of moisture through a textile assembly. Suitable fibers, structures and representative tests"
   },
+  "sewing_machine_mechanisms": {
+  "name": "Sewing-Machine Mechanisms",
+  "requires_all": [
+    "bone_needle_sewing",
+    "cam_motion_design"
+  ],
+  "requires_any": [],
+  "rate": 6.0,
+  "cost": {
+    "Treadle Sewing Machines": 1.0,
+    "Timber": 1.0
+  },
+  "inputs": {
+    "Woven Cloth": 0.7,
+    "Spun Yarn": 0.12,
+    "Sewing Service Parts": 0.005
+  },
+  "mode": "sew",
+  "production_items": [
+    "sewing_service_parts",
+    "treadle_sewing_machines"
+  ],
+  "observation": "Coordinate needle, shuttle and cloth feed using a paid manual treadle mechanism.",
+  "production_contract": "Paid parts and trial-fitted treadle machines support faster ordinary sewing through existing finite Logistics work and equipment quotas. Actual cloth, both sewing threads and replacement needle/feed parts are consumed. Garments keep existing sewn quality, figured-fabric identity, wear, care and save behavior; no electricity, free work, new insulation bonus or arbitrary fabric qualification is granted."
+},
   "bone_needle_sewing": {
     "name": "Bone-Needle Sewing",
     "requires_all": [
@@ -266,4 +291,5 @@ static func entries()->Array[Dictionary]:
 	for id:String in METHODS:
 		var spec:Dictionary=METHODS[id]
 		result.append({"id":id,"name":spec.name,"direction":"Materials","day":0,"chance":.002,"requires":spec.requires_all.duplicate(),"requires_all":spec.requires_all.duplicate(),"requires_any":spec.requires_any.duplicate(true),"learning_routes":[{"id":"local","label":spec.name,"requires_all":[]}],"signals":["crafting","research"],"observation":spec.observation,"effects":{},"clothing_method":id,"production_contract":spec.get("production_contract","Paid equipment, actual yarn or cloth, and shared Logistics work create knitted garments or woven wraps. Issued stocks wear; only their supplied condition and coverage reduce cold and storm exposure. Layering needs two garments; laundering uses water and drying time; moisture trials consume lining cloth and water.")})
+		if spec.has("production_items"):result.back()["production_items"]=spec.production_items.duplicate()
 	return result

@@ -2,6 +2,8 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"sewing_service_parts":{"name": "Qualified sewing needles and feed parts", "output": "Sewing Service Parts", "gate": "sewing_machine_mechanisms", "materials": {"Wrought Iron": 0.5, "Refined Copper": 0.1, "Charcoal": 0.2}, "days": 3, "tooling": {"Basic Machine Tool Sets": 1, "Stone": 2}},
+	"treadle_sewing_machines":{"name": "Trial-fitted treadle sewing machines", "output": "Treadle Sewing Machines", "gate": "sewing_machine_mechanisms", "materials": {"Cam Follower Sets": 1, "Sewing Service Parts": 1, "Wrought Iron": 2, "Timber": 4, "Rope Coils": 0.1, "Woven Cloth": 0.1, "Spun Yarn": 0.02}, "days": 10, "tooling": {"Basic Machine Tool Sets": 1, "Stone": 3}},
 	"cast_metal_type_sets":{"name": "Cast and finished bronze type sets", "output": "Metal Type Sets", "gate": "metal_type_casting", "materials": {"Refined Copper": 1.0, "Refined Tin": 0.12, "Charcoal": 0.5, "Clay": 0.25}, "days": 7, "tooling": {"Wrought Iron": 2, "Stone": 3, "Clay": 3}},
 	"carved_wood_type_sets":{"name": "Carved wooden type sets", "output": "Wood Type Sets", "gate": "wooden_movable_type", "materials": {"Timber": 1.8}, "days": 4, "tooling": {"Wrought Iron": 1, "Stone": 2}},
 	"composed_metal_type_forms":{"name": "Composed and proofed metal type forms", "output": "Printing Forms", "gate": "movable_type_composition", "materials": {"Metal Type Sets": 1, "Timber": 0.2, "Paper": 0.1, "Printing Ink": 0.01}, "days": 2.5, "tooling": {"Timber": 2, "Stone": 1}},

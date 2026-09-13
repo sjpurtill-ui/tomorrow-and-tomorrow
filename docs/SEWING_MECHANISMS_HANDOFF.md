@@ -1,0 +1,11 @@
+# Sewing-machine mechanisms
+
+Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/sewing-mechanisms`, base `e2c2105f03c002dc26d588b48e1af0d12613c35a`. One existing discovery retains bone_needle_sewing AND cam_motion_design.
+
+Two paid civilian recipes manufacture fitted service parts and treadle sewing machines from actual metal, wood, cam followers, rope and trial cloth/thread. Installation consumes the manufactured machine. Existing clothing production spends shared Logistics work, cloth, yarn and replacement service parts to produce six ordinary sewn garments per effective worker; manual treadle operation consumes no electricity. Figured cloth identity, insulation, wear and repair retain existing clothing behavior. The existing planner follows missing machine and service-part demand through real production lines.
+
+No new daily owner, lot kind or save field. Existing stockpiles, installed equipment and binary partial-production state retain ownership. Compatible ordinary cloth and fitted machinery are abstracted by paid work and materials; this does not model automatic pattern cutting, arbitrary leather sewing, individual needle/bobbin adjustment or an insulation upgrade. Numerical quantities are game balance.
+
+Sources: [Science Museum Group treadle lockstitch machine](https://collection.sciencemuseumgroup.org.uk/objects/co44746/head-of-a-lock-stitch-treadle-powered-sewing-machine) and [Smithsonian sewing-machine history](https://www.sil.si.edu/DigitalCollections/hst/cooper/pdf/Cooper1976sewing.pdf) support the manual drive and needle/shuttle thread mechanism.
+
+Worktree validation: 84 distinct cases pass: sewing8, household clothing27, planner15, textile process12, city resources13, dependency audit9. New checks cover original foundations, paid partial manufacture and binary resumption, actual installed garment output, absent work/service parts, figured cloth, the daily shared-work guard, real planner/controller behavior and secondary-city isolation. No script errors. Shared file is civilian_industry.gd; additions are recipe definitions only. Canonical combined acceptance remains pending. No player launch or package rebuild.
