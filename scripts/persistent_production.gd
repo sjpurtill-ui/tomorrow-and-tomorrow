@@ -259,6 +259,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
 	var can_run:=eligible(host,job)
 	if job.has("casting_pending"):Casting.synchronize_idle(job,Industry.product(String(job.item)),work if can_run else 0.0)
+	AlloyTrials.synchronize_idle(job,work if can_run else 0.0)
 	Metallurgy.synchronize_idle(job,work if can_run else 0.0)
 	Induction.synchronize_idle(job,work if can_run else 0.0)
 	Weld.synchronize_idle(job,work if can_run else 0.0)

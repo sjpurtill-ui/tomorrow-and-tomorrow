@@ -32,10 +32,11 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 			if float(state.resource_stockpiles.get(resource,0))<float(spec.materials[resource]):return
 		if Ops.service("electricity")<=0:return
 		job.alloy_trial={"recipe":job.item,"source_job":job.id,"ordinal":int(job.completed)+1,
-			"site":state.resource_settlement_id,"reserved":spec.materials.duplicate(true),"samples":[],"run":trial_run(0)}
+			"site":state.resource_settlement_id,"last_day":int(state.elapsed_days),"idle_days":0,"reserved":spec.materials.duplicate(true),"samples":[],"run":trial_run(0)}
 		for resource:String in spec.materials:
 			state.resource_stockpiles[resource]-=float(spec.materials[resource])
 			job.last_consumed[resource]=float(job.last_consumed.get(resource,0))+float(spec.materials[resource])
+	synchronize_idle(job,work)
 	var trial:Dictionary=job.alloy_trial
 	if trial.site!=state.resource_settlement_id:return
 	while work>.000001 and trial.samples.size()<18:
@@ -69,6 +70,7 @@ static func selected_composition(samples:Array)->float:
 static func valid_trial(trial:Variant,job:Dictionary,spec:Dictionary,finished:bool)->bool:
 	if not trial is Dictionary or not trial.has_all(["recipe","source_job","ordinal","site","reserved","samples","run"]):return false
 	if trial.recipe!=job.item or trial.source_job!=job.id or trial.ordinal!=int(job.completed)+(0 if finished else 1) or trial.reserved!=spec.materials:return false
+	if not trial.get("last_day") is int or trial.last_day<0 or not trial.get("idle_days") is int or trial.idle_days<0 or trial.idle_days>trial.last_day:return false
 	if not trial.site is String or trial.site.length()>128 or not trial.samples is Array or trial.samples.size()>18:return false
 	if finished!=(trial.samples.size()==18):return false
 	for index:int in range(trial.samples.size()):
@@ -88,3 +90,16 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 	return ""
 static func clear(job:Dictionary)->void:
 	job.erase("alloy_trial");job.erase("alloy_last")
+
+static func synchronize_idle(job:Dictionary,work:float)->void:
+	if not job.has("alloy_trial"):return
+	var trial:Dictionary=job.alloy_trial
+	var state=WorldSimulation.state;var today:=int(state.elapsed_days)
+	var delta:=maxi(0,today-int(trial.last_day))
+	if delta==0:return
+	var unavailable:bool=work<=0 or bool(job.get("paused",false)) or trial.site!=state.resource_settlement_id or Ops.service("electricity")<=0
+	var missed:=delta if unavailable else maxi(0,delta-1)
+	if missed>0:
+		trial.run.temperature=20.0+(float(trial.run.temperature)-20.0)*exp(-.05*float(missed))
+		trial.idle_days+=missed
+	trial.last_day=today
