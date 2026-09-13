@@ -229,7 +229,9 @@ static func rain_transfer(plot:Dictionary)->float:
   var trial:Dictionary=preload("res://scripts/settlement_fabric_inspection.gd").TRIALS[method]
   transfer=minf(transfer,clampf(float(observation[trial.response]),0,1))
  # Only the modeled interface share of wall exposure is protected.
- return .8+.2*transfer
+ var runoff:float=response_fraction(plot,"building_drainage_coordination")
+ var capillary:float=response_fraction(plot,"building_capillary_breaks")
+ return .6+.2*transfer+.1*runoff+.1*capillary
 
 static func repair_bill(plot:Dictionary,work:float)->Dictionary:
  var bill:Dictionary={}
@@ -287,3 +289,35 @@ static func supports_further_loading(plot:Dictionary)->bool:
   if observation.is_empty():continue
   if preload("res://scripts/settlement_fabric_inspection.gd").classify(method,observation).state!="accepted":return false
  return true
+
+static func response_fraction(plot:Dictionary,method:String)->float:
+ var observation:Dictionary=service_observation(plot,method)
+ if observation.is_empty():return 1.0
+ var trial:Dictionary=preload("res://scripts/settlement_fabric_inspection.gd").TRIALS[method]
+ return clampf(float(observation[trial.response])/maxf(.001,float(observation[trial.stimulus])),0,1)
+
+static func household_distribution(plots:Array,population:int,temperature:float)->Dictionary:
+ var heat:float=clampf((temperature-31.0)/17.0,0,1)
+ if not is_finite(heat) or heat<=0:return {}
+ var shaded:=false
+ var weights:Dictionary={}
+ var total:float=0.0
+ var capacity:int=0
+ for plot:Dictionary in plots:
+  var transmission:float=response_fraction(plot,"building_shading_design")
+  if transmission<1:shaded=true
+  var places:int=maxi(0,int(plot.get("resident_capacity",0)))
+  var weight:float=places*(1.0-.15*heat*transmission)
+  weights[int(plot.id)]=weight;total+=weight;capacity+=places
+ if not shaded or total<=0:return {}
+ var wanted:int=mini(maxi(0,population),capacity)
+ var assigned:int=0
+ var result:Dictionary={}
+ for plot:Dictionary in plots:
+  var count:int=mini(maxi(0,int(plot.get("resident_capacity",0))),floori(wanted*float(weights[int(plot.id)])/total))
+  result[int(plot.id)]=count;assigned+=count
+ # Redistribute capped/rounding remainder, preserving total people and capacities.
+ for plot:Dictionary in plots:
+  var extra:int=mini(wanted-assigned,maxi(0,int(plot.get("resident_capacity",0))-int(result[int(plot.id)])))
+  result[int(plot.id)]=int(result[int(plot.id)])+extra;assigned+=extra
+ return result

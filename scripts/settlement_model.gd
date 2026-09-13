@@ -2012,11 +2012,14 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		return score_a>score_b)
 	var primary_population:=_primary_population()
 	var occupancy_ratio:=clampf(float(primary_population)/maxf(1.0,float(total_capacity)),0.0,1.0)
+	var temperature:float=PlanetEnvironment.ambient_temperature_c(WorldSimulation.food.current_environment_profile(),day)
+	var shaded_distribution:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").household_distribution(residential,primary_population,temperature)
 	var assigned:=0
 	for index in residential.size():
 		var plot:=residential[index]
 		var desired:=mini(int(plot.get("resident_capacity",0)),roundi(float(plot.get("resident_capacity",0))*occupancy_ratio))
 		if index==residential.size()-1: desired=mini(int(plot.get("resident_capacity",0)),maxi(0,primary_population-assigned))
+		if shaded_distribution.has(int(plot.id)):desired=int(shaded_distribution[int(plot.id)])
 		plot["resident_count"]=desired
 		assigned+=desired
 		var previous_status:=String(plot.get("status","active"))

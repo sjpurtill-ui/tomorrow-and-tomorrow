@@ -71,7 +71,7 @@ func _initialize()->void:
    var protected:float=F.rain_transfer(ready)
    ready.condition=.1
    assert(F.rain_transfer(ready)>protected)
-   assert(protected>=.8)
+   assert(protected>=.8-1e-9)
    ready.condition=1.0
   var kit=preload("res://scripts/settlement_architecture_kit.gd")
   ready.fabric_generation=12
@@ -87,6 +87,20 @@ func _initialize()->void:
    var overlay:ArrayMesh=kit.detail_mesh(base_bounds,kit.installed_features(ready))
    assert(overlay.get_aabb().end.z>base_bounds.end.z)
    assert(overlay==kit.detail_mesh(base_bounds,kit.installed_features(ready)))
+  if method=="building_shading_design":
+   ready.condition=1.0
+   ready.resident_capacity=100
+   var bare:Dictionary=ready.duplicate(true)
+   bare.id=999;bare.erase("fabric_components")
+   var distribution:Dictionary=F.household_distribution([ready,bare],100,48.0)
+   assert(int(distribution[int(ready.id)])>int(distribution[999]))
+   assert(int(distribution[int(ready.id)])+int(distribution[999])==100)
+   assert(F.household_distribution([ready,bare],100,20.0).is_empty())
+   var full:Dictionary=F.household_distribution([ready,bare],300,48.0)
+   assert(int(full[int(ready.id)])==100 and int(full[999])==100)
+  if method in ["building_drainage_coordination","building_capillary_breaks"]:
+   ready.condition=1.0
+   assert(F.rain_transfer(ready)<1.0)
   var mesh:ArrayMesh=kit.mesh_for_plot(ready)
   assert(mesh==kit.mesh_for_plot(ready))
   if method=="building_shading_design":
