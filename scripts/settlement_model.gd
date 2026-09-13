@@ -1351,6 +1351,10 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 		if preload("res://scripts/settlement_fabric_operations.gd").needs_work(plot):
 			var used_work:float=preload("res://scripts/settlement_fabric_operations.gd").advance(plot,builders_per_site*labor_efficiency*.10,month_day)
 			if used_work>0:WorldSimulation.state.morphology_revision+=1
+		var fabric_result:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").resolve(plot,month_day)
+		if not fabric_result.is_empty():
+			WorldSimulation.state.morphology_revision+=1
+			WorldSimulation.state.settlement_plot_history.append({"day":month_day,"plot_id":int(plot.id),"event":"fabric_trial_resolved","method":fabric_result.method,"result":fabric_result.state})
 		if String(plot.get("status",""))=="under_construction":
 			var previous_progress:=float(plot.get("construction_progress",0.0))
 			# Parallel projects divide the real monthly builder pool. A large population

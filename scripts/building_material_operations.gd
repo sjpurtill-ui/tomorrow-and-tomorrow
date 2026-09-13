@@ -128,7 +128,7 @@ static func valid(value:Variant)->bool:
 		if not id is String or id.length()>100:return false
 	return true
 static func valid_plot(plot:Dictionary)->bool:
-	if not preload("res://scripts/settlement_fabric_operations.gd").valid_job(plot.get("fabric_job",{})):return false
+	if not preload("res://scripts/settlement_fabric_operations.gd").valid_plot_records(plot):return false
 	var profile:Variant=plot.get("building_materials",{})
 	if not valid(profile):return false
 	for key:String in ["curing_started_day","curing_last_day","curing_work_days","curing_completed_day"]:

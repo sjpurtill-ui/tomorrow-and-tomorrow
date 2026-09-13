@@ -56,6 +56,25 @@ func _initialize()->void:
   assert(not F.needs_work(restored))
   assert(restored.form=="inherited_house")
   assert(not F.start_trial(restored,F.trial_cost(method),7).ok)
+  var ready:Dictionary=JSON.parse_string(JSON.stringify(restored))
+  var resolved:Dictionary=F.resolve(ready,7)
+  assert(resolved.state=="accepted")
+  assert(ready.fabric_components.has(method))
+  assert(F.valid_plot_records(ready))
+  assert(F.resolve(ready,8).is_empty())
+  var moved:Dictionary=ready.duplicate(true)
+  moved.id=999
+  assert(not F.valid_plot_records(moved))
+  var forged:Dictionary=restored.duplicate(true)
+  forged.fabric_job.trial.result.state="rejected"
+  assert(F.resolve(forged,7).is_empty())
+  var weak:Dictionary=restored.duplicate(true)
+  weak.fabric_job.assembly.support_condition=.1
+  var response:Dictionary=preload("res://scripts/settlement_fabric_response.gd").observe(weak.fabric_job.assembly)
+  weak.fabric_job.trial.result=preload("res://scripts/settlement_fabric_inspection.gd").classify(method,response)
+  assert(F.resolve(weak,7).state!="accepted")
+  assert(weak.get("fabric_components",{}).is_empty())
+  assert(F.valid_plot_records(weak))
   restored.fabric_job.paid=0
   assert(not F.valid_job(restored.fabric_job))
  print("PASS: ten methods; payment, duplicate start, work, same-day guard, serialization, inspection hold, inherited form and malformed job")

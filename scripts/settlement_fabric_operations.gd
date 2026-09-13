@@ -141,3 +141,57 @@ static func valid_trial(value:Variant,method:String)->bool:
  if float(value.work)<0 or float(value.work)>1:return false
  if float(value.started_day)<0 or float(value.last_day)<float(value.started_day):return false
  return float(value.started_day)==floorf(float(value.started_day)) and float(value.last_day)==floorf(float(value.last_day))
+
+static func verified_result(job:Dictionary)->Dictionary:
+ if not valid_job(job) or job.is_empty() or String(job.state)!="awaiting_observations":return {}
+ var observation:Dictionary=preload("res://scripts/settlement_fabric_response.gd").observe(job.assembly)
+ var result:Dictionary=preload("res://scripts/settlement_fabric_inspection.gd").classify(String(job.method),observation)
+ if not result_matches(job.trial.get("result",{}),result):return {}
+ return result
+
+static func resolve(plot:Dictionary,day:int)->Dictionary:
+ var job:Dictionary=plot.get("fabric_job",{})
+ var result:Dictionary=verified_result(job)
+ if result.is_empty() or day<int(job.trial.last_day):return {}
+ if not compatible(plot,String(job.method)) or String(plot.get("status","")) not in ["active","stressed","damaged"]:return {}
+ var record:Dictionary={"job":job.duplicate(true),"resolved_day":day,"plot_id":int(plot.id)}
+ if String(result.state)=="accepted":
+  var installed:Dictionary=plot.get("fabric_components",{})
+  installed[String(job.method)]=record
+  plot.fabric_components=installed
+ # One retained last result bounds unsuccessful history. No material refund.
+ plot.fabric_last_result=record
+ plot.erase("fabric_job")
+ return {"method":String(job.method),"state":String(result.state)}
+
+static func valid_record(value:Variant,plot_id:int,accepted_only:bool=false)->bool:
+ if not value is Dictionary or not value.get("job") is Dictionary:return false
+ var result:Dictionary=verified_result(value.job)
+ if result.is_empty() or (accepted_only and result.state!="accepted"):return false
+ for key:String in ["resolved_day","plot_id"]:
+  if not value.get(key) is float and not value.get(key) is int:return false
+  if not is_finite(float(value[key])) or float(value[key])!=floorf(float(value[key])):return false
+ return int(value.plot_id)==plot_id and plot_id>0 and int(value.resolved_day)>=int(value.job.trial.last_day)
+
+static func valid_plot_records(plot:Dictionary)->bool:
+ if not valid_job(plot.get("fabric_job",{})):return false
+ var installed:Variant=plot.get("fabric_components",{})
+ if not installed is Dictionary or installed.size()>COMPONENTS.size():return false
+ for method:Variant in installed:
+  if not method is String or not COMPONENTS.has(method):return false
+  if not valid_record(installed[method],int(plot.get("id",0)),true):return false
+  if installed[method].job.method!=method:return false
+ if plot.has("fabric_last_result") and not valid_record(plot.fabric_last_result,int(plot.get("id",0))):return false
+ return true
+
+static func result_matches(stored:Variant,expected:Dictionary)->bool:
+ if not stored is Dictionary or stored.size()!=expected.size():return false
+ for key:String in expected:
+  if not stored.has(key):return false
+  if expected[key] is Dictionary:
+   if not result_matches(stored[key],expected[key]):return false
+  elif expected[key] is float or expected[key] is int:
+   if not stored[key] is float and not stored[key] is int:return false
+   if not is_finite(float(stored[key])) or absf(float(stored[key])-float(expected[key]))>1e-9:return false
+  elif stored[key]!=expected[key]:return false
+ return true
