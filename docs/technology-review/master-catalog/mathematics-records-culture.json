@@ -1908,37 +1908,6 @@
   },
   {
     "field": "D13",
-    "id": "parchment_record_preparation",
-    "name": "Parchment Record Preparation",
-    "foundations": "hafted_tools,curing_regimens",
-    "mechanism": "Prepare a qualified skin-based writing surface",
-    "operating_requirement": "Suitable hides, skilled processing and careful storage",
-    "consequence": "Provide a portable record medium with substantial labor and material demand",
-    "status": "authored_draft",
-    "requires_all": [
-      "hafted_tools",
-      "curing_regimens"
-    ],
-    "requires_any": [],
-    "recovery": "For Parchment Record Preparation: learn from a competent visiting teacher, delivered records or demonstrations, a reciprocal partnership or commissioned work. Outside access requires real travel or transmission, agreed payment or contribution and finite teaching time. Rebuild missing foundations and perform the local demonstration; purchasing results or a service does not award mastery. Route coefficients and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "parchment_record_preparation",
-      "local_demonstration": "Prepare a qualified skin-based writing surface",
-      "operating_requirements": "Suitable hides, skilled processing and careful storage",
-      "outside_costs": [
-        "source competence and availability",
-        "negotiated payment or reciprocal contribution",
-        "travel or transmission delay",
-        "local interpretation and practice",
-        "finite teachers and learners"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Demonstrate retrieval, delivery or interpretation using actual media, equipment and reachable participants. Stored or sent information is not automatically received knowledge."
-    }
-  },
-  {
-    "field": "D13",
     "id": "writing_ink_formulation",
     "name": "Writing-Ink Formulation",
     "foundations": "mineral_pigment_preparation,experimental_controls",

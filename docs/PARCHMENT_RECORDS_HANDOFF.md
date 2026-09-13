@@ -15,3 +15,5 @@ Limits: selected compatible skin batches, with soaking, scraping and tension-dry
 Validation and canonical acceptance are recorded below after integration.
 
 Worktree validation: 113 distinct cases pass: parchment 8, record media 8, paper knowledge 5, society exchange 28, civilian planner 15, leather 12, care 18, owned simulation 19. Zero errors/failures/skips/orphans. Initial test typing and target-stock fixtures were corrected; production ownership was unchanged. Graph passes at 725 discoveries / 507 routes / 382 recipes / 18 facilities, all declared production reachable. Canonical verification remains pending.
+
+Canonical acceptance at `01038541577d52ab78785ab4e94490fd3a8c1ac1`: parchment 8, record media 8, paper knowledge 5, leather 12, all 33 pass. Normal boot is clean. Exact 725-definition snapshot matches the promoted ledger; 15 catalog-tool tests pass. No player launch or package rebuild.

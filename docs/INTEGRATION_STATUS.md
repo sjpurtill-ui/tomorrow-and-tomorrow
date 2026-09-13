@@ -1,3 +1,11 @@
+## September 12 — 725 verified operating discoveries
+
+Parchment preparation is integrated at `01038541577d52ab78785ab4e94490fd3a8c1ac1`. Actual hunting supplies untanned skins; three paid recipes produce prepared skins, writing sheets and bound records. Study consumes real sheets within existing Knowledge work. Imported sheets do not teach manufacture; tanned leather cannot substitute.
+
+113 distinct worktree and 33 canonical cases pass, with no errors/failures/skips/orphans. Clean normal headless boot. Graph: **725 discoveries / 507 routes / 382 recipes / 18 facilities**. All 725 canonical definitions exactly match the ledger; 15 catalog-tool tests pass. Ledger: **725 integrated + 2,512 drafts = 3,237 identities**, leaving **1,763 to author and 4,275 to implement**. Art remains **146 / 725, 579 queued**, with parchment illustration prepared separately. Existing save and labor owners remain authoritative; process work abstracts soaking and tension-drying. See `PARCHMENT_RECORDS_HANDOFF.md`.
+
+Six machinery methods are READY at source `3b0c030` and undergoing integrator review. No player launch or package rebuild.
+
 ## September 12 — numerical and statistical coverage checkpoint
 
 Reviewed 24 distinct D12 proposals with explicit input/work requirements, uncertainty/failure limits and paid outside acquisition routes. Existing dimensional analysis, numerical integration/root finding and least-squares were excluded from duplicate counting. Ledger now holds **724 integrated + 2,513 drafts = 3,237 identities**, leaving **1,763 to author and 4,276 to implement**. All parents resolve, no normalized-name duplicates, and 15 catalog-tool tests pass. These drafts add no runtime capabilities. See `technology-review/Numerical and Statistical Methods Review.md`.
