@@ -25,6 +25,11 @@ static func selected(spec:Dictionary)->Dictionary:
 		var r:Dictionary=data().records[key]
 		if int(r.remaining)>0 and r.source_store==WorldSimulation.state.resource_settlement_id and I.product(r.recipe).output==spec.abrasive_inspection:return r
 	return {}
+static func available(spec:Dictionary)->float:
+	var total:=0.0
+	for r:Dictionary in data().records.values():
+		if r.source_store==WorldSimulation.state.resource_settlement_id and I.product(r.recipe).output==spec.get("abrasive_inspection",""):total+=float(r.remaining)
+	return minf(total,float(WorldSimulation.state.resource_stockpiles.get(spec.get("abrasive_inspection",""),0)))
 static func readings(source_job:int,ordinal:int)->Dictionary:
 	# Selected near-net plain steel forms / wheel / dry-belt qualification only.
 	# Fixed original identity prevents cancellation and save/load from rerolling.

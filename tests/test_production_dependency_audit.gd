@@ -80,3 +80,13 @@ func test_analytical_outputs_require_samples_references_and_operating_bench()->v
 	var missing_reference:=products.duplicate(true);missing_reference.erase("reference")
 	assert_array(Audit.audit(missing_reference,{"bench":plant},["Ore","Sample"],ids,routes).errors).is_not_empty()
 	assert_array(Audit.audit(products,{"bench":plant},["Ore","Sample"],["method"],routes).errors).contains(["assay: unknown discovery solution_method"])
+func test_rejected_inspection_output_requires_its_actual_manufacturing_route()->void:
+	var checked:=recipe("Finished",{"Candidate":1},{},1)
+	checked.abrasive_inspection="Candidate";checked.abrasive_reject="Rejected"
+	var products:={"check":checked,"recover":recipe("Recovered",{"Rejected":2})}
+	var blocked:=Audit.audit(products,{},["Candidate"],["method"])
+	assert_array(blocked.errors).is_empty()
+	assert_bool(blocked.blocked_products.has("recover")).is_true()
+	var result:=Audit.audit(products,{"generator":generator({"Candidate":1})},["Candidate"],["method"])
+	assert_dict(result.blocked_products).is_empty()
+	assert_array(result.conditional_quality_outcomes_assumed).contains(["check"])

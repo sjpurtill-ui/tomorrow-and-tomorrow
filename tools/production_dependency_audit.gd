@@ -23,6 +23,10 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 	for recipe:Dictionary in products.values():
 		sources[String(recipe.output)]=true
 		for item:String in recipe.get("co_products",{}):sources[item]=true
+		if recipe.has("abrasive_inspection") and recipe.get("abrasive_reject") is String and not recipe.abrasive_reject.is_empty():sources[recipe.abrasive_reject]=true
+	var conditional_quality:Array[String]=[]
+	for id:String in products:
+		if products[id].has("abrasive_inspection"):conditional_quality.append(id)
 	var service_sources:Dictionary={}
 	for plant:Dictionary in plants.values():
 		for name:String in plant.get("services",{}):service_sources[name]=true
@@ -56,7 +60,7 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 	# Do not execute closure on invalid quantities or unknown gates. Counts of
 	# zero here mean unverified, not proof that every dependency is blocked.
 	if not errors.is_empty():
-		return {"errors":errors,"blocked_products":{},"blocked_plants":{},"reachable_products":0,"product_count":products.size(),"reachable_plants":0,"plant_count":plants.size(),"rounds":0,"closure_performed":false,"analytical_route_count":analytical_routes.size(),"conditional_analysis_success_assumed":not analytical_routes.is_empty(),"external_supplier_reserves_assumed":external_supplies,"external_stock_exhaustion_simulated":false,"structural_only":true,"campaign_verified":false}
+		return {"errors":errors,"blocked_products":{},"blocked_plants":{},"reachable_products":0,"product_count":products.size(),"reachable_plants":0,"plant_count":plants.size(),"rounds":0,"closure_performed":false,"analytical_route_count":analytical_routes.size(),"conditional_analysis_success_assumed":not analytical_routes.is_empty(),"conditional_quality_outcomes_assumed":conditional_quality,"external_supplier_reserves_assumed":external_supplies,"external_stock_exhaustion_simulated":false,"structural_only":true,"campaign_verified":false}
 	var made:Dictionary={};var installed:Dictionary={};var services:Dictionary={}
 	var changed:=true;var rounds:=0
 	while changed:
@@ -69,6 +73,8 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 			if not missing(recipe.get("services",{}),services).is_empty():continue
 			made[id]=true;available[String(recipe.output)]=true;changed=true
 			for item:String in recipe.get("co_products",{}):available[item]=true
+			# Possible rejected output, not a guaranteed coproduct or a yield forecast.
+			if recipe.has("abrasive_inspection") and recipe.get("abrasive_reject") is String and not recipe.abrasive_reject.is_empty():available[recipe.abrasive_reject]=true
 		for id:String in plants:
 			if installed.has(id):continue
 			var plant:Dictionary=plants[id]
@@ -84,4 +90,4 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 		blocked[id]={"services":missing(recipe.get("services",{}),services),"materials":missing(recipe.materials,available),"tooling":missing(recipe.get("tooling",{}),available),"electricity":float(recipe.get("power",0))<=0 or services.has("electricity")}
 	for id:String in plants:
 		if not installed.has(id):blocked_plants[id]={"cost":missing(plants[id].cost,available),"inputs":missing(plants[id].inputs,available),"electricity":float(plants[id].power)<=0 or services.has("electricity")}
-	return {"errors":errors,"blocked_products":blocked,"blocked_plants":blocked_plants,"reachable_products":made.size(),"product_count":products.size(),"reachable_plants":installed.size(),"plant_count":plants.size(),"rounds":rounds,"closure_performed":true,"analytical_route_count":analytical_routes.size(),"conditional_analysis_success_assumed":not analytical_routes.is_empty(),"external_supplier_reserves_assumed":external_supplies,"external_stock_exhaustion_simulated":false,"structural_only":true,"campaign_verified":false}
+	return {"errors":errors,"blocked_products":blocked,"blocked_plants":blocked_plants,"reachable_products":made.size(),"product_count":products.size(),"reachable_plants":installed.size(),"plant_count":plants.size(),"rounds":rounds,"closure_performed":true,"analytical_route_count":analytical_routes.size(),"conditional_analysis_success_assumed":not analytical_routes.is_empty(),"conditional_quality_outcomes_assumed":conditional_quality,"external_supplier_reserves_assumed":external_supplies,"external_stock_exhaustion_simulated":false,"structural_only":true,"campaign_verified":false}

@@ -283,6 +283,11 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	var power:=power_per_item(job)
 	result["electricity_per_item"]=power
 	if power>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),preload("res://scripts/technology_operations.gd").service("electricity")/power)
+	if exposure_spec.has("abrasive_inspection"):
+		result["forecast_inspections_per_day"]=result.forecast_output_per_day
+		result["accepted_total"]=int(job.completed)-int(job.get("abrasive_rejected",0))
+		result["rejected_total"]=int(job.get("abrasive_rejected",0))
+		result.forecast_output_per_day=0.0
 	return result
 
 static func validate_saved(payload: Dictionary) -> String:

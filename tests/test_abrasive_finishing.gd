@@ -217,3 +217,24 @@ func test_lot_capacity_blocks_admission_and_malformed_lots_reject()->void:
 		assert_bool(Q.valid(Q.data())).is_true()
 		var malformed:Dictionary=Q.data().duplicate(true);malformed.records["1"].remaining=-1
 		assert_bool(Q.valid(malformed)).is_false())
+func test_planner_replaces_untraceable_stock_with_actual_local_candidates()->void:
+	WorldSimulation.scoped("abrasive",func()->void:
+		var state=WorldSimulation.state
+		for item:String in ["checked_ground_mounts","surface_ground_mount_candidates"]:
+			var spec:=I.product(item);learn(spec.gate)
+			for field:String in ["materials","tooling"]:
+				for r:String in spec[field]:state.resource_stockpiles[r]=100.0
+		state.resource_stockpiles["Ground Motor Mount Plates"]=0.0
+		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":100.0}
+		var order:=F.supply("Ground Motor Mount Plates",1,{})
+		assert_str(String(order.get("item",""))).is_equal("surface_ground_mount_candidates")
+		assert_int(int(order.get("target",0))).is_equal(101)
+		preload("res://scripts/civilization_controller.gd").production_order("abrasive",order)
+		assert_array(WorldSimulation.military.equipment_queue).is_not_empty()
+		if WorldSimulation.military.equipment_queue.is_empty():return
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		P.advance(WorldSimulation.military,job,3)
+		assert_float(preload("res://scripts/abrasive_inspection.gd").available(I.product("checked_ground_mounts"))).is_equal(1.0)
+		WorldSimulation.military.cancel_equipment_job(int(job.id))
+		order=F.supply("Ground Motor Mount Plates",1,{})
+		assert_str(String(order.get("item",""))).is_equal("checked_ground_mounts"))
