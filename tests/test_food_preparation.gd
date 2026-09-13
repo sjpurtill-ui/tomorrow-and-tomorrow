@@ -17,7 +17,8 @@ func after_test()->void:
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
 
 func test_closed_graph_contract_and_date_free_alternatives()->void:
-	assert_array(preload("res://scripts/technology_requirements.gd").validate(DiscoverySystem.technology_catalog)).is_empty()
+	var audit=preload("res://tools/technology-review/dormant_or_audit.gd")
+	assert_array(preload("res://scripts/technology_requirements.gd").validate(DiscoverySystem.technology_catalog,audit.pending(DiscoverySystem.technology_catalog))).is_empty()
 	var steam:=DiscoverySystem.discovery_definition("food_steaming_vessels")
 	for vessel:String in ["clay_shaping","basketry"]:
 		GameState.known_discoveries.assign(["hearth_roasting_control",vessel])

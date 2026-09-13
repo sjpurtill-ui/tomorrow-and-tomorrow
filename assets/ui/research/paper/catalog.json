@@ -6496,14 +6496,86 @@
       "id": "petition_registers",
       "name": "Petition Registers",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/habitat_observation_records.png",
+      "description": "Record organisms alongside the places and seasonal conditions where they occur",
+      "domain": "nutrition",
+      "id": "habitat_observation_records",
+      "name": "Habitat Observation Records",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/comparative_anatomy.png",
+      "description": "Compare the arrangement and form of structures across organisms",
+      "domain": "nutrition",
+      "id": "comparative_anatomy",
+      "name": "Comparative Anatomy",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/biological_classification.png",
+      "description": "Group organisms using explicit diagnostic traits and revisable relationships",
+      "domain": "nutrition",
+      "id": "biological_classification",
+      "name": "Biological Classification",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/biological_reference_collections.png",
+      "description": "Retain identified examples linked to collection and observation records",
+      "domain": "nutrition",
+      "id": "biological_reference_collections",
+      "name": "Biological Reference Collections",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/developmental_stage_series.png",
+      "description": "Compare organisms at successive stages of development",
+      "domain": "nutrition",
+      "id": "developmental_stage_series",
+      "name": "Developmental Stage Series",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/heredity_experiments.png",
+      "description": "Compare trait patterns across controlled parentage and successive generations",
+      "domain": "nutrition",
+      "id": "heredity_experiments",
+      "name": "Heredity Experiments",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plant_transpiration_measurement.png",
+      "description": "Measure water loss through plants in relation to environmental and physiological conditions",
+      "domain": "nutrition",
+      "id": "plant_transpiration_measurement",
+      "name": "Plant Transpiration Measurement",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plant_pathology_diagnosis.png",
+      "description": "Distinguish plausible causes of plant damage using qualified organism and environmental evidence",
+      "domain": "nutrition",
+      "id": "plant_pathology_diagnosis",
+      "name": "Plant Pathology Diagnosis",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/plant_resistance_trait_trials.png",
+      "description": "Evaluate inherited plant responses to a defined naturally occurring stress under reviewed trials",
+      "domain": "nutrition",
+      "id": "plant_resistance_trait_trials",
+      "name": "Plant Resistance Trait Trials",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
-  "live_count": 812,
+  "live_count": 821,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 251
+  "verified_count": 260
 }

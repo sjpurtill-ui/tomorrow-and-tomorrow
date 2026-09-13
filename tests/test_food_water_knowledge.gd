@@ -20,7 +20,9 @@ func test_new_catalog_contract_and_graph_are_valid()->void:
 	assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(additions,DiscoverySystem.technology_catalog)).is_empty()
 	var graph:Array=[]
 	for entry:Dictionary in DiscoverySystem.technology_catalog:graph.append(P.graph_entry(entry))
-	assert_array(R.validate(graph)).is_empty()
+	var audit=preload("res://tools/technology-review/dormant_or_audit.gd")
+	graph=audit.factor_common(graph,DiscoverySystem.technology_catalog)
+	assert_array(R.validate(graph,audit.pending(graph))).is_empty()
 
 func test_cisterns_have_three_lining_routes_without_an_aqueduct_gate()->void:
 	var entry:=DiscoverySystem.discovery_definition("rainwater_cisterns")

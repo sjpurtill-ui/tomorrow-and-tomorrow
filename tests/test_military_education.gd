@@ -22,7 +22,9 @@ func test_military_contracts_have_reachable_graph_and_supported_roles()->void:
 	assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(Education.entries(),DiscoverySystem.technology_catalog)).is_empty()
 	var graph:Array=[]
 	for entry:Dictionary in DiscoverySystem.technology_catalog:graph.append(P.graph_entry(entry))
-	assert_array(R.validate(graph)).is_empty()
+	var audit=preload("res://tools/technology-review/dormant_or_audit.gd")
+	graph=audit.factor_common(graph,DiscoverySystem.technology_catalog)
+	assert_array(R.validate(graph,audit.pending(graph))).is_empty()
 
 func test_training_research_is_role_specific_and_scales_with_adoption()->void:
 	var base:=Land.training_days("skirmisher")

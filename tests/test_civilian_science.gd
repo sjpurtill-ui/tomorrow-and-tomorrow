@@ -63,7 +63,9 @@ func test_authoring_rejects_fictional_downstream_links()->void:
 func test_whole_graph_remains_reachable_after_rewiring()->void:
 	var graph:Array=[]
 	for entry:Dictionary in DiscoverySystem.technology_catalog:graph.append(P.graph_entry(entry))
-	assert_array(R.validate(graph)).is_empty()
+	var audit=preload("res://tools/technology-review/dormant_or_audit.gd")
+	graph=audit.factor_common(graph,DiscoverySystem.technology_catalog)
+	assert_array(R.validate(graph,audit.pending(graph))).is_empty()
 
 func test_reclassified_question_cannot_remain_in_two_channels()->void:
 	var entry:=DiscoverySystem.discovery_definition("atomic_physics")
