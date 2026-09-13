@@ -117,3 +117,7 @@ Historical mechanism references, not claims about earliest invention dates:
 - [London Museum: treadle lathe](https://www.londonmuseum.org.uk/collections/v/object-132809/treadle-lathe/)
   and [University of Reading: lathe collection record](https://www.reading.ac.uk/adlib/Details/collect/9261)
   support foot-operated lathe mechanisms.
+
+## Canonical acceptance
+
+Integrated at `c4af26837581201c3007fb0c971258512982d241`, retaining both additive recipe families. 109 combined worktree cases pass; canonical machinery10, operations16, persistent19, planner15 and parchment8 all pass (68). Exact731-definition canonical snapshot matches the promoted ledger and15 catalog tests pass. Graph731/513/396/20 and normal headless boot are clean. Earlier READY wording is source-handoff history. No player launch or package rebuild.

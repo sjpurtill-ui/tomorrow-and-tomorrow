@@ -5298,6 +5298,54 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/bow_drill_drive.png",
+      "description": "Convert reciprocating hand motion into controlled tool rotation",
+      "domain": "production",
+      "id": "bow_drill_drive",
+      "name": "Bow-Drill Drive",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/treadle_lathe_drive.png",
+      "description": "Supply controlled rotary work from a foot-operated mechanism",
+      "domain": "production",
+      "id": "treadle_lathe_drive",
+      "name": "Treadle-Lathe Drive",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/water_powered_hammers.png",
+      "description": "Drive repeated forging or processing blows from available water power",
+      "domain": "production",
+      "id": "water_powered_hammers",
+      "name": "Water-Powered Hammers",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mechanical_screw_presses.png",
+      "description": "Apply controlled force through a qualified screw mechanism",
+      "domain": "production",
+      "id": "mechanical_screw_presses",
+      "name": "Mechanical Screw Presses",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cam_motion_design.png",
+      "description": "Shape a rotating or sliding profile to generate declared follower motion",
+      "domain": "production",
+      "id": "cam_motion_design",
+      "name": "Cam-Motion Design",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/belt_power_transmission.png",
+      "description": "Transfer shaft work through a tensioned flexible drive",
+      "domain": "production",
+      "id": "belt_power_transmission",
+      "name": "Belt-Power Transmission",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
       "description": "Repeated wet beating separates and fibrillates prepared plant fibers so they bond into a sheet.",
       "domain": "production",
@@ -5803,9 +5851,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 725,
+  "live_count": 731,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 578,
+  "queued_count": 584,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

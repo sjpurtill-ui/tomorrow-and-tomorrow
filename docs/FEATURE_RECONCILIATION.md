@@ -1,3 +1,11 @@
+## September 12 — 731 verified operating discoveries
+
+Early machinery source `3b0c030f18a4ab21033eafa526114325cd184b22` is integrated as `c4af26837581201c3007fb0c971258512982d241`. Six existing discoveries retain original predicates. Fourteen paid recipes supply actual cart parts, paper presses, belt drives and forge products. River hammers require a pinned confirmed nearby river, maintenance, operators and suitable local climate; all installations share at most eight daily hammer-work units. Forging consumes that finite service alongside materials and labor. A belt workshop spends real electricity and replacement belts. Existing general-led military and simulation owners remain authoritative.
+
+**109 combined worktree and 68 canonical cases pass**, with zero errors/failures/skips/orphans. Graph: **731 discoveries / 513 routes / 396 recipes / 20 facilities**, no dependency errors. All 731 canonical definitions match the promoted ledger; 15 catalog-tool tests pass. Normal headless boot is clean. Ledger: **731 integrated + 2,506 drafts = 3,237 identities**, leaving **1,763 to author and 4,269 to implement**.
+
+Parchment illustration `5d38707` is visually reviewed and passes canonical 768px/mipmap loading and all 12 atlas tests. Art: **147 verified / 731 live, 584 queued**; six machinery illustrations are being prepared separately. The one additive recipe conflict retained both families. No top-level save changes, player launch or package rebuild. Hydraulic capacity is an explicit bounded climate proxy, not measured discharge or head; primary installations only and long campaign pacing remains unverified. See `EARLY_MACHINERY_HANDOFF.md`.
+
 ## September 12 — 725 verified operating discoveries
 
 Parchment preparation is integrated at `01038541577d52ab78785ab4e94490fd3a8c1ac1`. Actual hunting supplies untanned skins; three paid recipes produce prepared skins, writing sheets and bound records. Study consumes real sheets within existing Knowledge work. Imported sheets do not teach manufacture; tanned leather cannot substitute.

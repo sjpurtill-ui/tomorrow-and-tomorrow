@@ -5198,6 +5198,48 @@
       "source_domain": "knowledge",
       "name": "Parchment Record Preparation",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "bow_drill_drive",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Bow-Drill Drive",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "treadle_lathe_drive",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Treadle-Lathe Drive",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "water_powered_hammers",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Water-Powered Hammers",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "mechanical_screw_presses",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Mechanical Screw Presses",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "cam_motion_design",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Cam-Motion Design",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "belt_power_transmission",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Belt-Power Transmission",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
