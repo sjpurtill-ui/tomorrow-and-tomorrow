@@ -4876,6 +4876,55 @@
       "source_domain": "knowledge",
       "name": "Bookbinding Assemblies",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "mechanical_clutches",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Mechanical Clutches",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ratchet_motion_control",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Ratchet-Motion Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "chain_power_transmission",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Chain-Power Transmission",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rolling_element_bearings",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Rolling-Element Bearings",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "shaft_alignment_methods",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Shaft-Alignment Methods",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "gear_tooth_generation",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Gear-Tooth Generation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "gear_hobbing",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Gear Hobbing",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

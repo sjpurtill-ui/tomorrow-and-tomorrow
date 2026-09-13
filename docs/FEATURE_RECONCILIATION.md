@@ -1,3 +1,9 @@
+## September 12 — paid mechanical drives and geared workshop
+
+INTEGRATED runtime `997269f56922f45e8f400a8fe11fb4431da67e58`: seven existing mechanical identities manufacture real clutches, ratchets, chains, bearings, aligned drives, generated gears and hobs. A paid, commissioned Geared Indexing Workshop consumes workers, generated power and replacement components through existing production services. All **54 distinct worktree cases and 28 canonical cases pass**, including binary partial-job and owned-save continuation. See `GEARED_WORKSHOP_HANDOFF.md` for behavior, compatibility and limits.
+
+Graph and exact canonical snapshot: **686 discoveries /468 explicit routes /321 recipes /18 facilities**. All 686 stored definitions match; 15 ledger-tool checks pass. Ledger: **686 integrated + 2,453 drafts = 3,139 identities**, with **1,861 still to author and 4,314 to implement**. Art: 110 verified /686 live, 576 queued. Physical rail freight remains HELD in its worker checkout. No player launch, package rebuild or full-history pacing claim.
+
 ## September 12 — physical record media and finite local study
 
 INTEGRATED runtime `5f2dc5c0bd070170f0aa34c2c6880eb3de9a2334`: three existing identities produce paid clay tablets, quantity-record cords and bound paper volumes. Local study consumes real media within one Knowledge work budget; knotted-record assistance is limited to trained specimen quantity work. All **67 distinct worktree cases and 32 canonical cases pass**, including stock conservation, arrived records, ordinary paper/print behavior and owned save continuation. See `RECORD_MEDIA_HANDOFF.md` for the imported-paper binding route and limits.

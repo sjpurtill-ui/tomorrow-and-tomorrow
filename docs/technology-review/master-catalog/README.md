@@ -4,14 +4,14 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 
 ## Authoritative baselines
 
-- Verified canonical runtime `5f2dc5c0bd070170f0aa34c2c6880eb3de9a2334`: **679 discoveries, 461 learning routes, 313 civilian recipes and 17 facilities**. Record-media integration passes 67 distinct worktree and 32 canonical cases. Earlier validation and the separate river-edge fixture limitation remain documented in `../../FOOD_CONSTRUCTION_INTEGRATION.md`.
-- Record media promote three existing authored identities. All 679 stored definitions exactly match the loaded canonical snapshot. The ledger contains 679 integrated + 2,460 drafts = 3,139 identities, leaving 1,861 to author and 4,321 to implement. Verified subject art: 110; 569 remain queued.
+- Verified canonical runtime `997269f56922f45e8f400a8fe11fb4431da67e58`: **686 discoveries, 468 learning routes, 321 civilian recipes and 18 facilities**. Geared workshop integration passes 54 distinct worktree and 28 canonical cases. Earlier validation and the separate river-edge fixture limitation remain documented in `../../FOOD_CONSTRUCTION_INTEGRATION.md`.
+- Mechanical drives promote seven existing authored identities. All 686 stored definitions exactly match the loaded canonical snapshot. The ledger contains 686 integrated + 2,453 drafts = 3,139 identities, leaving 1,861 to author and 4,314 to implement. Verified subject art: 110; 576 remain queued.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 
 ## Rail and food-processing authoring follow-up
 
-Reviewed rail and food-processing deliveries add 47 distinct proposals, preserving current runtime definitions and all horizon mappings. See [Rail Infrastructure and Service Review](../Rail%20Infrastructure%20and%20Service%20Review.md) and [Food Processing Service Review](../Food%20Processing%20Service%20Review.md). The current total is **3,139 identities**, including **676 integrated and 2,463 drafts**. These authoring deliveries add no operating rail or food system.
+Reviewed rail and food-processing deliveries add 47 distinct proposals, preserving current runtime definitions and all horizon mappings. See [Rail Infrastructure and Service Review](../Rail%20Infrastructure%20and%20Service%20Review.md) and [Food Processing Service Review](../Food%20Processing%20Service%20Review.md). At that checkpoint the total was **3,139 identities**, including **676 integrated and 2,463 drafts**. These authoring deliveries add no operating rail or food system.
 
 ## Maritime authoring follow-up
 

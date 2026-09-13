@@ -4042,6 +4042,62 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/mechanical_clutches.png",
+      "description": "Connect or release transmitted mechanical power through a qualified interface. Compatible drive, clutch, controls and maintenance.",
+      "domain": "production",
+      "id": "mechanical_clutches",
+      "name": "Mechanical Clutches",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ratchet_motion_control.png",
+      "description": "Permit indexed motion in a declared direction through a qualified locking arrangement. Suitable mechanism, load evidence and inspection.",
+      "domain": "production",
+      "id": "ratchet_motion_control",
+      "name": "Ratchet-Motion Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/chain_power_transmission.png",
+      "description": "Transfer rotary work through a qualified linked chain and matching wheels. Compatible components, lubrication and guarded operation.",
+      "domain": "production",
+      "id": "chain_power_transmission",
+      "name": "Chain-Power Transmission",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rolling_element_bearings.png",
+      "description": "Support relative motion through qualified rolling contacts. Accurate components, lubrication, seals and inspection.",
+      "domain": "production",
+      "id": "rolling_element_bearings",
+      "name": "Rolling-Element Bearings",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/shaft_alignment_methods.png",
+      "description": "Measure and adjust connected shaft geometry against operating requirements. References, instruments and accessible machinery.",
+      "domain": "production",
+      "id": "shaft_alignment_methods",
+      "name": "Shaft-Alignment Methods",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gear_tooth_generation.png",
+      "description": "Produce matching tooth profiles through controlled cutting or forming. Qualified tooling, workholding and inspection.",
+      "domain": "production",
+      "id": "gear_tooth_generation",
+      "name": "Gear-Tooth Generation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gear_hobbing.png",
+      "description": "Generate compatible gear teeth through synchronized tool and work motion. Qualified hob, machine, setup and inspection.",
+      "domain": "production",
+      "id": "gear_hobbing",
+      "name": "Gear Hobbing",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/bolt_blank_forging.png",
       "description": "A headed metal blank is formed before its shank receives a thread, separating head shaping from fitting.",
       "domain": "production",
@@ -5435,9 +5491,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 679,
+  "live_count": 686,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 569,
+  "queued_count": 576,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
