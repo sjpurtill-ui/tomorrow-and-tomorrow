@@ -4,10 +4,11 @@ extends RefCounted
 const K=preload("res://scripts/clothing_knowledge.gd")
 const R=preload("res://scripts/technology_requirements.gd")
 const LIMIT:=48
+const QUILT_REPAIR_INPUTS:={"Plant-Fiber Quilt Batts":.08,"Woven Cloth":.08,"Spun Yarn":.03}
 const HUNTING_BYPRODUCTS:={"Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay"}
 const BONE_RESOURCE:="Recovered Bone"
-const CREATION_MODES:=["knit","twill","pile","sew","fit","grade","leather"]
-const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42,"leather":.32}
+const CREATION_MODES:=["knit","twill","pile","sew","fit","grade","leather","tied","quilt"]
+const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42,"leather":.32,"tied":.25,"quilt":.50}
 static func empty_state()->Dictionary:return {"tools":{},"lots":[],"bone_stock":0.0,"last_day":-1,"report":{}}
 static func data()->Dictionary:return WorldSimulation.state.household_clothing
 static func available(item:String)->float:
@@ -19,7 +20,7 @@ static func materials(id:String,installation:bool=false)->Dictionary:
 	var result:Dictionary=K.METHODS[id].cost.duplicate() if installation else K.METHODS[id].inputs.duplicate()
 	# Existing sewing/cutting skills can use an imported figured fabric. Pattern
 	# origin is retained in the garment lot; it grants no insulation multiplier.
-	if String(K.METHODS[id].mode) in ["sew","fit","grade"] and result.has("Woven Cloth") and available("Figured Cloth")>=float(result["Woven Cloth"]):
+	if String(K.METHODS[id].mode) in ["sew","fit","grade","tied","quilt"] and result.has("Woven Cloth") and available("Figured Cloth")>=float(result["Woven Cloth"]):
 		result["Figured Cloth"]=result["Woven Cloth"];result.erase("Woven Cloth")
 	return result
 static func leather_count()->float:
@@ -37,7 +38,7 @@ static func leather_target(population:float)->float:
 	if int(data().tools.get(id,0))==0 and amount>0:amount+=.2
 	return minf(6,ceilf(amount))
 static func compatible_service(mode:String,lot:Dictionary)->bool:
-	return lot.kind!="leather" or mode not in ["wash","machine_wash","wick","repair","test"]
+	return (lot.kind!="leather" or mode not in ["wash","machine_wash","wick","repair","test"]) and not (lot.kind=="quilt" and mode=="repair")
 static func figured_count()->float:
 	var amount:=0.0
 	for lot:Dictionary in data().lots:
@@ -162,10 +163,10 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 	var washing:=mode in ["wash","machine_wash"]
 	if mode in CREATION_MODES:
 		var spent_before:=float(report.workers)
-		if mode=="leather":
-			var patches:={"Flexible Leather":.08,"Spun Yarn":.03}
+		if mode in ["leather","quilt"]:
+			var patches:={"Flexible Leather":.08,"Spun Yarn":.03} if mode=="leather" else QUILT_REPAIR_INPUTS
 			for lot:Dictionary in data().lots:
-				if lot.kind!="leather" or int(lot.ready)>day or float(lot.condition)<.15 or float(lot.condition)>=.6:continue
+				if lot.kind!=mode or int(lot.ready)>day or float(lot.condition)<.15 or float(lot.condition)>=.6:continue
 				var repaired:=minf(float(lot.amount),quota(id,maxf(0,workers-(float(report.workers)-spent_before)),report,patches))
 				if repaired<=.000001:continue
 				lot.condition=float(lot.condition)+minf(.3,.85-float(lot.condition))*repaired/float(lot.amount)

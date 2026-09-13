@@ -1842,6 +1842,22 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/textile_braiding.png",
+      "description": "Interlace yarn paths under controlled tension to make garment cords, then use actual cords to fasten woven wraps.",
+      "domain": "production",
+      "id": "textile_braiding",
+      "name": "Textile Braiding",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/quilted_layer_assembly.png",
+      "description": "Stitch cloth faces around actual prepared plant-fiber filling so it stays distributed in an insulated garment.",
+      "domain": "production",
+      "id": "quilted_layer_assembly",
+      "name": "Quilted Layer Assembly",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/leather_goods_patterning.png",
       "description": "Cut and fit compatible flexible leather into sewn outer garments; repair worn pieces with leather patches.",
       "domain": "production",
@@ -6003,11 +6019,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 750,
+  "live_count": 752,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 172
+  "verified_count": 174
 }

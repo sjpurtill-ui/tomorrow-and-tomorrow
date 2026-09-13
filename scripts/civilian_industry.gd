@@ -2,6 +2,9 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"braided_garment_cords":{"name": "Tensioned garment braids", "output": "Braided Garment Cords", "gate": "textile_braiding", "materials": {"Spun Yarn": 0.6}, "days": 2, "tooling": {"Timber": 2, "Stone": 1}},
+	"plant_fiber_quilt_batts":{"name": "Opened and lightly bound quilt filling", "output": "Plant-Fiber Quilt Batts", "gate": "quilted_layer_assembly", "materials": {"Prepared Fibers": 1.1, "Spun Yarn": 0.04}, "days": 2.5, "tooling": {"Timber": 2, "Stone": 1}},
+
 	"continuity_test_sets":{"name": "Sounder continuity-test sets", "output": "Continuity Test Sets", "gate": "electrical_measurement", "materials": {"Telegraph Sounders": 1, "Resistors": 0.2, "Copper Wire": 0.5, "Timber": 1}, "days": 3, "tooling": {"Wrought Iron": 1, "Timber": 1}},
 	# Formed parts retain separate finishing, fitting and load-test consumers.
 	"metal_spinning_tool_sets":{"name": "Fitted spinning mandrels and rollers", "output": "Metal Spinning Tool Sets", "gate": "metal_spinning_forming", "materials": {"Steel": 2, "Timber": 2, "Shaft Bearings": 0.5}, "days": 6, "tooling": {"Metalworking Lathes": 1, "Gauge Blocks": 1}},

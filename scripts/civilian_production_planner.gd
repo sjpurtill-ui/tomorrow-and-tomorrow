@@ -207,6 +207,10 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 		var spec:Dictionary=knowledge.METHODS[id]
 		if id not in state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not requirements.evaluate(spec,state.known_discoveries).ready:continue
 		var amount:=minf(10,deficit)
+		var quilt_repairs:=0.0
+		if spec.mode=="quilt":
+			for lot:Dictionary in clothing.data().lots:
+				if lot.kind=="quilt" and float(lot.condition)>=.15 and float(lot.condition)<.6 and int(lot.ready)<=int(state.elapsed_days):quilt_repairs=minf(10,quilt_repairs+float(lot.amount))
 		if spec.mode not in clothing.CREATION_MODES:
 			amount=0.0
 			for lot:Dictionary in clothing.data().lots:
@@ -217,10 +221,14 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 				for trial:Dictionary in clothing.data().get("trials",{}).values():
 					if int(trial.cycles)<5:amount+=1.0
 			amount=minf(10,amount)
-		if amount<=.000001:continue
+		if amount<=.000001 and quilt_repairs<=.000001:continue
 		var needed:Dictionary={}
 		var inputs:=clothing.materials(id)
 		for item:String in inputs:needed[item]=amount*float(inputs[item])
+		if quilt_repairs>0:
+			for item:String in clothing.QUILT_REPAIR_INPUTS:
+				var cost:float=clothing.QUILT_REPAIR_INPUTS[item]
+				needed[item]=float(needed.get(item,0))+quilt_repairs*cost
 		if int(clothing.data().tools.get(id,0))==0:
 			var costs:=clothing.materials(id,true)
 			for item:String in costs:needed[item]=float(needed.get(item,0))+float(costs[item])
