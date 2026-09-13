@@ -6448,14 +6448,46 @@
       "id": "rolling_intaglio_printing",
       "name": "Rolling Intaglio Printing",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+      "description": "Specify which authority handles a dispute by place, party or subject",
+      "domain": "institutions",
+      "id": "jurisdiction_boundaries",
+      "name": "Jurisdiction Boundaries",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/official_mandate_registers.png",
+      "description": "Record which powers each office holds and when authorization ends",
+      "domain": "institutions",
+      "id": "official_mandate_registers",
+      "name": "Official Mandate Registers",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/public_office_handover.png",
+      "description": "Transfer pending duties, records and assets when officials change",
+      "domain": "institutions",
+      "id": "public_office_handover",
+      "name": "Public Office Handover",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/petition_registers.png",
+      "description": "Record submitted grievances and their disposition",
+      "domain": "institutions",
+      "id": "petition_registers",
+      "name": "Petition Registers",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
-  "live_count": 806,
+  "live_count": 810,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 245
+  "verified_count": 249
 }
