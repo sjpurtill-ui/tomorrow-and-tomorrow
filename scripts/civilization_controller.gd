@@ -143,12 +143,13 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 			exists=true;managed=bool(job.get("planner_managed",false));break
 	if not exists and campaign.equipment_queue.size()>=campaign.production_line_capacity():
 		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line(String(preload("res://scripts/civilian_industry.gd").product(item).get("output","")))
+		if reusable<0:reusable=preload("res://scripts/armor_equipment.gd").reusable_line(campaign,item)
 		if reusable<0:return
 		if WorldSimulation.submit(id,{"kind":"production_retool","job":reusable,"item":item}).has("error"):return
 	ensure_line(id,item,int(recommendation.target))
 	if managed:
 		for job:Dictionary in campaign.equipment_queue:
-			if String(job.get("item",""))==item and String(job.get("job_type",""))=="civilian" and bool(job.get("persistent",false)):
+			if String(job.get("item",""))==item and (String(job.get("job_type",""))=="civilian" or preload("res://scripts/armor_equipment.gd").KITS.has(item)) and bool(job.get("persistent",false)):
 				job.planner_managed=true;break
 
 static func military_orders(id:String,plan:Dictionary={})->void:
@@ -166,11 +167,10 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	var chosen:="";var weapon:="";var score:=-1.0
 	for unit:String in campaign.UnitCatalog.ARCHETYPES:
 		var definition:Dictionary=campaign.UnitCatalog.ARCHETYPES[unit]
-		for item in definition.equipment:
-			if campaign._training_gate(unit,String(item)).has("error"):continue
-			if not can_supply_equipment(campaign,String(item)):continue
-			var value:=STRATEGY.unit_score(definition,plan)
-			if value>score:chosen=unit;weapon=String(item);score=value
+		var item:=preload("res://scripts/armor_equipment.gd").selection(campaign,unit,plan)
+		if item.is_empty():continue
+		var value:=STRATEGY.unit_score(definition,plan)
+		if value>score:chosen=unit;weapon=item;score=value
 	land_training_orders(id,chosen,weapon,target,plan)
 	if campaign.field_armies.is_empty() and int(campaign.home_army.get("troops",0))>=4:
 		WorldSimulation.submit(id,{"kind":"deploy","count":maxi(4,roundi(float(campaign.home_army.troops)*float(plan.deploy_share)))})
@@ -210,10 +210,11 @@ static func land_training_orders(id:String,chosen:String,weapon:String,target:in
 	var campaign=WorldSimulation.military
 	var count:=int(campaign.aggregate_recruits)
 	var equipment_target:=maxi(4,target)
+	production_order(id,preload("res://scripts/armor_equipment.gd").investment(campaign,chosen,weapon,equipment_target,plan))
 	var support:=preload("res://scripts/combined_arms_recruitment.gd").recommendation(chosen,plan,func(item:String)->bool:return can_supply_equipment(campaign,item))
 	if not support.is_empty():
 		chosen=String(support.unit);weapon=String(support.weapon);count=int(support.count);equipment_target=maxi(4,count)
-	ensure_line(id,weapon,equipment_target)
+	production_order(id,{"item":weapon,"target":equipment_target})
 	if count>0:WorldSimulation.submit(id,{"kind":"train","unit":chosen,"weapon":weapon,"count":count})
 
 static func can_supply_equipment(campaign:Node,item:String)->bool:
