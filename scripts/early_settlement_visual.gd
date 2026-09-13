@@ -68,9 +68,21 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			plot["roof_plan"] = "unsupported_early_adapter_form"
 			continue
 		plot["visual_form"]=kind(plot)
+		if LATE.kind(plot)=="" and kind(plot) not in KIT and TOWN.supports(plot) and LATE.installed_features(plot)>0:
+			# Variant is selected inside TOWN.layout; reserve the maximum envelope
+			# of its finite kit so overlays cannot bypass road/neighbor clearance.
+			var reserved:=Vector2.ZERO
+			for variant in TOWN.KIT.size():
+				var bounds:=TOWN.kit_mesh(variant).get_aabb()
+				bounds=bounds.merge(LATE.early_detail_mesh(bounds,"town",LATE.installed_features(plot)).get_aabb())
+				var extent:=bounds.position.abs().max(bounds.end.abs())
+				reserved=reserved.max(Vector2(extent.x,extent.z)*.001)
+			plot["placement_half_extent"]=reserved
 		if kind(plot).is_empty(): continue
 		if kind(plot) in KIT or LATE.kind(plot)!="":
-			var envelope := (LATE.mesh_for(LATE.kind(plot),LATE.floors(plot)) if LATE.kind(plot)!="" else kit_mesh(kind(plot))).get_aabb()
+			var envelope := (LATE.mesh_for_plot(plot) if LATE.kind(plot)!="" else kit_mesh(kind(plot))).get_aabb()
+			if LATE.kind(plot)=="" and LATE.installed_features(plot)>0:
+				envelope=envelope.merge(LATE.early_detail_mesh(envelope,kind(plot),LATE.installed_features(plot)).get_aabb())
 			var extent := envelope.position.abs().max(envelope.end.abs())
 			plot["placement_half_extent"] = Vector2(extent.x, extent.z) * .001
 		# Reuse the checked footprint/road/water solver, retaining plot identity and
@@ -133,6 +145,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		if String(record.get("early_kind","")) not in KIT and LATE.kind(record.plot)=="": inherited.buildings.append(record)
 	TOWN.render(inherited,center,height,parent)
 	LATE.render(plan,center,height,parent)
+	_render_installed_early_details(plan,center,height,parent)
 	if material == null:
 		material = StandardMaterial3D.new(); material.vertex_color_use_as_albedo = true
 		material.roughness = .95; material.cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -159,3 +172,32 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		var node := MultiMeshInstance3D.new(); node.name = "EarlySettlement_"+name
 		node.multimesh = batch; node.material_override = material
 		node.set_meta("source_transforms",transforms); parent.add_child(node)
+
+static func _render_installed_early_details(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)->void:
+	var groups:Dictionary={}
+	for record:Dictionary in plan.buildings:
+		var plot:Dictionary=record.plot
+		if LATE.kind(plot)!="":continue
+		if String(plot.get("status","active")) in ["ruin","reclaimed","under_construction"]:continue
+		if float(plot.get("damage",{}).get("structural",0))>.65:continue
+		var flags:=LATE.installed_features(plot)
+		if flags==0:continue
+		var name:=String(record.get("early_kind",""))
+		var source:Mesh
+		if name in KIT:source=kit_mesh(name)
+		elif TOWN.supports(plot):source=TOWN.kit_mesh(clampi(int(record.get("variant",0)),0,TOWN.KIT.size()-1))
+		else:continue
+		var mesh:=LATE.early_detail_mesh(source.get_aabb(),name,flags)
+		var key:=str(mesh.get_instance_id())
+		if not groups.has(key):groups[key]={"mesh":mesh,"records":[]}
+		groups[key].records.append(record)
+	if material==null:
+		material=StandardMaterial3D.new();material.vertex_color_use_as_albedo=true;material.roughness=.95;material.cull_mode=BaseMaterial3D.CULL_DISABLED
+	for key:String in groups:
+		var group:Dictionary=groups[key]
+		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.mesh=group.mesh;batch.instance_count=group.records.size()
+		for i in group.records.size():
+			var record:Dictionary=group.records[i]
+			var point:Vector2=record.position+Vector2(center.x,center.z)
+			batch.set_instance_transform(i,Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y)))
+		var node:=MultiMeshInstance3D.new();node.name="InstalledEarlyDetails_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
