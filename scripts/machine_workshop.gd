@@ -25,8 +25,10 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	if pending.phase=="inspection":
 		inspect(job,spec,work)
 		return
+	work=Support.service_filter(job,work)
+	if work<=0:return
 	var rate:=float(spec.power)/float(spec.days)
-	var receipt:=Program.advance(pending.run,Support.limit_work(job,work),ops.service("electricity"),rate)
+	var receipt:=Program.advance(pending.run,Support.limit_work(job,work,spec),ops.service("electricity"),rate)
 	Support.consume(job,float(receipt.work))
 	var installed:Dictionary=job.get("machine_support",{}).get("installed",{})
 	pending.film_work=float(pending.get("film_work",0))+(float(receipt.work) if installed.has("fluid_film_bearings") else 0.0)
