@@ -57,7 +57,7 @@ func run()->void:
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/communications_knowledge.gd").entries(),discovery.technology_catalog))
 	var discovery_ids:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:discovery_ids.append(entry.id)
-	var production:Dictionary=load("res://tools/production_dependency_audit.gd").audit(load("res://scripts/civilian_industry.gd").PRODUCTS,load("res://scripts/technology_operations.gd").PLANTS,root.get_node("ResourceSystem").catalog.keys(),discovery_ids)
+	var production:Dictionary=load("res://tools/production_dependency_audit.gd").audit(load("res://scripts/civilian_industry.gd").PRODUCTS,load("res://scripts/technology_operations.gd").PLANTS,root.get_node("ResourceSystem").catalog.keys()+preload("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),discovery_ids)
 	errors.append_array(production.errors)
 	for id:String in production.blocked_products:errors.append(id+": no structural manufacturing path "+JSON.stringify(production.blocked_products[id]))
 	for id:String in production.blocked_plants:errors.append(id+": no structural installation path "+JSON.stringify(production.blocked_plants[id]))

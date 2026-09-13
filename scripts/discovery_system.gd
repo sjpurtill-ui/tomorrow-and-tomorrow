@@ -138,6 +138,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/record_media_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/glassworking_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/glass_ceramic_process_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/leather_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/electronic_components.gd").entries())
 	catalog.append_array(preload("res://scripts/digital_logic_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/computing_memory_knowledge.gd").entries())

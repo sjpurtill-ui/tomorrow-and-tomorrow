@@ -20,13 +20,14 @@ func refresh()->void:
 	var ledger:=B.data();var service:=B.coverage(WorldSimulation.state.population_exact,int(WorldSimulation.state.elapsed_days))
 	details.text="%d installed · %.0f units per handler-day. Shares remaining Logistics work.\n%.1f garments · %.1f issued · cold exposure reduced %.1f%% · storm exposure reduced %.1f%%.\nGarments wear during use. Washing consumes water and removes garments for one drying day. Layering pairs spare garments; moisture handling adds tested lining. These are aggregate game coefficients."%[int(ledger.tools.get(subject,0)),float(K.METHODS[subject].rate),B.count(),float(service.issued),float(service.cold)*100,float(service.storm)*100]
 	var garments:Array[String]=[]
-	var names:={"knit":"knitted","twill":"twill wraps","pile":"pile wraps","sew":"sewn","fit":"fitted","grade":"graded fit"}
+	var names:={"knit":"knitted","twill":"twill wraps","pile":"pile wraps","sew":"sewn","fit":"fitted","grade":"graded fit","leather":"fitted leather"}
 	for kind:String in B.CREATION_MODES:
 		var amount:=0.0
 		for lot:Dictionary in ledger.lots:
 			if lot.kind==kind:amount+=float(lot.amount)
 		if amount>0:garments.append("%.1f %s"%[amount,names[kind]])
 	details.text+="\nStock: "+", ".join(garments)+". Recovered bone: %.2f (from actual hunting)."%B.available(B.BONE_RESOURCE)
+	details.text+="\nLeather garments: %.1f. Raw hides: %.1f; flexible leather: %.1f. Wet exposure wears leather; fitted leather patches repair it without textile laundering."%[B.leather_count(),B.available("Raw Hides"),B.available("Flexible Leather")]
 	details.text+="\nFigured-fabric garments: %.1f. Patterned cloth retains its identity through use and washing; decoration adds no protection."%B.figured_count()
 	var equipment:Array[String]=[];var inputs:Array[String]=[]
 	var costs:=B.materials(subject,true)

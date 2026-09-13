@@ -4,9 +4,10 @@ extends RefCounted
 const K=preload("res://scripts/clothing_knowledge.gd")
 const R=preload("res://scripts/technology_requirements.gd")
 const LIMIT:=48
+const HUNTING_BYPRODUCTS:={"Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay"}
 const BONE_RESOURCE:="Recovered Bone"
-const CREATION_MODES:=["knit","twill","pile","sew","fit","grade"]
-const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42}
+const CREATION_MODES:=["knit","twill","pile","sew","fit","grade","leather"]
+const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42,"leather":.32}
 static func empty_state()->Dictionary:return {"tools":{},"lots":[],"bone_stock":0.0,"last_day":-1,"report":{}}
 static func data()->Dictionary:return WorldSimulation.state.household_clothing
 static func available(item:String)->float:
@@ -21,6 +22,22 @@ static func materials(id:String,installation:bool=false)->Dictionary:
 	if String(K.METHODS[id].mode) in ["sew","fit","grade"] and result.has("Woven Cloth") and available("Figured Cloth")>=float(result["Woven Cloth"]):
 		result["Figured Cloth"]=result["Woven Cloth"];result.erase("Woven Cloth")
 	return result
+static func leather_count()->float:
+	var amount:=0.0
+	for lot:Dictionary in data().lots:
+		if lot.kind=="leather":amount+=float(lot.amount)
+	return amount
+static func leather_target(population:float)->float:
+	var state=WorldSimulation.state
+	var id:="leather_goods_patterning"
+	if state.convoy_traveling or not state.settlement_site_committed or id not in state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not R.evaluate(K.METHODS[id],state.known_discoveries).ready:return 0.0
+	var amount:=maxf(0,population*1.1-count())*.65
+	for lot:Dictionary in data().lots:
+		if lot.kind=="leather" and float(lot.condition)>=.15 and float(lot.condition)<.6:amount+=float(lot.amount)*.08
+	if int(data().tools.get(id,0))==0 and amount>0:amount+=.2
+	return minf(6,ceilf(amount))
+static func compatible_service(mode:String,lot:Dictionary)->bool:
+	return lot.kind!="leather" or mode not in ["wash","machine_wash","wick","repair","test"]
 static func figured_count()->float:
 	var amount:=0.0
 	for lot:Dictionary in data().lots:
@@ -84,7 +101,7 @@ static func power_demand()->float:
 	var dirty:=0.0
 	var remaining_wear:=maxf(0,WorldSimulation.settlements.primary_population_exact())
 	for lot:Dictionary in data().lots:
-		if int(lot.ready)>int(state.elapsed_days):continue
+		if int(lot.ready)>int(state.elapsed_days) or not compatible_service("machine_wash",lot):continue
 		var used:=minf(float(lot.amount),remaining_wear);remaining_wear-=used
 		var new_soil:=.025*used/maxf(.000001,float(lot.amount)) if int(data().last_day)<int(state.elapsed_days) else 0.0
 		if float(lot.soil)+new_soil>=.35:dirty+=float(lot.amount)
@@ -98,6 +115,7 @@ static func test_cycles(workers:float,population:float,day:int,report:Dictionary
 	if not data().has("trials"):data().trials={}
 	var before_work:=float(report.workers)
 	for kind:String in CREATION_MODES:
+		if kind=="leather":continue
 		var trial:Dictionary=data().trials.get(kind,{})
 		if not trial.is_empty() and (int(trial.last_day)>=day or (int(trial.cycles)>=5 and day-int(trial.last_day)<30)):continue
 		if quota(id,maxf(0,workers-(float(report.workers)-before_work)),report)<1.0-.000000001:break
@@ -117,17 +135,17 @@ static func test_cycles(workers:float,population:float,day:int,report:Dictionary
 	for i in range(data().lots.size()-1,-1,-1):
 		if float(data().lots[i].amount)<.000001:data().lots.remove_at(i)
 
-static func quota(id:String,workers:float,report:Dictionary)->float:
+static func quota(id:String,workers:float,report:Dictionary,override_inputs:Dictionary={})->float:
 	if id not in WorldSimulation.state.known_discoveries:return 0
 	var rate:=float(K.METHODS[id].rate)*clampf(WorldSimulation.discovery.adoption(id),0,1)
 	var amount:=minf(maxf(0,workers)*rate,maxf(0,float(data().tools.get(id,0))*rate-float(report.methods.get(id,0))))
-	var inputs:=materials(id)
+	var inputs:=materials(id) if override_inputs.is_empty() else override_inputs
 	for item:String in inputs:amount=minf(amount,maxf(0,available(item))/float(inputs[item]))
 	var power:=float(K.METHODS[id].get("power",0))
 	if power>0:amount=minf(amount,preload("res://scripts/technology_operations.gd").service("electricity")/power)
 	return amount
-static func charge(id:String,amount:float,report:Dictionary)->void:
-	var inputs:=materials(id)
+static func charge(id:String,amount:float,report:Dictionary,override_inputs:Dictionary={})->void:
+	var inputs:=materials(id) if override_inputs.is_empty() else override_inputs
 	for item:String in inputs:
 		var used:=float(inputs[item])*amount
 		spend(item,used)
@@ -143,13 +161,22 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 	if mode=="test":test_cycles(workers,population,day,report);return
 	var washing:=mode in ["wash","machine_wash"]
 	if mode in CREATION_MODES:
-		var amount:=minf(quota(id,workers,report),maxf(0,population*1.1-count()))
+		var spent_before:=float(report.workers)
+		if mode=="leather":
+			var patches:={"Flexible Leather":.08,"Spun Yarn":.03}
+			for lot:Dictionary in data().lots:
+				if lot.kind!="leather" or int(lot.ready)>day or float(lot.condition)<.15 or float(lot.condition)>=.6:continue
+				var repaired:=minf(float(lot.amount),quota(id,maxf(0,workers-(float(report.workers)-spent_before)),report,patches))
+				if repaired<=.000001:continue
+				lot.condition=float(lot.condition)+minf(.3,.85-float(lot.condition))*repaired/float(lot.amount)
+				charge(id,repaired,report,patches)
+		var amount:=minf(quota(id,maxf(0,workers-(float(report.workers)-spent_before)),report),maxf(0,population*1.1-count()))
 		var fabric:="figured" if materials(id).has("Figured Cloth") else "plain"
 		if amount>0 and add(mode,amount,1,0,false,false,0,fabric):charge(id,amount,report)
 		return
 	var used_before:=float(report.workers)
 	for lot:Dictionary in data().lots.duplicate():
-		if int(lot.ready)>day:continue
+		if int(lot.ready)>day or not compatible_service(mode,lot):continue
 		if mode=="layer" and (lot.layered or float(lot.condition)<.7):continue
 		if washing and float(lot.soil)<.35:continue
 		if mode=="wick" and lot.wick:continue
@@ -174,6 +201,15 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 	var day:=int(WorldSimulation.state.elapsed_days)
 	if int(data().last_day)==day:return {"workers":0.0,"coverage":coverage(population,day)}
 	data().last_day=day
+	# Raw hides are local hunting byproducts, not a conversion of stored meat.
+	# The existing once-per-day clothing guard also owns decay and collection.
+	var fat:=maxf(0,available("Recovered Animal Fat"))*.75
+	var raw:=maxf(0,available("Raw Hides"))*.75
+	if "hide_tanning" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("hide_tanning")>=.1 and is_finite(hunted_rations):
+		raw+=maxf(0,hunted_rations)*.001
+		fat+=maxf(0,hunted_rations)*.0005
+	WorldSimulation.state.resource_stockpiles["Recovered Animal Fat"]=minf(maxf(0,population)*.01,fat)
+	WorldSimulation.state.resource_stockpiles["Raw Hides"]=minf(maxf(0,population)*.02,raw)
 	# Non-edible byproduct of actual newly hunted food, never imported meat,
 	# opening food stores or a forecast. Collected once per local day.
 	var recovered:=0.0
@@ -186,7 +222,9 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 			lot.ready=0
 			var used:=minf(float(lot.amount),remaining_wear);remaining_wear-=used
 			var share:=used/maxf(.000001,float(lot.amount))
-			lot.condition=maxf(0,float(lot.condition)-(.008 if traveling else .004)*share)
+			var wear:=.008 if traveling else .004
+			if lot.kind=="leather":wear+=.004*clampf(float(WorldSimulation.food.current_environment_profile().get("precipitation",.5)),0,1)
+			lot.condition=maxf(0,float(lot.condition)-wear*share)
 			lot.soil=minf(1,float(lot.soil)+.025*share)
 	for i in range(data().lots.size()-1,-1,-1):
 		if float(data().lots[i].condition)<.15:report.discarded+=float(data().lots[i].amount);data().lots.remove_at(i)
@@ -224,7 +262,7 @@ static func valid(value:Variant)->bool:
 	var trials:Variant=value.get("trials",{})
 	if not trials is Dictionary or trials.size()>CREATION_MODES.size():return false
 	for kind:Variant in trials:
-		if kind not in CREATION_MODES or not trials[kind] is Dictionary:return false
+		if kind not in CREATION_MODES or kind=="leather" or not trials[kind] is Dictionary:return false
 		var trial:Dictionary=trials[kind]
 		if not trial.has_all(["started","last_day","cycles","before","condition","sample"]):return false
 		for key:String in ["started","last_day","cycles","before","condition","sample"]:

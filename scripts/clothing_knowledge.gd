@@ -1,5 +1,27 @@
 extends RefCounted
 const METHODS := {
+  "leather_goods_patterning": {
+  "name": "Leather-Goods Patterning",
+  "requires_all": [
+    "hide_tanning",
+    "garment_pattern_cutting"
+  ],
+  "requires_any": [],
+  "rate": 1.5,
+  "cost": {
+    "Stone": 2,
+    "Timber": 3,
+    "Recovered Bone": 0.1,
+    "Flexible Leather": 0.2
+  },
+  "inputs": {
+    "Flexible Leather": 0.65,
+    "Spun Yarn": 0.1
+  },
+  "mode": "leather",
+  "observation": "Cut and fit compatible flexible leather into sewn outer garments; repair worn pieces with leather patches.",
+  "production_contract": "Paid fitting tools, flexible leather, thread and shared Logistics work create bounded garment lots. Actual issued condition affects coverage; wet exposure increases wear. Textile washing, wicking and cloth repairs do not service leather. Compatible patch repairs consume leather and thread without creating garments. Imported finished leather does not grant tanning mastery."
+},
   "knitted_loop_fabrics": {
     "name": "Knitted-Loop Fabrics",
     "requires_all": [

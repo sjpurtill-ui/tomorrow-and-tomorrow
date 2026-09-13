@@ -2,6 +2,13 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"rendered_leather_fat":{"name": "Rendered fat for leather finishing", "output": "Rendered Animal Fat", "gate": "hide_tanning", "materials": {"Recovered Animal Fat": 1.25, "Timber": 0.3, "Freshwater": 0.2}, "days": 1, "tooling": {"Clay": 2, "Stone": 1}},
+	# Selected compatible hides/plants; costs include rejected feed and finishing losses.
+	"prepared_tanning_hides":{"name": "Cleaned and prepared tanning hides", "output": "Prepared Tanning Hides", "gate": "hide_tanning", "materials": {"Raw Hides": 1.2, "Salt": 0.2, "Freshwater": 2, "Slaked Lime": 0.1}, "days": 3, "tooling": {"Stone": 3, "Timber": 4, "Clay": 2}},
+	"plant_tannin_extract":{"name": "Selected plant tannin extract", "output": "Plant Tannin Extract", "gate": "hide_tanning", "materials": {"Medicinal Plants": 2, "Freshwater": 2, "Timber": 0.5}, "days": 3, "tooling": {"Clay": 4, "Stone": 2}},
+	"vegetable_tanned_leather":{"name": "Vegetable-tanned leather", "output": "Tanned Leather", "gate": "hide_tanning", "materials": {"Prepared Tanning Hides": 1, "Plant Tannin Extract": 1, "Freshwater": 3}, "days": 12, "tooling": {"Timber": 6, "Clay": 4}},
+	"finished_flexible_leather":{"name": "Finished flexible leather", "output": "Flexible Leather", "gate": "hide_tanning", "materials": {"Tanned Leather": 1.1, "Rendered Animal Fat": 0.05, "Freshwater": 0.2}, "days": 3, "tooling": {"Timber": 3, "Stone": 2}},
+
 	# Earth mixes and woven framing require subsequent local building drying.
 	"adobe_mix":{"name": "Mold-ready adobe earth mix", "output": "Adobe Mix", "gate": "adobe_wall_construction", "materials": {"Clay": 2, "Fine Sand": 1, "Fiber Plants": 0.2, "Freshwater": 1}, "days": 1, "tooling": {"Timber": 2, "Stone": 2}},
 	"earthen_daub":{"name": "Fiber-reinforced earthen daub", "output": "Earthen Daub", "gate": "wattle_and_daub_walls", "materials": {"Clay": 1.2, "Fine Sand": 0.5, "Fiber Plants": 0.2, "Freshwater": 0.8}, "days": 1, "tooling": {"Timber": 2, "Stone": 2}},

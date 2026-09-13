@@ -192,6 +192,10 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 	var requirements=preload("res://scripts/technology_requirements.gd")
 	var population:=WorldSimulation.settlements.primary_population_exact()
 	var deficit:=maxf(0,population*1.1-clothing.count())
+	var leather_target:=int(clothing.leather_target(population))
+	if leather_target>0 and clothing.available("Flexible Leather")<leather_target:
+		var leather:=supply("Flexible Leather",leather_target,{},plan_power)
+		if not leather.is_empty():return leather
 	var figured:=figured_clothing_recommendation(plan_power)
 	if not figured.is_empty():return figured
 	var best:Dictionary={};var best_work:=INF
@@ -202,7 +206,7 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 		if spec.mode not in clothing.CREATION_MODES:
 			amount=0.0
 			for lot:Dictionary in clothing.data().lots:
-				if int(lot.ready)>int(state.elapsed_days):continue
+				if int(lot.ready)>int(state.elapsed_days) or not clothing.compatible_service(String(spec.mode),lot):continue
 				if (spec.mode in ["wash","machine_wash"] and float(lot.soil)>=.35) or (spec.mode=="wick" and not lot.wick) or (spec.mode=="repair" and float(lot.condition)>=.15 and float(lot.condition)<.6):amount+=float(lot.amount)
 			if spec.mode=="test":
 				amount=1.0 if clothing.count()-population>=.25 else 0.0

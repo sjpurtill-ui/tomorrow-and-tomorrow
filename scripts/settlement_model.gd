@@ -350,6 +350,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				for item:String in care_needs:needs[item]=maxf(float(needs.get(item,0)),float(care_needs[item]))
 				var figured:=preload("res://scripts/household_clothing.gd").figured_target(WorldSimulation.state.population_exact)
 				if figured>0:needs["Figured Cloth"]=figured
+				var leather:=preload("res://scripts/household_clothing.gd").leather_target(WorldSimulation.state.population_exact)
+				if leather>0:needs["Flexible Leather"]=leather
 				return needs))
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
