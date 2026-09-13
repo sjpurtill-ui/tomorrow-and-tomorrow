@@ -9994,6 +9994,246 @@
       "classification_status": "editorial_review",
       "rationale": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
       "scope_digest": "2972bb0c4c52fbe763812e4a9cbf97eb7d36189564c1fd4fc946f5b3f922af46"
+    },
+    {
+      "id": "rail_fastening_load_transfer",
+      "name": "Rail Fastening Load Transfer",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "3e44f7b548d50b9135530811ac0ec198f04154ba7446f7123ef50ad82c5a7831"
+    },
+    {
+      "id": "ballast_tamping",
+      "name": "Ballast Tamping",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "b63ab6237735e610a8071a1375d2cf96d68d7fad005bd43ef6e687adc5f5d6ea"
+    },
+    {
+      "id": "ballast_fines_removal",
+      "name": "Ballast Fines Removal",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "eb35238feccac296fb7d0ba1fae94b065637ac6e2f63a8ff1bab35432600538d"
+    },
+    {
+      "id": "rail_profile_restoration",
+      "name": "Rail Profile Restoration",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "8d9c3155e247f09c6627eb23c693b45e64d7cfbae92a0301184c2075f3104edf"
+    },
+    {
+      "id": "rail_thermal_stress_management",
+      "name": "Rail Thermal Stress Management",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "534e811827988c0fa13b5eab0c4be0e94920d421f15deffbb52b3b5a1584e1b4"
+    },
+    {
+      "id": "rail_internal_flaw_inspection",
+      "name": "Rail Internal Flaw Inspection",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "cd9c1231beef626ed18139e6bc70e1fd649cc3f8d57fbeeba762b6448a11d2a2"
+    },
+    {
+      "id": "rail_geometry_recording",
+      "name": "Rail Geometry Recording",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "72f5c0a0151dfe637ad41af12f70c4eb180f27441cd0c157ed0090ff634a786b"
+    },
+    {
+      "id": "wheel_rail_profile_qualification",
+      "name": "Wheel Rail Profile Qualification",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "8eef4b25bc13c3fa84c436932383c8a0a8440010b63a8c887416635165b2e74f"
+    },
+    {
+      "id": "wheel_rail_friction_management",
+      "name": "Wheel Rail Friction Management",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "ce1d901ff6e81ace4a6aee168c00effb9b62fa5ff2db39095f4b46bab77359a3"
+    },
+    {
+      "id": "wayside_bearing_heat_detection",
+      "name": "Wayside Bearing Heat Detection",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "eea9f0ae02693004cff57fb2dade24200c351547c70d660c97ec31d59e428b91"
+    },
+    {
+      "id": "wheel_impact_load_monitoring",
+      "name": "Wheel Impact Load Monitoring",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "a3a7dc601b6774d45e69fe90f083dd766936c3e64a27db6273375e4bef832da7"
+    },
+    {
+      "id": "rail_track_circuit_detection",
+      "name": "Rail Track Circuit Detection",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "95388d8a7d4a6812a532eca6553a38550915f86cd0622f78a856bac01ab580cb"
+    },
+    {
+      "id": "rail_axle_count_detection",
+      "name": "Rail Axle Count Detection",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "a95248e8713a5bac176eaeb965d6dde135cb21ac917c19a9d2f57dcf69547679"
+    },
+    {
+      "id": "turnout_position_proving",
+      "name": "Turnout Position Proving",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "aafce65acae62a8409b74ce88a5063c4c413316f4b4e76678f63f0fe4aadda77"
+    },
+    {
+      "id": "overhead_contact_tensioning",
+      "name": "Overhead Contact Tensioning",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "038f74a989664a25121d5e69923e7a1efc277ad1e99fbee4531715d64f3e6b4c"
+    },
+    {
+      "id": "pantograph_contact_qualification",
+      "name": "Pantograph Contact Qualification",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "74d846e13d0b729606174a0be6de8982bfef3754706ef23cf3c41e8ce371fdf4"
+    },
+    {
+      "id": "traction_substation_conversion",
+      "name": "Traction Substation Conversion",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "39242f31b9ca597498254fe38cc632af1d5aaa5735c93528a339dfcb4d0dd208"
+    },
+    {
+      "id": "rail_return_current_control",
+      "name": "Rail Return Current Control",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "3b62224ad62f47099702c9057affb8191f4f3debe5e3fe32ff10a04290465afe"
+    },
+    {
+      "id": "regenerative_rail_energy_reception",
+      "name": "Regenerative Rail Energy Reception",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "27df10f0240b4944703ecb029c32d2da6a29639992baa8e1f2a04dd082623dcf"
+    },
+    {
+      "id": "rail_vehicle_clearance_assessment",
+      "name": "Rail Vehicle Clearance Assessment",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "e83ea9e3bae4bba0dc2528352ffed2d97960d62856478c50acc58a278f79bc6a"
+    },
+    {
+      "id": "rail_route_axle_load_qualification",
+      "name": "Rail Route Axle Load Qualification",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "17842df53801c3d931c18ec557634ebec0fa6f82b0ef3701050adfdd410cf011"
+    },
+    {
+      "id": "platform_train_gap_assessment",
+      "name": "Platform Train Gap Assessment",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "0e8d3fc42d7e2ace037c10b3df0566a0a598fb10ee33f93c5c89d1202958c5ef"
+    },
+    {
+      "id": "train_braking_curve_supervision",
+      "name": "Train Braking Curve Supervision",
+      "horizon": "H05",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Instrumented, electronic or network-qualified railway service; later applications do not make the mechanism speculative.",
+      "scope_digest": "8516246b9062d08ca44e6a69bf8b0000208bb2233576c415de3c5d5bd1e7d62a"
+    },
+    {
+      "id": "rail_worksite_possession_control",
+      "name": "Rail Worksite Possession Control",
+      "horizon": "H04",
+      "source_file": "rail-infrastructure-service-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Industrial rail infrastructure and empirical service qualification.",
+      "scope_digest": "e2b24fd4e295dfe563488b626119df17f0eb2f74134a512e44eec5492071cdcc"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
