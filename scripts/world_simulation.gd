@@ -386,6 +386,8 @@ func validate_payload(payload:Dictionary)->String:
 		if not batches.valid(actor.state.GameState.get("food_batches",batches.empty_state())) or not batches.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization food batch records."
 		var grain=preload("res://scripts/grain_processing.gd")
 		if not grain.valid(actor.state.GameState.get("grain_processing",grain.empty_state())) or not grain.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization grain processing records."
+		var microscopy=preload("res://scripts/microscopy_samples.gd")
+		if not microscopy.valid(actor.state.GameState.get("microscopy",microscopy.empty_state())) or not microscopy.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization microscopy records."
 		var botany=preload("res://scripts/field_botany.gd")
 		if not botany.valid(actor.state.GameState.get("field_botany",botany.empty_state())) or not botany.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization field botany records."
 		if not nutrition.valid(actor.state.GameState.get("cultivation_nutrients",nutrition.empty_state())) or not nutrition.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization cultivation nutrient reserves."

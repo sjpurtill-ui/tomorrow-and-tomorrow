@@ -1,0 +1,31 @@
+# Microscopy and benign culture implementation
+
+Worker /Users/seanpurtill/Documents/Codex/tt-microscopy-culture, codex/microscopy-culture, verified base4fab0bb5dabb88c9afa7542f6e7c405780e37e00 (821 operating). Root owns14 images. Frozen botany worktree remains unchanged.
+
+Accepted14: laboratory_notebooks, experimental_protocol_publication, microscopic_cell_observation, cell_theory, cell_division_observation, tissue_histology, biological_staining, microbial_observation, microbial_isolation_methods, microbial_growth_measurement, aseptic_laboratory_practice, instrument_sterilization, cell_culture_methods, live_cell_time_lapse. Exact authored predicates copied into microscopy_knowledge.gd; not registered or counted yet.
+
+Initial microscopy_samples.gd defines bounded actual samples/lineage, finite transfer during isolation, explicit mixed fraction (not guaranteed purity), supplied-media growth on distinct dates, measured cellular/contrast/tissue frames and bounded retained records. Two focused pure-core tests pass /tmp/tt-microscopy-core.log. This is not proof of paid operation, all14 methods or gameplay integration.
+
+Remaining: paid assembly/calibration and ongoing media/stain/heat costs; Knowledge standing reservation after scholar absence and CivilianCare without recursive double reservation; single local day owner; actual FoodBatches starter withdrawal/qualification and FieldBotany specimen/viability decisions; distinctive cell-theory, growth-measurement, protocol publication/independent replication, asepsis and culture roles; deep save/provenance validation; failures and recovery; city/rival isolation; actual acquisition; graph/export and final handoff. Existing products Compound Microscopes, Specimen Slides and Laboratory Glassware can be reused. Thermometry/stains/media need explicit physical supply, not assumed from knowledge. Do not invent pathogen/species identity from generic microscopy. Instruments and analyzed/stained cultures must not become edible output.
+
+## Connected laboratory checkpoint
+
+Added microscopy_lab.gd with standing Knowledge reservation after scholar/CivilianCare shares, bounded accumulated work for small staffs, paid microscope/glassware bench and finite thermometry vessel/probe assembly, two dated fuel/water heating steps, source starter/field-sample withdrawals, paid media/contrast preparations and observations. FoodBatches owns the once-day local invocation; ordinary Knowledge capacity sees the reservation. CivilianCare's explicit raw-capacity bypass remains unchanged in effect and does not subtract laboratory staff from its own reserved share.
+
+Distinct records now include notebook/contrast/cellular observations, growth/division, isolation lineage, time lapse, cross-material cellular comparison, and printed method replication between separately sourced samples. Repeatable published protocols permit paid aseptic use of finite heated instrument capacity. Source-specific starter rejection and recent field tissue viability are connected to existing consumers. These are provisional abstract biological models; deeper outcome/provenance scrutiny and consumer tests are still required.
+
+Three focused tests pass /tmp/tt-microscopy-paid.log: finite isolation/cells, supplied distinct-day growth, and actual local starter withdrawal/media/equipment/printing with staffing conservation and repeated-day protection. Remaining: deeper nested validation, failure/recovery and state isolation/save tests, direct consumer evidence (including actual field maturity timing), explicit protocol and heat records, graph/acquisition registration and end-to-end checks. No new discovery count claimed.
+
+## Controlled evidence and consumer checks
+
+Paid blank media now tracks procedural contamination separately; source-starter decisions use recent parent observations corrected by that blank and a matched isolated growth line. Lab contamination alone does not condemn source food. Rejected starters remain unconsumed through actual FoodBatches methods. Failed protocol replication can retry new independent source pairs; reversed identical pairs do not count as new work. Printed protocols retain the procedure/replication observations. Heating observations must be on consecutive days; long gaps do not accumulate stored heat credit.
+
+Nested method/frame/protocol/tool validation rejects mismatched evidence. Field sampling cannot use a future cohort stage, and retained field vouchers record the precise recent microscopy evidence responsible for rejecting a recommendation. A real two-generation crop trial test compares an otherwise qualified result with the recent cellular/tissue rejection.
+
+/tmp/tt-microscopy-botany.log passes16/16:6 microscopy and10 existing field-botany cases. Remaining: whole-save/primary-secondary-rival lifecycle tests; direct starvation/tool-loss recovery; acquisition/catalog registration, aggregate production/input availability checks and frozen review handoff. All14 remain unregistered and uncounted at this checkpoint.
+
+## Recorded evidence correction
+
+Replication now compares retained dated frames with matching elapsed sample age, stage, preparation contrast, mass, aseptic condition and paid blank controls. Field recommendations use recorded tissue estimates and uncertainty; later latent viability or tissue changes cannot update a retained report. Thermal apparatus now retains paid calibration and consecutive heat readings in abstract game units, with uncertainty thresholds and expiring finite uses. Recalibration clears old readings; gaps clear heat credit. Nested validation rejects inadequate heat evidence.
+
+Focused suite `/tmp/tt-microscopy-recorded.log`: 8/8 passed, including latent-state mutation, mismatched/missing observations, calibration-only state, expiry and failed heat evidence. Remaining: whole-save and settlement/rival isolation, supply-loss recovery, paid acquisition and final registration/graph review. All 14 remain unregistered.

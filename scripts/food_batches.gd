@@ -80,11 +80,11 @@ static func eligible(lot:Dictionary,mode:String,day:int)->bool:
 static func starter_available(day:int)->float:
 	var amount:=0.0
 	for lot:Dictionary in data().lots:
-		if lot.kind=="starter" and int(lot.ready)<=day:amount+=float(lot.amount)
+		if lot.kind=="starter" and int(lot.ready)<=day and preload("res://scripts/microscopy_lab.gd").starter_usable(lot,day):amount+=float(lot.amount)
 	return amount
 static func consume_starter(amount:float,day:int)->void:
 	for lot:Dictionary in data().lots:
-		if lot.kind!="starter" or int(lot.ready)>day:continue
+		if lot.kind!="starter" or int(lot.ready)>day or not preload("res://scripts/microscopy_lab.gd").starter_usable(lot,day):continue
 		var used:=minf(amount,float(lot.amount));withdraw(lot,used);amount-=used
 		if amount<=.000001:break
 static func process_lot(id:String,lot:Dictionary,workers:float,report:Dictionary,day:int)->float:
@@ -141,6 +141,7 @@ static func advance(logistics:float,demand:float,traveling:bool)->Dictionary:
 	var report:={"workers":0.0,"loss":0.0,"inputs":{},"methods":{}}
 	if int(data().last_day)==day:return report
 	data().last_day=day
+	preload("res://scripts/microscopy_lab.gd").advance(traveling)
 	if traveling or not WorldSimulation.state.settlement_site_committed:data().report=report;return report
 	var workers:=maxf(0,logistics)*.2
 	workers-=Selected.process(workers,demand,report,day)
