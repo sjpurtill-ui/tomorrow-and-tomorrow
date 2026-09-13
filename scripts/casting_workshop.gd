@@ -109,4 +109,37 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 			if not p.paid.is_empty() and p.paid!=paid:return "Invalid casting charge."
 			if float(p.run.work)>0 and p.paid.is_empty():return "Missing casting charge."
 			if absf(float(job.progress_days)-completed_work(spec,p.stage)-float(p.run.work))>.000001:return "Invalid casting progress."
+		var balance_error:=validate_balance(p,spec,finished)
+		if not balance_error.is_empty():return balance_error
 	return ""
+
+## Reconstruct material state from charged stages; saved aggregate fields are not authority.
+static func validate_balance(p:Dictionary,spec:Dictionary,finished:bool)->String:
+	var pattern:=0.0;var moisture:=0.0;var evaporated:=0.0;var layers:=0
+	var pour:Dictionary={}
+	for index:int in range(int(p.stage)+(0 if finished else 1)):
+		var done:=index<int(p.stage)
+		var stage:Dictionary=spec.casting_stages[index]
+		var frame:Dictionary=p.trace[index] if done else {"paid":p.paid,"thermal":p.run}
+		if frame.paid.is_empty():continue
+		pattern+=float(stage.materials.get("EPS Casting Patterns",0))
+		moisture+=float(stage.materials.get("Freshwater",0))
+		if stage.kind=="dry":
+			var removed:=minf(moisture,float(frame.thermal.work)*.2)
+			moisture-=removed;evaporated+=removed
+		if done:
+			if stage.kind=="coat":layers+=1
+			if stage.kind=="burnout":pattern*=1.0-clampf((float(frame.thermal.peak)-700.0)/150.0,0,1)
+			if stage.kind=="pour":
+				pour={"pour_pattern_mass":pattern,"pour_moisture":moisture,"pour_temperature":float(frame.thermal.temperature)}
+				if spec.casting_kind=="lost_foam":pattern=0.0
+			if not same_quantity(frame.get("pattern_remaining"),pattern) or not same_quantity(frame.get("moisture"),moisture):return "Casting stage material balance mismatch."
+	for field:String in pour:
+		if not same_quantity(p.get(field),float(pour[field])):return "Casting pour record mismatch."
+	if pour.is_empty():
+		for field:String in ["pour_pattern_mass","pour_moisture","pour_temperature"]:
+			if p.has(field):return "Premature casting pour record."
+	if not same_quantity(p.pattern_mass,pattern) or not same_quantity(p.moisture,moisture) or not same_quantity(p.evaporated_water,evaporated) or p.shell_layers!=layers:return "Casting material balance mismatch."
+	return ""
+static func same_quantity(value:Variant,expected:float)->bool:
+	return T.number(value) and absf(float(value)-expected)<=.000001

@@ -202,3 +202,7 @@ The full project objective remains 5,000 distinct authored and operating
 discoveries, validated branching/recovery, viable full-history progression,
 civilian/military consequences and the approved imagery. This batch is only a
 portion of that unfinished objective.
+
+### Casting material provenance follow-up
+Saved casting moisture, evaporated water, pattern units, shell layers and pour readings now reconstruct from paid stage history. A changed aggregate, altered frame material state or forged pour temperature is rejected even when inspection readings and acceptance are changed to match. This does not yet replay thermal energy histories or complete EPS source qualification/calendar cooling.
+Targeted casting suite: 3/3 passed, no errors or skips, /tmp/tt-casting-balance-tests.log (963 ms test execution). Existing serialized partial molds and both actual bearing consumers still pass. No schema fields added; legitimately generated partial records remain compatible. Scope remains HELD/unregistered, canonical count unchanged. Changes confined to casting_workshop.gd, its tests and this progress document; no shared-file conflict in this follow-up.

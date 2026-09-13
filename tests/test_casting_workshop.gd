@@ -57,3 +57,23 @@ func test_worn_casting_setup_rejects_and_underpaid_stage_cannot_advance()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal(0.0)
 		assert_float(float(WorldSimulation.state.resource_stockpiles[spec.casting_reject])).is_equal(1.0)
 	)
+
+func test_casting_saved_materials_must_follow_paid_stage_history()->void:
+	WorldSimulation.scoped("casting_work",func()->void:
+		var line:=prepare("investment_copper_brackets");var spec:=I.product(line.item)
+		P.advance(WorldSimulation.military,line,.75)
+		for field:String in ["moisture","pattern_mass","evaporated_water","shell_layers"]:
+			var altered:Dictionary=line.duplicate(true)
+			altered.casting_pending[field]+=1
+			assert_str(C.validate_job(altered,spec)).is_not_empty()
+		P.advance(WorldSimulation.military,line,float(spec.days)-.75)
+		assert_str(C.validate_job(line,spec)).is_empty()
+		var altered:Dictionary=line.duplicate(true)
+		altered.casting_last.pour_temperature=1000.0
+		altered.casting_last.observation.readings=C.readings(altered.casting_last,spec)
+		altered.casting_last.accepted=C.accepted(altered.casting_last.observation.readings)
+		assert_str(C.validate_job(altered,spec)).is_not_empty()
+		altered=line.duplicate(true)
+		altered.casting_last.trace[0].pattern_remaining=0.0
+		assert_str(C.validate_job(altered,spec)).is_not_empty()
+	)
