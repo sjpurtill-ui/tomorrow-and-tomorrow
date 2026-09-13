@@ -51,3 +51,26 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 	return ""
 static func clear(job:Dictionary)->void:
 	job.erase("formed_piece");job.erase("forming_pending")
+
+static func source_key(p:Dictionary)->String:
+	return var_to_str([p.site,p.source_job,p.ordinal])
+static func validate_links(jobs:Array)->String:
+	var owners:Dictionary={};var claims:Dictionary={}
+	for job:Dictionary in jobs:
+		if job.has("formed_piece"):
+			if not bool(job.get("persistent",false)) or not valid_source(job.formed_piece):return "Invalid formed source owner."
+			var key:=source_key(job.formed_piece)
+			if owners.has(key):return "Duplicate formed source owner."
+			owners[key]=job.formed_piece
+	for job:Dictionary in jobs:
+		for field:String in ["slitting_pending","slitting_last","fracture_pending","fracture_last"]:
+			var trial:Variant=job.get(field,{})
+			if not trial is Dictionary:return "Invalid material trial."
+			if not trial.has("external_source"):continue
+			var source:Variant=trial.external_source
+			if not bool(job.get("persistent",false)) or not valid_source(source) or not source.consumed:return "Invalid consumed material source."
+			var key:=source_key(source)
+			if claims.has(key):return "A formed workpiece was consumed by multiple trials."
+			claims[key]=true
+			if owners.has(key) and owners[key]!=source:return "Source owner and consuming trial disagree."
+	return ""

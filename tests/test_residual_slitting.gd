@@ -83,6 +83,15 @@ func test_independent_formed_workpieces_drive_measured_accept_or_reject()->void:
 			assert_bool(producer.formed_piece.consumed).is_true()
 			var restored:Dictionary=bytes_to_var(var_to_bytes(line))
 			assert_str(P.validate_saved({"equipment_queue":[producer,restored]})).is_empty()
+			var revived:Dictionary=producer.duplicate(true);revived.formed_piece.consumed=false
+			assert_str(P.validate_saved({"equipment_queue":[revived,restored]})).is_not_empty()
+			var duplicated:Dictionary=restored.duplicate(true)
+			duplicated.id=int(restored.id)+100
+			duplicated.slitting_pending.source_job=duplicated.id
+			assert_str(P.validate_saved({"equipment_queue":[producer,restored,duplicated]})).is_not_empty()
+			# Consumed material remains provable if the closed producer is absent.
+			assert_str(P.validate_saved({"equipment_queue":[restored]})).is_empty()
+
 			P.advance(WorldSimulation.military,restored,1.5)
 			assert_str(W.validate_job(restored,spec)).is_empty()
 			var accepted:bool=source_id=="gently_formed_steel_bars"

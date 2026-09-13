@@ -10,9 +10,9 @@ static func precrack(cycles:int)->Dictionary:
 	var length:=.45+float(cycles)*.00005
 	return {"cycles":cycles,"minimum_force":.005,"maximum_force":.03,
 		"front":[length-.001,length,length+.001],"method":"fatigue_precrack"}
-static func sample(index:int,initial:float,g:Dictionary)->Dictionary:
+static func sample(index:int,initial:float,g:Dictionary,resistance:float=2.0)->Dictionary:
 	# A selected crack resistance sets the specimen response, not the observer.
-	var critical:=2.0*float(g.thickness)*sqrt(float(g.width))/shape(initial/float(g.width))
+	var critical:=resistance*float(g.thickness)*sqrt(float(g.width))/shape(initial/float(g.width))
 	var imposed:=float(index+1)*.01
 	var force:=imposed if imposed<=critical else maxf(.01,critical-(imposed-critical)*.6)
 	var extension:=maxf(0,imposed-critical)*2.0

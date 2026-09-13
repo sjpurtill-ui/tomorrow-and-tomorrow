@@ -431,4 +431,4 @@ static func validate_saved(payload: Dictionary) -> String:
 				if not (value is int or value is float) or not is_finite(float(value)) or float(value)<=0 or float(value)>MAX_TARGET:return "Invalid installed tooling quantity."
 		for value in job.materials.values():
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid material cost."
-	return ""
+	return Formed.validate_links(payload.get("equipment_queue",[]))
