@@ -382,38 +382,6 @@
   },
   {
     "field": "D01",
-    "id": "dough_leavening",
-    "name": "Dough Leavening",
-    "foundations": "fermentation_control,flour_sifting",
-    "mechanism": "Retain fermentation gases within a prepared dough structure",
-    "operating_requirement": "Flour, water, a maintained ferment and suitable conditions",
-    "consequence": "Change texture and processing time without increasing available food mass",
-    "status": "authored_draft",
-    "requires_all": [
-      "fermentation_control",
-      "flour_sifting"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "controlled_baking",
-    "name": "Controlled Baking",
-    "foundations": "kiln_control,dough_leavening",
-    "mechanism": "Apply a repeatable heating schedule to prepared food",
-    "operating_requirement": "Oven, fuel, monitoring and trained operators",
-    "consequence": "Produce more consistent cooked food with fuel and moisture losses",
-    "status": "authored_draft",
-    "requires_all": [
-      "kiln_control",
-      "dough_leavening"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
     "id": "edible_oil_clarification",
     "name": "Edible-Oil Clarification",
     "foundations": "seed_oil_pressing,commodity_quality_grading",
@@ -490,42 +458,6 @@
       "sealed_vessels"
     ],
     "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "food_batch_traceability",
-    "name": "Food-Batch Traceability",
-    "foundations": "seed_lot_identity,material_accounting",
-    "mechanism": "Record ingredient sources, processing batches and destinations",
-    "operating_requirement": "Identified lots and reliable handling records",
-    "consequence": "Locate implicated goods without recalling every unrelated batch",
-    "status": "authored_draft",
-    "requires_all": [
-      "seed_lot_identity",
-      "material_accounting"
-    ],
-    "requires_any": [],
-    "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
-  },
-  {
-    "field": "D01",
-    "id": "food_process_hazard_analysis",
-    "name": "Food-Process Hazard Analysis",
-    "foundations": "food_batch_traceability",
-    "mechanism": "Identify process stages where failure can create a food hazard and define monitored controls",
-    "operating_requirement": "Qualified analysis, validated controls and operating records",
-    "consequence": "Target prevention at specified failure points rather than trusting final appearance",
-    "status": "authored_draft",
-    "requires_all": [
-      "food_batch_traceability"
-    ],
-    "requires_any": [
-      [
-        "thermal_process_validation",
-        "experimental_controls"
-      ]
-    ],
     "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored."
   },
   {

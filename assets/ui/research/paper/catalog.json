@@ -4607,7 +4607,7 @@
       "domain": "infrastructure",
       "id": "thatched_roofing",
       "name": "Thatched Roofing",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fired_roof_tiles.png",
@@ -5213,9 +5213,9 @@
   "live_art_complete": false,
   "live_count": 651,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 548,
+  "queued_count": 547,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 103
+  "verified_count": 104
 }

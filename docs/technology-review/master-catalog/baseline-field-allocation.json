@@ -4421,6 +4421,265 @@
       "source_domain": "nutrition",
       "name": "Grain Malting",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_pounding_mortars",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food Pounding Mortars",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "hand_dough_forming",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Hand Dough Forming",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "dough_leavening",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Dough Leavening",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "controlled_baking",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Controlled Baking",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "fermentation_starter_cultures",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Fermentation Starter Cultures",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "cereal_dehulling",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Cereal Dehulling",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "starch_washing_separation",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Starch Washing Separation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "postharvest_loss_measurement",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Postharvest Loss Measurement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_batch_traceability",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food-Batch Traceability",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_process_hazard_analysis",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food-Process Hazard Analysis",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_acidity_measurement",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food Acidity Measurement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_water_activity_measurement",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food Water Activity Measurement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_package_leak_detection",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food Package Leak Detection",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "food_package_barrier_testing",
+      "field": "D01",
+      "source_domain": "nutrition",
+      "name": "Food Package Barrier Testing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "humidity_measurement",
+      "field": "D22",
+      "source_domain": "nutrition",
+      "name": "Humidity Measurement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "voussoir_arch_assembly",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Voussoir Arch Assembly",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "masonry_arch_centering",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Masonry Arch Centering",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "masonry_bond_patterns",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Masonry Bond Patterns",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "mortar_compatibility_assessment",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Mortar Compatibility Assessment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "masonry_repointing",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Masonry Repointing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "concrete_curing_control",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Concrete Curing Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "concrete_compaction_practice",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Concrete Compaction Practice",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "hydraulic_lime_binders",
+      "field": "D04",
+      "source_domain": "infrastructure",
+      "name": "Hydraulic-Lime Binders",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "pozzolanic_binder_blends",
+      "field": "D04",
+      "source_domain": "infrastructure",
+      "name": "Pozzolanic Binder Blends",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "portland_cement_clinker",
+      "field": "D04",
+      "source_domain": "infrastructure",
+      "name": "Portland-Cement Clinker",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rammed_earth_construction",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Rammed-Earth Construction",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "thatched_roofing",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Thatched Roofing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "fired_roof_tiles",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Fired Roof Tiles",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "shallow_foundation_assessment",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Shallow-Foundation Assessment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "foundation_settlement_monitoring",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Foundation-Settlement Monitoring",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "timber_roof_trusses",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Timber Roof Trusses",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "masonry_buttressing",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Masonry Buttressing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "vaulted_masonry_roofs",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Vaulted Masonry Roofs",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "domed_masonry_roofs",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Domed Masonry Roofs",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "masonry_moisture_management",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Masonry Moisture Management",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "concrete_mix_design",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Concrete-Mix Design",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "concrete_formwork_systems",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Concrete Formwork Systems",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

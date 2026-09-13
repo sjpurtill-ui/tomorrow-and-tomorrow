@@ -4,8 +4,8 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 
 ## Authoritative baselines
 
-- Verified canonical checkpoint `2fc24b49ff607ba2c4a6f6e1990db6e5a674e4db`: **614 discoveries, 396 learning routes, 282 civilian recipes, 17 facilities and 103 reviewed subject illustrations**. Runtime source `5eab52adbbc30af5c6437e08d61946dbaa3c51de` passed 279 combined worktree cases and 69 canonical cases; see canonical integration handoff for scope.
-- Communications and seven staple-processing discoveries are integrated. The snapshot promotes 58 previously accounted identities (48 communications, three cooking methods and seven grain techniques), adding no identities to the master total.
+- Verified canonical runtime `174f80f4fbcb3d581d6ac7a418dd252f0ed3d624`: **651 discoveries, 433 learning routes, 303 civilian recipes and 17 facilities**. All 215 combined runtime/ownership/kit/atlas cases and 68 canonical cases pass. The separate settlement visual suite passes 82 of 83; its remaining river-edge fixture is disclosed in `../../FOOD_CONSTRUCTION_INTEGRATION.md`.
+- Food and construction promote 37 previously authored identities without adding identities. The stored 651 definitions exactly match the loaded canonical snapshot. The separately reviewed thatching illustration brings verified subject art to 104; 547 remain queued for current live discoveries.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 
@@ -21,11 +21,11 @@ Implement and integrate cohesive operating systems while extending broad authore
 
 ## Current authored coverage
 
-The master expansion contains **2,442 draft identities** across all twenty-four fields. Alongside **614 integrated identities**, this accounts for **3,056 distinct IDs; 1,944 remain to author**. The pending communications bucket is empty. Integration and focused tests do not establish full-campaign pacing or completed artwork.
+The master expansion contains **2,405 draft identities** across all twenty-four fields. Alongside **651 integrated identities**, this accounts for **3,056 distinct IDs; 1,944 remain to author**. The pending communications bucket is empty. Integration and focused tests do not establish full-campaign pacing or completed artwork.
 
-462 explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
+458 explicit alternative prerequisite groups are included. Identity, normalized-name and AND/OR reachability checks find no duplicate IDs, duplicate normalized names, missing parents or unreachable draft nodes against the recorded baseline. Semantic review removed a proposed well-curb discovery already covered by Protected Wellheads; further meaning-level reconciliation remains necessary.
 
-[Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 614 integrated identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. [Historical-horizon allocation](Historical%20Horizon%20Allocation%20Review.md) now includes 960 explicit scope-based assignments; 2,096 existing identities remain unassigned. The checker keeps unassigned identities visible and invalidates classifications when a capability changes. Future-facing fields do not automatically count toward advanced/future coverage. The [energy and space follow-on review](Energy%20and%20Space%20Historical%20Horizon%20Review.md) adds 235 explicit assignments without adding discoveries.
+[Whole-catalog field allocation](Field%20Allocation%20Review.md) reconciles all 651 integrated identities with the drafts. The checker maintains per-field implemented, pending, draft and remaining counts; field targets are editorial coverage goals, not unlock gates. [Historical-horizon allocation](Historical%20Horizon%20Allocation%20Review.md) now includes 960 explicit scope-based assignments; 2,096 existing identities remain unassigned. The checker keeps unassigned identities visible and invalidates classifications when a capability changes. Future-facing fields do not automatically count toward advanced/future coverage. The [energy and space follow-on review](Energy%20and%20Space%20Historical%20Horizon%20Review.md) adds 235 explicit assignments without adding discoveries.
 
 Review sections:
 

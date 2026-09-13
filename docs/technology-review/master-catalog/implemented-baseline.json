@@ -1,5 +1,5 @@
 {
-  "source_commit": "5eab52adbbc30af5c6437e08d61946dbaa3c51de",
+  "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -14993,6 +14993,1467 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Stored reserve"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "food_pounding_mortars",
+      "name": "Food Pounding Mortars",
+      "foundations": "",
+      "mechanism": "Break or separate suitable food material through controlled impact in a fitted receptacle",
+      "operating_requirement": "Compatible pounding tools, actual food and labor",
+      "consequence": "Prepare selected foods with finite work and tool wear",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "stone_sorting",
+          "hafted_tools"
+        ]
+      ],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "food_pounding_mortars",
+        "local_demonstration": "Break or separate suitable food material through controlled impact in a fitted receptacle",
+        "operating_requirements": "Compatible pounding tools, actual food and labor",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "branching_note": "Suitable pounding equipment may follow selected stone or worked-tool traditions; the receptacle need not be stone.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [],
+        "previous_requires_any": [
+          [
+            "stone_sorting",
+            "hafted_tools"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "food_pounding_mortars",
+        "id": "food_pounding_mortars",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Food Pounding Mortars",
+            "missing_all": [],
+            "missing_any": [
+              [
+                "stone_sorting",
+                "hafted_tools"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "stone_sorting",
+              "hafted_tools"
+            ],
+            "requires_all": [],
+            "requires_any": [
+              [
+                "stone_sorting",
+                "hafted_tools"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Food Pounding Mortars",
+        "observation": "Break or separate suitable food material through controlled impact in a fitted receptacle. Compatible pounding tools, actual food and labor.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "stone_sorting",
+            "hafted_tools"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "hand_dough_forming",
+      "name": "Hand Dough Forming",
+      "foundations": "grain_milling",
+      "mechanism": "Shape a prepared dough through repeated hand or simple-tool work",
+      "operating_requirement": "Suitable ingredients, working surface and skilled labor",
+      "consequence": "Produce consistent forms for compatible cooking processes",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "hand_dough_forming",
+        "local_demonstration": "Shape a prepared dough through repeated hand or simple-tool work",
+        "operating_requirements": "Suitable ingredients, working surface and skilled labor",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "grain_milling"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "hand_dough_forming",
+        "id": "hand_dough_forming",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Hand Dough Forming",
+            "missing_all": [
+              "grain_milling"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "grain_milling"
+            ],
+            "requires_all": [
+              "grain_milling"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Hand Dough Forming",
+        "observation": "Shape a prepared dough through repeated hand or simple-tool work. Suitable ingredients, working surface and skilled labor.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "grain_milling"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "dough_leavening",
+      "name": "Dough Leavening",
+      "foundations": "fermentation_control,flour_sifting",
+      "mechanism": "Retain fermentation gases within a prepared dough structure",
+      "operating_requirement": "Flour, water, a maintained ferment and suitable conditions",
+      "consequence": "Change texture and processing time without increasing available food mass",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-water-ecology.json",
+        "previous_requires_all": [
+          "fermentation_control",
+          "flour_sifting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "dough_leavening",
+        "id": "dough_leavening",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Dough Leavening",
+            "missing_all": [
+              "fermentation_control",
+              "flour_sifting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "fermentation_control",
+              "flour_sifting"
+            ],
+            "requires_all": [
+              "fermentation_control",
+              "flour_sifting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Dough Leavening",
+        "observation": "Retain fermentation gases within a prepared dough structure. Flour, water, a maintained ferment and suitable conditions.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "fermentation_control",
+          "flour_sifting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "controlled_baking",
+      "name": "Controlled Baking",
+      "foundations": "kiln_control,dough_leavening",
+      "mechanism": "Apply a repeatable heating schedule to prepared food",
+      "operating_requirement": "Oven, fuel, monitoring and trained operators",
+      "consequence": "Produce more consistent cooked food with fuel and moisture losses",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-water-ecology.json",
+        "previous_requires_all": [
+          "kiln_control",
+          "dough_leavening"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "controlled_baking",
+        "id": "controlled_baking",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Controlled Baking",
+            "missing_all": [
+              "kiln_control",
+              "hand_dough_forming"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "kiln_control",
+              "hand_dough_forming"
+            ],
+            "requires_all": [
+              "kiln_control",
+              "hand_dough_forming"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Controlled Baking",
+        "observation": "Apply a repeatable heating schedule to prepared food. Oven, fuel, monitoring and trained operators.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "kiln_control",
+          "hand_dough_forming"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "fermentation_starter_cultures",
+      "name": "Fermentation Starter Cultures",
+      "foundations": "fermentation_control",
+      "mechanism": "Maintain and use characterized cultures for a specified food fermentation",
+      "operating_requirement": "Qualified cultures, suitable substrate, hygiene and controlled process conditions",
+      "consequence": "Improve reproducibility while contamination and culture drift remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "fermentation_starter_cultures",
+        "local_demonstration": "Maintain and use characterized cultures for a specified food fermentation",
+        "operating_requirements": "Qualified cultures, suitable substrate, hygiene and controlled process conditions",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "branching_note": "Maintained selected mixed starters can precede isolated pure cultures; empirical repeatability does not establish universal product safety.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "fermentation_control"
+        ],
+        "previous_requires_any": [
+          [
+            "microbial_isolation_methods",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "fermentation_starter_cultures",
+        "id": "fermentation_starter_cultures",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Fermentation Starter Cultures",
+            "missing_all": [
+              "fermentation_control"
+            ],
+            "missing_any": [
+              [
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "fermentation_control",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "fermentation_control"
+            ],
+            "requires_any": [
+              [
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Fermentation Starter Cultures",
+        "observation": "Maintain and use characterized cultures for a specified food fermentation. Qualified cultures, suitable substrate, hygiene and controlled process conditions.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "fermentation_control"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "cereal_dehulling",
+      "name": "Cereal Dehulling",
+      "foundations": "grain_milling",
+      "mechanism": "Separate protective grain coverings while limiting loss of edible material",
+      "operating_requirement": "Suitable grain, mechanical tools and practiced separation",
+      "consequence": "Recover an edible fraction while accounting for hulls and broken grain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "cereal_dehulling",
+        "local_demonstration": "Separate protective grain coverings while limiting loss of edible material",
+        "operating_requirements": "Suitable grain, mechanical tools and practiced separation",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "grain_milling"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "cereal_dehulling",
+        "id": "cereal_dehulling",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Cereal Dehulling",
+            "missing_all": [
+              "grain_milling"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "grain_milling"
+            ],
+            "requires_all": [
+              "grain_milling"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Cereal Dehulling",
+        "observation": "Separate protective grain coverings while limiting loss of edible material. Suitable grain, mechanical tools and practiced separation.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "grain_milling"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "starch_washing_separation",
+      "name": "Starch Washing Separation",
+      "foundations": "food_pounding_mortars,clean_water",
+      "mechanism": "Separate suitable starch-rich fractions by controlled washing and settling",
+      "operating_requirement": "Recognized feedstock, suitable water, vessels and labor",
+      "consequence": "Produce evaluated starch ingredients with water use and residue losses",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "starch_washing_separation",
+        "local_demonstration": "Separate suitable starch-rich fractions by controlled washing and settling",
+        "operating_requirements": "Recognized feedstock, suitable water, vessels and labor",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "food_pounding_mortars",
+          "clean_water"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "starch_washing_separation",
+        "id": "starch_washing_separation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Starch Washing Separation",
+            "missing_all": [
+              "food_pounding_mortars",
+              "clean_water"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "food_pounding_mortars",
+              "clean_water"
+            ],
+            "requires_all": [
+              "food_pounding_mortars",
+              "clean_water"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Starch Washing Separation",
+        "observation": "Separate suitable starch-rich fractions by controlled washing and settling. Recognized feedstock, suitable water, vessels and labor.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "food_pounding_mortars",
+          "clean_water"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "postharvest_loss_measurement",
+      "name": "Postharvest Loss Measurement",
+      "foundations": "material_accounting,statistical_sampling",
+      "mechanism": "Measure quantity and quality losses across defined handling stages with explicit boundaries",
+      "operating_requirement": "Representative observation, scales, condition assessment and records",
+      "consequence": "Target avoidable losses without counting moisture change as all lost food",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "postharvest_loss_measurement",
+        "local_demonstration": "Measure quantity and quality losses across defined handling stages with explicit boundaries",
+        "operating_requirements": "Representative observation, scales, condition assessment and records",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "material_accounting",
+          "statistical_sampling"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "postharvest_loss_measurement",
+        "id": "postharvest_loss_measurement",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Postharvest Loss Measurement",
+            "missing_all": [
+              "material_accounting",
+              "statistical_sampling"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "material_accounting",
+              "statistical_sampling"
+            ],
+            "requires_all": [
+              "material_accounting",
+              "statistical_sampling"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Postharvest Loss Measurement",
+        "observation": "Measure quantity and quality losses across defined handling stages with explicit boundaries. Representative observation, scales, condition assessment and records.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "material_accounting",
+          "statistical_sampling"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "food_batch_traceability",
+      "name": "Food-Batch Traceability",
+      "foundations": "seed_lot_identity,material_accounting",
+      "mechanism": "Record ingredient sources, processing batches and destinations",
+      "operating_requirement": "Identified lots and reliable handling records",
+      "consequence": "Locate implicated goods without recalling every unrelated batch",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-water-ecology.json",
+        "previous_requires_all": [
+          "seed_lot_identity",
+          "material_accounting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "food_batch_traceability",
+        "id": "food_batch_traceability",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Food-Batch Traceability",
+            "missing_all": [
+              "material_accounting",
+              "cargo_seals"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "material_accounting",
+              "cargo_seals"
+            ],
+            "requires_all": [
+              "material_accounting",
+              "cargo_seals"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Food-Batch Traceability",
+        "observation": "Record ingredient sources, processing batches and destinations. Identified lots and reliable handling records.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "material_accounting",
+          "cargo_seals"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "food_process_hazard_analysis",
+      "name": "Food-Process Hazard Analysis",
+      "foundations": "food_batch_traceability",
+      "mechanism": "Identify process stages where failure can create a food hazard and define monitored controls",
+      "operating_requirement": "Qualified analysis, validated controls and operating records",
+      "consequence": "Target prevention at specified failure points rather than trusting final appearance",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "thermal_process_validation",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Existing disadvantaged evidence or teaching route where applicable; local validation, competent workers, physical assets and continuing inputs remain necessary. Explicit per-method recovery contracts remain to be authored.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-water-ecology.json",
+        "previous_requires_all": [
+          "food_batch_traceability"
+        ],
+        "previous_requires_any": [
+          [
+            "thermal_process_validation",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "food_process_hazard_analysis",
+        "id": "food_process_hazard_analysis",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Food-Process Hazard Analysis",
+            "missing_all": [
+              "food_batch_traceability"
+            ],
+            "missing_any": [
+              [
+                "thermal_process_validation",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "food_batch_traceability",
+              "thermal_process_validation",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "food_batch_traceability"
+            ],
+            "requires_any": [
+              [
+                "thermal_process_validation",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Food-Process Hazard Analysis",
+        "observation": "Identify process stages where failure can create a food hazard and define monitored controls. Qualified analysis, validated controls and operating records.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "food_batch_traceability"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "thermal_process_validation",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "food_acidity_measurement",
+      "name": "Food Acidity Measurement",
+      "foundations": "standard_measures,electrochemical_cells",
+      "mechanism": "Measure a specified acidity property with calibrated food-analysis methods",
+      "operating_requirement": "Qualified testing, representative samples and retained process context",
+      "consequence": "Inform product assessment without assuming acidity alone establishes safety",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "food_acidity_measurement",
+        "local_demonstration": "Measure a specified acidity property with calibrated food-analysis methods",
+        "operating_requirements": "Qualified testing, representative samples and retained process context",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "branching_note": "This retained route uses calibrated electrochemical measurement; prior food hazard-analysis organization is unnecessary. A chemical-titration alternative still requires its own authored measurement foundation.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "standard_measures",
+          "electrochemical_cells"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "food_acidity_measurement",
+        "id": "food_acidity_measurement",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Food Acidity Measurement",
+            "missing_all": [
+              "standard_measures",
+              "electrochemical_cells"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "standard_measures",
+              "electrochemical_cells"
+            ],
+            "requires_all": [
+              "standard_measures",
+              "electrochemical_cells"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Food Acidity Measurement",
+        "observation": "Measure a specified acidity property with calibrated food-analysis methods. Qualified testing, representative samples and retained process context.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "standard_measures",
+          "electrochemical_cells"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "food_water_activity_measurement",
+      "name": "Food Water Activity Measurement",
+      "foundations": "food_process_hazard_analysis,humidity_measurement",
+      "mechanism": "Measure available water in a defined food matrix against a validated method",
+      "operating_requirement": "Qualified instrument, representative samples and competent interpretation",
+      "consequence": "Support product-specific stability assessment without substituting for all hazard controls",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "food_water_activity_measurement",
+        "local_demonstration": "Measure available water in a defined food matrix against a validated method",
+        "operating_requirements": "Qualified instrument, representative samples and competent interpretation",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "food_process_hazard_analysis",
+          "humidity_measurement"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "food_water_activity_measurement",
+        "id": "food_water_activity_measurement",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Food Water Activity Measurement",
+            "missing_all": [
+              "food_process_hazard_analysis",
+              "humidity_measurement"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "food_process_hazard_analysis",
+              "humidity_measurement"
+            ],
+            "requires_all": [
+              "food_process_hazard_analysis",
+              "humidity_measurement"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Food Water Activity Measurement",
+        "observation": "Measure available water in a defined food matrix against a validated method. Qualified instrument, representative samples and competent interpretation.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "food_process_hazard_analysis",
+          "humidity_measurement"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "food_package_leak_detection",
+      "name": "Food Package Leak Detection",
+      "foundations": "food_package_barrier_testing",
+      "mechanism": "Test finished package integrity through a qualified non-destructive or sampling method",
+      "operating_requirement": "Suitable inspection equipment, samples and rejection controls",
+      "consequence": "Find supported seal defects without certifying every possible contamination hazard",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "pressure_vessels",
+          "electrical_measurement"
+        ]
+      ],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "food_package_leak_detection",
+        "local_demonstration": "Test finished package integrity through a qualified non-destructive or sampling method",
+        "operating_requirements": "Suitable inspection equipment, samples and rejection controls",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "branching_note": "Different qualified pressure or sensing techniques can establish bounded package integrity evidence.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "food_package_barrier_testing"
+        ],
+        "previous_requires_any": [
+          [
+            "pressure_vessels",
+            "electrical_measurement"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "food_package_leak_detection",
+        "id": "food_package_leak_detection",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Food Package Leak Detection",
+            "missing_all": [
+              "food_package_barrier_testing"
+            ],
+            "missing_any": [
+              [
+                "pressure_vessels",
+                "electrical_measurement"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "food_package_barrier_testing",
+              "pressure_vessels",
+              "electrical_measurement"
+            ],
+            "requires_all": [
+              "food_package_barrier_testing"
+            ],
+            "requires_any": [
+              [
+                "pressure_vessels",
+                "electrical_measurement"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Food Package Leak Detection",
+        "observation": "Test finished package integrity through a qualified non-destructive or sampling method. Suitable inspection equipment, samples and rejection controls.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "food_package_barrier_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "pressure_vessels",
+            "electrical_measurement"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D01",
+      "id": "food_package_barrier_testing",
+      "name": "Food Package Barrier Testing",
+      "foundations": "food_process_hazard_analysis",
+      "mechanism": "Measure package transmission and compatibility against a specified food-storage requirement",
+      "operating_requirement": "Representative packages, qualified tests and product evidence",
+      "consequence": "Select suitable packaging while real sealing and handling remain necessary",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Learn from an available competent practitioner, reciprocal trial, purchased research or a qualified imported product or service. Pay actual travel, delivery, teaching and local adaptation costs. Imported seed, food, animals or equipment do not grant mastery or reproduce themselves without suitable inputs.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "food_package_barrier_testing",
+        "local_demonstration": "Measure package transmission and compatibility against a specified food-storage requirement",
+        "operating_requirements": "Representative packages, qualified tests and product evidence",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "payment or reciprocal contribution",
+          "actual travel or product delivery",
+          "finite local trials and practiced qualification",
+          "continuing feedstock, labor, utilities and maintenance"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite teaching by an available competent grower, processor or specialist; reproduce the practice under local conditions.",
+          "partnership": "Contribute actual trial resources or comparable evidence; share results with communication delays and agreed obligations.",
+          "purchased_research": "Commission a defined agronomic or process question; delivered evidence supports local trials but does not guarantee favorable local yields.",
+          "licensed_or_imported_service": "Pay for actual seed, cultures, equipment, pollination, processing or food within source capacity; repeated supplies and compatibility remain dependencies, not mastery.",
+          "reverse_engineering": "Examine a real product, instrument or usable process record with finite analysis; a finished food alone does not disclose the full biological process or establish safety."
+        }
+      },
+      "implementation_status": "Authored proposal; actual species/resource stocks, food-process outputs, finite labor and utility use, acquisition costs and AI choices remain pending.",
+      "branching_note": "Measured barrier performance may be established empirically and can cover non-polymer packages; actual compatibility and sealing remain necessary.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "food-agriculture-depth.json",
+        "previous_requires_all": [
+          "food_process_hazard_analysis"
+        ],
+        "previous_requires_any": [
+          [
+            "polymer_chain_models",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "food_package_barrier_testing",
+        "id": "food_package_barrier_testing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Food Package Barrier Testing",
+            "missing_all": [
+              "food_process_hazard_analysis"
+            ],
+            "missing_any": [
+              [
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "food_process_hazard_analysis",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "food_process_hazard_analysis"
+            ],
+            "requires_any": [
+              [
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Food Package Barrier Testing",
+        "observation": "Measure package transmission and compatibility against a specified food-storage requirement. Representative packages, qualified tests and product evidence.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "food_process_hazard_analysis"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D22",
+      "id": "humidity_measurement",
+      "name": "Humidity Measurement",
+      "foundations": "precision_thermometry,measurement_uncertainty",
+      "mechanism": "Measure atmospheric moisture through a qualified method",
+      "operating_requirement": "Suitable instruments, calibration and exposure",
+      "consequence": "Support moisture assessment with temperature and instrument limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Humidity Measurement: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "humidity_measurement",
+        "local_demonstration": "Measure atmospheric moisture through a qualified method",
+        "operating_requirements": "Suitable instruments, calibration and exposure",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Collect or receive attributable observations and validate the stated interpretation; a report or model does not reveal unobserved world state or authorize an environmental intervention."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "precision_thermometry",
+          "measurement_uncertainty"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "nutrition",
+        "dynamic": "nutrition",
+        "effects": {},
+        "food_batch_method": "humidity_measurement",
+        "id": "humidity_measurement",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Humidity Measurement",
+            "missing_all": [
+              "precision_thermometry",
+              "measurement_uncertainty"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "precision_thermometry",
+              "measurement_uncertainty"
+            ],
+            "requires_all": [
+              "precision_thermometry",
+              "measurement_uncertainty"
+            ],
+            "requires_any": [],
+            "signals": [
+              "food",
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Humidity Measurement",
+        "observation": "Measure atmospheric moisture through a qualified method. Suitable instruments, calibration and exposure.",
+        "production_contract": "Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs.",
+        "requires": [
+          "precision_thermometry",
+          "measurement_uncertainty"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "food",
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
+        "subcategory": "Daily supply"
       }
     },
     {
@@ -41280,6 +42741,2231 @@
         ],
         "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
         "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "voussoir_arch_assembly",
+      "name": "Voussoir Arch Assembly",
+      "foundations": "stone_sorting,masonry_arch_centering",
+      "mechanism": "Assemble shaped masonry units over temporary support so compression reaches suitable abutments",
+      "operating_requirement": "Compatible units, centering, qualified supports and skilled masons",
+      "consequence": "Construct load-bearing masonry arches with actual thrust and settlement limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "voussoir_arch_assembly",
+        "local_demonstration": "Assemble shaped masonry units over temporary support so compression reaches suitable abutments",
+        "operating_requirements": "Compatible units, centering, qualified supports and skilled masons",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "branching_note": "Shaped units, temporary support and competent abutments are distinct from the later bridge or roof application. Empirical qualified assembly can precede formal thrust analysis.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "stone_sorting",
+          "masonry_arch_centering"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "voussoir_arch_assembly",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "stone_sorting",
+              "masonry_arch_centering"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "stone_sorting",
+              "masonry_arch_centering"
+            ],
+            "requires_all": [
+              "stone_sorting",
+              "masonry_arch_centering"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Voussoir Arch Assembly",
+        "observation": "Assemble shaped masonry units over temporary support so compression reaches suitable abutments",
+        "production_contract": "Compatible units, centering, qualified supports and skilled masons. Construct load-bearing masonry arches with actual thrust and settlement limits. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "voussoir_stones"
+        ],
+        "requires": [
+          "stone_sorting",
+          "masonry_arch_centering"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "masonry_arch_centering",
+      "name": "Masonry Arch Centering",
+      "foundations": "standard_measures",
+      "mechanism": "Support unfinished arch masonry with qualified removable temporary works",
+      "operating_requirement": "Suitable timber framing or earth support, stable ground, labor and inspection",
+      "consequence": "Carry temporary loads until the completed arch can support its qualified duty",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "joinery",
+          "rammed_earth_construction"
+        ]
+      ],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "masonry_arch_centering",
+        "local_demonstration": "Support unfinished arch masonry with qualified removable temporary works",
+        "operating_requirements": "Suitable timber framing or earth support, stable ground, labor and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "branching_note": "Qualified timber or suitably prepared earth support can carry unfinished masonry; a modern construction-lifting discipline is not required.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "standard_measures"
+        ],
+        "previous_requires_any": [
+          [
+            "joinery",
+            "rammed_earth_construction"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "masonry_arch_centering",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "standard_measures"
+            ],
+            "missing_any": [
+              [
+                "joinery",
+                "rammed_earth_construction"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "standard_measures",
+              "joinery",
+              "rammed_earth_construction"
+            ],
+            "requires_all": [
+              "standard_measures"
+            ],
+            "requires_any": [
+              [
+                "joinery",
+                "rammed_earth_construction"
+              ]
+            ],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Masonry Arch Centering",
+        "observation": "Support unfinished arch masonry with qualified removable temporary works",
+        "production_contract": "Suitable timber framing or earth support, stable ground, labor and inspection. Carry temporary loads until the completed arch can support its qualified duty. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "arch_centering"
+        ],
+        "requires": [
+          "standard_measures"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "joinery",
+            "rammed_earth_construction"
+          ]
+        ],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "masonry_bond_patterns",
+      "name": "Masonry Bond Patterns",
+      "foundations": "lime_mortar,stone_sorting",
+      "mechanism": "Arrange masonry units and joints to distribute loads through evaluated wall bonds",
+      "operating_requirement": "Suitable units, compatible mortar, masons and inspection",
+      "consequence": "Build coherent walls while workmanship and material condition constrain capacity",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "masonry_bond_patterns",
+        "local_demonstration": "Arrange masonry units and joints to distribute loads through evaluated wall bonds",
+        "operating_requirements": "Suitable units, compatible mortar, masons and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "lime_mortar",
+          "stone_sorting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "masonry_bond_patterns",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "masonry_bond_patterns",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "lime_mortar",
+              "stone_sorting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "lime_mortar",
+              "stone_sorting"
+            ],
+            "requires_all": [
+              "lime_mortar",
+              "stone_sorting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Masonry Bond Patterns",
+        "observation": "Arrange masonry units and joints to distribute loads through evaluated wall bonds",
+        "production_contract": "Suitable units, compatible mortar, masons and inspection. Build coherent walls while workmanship and material condition constrain capacity. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "lime_mortar",
+          "stone_sorting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "mortar_compatibility_assessment",
+      "name": "Mortar Compatibility Assessment",
+      "foundations": "lime_mortar,masonry_moisture_management",
+      "mechanism": "Match repair mortar behavior to existing masonry and environmental exposure",
+      "operating_requirement": "Characterized masonry, suitable trial mixes and qualified craft assessment",
+      "consequence": "Repair joints without assuming harder mortar is always more compatible",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "mortar_compatibility_assessment",
+        "local_demonstration": "Match repair mortar behavior to existing masonry and environmental exposure",
+        "operating_requirements": "Characterized masonry, suitable trial mixes and qualified craft assessment",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "lime_mortar",
+          "masonry_moisture_management"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "mortar_compatibility_assessment",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "mortar_compatibility_assessment",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "lime_mortar",
+              "masonry_moisture_management"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "lime_mortar",
+              "masonry_moisture_management"
+            ],
+            "requires_all": [
+              "lime_mortar",
+              "masonry_moisture_management"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Mortar Compatibility Assessment",
+        "observation": "Match repair mortar behavior to existing masonry and environmental exposure",
+        "production_contract": "Characterized masonry, suitable trial mixes and qualified craft assessment. Repair joints without assuming harder mortar is always more compatible. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "lime_mortar",
+          "masonry_moisture_management"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "masonry_repointing",
+      "name": "Masonry Repointing",
+      "foundations": "mortar_compatibility_assessment",
+      "mechanism": "Renew deteriorated exposed mortar joints while preserving sound units and joint function",
+      "operating_requirement": "Compatible mortar, appropriate tools, access and trained masons",
+      "consequence": "Restore selected joint service through real labor and materials",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "masonry_repointing",
+        "local_demonstration": "Renew deteriorated exposed mortar joints while preserving sound units and joint function",
+        "operating_requirements": "Compatible mortar, appropriate tools, access and trained masons",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "mortar_compatibility_assessment"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "masonry_repointing",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "masonry_repointing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "mortar_compatibility_assessment"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "mortar_compatibility_assessment"
+            ],
+            "requires_all": [
+              "mortar_compatibility_assessment"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Masonry Repointing",
+        "observation": "Renew deteriorated exposed mortar joints while preserving sound units and joint function",
+        "production_contract": "Compatible mortar, appropriate tools, access and trained masons. Restore selected joint service through real labor and materials. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "mortar_compatibility_assessment"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "concrete_curing_control",
+      "name": "Concrete Curing Control",
+      "foundations": "concrete_mix_design",
+      "mechanism": "Maintain evaluated moisture and thermal conditions during concrete property development",
+      "operating_requirement": "Actual placed concrete, curing resources, time and inspection",
+      "consequence": "Develop supported material properties rather than granting full capacity at placement",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "concrete_curing_control",
+        "local_demonstration": "Maintain evaluated moisture and thermal conditions during concrete property development",
+        "operating_requirements": "Actual placed concrete, curing resources, time and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "concrete_mix_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "concrete_curing_control",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "concrete_curing_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "concrete_mix_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "concrete_mix_design"
+            ],
+            "requires_all": [
+              "concrete_mix_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Concrete Curing Control",
+        "observation": "Maintain evaluated moisture and thermal conditions during concrete property development",
+        "production_contract": "Actual placed concrete, curing resources, time and inspection. Develop supported material properties rather than granting full capacity at placement. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "concrete_mix_design"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "concrete_compaction_practice",
+      "name": "Concrete Compaction Practice",
+      "foundations": "concrete_mix_design",
+      "mechanism": "Consolidate placed concrete through a qualified method while avoiding harmful segregation",
+      "operating_requirement": "Compatible mix, accessible forms, equipment or craft labor and inspection",
+      "consequence": "Reduce selected voids while placement conditions still affect quality",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "concrete_formwork_systems",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "concrete_compaction_practice",
+        "local_demonstration": "Consolidate placed concrete through a qualified method while avoiding harmful segregation",
+        "operating_requirements": "Compatible mix, accessible forms, equipment or craft labor and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "branching_note": "Qualified hand or mechanical consolidation can be investigated before elaborate formwork systems; actual containment still matches the placement.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "concrete_mix_design"
+        ],
+        "previous_requires_any": [
+          [
+            "concrete_formwork_systems",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "building_method": "concrete_compaction_practice",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "concrete_compaction_practice",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "concrete_mix_design"
+            ],
+            "missing_any": [
+              [
+                "concrete_formwork_systems",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "concrete_mix_design",
+              "concrete_formwork_systems",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "concrete_mix_design"
+            ],
+            "requires_any": [
+              [
+                "concrete_formwork_systems",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Concrete Compaction Practice",
+        "observation": "Consolidate placed concrete through a qualified method while avoiding harmful segregation",
+        "production_contract": "Compatible mix, accessible forms, equipment or craft labor and inspection. Reduce selected voids while placement conditions still affect quality. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "concrete_mix_design"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "concrete_formwork_systems",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "hydraulic_lime_binders",
+      "name": "Hydraulic-Lime Binders",
+      "foundations": "lime_burning,clay_testing",
+      "mechanism": "Prepare a qualified lime-based binder that can develop strength under damp conditions",
+      "operating_requirement": "Suitable feed, controlled burning, water and material tests",
+      "consequence": "Offer binding behavior beyond air-lime systems with source and curing constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Hydraulic-Lime Binders: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "hydraulic_lime_binders",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Hydraulic-Lime Binders",
+        "local_demonstration": "Prepare a qualified lime-based binder that can develop strength under damp conditions",
+        "operating_requirements": "Suitable feed, controlled burning, water and material tests",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "lime_burning",
+          "clay_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "hydraulic_lime_binders",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "lime_burning",
+              "clay_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "lime_burning",
+              "clay_testing"
+            ],
+            "requires_all": [
+              "lime_burning",
+              "clay_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Hydraulic-Lime Binders",
+        "observation": "Prepare a qualified lime-based binder that can develop strength under damp conditions",
+        "production_contract": "Suitable feed, controlled burning, water and material tests. Offer binding behavior beyond air-lime systems with source and curing constraints. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "hydraulic_lime_binder"
+        ],
+        "requires": [
+          "lime_burning",
+          "clay_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "pozzolanic_binder_blends",
+      "name": "Pozzolanic Binder Blends",
+      "foundations": "lime_mortar,clay_testing",
+      "mechanism": "Combine a lime-bearing binder with a characterized reactive mineral fraction",
+      "operating_requirement": "Suitable mineral feed, mixing, water and curing evidence",
+      "consequence": "Alter durability and strength development without requiring one particular volcanic source",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "grain_milling",
+          "grog_preparation"
+        ]
+      ],
+      "branching_note": "Qualified mineral preparation can develop through different grinding practices; pigment making is not indispensable.",
+      "recovery": "For Pozzolanic Binder Blends: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "pozzolanic_binder_blends",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Pozzolanic Binder Blends",
+        "local_demonstration": "Combine a lime-bearing binder with a characterized reactive mineral fraction",
+        "operating_requirements": "Suitable mineral feed, mixing, water and curing evidence",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "lime_mortar",
+          "clay_testing"
+        ],
+        "previous_requires_any": [
+          [
+            "grain_milling",
+            "ore_comminution"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "pozzolanic_binder_blends",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "lime_mortar",
+              "clay_testing"
+            ],
+            "missing_any": [
+              [
+                "grain_milling",
+                "grog_preparation"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "lime_mortar",
+              "clay_testing",
+              "grain_milling",
+              "grog_preparation"
+            ],
+            "requires_all": [
+              "lime_mortar",
+              "clay_testing"
+            ],
+            "requires_any": [
+              [
+                "grain_milling",
+                "grog_preparation"
+              ]
+            ],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Pozzolanic Binder Blends",
+        "observation": "Combine a lime-bearing binder with a characterized reactive mineral fraction",
+        "production_contract": "Suitable mineral feed, mixing, water and curing evidence. Alter durability and strength development without requiring one particular volcanic source. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "pozzolanic_binder"
+        ],
+        "requires": [
+          "lime_mortar",
+          "clay_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "grain_milling",
+            "grog_preparation"
+          ]
+        ],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "portland_cement_clinker",
+      "name": "Portland-Cement Clinker",
+      "foundations": "refractory_furnaces,clay_testing,material_accounting",
+      "mechanism": "Produce and qualify a clinker-based hydraulic binder through controlled mineral processing",
+      "operating_requirement": "Suitable mineral feed, kiln, grinding, energy and emissions management",
+      "consequence": "Supply a repeatable binder at substantial heat and process-emission cost",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "branching_note": "Cement production needs controlled mineral processing and accounting, not a completed metallurgical mass-balance program.",
+      "recovery": "For Portland-Cement Clinker: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "portland_cement_clinker",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Portland-Cement Clinker",
+        "local_demonstration": "Produce and qualify a clinker-based hydraulic binder through controlled mineral processing",
+        "operating_requirements": "Suitable mineral feed, kiln, grinding, energy and emissions management",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "refractory_furnaces",
+          "clay_testing",
+          "material_accounting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "portland_cement_clinker",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "refractory_furnaces",
+              "clay_testing",
+              "material_accounting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "refractory_furnaces",
+              "clay_testing",
+              "material_accounting"
+            ],
+            "requires_all": [
+              "refractory_furnaces",
+              "clay_testing",
+              "material_accounting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Portland-Cement Clinker",
+        "observation": "Produce and qualify a clinker-based hydraulic binder through controlled mineral processing",
+        "production_contract": "Suitable mineral feed, kiln, grinding, energy and emissions management. Supply a repeatable binder at substantial heat and process-emission cost. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "cement_clinker",
+          "ground_cement",
+          "cement_gypsum"
+        ],
+        "requires": [
+          "refractory_furnaces",
+          "clay_testing",
+          "material_accounting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "rammed_earth_construction",
+      "name": "Rammed-Earth Construction",
+      "foundations": "clay_testing,structural_load_testing",
+      "mechanism": "Compact suitable earth within temporary forms to create qualified wall sections",
+      "operating_requirement": "Characterized soil, formwork, compaction labor and moisture detailing",
+      "consequence": "Build massive walls while soil variability and water exposure constrain performance",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Rammed-Earth Construction: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "rammed_earth_construction",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Rammed-Earth Construction",
+        "local_demonstration": "Compact suitable earth within temporary forms to create qualified wall sections",
+        "operating_requirements": "Characterized soil, formwork, compaction labor and moisture detailing",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "clay_testing",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "rammed_earth_construction",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "clay_testing",
+              "structural_load_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "clay_testing",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "clay_testing",
+              "structural_load_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Rammed-Earth Construction",
+        "observation": "Compact suitable earth within temporary forms to create qualified wall sections",
+        "production_contract": "Characterized soil, formwork, compaction labor and moisture detailing. Build massive walls while soil variability and water exposure constrain performance. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "earth_ramming_frames"
+        ],
+        "requires": [
+          "clay_testing",
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "thatched_roofing",
+      "name": "Thatched Roofing",
+      "foundations": "fiber_grading,framed_construction",
+      "mechanism": "Arrange plant material to shed water over a supported roof",
+      "operating_requirement": "Suitable vegetation, skilled fixing, roof pitch and periodic replacement",
+      "consequence": "Provide a light covering with fire, decay and maintenance tradeoffs",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Thatched Roofing: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "thatched_roofing",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Thatched Roofing",
+        "local_demonstration": "Arrange plant material to shed water over a supported roof",
+        "operating_requirements": "Suitable vegetation, skilled fixing, roof pitch and periodic replacement",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "fiber_grading",
+          "framed_construction"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "thatched_roofing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "fiber_grading",
+              "framed_construction"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "fiber_grading",
+              "framed_construction"
+            ],
+            "requires_all": [
+              "fiber_grading",
+              "framed_construction"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Thatched Roofing",
+        "observation": "Arrange plant material to shed water over a supported roof",
+        "production_contract": "Suitable vegetation, skilled fixing, roof pitch and periodic replacement. Provide a light covering with fire, decay and maintenance tradeoffs. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "thatch_panels"
+        ],
+        "requires": [
+          "fiber_grading",
+          "framed_construction"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "fired_roof_tiles",
+      "name": "Fired Roof Tiles",
+      "foundations": "kiln_control,clay_tempering,framed_construction",
+      "mechanism": "Form and fire overlapping ceramic units for a supported weathering surface",
+      "operating_requirement": "Suitable clay, kiln energy, roof support and fixing",
+      "consequence": "Provide replaceable roofing with weight, fracture and joint-leakage constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Fired Roof Tiles: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "fired_roof_tiles",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Fired Roof Tiles",
+        "local_demonstration": "Form and fire overlapping ceramic units for a supported weathering surface",
+        "operating_requirements": "Suitable clay, kiln energy, roof support and fixing",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "kiln_control",
+          "clay_tempering",
+          "framed_construction"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "fired_roof_tiles",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "kiln_control",
+              "clay_tempering",
+              "framed_construction"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "kiln_control",
+              "clay_tempering",
+              "framed_construction"
+            ],
+            "requires_all": [
+              "kiln_control",
+              "clay_tempering",
+              "framed_construction"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Fired Roof Tiles",
+        "observation": "Form and fire overlapping ceramic units for a supported weathering surface",
+        "production_contract": "Suitable clay, kiln energy, roof support and fixing. Provide replaceable roofing with weight, fracture and joint-leakage constraints. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "roof_tiles"
+        ],
+        "requires": [
+          "kiln_control",
+          "clay_tempering",
+          "framed_construction"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "shallow_foundation_assessment",
+      "name": "Shallow-Foundation Assessment",
+      "foundations": "soil_assays,structural_load_testing",
+      "mechanism": "Compare near-surface ground behavior with a structure's expected load",
+      "operating_requirement": "Site observations, trial evidence and drainage assessment",
+      "consequence": "Choose supported foundation arrangements without assuming uniform ground",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Shallow-Foundation Assessment: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "shallow_foundation_assessment",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Shallow-Foundation Assessment",
+        "local_demonstration": "Compare near-surface ground behavior with a structure's expected load",
+        "operating_requirements": "Site observations, trial evidence and drainage assessment",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "soil_assays",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "shallow_foundation_assessment",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "shallow_foundation_assessment",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "soil_assays",
+              "structural_load_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "soil_assays",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "soil_assays",
+              "structural_load_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Shallow-Foundation Assessment",
+        "observation": "Compare near-surface ground behavior with a structure's expected load",
+        "production_contract": "Site observations, trial evidence and drainage assessment. Choose supported foundation arrangements without assuming uniform ground. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "foundation_survey_kits"
+        ],
+        "requires": [
+          "soil_assays",
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "foundation_settlement_monitoring",
+      "name": "Foundation-Settlement Monitoring",
+      "foundations": "geometric_survey,shallow_foundation_assessment",
+      "mechanism": "Measure movement of a loaded structure relative to maintained references",
+      "operating_requirement": "Survey points, instruments and repeated observations",
+      "consequence": "Detect some progressive movement before treating early stability as permanent",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Foundation-Settlement Monitoring: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "foundation_settlement_monitoring",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Foundation-Settlement Monitoring",
+        "local_demonstration": "Measure movement of a loaded structure relative to maintained references",
+        "operating_requirements": "Survey points, instruments and repeated observations",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "geometric_survey",
+          "shallow_foundation_assessment"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "foundation_settlement_monitoring",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "foundation_settlement_monitoring",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "geometric_survey",
+              "shallow_foundation_assessment"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "geometric_survey",
+              "shallow_foundation_assessment"
+            ],
+            "requires_all": [
+              "geometric_survey",
+              "shallow_foundation_assessment"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Foundation-Settlement Monitoring",
+        "observation": "Measure movement of a loaded structure relative to maintained references",
+        "production_contract": "Survey points, instruments and repeated observations. Detect some progressive movement before treating early stability as permanent. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "settlement_gauges"
+        ],
+        "requires": [
+          "geometric_survey",
+          "shallow_foundation_assessment"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "timber_roof_trusses",
+      "name": "Timber Roof Trusses",
+      "foundations": "joinery,framed_construction,structural_load_testing",
+      "mechanism": "Carry roof loads through connected timber members with defined support paths",
+      "operating_requirement": "Graded timber, qualified joints and erection labor",
+      "consequence": "Span larger enclosed spaces while joint condition and load changes remain limiting",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Timber Roof Trusses: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "timber_roof_trusses",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Timber Roof Trusses",
+        "local_demonstration": "Carry roof loads through connected timber members with defined support paths",
+        "operating_requirements": "Graded timber, qualified joints and erection labor",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "joinery",
+          "framed_construction",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "timber_roof_trusses",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "joinery",
+              "framed_construction",
+              "structural_load_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "joinery",
+              "framed_construction",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "joinery",
+              "framed_construction",
+              "structural_load_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Timber Roof Trusses",
+        "observation": "Carry roof loads through connected timber members with defined support paths",
+        "production_contract": "Graded timber, qualified joints and erection labor. Span larger enclosed spaces while joint condition and load changes remain limiting. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "timber_trusses"
+        ],
+        "requires": [
+          "joinery",
+          "framed_construction",
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "masonry_buttressing",
+      "name": "Masonry Buttressing",
+      "foundations": "lime_mortar,structural_load_testing",
+      "mechanism": "Provide external or integrated support against masonry thrust and instability",
+      "operating_requirement": "Suitable masonry, foundations and structural assessment",
+      "consequence": "Stabilize selected forms while consuming space and material",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Masonry Buttressing: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "masonry_buttressing",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Masonry Buttressing",
+        "local_demonstration": "Provide external or integrated support against masonry thrust and instability",
+        "operating_requirements": "Suitable masonry, foundations and structural assessment",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "lime_mortar",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "masonry_buttressing",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "masonry_buttressing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "lime_mortar",
+              "structural_load_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "lime_mortar",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "lime_mortar",
+              "structural_load_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Masonry Buttressing",
+        "observation": "Provide external or integrated support against masonry thrust and instability",
+        "production_contract": "Suitable masonry, foundations and structural assessment. Stabilize selected forms while consuming space and material. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "lime_mortar",
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "vaulted_masonry_roofs",
+      "name": "Vaulted Masonry Roofs",
+      "foundations": "voussoir_arch_assembly,masonry_buttressing",
+      "mechanism": "Extend compressed masonry forms across enclosed spaces with supported thrust paths",
+      "operating_requirement": "Qualified masonry, temporary support, foundations and skilled erection",
+      "consequence": "Cover durable interior spaces with substantial weight and support demands",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Vaulted Masonry Roofs: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "vaulted_masonry_roofs",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Vaulted Masonry Roofs",
+        "local_demonstration": "Extend compressed masonry forms across enclosed spaces with supported thrust paths",
+        "operating_requirements": "Qualified masonry, temporary support, foundations and skilled erection",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "branching_note": "A masonry roof can develop from shared arch assembly without first constructing a bridge; qualified support and thrust requirements remain.",
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "voussoir_arch_assembly",
+          "masonry_buttressing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "vaulted_masonry_roofs",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "vaulted_masonry_roofs",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "voussoir_arch_assembly",
+              "masonry_buttressing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "voussoir_arch_assembly",
+              "masonry_buttressing"
+            ],
+            "requires_all": [
+              "voussoir_arch_assembly",
+              "masonry_buttressing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Vaulted Masonry Roofs",
+        "observation": "Extend compressed masonry forms across enclosed spaces with supported thrust paths",
+        "production_contract": "Qualified masonry, temporary support, foundations and skilled erection. Cover durable interior spaces with substantial weight and support demands. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "voussoir_arch_assembly",
+          "masonry_buttressing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "domed_masonry_roofs",
+      "name": "Domed Masonry Roofs",
+      "foundations": "vaulted_masonry_roofs,geometric_survey",
+      "mechanism": "Carry enclosure loads through a curved shell with assessed supports",
+      "operating_requirement": "Suitable geometry, masonry, temporary works and structural review",
+      "consequence": "Enclose broad spaces while cracking and support movement threaten stability",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Domed Masonry Roofs: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "domed_masonry_roofs",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Domed Masonry Roofs",
+        "local_demonstration": "Carry enclosure loads through a curved shell with assessed supports",
+        "operating_requirements": "Suitable geometry, masonry, temporary works and structural review",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "vaulted_masonry_roofs",
+          "geometric_survey"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "domed_masonry_roofs",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "domed_masonry_roofs",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "vaulted_masonry_roofs",
+              "geometric_survey"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "vaulted_masonry_roofs",
+              "geometric_survey"
+            ],
+            "requires_all": [
+              "vaulted_masonry_roofs",
+              "geometric_survey"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Domed Masonry Roofs",
+        "observation": "Carry enclosure loads through a curved shell with assessed supports",
+        "production_contract": "Suitable geometry, masonry, temporary works and structural review. Enclose broad spaces while cracking and support movement threaten stability. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [],
+        "requires": [
+          "vaulted_masonry_roofs",
+          "geometric_survey"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "masonry_moisture_management",
+      "name": "Masonry Moisture Management",
+      "foundations": "lime_mortar,drainage",
+      "mechanism": "Control water entry, movement and drying in a compatible masonry assembly",
+      "operating_requirement": "Sound details, suitable materials, ventilation and maintenance",
+      "consequence": "Reduce selected decay while trapped moisture or incompatible repairs can worsen it",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Masonry Moisture Management: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "masonry_moisture_management",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Masonry Moisture Management",
+        "local_demonstration": "Control water entry, movement and drying in a compatible masonry assembly",
+        "operating_requirements": "Sound details, suitable materials, ventilation and maintenance",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "lime_mortar",
+          "drainage"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "building_method": "masonry_moisture_management",
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "masonry_moisture_management",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "lime_mortar",
+              "drainage"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "lime_mortar",
+              "drainage"
+            ],
+            "requires_all": [
+              "lime_mortar",
+              "drainage"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Masonry Moisture Management",
+        "observation": "Control water entry, movement and drying in a compatible masonry assembly",
+        "production_contract": "Sound details, suitable materials, ventilation and maintenance. Reduce selected decay while trapped moisture or incompatible repairs can worsen it. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "masonry_drainage_beds"
+        ],
+        "requires": [
+          "lime_mortar",
+          "drainage"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "concrete_mix_design",
+      "name": "Concrete-Mix Design",
+      "foundations": "standard_measures,structural_load_testing",
+      "mechanism": "Qualify aggregate, binder and water proportions for a declared placing and service condition",
+      "operating_requirement": "Characterized materials, controlled mixing, curing and test evidence",
+      "consequence": "Produce supported concrete properties rather than assuming every mixture is equivalent",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "hydraulic_lime_binders",
+          "pozzolanic_binder_blends",
+          "portland_cement_clinker"
+        ]
+      ],
+      "branching_note": "Qualified binder routes reconverge on concrete mix practice; Portland cement is not the origin of all concrete.",
+      "recovery": "For Concrete-Mix Design: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "concrete_mix_design",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Concrete-Mix Design",
+        "local_demonstration": "Qualify aggregate, binder and water proportions for a declared placing and service condition",
+        "operating_requirements": "Characterized materials, controlled mixing, curing and test evidence",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "standard_measures",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": [
+          [
+            "hydraulic_lime_binders",
+            "pozzolanic_binder_blends",
+            "portland_cement_clinker"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "concrete_mix_design",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "standard_measures",
+              "structural_load_testing"
+            ],
+            "missing_any": [
+              [
+                "hydraulic_lime_binders",
+                "pozzolanic_binder_blends",
+                "portland_cement_clinker"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "standard_measures",
+              "structural_load_testing",
+              "hydraulic_lime_binders",
+              "pozzolanic_binder_blends",
+              "portland_cement_clinker"
+            ],
+            "requires_all": [
+              "standard_measures",
+              "structural_load_testing"
+            ],
+            "requires_any": [
+              [
+                "hydraulic_lime_binders",
+                "pozzolanic_binder_blends",
+                "portland_cement_clinker"
+              ]
+            ],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Concrete-Mix Design",
+        "observation": "Qualify aggregate, binder and water proportions for a declared placing and service condition",
+        "production_contract": "Characterized materials, controlled mixing, curing and test evidence. Produce supported concrete properties rather than assuming every mixture is equivalent. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "hydraulic_concrete",
+          "pozzolanic_concrete",
+          "portland_concrete"
+        ],
+        "requires": [
+          "standard_measures",
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "hydraulic_lime_binders",
+            "pozzolanic_binder_blends",
+            "portland_cement_clinker"
+          ]
+        ],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "concrete_formwork_systems",
+      "name": "Concrete Formwork Systems",
+      "foundations": "joinery,concrete_mix_design",
+      "mechanism": "Support freshly placed material in a controlled geometry until it can carry required loads",
+      "operating_requirement": "Qualified forms, bracing, labor and release criteria",
+      "consequence": "Build repeatable shapes while temporary-work failure can precede finished strength",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Concrete Formwork Systems: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "concrete_formwork_systems",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Concrete Formwork Systems",
+        "local_demonstration": "Support freshly placed material in a controlled geometry until it can carry required loads",
+        "operating_requirements": "Qualified forms, bracing, labor and release criteria",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "174f80f4fbcb3d581d6ac7a418dd252f0ed3d624",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "joinery",
+          "concrete_mix_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "concrete_formwork_systems",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local construction trials",
+            "missing_all": [
+              "joinery",
+              "concrete_mix_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "joinery",
+              "concrete_mix_design"
+            ],
+            "requires_all": [
+              "joinery",
+              "concrete_mix_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Concrete Formwork Systems",
+        "observation": "Support freshly placed material in a controlled geometry until it can carry required loads",
+        "production_contract": "Qualified forms, bracing, labor and release criteria. Build repeatable shapes while temporary-work failure can precede finished strength. Implementation uses paid workshop materials and the existing settlement construction and maintenance owners.",
+        "production_items": [
+          "building_formwork"
+        ],
+        "requires": [
+          "joinery",
+          "concrete_mix_design"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
       }
     },
     {

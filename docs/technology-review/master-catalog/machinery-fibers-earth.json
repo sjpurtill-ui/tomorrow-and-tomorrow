@@ -4147,37 +4147,6 @@
   },
   {
     "field": "D22",
-    "id": "humidity_measurement",
-    "name": "Humidity Measurement",
-    "foundations": "precision_thermometry,measurement_uncertainty",
-    "mechanism": "Measure atmospheric moisture through a qualified method",
-    "operating_requirement": "Suitable instruments, calibration and exposure",
-    "consequence": "Support moisture assessment with temperature and instrument limits",
-    "status": "authored_draft",
-    "requires_all": [
-      "precision_thermometry",
-      "measurement_uncertainty"
-    ],
-    "requires_any": [],
-    "recovery": "For Humidity Measurement: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "humidity_measurement",
-      "local_demonstration": "Measure atmospheric moisture through a qualified method",
-      "operating_requirements": "Suitable instruments, calibration and exposure",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Collect or receive attributable observations and validate the stated interpretation; a report or model does not reveal unobserved world state or authorize an environmental intervention."
-    }
-  },
-  {
-    "field": "D22",
     "id": "atmospheric_profile_sounding",
     "name": "Atmospheric-Profile Sounding",
     "foundations": "wind_profile_observation,barometric_observation",

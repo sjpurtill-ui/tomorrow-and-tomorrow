@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 614,
+  "verified_baseline_discoveries": 651,
   "pending_communications": 0,
-  "new_authored_drafts": 2442,
+  "new_authored_drafts": 2405,
   "distinct_accounted_identities": 3056,
   "remaining_identities_to_author": 1944,
   "target": 5000,
@@ -2298,9 +2298,9 @@
         "target": 600,
         "assigned": 23,
         "target_slots_not_yet_assigned": 577,
-        "implemented_baseline": 3,
+        "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 20
+        "authored_drafts": 18
       },
       {
         "id": "H02",
@@ -2308,9 +2308,9 @@
         "target": 700,
         "assigned": 69,
         "target_slots_not_yet_assigned": 631,
-        "implemented_baseline": 4,
+        "implemented_baseline": 8,
         "pending_communications": 0,
-        "authored_drafts": 65
+        "authored_drafts": 61
       },
       {
         "id": "H03",
@@ -2318,9 +2318,9 @@
         "target": 800,
         "assigned": 202,
         "target_slots_not_yet_assigned": 598,
-        "implemented_baseline": 0,
+        "implemented_baseline": 1,
         "pending_communications": 0,
-        "authored_drafts": 202
+        "authored_drafts": 201
       },
       {
         "id": "H04",
@@ -2328,9 +2328,9 @@
         "target": 700,
         "assigned": 177,
         "target_slots_not_yet_assigned": 523,
-        "implemented_baseline": 3,
+        "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 174
+        "authored_drafts": 172
       },
       {
         "id": "H05",
@@ -2338,9 +2338,9 @@
         "target": 900,
         "assigned": 450,
         "target_slots_not_yet_assigned": 450,
-        "implemented_baseline": 0,
+        "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 450
+        "authored_drafts": 445
       },
       {
         "id": "H06",
@@ -2355,17 +2355,17 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 467,
+  "branch_alternatives": 458,
   "draft_reachability_rounds": 13,
   "draft_fields": {
-    "D01": 108,
+    "D01": 94,
     "D02": 109,
     "D03": 97,
-    "D04": 119,
+    "D04": 116,
     "D05": 156,
     "D06": 62,
     "D07": 60,
-    "D08": 116,
+    "D08": 97,
     "D09": 60,
     "D10": 61,
     "D11": 60,
@@ -2379,7 +2379,7 @@
     "D19": 95,
     "D20": 113,
     "D21": 180,
-    "D22": 60,
+    "D22": 59,
     "D23": 135,
     "D24": 56
   },
@@ -2388,9 +2388,9 @@
       "id": "D01",
       "name": "Food and agriculture",
       "target": 280,
-      "implemented_baseline": 53,
+      "implemented_baseline": 67,
       "pending_communications": 0,
-      "authored_drafts": 108,
+      "authored_drafts": 94,
       "accounted": 161,
       "remaining_to_target": 119
     },
@@ -2418,9 +2418,9 @@
       "id": "D04",
       "name": "Materials and chemical processes",
       "target": 300,
-      "implemented_baseline": 67,
+      "implemented_baseline": 70,
       "pending_communications": 0,
-      "authored_drafts": 119,
+      "authored_drafts": 116,
       "accounted": 186,
       "remaining_to_target": 114
     },
@@ -2458,9 +2458,9 @@
       "id": "D08",
       "name": "Buildings and settlements",
       "target": 220,
-      "implemented_baseline": 13,
+      "implemented_baseline": 32,
       "pending_communications": 0,
-      "authored_drafts": 116,
+      "authored_drafts": 97,
       "accounted": 129,
       "remaining_to_target": 91
     },
@@ -2598,9 +2598,9 @@
       "id": "D22",
       "name": "Earth systems and resources",
       "target": 160,
-      "implemented_baseline": 16,
+      "implemented_baseline": 17,
       "pending_communications": 0,
-      "authored_drafts": 60,
+      "authored_drafts": 59,
       "accounted": 76,
       "remaining_to_target": 84
     },
