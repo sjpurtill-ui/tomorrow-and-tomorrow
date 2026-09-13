@@ -34,7 +34,7 @@ static func start(plot:Dictionary,method:String,stock:Dictionary,known:Array,ado
  if not is_finite(available) or available<1:return {"ok":false,"reason":"A prepared component batch must be delivered."}
  # Reserve by consuming at start; interruption cannot duplicate installed inputs.
  stock[component]=available-1.0
- plot.fabric_job={"method":method,"component":component,"paid":1.0,"work":0.0,"required_work":WORK[method],"started_day":day,"last_day":day,"state":"assembling"}
+ plot.fabric_job={"method":method,"component":component,"paid":1.0,"work":0.0,"required_work":WORK[method],"started_day":day,"last_day":day,"state":"assembling","assembly":preload("res://scripts/settlement_fabric_response.gd").prepare(method,float(plot.get("condition",.8)))}
  return {"ok":true}
 
 static func advance(plot:Dictionary,work:float,day:int)->float:
@@ -54,6 +54,7 @@ static func valid_job(value:Variant)->bool:
  if value.is_empty():return true
  var method:String=String(value.get("method",""))
  if not COMPONENTS.has(method) or value.get("component")!=COMPONENTS[method]:return false
+ if not preload("res://scripts/settlement_fabric_response.gd").valid(value.get("assembly"),method):return false
  for key:String in ["paid","work","required_work","started_day","last_day"]:
   if not value.get(key) is float and not value.get(key) is int:return false
   if not is_finite(float(value[key])):return false
@@ -125,7 +126,10 @@ static func advance_trial(plot:Dictionary,work:float,day:int)->float:
  var used:float=minf(work,1.0-float(job.trial.work))
  job.trial.work=float(job.trial.work)+used
  job.trial.last_day=day
- if float(job.trial.work)>=1.0:job.state="awaiting_observations"
+ if float(job.trial.work)>=1.0:
+  job.state="awaiting_observations"
+  var observed:Dictionary=preload("res://scripts/settlement_fabric_response.gd").observe(job.assembly)
+  job.trial["result"]=preload("res://scripts/settlement_fabric_inspection.gd").classify(String(job.method),observed)
  return used
 
 static func valid_trial(value:Variant,method:String)->bool:
