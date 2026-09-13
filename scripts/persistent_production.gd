@@ -3,6 +3,7 @@ extends RefCounted
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
 const Machine=preload("res://scripts/machine_workshop.gd")
+const Fracture=preload("res://scripts/fracture_workshop.gd")
 const Slitting=preload("res://scripts/slitting_workshop.gd")
 const Induction=preload("res://scripts/induction_workshop.gd")
 const Metallurgy=preload("res://scripts/metallurgy_workshop.gd")
@@ -148,6 +149,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		Exposure.clear(job)
 		Abrasive.clear(job)
 		Machine.clear(job)
+		Fracture.clear(job)
 		Slitting.clear(job)
 		Induction.clear(job)
 		Metallurgy.clear(job)
@@ -176,6 +178,9 @@ static func state(host: Node, job: Dictionary) -> String:
 	if Industry.product(String(job.item)).has("abrasive_candidate") and not Abrasive.capacity():return "Abrasive lot register full"
 	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
 	var inspection:Dictionary=Industry.product(String(job.item))
+	if inspection.get("fracture_trial",false) and job.has("fracture_pending"):
+		if job.fracture_pending.site!=WorldSimulation.state.resource_settlement_id:return "Specimen belongs to another store"
+		return "Working"
 	if inspection.has("slitting_curvature") and job.has("slitting_pending"):
 		if job.slitting_pending.site!=WorldSimulation.state.resource_settlement_id:return "Specimen belongs to another store"
 		return "Working"
@@ -240,6 +245,9 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.get("fracture_trial",false):
+		Fracture.advance(job,exposure_spec,work)
+		return
 	if exposure_spec.has("slitting_curvature"):
 		Slitting.advance(job,exposure_spec,work)
 		return
@@ -363,6 +371,8 @@ static func validate_saved(payload: Dictionary) -> String:
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
 		var machine_error:=Machine.validate_job(job,Industry.product(String(job.item)))
 		if not machine_error.is_empty():return machine_error
+		var fracture_error:=Fracture.validate_job(job,Industry.product(String(job.item)))
+		if not fracture_error.is_empty():return fracture_error
 		var slitting_error:=Slitting.validate_job(job,Industry.product(String(job.item)))
 		if not slitting_error.is_empty():return slitting_error
 		var induction_error:=Induction.validate_job(job,Industry.product(String(job.item)))
