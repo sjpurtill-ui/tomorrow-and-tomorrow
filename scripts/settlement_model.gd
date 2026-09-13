@@ -21,6 +21,7 @@ const SETTLEMENT_NAME_ROOTS:=["Alder","Ash","Bright","Cairn","Dawn","Deep","Elm"
 const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","haven","hearth","holm","landing","march","meadow","rest","ridge","stead","vale","watch","wick"]
 
 const CITY_RESOURCE_DEFAULTS:={
+	"household_clothing":{"tools":{},"lots":[],"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
 	"grain_processing":{"stocks":{"grain":0.0,"clean":0.0,"tested":0.0,"dry":0.0,"flour":0.0,"fine":0.0,"bran":0.0,"malt":0.0},"tools":{},"batches":[],"last_day":-1,"report":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},

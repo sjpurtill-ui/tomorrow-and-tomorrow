@@ -611,6 +611,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var environment:Dictionary=_food_system().current_environment_profile()
 	var environmental_hazards:Dictionary=environment.get("hazards",{})
 	var disease_pressure:=clampf(float(environmental_hazards.get("disease",0.0)),0.0,1.0)
+	var clothing:Dictionary=food_result.get("clothing",{})
 	var cold_pressure:=clampf(float(environmental_hazards.get("cold",0.0)),0.0,1.0)
 	var heat_pressure:=clampf(float(environmental_hazards.get("heat",0.0)),0.0,1.0)
 	var storm_pressure:=clampf(float(environmental_hazards.get("storm",0.0)),0.0,1.0)
@@ -648,14 +649,12 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if traveling:
 		travel_health_penalty=0.08+maxf(0.0,0.62-housing_ratio)*0.30+minf(0.24,WorldSimulation.state.consecutive_food_shortage_days*0.009)
 	var process_health_cost:=(WorldSimulation.discovery.effect("health_risk")+WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity
-	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
+	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024*(1.0-float(clothing.get("cold",0)))+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
 	var exchange_pressure:Dictionary=preload("res://scripts/society_exchange.gd").pressure()
 	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,0.022)
 	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
 	WorldSimulation.state.simulation_metrics["water_days"]=float(WorldSimulation.state.water_metrics.get("days",0.0))
-	WorldSimulation.state.simulation_metrics["environment_profile"]=environment.duplicate(true)
-	WorldSimulation.state.simulation_metrics["environmental_health_cost"]=environmental_health_cost
 
 	var admin_coverage := clampf(stewards/maxf(1.0,population*0.035),0.0,1.25)
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
@@ -719,7 +718,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"Natural causes":WorldSimulation.state.current_natural_mortality_rate(housing_ratio),
 		"Hunger":0.0,
 		"Illness":maxf(0.0,0.50-WorldSimulation.state.population_health)*0.055*maxf(0.35,1.0+WorldSimulation.discovery.effect("disease_exposure")-WorldSimulation.discovery.effect("sanitation"))+disease_pressure*maxf(0.10,1.0-WorldSimulation.discovery.effect("sanitation"))*0.005,
-		"Exposure":maxf(0.0,0.68-housing_ratio)*(0.24 if traveling else 0.040)+(cold_pressure*0.018+heat_pressure*0.012+storm_pressure*0.006)*maxf(0.0,0.92-housing_ratio),
+		"Exposure":maxf(0.0,0.68-housing_ratio)*(0.24 if traveling else 0.040)+(cold_pressure*0.018*(1.0-float(clothing.get("cold",0)))+heat_pressure*0.012+storm_pressure*0.006*(1.0-float(clothing.get("storm",0))))*maxf(0.0,0.92-housing_ratio),
 		"Travel exhaustion":0.0,
 		"Insecurity":maxf(0.0,0.30-security)*0.025
 	}
@@ -778,6 +777,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 
 	var settlement_score := clampf(float(WorldSimulation.state.settlement_completed.size())/8.0,0.0,1.0)
 	WorldSimulation.state.simulation_metrics = {
+		"clothing_coverage":clothing.duplicate(),"environment_profile":environment.duplicate(true),"environmental_health_cost":environmental_health_cost,
 		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"housing_capacity":WorldSimulation.state.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
 		"material_capacity":material_capacity,"logistics":logistics,"security":security,"ecology":ecology,"legitimacy":legitimacy,
 		"governance_administrative_load":administrative_load,"governance_policy_churn":policy_churn,"governance_council_support":council_support,"governance_active_policies":int(governance.active_policy_count),

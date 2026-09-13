@@ -77,8 +77,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var grain:=Grain.advance(float(nutrient_report.get("cultivated_harvest",0)),maxf(0,logistics-float(meal_plan.workers)),float(demand_breakdown.total),traveling)
 	WorldSimulation.state.food_stocks["Dry staples"]=maxf(0,float(WorldSimulation.state.food_stocks.get("Dry staples",0))-float(grain.routed))
 	var batches:=Batches.advance(maxf(0,logistics-float(meal_plan.workers)-float(grain.workers)),float(demand_breakdown.total),traveling)
+	var clothing:=preload("res://scripts/household_clothing.gd").advance(maxf(0,logistics-float(meal_plan.workers)-float(grain.workers)-float(batches.workers)),WorldSimulation.state.population_exact,traveling)
 	var preservation_inputs:Dictionary={}
-	var preserved:=_preserve(maxf(0.0,logistics-float(meal_plan.workers)-float(grain.workers)-float(batches.workers)),makers,traveling,preservation_inputs)
+	var preserved:=_preserve(maxf(0.0,logistics-float(meal_plan.workers)-float(grain.workers)-float(batches.workers)-float(clothing.workers)),makers,traveling,preservation_inputs)
 	var canned:Dictionary=preload("res://scripts/canning_preservation.gd").preserve(float(demand_breakdown.total),traveling)
 	for food_type:String in canned:preserved[food_type]=float(preserved.get(food_type,0.0))+float(canned[food_type])
 	var spoilage:=_spoil(traveling)
@@ -125,6 +126,8 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var forecast_30:Dictionary=milestones[30]
 	var weather_factor:=_weather_yield_factor(_environment_mix(),WorldSimulation.state.elapsed_days)
 	var result:={
+		"clothing":clothing.coverage,
+		"clothing_workers":clothing.workers,
 		"cultivation_base_harvest":float(nutrient_report.get("base_harvest",0)),
 		"cultivation_nutrient_inputs":nutrient_report.get("inputs",{}).duplicate(),
 		"cultivation_nutrient_bonus":float(nutrient_report.get("bonus",0)),
