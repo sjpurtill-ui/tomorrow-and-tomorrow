@@ -275,3 +275,15 @@ static func choose_retrofit(plots:Array,stock:Dictionary,known:Array,adoption:Di
    if score>best_score:
     best_score=score;best={"plot_id":int(plot.id),"method":method}
  return best
+
+static func supports_further_loading(plot:Dictionary)->bool:
+ # Negative retained evidence must affect construction decisions. Absence of
+ # these optional records retains legacy rules; a passed test is not a permit
+ # for arbitrary additional storeys or loads.
+ for method:String in ["timber_post_beam_connections","timber_splice_connections","timber_lateral_bracing","timber_moisture_movement_design","building_wind_load_assessment"]:
+  var failed:Dictionary=plot.get("fabric_failed",{}).get(method,{})
+  if not failed.is_empty():return false
+  var observation:Dictionary=service_observation(plot,method)
+  if observation.is_empty():continue
+  if preload("res://scripts/settlement_fabric_inspection.gd").classify(method,observation).state!="accepted":return false
+ return true

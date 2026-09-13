@@ -106,6 +106,12 @@ func _initialize()->void:
   assert(F.resolve(weak,7).state!="accepted")
   assert(weak.get("fabric_components",{}).is_empty())
   assert(F.valid_plot_records(weak))
+  if method in ["timber_post_beam_connections","timber_splice_connections","timber_lateral_bracing","timber_moisture_movement_design","building_wind_load_assessment"]:
+   assert(not F.supports_further_loading(weak))
+   ready.condition=1.0
+   assert(F.supports_further_loading(ready))
+   ready.condition=.1
+   assert(not F.supports_further_loading(ready))
   restored.fabric_job.paid=0
   assert(not F.valid_job(restored.fabric_job))
  print("PASS: ten methods; payment, duplicate start, work, same-day guard, serialization, inspection hold, inherited form and malformed job")

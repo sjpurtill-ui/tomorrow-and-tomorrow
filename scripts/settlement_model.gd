@@ -2357,6 +2357,7 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) not in ["active","stressed"]: continue
 		if String(plot.get("land_use","")) in ["temporary_encampment","water","waste","pasture","vacant","ruin"]: continue
+		if not preload("res://scripts/settlement_fabric_operations.gd").supports_further_loading(plot):continue
 		var current_tier:=int(plot.get("fabric_generation",0))
 		if current_tier>=target_tier: continue
 		var next_tier:=current_tier+1
@@ -2379,6 +2380,7 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 
 func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->void:
 	var chosen_plot:Dictionary=chosen.plot
+	if not preload("res://scripts/settlement_fabric_operations.gd").supports_further_loading(chosen_plot):return
 	var next_tier:int=chosen.next_tier
 	var cost:Dictionary=chosen.cost
 	for resource_name in cost:
