@@ -658,16 +658,16 @@ func test_natural_rutile_occurrence_can_be_recognized_and_worked()->void:
 		resource.process_day({"origin":Vector3.ZERO,"settled":false,"tools":1.0})
 		assert_float(float(found.lifetime_extracted)).is_greater(0.0)
 		assert_float(float(found.remaining)+float(found.lifetime_extracted)).is_equal_approx(initial,.00001))
-func test_coordination_and_tacticity_route_produces_usable_wash_bottle_closures()->void:
+func test_coordination_route_requires_catalyst_and_cannot_self_certify_tacticity()->void:
 	WorldSimulation.scoped("polymers",func()->void:
 		prepare();var s=WorldSimulation.state
 		Ops.data().last_day=0;Ops.data().services={"electricity":1000.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
 		for resource:String in ["Polymer-Grade Ethene","Hydrogen Chloride","Anhydrous Aluminum Chloride","Refined Aluminum","Rutile Ore","Charcoal","Chlorine","Crude Propene","Quicklime","Toluene","Methanol","Caustic Soda","LDPE Wash Bottle Bodies"]:s.resource_stockpiles[resource]=100.0
-		var items:Array[String]=["catalyst_ethyl_chloride","ethylaluminum_cocatalyst","purified_titanium_chloride","reduced_titanium_catalyst","purified_propene_feed","coordination_polypropylene","spectrally_qualified_polypropylene","polypropylene_molding_grade","injected_pp_wash_closures","pp_closure_wash_bottles"]
-		var targets:Array[int]=[2,1,2,1,5,4,3,2,1,1]
+		var items:Array[String]=["catalyst_ethyl_chloride","ethylaluminum_cocatalyst","purified_titanium_chloride","reduced_titanium_catalyst","purified_propene_feed","coordination_polypropylene"]
+		var targets:Array[int]=[2,1,2,1,5,4]
 		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
-		assert_float(float(s.resource_stockpiles["Water Wash Bottles"])).is_equal(1.0)
-		assert_float(float(s.resource_stockpiles["PP Wash Bottle Closures"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles.get("Tacticity-Qualified Polypropylene",0))).is_equal(0.0)
+		assert_bool(WorldSimulation.military.start_production_line("spectrally_qualified_polypropylene",1).get("ok",false)).is_false()
 		assert_float(float(s.resource_stockpiles["Titanium Trichloride Catalyst"])).is_equal_approx(.92,.000001)
 		assert_float(float(s.resource_stockpiles["Ethylaluminum Cocatalyst"])).is_equal_approx(.96,.000001)
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(2.0))

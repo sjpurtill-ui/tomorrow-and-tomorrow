@@ -4,9 +4,9 @@ const WORK=4.0
 static func record(sample_id:String)->Dictionary:
 	return WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{}).get(sample_id,{})
 static func supported(sample:Dictionary)->bool:
-	return sample.get("response_model",{}).get("kind")in ["synthetic_copolymer_v1","synthetic_linear_peg_v1"]
+	return sample.get("response_model",{}).get("kind")in ["synthetic_copolymer_v1","synthetic_linear_peg_v1","synthetic_pp_triads_v1"]
 static func required_work(sample:Dictionary)->float:
-	return 6.0 if sample.get("recipe")=="traceable_peg_batch" else WORK
+	return 6.0 if sample.get("recipe") in ["traceable_peg_batch","traceable_pp_batch"] else WORK
 static func start(sample_id:String)->Dictionary:
 	var sample:=record(sample_id)
 	if sample.is_empty() or sample.status!="unmeasured":return {"error":"Choose an unmeasured prepared sample."}
@@ -18,7 +18,7 @@ static func start(sample_id:String)->Dictionary:
 	var costs:Dictionary={String(spec.output):1.0,"Paper":.1,"Freshwater":.2}
 	var calibration=load("res://scripts/nmr_calibration.gd")
 	var conditioned:bool=calibration.usable() and WorldSimulation.discovery.adoption("polymer_solution_processing")>=.1
-	if sample.recipe=="traceable_peg_batch" and not conditioned:return {"error":"Quantitative PEG acquisition requires the calibrated solution method."}
+	if sample.recipe in ["traceable_peg_batch","traceable_pp_batch"] and not conditioned:return {"error":"Quantitative polymer acquisition requires the calibrated solution method."}
 	if conditioned:
 		if sample.recipe=="traceable_peg_batch":costs["Freshwater"]+=.5
 		else:costs["Toluene"]=.5
@@ -81,12 +81,16 @@ static func valid(sample:Dictionary)->bool:
 		for point:Variant in observed.trace:
 			if not (point is int or point is float) or not is_finite(float(point)) or absf(float(point))>10000:return false
 		if observed.get("reference",{})!=acquisition.get("reference",{}):return false
+		if sample.recipe=="traceable_pp_batch" and bool(sample.get("specimen_released",false)):
+			var pp:Dictionary=load("res://scripts/nmr_pp_acquisition.gd").evaluate(observed,sample.sample_id,sample.source_store)
+			if not pp.resolved or float(pp.mm_lower)<.85:return false
 		if sample.recipe=="traceable_peg_batch" and bool(sample.get("specimen_released",false)):
 			var peg:Dictionary=load("res://scripts/polymer_peg_endgroup_assay.gd").evaluate(observed.get("peg_observation",{}),sample.sample_id,sample.source_store)
 			if not peg.accepted or float(peg.mean_dp_lower)<10 or float(peg.mean_dp_upper)>80:return false
 	return (float(acquisition.work)<required_work(sample)) if sample.status=="acquiring" else (float(acquisition.work)==required_work(sample))
 
 static func observe(sample:Dictionary)->Dictionary:
+	if sample.recipe=="traceable_pp_batch":return load("res://scripts/nmr_pp_acquisition.gd").acquire(sample,load("res://scripts/nmr_calibration.gd").profile(),sample.acquisition.get("reference",{}))
 	if sample.recipe=="traceable_peg_batch":return load("res://scripts/nmr_peg_acquisition.gd").acquire(sample,load("res://scripts/nmr_calibration.gd").profile(),sample.acquisition.get("reference",{}))
 	# Explicit game sample variability, not a known spectrum inferred from an
 	# inventory label. Only this retained representative specimen is observed.
@@ -123,6 +127,9 @@ static func report(sample_id:String)->Dictionary:
 	if sample.status=="unmeasured":return {"status":"unmeasured","message":"Prepared; awaiting a calibrated method, bench time and supplies."}
 	if sample.status=="acquiring":return {"status":"acquiring","message":"Acquiring: %.1f / %.1f instrument-time units." % [float(sample.acquisition.work),required_work(sample)]}
 	if sample.status=="measurement_failed":return {"status":"measurement_failed","message":String(sample.observation.error)}
+	if sample.recipe=="traceable_pp_batch":
+		var pp:Dictionary=load("res://scripts/nmr_pp_acquisition.gd").evaluate(sample.observation,sample.sample_id,sample.source_store)
+		return {"status":"resolved" if pp.resolved else "measured_unqualified","message":("Retained PP mm triads %.1f%%; full stereosequence unmeasured." % (100*float(pp.observed_triad_fractions.mm))) if pp.resolved else String(pp.reason),"interpretation":pp}
 	if sample.recipe=="traceable_peg_batch":
 		var result:Dictionary=load("res://scripts/polymer_peg_endgroup_assay.gd").evaluate(sample.observation.get("peg_observation",{}),sample.sample_id,sample.source_store)
 		return {"status":"resolved" if result.accepted else "measured_unqualified","message":("Retained PEG mean repeat count %.1f (%.1f–%.1f); distribution unmeasured." % [result.mean_dp,result.mean_dp_lower,result.mean_dp_upper]) if result.accepted else String(result.reason),"interpretation":result}
@@ -142,6 +149,12 @@ static func release_characterized_specimen(sample:Dictionary)->void:
 	# Only the representative physically reserved at acquisition can be released.
 	# One specimen contained 0.1 source-material units; a microbatch is not a
 	# bulk resin unit. Drying and molding remain separate paid workshop jobs.
+	if sample.recipe=="traceable_pp_batch":
+		var pp:Dictionary=load("res://scripts/nmr_pp_acquisition.gd").evaluate(sample.observation,sample.sample_id,sample.source_store)
+		if not pp.resolved or float(pp.mm_lower)<.85 or bool(sample.get("specimen_released",false)):return
+		WorldSimulation.state.resource_stockpiles["Tacticity-Characterized PP Batches"]=float(WorldSimulation.state.resource_stockpiles.get("Tacticity-Characterized PP Batches",0))+1.0
+		sample.specimen_released=true
+		return
 	if sample.recipe=="traceable_peg_batch":
 		var peg:Dictionary=load("res://scripts/polymer_peg_endgroup_assay.gd").evaluate(sample.observation.get("peg_observation",{}),sample.sample_id,sample.source_store)
 		if not peg.accepted or float(peg.mean_dp_lower)<10 or float(peg.mean_dp_upper)>80 or bool(sample.get("specimen_released",false)):return

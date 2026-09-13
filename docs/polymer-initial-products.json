@@ -1733,12 +1733,12 @@
     }
   },
   "spectrally_qualified_polypropylene": {
-    "name": "Spectrally compared polypropylene batch",
+    "name": "Recover the measured-tacticity polypropylene batch",
     "output": "Tacticity-Qualified Polypropylene",
     "gate": "polymer_tacticity_characterization",
     "materials": {
-      "Raw Polypropylene": 1.06,
-      "Laboratory Glassware": 0.02
+      "Tacticity-Characterized PP Batches": 1,
+      "Freshwater": 0.2
     },
     "days": 4,
     "tooling": {
@@ -2022,5 +2022,33 @@
       "polymer_heat_removal": 1
     },
     "specimen_source": "Locally synthesized linear PEG batch"
+  },
+  "traceable_pp_batch": {
+    "name": "Synthesize and retain a traceable polypropylene batch",
+    "output": "Sealed Traceable PP Batches",
+    "gate": "coordination_polymerization",
+    "materials": {
+      "Polymer-Grade Propene": 1.1,
+      "Titanium Trichloride Catalyst": 0.02,
+      "Ethylaluminum Cocatalyst": 0.01,
+      "Toluene": 0.3,
+      "Methanol": 0.1,
+      "Caustic Soda": 0.02,
+      "Glass Tubes": 0.1,
+      "Paper": 0.01
+    },
+    "days": 7,
+    "tooling": {
+      "Pressure Vessels": 3,
+      "Laboratory Glassware": 3,
+      "Steel": 3
+    },
+    "power": 2,
+    "daily_power": 0.2857142857142857,
+    "services": {
+      "polymer_stirred_work": 1,
+      "polymer_heat_removal": 2
+    },
+    "specimen_source": "Locally synthesized polypropylene batch"
   }
 }

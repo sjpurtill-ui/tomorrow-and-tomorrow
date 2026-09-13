@@ -1548,7 +1548,8 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Qualified propene and separately prepared titanium/alkylaluminum catalysts produce a raw polypropylene batch with finite cooling, work and chemical supply. Paid spectral characterization remains separate from rheological/application qualification. Raw resin does not grant a universal forming grade.",
     "production_items": [
       "coordination_polypropylene",
-      "controlled_propene_ethene_copolymer"
+      "controlled_propene_ethene_copolymer",
+      "traceable_pp_batch"
     ]
   },
   {

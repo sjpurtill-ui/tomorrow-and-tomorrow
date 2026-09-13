@@ -4,6 +4,10 @@ extends RefCounted
 const Evidence=preload("res://scripts/polymer_spectral_evidence.gd")
 const WINDOWS={"PP":20.0,"PE":25.0,"EE":30.0}
 static func analyze(response:Dictionary,reference:Dictionary)->Dictionary:
+	var measured:=measure(response,WINDOWS)
+	if not measured.get("resolved",false):return measured
+	return Evidence.evaluate({"sample_id":response.sample_id,"nucleus":"13C","assay":"propene_ethene_dyads","reference":reference,"peaks":measured.peaks},String(response.sample_id))
+static func measure(response:Dictionary,windows:Dictionary)->Dictionary:
 	var sample_id:=String(response.get("sample_id",""))
 	if sample_id.is_empty():return Evidence.reject("Missing sample identity.")
 	if not response.get("trace") is Array or response.trace.size()!=401:return Evidence.reject("Incomplete sampled trace.")
@@ -12,8 +16,9 @@ static func analyze(response:Dictionary,reference:Dictionary)->Dictionary:
 	for point:Variant in response.trace:
 		if not Evidence.finite_number(point):return Evidence.reject("Invalid sampled response.")
 	var peaks:Array=[]
-	for assignment:String in WINDOWS:
-		var center:=roundi(float(WINDOWS[assignment])*10)
+	for assignment:String in windows:
+		if not Evidence.finite_number(windows[assignment]) or float(windows[assignment])<2 or float(windows[assignment])>38:return Evidence.reject("Unsupported peak window.")
+		var center:=roundi(float(windows[assignment])*10)
 		var lower:=center-20;var upper:=center+20
 		var peak_index:=lower
 		for index:int in range(lower+1,upper+1):
@@ -30,4 +35,4 @@ static func analyze(response:Dictionary,reference:Dictionary)->Dictionary:
 		for index:int in range(lower,upper):
 			area+=maxf(0.0,(float(response.trace[index])+float(response.trace[index+1]))*.5-baseline)*.1
 		peaks.append({"assignment":assignment,"shift":peak_index*.1,"width":maxf(.1,(right-left)*.05),"area":area,"area_uncertainty":float(response.noise_estimate)*4.0,"snr":height/float(response.noise_estimate)})
-	return Evidence.evaluate({"sample_id":sample_id,"nucleus":"13C","assay":"propene_ethene_dyads","reference":reference,"peaks":peaks},sample_id)
+	return {"resolved":true,"peaks":peaks}
