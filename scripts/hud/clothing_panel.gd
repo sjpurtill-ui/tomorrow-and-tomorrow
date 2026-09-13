@@ -19,4 +19,9 @@ func refresh()->void:
 	if not is_instance_valid(details):return
 	var ledger:=B.data();var service:=B.coverage(WorldSimulation.state.population_exact,int(WorldSimulation.state.elapsed_days))
 	details.text="%d installed · %.0f units per handler-day. Shares remaining Logistics work.\n%.1f garments · %.1f issued · cold exposure reduced %.1f%% · storm exposure reduced %.1f%%.\nGarments wear during use. Washing consumes water and removes garments for one drying day. Layering pairs spare garments; moisture handling adds tested lining. These are aggregate game coefficients."%[int(ledger.tools.get(subject,0)),float(K.METHODS[subject].rate),B.count(),float(service.issued),float(service.cold)*100,float(service.storm)*100]
+	var equipment:Array[String]=[];var inputs:Array[String]=[]
+	for item:String in K.METHODS[subject].cost:equipment.append("%.2f %s"%[float(K.METHODS[subject].cost[item]),item])
+	for item:String in K.METHODS[subject].inputs:inputs.append("%.2f %s"%[float(K.METHODS[subject].inputs[item]),item])
+	if K.METHODS[subject].mode=="layer":inputs.append("2 spare garments per layered assembly")
+	details.text+="\nInstall: "+", ".join(equipment)+".\nPer unit processed: "+", ".join(inputs)+".\nProcessed today: %.1f units; all clothing work today: %.2f handler-days."%[float(ledger.report.get("methods",{}).get(subject,0)),float(ledger.report.get("workers",0))]
 	var quote:=B.quote(subject);install_button.disabled=quote.has("error");install_button.tooltip_text=String(quote.get("message",quote.get("error","")))
