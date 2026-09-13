@@ -1,6 +1,47 @@
 extends RefCounted
 ## Authored processing and assay equipment. Rates use aggregate ration units.
 const METHODS := {
+  "grain_parboiling": {
+    "name": "Grain Parboiling",
+    "requires_all": [
+      "cereal_dehulling",
+      "food_drying"
+    ],
+    "requires_any": [
+      [
+        "earth_oven_cooking",
+        "food_steaming_vessels"
+      ]
+    ],
+    "rate": 16.0,
+    "cost": {
+      "Clay": 8,
+      "Stone": 4,
+      "Timber": 4
+    },
+    "inputs": {
+      "Freshwater": 0.18,
+      "Timber": 0.04
+    },
+    "mode": "parboil",
+    "observation": "Heat and moisten a suitable cereal share, then dry and dehull it in a later paid handling step. Water, fuel, vessels and finite shared handlers limit throughput; damp grain remains unavailable until finished."
+  },
+  "indirect_solar_food_drying": {
+    "name": "Indirect Solar Food Drying",
+    "requires_all": [
+      "food_drying"
+    ],
+    "requires_any": [],
+    "rate": 20.0,
+    "cost": {
+      "Timber": 8,
+      "Woven Cloth": 2,
+      "Clay": 2
+    },
+    "inputs": {},
+    "mode": "solar",
+    "observation": "A paid collector, air path and screened trays dry suitable plant lots using ambient warmth. Weather limits throughput; retained wet lots need later handling and cannot be issued as finished food."
+  },
   "food_pounding_mortars": {
     "name": "Food Pounding Mortars",
     "requires_all": [],

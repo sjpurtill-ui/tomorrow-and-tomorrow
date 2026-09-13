@@ -28,6 +28,8 @@ func refresh()->void:
 		lines.append("Lot %d · %s · %.2f rations · ready day %d%s"%[int(lot.id),String(lot.kind).capitalize(),float(lot.amount),int(lot.ready)," · "+", ".join(observations) if not observations.is_empty() else ""])
 		shown+=1
 		if shown>=6:break
+	if subject in ["grain_parboiling","indirect_solar_food_drying"]:
+		lines.append("Wet grain and loaded trays need later paid handling. Solar throughput today: %.0f%%; cold or wet conditions can stop it. Fuelled grain drying needs additional timber."%(B.solar_factor(WorldSimulation.food.current_environment_profile(),int(WorldSimulation.state.elapsed_days))*100))
 	lines.append("Assays consume samples from the examined lot. Packaging protection requires a current passing leak check; it expires after three days.")
 	details.text="\n".join(lines)
 	var quote:=B.quote(subject);install_button.disabled=quote.has("error");install_button.tooltip_text=String(quote.get("message",quote.get("error","")))

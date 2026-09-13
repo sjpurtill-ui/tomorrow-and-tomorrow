@@ -5,8 +5,8 @@ const K=preload("res://scripts/food_batch_knowledge.gd")
 const R=preload("res://scripts/technology_requirements.gd")
 const G=preload("res://scripts/grain_processing.gd")
 const LIMIT:=96
-const KINDS:=["meal","dehulled","starch","residue","dough","leavened","bread","starter"]
-const UNAVAILABLE:=["dough","leavened","starter"]
+const KINDS:=["meal","dehulled","starch","residue","dough","leavened","bread","starter","wet_parboiled","parboiled","solar_drying","solar_dried"]
+const UNAVAILABLE:=["dough","leavened","starter","wet_parboiled","solar_drying"]
 const ASSAYS:=["humidity","trace","loss","acidity","activity","review","barrier","leak"]
 static func empty_state()->Dictionary:return {"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}}
 static func data()->Dictionary:return WorldSimulation.state.food_batches
@@ -142,6 +142,7 @@ static func advance(logistics:float,demand:float,traveling:bool)->Dictionary:
 	data().last_day=day
 	if traveling or not WorldSimulation.state.settlement_site_committed:data().report=report;return report
 	var workers:=maxf(0,logistics)*.2
+	workers-=condition_grain(workers,demand,report,day)
 	# Both player and rival use this same paid, input-aware steward.
 	if WorldSimulation.food._stock_total()>maxf(1,demand)*7:
 		for id:String in K.METHODS:
@@ -178,13 +179,15 @@ static func issue(requested:float,discard_work:bool=false)->Dictionary:
 		if not discard_work and lot.kind in UNAVAILABLE:continue
 		var used:=minf(maxf(0,requested-float(result.amount)),float(lot.amount))
 		withdraw(lot,used);result.amount+=used
-		if lot.kind=="bread":result.processed+=used
+		if lot.kind in ["bread","parboiled","solar_dried"]:result.processed+=used
 	clean_empty();return result
 static func discard(amount:float)->float:return float(issue(amount,true).amount)
 static func spoil(traveling:bool,multiplier:float)->float:
 	var lost:=0.0;var day:=int(WorldSimulation.state.elapsed_days)
 	for lot:Dictionary in data().lots:
 		var rate:=.004 if lot.kind in ["meal","dehulled","starch","residue"] else (.04 if lot.kind=="starter" else .015)
+		if lot.kind in ["parboiled","solar_dried"]:rate=.0015
+		if lot.kind in ["wet_parboiled","solar_drying"]:rate=.025
 		if lot.kind=="bread" and bool(lot.observations.get("leak_pass",false)) and day-int(lot.observations.get("leak",-10))<3 and float(lot.seal)>.75:rate*=.35
 		var loss:=minf(float(lot.amount),float(lot.amount)*rate*maxf(0,multiplier)*(1.3 if traveling else 1))
 		lot.amount-=loss;lost+=loss;lot.seal=maxf(0,float(lot.seal)-.08)
@@ -227,3 +230,65 @@ static func valid_settlements(records:Variant)->bool:
 		if not record is Dictionary or not record.get("local_resources",{}) is Dictionary:return false
 		if not valid(record.get("local_resources",{}).get("food_batches",empty_state())):return false
 	return true
+
+# This is the existing aggregate cereal share, not a claim that every crop is
+# suitable for rice-style parboiling. All amounts are ration-energy equivalents.
+static func solar_factor(environment:Dictionary,day:int)->float:
+	var temperature:=PlanetEnvironment.ambient_temperature_c(environment,day)
+	return clampf((temperature-5.0)/20.0,0,1)*clampf((.9-float(environment.get("precipitation",.5)))/.7,0,1)
+static func dry_capacity(id:String,requested:float,workers:float,report:Dictionary,weather:float)->float:
+	var factor:=weather if id=="indirect_solar_food_drying" else 1.0
+	var amount:=minf(maxf(0,requested),minf(capacity(id,workers)*factor,maxf(0,capacity(id,10000)*factor-float(report.methods.get(id,0)))))
+	if id=="grain_parboiling":amount=minf(amount,maxf(0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0)))/.015)
+	return amount
+static func pay_drying(id:String,amount:float,report:Dictionary,weather:float)->float:
+	if amount<=.000001:return 0.0
+	var factor:=weather if id=="indirect_solar_food_drying" else 1.0
+	var work:=amount/(float(K.METHODS[id].rate)*WorldSimulation.discovery.adoption(id)*factor)
+	if id=="grain_parboiling":
+		var fuel:=amount*.015;WorldSimulation.state.resource_stockpiles.Timber-=fuel
+		report.inputs["Timber"]=float(report.inputs.get("Timber",0))+fuel
+	report.workers+=work;report.methods[id]=float(report.methods.get(id,0))+amount
+	return work
+static func condition_grain(workers:float,demand:float,report:Dictionary,day:int)->float:
+	var before:=workers
+	var weather:=solar_factor(WorldSimulation.food.current_environment_profile(),day)
+	var surplus:=maxf(0,WorldSimulation.food._stock_total()-maxf(0,demand)*7)
+	# Existing automatic installation pays local stock, one setup per day here.
+	if surplus>0:
+		for id:String in ["grain_parboiling","indirect_solar_food_drying"]:
+			var needed:=float(G.data().stocks.grain)>0 if id=="grain_parboiling" else float(WorldSimulation.state.food_stocks.get("Fresh plants",0))>0 and weather>0
+			for lot:Dictionary in data().lots:
+				if lot.kind=="wet_parboiled" or (id=="indirect_solar_food_drying" and lot.kind=="solar_drying"):needed=true
+			if needed and int(data().tools.get(id,0))==0 and not quote(id).has("error"):install(id);break
+	# Finish existing lots before committing more food. Solar drying and fuelled
+	# drying are actual alternative services, each with one shared daily quota.
+	for lot:Dictionary in data().lots.duplicate():
+		if lot.kind not in ["wet_parboiled","solar_drying"] or int(lot.ready)>day:continue
+		for id:String in ["indirect_solar_food_drying","grain_parboiling"]:
+			if lot.kind=="solar_drying" and id=="grain_parboiling":continue
+			var amount:=dry_capacity(id,float(lot.amount),workers,report,weather)
+			if amount<=.000001:continue
+			var replaces:=amount>=float(lot.amount)-.000001
+			if not replaces and data().lots.size()>=LIMIT:continue
+			var origin:=withdraw(lot,amount)
+			if replaces:data().lots.erase(lot)
+			var ratio:=.995 if lot.kind=="wet_parboiled" else .92
+			add_lot("parboiled" if lot.kind=="wet_parboiled" else "solar_dried",amount*ratio,day,origin)
+			report.loss+=amount*(1-ratio);workers-=pay_drying(id,amount,report,weather)
+			if replaces:break
+	clean_empty()
+	# Grain heating and chamber loading each consume the available daily quota.
+	surplus=maxf(0,WorldSimulation.food._stock_total()-maxf(0,demand)*7)
+	var amount:=supplied("grain_parboiling",minf(float(G.data().stocks.grain),surplus*.1),workers,report)
+	if amount>.000001 and data().lots.size()<LIMIT:
+		G.data().stocks.grain-=amount
+		var lot:=add_lot("wet_parboiled",amount*.97,day,amount);lot.ready=day+2
+		report.loss+=amount*.03;workers-=charge("grain_parboiling",amount,report)
+	surplus=maxf(0,WorldSimulation.food._stock_total()-maxf(0,demand)*7)
+	amount=dry_capacity("indirect_solar_food_drying",minf(float(WorldSimulation.state.food_stocks.get("Fresh plants",0)),surplus*.1),workers,report,weather)
+	if amount>.000001 and data().lots.size()<LIMIT:
+		WorldSimulation.state.food_stocks["Fresh plants"]-=amount
+		var lot:=add_lot("solar_drying",amount,day);lot.ready=day+1
+		workers-=pay_drying("indirect_solar_food_drying",amount,report,weather)
+	return before-workers

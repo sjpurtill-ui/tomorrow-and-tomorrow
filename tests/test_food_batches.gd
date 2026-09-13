@@ -19,9 +19,9 @@ func equip(id:String)->void:
 	assert_bool(B.install(id).get("ok",false)).is_true()
 func report()->Dictionary:return {"workers":0.0,"loss":0.0,"inputs":{},"methods":{}}
 func energy()->float:return WorldSimulation.food._stock_total()+G.in_process()+B.in_process()
-func test_fifteen_operating_methods_have_reachable_real_inputs()->void:
+func test_seventeen_operating_methods_have_reachable_real_inputs()->void:
 	WorldSimulation.scoped("batches",func()->void:
-		assert_int(K.entries().size()).is_equal(15)
+		assert_int(K.entries().size()).is_equal(17)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 		var outputs:Array=WorldSimulation.resources.catalog.keys()
 		for product:Dictionary in preload("res://scripts/civilian_industry.gd").PRODUCTS.values():outputs.append(product.output)
@@ -122,7 +122,7 @@ func test_all_operations_share_workers_and_same_day_is_idempotent()->void:
 		assert_float(float(result.workers)).is_less_equal(2.000001)
 		assert_float(energy()+float(result.loss)).is_equal_approx(before,.000001)
 		var saved:=B.data().duplicate(true);B.advance(10,100,false);assert_dict(B.data()).is_equal(saved)
-		assert_bool(B.valid(saved)).is_true()
+		assert_bool(B.valid(saved)).override_failure_message(str(saved)).is_true()
 	)
 func test_consumption_and_forecast_count_ready_food_once()->void:
 	WorldSimulation.scoped("batches",func()->void:
@@ -175,7 +175,7 @@ func test_real_food_day_stock_net_includes_processing_and_shared_workers()->void
 		assert_float(float(result.food_net)).is_equal_approx(WorldSimulation.food._stock_total()-before,.000001)
 		assert_float(float(result.food_batches.workers)).is_less_equal(WorldSimulation.state.effective_workers("Logistics")*.2+.000001)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Food)).is_equal_approx(WorldSimulation.food._stock_total(),.000001)
-		assert_bool(B.valid(B.data())).is_true()
+		assert_bool(B.valid(B.data())).override_failure_message(str(B.data())).is_true()
 	)
 func test_owned_save_roundtrip_preserves_lots_tools_and_next_day()->void:
 	WorldSimulation.scoped("batches",func()->void:
@@ -190,7 +190,8 @@ func test_owned_save_roundtrip_preserves_lots_tools_and_next_day()->void:
 func test_full_save_file_restores_food_lots_and_missing_legacy_field()->void:
 	WorldSimulation.clear();GameState.reset_for_new_world(442);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize();CivilizationSystem.reset_for_new_world()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
-	prepare();equip("controlled_baking");var lot:=B.add_lot("dough",20,0);lot.ready=3
+	prepare();equip("controlled_baking");equip("grain_parboiling");var lot:=B.add_lot("dough",20,0);lot.ready=3
+	B.add_lot("wet_parboiled",8,0).ready=2;B.add_lot("solar_drying",6,0).ready=1
 	var expected:=B.data().duplicate(true);var slot:="food_batches_%d"%OS.get_process_id()
 	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
 	GameState.food_batches=B.empty_state();var restored:=SaveSystem.load_game(slot)
@@ -254,4 +255,93 @@ func test_steward_installs_dough_tools_for_existing_meal_lots()->void:
 		assert_int(int(B.data().tools.get("hand_dough_forming",0))).is_equal(1)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Timber)).is_equal(timber-2)
 		assert_float(B.in_process()).is_greater(0.0)
+	)
+func test_parboiling_reserves_real_grain_and_pays_both_heat_and_later_drying()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("grain_parboiling");WorldSimulation.state.resource_stockpiles.Stone=0.0
+		G.data().stocks.grain=16.0;var before:=energy();WorldSimulation.state.elapsed_days=1
+		var result:=B.advance(100,100,false)
+		assert_float(G.data().stocks.grain).is_equal(0.0)
+		assert_float(B.in_process()).is_equal_approx(15.52,.000001)
+		assert_float(float(result.inputs.Freshwater)).is_equal_approx(2.88,.000001)
+		assert_float(float(result.inputs.Timber)).is_equal_approx(.64,.000001)
+		assert_float(energy()+float(result.loss)).is_equal_approx(before,.000001)
+		WorldSimulation.state.elapsed_days=2;B.advance(100,100,false)
+		assert_float(B.available_total()).is_equal(0.0)
+		WorldSimulation.state.elapsed_days=3;before=energy();result=B.advance(100,100,false)
+		assert_float(B.in_process()).is_equal(0.0)
+		assert_float(B.available_total()).is_equal_approx(15.4424,.000001)
+		assert_float(float(result.inputs.Timber)).is_equal_approx(15.52*.015,.000001)
+		assert_bool(result.inputs.has("Freshwater")).is_false()
+		assert_float(energy()+float(result.loss)).is_equal_approx(before,.000001)
+		assert_float(float(B.issue(100).processed)).is_equal_approx(15.4424,.000001)
+	)
+func test_parboiling_missing_water_or_drying_fuel_cannot_finish_food()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("grain_parboiling");WorldSimulation.state.resource_stockpiles.Stone=0.0
+		G.data().stocks.grain=10.0;WorldSimulation.state.resource_stockpiles.Freshwater=0.0;WorldSimulation.state.elapsed_days=1
+		B.advance(100,100,false);assert_float(G.data().stocks.grain).is_equal(10.0)
+		WorldSimulation.state.resource_stockpiles.Freshwater=100.0;WorldSimulation.state.elapsed_days=2;B.advance(100,100,false)
+		WorldSimulation.state.resource_stockpiles.Timber=0.0;WorldSimulation.state.elapsed_days=4
+		B.advance(100,100,false);assert_float(B.available_total()).is_equal(0.0);assert_float(B.in_process()).is_greater(0.0)
+	)
+func solar_environment(temperature:float,precipitation:float)->void:
+	WorldSimulation.state.player_settlements=[{"id":"drying","primary":true,"environment_profile":{"mean_temperature_c":temperature,"seasonality_c":0.0,"precipitation":precipitation}}]
+func test_solar_chamber_consumes_actual_plants_and_waits_for_weather_and_work()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("indirect_solar_food_drying");solar_environment(25.0,.2)
+		WorldSimulation.state.food_stocks["Fresh plants"]=20.0;var before:=energy();WorldSimulation.state.elapsed_days=1
+		var result:=B.advance(100,100,false)
+		assert_float(B.in_process()).is_equal_approx(20.0,.000001)
+		assert_float(float(WorldSimulation.state.food_stocks["Fresh plants"])).is_equal_approx(0.0,.000001)
+		assert_float(float(result.workers)).is_equal_approx(1.0,.000001)
+		assert_dict(result.inputs).is_empty();assert_float(energy()).is_equal_approx(before,.000001)
+		WorldSimulation.state.elapsed_days=2;solar_environment(0.0,.2);B.advance(100,100,false)
+		assert_float(B.available_total()).is_equal(0.0)
+		WorldSimulation.state.elapsed_days=3;solar_environment(25.0,1.0);B.advance(100,100,false)
+		assert_float(B.available_total()).is_equal(0.0)
+		WorldSimulation.state.elapsed_days=4;solar_environment(25.0,.2);B.advance(0,100,false)
+		assert_float(B.available_total()).is_equal(0.0)
+		WorldSimulation.state.elapsed_days=5;result=B.advance(100,100,false)
+		assert_float(B.available_total()).is_equal_approx(18.4,.000001)
+		assert_float(energy()+float(result.loss)).is_equal_approx(before,.000001)
+		assert_float(float(B.issue(100).processed)).is_equal_approx(18.4,.000001)
+	)
+func test_solar_and_fuel_are_paid_alternatives_for_wet_grain()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("grain_parboiling");equip("indirect_solar_food_drying");solar_environment(25.0,.2)
+		WorldSimulation.state.resource_stockpiles.Timber=0.0;var lot:=B.add_lot("wet_parboiled",10,0);lot.ready=2
+		WorldSimulation.state.elapsed_days=2;var result:=B.advance(100,100,false)
+		assert_float(B.available_total()).is_equal_approx(9.95,.000001)
+		assert_dict(result.inputs).is_empty();assert_bool(result.methods.has("grain_parboiling")).is_false()
+	)
+func test_drying_quota_is_shared_across_lots_and_new_chamber_loading()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("indirect_solar_food_drying");solar_environment(25.0,.2)
+		B.add_lot("solar_drying",10,0);B.add_lot("solar_drying",20,0);WorldSimulation.state.food_stocks["Fresh plants"]=30.0
+		WorldSimulation.state.elapsed_days=2;var result:=B.advance(1000,100,false)
+		assert_float(float(result.methods.indirect_solar_food_drying)).is_equal_approx(20.0,.000001)
+		assert_float(float(WorldSimulation.state.food_stocks["Fresh plants"])).is_equal(30.0)
+		assert_float(B.in_process()).is_equal_approx(10.0,.000001)
+		var expected:=B.data().duplicate(true);B.advance(1000,100,false);assert_dict(B.data()).is_equal(expected)
+	)
+func test_conditioning_never_reserves_last_rations_or_bypasses_lot_limit()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("grain_parboiling");WorldSimulation.state.resource_stockpiles.Stone=0.0
+		WorldSimulation.state.food_stocks["Dry staples"]=0.0;G.data().stocks.grain=10.0
+		WorldSimulation.state.elapsed_days=1;B.advance(100,100,false);assert_float(B.in_process()).is_equal(0.0)
+		WorldSimulation.state.food_stocks["Dry staples"]=100000.0
+		for i in B.LIMIT:B.add_lot("meal",1,0)
+		var inputs:=WorldSimulation.state.resource_stockpiles.duplicate();WorldSimulation.state.elapsed_days=2;B.advance(100,100,false)
+		assert_float(G.data().stocks.grain).is_equal(10.0);assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(inputs)
+	)
+func test_wet_conditioning_binary_save_continues_without_free_completion()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("grain_parboiling");WorldSimulation.state.resource_stockpiles.Stone=0.0
+		G.data().stocks.grain=8.0;WorldSimulation.state.elapsed_days=1;B.advance(100,100,false)
+		var encoded:=var_to_bytes(B.data());assert_bool(B.valid(bytes_to_var(encoded))).is_true()
+		var loaded:Dictionary=bytes_to_var(encoded);B.data().clear();B.data().merge(loaded,true)
+		WorldSimulation.state.elapsed_days=2;B.advance(100,100,false);assert_float(B.available_total()).is_equal(0.0)
+		WorldSimulation.state.elapsed_days=3;B.advance(100,100,false);assert_float(B.available_total()).is_greater(0.0)
+		assert_bool(B.valid(B.data())).override_failure_message(str(B.data())).is_true()
 	)
