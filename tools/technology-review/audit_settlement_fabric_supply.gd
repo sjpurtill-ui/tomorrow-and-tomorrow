@@ -13,6 +13,12 @@ func run()->void:
 	for entry:Dictionary in proposed:
 		if entry.id not in ids:ids.append(entry.id)
 	var products:Dictionary=load("res://scripts/civilian_industry.gd").PRODUCTS.duplicate(true)
+	# Deferred site trials consume inputs after component manufacture. Include
+	# them in this private closure graph without inventing additional recipes.
+	var fabric:Script=load("res://scripts/settlement_fabric_operations.gd")
+	for entry:Dictionary in proposed:
+		for item:String in entry.get("production_items",[]):
+			if products.has(item):products[item].machine_inspection=fabric.trial_cost(String(entry.id))
 	for recipe:Dictionary in products.values():
 		if recipe.has("thermal_program"):recipe.machine_inspection=load("res://scripts/metallurgy_sections.gd").COST
 		if recipe.has("induction_frequency"):recipe.machine_inspection=load("res://scripts/induction_workshop.gd").INSPECTION
@@ -49,6 +55,7 @@ func run()->void:
 	result.integrated_definitions=discovery.technology_catalog.size()
 	result.unregistered_candidates=catalog.size()-discovery.technology_catalog.size()
 	result.candidate_graph_definitions=catalog.size()
-	result.assumptions="Structural sources only; all knowledge and raw resources assumed available. Any unregistered settlement fabric IDs are supplied locally; registered entries are used directly. Quality success, actual quantities, calendar, labor, capital qualification and acquisition are not proved. Includes deferred section/induction inspection inputs."
+	result.deferred_fabric_trials=proposed.size()
+	result.assumptions="Structural sources only; all knowledge and raw resources assumed available. Any unregistered settlement fabric IDs are supplied locally; registered entries are used directly. Quality success, actual quantities, calendar, labor, capital qualification and acquisition are not proved. Includes deferred section/induction inspection and settlement fabric trial inputs; repair uses the same manufactured components."
 	print(JSON.stringify(result))
 	quit(0 if result.errors.is_empty() and result.blocked_products.is_empty() and result.blocked_plants.is_empty() else 1)
