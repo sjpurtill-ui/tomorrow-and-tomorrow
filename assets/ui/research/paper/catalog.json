@@ -4170,6 +4170,46 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/reamed_bore_finishing.png",
+      "description": "A multi-edge tool finishes an already prepared hole.",
+      "domain": "production",
+      "id": "reamed_bore_finishing",
+      "name": "Reamed Bore Finishing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/reciprocating_profile_slotting.png",
+      "description": "Repeated single-tool strokes remove material from a slot.",
+      "domain": "production",
+      "id": "reciprocating_profile_slotting",
+      "name": "Reciprocating Profile Slotting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gear_shaping_generation.png",
+      "description": "A reciprocating cutter generates meshing tooth geometry.",
+      "domain": "production",
+      "id": "gear_shaping_generation",
+      "name": "Gear Shaping Generation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/progressive_profile_broaching.png",
+      "description": "Successively larger cutting teeth produce a finished profile.",
+      "domain": "production",
+      "id": "progressive_profile_broaching",
+      "name": "Progressive Profile Broaching",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/interchangeable_component_fits.png",
+      "description": "Specify and verify compatible dimensional ranges across separately made components",
+      "domain": "production",
+      "id": "interchangeable_component_fits",
+      "name": "Interchangeable Component Fits",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/metal_annealing_control.png",
       "description": "Relate controlled thermal treatment to measured metal hardness and workability. Suitable metal, heating equipment, skilled handling and property checks.",
       "domain": "production",
@@ -5923,11 +5963,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 740,
+  "live_count": 745,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 162
+  "verified_count": 167
 }
