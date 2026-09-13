@@ -24,6 +24,9 @@ func test_actual_survey_retains_compositions_and_partial_observations_before_sol
 		assert_str(P.validate_saved({"equipment_queue":[restored]})).is_empty()
 		P.advance(WorldSimulation.military,restored,29)
 		assert_int(restored.alloy_last.samples.size()).is_equal(18)
+		var altered:Dictionary=restored.duplicate(true)
+		altered.alloy_last.run.temperature=20.0
+		assert_str(A.validate_job(altered,recipe)).is_not_empty()
 		assert_str(A.validate_job(restored,recipe)).is_empty()
 		assert_float(float(restored.alloy_last.selected_tin)).is_equal_approx(.6213,.000001)
 		assert_float(float(state.resource_stockpiles[recipe.output])).is_equal(1.0)

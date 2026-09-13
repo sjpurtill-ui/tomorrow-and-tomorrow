@@ -78,6 +78,7 @@ static func valid_trial(trial:Variant,job:Dictionary,spec:Dictionary,finished:bo
 		if not s is Dictionary or s.get("index")!=index or s.get("tin_mass")!=fraction*.05 or s.get("lead_mass")!=(1-fraction)*.05:return false
 		if not s.get("thermal") is Dictionary or not Thermal.complete(s.thermal) or s.thermal.program!=trial_run(index).program:return false
 		if s.get("observation")!=observation(fraction,float(s.thermal.temperature)):return false
+	if finished and trial.run!=trial.samples.back().thermal:return false
 	if finished and trial.get("selected_tin")!=selected_composition(trial.samples):return false
 	if finished and (not trial.get("qualified") is bool or trial.qualified!=(absf(float(trial.selected_tin)-.6213)<.000001)):return false
 	if not Thermal.valid(trial.run) or trial.run.program!=trial_run(mini(17,trial.samples.size())).program:return false

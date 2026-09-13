@@ -106,6 +106,7 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 			if not T.complete(frame.thermal) or frame.thermal.program!=run_for(stage).program:return "Invalid casting thermal history."
 		if finished:
 			if p.stage!=spec.casting_stages.size() or not p.has_all(["observation","accepted","pour_temperature","pour_pattern_mass","pour_moisture"]):return "Incomplete casting inspection."
+			if p.run!=p.trace.back().thermal:return "Casting final thermal record disagrees with stage history."
 			if not p.observation is Dictionary or p.observation.get("readings")!=readings(p,spec):return "Invalid casting readings."
 			var passed:=accepted(p.observation.readings)
 			if spec.casting_kind=="investment":passed=passed and float(p.pour_pattern_mass)<.000001 and int(p.shell_layers)>=3

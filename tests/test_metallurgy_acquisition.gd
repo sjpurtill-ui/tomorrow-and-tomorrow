@@ -87,3 +87,39 @@ func test_all_foundations_and_each_alternative_survive_imported_evidence()->void
 				for route:Dictionary in P.routes_for(entry,alternate,{},source):assert_bool(route.ready).is_true()
 		for recipe:String in entry.get("production_items",[]):
 			assert_str(String(preload("res://scripts/civilian_industry.gd").product(recipe).gate)).is_equal(String(entry.id))
+
+func test_all_metallurgy_scholar_visits_pay_for_temporary_subject_specific_teaching()->void:
+	var scholars=preload("res://scripts/scholar_visits.gd")
+	for entry:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
+		before_test();prepare()
+		var subject:=String(entry.id)
+		assert_bool(scholars.quote("neighbor",subject,"Stone").has("error")).is_true()
+		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
+		for group:Array in entry.requires_any:GameState.known_discoveries.append(String(group.back()))
+		var provider:=E.owner_state("neighbor")
+		provider.known_discoveries.append(subject);provider.discovery_adoption[subject]=1.0
+		provider.elapsed_days=100000
+		var workers:float=provider.effective_workers("Knowledge")
+		var population:float=provider.population_exact
+		var payment:=float(GameState.resource_stockpiles.Stone)
+		var food:=float(GameState.resource_stockpiles.Food)
+		assert_bool(scholars.dispatch("neighbor",subject,"Stone").get("ok",false)).is_true()
+		assert_float(float(GameState.resource_stockpiles.Stone)).is_less(payment)
+		assert_float(float(GameState.resource_stockpiles.Food)).is_less(food)
+		var mission:Dictionary=CivilizationSystem.diplomatic_mission
+		E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day))
+		assert_bool(mission.research_refused).is_false()
+		provider.elapsed_days=mission.arrival_day
+		assert_float(provider.effective_workers("Knowledge")).is_equal(workers-1)
+		assert_float(scholars.bonus(subject,int(mission.return_day))).is_equal(1.0)
+		Purchase.prepare_return(mission)
+		assert_float(scholars.bonus(subject,int(mission.return_day))).is_equal(1.5)
+		assert_float(scholars.bonus("cordage",int(mission.return_day))).is_equal(1.0)
+		var visit:Dictionary=bytes_to_var(var_to_bytes(E.data().scholar_visits))
+		assert_bool(scholars.valid(visit)).is_true()
+		assert_float(scholars.bonus(subject,int(mission.scholar_contract.leave_day))).is_equal(1.0)
+		provider.elapsed_days=mission.scholar_contract.home_day
+		assert_float(provider.effective_workers("Knowledge")).is_equal(workers)
+		assert_float(provider.population_exact).is_equal(population)
+		assert_bool(subject in GameState.known_discoveries).is_false()
+		assert_array(MilitaryCampaign.equipment_queue).is_empty()

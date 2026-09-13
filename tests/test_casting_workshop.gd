@@ -74,6 +74,11 @@ func test_casting_saved_materials_must_follow_paid_stage_history()->void:
 		altered.casting_last.accepted=C.accepted(altered.casting_last.observation.readings)
 		assert_str(C.validate_job(altered,spec)).is_not_empty()
 		altered=line.duplicate(true)
+		altered.casting_last.run.temperature=20.0
+		altered.casting_last.observation.readings=C.readings(altered.casting_last,spec)
+		altered.casting_last.accepted=C.accepted(altered.casting_last.observation.readings)
+		assert_str(C.validate_job(altered,spec)).is_not_empty()
+		altered=line.duplicate(true)
 		altered.casting_last.trace[0].pattern_remaining=0.0
 		assert_str(C.validate_job(altered,spec)).is_not_empty()
 	)
