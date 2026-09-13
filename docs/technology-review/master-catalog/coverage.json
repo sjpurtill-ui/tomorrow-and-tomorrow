@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 823,
+  "verified_baseline_discoveries": 837,
   "pending_communications": 0,
-  "new_authored_drafts": 2647,
+  "new_authored_drafts": 2633,
   "distinct_accounted_identities": 3470,
   "remaining_identities_to_author": 1530,
   "target": 5000,
@@ -2320,9 +2320,9 @@
         "target": 800,
         "assigned": 222,
         "target_slots_not_yet_assigned": 578,
-        "implemented_baseline": 14,
+        "implemented_baseline": 15,
         "pending_communications": 0,
-        "authored_drafts": 208
+        "authored_drafts": 207
       },
       {
         "id": "H04",
@@ -2330,9 +2330,9 @@
         "target": 700,
         "assigned": 299,
         "target_slots_not_yet_assigned": 401,
-        "implemented_baseline": 34,
+        "implemented_baseline": 35,
         "pending_communications": 0,
-        "authored_drafts": 265
+        "authored_drafts": 264
       },
       {
         "id": "H05",
@@ -2357,7 +2357,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 447,
+  "branch_alternatives": 446,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 109,
@@ -2373,11 +2373,11 @@
     "D11": 84,
     "D12": 115,
     "D13": 113,
-    "D14": 173,
-    "D15": 118,
+    "D14": 172,
+    "D15": 107,
     "D16": 131,
     "D17": 115,
-    "D18": 92,
+    "D18": 90,
     "D19": 95,
     "D20": 116,
     "D21": 196,
@@ -2520,9 +2520,9 @@
       "id": "D14",
       "name": "Medicine and care",
       "target": 280,
-      "implemented_baseline": 16,
+      "implemented_baseline": 17,
       "pending_communications": 0,
-      "authored_drafts": 173,
+      "authored_drafts": 172,
       "accounted": 189,
       "remaining_to_target": 91
     },
@@ -2530,9 +2530,9 @@
       "id": "D15",
       "name": "Biology",
       "target": 200,
-      "implemented_baseline": 9,
+      "implemented_baseline": 20,
       "pending_communications": 0,
-      "authored_drafts": 118,
+      "authored_drafts": 107,
       "accounted": 127,
       "remaining_to_target": 73
     },
@@ -2560,9 +2560,9 @@
       "id": "D18",
       "name": "Learning and organized work",
       "target": 160,
-      "implemented_baseline": 9,
+      "implemented_baseline": 11,
       "pending_communications": 0,
-      "authored_drafts": 92,
+      "authored_drafts": 90,
       "accounted": 101,
       "remaining_to_target": 59
     },

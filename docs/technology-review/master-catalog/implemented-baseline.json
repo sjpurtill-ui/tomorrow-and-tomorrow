@@ -1,5 +1,5 @@
 {
-  "source_commit": "446e926489b55599bee99c5122473cd96519298d",
+  "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -66660,6 +66660,1266 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D18",
+      "id": "laboratory_notebooks",
+      "name": "Laboratory Notebooks",
+      "foundations": "formal_archives,experimental_controls",
+      "mechanism": "Record methods, observations, deviations and dates while work occurs",
+      "operating_requirement": "Durable media and disciplined investigators",
+      "consequence": "Permit reconstruction of what was actually attempted",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "civic-economic-learning.json",
+        "previous_requires_all": [
+          "formal_archives",
+          "experimental_controls"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "laboratory_notebooks",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Laboratory Notebooks",
+            "missing_all": [
+              "formal_archives",
+              "experimental_controls"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "formal_archives",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "formal_archives",
+              "experimental_controls"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Laboratory Notebooks",
+        "observation": "Record methods, observations, deviations and dates while work occurs",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "formal_archives",
+          "experimental_controls"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Preserved knowledge"
+      }
+    },
+    {
+      "field": "D18",
+      "id": "experimental_protocol_publication",
+      "name": "Experimental Protocol Publication",
+      "foundations": "laboratory_notebooks,printing_process",
+      "mechanism": "Publish enough method detail for another group to attempt reproduction",
+      "operating_requirement": "Authors, editors and distributable records",
+      "consequence": "Separate a reported result from an executable method",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "civic-economic-learning.json",
+        "previous_requires_all": [
+          "laboratory_notebooks",
+          "printing_process"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "experimental_protocol_publication",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Experimental Protocol Publication",
+            "missing_all": [
+              "laboratory_notebooks",
+              "printing_process"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "laboratory_notebooks",
+              "printing_process"
+            ],
+            "requires_all": [
+              "laboratory_notebooks",
+              "printing_process"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Experimental Protocol Publication",
+        "observation": "Publish enough method detail for another group to attempt reproduction",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "laboratory_notebooks",
+          "printing_process"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "microscopic_cell_observation",
+      "name": "Microscopic Cell Observation",
+      "foundations": "compound_microscopy,specimen_slide_mounting",
+      "mechanism": "Observe recurring small structures in suitable biological preparations",
+      "operating_requirement": "Microscopes, prepared samples and trained observers",
+      "consequence": "Distinguish cellular structures from unaided gross anatomy",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Microscopic Cell Observation: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Observe recurring small structures in suitable biological preparations",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "microscopic_cell_observation",
+        "grants_instant_mastery": false,
+        "operation_requires": "Microscopes, prepared samples and trained observers"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "compound_microscopy",
+          "specimen_slide_mounting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "microscopic_cell_observation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Microscopic Cell Observation",
+            "missing_all": [
+              "compound_microscopy",
+              "specimen_slide_mounting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "compound_microscopy",
+              "specimen_slide_mounting"
+            ],
+            "requires_all": [
+              "compound_microscopy",
+              "specimen_slide_mounting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Microscopic Cell Observation",
+        "observation": "Observe recurring small structures in suitable biological preparations",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "compound_microscopy",
+          "specimen_slide_mounting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "cell_theory",
+      "name": "Cell Theory",
+      "foundations": "microscopic_cell_observation,comparative_anatomy",
+      "mechanism": "Relate organism structure and growth to cells and their continuity",
+      "operating_requirement": "Comparative observations and repeatable evidence",
+      "consequence": "Provide a foundation for interpreting tissues as organized cellular systems",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Cell Theory: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Relate organism structure and growth to cells and their continuity",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "cell_theory",
+        "grants_instant_mastery": false,
+        "operation_requires": "Comparative observations and repeatable evidence"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "microscopic_cell_observation",
+          "comparative_anatomy"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "cell_theory",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Cell Theory",
+            "missing_all": [
+              "microscopic_cell_observation",
+              "comparative_anatomy"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "microscopic_cell_observation",
+              "comparative_anatomy"
+            ],
+            "requires_all": [
+              "microscopic_cell_observation",
+              "comparative_anatomy"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Cell Theory",
+        "observation": "Relate organism structure and growth to cells and their continuity",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "microscopic_cell_observation",
+          "comparative_anatomy"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "cell_division_observation",
+      "name": "Cell-Division Observation",
+      "foundations": "microscopic_cell_observation,experimental_controls",
+      "mechanism": "Compare successive cellular states during growth and reproduction",
+      "operating_requirement": "Suitable samples, observation records and adequate resolving power",
+      "consequence": "Recognize repeatable division patterns without yet explaining inheritance",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Cell-Division Observation: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Compare successive cellular states during growth and reproduction",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "cell_division_observation",
+        "grants_instant_mastery": false,
+        "operation_requires": "Suitable samples, observation records and adequate resolving power"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "microscopic_cell_observation",
+          "experimental_controls"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "cell_division_observation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Cell-Division Observation",
+            "missing_all": [
+              "microscopic_cell_observation",
+              "experimental_controls"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "microscopic_cell_observation",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "microscopic_cell_observation",
+              "experimental_controls"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Cell-Division Observation",
+        "observation": "Compare successive cellular states during growth and reproduction",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "microscopic_cell_observation",
+          "experimental_controls"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "tissue_histology",
+      "name": "Tissue Histology",
+      "foundations": "cell_theory,specimen_slide_mounting",
+      "mechanism": "Compare organized cellular patterns within different tissues",
+      "operating_requirement": "Prepared sections, optical contrast and qualified interpretation",
+      "consequence": "Relate tissue organization to observed function or abnormality",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Tissue Histology: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Compare organized cellular patterns within different tissues",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "tissue_histology",
+        "grants_instant_mastery": false,
+        "operation_requires": "Prepared sections, optical contrast and qualified interpretation"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "cell_theory",
+          "specimen_slide_mounting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "tissue_histology",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Tissue Histology",
+            "missing_all": [
+              "cell_theory",
+              "specimen_slide_mounting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cell_theory",
+              "specimen_slide_mounting"
+            ],
+            "requires_all": [
+              "cell_theory",
+              "specimen_slide_mounting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Tissue Histology",
+        "observation": "Compare organized cellular patterns within different tissues",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "cell_theory",
+          "specimen_slide_mounting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "biological_staining",
+      "name": "Biological Staining",
+      "foundations": "microscopic_cell_observation,chemical_distillation",
+      "mechanism": "Use selective contrast to distinguish structures in biological preparations",
+      "operating_requirement": "Qualified stains, preparation equipment and controlled comparisons",
+      "consequence": "Reveal some structures while introducing preparation artifacts",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Biological Staining: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Use selective contrast to distinguish structures in biological preparations",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "biological_staining",
+        "grants_instant_mastery": false,
+        "operation_requires": "Qualified stains, preparation equipment and controlled comparisons"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "microscopic_cell_observation",
+          "chemical_distillation"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "biological_staining",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Biological Staining",
+            "missing_all": [
+              "microscopic_cell_observation",
+              "chemical_distillation"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "microscopic_cell_observation",
+              "chemical_distillation"
+            ],
+            "requires_all": [
+              "microscopic_cell_observation",
+              "chemical_distillation"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Biological Staining",
+        "observation": "Use selective contrast to distinguish structures in biological preparations",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "microscopic_cell_observation",
+          "chemical_distillation"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "microbial_observation",
+      "name": "Microbial Observation",
+      "foundations": "compound_microscopy",
+      "mechanism": "Observe microscopic organisms associated with changing biological materials",
+      "operating_requirement": "Microscopy, suitable samples and contamination-aware handling",
+      "consequence": "Distinguish living microscopic forms from unaided assumptions about decay",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "fermentation_control",
+          "clean_water"
+        ]
+      ],
+      "recovery_profile": "biological",
+      "recovery": "For Microbial Observation: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Observe microscopic organisms associated with changing biological materials",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "microbial_observation",
+        "grants_instant_mastery": false,
+        "operation_requires": "Microscopy, suitable samples and contamination-aware handling"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "compound_microscopy"
+        ],
+        "previous_requires_any": [
+          [
+            "fermentation_control",
+            "clean_water"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "microbial_observation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Microbial Observation",
+            "missing_all": [
+              "compound_microscopy"
+            ],
+            "missing_any": [
+              [
+                "fermentation_control",
+                "clean_water"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "compound_microscopy",
+              "fermentation_control",
+              "clean_water"
+            ],
+            "requires_all": [
+              "compound_microscopy"
+            ],
+            "requires_any": [
+              [
+                "fermentation_control",
+                "clean_water"
+              ]
+            ],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Microbial Observation",
+        "observation": "Observe microscopic organisms associated with changing biological materials",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "compound_microscopy"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "fermentation_control",
+            "clean_water"
+          ]
+        ],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "microbial_isolation_methods",
+      "name": "Microbial Isolation Methods",
+      "foundations": "microbial_observation,experimental_controls",
+      "mechanism": "Separate mixed biological observations into reproducible identified laboratory subjects",
+      "operating_requirement": "Appropriate laboratory containment, trained personnel and validated methods",
+      "consequence": "Permit comparisons tied to identified organisms rather than an uncontrolled mixture",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Microbial Isolation Methods: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Separate mixed biological observations into reproducible identified laboratory subjects",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "microbial_isolation_methods",
+        "grants_instant_mastery": false,
+        "operation_requires": "Appropriate laboratory containment, trained personnel and validated methods"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "microbial_observation",
+          "experimental_controls"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "microbial_isolation_methods",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Microbial Isolation Methods",
+            "missing_all": [
+              "microbial_observation",
+              "experimental_controls"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "microbial_observation",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "microbial_observation",
+              "experimental_controls"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Microbial Isolation Methods",
+        "observation": "Separate mixed biological observations into reproducible identified laboratory subjects",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "microbial_observation",
+          "experimental_controls"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "microbial_growth_measurement",
+      "name": "Microbial Growth Measurement",
+      "foundations": "microbial_isolation_methods,statistical_sampling",
+      "mechanism": "Measure changes in an identified microbial population under declared conditions",
+      "operating_requirement": "Qualified laboratory systems, monitoring and controls",
+      "consequence": "Compare growth behavior with stated measurement limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Microbial Growth Measurement: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Measure changes in an identified microbial population under declared conditions",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "microbial_growth_measurement",
+        "grants_instant_mastery": false,
+        "operation_requires": "Qualified laboratory systems, monitoring and controls"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "microbial_isolation_methods",
+          "statistical_sampling"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "microbial_growth_measurement",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Microbial Growth Measurement",
+            "missing_all": [
+              "microbial_isolation_methods",
+              "statistical_sampling"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "microbial_isolation_methods",
+              "statistical_sampling"
+            ],
+            "requires_all": [
+              "microbial_isolation_methods",
+              "statistical_sampling"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Microbial Growth Measurement",
+        "observation": "Measure changes in an identified microbial population under declared conditions",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "microbial_isolation_methods",
+          "statistical_sampling"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "aseptic_laboratory_practice",
+      "name": "Aseptic Laboratory Practice",
+      "foundations": "microbial_isolation_methods,experimental_protocol_publication",
+      "mechanism": "Maintain separation between intended biological material and contaminating sources",
+      "operating_requirement": "Qualified facilities, trained staff and validated contamination controls",
+      "consequence": "Make experiments more interpretable without guaranteeing absence of contamination",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Aseptic Laboratory Practice: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Maintain separation between intended biological material and contaminating sources",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "aseptic_laboratory_practice",
+        "grants_instant_mastery": false,
+        "operation_requires": "Qualified facilities, trained staff and validated contamination controls"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "microbial_isolation_methods",
+          "experimental_protocol_publication"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "aseptic_laboratory_practice",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Aseptic Laboratory Practice",
+            "missing_all": [
+              "microbial_isolation_methods",
+              "experimental_protocol_publication"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "microbial_isolation_methods",
+              "experimental_protocol_publication"
+            ],
+            "requires_all": [
+              "microbial_isolation_methods",
+              "experimental_protocol_publication"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Aseptic Laboratory Practice",
+        "observation": "Maintain separation between intended biological material and contaminating sources",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "microbial_isolation_methods",
+          "experimental_protocol_publication"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D14",
+      "id": "instrument_sterilization",
+      "name": "Instrument Sterilization",
+      "foundations": "precision_thermometry,experimental_controls",
+      "mechanism": "Apply and verify a validated process for reusable clinical instruments",
+      "operating_requirement": "Qualified equipment, compatible instruments and cycle verification",
+      "consequence": "Supply sterile instruments only when the required process succeeds",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "clinical",
+      "recovery": "For Instrument Sterilization: Supervised clinical teaching with de-identified records and demonstrated service practice. Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Supervised clinical teaching with de-identified records and demonstrated service practice",
+        "local_demonstration": "Apply and verify a validated process for reusable clinical instruments",
+        "verification": "Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence",
+        "reconverges_on": "instrument_sterilization",
+        "grants_instant_mastery": false,
+        "operation_requires": "Qualified equipment, compatible instruments and cycle verification"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "precision_thermometry",
+          "experimental_controls"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "instrument_sterilization",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Instrument Sterilization",
+            "missing_all": [
+              "precision_thermometry",
+              "experimental_controls"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "precision_thermometry",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "precision_thermometry",
+              "experimental_controls"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Instrument Sterilization",
+        "observation": "Apply and verify a validated process for reusable clinical instruments",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "precision_thermometry",
+          "experimental_controls"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "cell_culture_methods",
+      "name": "Cell-Culture Methods",
+      "foundations": "cell_theory,aseptic_laboratory_practice",
+      "mechanism": "Maintain defined cells outside their original tissue environment",
+      "operating_requirement": "Qualified facilities, appropriate media and identity checks",
+      "consequence": "Support controlled cellular observations while retaining contamination and selection effects",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "biological",
+      "recovery": "For Cell-Culture Methods: Documented observations, identified reference material and qualified laboratory demonstrations. Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Documented observations, identified reference material and qualified laboratory demonstrations",
+        "local_demonstration": "Maintain defined cells outside their original tissue environment",
+        "verification": "Reproduce the stated observation or measurement locally using suitable specimens, controls and apparatus; maintaining material requires its real storage and handling inputs",
+        "reconverges_on": "cell_culture_methods",
+        "grants_instant_mastery": false,
+        "operation_requires": "Qualified facilities, appropriate media and identity checks"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "cell_theory",
+          "aseptic_laboratory_practice"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "cell_culture_methods",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Cell-Culture Methods",
+            "missing_all": [
+              "cell_theory",
+              "aseptic_laboratory_practice"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cell_theory",
+              "aseptic_laboratory_practice"
+            ],
+            "requires_all": [
+              "cell_theory",
+              "aseptic_laboratory_practice"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Cell-Culture Methods",
+        "observation": "Maintain defined cells outside their original tissue environment",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "cell_theory",
+          "aseptic_laboratory_practice"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Observers"
+      }
+    },
+    {
+      "field": "D15",
+      "id": "live_cell_time_lapse",
+      "name": "Live Cell Time Lapse",
+      "foundations": "cell_culture_methods,microscopic_cell_observation",
+      "mechanism": "Record qualified living-cell changes over time while monitoring observation effects",
+      "operating_requirement": "Suitable culture support, stable imaging and tracked conditions",
+      "consequence": "Reveal dynamics that fixed snapshots miss without assuming imaging is harmless",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "live_cell_time_lapse",
+        "local_demonstration": "Record qualified living-cell changes over time while monitoring observation effects",
+        "operating_requirements": "Suitable culture support, stable imaging and tracked conditions",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real specimen or information delivery",
+          "finite local replication and interpretation",
+          "continuing instruments, specimens, utilities and staff"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
+          "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
+          "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
+          "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
+          "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
+        }
+      },
+      "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
+      "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "dd18f3d047bdaa86c8764bd21e45740108d69a1d",
+        "editorial_source": "biology-measurement-depth.json",
+        "previous_requires_all": [
+          "cell_culture_methods",
+          "microscopic_cell_observation"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "knowledge",
+        "dynamic": "knowledge",
+        "effects": {},
+        "id": "live_cell_time_lapse",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Live Cell Time Lapse",
+            "missing_all": [
+              "cell_culture_methods",
+              "microscopic_cell_observation"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cell_culture_methods",
+              "microscopic_cell_observation"
+            ],
+            "requires_all": [
+              "cell_culture_methods",
+              "microscopic_cell_observation"
+            ],
+            "requires_any": [],
+            "signals": [
+              "research",
+              "nature",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Live Cell Time Lapse",
+        "observation": "Record qualified living-cell changes over time while monitoring observation effects",
+        "operating_contract": "Finite local culture and field specimens, paid instruments and controlled dated observations qualify specific starter or crop evidence; no species identification, free material or automatic benefit.",
+        "requires": [
+          "cell_culture_methods",
+          "microscopic_cell_observation"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "research",
+          "nature",
+          "information"
+        ],
+        "social_consequence": "Reproducible evidence can challenge inherited authority because claims no longer depend only on status or memory",
+        "subcategory": "Preserved knowledge"
       }
     }
   ]

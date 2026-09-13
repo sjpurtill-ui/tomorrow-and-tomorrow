@@ -7879,8 +7879,8 @@
       "id": "laboratory_notebooks",
       "name": "Laboratory Notebooks",
       "horizon": "H03",
-      "source_file": "civic-economic-learning.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The authored record, contract, craft-instruction or deliberative procedure fits organized preindustrial learned traditions. Researching it does not automatically establish that institution.",
       "scope_digest": "b584dbf444faa32d4f11e3caa07ccd723450a37de4a50537c2903afe9164e610"
@@ -7899,8 +7899,8 @@
       "id": "experimental_protocol_publication",
       "name": "Experimental Protocol Publication",
       "horizon": "H04",
-      "source_file": "civic-economic-learning.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified method belongs to industrial-era organizational, financial or professional coordination in this editorial allocation; modern digital infrastructure is not universally necessary.",
       "scope_digest": "ca4cbbd7ab7c1acec0d8deab935a04dc74b942e18dadaf47174a2775a18a6e7f"

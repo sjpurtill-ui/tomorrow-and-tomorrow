@@ -1604,45 +1604,6 @@
   },
   {
     "field": "D15",
-    "id": "live_cell_time_lapse",
-    "name": "Live Cell Time Lapse",
-    "foundations": "cell_culture_methods,microscopic_cell_observation",
-    "mechanism": "Record qualified living-cell changes over time while monitoring observation effects",
-    "operating_requirement": "Suitable culture support, stable imaging and tracked conditions",
-    "consequence": "Reveal dynamics that fixed snapshots miss without assuming imaging is harmless",
-    "status": "authored_draft",
-    "requires_all": [
-      "cell_culture_methods",
-      "microscopic_cell_observation"
-    ],
-    "requires_any": [],
-    "recovery": "Learn from a competent visiting scholar, reciprocal research, commissioned analysis or a qualified external laboratory service. Pay actual access, delivery and local validation costs. Received measurements or biological material do not grant every underlying method or produce a treatment automatically.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "live_cell_time_lapse",
-      "local_demonstration": "Record qualified living-cell changes over time while monitoring observation effects",
-      "operating_requirements": "Suitable culture support, stable imaging and tracked conditions",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "available competent source",
-        "payment or reciprocal contribution",
-        "real specimen or information delivery",
-        "finite local replication and interpretation",
-        "continuing instruments, specimens, utilities and staff"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay real travel, board and finite instruction by a competent researcher; local staff reproduce the relevant measurement or reasoning.",
-        "partnership": "Contribute staff, characterized material, instrument time or usable evidence; access, delivery and interpretation consume real resources.",
-        "purchased_research": "Commission a specified question from a qualified provider; a delivered result supports inquiry but does not guarantee a useful application or local mastery.",
-        "licensed_or_imported_service": "Pay for actual measurement, qualified material or analytical capacity within provider limits; continuing access and compatible local interpretation remain dependencies.",
-        "reverse_engineering": "Study a delivered specimen, device or interpretable record with finite analysis; an observation does not disclose every method or establish causal validity in a new context."
-      }
-    },
-    "scope_boundary": "High-level benign biological research capability. Evidence is organism-, method- and context-specific; no automatic clinical benefit, universal trait improvement or free biological stock.",
-    "implementation_status": "Authored proposal; laboratories, sample stocks, finite analysis, acquisition penalties, qualified applications and AI choices remain pending."
-  },
-  {
-    "field": "D15",
     "id": "biological_electron_microscopy",
     "name": "Biological Electron Microscopy",
     "foundations": "electron_physics,vacuum_pumps",

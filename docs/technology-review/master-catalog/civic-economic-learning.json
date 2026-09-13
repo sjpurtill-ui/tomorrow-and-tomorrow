@@ -2375,22 +2375,6 @@
   },
   {
     "field": "D18",
-    "id": "laboratory_notebooks",
-    "name": "Laboratory Notebooks",
-    "foundations": "formal_archives,experimental_controls",
-    "mechanism": "Record methods, observations, deviations and dates while work occurs",
-    "operating_requirement": "Durable media and disciplined investigators",
-    "consequence": "Permit reconstruction of what was actually attempted",
-    "status": "authored_draft",
-    "requires_all": [
-      "formal_archives",
-      "experimental_controls"
-    ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
-  },
-  {
-    "field": "D18",
     "id": "instrument_training_protocols",
     "name": "Instrument Training Protocols",
     "foundations": "laboratory_notebooks,dimensional_metrology",
@@ -2401,22 +2385,6 @@
     "requires_all": [
       "laboratory_notebooks",
       "dimensional_metrology"
-    ],
-    "requires_any": [],
-    "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."
-  },
-  {
-    "field": "D18",
-    "id": "experimental_protocol_publication",
-    "name": "Experimental Protocol Publication",
-    "foundations": "laboratory_notebooks,printing_process",
-    "mechanism": "Publish enough method detail for another group to attempt reproduction",
-    "operating_requirement": "Authors, editors and distributable records",
-    "consequence": "Separate a reported result from an executable method",
-    "status": "authored_draft",
-    "requires_all": [
-      "laboratory_notebooks",
-      "printing_process"
     ],
     "requires_any": [],
     "recovery": "Acquire records or instruction through the existing disadvantaged acquisition systems; retain local learning, competent staff, resources and institutional authorization. Implementation and route-specific prices remain pending."

@@ -5884,6 +5884,104 @@
       "source_domain": "production",
       "name": "Garment Seam Sealing",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "laboratory_notebooks",
+      "field": "D18",
+      "source_domain": "knowledge",
+      "name": "Laboratory Notebooks",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "experimental_protocol_publication",
+      "field": "D18",
+      "source_domain": "knowledge",
+      "name": "Experimental Protocol Publication",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "microscopic_cell_observation",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Microscopic Cell Observation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "cell_theory",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Cell Theory",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "cell_division_observation",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Cell-Division Observation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "tissue_histology",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Tissue Histology",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "biological_staining",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Biological Staining",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "microbial_observation",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Microbial Observation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "microbial_isolation_methods",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Microbial Isolation Methods",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "microbial_growth_measurement",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Microbial Growth Measurement",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "aseptic_laboratory_practice",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Aseptic Laboratory Practice",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "instrument_sterilization",
+      "field": "D14",
+      "source_domain": "knowledge",
+      "name": "Instrument Sterilization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "cell_culture_methods",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Cell-Culture Methods",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "live_cell_time_lapse",
+      "field": "D15",
+      "source_domain": "knowledge",
+      "name": "Live Cell Time Lapse",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
