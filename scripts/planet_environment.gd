@@ -272,7 +272,8 @@ func _resource_potentials(position:Vector2,biome:String,temperature:float,precip
 		"Nitrates":clampf(arid*weathering*0.62+(0.18 if coastal else 0.0),0.0,1.0),"Deep Aquifer":clampf(sediment*0.40+basin*0.35+precipitation*0.18,0.0,1.0),
 		"Refractory Clay":clampf(weathering*0.50+igneous*0.28+sediment*0.12,0.0,1.0),"Phosphate Rock":clampf(sediment*0.44+(0.28 if coastal else 0.0)+local_variation*0.18,0.0,1.0),
 		"Graphite":clampf(metamorphic*mineral*0.86,0.0,1.0),
-		"Uranium Ore":clampf(igneous*mineral*0.65+sediment*mineral*0.15,0.0,1.0)
+		"Uranium Ore":clampf(igneous*mineral*0.65+sediment*mineral*0.15,0.0,1.0),
+		"Silver Ore":clampf(mineral*(igneous*0.45+metamorphic*0.30+sediment*0.15),0.0,1.0)
 	}
 
 

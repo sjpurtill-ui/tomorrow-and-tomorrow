@@ -504,5 +504,146 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "laminated_interior_panels"
     ]
+  },
+  {
+    "id": "wood_methanol_recovery",
+    "name": "Wood Methanol Recovery",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "charcoal_retorts",
+      "chemical_distillation"
+    ],
+    "requires_all": [
+      "charcoal_retorts",
+      "chemical_distillation"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Wood Methanol Recovery",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Capture wood-carbonization vapors and separate a methanol-bearing fraction from watery condensate and tar; further refining distinguishes usable methanol from crude mixed solvent.",
+    "effects": {},
+    "production_items": [
+      "wood_chemical_condensate",
+      "wood_methanol_fraction"
+    ],
+    "production_contract": "Pay suitable Timber, retort and condenser capacity, heat, water, separation work and feed-quality trials; account for low variable methanol recovery and rejected watery or tarry fractions.; named physical feedstocks, installed tooling, shared labor and specified energy are consumed. Imported product grants no synthesis mastery."
+  },
+  {
+    "id": "silver_cupellation",
+    "name": "Silver Cupellation",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "lead_smelting",
+      "ore_assaying"
+    ],
+    "requires_all": [
+      "lead_smelting",
+      "ore_assaying"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Silver Cupellation",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Oxidize the lead and base-metal carrier of a qualified silver-bearing metal charge, retaining a noble-metal-rich residue and separating oxidized material in a consumable hearth lining.",
+    "effects": {},
+    "production_items": [
+      "cupelled_silver"
+    ],
+    "production_contract": "Pay assayed silver-bearing feed, any required lead collector, fuel, furnace work and lining replacement; retain slag/litharge and metal losses, and verify the recovered silver grade.; named physical feedstocks, installed tooling, shared labor and specified energy are consumed. Imported product grants no synthesis mastery."
+  },
+  {
+    "id": "formaldehyde_synthesis",
+    "name": "Formaldehyde Synthesis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "industrial_catalyst_design",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "industrial_catalyst_design",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Formaldehyde Synthesis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Convert qualified methanol through a selected catalytic oxidation/dehydrogenation route and absorb the resulting formaldehyde into a defined solution.",
+    "effects": {},
+    "production_items": [
+      "formaldehyde_solution"
+    ],
+    "production_contract": "Pay named methanol feed, maintained qualified catalyst, controlled air handling, reaction and cooling capacity, water, separation work and output checks; retain catalyst wear and rejected fractions.; named physical feedstocks, installed tooling, shared labor and specified energy are consumed. Imported product grants no synthesis mastery."
+  },
+  {
+    "id": "urea_synthesis",
+    "name": "Urea Synthesis",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "pressure_vessels",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "pressure_vessels",
+      "chemical_distillation",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Urea Synthesis",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "React defined ammonia and carbon-dioxide feeds through the carbamate-to-urea pathway, separating product from unconverted material.",
+    "effects": {},
+    "production_items": [
+      "separated_urea"
+    ],
+    "production_contract": "Pay named Ammonia and Carbon Dioxide, maintained pressure plant, heat, cooling and separation work; bounded recycle retains makeup requirements and losses, and product qualification consumes samples.; named physical feedstocks, installed tooling, shared labor and specified energy are consumed. Imported product grants no synthesis mastery."
   }
 ]

@@ -163,3 +163,71 @@ func test_condensation_supply_chain_reaches_an_indoor_switchboard()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles.get("Interior Bonded Wood Panels",0))).is_equal(0.0)
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Silver Ore"])).is_equal(984.0)
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(98.0))
+func test_silver_needs_assaying_and_finite_worked_deposit()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare()
+		var s=WorldSimulation.state
+		var resource=WorldSimulation.resources
+		var deposit:Dictionary=resource._deposit("Silver Ore",Vector3(1,0,1),.8,1000,0)
+		deposit.clues=1.0;s.resource_deposits.assign([deposit])
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(deposit.stage)).is_equal("unknown")
+		s.known_discoveries.append("ore_assaying");s.discovery_adoption.ore_assaying=1.0
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(deposit.stage)).is_equal("recognized")
+		assert_float(float(s.resource_stockpiles.get("Silver Ore",0))).is_equal(0.0)
+		deposit.stage="surveyed";deposit.route=1.0
+		s.population_allocations.Extraction=8;s.population_allocations.Logistics=8;s.population_allocations.Knowledge=5;s.population_allocations.Construction=10
+		resource.process_day({"origin":Vector3.ZERO,"settled":false,"tools":1.0})
+		assert_float(float(deposit.remaining)).is_less(1000.0)
+		assert_float(float(deposit.lifetime_extracted)).is_greater(0.0)
+		assert_float(float(deposit.remaining)+float(deposit.lifetime_extracted)).is_equal_approx(1000.0,.00001))
+func test_silver_has_geographic_potential_and_old_ore_keys_keep_order()->void:
+	var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(100,200))
+	assert_bool(profile.resource_potentials.has("Silver Ore")).is_true()
+	assert_float(float(profile.resource_potentials["Silver Ore"])).is_between(0.0,1.0)
+	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Silver Ore")
+	assert_bool(bool(ResourceSystem.catalog["Silver Ore"].renewable)).is_false()
+func test_appended_silver_does_not_change_existing_generated_deposits()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		var resource=WorldSimulation.resources
+		var silver:Dictionary=resource.catalog["Silver Ore"].duplicate(true)
+		var potentials:Dictionary={}
+		for key:String in resource.catalog:potentials[key]=.8
+		var profile:={"resource_potentials":potentials,"signature":"silver-regression"}
+		var seen_silver:=false
+		for seed_value:int in range(10,18):
+			WorldSimulation.state.world_seed=seed_value
+			resource.catalog.erase("Silver Ore")
+			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
+			resource.register_local_occurrences([],"Hills",profile)
+			var old: Array=WorldSimulation.state.resource_deposits.duplicate(true)
+			resource.catalog["Silver Ore"]=silver
+			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
+			resource.register_local_occurrences([],"Hills",profile)
+			var unchanged:Array=[]
+			for deposit:Dictionary in WorldSimulation.state.resource_deposits:
+				if deposit.resource=="Silver Ore":seen_silver=true
+				else:unchanged.append(deposit)
+			assert_array(unchanged).is_equal(old)
+		assert_bool(seen_silver).is_true())
+func test_silver_deposit_and_stock_survive_full_save_load()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare()
+		var deposit:Dictionary=WorldSimulation.resources._deposit("Silver Ore",Vector3(1,0,1),.8,500,0)
+		deposit.stage="recognized"
+		WorldSimulation.state.resource_deposits.assign([deposit])
+		WorldSimulation.state.resource_stockpiles["Silver Ore"]=3.5)
+	var slot:="polymer_silver_%d"%OS.get_process_id()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear();var result:=SaveSystem.load_game(slot)
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
+	if not result.get("ok",false):return
+	WorldSimulation.scoped("polymers",func()->void:
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Silver Ore"])).is_equal(3.5)
+		var deposit:Dictionary=WorldSimulation.state.resource_deposits[0]
+		assert_str(String(deposit.resource)).is_equal("Silver Ore")
+		assert_str(String(deposit.stage)).is_equal("recognized")
+		assert_float(float(deposit.remaining)).is_equal(500.0))
