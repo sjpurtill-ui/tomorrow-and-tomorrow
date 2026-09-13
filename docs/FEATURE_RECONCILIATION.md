@@ -1,3 +1,7 @@
+## September 12 — glass and earthen illustrations verified
+
+Integrated `02e882d`: seven visually reviewed discovery illustrations and explicit 768px mipmapped import settings. All seven textures load correctly in the canonical checkout, and all 12 worktree atlas cases pass. Art now covers **138 of 716 live discoveries**, with **578 queued**. No runtime or save changes; the runtime remains 716 discoveries, 498 routes, 365 recipes and 18 facilities. Ledger remains 3,213 identities, with 1,787 still to author and 4,284 to implement. The next armor delivery includes six existing identities, including fitted shields. No player launch or package rebuild.
+
 ## September 12 — reviewed civilian response coverage
 
 ## September 12 — geological coverage and textile art checkpoint
