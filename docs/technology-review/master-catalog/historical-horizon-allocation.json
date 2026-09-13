@@ -12264,6 +12264,326 @@
       "classification_status": "editorial_review",
       "rationale": "The specified instrument or inference method defines the capability class, without asserting an exclusive invention era or runtime unlock.",
       "scope_digest": "f3bcd88c24938eb03351720f07dea0ec6c05c7ca35a22c1f114cf73f86fe2955"
+    },
+    {
+      "id": "gear_shaping_generation",
+      "name": "Gear Shaping Generation",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c53b25685d0227b3ce552d14c3bb729999690b139fa87f18f33da47f1a566ae1"
+    },
+    {
+      "id": "gear_power_skiving",
+      "name": "Gear Power Skiving",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b7036e6c1dc9d9f6ff9155c3d65457abecb2da78bc55ccd0aceccc2af40498ba"
+    },
+    {
+      "id": "progressive_profile_broaching",
+      "name": "Progressive Profile Broaching",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b9770e2cc431516ddbfc26dd8df3109295bf927fa47b15f1b1e98eed02c8ee85"
+    },
+    {
+      "id": "reciprocating_profile_slotting",
+      "name": "Reciprocating Profile Slotting",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "a93627445af722754872b5983d9474df93df28d6bfd1a17863dfd5f894d2f117"
+    },
+    {
+      "id": "reamed_bore_finishing",
+      "name": "Reamed Bore Finishing",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "eccc1f8aa4dde0bed12b47fe2f311783c2ef68f2defbf1b79d87ea3d3ee11879"
+    },
+    {
+      "id": "honed_bore_finishing",
+      "name": "Honed Bore Finishing",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "9625fcf9544627d1df5facf75e4800e0b15db057663ed778f46df208bba1f08f"
+    },
+    {
+      "id": "centerless_grinding",
+      "name": "Centerless Grinding",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f1f91a4b07b349c130d758abe9b4727d46c20bdee742e889852739e86e5a6ac7"
+    },
+    {
+      "id": "cylindrical_grinding",
+      "name": "Cylindrical Grinding",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "13562f92c47e57349408b7ed7f82c36a33c3ff486ff3202fd5e9a959f38647ee"
+    },
+    {
+      "id": "surface_grinding",
+      "name": "Surface Grinding",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "5470314e077479a89ba6823595c8dccf45627a0ad633602e9208aa282a791638"
+    },
+    {
+      "id": "abrasive_belt_finishing",
+      "name": "Abrasive Belt Finishing",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2c4d6d3fcfd2533f006f2b7577c62ea8873beae35821eebf8b2f639cba883ff6"
+    },
+    {
+      "id": "short_stroke_superfinishing",
+      "name": "Short-Stroke Superfinishing",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "a16734f9ee89b5e0b8b00f0179cf04cc3aae694157bc3e66eea4e3651454dc90"
+    },
+    {
+      "id": "wire_electrical_discharge_machining",
+      "name": "Wire Electrical-Discharge Machining",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "8c1a5d563c7bc9336e5cb52549e5f67a3f776a24ae813a5cd60bf200a4462928"
+    },
+    {
+      "id": "sinker_electrical_discharge_machining",
+      "name": "Sinker Electrical-Discharge Machining",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "239ec1db0706360436b58e6cac9aa02a0049c309d9cee0e7521f5c5b1bf7dc92"
+    },
+    {
+      "id": "electrochemical_machining",
+      "name": "Electrochemical Machining",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "28af39a8667fcb423d1a6a131f78cbcf357a1a0e125eedf22f4b48516088f415"
+    },
+    {
+      "id": "abrasive_waterjet_cutting",
+      "name": "Abrasive Waterjet Cutting",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "83717b2e93befcc9a2f77a5b7160e39f51d009061565f2a3f652b75768684273"
+    },
+    {
+      "id": "laser_sheet_cutting",
+      "name": "Laser Sheet Cutting",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b1b99fe05ffde196fc6d8d410e41a796c7ae391cdafae14881ec0e2e348885ab"
+    },
+    {
+      "id": "ultrasonic_abrasive_machining",
+      "name": "Ultrasonic Abrasive Machining",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c946d09feda2ef6fcd4c71bdef7420063e74c4468800a547badbafb5ed8364ec"
+    },
+    {
+      "id": "photochemical_metal_etching",
+      "name": "Photochemical Metal Etching",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "411f328f6d789712eb394612413289a269e4997746767010b79e8b10cd657965"
+    },
+    {
+      "id": "fineblanking_sheet_parts",
+      "name": "Fineblanking Sheet Parts",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "038832dfd9b602ce9f4fb512e6daa934e8fa1785b4be43432a62f84759f4adc0"
+    },
+    {
+      "id": "deep_drawn_sheet_forming",
+      "name": "Deep-Drawn Sheet Forming",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "1290341855fd4a9e5e933b4f7af3636cf3820221285147bc6b73da1454dbf379"
+    },
+    {
+      "id": "incremental_sheet_forming",
+      "name": "Incremental Sheet Forming",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "a80db9902f07f5964b279927c7a7fd14a81c5c4ab500c54ec8a11ff4aedf5db9"
+    },
+    {
+      "id": "metal_spinning_forming",
+      "name": "Metal Spinning Forming",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "051bcafce45b8e365a2a5b65c34555216bddb7f44d65a0879153cb3ff9525108"
+    },
+    {
+      "id": "rotary_swaging",
+      "name": "Rotary Swaging",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "7c37b91c5e7a0fe7babcc6fe92e2f20a7dba9a0f50c9fd8dee126eaf7f58988b"
+    },
+    {
+      "id": "tube_rotary_draw_bending",
+      "name": "Tube Rotary-Draw Bending",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "460727c87b794d54442d7196ddbda1aa7d9a957981b3eb89cfb48791134d1534"
+    },
+    {
+      "id": "stretch_sheet_forming",
+      "name": "Stretch Sheet Forming",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b0efb0e7f597908c10317326e918caf6c69c284d86ffdcf115f732046da18c13"
+    },
+    {
+      "id": "roll_formed_sections",
+      "name": "Roll-Formed Sections",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "8827582f955d6c03084814d164178cf336708b60469a4888f191dec8c1e3cca9"
+    },
+    {
+      "id": "ultrasonic_metal_joining",
+      "name": "Ultrasonic Metal Joining",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "0e444307b52a2c6f7b5d59bc91e9356562f991256bc92ce201e593ac394b5707"
+    },
+    {
+      "id": "diffusion_bonding_process",
+      "name": "Diffusion Bonding Process",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2a000c68a805a0d18caf82b7eac0430854c95ccdbc098b06522713d4c43dc173"
+    },
+    {
+      "id": "investment_casting_process",
+      "name": "Investment Casting Process",
+      "horizon": "H03",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e85d9be3ebe7c94f9bdc730131f66737021f0dbda3cc9f48d203ee81503aa2fd"
+    },
+    {
+      "id": "pressure_die_casting",
+      "name": "Pressure Die Casting",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b6b90f8152763e85ad68006e596dbd5fd251ed1fe10f6582d61bae3c874ba99d"
+    },
+    {
+      "id": "centrifugal_tube_casting",
+      "name": "Centrifugal Tube Casting",
+      "horizon": "H04",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e8ef371a99d8e3a9b13f6232750ad0eb1b48b759134f994f0b814c4a0d4dddd5"
+    },
+    {
+      "id": "lost_foam_casting",
+      "name": "Lost-Foam Casting",
+      "horizon": "H05",
+      "source_file": "manufacturing-process-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "da15fa1e3bfefc28a383365e5741a88e8193766199fcc89ba142834eae80a79d"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

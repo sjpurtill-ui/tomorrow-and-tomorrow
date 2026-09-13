@@ -1,3 +1,9 @@
+## September 13 — manufacturing process coverage
+
+Reviewed32 distinct removal, forming, joining and casting processes with specific component consumers. Support geometry, tooling access, material compatibility, paid work/energy, consumable losses and inspection remain explicit. Existing generic grinding, gear generation/hobbing, lapping, fastener production and casting-feed design are not recounted. These rows remain authored proposals.
+
+Ledger: **740 integrated +2,611 drafts =3,351 identities**, leaving **1,649 to author and4,260 to implement**. D06 accounts for169/240 planned identities. Parent paths resolve, normalized names are distinct and15 ledger tests pass. Runtime740/522/402/20 and art162/740 are unchanged. No player launch or package rebuild. See `technology-review/Manufacturing Process Review.md`. Polymer implementation continues in its isolated worker checkout.
+
 ## September 13 — Earth observation method coverage
 
 Reviewed25 distinct observational and analytical methods covering radar/optical retrievals, atmospheric layers, cryosphere measurements, ocean budgets and flux/source inference. Each requires attributable observations, paid acquisition or computation, uncertainty and a downstream consumer. Existing broad observation networks and forecasting services are not recounted; inferred or missing measurements cannot disclose hidden world state.
