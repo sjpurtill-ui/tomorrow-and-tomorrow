@@ -4927,7 +4927,7 @@
       "domain": "infrastructure",
       "id": "adobe_wall_construction",
       "name": "Adobe-Wall Construction",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/wattle_and_daub_walls.png",
@@ -4935,7 +4935,7 @@
       "domain": "infrastructure",
       "id": "wattle_and_daub_walls",
       "name": "Wattle-and-Daub Walls",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/clay_pipe_forming.png",
@@ -5351,7 +5351,7 @@
       "domain": "production",
       "id": "glass_batch_composition_control",
       "name": "Glass Batch Composition Control",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/glass_annealing_schedules.png",
@@ -5359,7 +5359,7 @@
       "domain": "production",
       "id": "glass_annealing_schedules",
       "name": "Glass Annealing Schedules",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/ceramic_slip_casting.png",
@@ -5367,7 +5367,7 @@
       "domain": "production",
       "id": "ceramic_slip_casting",
       "name": "Ceramic Slip Casting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
@@ -5375,7 +5375,7 @@
       "domain": "production",
       "id": "ceramic_glaze_formulation",
       "name": "Ceramic-Glaze Formulation",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/high_fire_stoneware.png",
@@ -5383,7 +5383,7 @@
       "domain": "production",
       "id": "high_fire_stoneware",
       "name": "High-Fire Stoneware",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/carbon_resistors.png",
@@ -5733,9 +5733,9 @@
   "live_art_complete": false,
   "live_count": 716,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 585,
+  "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 131
+  "verified_count": 138
 }
