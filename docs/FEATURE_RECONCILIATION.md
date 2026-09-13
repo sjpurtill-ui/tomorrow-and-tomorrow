@@ -1,3 +1,9 @@
+## September 12 — textile operation coverage
+
+Reviewed32 additional textile operations spanning feed preparation, loom setup/insertion, distinct finishing processes, machine knitting and nonwoven formation/bonding. Existing combing, generic weaving, drawloom/Jacquard selection, fulling/calendering and finished filtration qualification are excluded from duplicate counting. Each proposal has a primary mechanism reference, paid outside-learning contracts, explicit process inputs and a downstream consumer; none is counted as runtime behavior.
+
+Ledger: **740 integrated +2,553 drafts =3,293 identities**, leaving **1,707 to author and4,260 to implement**. D07 accounts for108/120 planned identities. All parent paths resolve, normalized names are unique and15 catalog-tool tests pass. Runtime740/522/402/20 and art162/740 remain verified at `c1f13057d6dee1e53cce319d16fc7fc112c5820c`. No player launch or package rebuild. See `technology-review/Textile Operation Review.md`. The other task is implementing25 polymer discoveries from6d89ae9, including typed feedstock closure and actual downstream consumers.
+
 ## September 12 — 740 verified operating discoveries
 
 Selected food source `6731829793b0eb5b65dbb8f0fb94b36d622b4600` and sewing source `8201718` are combined in `43e073253e78fc99b4ab87fee632e63116f843eb`; canonical runtime/art acceptance is `c1f13057d6dee1e53cce319d16fc7fc112c5820c`. Six food identities retain their original predicates. Stable compatible local resource opportunities require recognition, matching adopted preparation and finite collection work; that work is subtracted from the existing food workforce. Raw and unfinished lots are unavailable as food. Shelling, screening, leaching, grating and splitting spend equipment, materials and shared Logistics work; selected intermediates require later paid cooking. No generic plant stock is relabeled into selected species.

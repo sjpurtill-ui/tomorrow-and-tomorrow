@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 740,
   "pending_communications": 0,
-  "new_authored_drafts": 2521,
-  "distinct_accounted_identities": 3261,
-  "remaining_identities_to_author": 1739,
+  "new_authored_drafts": 2553,
+  "distinct_accounted_identities": 3293,
+  "remaining_identities_to_author": 1707,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1165,
+    "assigned_identities": 1197,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2310,31 +2310,31 @@
         "id": "H03",
         "name": "Complex societies and learned traditions",
         "target": 800,
-        "assigned": 211,
-        "target_slots_not_yet_assigned": 589,
+        "assigned": 216,
+        "target_slots_not_yet_assigned": 584,
         "implemented_baseline": 8,
         "pending_communications": 0,
-        "authored_drafts": 203
+        "authored_drafts": 208
       },
       {
         "id": "H04",
         "name": "Mechanization and industrial systems",
         "target": 700,
-        "assigned": 221,
-        "target_slots_not_yet_assigned": 479,
+        "assigned": 239,
+        "target_slots_not_yet_assigned": 461,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 216
+        "authored_drafts": 234
       },
       {
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 595,
-        "target_slots_not_yet_assigned": 305,
+        "assigned": 604,
+        "target_slots_not_yet_assigned": 296,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 590
+        "authored_drafts": 599
       },
       {
         "id": "H06",
@@ -2358,7 +2358,7 @@
     "D04": 107,
     "D05": 156,
     "D06": 53,
-    "D07": 38,
+    "D07": 70,
     "D08": 95,
     "D09": 79,
     "D10": 79,
@@ -2444,9 +2444,9 @@
       "target": 120,
       "implemented_baseline": 38,
       "pending_communications": 0,
-      "authored_drafts": 38,
-      "accounted": 76,
-      "remaining_to_target": 44
+      "authored_drafts": 70,
+      "accounted": 108,
+      "remaining_to_target": 12
     },
     {
       "id": "D08",

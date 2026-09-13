@@ -11684,6 +11684,326 @@
       "classification_status": "editorial_review",
       "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
       "scope_digest": "e50043a5c3ad81aa967cd1fa3b37862d38959473ce3b61a10b3a9661843f3f71"
+    },
+    {
+      "id": "fiber_card_webs",
+      "name": "Fiber Carding Webs",
+      "horizon": "H03",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "55befb98e94256c196f69c6530369fcfa8a790d98f4b794271c6260160108e05"
+    },
+    {
+      "id": "wool_scouring",
+      "name": "Wool Scouring",
+      "horizon": "H03",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f869af9b9a3713da0b1880203b3b1c38450796ad05dd928baa90c9ba8aacef25"
+    },
+    {
+      "id": "sliver_drawing",
+      "name": "Sliver Drawing",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "bce97472ecc3f04cd232f15add0d0b114baa4cb1021c86f1cd468657609ad993"
+    },
+    {
+      "id": "yarn_plying_balance",
+      "name": "Yarn Plying Balance",
+      "horizon": "H03",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e86385682156e9a72137b49e4e9d85edb0101c81150108cd5e1a28a896913627"
+    },
+    {
+      "id": "yarn_package_winding",
+      "name": "Yarn Package Winding",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e95feece51f76bb2f7019f1c5a7b1c8da3e49fe64af4835223026037cfc6ba9f"
+    },
+    {
+      "id": "warp_beam_preparation",
+      "name": "Warp Beam Preparation",
+      "horizon": "H03",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "ab52dc8bebac7cd889bd59776cf64e8e128bc8db3daf69a3aaa92a8c9bcdfa97"
+    },
+    {
+      "id": "warp_sizing",
+      "name": "Warp Sizing",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "4ed8770f677513c2f9bc38f0be28169de7440d02c0185921c9a9cc4956d0b0e6"
+    },
+    {
+      "id": "loom_draw_in_plans",
+      "name": "Loom Draw-in Plans",
+      "horizon": "H03",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "fe7d3f1417bfeb68d833386f96a02ce7b76a322a157b1a641e30d295af2d27d1"
+    },
+    {
+      "id": "dobby_shed_control",
+      "name": "Dobby Shed Control",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "89c91d82b19fcb93004ebb8d81398a18b0dbff7bad181c3dc91f6647be9ed343"
+    },
+    {
+      "id": "rapier_weft_insertion",
+      "name": "Rapier Weft Insertion",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "6c3bc79ece83760a88a4121addcf01ab2ff6c63fecc8880f812435069cfd7326"
+    },
+    {
+      "id": "air_jet_weft_insertion",
+      "name": "Air-Jet Weft Insertion",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "90e5b7e96c7d29a5283f612d95bce4542702e241c6bd25319091d26b8de4ad12"
+    },
+    {
+      "id": "water_jet_weft_insertion",
+      "name": "Water-Jet Weft Insertion",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "1daffedfe149a4a04e7571a705e66861d82d57ff3fe75685fa0fb2c52201f127"
+    },
+    {
+      "id": "cotton_scouring",
+      "name": "Cotton Scouring",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "64f8513804ac58733ed512a19be31f2b2857848ae70ad06437f248cf15ea67c7"
+    },
+    {
+      "id": "warp_size_removal",
+      "name": "Warp-Size Removal",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "29867dae082cc4ef4a09d46a1090be538e3fdd5a1213a8f64b75a5405b064664"
+    },
+    {
+      "id": "cotton_mercerization",
+      "name": "Cotton Mercerization",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "947fde1576d05a00b415833ff37ab3a1d7f3715b5cb5ab49ba49cd03d1f7c486"
+    },
+    {
+      "id": "textile_singeing",
+      "name": "Textile Singeing",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "4a3a52768c8edef37bfd4e954ebfce0f5f43780daa2a89c08f3292c40f0fe81c"
+    },
+    {
+      "id": "fabric_tenter_control",
+      "name": "Fabric Tenter Control",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "15c29ef85acc5d426f1323606c02e001eec5c8007c8e784800fa5c17939f3e47"
+    },
+    {
+      "id": "fabric_compressive_shrinkage",
+      "name": "Fabric Compressive Shrinkage",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "f07c722a3150f335e8ea911783df332fb996088a4b0e52a3b3a4d67ff4196ad1"
+    },
+    {
+      "id": "raised_nap_finishing",
+      "name": "Raised-Nap Finishing",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "95ea45c61f13f6c4166b7323f80bf6bdf4a5253345f85db0073e57e270bcaebd"
+    },
+    {
+      "id": "pile_shearing_control",
+      "name": "Pile Shearing Control",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "700ca484b796e8938603117467500af6be20ad46f760b45a005c2bcaa64a2593"
+    },
+    {
+      "id": "thermoplastic_fabric_heat_setting",
+      "name": "Thermoplastic Fabric Heat Setting",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "bf33a902db7d2da3714bad7fb53c0e64958da947094e8f1df277ec20aa509fe5"
+    },
+    {
+      "id": "warp_knitting_machines",
+      "name": "Warp-Knitting Machines",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "ede1880f3f8cb4438ff55aa0bad390428d41342d6f6b0e01c47c96c880f1bffd"
+    },
+    {
+      "id": "circular_knitting_machines",
+      "name": "Circular Knitting Machines",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "80276ff07f7a1ce740b35ce99e2bd93e2d9828451d73bf43d7e49c85b569c156"
+    },
+    {
+      "id": "flat_bed_knitting_machines",
+      "name": "Flat-Bed Knitting Machines",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "5c387778907f1dc71ca50ae49d48aaee0c8446537e0440dca3b22ea52fb9ef7f"
+    },
+    {
+      "id": "nonwoven_air_laying",
+      "name": "Nonwoven Air Laying",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "fd41c896584bb2b60fb986f8eeb746894c020db8e78e4c2b8685b4946578f3e4"
+    },
+    {
+      "id": "nonwoven_wet_laying",
+      "name": "Nonwoven Wet Laying",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "482ccc63fdecfaad493316c292461aa0f05320b6057d6f557e22cec390c04807"
+    },
+    {
+      "id": "nonwoven_spunlaying",
+      "name": "Nonwoven Spunlaying",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "43633a413358125729f77d27f0e06b5af3999cd761cf68d992efd5825bc3f4b6"
+    },
+    {
+      "id": "nonwoven_meltblowing",
+      "name": "Nonwoven Meltblowing",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "07c25eda675b9e3b47029b84dbe20f153869063c2df914c606e5d3ec12e33497"
+    },
+    {
+      "id": "nonwoven_needle_punching",
+      "name": "Nonwoven Needle Punching",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e235c74d9f572babf55d32a94afbf9174648ba9db4e2f224b3ec76df2369ab74"
+    },
+    {
+      "id": "nonwoven_hydroentanglement",
+      "name": "Nonwoven Hydroentanglement",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b20cf94a3e4c4f061664049dd34e02716314e326455805a7d5c13f72aaf3fdae"
+    },
+    {
+      "id": "nonwoven_thermal_bonding",
+      "name": "Nonwoven Thermal Bonding",
+      "horizon": "H05",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "4e110a26663f165dd42abbfc4919061cbb6a6b8b8031a6bcd67ca32b993eefce"
+    },
+    {
+      "id": "nonwoven_binder_bonding",
+      "name": "Nonwoven Binder Bonding",
+      "horizon": "H04",
+      "source_file": "textile-operation-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3b38175181ac9ab0c853b0e0858a31fd54e7c70b31f564a3ee538ada8908d80d"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

@@ -1,0 +1,1155 @@
+[
+  {
+    "id": "fiber_card_webs",
+    "name": "Fiber Carding Webs",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "fiber_grading",
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "foundations": "fiber_grading,hafted_tools",
+    "mechanism": "Toothed surfaces open tangled staple into a web.",
+    "operating_requirement": "Pay for graded staple, maintained card teeth and working time; excessive action breaks fibers.",
+    "consequence": "Supply carded feed to spinning or nonwoven bonding; refuse contaminated or overbroken batches.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable fiber carding webs instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fiber_card_webs",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Toothed surfaces open tangled staple into a web.",
+      "operating_requirements": "Pay for graded staple, maintained card teeth and working time; excessive action breaks fibers.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local fiber carding webs trials.",
+        "partnership": "Share actual samples and operator time for fiber carding webs; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded fiber carding webs process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external fiber carding webs processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable fiber carding webs machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.woolmark.com/industry/product-development/wool-processing/woollen-carding/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "wool_scouring",
+    "name": "Wool Scouring",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "fiber_grading",
+      "soap_manufacture"
+    ],
+    "requires_any": [],
+    "foundations": "fiber_grading,soap_manufacture",
+    "mechanism": "A controlled wash removes grease and dirt from fleece.",
+    "operating_requirement": "Consume identified raw wool, wash agent, water, heat and drying work; track removed mass and wastewater.",
+    "consequence": "Supply clean wool to carding; reject felted or incompletely cleaned lots rather than upgrading all fiber.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable wool scouring instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wool_scouring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A controlled wash removes grease and dirt from fleece.",
+      "operating_requirements": "Consume identified raw wool, wash agent, water, heat and drying work; track removed mass and wastewater.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local wool scouring trials.",
+        "partnership": "Share actual samples and operator time for wool scouring; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded wool scouring process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external wool scouring processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable wool scouring machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.woolmark.com/globalassets/_06-new-woolmark/_industry/support/resources/exclusive-resources/block-1---wool-in-the-world/gd4478-wool-a-sustainable-solution-toolkit-12.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "sliver_drawing",
+    "name": "Sliver Drawing",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "fiber_card_webs",
+      "gear_ratios"
+    ],
+    "requires_any": [],
+    "foundations": "fiber_card_webs,gear_ratios",
+    "mechanism": "Differential roller motion attenuates combined slivers.",
+    "operating_requirement": "Reserve feed slivers, adjusted rollers, drive energy and operator time; test delivered linear mass.",
+    "consequence": "Supply even spinning feed, with breaks and off-count material excluded from qualified output.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable sliver drawing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sliver_drawing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Differential roller motion attenuates combined slivers.",
+      "operating_requirements": "Reserve feed slivers, adjusted rollers, drive energy and operator time; test delivered linear mass.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local sliver drawing trials.",
+        "partnership": "Share actual samples and operator time for sliver drawing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded sliver drawing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external sliver drawing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable sliver drawing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.rieter.com/products/systems/spinning-preparation/draw-frame-sb-d-27"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "yarn_plying_balance",
+    "name": "Yarn Plying Balance",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "spinning_wheels",
+      "yarn_count_standards"
+    ],
+    "requires_any": [],
+    "foundations": "spinning_wheels,yarn_count_standards",
+    "mechanism": "Multiple spun strands receive controlled ply twist.",
+    "operating_requirement": "Spend distinct yarn strands and spindle work; check direction, count and residual torque on samples.",
+    "consequence": "Supply specified multi-ply sewing or weaving yarn; excess torque fails the intended product specification.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable yarn plying balance instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "yarn_plying_balance",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Multiple spun strands receive controlled ply twist.",
+      "operating_requirements": "Spend distinct yarn strands and spindle work; check direction, count and residual torque on samples.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local yarn plying balance trials.",
+        "partnership": "Share actual samples and operator time for yarn plying balance; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded yarn plying balance process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external yarn plying balance processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable yarn plying balance machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/yarn-manufacturing/yarn-ply-counts-and-treatments/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "yarn_package_winding",
+    "name": "Yarn Package Winding",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "spinning_wheels",
+      "yarn_tension_control"
+    ],
+    "requires_any": [],
+    "foundations": "spinning_wheels,yarn_tension_control",
+    "mechanism": "Yarn is transferred onto a controlled payout package.",
+    "operating_requirement": "Pay winding work and cores; preserve fiber identity and quantity after removed faults and joins.",
+    "consequence": "Supply usable loom or knitting packages; reject uneven payout without creating additional yarn.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable yarn package winding instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "yarn_package_winding",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Yarn is transferred onto a controlled payout package.",
+      "operating_requirements": "Pay winding work and cores; preserve fiber identity and quantity after removed faults and joins.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local yarn package winding trials.",
+        "partnership": "Share actual samples and operator time for yarn package winding; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded yarn package winding process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external yarn package winding processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable yarn package winding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/yarn-manufacturing/yarn-spinning/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "warp_beam_preparation",
+    "name": "Warp Beam Preparation",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "plain_weaving",
+      "yarn_tension_control"
+    ],
+    "requires_any": [],
+    "foundations": "plain_weaving,yarn_tension_control",
+    "mechanism": "Parallel yarn ends are assembled into an ordered beam.",
+    "operating_requirement": "Allocate real yarn by measured length and end count; pay creeling and winding work and record beam order.",
+    "consequence": "Feed a specified loom job; crossing or missing ends prevents accepted setup.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable warp beam preparation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "warp_beam_preparation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Parallel yarn ends are assembled into an ordered beam.",
+      "operating_requirements": "Allocate real yarn by measured length and end count; pay creeling and winding work and record beam order.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local warp beam preparation trials.",
+        "partnership": "Share actual samples and operator time for warp beam preparation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded warp beam preparation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external warp beam preparation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable warp beam preparation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/weaving/preparation-for-weaving/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "warp_sizing",
+    "name": "Warp Sizing",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "warp_beam_preparation",
+      "starch_washing_separation"
+    ],
+    "requires_any": [],
+    "foundations": "warp_beam_preparation,starch_washing_separation",
+    "mechanism": "A removable coating protects warp yarn during weaving.",
+    "operating_requirement": "Consume compatible size, water, heat and beam work; retain coating identity and pickup in the lot.",
+    "consequence": "Reduce qualifying warp breakage only on treated beams; excess coating blocks later wet finishing until removed.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable warp sizing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "warp_sizing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A removable coating protects warp yarn during weaving.",
+      "operating_requirements": "Consume compatible size, water, heat and beam work; retain coating identity and pickup in the lot.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local warp sizing trials.",
+        "partnership": "Share actual samples and operator time for warp sizing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded warp sizing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external warp sizing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable warp sizing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/weaving/preparation-for-weaving/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "loom_draw_in_plans",
+    "name": "Loom Draw-in Plans",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "warp_beam_preparation",
+      "plain_weaving"
+    ],
+    "requires_any": [],
+    "foundations": "warp_beam_preparation,plain_weaving",
+    "mechanism": "Threading assigns warp ends to heddles and reed spaces.",
+    "operating_requirement": "Spend setup labor against a retained weave draft and actual beam; inspect crossed or omitted threads.",
+    "consequence": "Release a correctly threaded loom job; an invalid draft cannot produce the requested structure.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable loom draw-in plans instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "loom_draw_in_plans",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Threading assigns warp ends to heddles and reed spaces.",
+      "operating_requirements": "Spend setup labor against a retained weave draft and actual beam; inspect crossed or omitted threads.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local loom draw-in plans trials.",
+        "partnership": "Share actual samples and operator time for loom draw-in plans; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded loom draw-in plans process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external loom draw-in plans processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable loom draw-in plans machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/weaving/preparation-for-weaving/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H03 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "dobby_shed_control",
+    "name": "Dobby Shed Control",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "loom_draw_in_plans",
+      "cam_motion_design"
+    ],
+    "requires_any": [],
+    "foundations": "loom_draw_in_plans,cam_motion_design",
+    "mechanism": "A selection mechanism lifts groups of heald frames.",
+    "operating_requirement": "Install paid frame-control parts and a compatible repeat plan; consume setup and drive work.",
+    "consequence": "Produce specified small-repeat woven structures within available frames; no arbitrary individual-end patterning.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable dobby shed control instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dobby_shed_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A selection mechanism lifts groups of heald frames.",
+      "operating_requirements": "Install paid frame-control parts and a compatible repeat plan; consume setup and drive work.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local dobby shed control trials.",
+        "partnership": "Share actual samples and operator time for dobby shed control; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded dobby shed control process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external dobby shed control processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable dobby shed control machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.staubli.com/cz/en/textile/products/frame-weaving.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "rapier_weft_insertion",
+    "name": "Rapier Weft Insertion",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "loom_draw_in_plans",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "foundations": "loom_draw_in_plans,precision_machinery",
+    "mechanism": "Mechanical grippers carry weft through the shed.",
+    "operating_requirement": "Pay rapier equipment, yarn, drive work and gripper maintenance; qualify transfer timing and useful width.",
+    "consequence": "Deliver accepted woven cloth under the existing loom owner; dropped transfers consume work without accepted picks.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable rapier weft insertion instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rapier_weft_insertion",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Mechanical grippers carry weft through the shed.",
+      "operating_requirements": "Pay rapier equipment, yarn, drive work and gripper maintenance; qualify transfer timing and useful width.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local rapier weft insertion trials.",
+        "partnership": "Share actual samples and operator time for rapier weft insertion; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded rapier weft insertion process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external rapier weft insertion processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable rapier weft insertion machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/weaving/weaving-basics/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "air_jet_weft_insertion",
+    "name": "Air-Jet Weft Insertion",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "loom_draw_in_plans",
+      "compressed_air_systems"
+    ],
+    "requires_any": [],
+    "foundations": "loom_draw_in_plans,compressed_air_systems",
+    "mechanism": "Air jets propel weft across a guided shed.",
+    "operating_requirement": "Consume measured air service, yarn and maintained nozzles; qualify the yarn and arrival timing.",
+    "consequence": "Produce cloth only within the qualified insertion envelope; absent air or failed arrival stops the job.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable air-jet weft insertion instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "air_jet_weft_insertion",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Air jets propel weft across a guided shed.",
+      "operating_requirements": "Consume measured air service, yarn and maintained nozzles; qualify the yarn and arrival timing.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local air-jet weft insertion trials.",
+        "partnership": "Share actual samples and operator time for air-jet weft insertion; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded air-jet weft insertion process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external air-jet weft insertion processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable air-jet weft insertion machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/weaving/weaving-basics/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "water_jet_weft_insertion",
+    "name": "Water-Jet Weft Insertion",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "loom_draw_in_plans",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "foundations": "loom_draw_in_plans,pressure_vessels",
+    "mechanism": "A water jet carries compatible hydrophobic filament weft.",
+    "operating_requirement": "Pay pump work, clean water, corrosion-resistant equipment and dewatering; absorbent yarn is incompatible.",
+    "consequence": "Supply qualified filament cloth to finishing; wastewater and wet stock remain accounted for.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable water-jet weft insertion instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "water_jet_weft_insertion",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A water jet carries compatible hydrophobic filament weft.",
+      "operating_requirements": "Pay pump work, clean water, corrosion-resistant equipment and dewatering; absorbent yarn is incompatible.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local water-jet weft insertion trials.",
+        "partnership": "Share actual samples and operator time for water-jet weft insertion; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded water-jet weft insertion process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external water-jet weft insertion processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable water-jet weft insertion machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/weaving/weaving-basics/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "cotton_scouring",
+    "name": "Cotton Scouring",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "textile_fiber_identification",
+      "soap_manufacture"
+    ],
+    "requires_any": [],
+    "foundations": "textile_fiber_identification,soap_manufacture",
+    "mechanism": "Wet preparation removes cotton waxes and nonfibrous impurities.",
+    "operating_requirement": "Consume identified cotton lots, wash chemistry, water, heat and rinsing work; test retained absorbency and residues.",
+    "consequence": "Supply clean cotton to dyeing; unsuitable chemistry or failed preparation rejects the lot.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable cotton scouring instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cotton_scouring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Wet preparation removes cotton waxes and nonfibrous impurities.",
+      "operating_requirements": "Consume identified cotton lots, wash chemistry, water, heat and rinsing work; test retained absorbency and residues.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local cotton scouring trials.",
+        "partnership": "Share actual samples and operator time for cotton scouring; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded cotton scouring process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external cotton scouring processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable cotton scouring machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/dyeing/dyeing-preparation/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "warp_size_removal",
+    "name": "Warp-Size Removal",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "warp_sizing",
+      "textile_laundering_practice"
+    ],
+    "requires_any": [],
+    "foundations": "warp_sizing,textile_laundering_practice",
+    "mechanism": "A compatible treatment removes the retained warp coating.",
+    "operating_requirement": "Read the lot's size identity; consume matching treatment and rinsing inputs, labor and wastewater capacity.",
+    "consequence": "Make the treated cloth eligible for wet finishing; unmatched coatings remain a blockage.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable warp-size removal instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "warp_size_removal",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A compatible treatment removes the retained warp coating.",
+      "operating_requirements": "Read the lot's size identity; consume matching treatment and rinsing inputs, labor and wastewater capacity.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local warp-size removal trials.",
+        "partnership": "Share actual samples and operator time for warp-size removal; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded warp-size removal process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external warp-size removal processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable warp-size removal machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://publications.gc.ca/collections/collection_2025/eccc/En84-353-1998-eng.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "cotton_mercerization",
+    "name": "Cotton Mercerization",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "cotton_scouring",
+      "chloralkali_cells"
+    ],
+    "requires_any": [],
+    "foundations": "cotton_scouring,chloralkali_cells",
+    "mechanism": "Alkali treatment under controlled tension alters cotton structure.",
+    "operating_requirement": "Use qualified cotton, caustic solution, restrained equipment and paid washing/neutralization; record dimensional checks.",
+    "consequence": "Supply a specified receptive finishing substrate; no universal strength or insulation bonus applies to other fibers.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable cotton mercerization instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cotton_mercerization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Alkali treatment under controlled tension alters cotton structure.",
+      "operating_requirements": "Use qualified cotton, caustic solution, restrained equipment and paid washing/neutralization; record dimensional checks.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local cotton mercerization trials.",
+        "partnership": "Share actual samples and operator time for cotton mercerization; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded cotton mercerization process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external cotton mercerization processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable cotton mercerization machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/dyeing/dyeing-preparation/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "textile_singeing",
+    "name": "Textile Singeing",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "plain_weaving",
+      "combustion_air_regulation"
+    ],
+    "requires_any": [],
+    "foundations": "plain_weaving,combustion_air_regulation",
+    "mechanism": "Brief surface heating removes projecting fiber ends.",
+    "operating_requirement": "Reserve compatible cloth, fuel and controlled passage work; scorched or weakened samples fail release.",
+    "consequence": "Supply a smoother printing substrate after inspection, while retaining fabric mass loss and damage.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable textile singeing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "textile_singeing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Brief surface heating removes projecting fiber ends.",
+      "operating_requirements": "Reserve compatible cloth, fuel and controlled passage work; scorched or weakened samples fail release.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local textile singeing trials.",
+        "partnership": "Share actual samples and operator time for textile singeing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded textile singeing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external textile singeing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable textile singeing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://publications.gc.ca/collections/collection_2025/eccc/En84-353-1998-eng.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "fabric_tenter_control",
+    "name": "Fabric Tenter Control",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "plain_weaving",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "plain_weaving,dimensional_metrology",
+    "mechanism": "Edge restraint controls width during drying.",
+    "operating_requirement": "Consume wet cloth, heat and machine work; record width, tension and moisture against the order.",
+    "consequence": "Deliver specified-width finishing stock; tears and excessive stretching prevent acceptance.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable fabric tenter control instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fabric_tenter_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Edge restraint controls width during drying.",
+      "operating_requirements": "Consume wet cloth, heat and machine work; record width, tension and moisture against the order.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local fabric tenter control trials.",
+        "partnership": "Share actual samples and operator time for fabric tenter control; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded fabric tenter control process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external fabric tenter control processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable fabric tenter control machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/finishing/mechanical-finishing/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "fabric_compressive_shrinkage",
+    "name": "Fabric Compressive Shrinkage",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "textile_durability_testing",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "foundations": "textile_durability_testing,precision_machinery",
+    "mechanism": "Mechanical compression pre-shrinks a fabric length.",
+    "operating_requirement": "Pay moisture, heat and controlled roller work; test dimensions after a defined wash cycle.",
+    "consequence": "Supply dimensionally qualified garment cloth with reduced delivered length; do not create extra area.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable fabric compressive shrinkage instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fabric_compressive_shrinkage",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Mechanical compression pre-shrinks a fabric length.",
+      "operating_requirements": "Pay moisture, heat and controlled roller work; test dimensions after a defined wash cycle.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local fabric compressive shrinkage trials.",
+        "partnership": "Share actual samples and operator time for fabric compressive shrinkage; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded fabric compressive shrinkage process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external fabric compressive shrinkage processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable fabric compressive shrinkage machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/finishing/mechanical-finishing/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "raised_nap_finishing",
+    "name": "Raised-Nap Finishing",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "plain_weaving",
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "foundations": "plain_weaving,hafted_tools",
+    "mechanism": "Wire points lift surface fibers into a nap.",
+    "operating_requirement": "Spend cloth, brushing work and replacement points; qualify substrate and account for shed material.",
+    "consequence": "Supply specified napped cloth to garment finishing; reject damaged surfaces and do not grant untested warmth.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable raised-nap finishing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "raised_nap_finishing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Wire points lift surface fibers into a nap.",
+      "operating_requirements": "Spend cloth, brushing work and replacement points; qualify substrate and account for shed material.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local raised-nap finishing trials.",
+        "partnership": "Share actual samples and operator time for raised-nap finishing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded raised-nap finishing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external raised-nap finishing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable raised-nap finishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/finishing/mechanical-finishing/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "pile_shearing_control",
+    "name": "Pile Shearing Control",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "pile_fabric_weaving",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "pile_fabric_weaving,dimensional_metrology",
+    "mechanism": "Cutting levels protruding pile to a set height.",
+    "operating_requirement": "Pay blades, guide setup and cutting work on actual pile lots; collect waste and inspect uneven cuts.",
+    "consequence": "Supply even pile for finished textiles; cutting cannot repair an absent or weak pile foundation.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable pile shearing control instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pile_shearing_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Cutting levels protruding pile to a set height.",
+      "operating_requirements": "Pay blades, guide setup and cutting work on actual pile lots; collect waste and inspect uneven cuts.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local pile shearing control trials.",
+        "partnership": "Share actual samples and operator time for pile shearing control; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded pile shearing control process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external pile shearing control processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable pile shearing control machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/finishing/mechanical-finishing/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "thermoplastic_fabric_heat_setting",
+    "name": "Thermoplastic Fabric Heat Setting",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "melt_spun_fibers",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "foundations": "melt_spun_fibers,calorimetry",
+    "mechanism": "Controlled heat and restraint stabilize thermoplastic fabric dimensions.",
+    "operating_requirement": "Consume compatible fabric, heat and dwell work; record temperature exposure and dimensional tests.",
+    "consequence": "Release qualified shaped cloth; incompatible fibers, overheating or insufficient dwell retain rejection states.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable thermoplastic fabric heat setting instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "thermoplastic_fabric_heat_setting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Controlled heat and restraint stabilize thermoplastic fabric dimensions.",
+      "operating_requirements": "Consume compatible fabric, heat and dwell work; record temperature exposure and dimensional tests.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local thermoplastic fabric heat setting trials.",
+        "partnership": "Share actual samples and operator time for thermoplastic fabric heat setting; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded thermoplastic fabric heat setting process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external thermoplastic fabric heat setting processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable thermoplastic fabric heat setting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/finishing/mechanical-finishing/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "warp_knitting_machines",
+    "name": "Warp-Knitting Machines",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "knitted_loop_fabrics",
+      "warp_beam_preparation",
+      "cam_motion_design"
+    ],
+    "requires_any": [],
+    "foundations": "knitted_loop_fabrics,warp_beam_preparation,cam_motion_design",
+    "mechanism": "Parallel yarns form simultaneous linked loops across needles.",
+    "operating_requirement": "Install paid guide bars and needles; reserve a matching warp beam, drive work and loop setup checks.",
+    "consequence": "Supply specified warp-knit panels to cutting; missing ends or incompatible loop plans stop release.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable warp-knitting machines instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "warp_knitting_machines",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Parallel yarns form simultaneous linked loops across needles.",
+      "operating_requirements": "Install paid guide bars and needles; reserve a matching warp beam, drive work and loop setup checks.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local warp-knitting machines trials.",
+        "partnership": "Share actual samples and operator time for warp-knitting machines; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded warp-knitting machines process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external warp-knitting machines processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable warp-knitting machines machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/knitting/knit-machinery/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "circular_knitting_machines",
+    "name": "Circular Knitting Machines",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "knitted_loop_fabrics",
+      "cam_motion_design"
+    ],
+    "requires_any": [],
+    "foundations": "knitted_loop_fabrics,cam_motion_design",
+    "mechanism": "Needles around a cylinder form successive tubular courses.",
+    "operating_requirement": "Pay needle-cylinder tooling, yarn packages, work and needle replacement; check gauge and dropped loops.",
+    "consequence": "Produce bounded tube fabric for garment orders; diameter and gauge constrain the output.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable circular knitting machines instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "circular_knitting_machines",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Needles around a cylinder form successive tubular courses.",
+      "operating_requirements": "Pay needle-cylinder tooling, yarn packages, work and needle replacement; check gauge and dropped loops.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local circular knitting machines trials.",
+        "partnership": "Share actual samples and operator time for circular knitting machines; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded circular knitting machines process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external circular knitting machines processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable circular knitting machines machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/knitting/knit-machinery/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "flat_bed_knitting_machines",
+    "name": "Flat-Bed Knitting Machines",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "knitted_loop_fabrics",
+      "cam_motion_design"
+    ],
+    "requires_any": [],
+    "foundations": "knitted_loop_fabrics,cam_motion_design",
+    "mechanism": "A moving carriage operates needles along a flat bed.",
+    "operating_requirement": "Spend needle-bed tooling, yarn and carriage work; retain the panel's loop plan and verified dimensions.",
+    "consequence": "Supply shaped knit panels within bed width; failed stitches require paid correction or rejection.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable flat-bed knitting machines instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "flat_bed_knitting_machines",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A moving carriage operates needles along a flat bed.",
+      "operating_requirements": "Spend needle-bed tooling, yarn and carriage work; retain the panel's loop plan and verified dimensions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local flat-bed knitting machines trials.",
+        "partnership": "Share actual samples and operator time for flat-bed knitting machines; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded flat-bed knitting machines process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external flat-bed knitting machines processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable flat-bed knitting machines machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://cottonworks.com/learning-hub/knitting/knit-machinery/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_air_laying",
+    "name": "Nonwoven Air Laying",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "fiber_grading",
+      "compressed_air_systems"
+    ],
+    "requires_any": [],
+    "foundations": "fiber_grading,compressed_air_systems",
+    "mechanism": "Air distributes short fibers onto a forming surface.",
+    "operating_requirement": "Pay selected staple, air service and collection work; preserve web mass, direction and unbonded state.",
+    "consequence": "Feed qualified loose webs to a compatible bonding operation; unbonded material is not finished cloth.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven air laying instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_air_laying",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Air distributes short fibers onto a forming surface.",
+      "operating_requirements": "Pay selected staple, air service and collection work; preserve web mass, direction and unbonded state.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven air laying trials.",
+        "partnership": "Share actual samples and operator time for nonwoven air laying; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven air laying process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven air laying processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven air laying machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_wet_laying",
+    "name": "Nonwoven Wet Laying",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "fiber_pulp_beating",
+      "paper_sheet_pressing"
+    ],
+    "requires_any": [],
+    "foundations": "fiber_pulp_beating,paper_sheet_pressing",
+    "mechanism": "A drained fiber suspension forms a textile web.",
+    "operating_requirement": "Consume compatible fibers, water, screen work and dewatering; distinguish long-fiber web identity from paper pulp.",
+    "consequence": "Supply wet webs for bonding and drying; drainage failures retain unusable wet intermediates.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven wet laying instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_wet_laying",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A drained fiber suspension forms a textile web.",
+      "operating_requirements": "Consume compatible fibers, water, screen work and dewatering; distinguish long-fiber web identity from paper pulp.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven wet laying trials.",
+        "partnership": "Share actual samples and operator time for nonwoven wet laying; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven wet laying process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven wet laying processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven wet laying machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_spunlaying",
+    "name": "Nonwoven Spunlaying",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "melt_spun_fibers",
+      "polymer_melt_rheology"
+    ],
+    "requires_any": [],
+    "foundations": "melt_spun_fibers,polymer_melt_rheology",
+    "mechanism": "Extruded continuous filaments are deposited as a web.",
+    "operating_requirement": "Pay qualified polymer, extrusion energy, spinneret upkeep and collection work; retain unbonded web stock.",
+    "consequence": "Supply controlled filament webs to actual bonding; no finished barrier or filter is granted by deposition alone.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven spunlaying instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_spunlaying",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Extruded continuous filaments are deposited as a web.",
+      "operating_requirements": "Pay qualified polymer, extrusion energy, spinneret upkeep and collection work; retain unbonded web stock.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven spunlaying trials.",
+        "partnership": "Share actual samples and operator time for nonwoven spunlaying; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven spunlaying process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven spunlaying processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven spunlaying machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_meltblowing",
+    "name": "Nonwoven Meltblowing",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "melt_spun_fibers",
+      "compressed_air_systems"
+    ],
+    "requires_any": [],
+    "foundations": "melt_spun_fibers,compressed_air_systems",
+    "mechanism": "Hot air attenuates polymer streams into fine fibers.",
+    "operating_requirement": "Consume compatible polymer, heated air, extrusion work and maintained dies; qualify collected web consistency.",
+    "consequence": "Supply fine-fiber webs for subsequent product testing; no filtration rating is inferred from the method alone.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven meltblowing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_meltblowing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Hot air attenuates polymer streams into fine fibers.",
+      "operating_requirements": "Consume compatible polymer, heated air, extrusion work and maintained dies; qualify collected web consistency.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven meltblowing trials.",
+        "partnership": "Share actual samples and operator time for nonwoven meltblowing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven meltblowing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven meltblowing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven meltblowing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_needle_punching",
+    "name": "Nonwoven Needle Punching",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "fiber_card_webs",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "foundations": "fiber_card_webs,precision_machinery",
+    "mechanism": "Barbed needles mechanically entangle a fiber web.",
+    "operating_requirement": "Pay web stock, needle wear and repeated machine passes; preserve output mass after damaged material.",
+    "consequence": "Supply bonded pads for qualified textile uses; thin or brittle feed may fail cohesion.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven needle punching instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_needle_punching",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Barbed needles mechanically entangle a fiber web.",
+      "operating_requirements": "Pay web stock, needle wear and repeated machine passes; preserve output mass after damaged material.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven needle punching trials.",
+        "partnership": "Share actual samples and operator time for nonwoven needle punching; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven needle punching process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven needle punching processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven needle punching machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_hydroentanglement",
+    "name": "Nonwoven Hydroentanglement",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "nonwoven_wet_laying",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "foundations": "nonwoven_wet_laying,pressure_vessels",
+    "mechanism": "Water jets entangle fibers in a supported web.",
+    "operating_requirement": "Consume web stock, pumping work, clean water and drying capacity; retain spent water and quality samples.",
+    "consequence": "Supply bonded sheet after strength checks; weak webs and inadequate drying cannot enter finished stock.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven hydroentanglement instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_hydroentanglement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Water jets entangle fibers in a supported web.",
+      "operating_requirements": "Consume web stock, pumping work, clean water and drying capacity; retain spent water and quality samples.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven hydroentanglement trials.",
+        "partnership": "Share actual samples and operator time for nonwoven hydroentanglement; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven hydroentanglement process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven hydroentanglement processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven hydroentanglement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_thermal_bonding",
+    "name": "Nonwoven Thermal Bonding",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "nonwoven_spunlaying",
+      "calorimetry"
+    ],
+    "requires_any": [],
+    "foundations": "nonwoven_spunlaying,calorimetry",
+    "mechanism": "Heat joins compatible thermoplastic fiber contacts.",
+    "operating_requirement": "Pay qualified web, heat and restraint work; test bond coverage and pore retention against the order.",
+    "consequence": "Supply bonded sheet within the verified material envelope; overheating cannot masquerade as improved filtration.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven thermal bonding instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_thermal_bonding",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Heat joins compatible thermoplastic fiber contacts.",
+      "operating_requirements": "Pay qualified web, heat and restraint work; test bond coverage and pore retention against the order.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven thermal bonding trials.",
+        "partnership": "Share actual samples and operator time for nonwoven thermal bonding; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven thermal bonding process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven thermal bonding processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven thermal bonding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nonwoven_binder_bonding",
+    "name": "Nonwoven Binder Bonding",
+    "field": "D07",
+    "status": "authored_draft",
+    "requires_all": [
+      "fiber_card_webs",
+      "adhesive_bond_design"
+    ],
+    "requires_any": [],
+    "foundations": "fiber_card_webs,adhesive_bond_design",
+    "mechanism": "An applied binder joins fiber contacts.",
+    "operating_requirement": "Spend web, compatible binder and drying or curing work; retain residue and release-test records.",
+    "consequence": "Supply bonded textile backing only after acceptance; binder knowledge alone grants no medical-barrier claim.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nonwoven binder bonding instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nonwoven_binder_bonding",
+      "grants_instant_mastery": false,
+      "local_demonstration": "An applied binder joins fiber contacts.",
+      "operating_requirements": "Spend web, compatible binder and drying or curing work; retain residue and release-test records.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nonwoven binder bonding trials.",
+        "partnership": "Share actual samples and operator time for nonwoven binder bonding; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nonwoven binder bonding process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nonwoven binder bonding processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nonwoven binder bonding machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.edana.org/nw-related-industry/how-are-nonwovens-made"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]
