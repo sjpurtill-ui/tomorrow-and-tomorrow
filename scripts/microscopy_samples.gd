@@ -26,6 +26,7 @@ static func measure(ledger:Dictionary,specimen:Dictionary,day:int,stained:bool,k
 	# Microscopic visibility distinguishes aggregate structures from reliably
 	# separated cellular units. Staining is optional and material-paid by owner.
 	var view:={"day":day,"cells":float(specimen.cells)*float(specimen.viability),"total_cells":float(specimen.cells),"uncertainty":1.0-contrast,"sample_mass":float(specimen.amount),"source_stage":int(specimen.profile.get("stage",0)),"blank_paid":float(specimen.blank_media),"aseptic":bool(specimen.methods.get("culture",{}).get("observation",{}).get("aseptic",false)),"contrast":contrast,"contamination":float(specimen.contamination),"blank_contamination":float(specimen.blank_contamination),"tissue_order":float(specimen.profile.get("tissue_order",0)),"line":int(specimen.line)}
+	view["tracked_cells"]=visual_cells(specimen) if contrast>=.8 and "microscopic_cell_observation" in known else []
 	specimen.history.append(view)
 	while specimen.history.size()>8:specimen.history.pop_front()
 	if "laboratory_notebooks" in known:record(ledger,specimen,day,"notebook",{"kind":String(specimen.kind),"preparation":"stained" if stained else "unstained","elapsed":day-int(specimen.day),"view":view})
@@ -34,9 +35,10 @@ static func measure(ledger:Dictionary,specimen:Dictionary,day:int,stained:bool,k
 	if specimen.kind=="starter" and "microbial_observation" in known:record(ledger,specimen,day,"microbes",{"count":view.cells,"mixed_fraction":maxf(0,float(view.contamination)-float(view.blank_contamination)),"blank_fraction":float(view.blank_contamination),"identity":"unassigned local culture"})
 	if "cell_division_observation" in known and specimen.history.size()>=2:
 		var previous:Dictionary=specimen.history[-2]
-		if day>int(previous.day) and float(view.cells)>float(previous.cells):record(ledger,specimen,day,"division",{"before":float(previous.cells),"after":float(view.cells),"elapsed":day-int(previous.day)})
-	if specimen.kind=="plant" and "tissue_histology" in known and contrast>=.8:
-		record(ledger,specimen,day,"tissue",{"organized_fraction":view.tissue_order,"viable_fraction":clampf(float(view.cells)/maxf(.000001,float(view.total_cells)),0,1),"uncertainty":float(view.uncertainty),"contrast":contrast,"cohort":int(specimen.source),"sampled_stage":int(specimen.profile.get("stage",0))})
+		if division_pair(previous,view):record(ledger,specimen,day,"division",{"before_frame":previous.duplicate(true),"after_frame":view.duplicate(true),"parent":1,"daughters":[2,3]})
+	if specimen.kind=="plant" and "tissue_histology" in known and contrast>=.8 and specimen.methods.has("section") and int(specimen.methods.section.day)==day:
+		var section:Dictionary=specimen.methods.section.observation
+		record(ledger,specimen,day,"tissue",{"organized_fraction":float(section.organized_fraction),"viable_fraction":float(section.viable_fraction),"uncertainty":float(view.uncertainty),"contrast":contrast,"cohort":int(specimen.source),"sampled_stage":int(specimen.profile.get("stage",0)),"section":specimen.methods.section.duplicate(true)})
 	if "live_cell_time_lapse" in known and specimen.history.size()>=3 and specimen.methods.has("culture"):
 		record(ledger,specimen,day,"time_lapse",{"frames":specimen.history.duplicate(true),"source_line":int(specimen.line)})
 	return true
@@ -47,6 +49,9 @@ static func grow(specimen:Dictionary,day:int,media:float,aseptic:bool)->bool:
 	# One eligible day only; missed time is not converted into free generations.
 	var food:=minf(media,.02)
 	var growth:=food*100.0*float(specimen.viability)*(1.0-float(specimen.contamination))
+	# One bounded representative cell event, advanced only by supplied growth.
+	# This is separate from aggregate counts; only resolved retained views prove it.
+	if growth>=.5 and float(specimen.cells)>=1.0:specimen["visual_phase"]=mini(2,int(specimen.get("visual_phase",0))+1)
 	specimen.cells=minf(1000000,float(specimen.cells)+growth)
 	specimen.media+=food
 	specimen.blank_media+=.01
@@ -113,7 +118,8 @@ static func valid(ledger:Variant)->bool:
 		if not sample.get("profile") is Dictionary or not sample.get("methods") is Dictionary or not sample.get("history") is Array or sample.history.size()>8:return false
 		for key:Variant in sample.profile:
 			if key not in ["viability","contamination","tissue_order","stage","leaf_ratio"] or not number(sample.profile[key],180 if key=="stage" else 1):return false
-		if sample.methods.size()>12:return false
+		if not sample.get("visual_phase",0) is int or int(sample.get("visual_phase",0)) not in [0,1,2]:return false
+		if sample.methods.size()>14:return false
 		for method:Variant in sample.methods:
 			var row:Variant=sample.methods[method]
 			if not valid_record(row) or row.method!=method or row.sample!=sample.id or row.source!=sample.source or row.source_day!=sample.source_day or row.site!=sample.site or row.day<sample.day:return false
@@ -137,6 +143,8 @@ static func valid_frame(frame:Variant)->bool:
 	for key:String in ["cells","total_cells","contrast","uncertainty","sample_mass","blank_paid","contamination","blank_contamination","tissue_order"]:
 		if not number(frame.get(key),1000000 if key in ["cells","total_cells","sample_mass","blank_paid"] else 1):return false
 	if not frame.get("source_stage") is int or frame.source_stage<0 or not frame.get("aseptic") is bool:return false
+	if not frame.get("tracked_cells",[]) is Array or frame.get("tracked_cells",[]) not in [[],cell_shapes(0),cell_shapes(1),cell_shapes(2)]:return false
+	if not frame.get("tracked_cells",[]).is_empty() and float(frame.contrast)<.8:return false
 	if absf(float(frame.uncertainty)-(1.0-float(frame.contrast)))>.00001:return false
 	return true
 static func valid_record(row:Variant)->bool:
@@ -150,8 +158,9 @@ static func valid_record(row:Variant)->bool:
 		"cells":return valid_frame(o) and o.day==row.day
 		"contrast":return o.get("contrast")==.85 and o.get("unstained_reference")==.45
 		"microbes":return number(o.get("count")) and number(o.get("mixed_fraction"),1) and number(o.get("blank_fraction"),1) and o.get("identity")=="unassigned local culture"
-		"division":return number(o.get("before")) and number(o.get("after")) and o.after>o.before and o.get("elapsed") is int and o.elapsed>0
-		"tissue":return number(o.get("organized_fraction"),1) and number(o.get("viable_fraction"),1) and number(o.get("uncertainty"),1) and number(o.get("contrast"),1) and o.get("cohort")==row.source and o.get("sampled_stage") is int and o.sampled_stage>=0
+		"division":return valid_frame(o.get("before_frame")) and valid_frame(o.get("after_frame")) and o.after_frame.day==row.day and o.get("parent")==1 and o.get("daughters")==[2,3] and division_pair(o.before_frame,o.after_frame)
+		"section":return o.get("portion")==.0001 and number(o.get("cells")) and number(o.get("viable_fraction"),1) and number(o.get("organized_fraction"),1) and o.get("tool_wear")==.001 and o.get("slide")==.01 and o.get("work")==.1
+		"tissue":return o.get("section") is Dictionary and o.section.get("method")=="section" and valid_record(o.section) and o.section.sample==row.sample and o.section.source==row.source and o.section.site==row.site and o.section.day==row.day and o.get("viable_fraction")==o.section.observation.viable_fraction and o.get("organized_fraction")==o.section.observation.organized_fraction and number(o.get("organized_fraction"),1) and number(o.get("viable_fraction"),1) and number(o.get("uncertainty"),1) and number(o.get("contrast"),1) and o.get("cohort")==row.source and o.get("sampled_stage") is int and o.sampled_stage>=0
 		"time_lapse":
 			if not o.get("frames") is Array or o.frames.size()<3 or o.frames.size()>8 or not o.get("source_line") is int:return false
 			var previous:=-1
@@ -201,3 +210,12 @@ static func valid_heat(tools:Dictionary)->bool:
 	if int(tools.get("sterile_uses",0))>0:
 		if readings.size()!=2 or float(readings[0].observed_heat)<.7 or float(readings[-1].observed_heat)-float(readings[-1].uncertainty)<.9 or int(tools.get("sterile_until",0))!=int(readings[-1].day)+1:return false
 	return true
+
+static func cell_shapes(phase:int)->Array:
+	if phase==1:return [{"id":1,"parent":0,"shape":"constricted","x":0.0,"lobes":2}]
+	if phase==2:return [{"id":2,"parent":1,"shape":"separated","x":-.5,"lobes":1},{"id":3,"parent":1,"shape":"separated","x":.5,"lobes":1}]
+	return [{"id":1,"parent":0,"shape":"compact","x":0.0,"lobes":1}]
+static func visual_cells(sample:Dictionary)->Array:
+	return cell_shapes(int(sample.get("visual_phase",0))) if float(sample.cells)>=1.0 else []
+static func division_pair(before:Dictionary,after:Dictionary)->bool:
+	return int(after.day)==int(before.day)+1 and float(before.contrast)>=.8 and float(after.contrast)>=.8 and before.get("tracked_cells",[])==cell_shapes(1) and after.get("tracked_cells",[])==cell_shapes(2)
