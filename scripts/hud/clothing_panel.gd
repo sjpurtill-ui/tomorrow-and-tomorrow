@@ -27,9 +27,12 @@ func refresh()->void:
 			if lot.kind==kind:amount+=float(lot.amount)
 		if amount>0:garments.append("%.1f %s"%[amount,names[kind]])
 	details.text+="\nStock: "+", ".join(garments)+". Recovered bone: %.2f (from actual hunting)."%B.available(B.BONE_RESOURCE)
+	details.text+="\nFigured-fabric garments: %.1f. Patterned cloth retains its identity through use and washing; decoration adds no protection."%B.figured_count()
 	var equipment:Array[String]=[];var inputs:Array[String]=[]
-	for item:String in K.METHODS[subject].cost:equipment.append("%.2f %s"%[float(K.METHODS[subject].cost[item]),item])
-	for item:String in K.METHODS[subject].inputs:inputs.append("%.2f %s"%[float(K.METHODS[subject].inputs[item]),item])
+	var costs:=B.materials(subject,true)
+	for item:String in costs:equipment.append("%.2f %s"%[float(costs[item]),item])
+	var supplies:=B.materials(subject)
+	for item:String in supplies:inputs.append("%.2f %s"%[float(supplies[item]),item])
 	if K.METHODS[subject].mode=="layer":inputs.append("2 spare garments per layered assembly")
 	details.text+="\nInstall: "+", ".join(equipment)+".\nPer unit processed: "+", ".join(inputs)+".\nProcessed today: %.1f units; all clothing work today: %.2f handler-days."%[float(ledger.report.get("methods",{}).get(subject,0)),float(ledger.report.get("workers",0))]
 	if float(K.METHODS[subject].get("power",0))>0:details.text+="\nUses %.2f generated electricity per washed garment; powered washing causes 0.002 condition wear."%float(K.METHODS[subject].power)

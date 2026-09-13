@@ -1,0 +1,11 @@
+# Earthen housing and textile integration
+
+Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/earthen-building-processes`, integrated base `b75d93696f2f480406757a40dd68a1df5bc4eabf`.
+
+Earthen runtime `9f03bbd` adds two authored methods with paid site drying and real construction/maintenance. Textile source `6d749d46ab20192d99e920b888e7b6c578da65d4`, from verified703 base851a0ca, adds six authored methods with ten paid recipes and actual cloth/garment consumers. The single CivilianIndustry conflict was additive: retain all three earthen, eleven glass/ceramic and ten textile recipes. Discovery registration merged cleanly; source textile clothing, planner and city targets are retained exactly. No shared terrain, government labor allocation, GameState or SaveSystem change.
+
+Textile fabric identity is the optional plain/figured enum on existing bounded garment lots. Old lots default plain; washing, layering and whole-save continuation retain figured identity. Decoration adds no protection. Imported measured yarn and figured cloth work under downstream skills without upstream mastery. Real local production and delayed city delivery supply bounded garment deficits, reserving donor needs and consuming existing transport capacity.
+
+Earthen plots reuse the existing optional material/curing fields. Adobe units dry before assembly; applied daub dries before occupancy. The local monthly climate sample limits elapsed drying and rain affects decay. Existing construction, housing capacity, paid maintenance and population authorities remain in control. See the individual handoffs for physical references, game abstractions and detailed limitations.
+
+Combined worktree graph is clean at716 discoveries,498 routes,365 recipes and18 facilities. Source709 is an older-base audit, not the combined snapshot. All110 combined worktree cases pass across earthen9, building11, textile12, clothing27, planner15, city13, owned civilizations19 and architecture4. No errors, failures, skips or orphans. Canonical acceptance and promotion pending. Neither full historical pacing nor a new player/package launch is claimed. Six textile illustrations are being prepared independently; seven glass/earthen illustrations remain queued.

@@ -173,6 +173,16 @@ static func operating_input_recommendation(plan_power:bool=false)->Dictionary:
 
 ## A bounded supply target follows actual clothing needs. This requests an
 ## ordinary paid civilian line; it grants neither yarn nor textile mastery.
+static func figured_clothing_recommendation(plan_power:bool=false)->Dictionary:
+	var clothing=preload("res://scripts/household_clothing.gd")
+	var state=WorldSimulation.state
+	var population:=WorldSimulation.settlements.primary_population_exact()
+	# Optional pattern-cloth demand is shared with real city trade targets.
+	var target:=int(clothing.figured_target(population))
+	if target<=0:return {}
+	if float(state.resource_stockpiles.get("Figured Cloth",0))>=target:return {}
+	return supply("Figured Cloth",target,{},plan_power)
+
 static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 	var state=WorldSimulation.state
 	if state.convoy_traveling or not state.settlement_site_committed or not state.resource_settlement_id.is_empty():return {}
@@ -182,6 +192,8 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 	var requirements=preload("res://scripts/technology_requirements.gd")
 	var population:=WorldSimulation.settlements.primary_population_exact()
 	var deficit:=maxf(0,population*1.1-clothing.count())
+	var figured:=figured_clothing_recommendation(plan_power)
+	if not figured.is_empty():return figured
 	var best:Dictionary={};var best_work:=INF
 	for id:String in knowledge.METHODS:
 		var spec:Dictionary=knowledge.METHODS[id]
@@ -199,9 +211,11 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 			amount=minf(10,amount)
 		if amount<=.000001:continue
 		var needed:Dictionary={}
-		for item:String in spec.inputs:needed[item]=amount*float(spec.inputs[item])
+		var inputs:=clothing.materials(id)
+		for item:String in inputs:needed[item]=amount*float(inputs[item])
 		if int(clothing.data().tools.get(id,0))==0:
-			for item:String in spec.cost:needed[item]=float(needed.get(item,0))+float(spec.cost[item])
+			var costs:=clothing.materials(id,true)
+			for item:String in costs:needed[item]=float(needed.get(item,0))+float(costs[item])
 		var first:Dictionary={};var possible:=true;var work:=0.0
 		for item:String in needed:
 			if clothing.available(item)>=float(needed[item]):continue

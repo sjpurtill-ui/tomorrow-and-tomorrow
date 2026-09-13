@@ -348,6 +348,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				for item:String in rail_needs:needs[item]=float(needs.get(item,0))+float(rail_needs[item])
 				var care_needs:=preload("res://scripts/civilian_care.gd").targets()
 				for item:String in care_needs:needs[item]=maxf(float(needs.get(item,0)),float(care_needs[item]))
+				var figured:=preload("res://scripts/household_clothing.gd").figured_target(WorldSimulation.state.population_exact)
+				if figured>0:needs["Figured Cloth"]=figured
 				return needs))
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
