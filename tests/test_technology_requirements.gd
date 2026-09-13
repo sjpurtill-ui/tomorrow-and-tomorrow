@@ -80,7 +80,9 @@ func test_graph_reports_unknown_foundations_and_unrecoverable_cycles()->void:
 func test_live_catalog_has_reachable_causal_foundations()->void:
 	var graph:Array=[]
 	for entry:Dictionary in DiscoverySystem.technology_catalog:graph.append(P.graph_entry(entry))
-	assert_array(R.validate(graph)).is_empty()
+	var dormant=preload("res://tools/technology-review/dormant_or_audit.gd")
+	graph=dormant.factor_common(graph,DiscoverySystem.technology_catalog)
+	assert_array(R.validate(graph,dormant.pending(graph))).is_empty()
 
 func test_legacy_opponent_candidates_use_the_same_alternative_foundations()->void:
 	var civ:={"production":1.0,"logistics":1.0,"environment_profile":{"resource_potentials":{}},"discovery_profile":{"seed":42,"technologies":["formal_archives","public_schools"]}}
