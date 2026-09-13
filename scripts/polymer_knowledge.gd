@@ -1545,7 +1545,8 @@ static func entries()->Array[Dictionary]:
     "effects": {},
     "production_contract": "Qualified propene and separately prepared titanium/alkylaluminum catalysts produce a raw polypropylene batch with finite cooling, work and chemical supply. Paid spectral characterization remains separate from rheological/application qualification. Raw resin does not grant a universal forming grade.",
     "production_items": [
-      "coordination_polypropylene"
+      "coordination_polypropylene",
+      "controlled_propene_ethene_copolymer"
     ]
   },
   {
@@ -1580,6 +1581,44 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Qualified propene and separately prepared titanium/alkylaluminum catalysts produce a raw polypropylene batch with finite cooling, work and chemical supply. Paid spectral characterization remains separate from rheological/application qualification. Raw resin does not grant a universal forming grade.",
     "production_items": [
       "spectrally_qualified_polypropylene"
+    ]
+  },
+  {
+    "id": "copolymer_sequence_control",
+    "name": "Copolymer Sequence Control",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_molecular_weight_control"
+    ],
+    "requires_all": [
+      "polymer_molecular_weight_control"
+    ],
+    "requires_any": [
+      [
+        "radical_chain_polymerization",
+        "ionic_chain_polymerization",
+        "coordination_polymerization"
+      ]
+    ],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Copolymer Sequence Control",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Control and characterize incorporation of different monomer units within a specified copolymer",
+    "effects": {},
+    "production_contract": "Metered mixed monomers supply a separate copolymer synthesis route. Raw composition alone does not establish sequence: sequence-sensitive analytical qualification and an application consumer remain required before family acceptance.",
+    "production_items": [
+      "metered_propene_ethene_feed"
     ]
   }
 ]

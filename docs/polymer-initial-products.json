@@ -1801,5 +1801,48 @@
     },
     "power": 0,
     "daily_power": 0.0
+  },
+  "metered_propene_ethene_feed": {
+    "name": "Metered propene-ethene copolymer feed",
+    "output": "Metered Propene-Ethene Feed",
+    "gate": "copolymer_sequence_control",
+    "materials": {
+      "Polymer-Grade Propene": 1,
+      "Polymer-Grade Ethene": 0.06,
+      "Laboratory Glassware": 0.01
+    },
+    "days": 3,
+    "tooling": {
+      "Pressure Vessels": 3,
+      "Laboratory Glassware": 3,
+      "Steel": 2
+    },
+    "power": 1,
+    "daily_power": 0.3333333333333333
+  },
+  "controlled_propene_ethene_copolymer": {
+    "name": "Controlled-feed propene-ethene copolymer",
+    "output": "Raw Propene-Ethene Copolymer",
+    "gate": "coordination_polymerization",
+    "materials": {
+      "Metered Propene-Ethene Feed": 1.1,
+      "Titanium Trichloride Catalyst": 0.02,
+      "Ethylaluminum Cocatalyst": 0.01,
+      "Toluene": 0.3,
+      "Methanol": 0.1,
+      "Caustic Soda": 0.02
+    },
+    "days": 8,
+    "tooling": {
+      "Pressure Vessels": 3,
+      "Laboratory Glassware": 3,
+      "Steel": 3
+    },
+    "power": 2,
+    "daily_power": 0.25,
+    "services": {
+      "polymer_stirred_work": 1,
+      "polymer_heat_removal": 2
+    }
   }
 }

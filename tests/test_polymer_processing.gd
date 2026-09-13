@@ -671,3 +671,21 @@ func test_coordination_and_tacticity_route_produces_usable_wash_bottle_closures(
 		assert_float(float(s.resource_stockpiles["Titanium Trichloride Catalyst"])).is_equal_approx(.92,.000001)
 		assert_float(float(s.resource_stockpiles["Ethylaluminum Cocatalyst"])).is_equal_approx(.96,.000001)
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(2.0))
+func test_copolymer_feed_requires_both_monomers_and_remains_unqualified_after_synthesis()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		s.known_discoveries.append("copolymer_sequence_control");s.discovery_adoption.copolymer_sequence_control=1.0
+		for resource:String in I.product("metered_propene_ethene_feed").tooling:s.resource_stockpiles[resource]=100.0
+		s.resource_stockpiles["Polymer-Grade Propene"]=3.0;s.resource_stockpiles["Polymer-Grade Ethene"]=0.0
+		var denied:Dictionary=WorldSimulation.military.start_production_line("metered_propene_ethene_feed",1)
+		assert_bool(denied.get("ok",false)).is_false()
+		assert_str(String(denied.get("error",""))).contains("Polymer-Grade Ethene")
+		s.resource_stockpiles["Polymer-Grade Ethene"]=.12
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
+		for resource:String in ["Titanium Trichloride Catalyst","Ethylaluminum Cocatalyst","Toluene","Methanol","Caustic Soda"]:s.resource_stockpiles[resource]=100.0
+		assert_int(int(run_batch("metered_propene_ethene_feed",2).get("completed",0))).is_equal(2)
+		assert_int(int(run_batch("controlled_propene_ethene_copolymer",1).get("completed",0))).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Polymer-Grade Ethene"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["Raw Propene-Ethene Copolymer"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles.get("Molding-Grade Polypropylene",0))).is_equal(0.0)
+		assert_float(Ops.service("polymer_heat_removal")).is_equal(8.0))
