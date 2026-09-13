@@ -24,6 +24,9 @@ static func recipe(host: Node, item: String) -> Dictionary:
 	if not bool(gate.get("unlocked",false)): return {"error":String(gate.get("reason","Adopt the required production practice first."))}
 	return {"item":item,"job_type":kind,"materials":definition.materials.duplicate(true),"work_per_item":float(definition.days),"tooling":definition.get("tooling",{}).duplicate(true)}
 
+static func services_per_item(job:Dictionary)->Dictionary:
+	return Industry.product(String(job.get("item",""))).get("services",{}) if String(job.get("job_type",""))=="civilian" else {}
+
 static func power_per_item(job:Dictionary)->float:
 	return float(Industry.product(String(job.get("item",""))).get("power",0)) if String(job.get("job_type",""))=="civilian" else 0.0
 
@@ -38,6 +41,7 @@ static func product_description(item:String)->String:
 		var definition:=Industry.product(item);var parts:Array[String]=[]
 		for resource:String in definition.tooling:parts.append("%.1f %s" % [float(definition.tooling[resource]),resource])
 		var power_note:=" Each batch also consumes %.1f electricity from the shared daily supply." % float(definition.power) if float(definition.get("power",0))>0 else ""
+		for name:String in definition.get("services",{}):power_note+=" Each batch consumes %.1f %s from the shared daily supply." % [float(definition.services[name]),name.replace("_"," ")]
 		var joint_outputs:Array[String]=[]
 		for resource:String in definition.get("co_products",{}):joint_outputs.append("%.2f %s" % [float(definition.co_products[resource]),resource])
 		var co_note:=" Each completed batch also yields "+", ".join(joint_outputs)+"; the stock target tracks "+String(definition.output)+"." if not joint_outputs.is_empty() else ""
@@ -151,6 +155,8 @@ static func state(host: Node, job: Dictionary) -> String:
 	for resource in job.materials:
 		if float(job.materials[resource])>0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
 	if power_per_item(job)>0 and preload("res://scripts/technology_operations.gd").service("electricity")<=.000000001:return "Waiting for electricity"
+	for name:String in services_per_item(job):
+		if preload("res://scripts/technology_operations.gd").service(name)<=.000000001:return "Waiting for "+name.replace("_"," ")
 	return "Working"
 
 static func eligible(host: Node, job: Dictionary) -> bool:
@@ -191,8 +197,12 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		if cost>0: possible=minf(possible,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0)))/cost)
 	var power:=power_per_item(job)
 	if power>0:possible=minf(possible,preload("res://scripts/technology_operations.gd").service("electricity")/power)
+	var services:=services_per_item(job)
+	for name:String in services:
+		possible=minf(possible,preload("res://scripts/technology_operations.gd").service(name)/float(services[name]))
 	possible=maxf(0,possible)
 	if power>0:preload("res://scripts/technology_operations.gd").consume_electricity(possible*power)
+	for name:String in services:preload("res://scripts/technology_operations.gd").consume_service(name,possible*float(services[name]))
 	for resource in job.materials:
 		var consumed:=float(job.materials[resource])*possible
 		WorldSimulation.state.resource_stockpiles[resource]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0))-consumed)

@@ -14,12 +14,18 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 	for recipe:Dictionary in products.values():
 		sources[String(recipe.output)]=true
 		for item:String in recipe.get("co_products",{}):sources[item]=true
+	var service_sources:Dictionary={}
+	for plant:Dictionary in plants.values():
+		for name:String in plant.get("services",{}):service_sources[name]=true
 	for id:String in products:
 		var recipe:Dictionary=products[id]
 		if String(recipe.gate) not in discovery_ids:errors.append(id+": unknown discovery "+String(recipe.gate))
 		if String(recipe.output).strip_edges().is_empty():errors.append(id+": missing manufactured output")
 		if not numeric(recipe.get("days"),true):errors.append(id+": invalid manufacturing work")
 		if not numeric(recipe.get("power",0)):errors.append(id+": invalid electricity requirement")
+		for name:String in recipe.get("services",{}):
+			if not numeric(recipe.services[name],true):errors.append(id+": invalid service requirement for "+name)
+			if not service_sources.has(name):errors.append(id+": no service source for "+name)
 		for field:String in ["materials","tooling","co_products"]:
 			for item:String in recipe.get(field,{}):
 				var quantity:Variant=recipe[field][item]
@@ -50,6 +56,7 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 			var recipe:Dictionary=products[id]
 			if not missing(recipe.materials,available).is_empty() or not missing(recipe.get("tooling",{}),available).is_empty():continue
 			if float(recipe.get("power",0))>0 and not services.has("electricity"):continue
+			if not missing(recipe.get("services",{}),services).is_empty():continue
 			made[id]=true;available[String(recipe.output)]=true;changed=true
 			for item:String in recipe.get("co_products",{}):available[item]=true
 		for id:String in plants:
@@ -64,7 +71,7 @@ static func audit(products:Dictionary,plants:Dictionary,raw_resources:Array,disc
 	for id:String in products:
 		if made.has(id):continue
 		var recipe:Dictionary=products[id]
-		blocked[id]={"materials":missing(recipe.materials,available),"tooling":missing(recipe.get("tooling",{}),available),"electricity":float(recipe.get("power",0))<=0 or services.has("electricity")}
+		blocked[id]={"services":missing(recipe.get("services",{}),services),"materials":missing(recipe.materials,available),"tooling":missing(recipe.get("tooling",{}),available),"electricity":float(recipe.get("power",0))<=0 or services.has("electricity")}
 	for id:String in plants:
 		if not installed.has(id):blocked_plants[id]={"cost":missing(plants[id].cost,available),"inputs":missing(plants[id].inputs,available),"electricity":float(plants[id].power)<=0 or services.has("electricity")}
 	return {"errors":errors,"blocked_products":blocked,"blocked_plants":blocked_plants,"reachable_products":made.size(),"product_count":products.size(),"reachable_plants":installed.size(),"plant_count":plants.size(),"rounds":rounds,"closure_performed":true,"structural_only":true,"campaign_verified":false}

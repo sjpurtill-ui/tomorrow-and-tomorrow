@@ -2,8 +2,11 @@ extends RefCounted
 ## Aggregate primary-settlement installations. Government still assigns roles;
 ## operators reserve capacity within Crafting rather than creating workers.
 const LIMIT:=1000
+const WaterDrive=preload("res://scripts/water_hammer_site.gd")
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"water_hammer":{"name":"River-driven forge hammer","gate":"water_powered_hammers","requires":[],"cost":{"Water Hammer Drives":1.0,"Stone":8.0},"work":24.0,"workers":1.0,"inputs":{"Rope Coils":0.005},"power":0.0,"services":{"hammer_work":4.0}},
+	"belt_workshop":{"name":"Belt-driven workshop","gate":"belt_power_transmission","requires":["electric_motors"],"cost":{"Belt Drive Sets":1.0,"Electric Motors":1.0,"Timber":4.0},"work":12.0,"workers":1.0,"inputs":{"Drive Belts":0.01},"power":2.0,"services":{"mechanical_work":3.5}},
 	"geared_workshop":{"name": "Geared indexing workshop", "gate": "shaft_alignment_methods", "requires": ["electric_motors"], "cost": {"Basic Machine Tool Sets": 1, "Aligned Drive Assemblies": 1, "Generated Gear Sets": 1, "Electric Motors": 1, "Insulated Cable": 2}, "work": 18.0, "workers": 1.5, "inputs": {"Rolling Bearings": 0.01, "Drive Chains": 0.01}, "power": 3.0, "services": {"mechanical_work": 5.0}},
 	"research_radio_station":{"name": "Research radio station", "gate": "radio_telegraphy", "requires": ["agreed_signal_codes"], "cost": {"Radio Telegraph Sets": 1, "Timber": 2}, "work": 14.0, "workers": 1.0, "inputs": {"Paper": 0.05}, "power": 2.0, "services": {"radio_records": 1.0}},
 	"optical_signal_bench":{"analysis_family": "optical", "name": "Optical signaling bench", "gate": "optical_telegraphy", "requires": ["experimental_controls"], "cost": {"Optical Telegraph Sets": 1, "Timber": 2}, "work": 10.0, "workers": 0.5, "inputs": {"Paper": 0.02}, "power": 0.0, "services": {"analysis_optical": 1.0}},
@@ -35,6 +38,7 @@ static func quote(id:String,count:int=1)->Dictionary:
 		if gate not in state.known_discoveries or WorldSimulation.discovery.adoption(gate)<.25:return {"error":"Establish "+String(WorldSimulation.discovery.discovery_definition(gate).get("name",gate))+" before commissioning this plant."}
 	var record:Dictionary=data().plants.get(id,{})
 	if int(record.get("installed",0))+int(record.get("building",0))+count>LIMIT:return {"error":"Installation capacity is full."}
+	if id=="water_hammer" and record.is_empty() and WaterDrive.select(WorldSimulation.discovery.latest_context).is_empty():return {"error":"Choose a settled home within 0.75 km of a revealed river or tributary."}
 	var cost:Dictionary={};var parts:Array[String]=[]
 	for item:String in spec.cost:
 		cost[item]=float(spec.cost[item])*count
@@ -46,6 +50,7 @@ static func install(id:String,count:int=1)->Dictionary:
 	if offer.has("error"):return offer
 	for item:String in offer.cost:WorldSimulation.state.resource_stockpiles[item]=float(WorldSimulation.state.resource_stockpiles[item])-float(offer.cost[item])
 	if not data().plants.has(id):data().plants[id]={"installed":0,"building":0,"work":0.0,"enabled":true}
+	if id=="water_hammer" and not data().plants[id].has("river_site"):data().plants[id]["river_site"]=WaterDrive.select(WorldSimulation.discovery.latest_context)
 	data().plants[id].building+=count
 	return offer
 static func set_enabled(id:String,value:bool)->void:
@@ -74,11 +79,17 @@ static func workshop_power_demand()->float:
 	return demand
 static func auxiliary_power_demand()->float:
 	return float(load("res://scripts/grain_processing.gd").power_demand())+float(load("res://scripts/household_clothing.gd").power_demand())
+static func consume_service(name:String,amount:float)->float:
+	if not is_finite(amount):return 0.0
+	var used:=minf(maxf(0,amount),service(name))
+	if used>0:data().services[name]=float(data().services[name])-used
+	return used
 static func consume_electricity(amount:float)->float:
 	var used:=minf(maxf(0,amount),service("electricity"))
 	if used>0:data().services.electricity-=used
 	return used
 static func advance(day:int)->void:
+	if not WorldSimulation.state.resource_settlement_id.is_empty():return
 	var ledger:=data()
 	if day<=int(ledger.last_day):return
 	var elapsed:=maxi(1,day-int(ledger.last_day)) if int(ledger.last_day)>=0 else 1
@@ -86,7 +97,7 @@ static func advance(day:int)->void:
 	Storage.retain(ledger,PLANTS,elapsed)
 	for record:Dictionary in ledger.plants.values():record["running_units"]=0.0
 	var state:=WorldSimulation.state
-	if not state.settlement_site_committed or state.convoy_traveling:return
+	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return
 	var available:float=state.effective_workers("Crafting")
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1.0)
 	if condition<=0 or available<=0:return
@@ -112,6 +123,7 @@ static func advance(day:int)->void:
 		if float(spec.power)>0:units=minf(units,float(ledger.services.get("electricity",0))/float(spec.power))
 		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
 		if id=="cannery":units=minf(units,canning_demand()/float(spec.services.food_preservation))
+		if id=="water_hammer":units=minf(units,float(WaterDrive.assessment(record.get("river_site",{}),WorldSimulation.discovery.latest_context,day).capacity))
 		if units>0:available=_operate(ledger,record,spec,units,available,condition)
 	# Charging can use spare generation, after consumer operators and the
 	# electricity budget for pending workshop production have been protected.
@@ -173,6 +185,9 @@ static func status(id:String)->String:
 	if float(record.get("running_units",0))>0:return "Operating %.2f of %d installed units" % [float(record.running_units),int(record.installed)]
 	if int(record.installed)<=0:return "Commissioning: %.1f work completed toward the next unit" % float(record.work)
 	var spec:Dictionary=PLANTS[id]
+	if id=="water_hammer":
+		var site_status:=WaterDrive.assessment(record.get("river_site",{}),WorldSimulation.discovery.latest_context,int(WorldSimulation.state.elapsed_days))
+		if float(site_status.capacity)<=0:return String(site_status.reason)
 	if id=="cannery" and canning_demand()<=0:return "Waiting for surplus perishable food"
 	for item:String in spec.inputs:
 		if float(WorldSimulation.state.resource_stockpiles.get(item,0))<=0:return "Waiting for "+item
@@ -200,11 +215,11 @@ static func valid(value:Variant)->bool:
 	for field:String in ["services","inputs"]:
 		if not value[field] is Dictionary or value[field].size()>16:return false
 		for key:Variant in value[field]:
-			if field=="services" and key not in ["electricity","cold_storage","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records"]:return false
-			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains"]:return false
+			if field=="services" and key not in ["electricity","cold_storage","hammer_work","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records"]:return false
+			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":26500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}:
-		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"mechanical_work":26500.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":200000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":200000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]
@@ -213,6 +228,7 @@ static func valid(value:Variant)->bool:
 			if not number(record[field]) or record[field]<0:return false
 		if not number(record.get("running_units",0)) or float(record.get("running_units",0))<0 or float(record.get("running_units",0))>float(record.installed)+.000001:return false
 		if not Storage.valid(record,PLANTS[id]):return false
+		if id=="water_hammer" and not WaterDrive.valid(record.get("river_site")):return false
 		if record.installed!=floorf(record.installed) or record.building!=floorf(record.building) or record.installed+record.building>LIMIT or record.work>=float(PLANTS[id].work):return false
 	return true
 static func number(value:Variant)->bool:return (value is float or value is int) and is_finite(float(value))

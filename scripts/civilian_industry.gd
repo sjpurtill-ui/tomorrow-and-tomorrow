@@ -2,6 +2,21 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	# Distinct hand drives and physically supplied powered processes.
+	"bow_drill_sets":{"name": "Fitted bow-drill sets", "output": "Bow Drill Sets", "gate": "bow_drill_drive", "materials": {"Timber": 1, "Rope Coils": 0.1, "Flint": 0.2}, "days": 2, "tooling": {"Stone": 1}},
+	"bow_drilled_axle_boxes":{"name": "Bow-drilled wooden axle boxes", "output": "Axle Boxes", "gate": "wooden_axle_boxes", "materials": {"Timber": 1}, "days": 1.5, "tooling": {"Bow Drill Sets": 1, "Timber": 1}},
+	"treadle_lathes":{"name": "Foot-driven woodworking lathes", "output": "Treadle Lathes", "gate": "treadle_lathe_drive", "materials": {"Timber": 8, "Rope Coils": 0.5, "Wrought Iron": 1}, "days": 8, "tooling": {"Stone": 3, "Wrought Iron": 1}},
+	"treadle_turned_axles":{"name": "Treadle-turned wooden axles", "output": "Wooden Axles", "gate": "wooden_axle_shaping", "materials": {"Timber": 2.8}, "days": 2, "tooling": {"Treadle Lathes": 1, "Wrought Iron": 1}},
+	"mechanical_screw_presses":{"name": "Fitted mechanical screw presses", "output": "Mechanical Screw Presses", "gate": "mechanical_screw_presses", "materials": {"Timber": 8, "Wrought Iron": 2}, "days": 9, "tooling": {"Stone": 3, "Wrought Iron": 2}},
+	"screw_dewatered_paper":{"name": "Screw-dewatered paper sheets", "output": "Paper", "gate": "paper_sheet_pressing", "materials": {"Paper Pulp": 1, "Freshwater": 1}, "days": 1.5, "tooling": {"Mechanical Screw Presses": 1, "Woven Cloth": 1}},
+	"fitted_screw_printing":{"name": "Printing with fitted screw press", "output": "Printed Sheets", "gate": "screw_press_printing", "materials": {"Paper": 1, "Printing Ink": 0.1}, "days": 1.2, "tooling": {"Mechanical Screw Presses": 1, "Printing Forms": 1}},
+	"cam_follower_sets":{"name": "Trial-fitted cams and followers", "output": "Cam Follower Sets", "gate": "cam_motion_design", "materials": {"Wrought Iron": 2, "Timber": 1, "Graphite": 0.05}, "days": 5, "tooling": {"Wrought Iron": 2, "Stone": 2}},
+	"cam_pressed_paper":{"name": "Cam-driven repeated paper pressing", "output": "Paper", "gate": "paper_sheet_pressing", "materials": {"Paper Pulp": 1, "Freshwater": 1, "Cam Follower Sets": 0.005}, "days": 0.8, "tooling": {"Cam Follower Sets": 1, "Electric Motors": 1, "Woven Cloth": 1, "Timber": 5}, "power": 1, "daily_power": 1},
+	"woven_drive_belts":{"name": "Woven and tension-tested drive belts", "output": "Drive Belts", "gate": "belt_power_transmission", "materials": {"Woven Cloth": 2, "Spun Yarn": 0.2}, "days": 3, "tooling": {"Timber": 3, "Stone": 1}},
+	"belt_drive_sets":{"name": "Aligned pulley and belt assemblies", "output": "Belt Drive Sets", "gate": "belt_power_transmission", "materials": {"Drive Belts": 1, "Timber": 3, "Wrought Iron": 1}, "days": 5, "tooling": {"Timber": 3, "Stone": 2}},
+	"water_hammer_drives":{"name": "Fitted waterwheel and hammer drives", "output": "Water Hammer Drives", "gate": "water_powered_hammers", "materials": {"Timber": 12, "Wrought Iron": 4, "Rope Coils": 1}, "days": 12, "tooling": {"Wrought Iron": 2, "Stone": 4}},
+	"water_hammered_armor_plates":{"name": "Water-hammered iron armor elements", "output": "Armor Plates", "gate": "hardened_edges", "materials": {"Wrought Iron": 1.1, "Charcoal": 0.4}, "days": 1.5, "tooling": {"Wrought Iron": 2, "Stone": 3}, "services": {"hammer_work": 2}},
+	"water_hammered_bolt_blanks":{"name": "Water-hammered bolt blanks", "output": "Bolt Blanks", "gate": "bolt_blank_forging", "materials": {"Wrought Iron": 1, "Charcoal": 0.3}, "days": 1.5, "tooling": {"Wrought Iron": 2, "Stone": 3}, "services": {"hammer_work": 2}},
 	"rendered_leather_fat":{"name": "Rendered fat for leather finishing", "output": "Rendered Animal Fat", "gate": "hide_tanning", "materials": {"Recovered Animal Fat": 1.25, "Timber": 0.3, "Freshwater": 0.2}, "days": 1, "tooling": {"Clay": 2, "Stone": 1}},
 	# Selected compatible hides/plants; costs include rejected feed and finishing losses.
 	"prepared_tanning_hides":{"name": "Cleaned and prepared tanning hides", "output": "Prepared Tanning Hides", "gate": "hide_tanning", "materials": {"Raw Hides": 1.2, "Salt": 0.2, "Freshwater": 2, "Slaked Lime": 0.1}, "days": 3, "tooling": {"Stone": 3, "Timber": 4, "Clay": 2}},

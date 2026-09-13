@@ -58,6 +58,10 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		var recipe:=P.recipe(WorldSimulation.military,item)
 		if recipe.has("error"):continue
 		if not plan_power and float(I.PRODUCTS[item].get("power",0.0))>0.0 and preload("res://scripts/technology_operations.gd").service("electricity")<=0.0:continue
+		var services_ready:=true
+		for service_name:String in I.PRODUCTS[item].get("services",{}):
+			if preload("res://scripts/technology_operations.gd").service(service_name)<=0:services_ready=false
+		if not services_ready:continue
 		var batches:=maxi(1,ceili(target-float(WorldSimulation.state.resource_stockpiles.get(resource,0.0))))
 		# A line may begin with one batch in hand; the target is not an upfront
 		# reservation. Plan upstream only when the next batch cannot be made.
