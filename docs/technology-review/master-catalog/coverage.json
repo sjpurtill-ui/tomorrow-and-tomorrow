@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 750,
   "pending_communications": 0,
-  "new_authored_drafts": 2655,
-  "distinct_accounted_identities": 3405,
-  "remaining_identities_to_author": 1595,
+  "new_authored_drafts": 2679,
+  "distinct_accounted_identities": 3429,
+  "remaining_identities_to_author": 1571,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -183,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 1309,
+    "assigned_identities": 1333,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2330,11 +2330,11 @@
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 658,
-        "target_slots_not_yet_assigned": 242,
+        "assigned": 682,
+        "target_slots_not_yet_assigned": 218,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 653
+        "authored_drafts": 677
       },
       {
         "id": "H06",
@@ -2362,7 +2362,7 @@
     "D08": 95,
     "D09": 111,
     "D10": 79,
-    "D11": 60,
+    "D11": 84,
     "D12": 115,
     "D13": 113,
     "D14": 173,
@@ -2484,9 +2484,9 @@
       "target": 160,
       "implemented_baseline": 7,
       "pending_communications": 0,
-      "authored_drafts": 60,
-      "accounted": 67,
-      "remaining_to_target": 93
+      "authored_drafts": 84,
+      "accounted": 91,
+      "remaining_to_target": 69
     },
     {
       "id": "D12",

@@ -13124,6 +13124,246 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "638464b3f8e05983e68c279b81be40464e3d01b5154c52eb97384b2f9c1428da"
+    },
+    {
+      "id": "wingtip_vortex_devices",
+      "name": "Wingtip Vortex Devices",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3b0bab53b5b09d19a77cd94cad63bf26f3c8700492f6cad51179d2d07c025e6c"
+    },
+    {
+      "id": "natural_laminar_wing_surfaces",
+      "name": "Natural Laminar Wing Surfaces",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "4138e1eca4e76801d9045f30065f394345683b4b9d9d239f79fbb929adbf4df7"
+    },
+    {
+      "id": "suction_laminar_flow_control",
+      "name": "Suction Laminar-Flow Control",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "012ce5b2307de15892fc53cf015000569c677ee7d78e2bcc74b17c19483caaf0"
+    },
+    {
+      "id": "variable_sweep_wing_mechanisms",
+      "name": "Variable-Sweep Wing Mechanisms",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2d079e5ea7dc68080f57ee3b79d02b65dad8cced08f86e8a4d933ba3e8816e20"
+    },
+    {
+      "id": "spoiler_lift_dumping",
+      "name": "Spoiler Lift Dumping",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "05dc3e84a1445254af21f95f03a53fc01bce66505e426c4233894182f414e39e"
+    },
+    {
+      "id": "servo_tab_actuation",
+      "name": "Servo-Tab Actuation",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "bb15492de6481c18de52ceb42af5c9c5f0cc5d2dd346ffc2744c7108c73daf61"
+    },
+    {
+      "id": "aircraft_yaw_damping",
+      "name": "Aircraft Yaw Damping",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "59da0f6012dd28623d644c0d834e043a165978ac1730a205d20ebab6092aec1c"
+    },
+    {
+      "id": "hydraulic_flight_actuation",
+      "name": "Hydraulic Flight Actuation",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "5b7f94fb2469d8d91da22a958a5b9310974abbcbccc88ef32a34669c42eddf4a"
+    },
+    {
+      "id": "aircraft_fuel_crossfeed",
+      "name": "Aircraft Fuel Crossfeed",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c14a31f267a9cd0e014a827902825d13dcc9729129a8c01a26eb2e5d209ac044"
+    },
+    {
+      "id": "fuel_tank_inerting",
+      "name": "Fuel-Tank Inerting",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b22965937bc287dd434a4aca3dcbf1e45d7879bba77fcf3b8a0c18b0335e2d66"
+    },
+    {
+      "id": "capacitive_fuel_gauging",
+      "name": "Capacitive Fuel Gauging",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "9e360e3678cd72fb2c54e64b50aef1a7288f448fffc74a879c38654e78c78b1b"
+    },
+    {
+      "id": "ram_air_emergency_generation",
+      "name": "Ram-Air Emergency Generation",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "7bb8b6cd2338b0bbaf0a3cc0bdf23a98b81fb7e3f0e8c6f4102cfed65785467d"
+    },
+    {
+      "id": "aircraft_auxiliary_power_units",
+      "name": "Aircraft Auxiliary Power Units",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "865ea998af6067e0741246a46692dca10f9dc3a880b9b387f26cce69e7dab533"
+    },
+    {
+      "id": "aircraft_essential_bus_isolation",
+      "name": "Aircraft Essential-Bus Isolation",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "b9938f3e03d25d8d6ae889719faf0059009d8b4da7824edeb549fba68100d5bd"
+    },
+    {
+      "id": "continuous_loop_fire_detection",
+      "name": "Continuous-Loop Fire Detection",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "17f6232b06549d30dc12c1cd11f17af35f341063cb9e556450d92bcf8b3c8d8b"
+    },
+    {
+      "id": "cascade_thrust_reversal",
+      "name": "Cascade Thrust Reversal",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "feb5dd5016f0856de10cffb98cd51365982fdfe4084b7097fe3245f5fa4c44cb"
+    },
+    {
+      "id": "rotor_freewheeling_drives",
+      "name": "Rotor Freewheeling Drives",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "9ffe3a4321c1106e609ce6a68100e4b65ff994617349eda33356b0eeca9eb36b"
+    },
+    {
+      "id": "rotor_lead_lag_dampers",
+      "name": "Rotor Lead-Lag Dampers",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "244f39e144dd878bdbc0500ed50fd6316da69e33d680cd775600bec7607e6814"
+    },
+    {
+      "id": "rotor_track_balance_measurement",
+      "name": "Rotor Track and Balance Measurement",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "d1cd4eb9ebc75fc095b2b7150d17801f3cc5669c1ecc2896fbc90e7345a6236b"
+    },
+    {
+      "id": "oleopneumatic_landing_struts",
+      "name": "Oleopneumatic Landing Struts",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3053c5be232b321cda76c197573181c28fce4b26962254de92585a6b00ab5a27"
+    },
+    {
+      "id": "nosewheel_shimmy_damping",
+      "name": "Nosewheel Shimmy Damping",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "9047fba702acebe82fd1e82887388feb10bc8e1ddc7139060dffb0a56408b25a"
+    },
+    {
+      "id": "aircraft_wheel_thermal_vents",
+      "name": "Aircraft Wheel Thermal Vents",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3522b21fbd2a1e1a0b15a02d72d1d22612362ca80f28a2dff16ee2cea127bfd8"
+    },
+    {
+      "id": "cabin_air_cycle_refrigeration",
+      "name": "Cabin Air-Cycle Refrigeration",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "fbbf4479c5ee24b7c9bc610788785270320e4fe70fd4651153393b2df5dae0ad"
+    },
+    {
+      "id": "pneumatic_deicing_boots",
+      "name": "Pneumatic Deicing Boots",
+      "horizon": "H05",
+      "source_file": "aviation-systems-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "4b3d405f6d54072886b2bc4f2c11230bb436af88ad299b061a7d14dfbed8a060"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

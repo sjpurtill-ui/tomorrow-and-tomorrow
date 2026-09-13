@@ -1,0 +1,869 @@
+[
+  {
+    "id": "wingtip_vortex_devices",
+    "name": "Wingtip Vortex Devices",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "wing_section_characterization",
+      "airframe_fatigue_management"
+    ],
+    "requires_any": [],
+    "foundations": "wing_section_characterization,airframe_fatigue_management",
+    "mechanism": "Shape a qualified wingtip to alter trailing-vortex flow and induced drag.",
+    "operating_requirement": "Pay for tip structures and comparative load/drag measurements on the intended wing across selected lift conditions.",
+    "consequence": "An equipped aircraft uses its measured drag curve and added structural mass; other wings receive no benefit.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable wingtip vortex devices instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wingtip_vortex_devices",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Shape a qualified wingtip to alter trailing-vortex flow and induced drag.",
+      "operating_requirements": "Pay for tip structures and comparative load/drag measurements on the intended wing across selected lift conditions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local wingtip vortex devices trials.",
+        "partnership": "Share actual samples and operator time for wingtip vortex devices; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded wingtip vortex devices process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external wingtip vortex devices processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable wingtip vortex devices machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nasa.gov/centers-and-facilities/armstrong/on-the-winglets-of-innovation-with-nasa-armstrong-2/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "natural_laminar_wing_surfaces",
+    "name": "Natural Laminar Wing Surfaces",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "wing_section_characterization",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "wing_section_characterization,dimensional_metrology",
+    "mechanism": "Combine a selected pressure distribution with smooth surface geometry to delay boundary-layer transition.",
+    "operating_requirement": "Manufacture and inspect a wing surface; measure transition with representative contamination and flight conditions.",
+    "consequence": "The inspected wing uses a bounded skin-friction model that loses the demonstrated benefit when its surface or conditions no longer qualify.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable natural laminar wing surfaces instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "natural_laminar_wing_surfaces",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Combine a selected pressure distribution with smooth surface geometry to delay boundary-layer transition.",
+      "operating_requirements": "Manufacture and inspect a wing surface; measure transition with representative contamination and flight conditions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local natural laminar wing surfaces trials.",
+        "partnership": "Share actual samples and operator time for natural laminar wing surfaces; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded natural laminar wing surfaces process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external natural laminar wing surfaces processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable natural laminar wing surfaces machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nasa.gov/aeronautics/nasa-seeks-it-all-high-lift-low-drag/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "suction_laminar_flow_control",
+    "name": "Suction Laminar-Flow Control",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "natural_laminar_wing_surfaces",
+      "vacuum_pumps"
+    ],
+    "requires_any": [],
+    "foundations": "natural_laminar_wing_surfaces,vacuum_pumps",
+    "mechanism": "Remove a small boundary-layer flow through distributed surface openings to delay transition.",
+    "operating_requirement": "Build porous panels, ducts and a powered suction system; measure flow distribution, clogging and net drag after pumping cost.",
+    "consequence": "An operating equipped wing can use a qualified transition envelope while blockage or lost pumping removes that capability.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable suction laminar-flow control instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "suction_laminar_flow_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Remove a small boundary-layer flow through distributed surface openings to delay transition.",
+      "operating_requirements": "Build porous panels, ducts and a powered suction system; measure flow distribution, clogging and net drag after pumping cost.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local suction laminar-flow control trials.",
+        "partnership": "Share actual samples and operator time for suction laminar-flow control; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded suction laminar-flow control process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external suction laminar-flow control processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable suction laminar-flow control machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nasa.gov/wp-content/uploads/2021/04/88792main_laminar.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "variable_sweep_wing_mechanisms",
+    "name": "Variable-Sweep Wing Mechanisms",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "swept_wing_design",
+      "airframe_fatigue_management"
+    ],
+    "requires_any": [],
+    "foundations": "swept_wing_design,airframe_fatigue_management",
+    "mechanism": "Rotate loaded wing panels about engineered pivots to change sweep while retaining controlled geometry.",
+    "operating_requirement": "Pay for pivots, synchronized actuators and structural tests at each allowed sweep setting.",
+    "consequence": "A specific aircraft can select validated wing settings with changing drag, lift, mass balance and maintenance costs.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable variable-sweep wing mechanisms instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "variable_sweep_wing_mechanisms",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Rotate loaded wing panels about engineered pivots to change sweep while retaining controlled geometry.",
+      "operating_requirements": "Pay for pivots, synchronized actuators and structural tests at each allowed sweep setting.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local variable-sweep wing mechanisms trials.",
+        "partnership": "Share actual samples and operator time for variable-sweep wing mechanisms; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded variable-sweep wing mechanisms process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external variable-sweep wing mechanisms processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable variable-sweep wing mechanisms machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nasa.gov/centers-and-facilities/armstrong/nasa-armstrong-fact-sheet-x-5-research-aircraft/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "spoiler_lift_dumping",
+    "name": "Spoiler Lift Dumping",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "aircraft_control_surfaces",
+      "flight_stability_models"
+    ],
+    "requires_any": [],
+    "foundations": "aircraft_control_surfaces,flight_stability_models",
+    "mechanism": "Raise upper-wing panels to separate local airflow and reduce lift while increasing drag.",
+    "operating_requirement": "Install qualified panels and actuators; test symmetry, deployment interlocks and measured aerodynamic increments.",
+    "consequence": "An equipped aircraft uses measured lift and drag changes during permitted rollout or flight modes; deployment can reduce available lift.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable spoiler lift dumping instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "spoiler_lift_dumping",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Raise upper-wing panels to separate local airflow and reduce lift while increasing drag.",
+      "operating_requirements": "Install qualified panels and actuators; test symmetry, deployment interlocks and measured aerodynamic increments.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local spoiler lift dumping trials.",
+        "partnership": "Share actual samples and operator time for spoiler lift dumping; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded spoiler lift dumping process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external spoiler lift dumping processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable spoiler lift dumping machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "servo_tab_actuation",
+    "name": "Servo-Tab Actuation",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "aircraft_control_surfaces",
+      "flight_stability_models"
+    ],
+    "requires_any": [],
+    "foundations": "aircraft_control_surfaces,flight_stability_models",
+    "mechanism": "Deflect a small trailing tab so its aerodynamic moment moves a larger primary control surface.",
+    "operating_requirement": "Build hinge/linkage geometry and test force, travel and reversal across the intended airflow range.",
+    "consequence": "A specific mechanical control gains demonstrated aerodynamic assistance that depends on airspeed and cannot replace a jammed linkage.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable servo-tab actuation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "servo_tab_actuation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Deflect a small trailing tab so its aerodynamic moment moves a larger primary control surface.",
+      "operating_requirements": "Build hinge/linkage geometry and test force, travel and reversal across the intended airflow range.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local servo-tab actuation trials.",
+        "partnership": "Share actual samples and operator time for servo-tab actuation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded servo-tab actuation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external servo-tab actuation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable servo-tab actuation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "aircraft_yaw_damping",
+    "name": "Aircraft Yaw Damping",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "gyroscopic_flight_instruments",
+      "feedback_stability_analysis",
+      "aircraft_control_surfaces"
+    ],
+    "requires_any": [],
+    "foundations": "gyroscopic_flight_instruments,feedback_stability_analysis,aircraft_control_surfaces",
+    "mechanism": "Feed measured yaw-rate motion into bounded rudder correction to damp coupled yaw-roll oscillation.",
+    "operating_requirement": "Install rate sensing, powered control and qualified gains; test sensor faults and authority limits.",
+    "consequence": "An equipped aircraft uses validated oscillation damping only while its sensor and actuator are operating.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable aircraft yaw damping instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aircraft_yaw_damping",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Feed measured yaw-rate motion into bounded rudder correction to damp coupled yaw-roll oscillation.",
+      "operating_requirements": "Install rate sensing, powered control and qualified gains; test sensor faults and authority limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local aircraft yaw damping trials.",
+        "partnership": "Share actual samples and operator time for aircraft yaw damping; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded aircraft yaw damping process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external aircraft yaw damping processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable aircraft yaw damping machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "hydraulic_flight_actuation",
+    "name": "Hydraulic Flight Actuation",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydraulic_power_machinery",
+      "aircraft_control_surfaces"
+    ],
+    "requires_any": [],
+    "foundations": "hydraulic_power_machinery,aircraft_control_surfaces",
+    "mechanism": "Meter pressurized fluid into flight-control actuators to deliver commanded surface force.",
+    "operating_requirement": "Build compatible pumps, valves, cylinders and isolated circuits; pay fluid, power, leakage checks and load trials.",
+    "consequence": "Specific installed surfaces gain measured actuation force and speed, degrading when pressure, fluid or circuit availability is lost.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable hydraulic flight actuation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hydraulic_flight_actuation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Meter pressurized fluid into flight-control actuators to deliver commanded surface force.",
+      "operating_requirements": "Build compatible pumps, valves, cylinders and isolated circuits; pay fluid, power, leakage checks and load trials.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local hydraulic flight actuation trials.",
+        "partnership": "Share actual samples and operator time for hydraulic flight actuation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded hydraulic flight actuation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external hydraulic flight actuation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable hydraulic flight actuation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "aircraft_fuel_crossfeed",
+    "name": "Aircraft Fuel Crossfeed",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "piston_aircraft_powerplants",
+      "pressure_pipe_jointing"
+    ],
+    "requires_any": [],
+    "foundations": "piston_aircraft_powerplants,pressure_pipe_jointing",
+    "mechanism": "Connect selected tank supply paths to either engine through controlled valves and pumps.",
+    "operating_requirement": "Install and leak-test a defined multiengine fuel topology, compatible pumps and valve-state indications.",
+    "consequence": "An engine may consume real fuel from a permitted alternate tank; crossfeed alone neither transfers fuel between tanks nor cleans contaminated fuel.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable aircraft fuel crossfeed instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aircraft_fuel_crossfeed",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Connect selected tank supply paths to either engine through controlled valves and pumps.",
+      "operating_requirements": "Install and leak-test a defined multiengine fuel topology, compatible pumps and valve-state indications.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local aircraft fuel crossfeed trials.",
+        "partnership": "Share actual samples and operator time for aircraft fuel crossfeed; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded aircraft fuel crossfeed process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external aircraft fuel crossfeed processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable aircraft fuel crossfeed machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "fuel_tank_inerting",
+    "name": "Fuel-Tank Inerting",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis",
+      "cabin_pressurization"
+    ],
+    "requires_any": [],
+    "foundations": "gas_composition_analysis,cabin_pressurization",
+    "mechanism": "Supply oxygen-depleted air to tank ullage through a qualified gas-separation and distribution system.",
+    "operating_requirement": "Pay for separation modules, conditioned compressed air, controls and measured ullage composition over the operating cycle.",
+    "consequence": "An equipped tank tracks a bounded lower-oxygen condition only while supplied; leaks and outages can invalidate its demonstrated flammability condition.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable fuel-tank inerting instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fuel_tank_inerting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Supply oxygen-depleted air to tank ullage through a qualified gas-separation and distribution system.",
+      "operating_requirements": "Pay for separation modules, conditioned compressed air, controls and measured ullage composition over the operating cycle.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local fuel-tank inerting trials.",
+        "partnership": "Share actual samples and operator time for fuel-tank inerting; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded fuel-tank inerting process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external fuel-tank inerting processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable fuel-tank inerting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://aircraft.airbus.com/sites/g/files/jlcbta126/files/2022-04/FAST44.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "capacitive_fuel_gauging",
+    "name": "Capacitive Fuel Gauging",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "capacitive_displacement_sensing",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "capacitive_displacement_sensing,electrical_measurement",
+    "mechanism": "Infer tank contents from capacitance changes between probes as fuel replaces air.",
+    "operating_requirement": "Install probes and calibrated electronics; test tank geometry, fuel dielectric variation, attitude and unusable volume.",
+    "consequence": "A specific tank supplies an uncertain measured quantity to dispatch and engine planning rather than revealing exact hidden fuel state.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable capacitive fuel gauging instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "capacitive_fuel_gauging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Infer tank contents from capacitance changes between probes as fuel replaces air.",
+      "operating_requirements": "Install probes and calibrated electronics; test tank geometry, fuel dielectric variation, attitude and unusable volume.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local capacitive fuel gauging trials.",
+        "partnership": "Share actual samples and operator time for capacitive fuel gauging; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded capacitive fuel gauging process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external capacitive fuel gauging processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable capacitive fuel gauging machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "ram_air_emergency_generation",
+    "name": "Ram-Air Emergency Generation",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "aircraft_propeller_aerodynamics",
+      "electric_motors",
+      "feedback_governors"
+    ],
+    "requires_any": [],
+    "foundations": "aircraft_propeller_aerodynamics,electric_motors,feedback_governors",
+    "mechanism": "Deploy an airflow-driven turbine to supply limited emergency electrical or hydraulic power.",
+    "operating_requirement": "Install and test the turbine, regulator, generator and deployment mechanism across an airspeed envelope.",
+    "consequence": "Emergency aircraft loads receive only demonstrated output while airflow and hardware permit; the device adds drag and cannot power a stationary aircraft for free.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable ram-air emergency generation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ram_air_emergency_generation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Deploy an airflow-driven turbine to supply limited emergency electrical or hydraulic power.",
+      "operating_requirements": "Install and test the turbine, regulator, generator and deployment mechanism across an airspeed envelope.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local ram-air emergency generation trials.",
+        "partnership": "Share actual samples and operator time for ram-air emergency generation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded ram-air emergency generation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external ram-air emergency generation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable ram-air emergency generation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.safran-group.com/products-services/ram-air-turbine"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "aircraft_auxiliary_power_units",
+    "name": "Aircraft Auxiliary Power Units",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_turbine_cycles",
+      "electric_motors"
+    ],
+    "requires_any": [],
+    "foundations": "gas_turbine_cycles,electric_motors",
+    "mechanism": "Run a separate small turbine to supply onboard electrical and pneumatic services.",
+    "operating_requirement": "Build and qualify an auxiliary turbine, generator and air distribution with real fuel, starting energy and maintenance.",
+    "consequence": "An equipped aircraft can obtain bounded ground or permitted inflight auxiliary service while burning fuel; main-engine shutdown does not imply unlimited power.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable aircraft auxiliary power units instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aircraft_auxiliary_power_units",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Run a separate small turbine to supply onboard electrical and pneumatic services.",
+      "operating_requirements": "Build and qualify an auxiliary turbine, generator and air distribution with real fuel, starting energy and maintenance.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local aircraft auxiliary power units trials.",
+        "partnership": "Share actual samples and operator time for aircraft auxiliary power units; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded aircraft auxiliary power units process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external aircraft auxiliary power units processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable aircraft auxiliary power units machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "aircraft_essential_bus_isolation",
+    "name": "Aircraft Essential-Bus Isolation",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "electromagnetic_relays"
+    ],
+    "requires_any": [],
+    "foundations": "electrical_measurement,electromagnetic_relays",
+    "mechanism": "Separate and switch priority electrical loads so a fault or source loss can shed nonessential demand.",
+    "operating_requirement": "Install qualified wiring, contactors, protection and backup supply; measure load and fault isolation for each bus.",
+    "consequence": "Available stored/generated energy supplies selected instruments through explicit capacity and endurance limits; disconnected loads stop operating.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable aircraft essential-bus isolation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aircraft_essential_bus_isolation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate and switch priority electrical loads so a fault or source loss can shed nonessential demand.",
+      "operating_requirements": "Install qualified wiring, contactors, protection and backup supply; measure load and fault isolation for each bus.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local aircraft essential-bus isolation trials.",
+        "partnership": "Share actual samples and operator time for aircraft essential-bus isolation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded aircraft essential-bus isolation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external aircraft essential-bus isolation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable aircraft essential-bus isolation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.govinfo.gov/content/pkg/GOVPUB-TD4-PURL-LPS106859/pdf/GOVPUB-TD4-PURL-LPS106859.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "continuous_loop_fire_detection",
+    "name": "Continuous-Loop Fire Detection",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "electrical_measurement,precision_thermometry",
+    "mechanism": "Detect heating along a distributed temperature-sensitive loop around an aircraft fire zone.",
+    "operating_requirement": "Install qualified sensing loops, alarm electronics and tests that distinguish circuit faults from supported heat indications.",
+    "consequence": "An equipped compartment can issue attributable heat warnings within sensor coverage; detection does not extinguish a fire or guarantee its absence.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable continuous-loop fire detection instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "continuous_loop_fire_detection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Detect heating along a distributed temperature-sensitive loop around an aircraft fire zone.",
+      "operating_requirements": "Install qualified sensing loops, alarm electronics and tests that distinguish circuit faults from supported heat indications.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local continuous-loop fire detection trials.",
+        "partnership": "Share actual samples and operator time for continuous-loop fire detection; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded continuous-loop fire detection process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external continuous-loop fire detection processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable continuous-loop fire detection machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "cascade_thrust_reversal",
+    "name": "Cascade Thrust Reversal",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "high_bypass_turbofan_design",
+      "hydraulic_flight_actuation"
+    ],
+    "requires_any": [],
+    "foundations": "high_bypass_turbofan_design,hydraulic_flight_actuation",
+    "mechanism": "Deploy a qualified nacelle mechanism that redirects fan flow to oppose aircraft motion.",
+    "operating_requirement": "Build cascade ducts, synchronized actuators and locking/interlock systems; test deployed loads and permitted operation.",
+    "consequence": "A specific operating engine contributes measured reverse force during allowed landing modes, consuming fuel and remaining subject to deployment faults.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable cascade thrust reversal instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cascade_thrust_reversal",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Deploy a qualified nacelle mechanism that redirects fan flow to oppose aircraft motion.",
+      "operating_requirements": "Build cascade ducts, synchronized actuators and locking/interlock systems; test deployed loads and permitted operation.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local cascade thrust reversal trials.",
+        "partnership": "Share actual samples and operator time for cascade thrust reversal; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded cascade thrust reversal process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external cascade thrust reversal processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable cascade thrust reversal machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.safran-group.com/products-services/thrust-reverser-actuation-system-and-power-door-opening-system-p-dos"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "rotor_freewheeling_drives",
+    "name": "Rotor Freewheeling Drives",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "rotary_wing",
+      "mechanical_clutches"
+    ],
+    "requires_any": [],
+    "foundations": "rotary_wing,mechanical_clutches",
+    "mechanism": "Use an overrunning drive coupling to disconnect a slowing engine while allowing the rotor drivetrain to continue rotating.",
+    "operating_requirement": "Manufacture and load-test a compatible coupling and drivetrain with actual lubrication and inspection.",
+    "consequence": "A qualified rotorcraft can enter a separately demonstrated unpowered rotor regime; disengagement provides no engine power or guaranteed landing outcome.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable rotor freewheeling drives instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rotor_freewheeling_drives",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use an overrunning drive coupling to disconnect a slowing engine while allowing the rotor drivetrain to continue rotating.",
+      "operating_requirements": "Manufacture and load-test a compatible coupling and drivetrain with actual lubrication and inspection.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local rotor freewheeling drives trials.",
+        "partnership": "Share actual samples and operator time for rotor freewheeling drives; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded rotor freewheeling drives process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external rotor freewheeling drives processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable rotor freewheeling drives machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/lessonslearned/rotorcraft/accidents/robinson-r22-beta-ii"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "rotor_lead_lag_dampers",
+    "name": "Rotor Lead-Lag Dampers",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "rotary_wing",
+      "structural_vibration_serviceability"
+    ],
+    "requires_any": [],
+    "foundations": "rotary_wing,structural_vibration_serviceability",
+    "mechanism": "Dissipate articulated blade in-plane motion with bounded damping at the rotor hub.",
+    "operating_requirement": "Build and characterize dampers together with blade and landing-gear dynamic response; pay inspection and fluid/component upkeep.",
+    "consequence": "The specific rotor system uses measured damping within its tested speeds; degraded dampers can leave coupled ground vibration uncontrolled.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable rotor lead-lag dampers instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rotor_lead_lag_dampers",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Dissipate articulated blade in-plane motion with bounded damping at the rotor hub.",
+      "operating_requirements": "Build and characterize dampers together with blade and landing-gear dynamic response; pay inspection and fluid/component upkeep.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local rotor lead-lag dampers trials.",
+        "partnership": "Share actual samples and operator time for rotor lead-lag dampers; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded rotor lead-lag dampers process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external rotor lead-lag dampers processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable rotor lead-lag dampers machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "rotor_track_balance_measurement",
+    "name": "Rotor Track and Balance Measurement",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "rotary_wing",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "rotary_wing,dimensional_metrology",
+    "mechanism": "Correlate blade track and vibration phase/amplitude with selected pitch or balance corrections.",
+    "operating_requirement": "Use tracking equipment and calibrated vibration sensing on an actual rotor; pay test runs and record applied corrections.",
+    "consequence": "An inspected rotor receives a measured vibration condition and correction record, not a permanent reliability or fatigue immunity bonus.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable rotor track and balance measurement instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "rotor_track_balance_measurement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Correlate blade track and vibration phase/amplitude with selected pitch or balance corrections.",
+      "operating_requirements": "Use tracking equipment and calibrated vibration sensing on an actual rotor; pay test runs and record applied corrections.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local rotor track and balance measurement trials.",
+        "partnership": "Share actual samples and operator time for rotor track and balance measurement; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded rotor track and balance measurement process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external rotor track and balance measurement processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable rotor track and balance measurement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "oleopneumatic_landing_struts",
+    "name": "Oleopneumatic Landing Struts",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "aircraft_landing_gear",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "foundations": "aircraft_landing_gear,pressure_vessels",
+    "mechanism": "Compress a gas charge and force oil through metering passages to absorb and dissipate landing energy.",
+    "operating_requirement": "Manufacture struts with compatible seals and fluid; test charge, stroke, leakage and selected landing loads.",
+    "consequence": "A fitted landing gear uses its demonstrated energy/stroke response; depleted charge or bottoming can exceed structural limits.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable oleopneumatic landing struts instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "oleopneumatic_landing_struts",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compress a gas charge and force oil through metering passages to absorb and dissipate landing energy.",
+      "operating_requirements": "Manufacture struts with compatible seals and fluid; test charge, stroke, leakage and selected landing loads.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local oleopneumatic landing struts trials.",
+        "partnership": "Share actual samples and operator time for oleopneumatic landing struts; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded oleopneumatic landing struts process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external oleopneumatic landing struts processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable oleopneumatic landing struts machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://safetyfirst.airbus.com/proper-landing-gear-servicing-for-safe-operations/?airbus-iframe=true&airbus-post=2075"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "nosewheel_shimmy_damping",
+    "name": "Nosewheel Shimmy Damping",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "aircraft_landing_gear",
+      "structural_vibration_serviceability"
+    ],
+    "requires_any": [],
+    "foundations": "aircraft_landing_gear,structural_vibration_serviceability",
+    "mechanism": "Resist rapid steering oscillation through a qualified wheel-linkage damper.",
+    "operating_requirement": "Build and measure damping in the actual tire, linkage and strut assembly across selected rolling speeds.",
+    "consequence": "The fitted nosewheel gains bounded oscillation damping while worn joints or depleted damping can invalidate the tested response.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable nosewheel shimmy damping instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nosewheel_shimmy_damping",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Resist rapid steering oscillation through a qualified wheel-linkage damper.",
+      "operating_requirements": "Build and measure damping in the actual tire, linkage and strut assembly across selected rolling speeds.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local nosewheel shimmy damping trials.",
+        "partnership": "Share actual samples and operator time for nosewheel shimmy damping; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded nosewheel shimmy damping process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external nosewheel shimmy damping processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable nosewheel shimmy damping machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "aircraft_wheel_thermal_vents",
+    "name": "Aircraft Wheel Thermal Vents",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "aircraft_landing_gear",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "aircraft_landing_gear,precision_thermometry",
+    "mechanism": "Use a fusible wheel plug to vent tire pressure when local heating reaches its designed release condition.",
+    "operating_requirement": "Manufacture and destructively qualify plug batches with wheel geometry and thermal exposure.",
+    "consequence": "A heated equipped wheel may deliberately deflate instead of retaining excessive pressure; the spent plug and tire condition require service before dispatch.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable aircraft wheel thermal vents instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "aircraft_wheel_thermal_vents",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use a fusible wheel plug to vent tire pressure when local heating reaches its designed release condition.",
+      "operating_requirements": "Manufacture and destructively qualify plug batches with wheel geometry and thermal exposure.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local aircraft wheel thermal vents trials.",
+        "partnership": "Share actual samples and operator time for aircraft wheel thermal vents; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded aircraft wheel thermal vents process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external aircraft wheel thermal vents processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable aircraft wheel thermal vents machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "cabin_air_cycle_refrigeration",
+    "name": "Cabin Air-Cycle Refrigeration",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "cabin_pressurization",
+      "industrial_heat_exchangers"
+    ],
+    "requires_any": [],
+    "foundations": "cabin_pressurization,industrial_heat_exchangers",
+    "mechanism": "Cool compressed air through heat exchange and expansion-turbine work before conditioned cabin delivery.",
+    "operating_requirement": "Install a qualified air-cycle machine, heat exchangers and water separation with actual compressed-air supply and heat rejection.",
+    "consequence": "An operating aircraft pack supplies bounded conditioned airflow at a real energy cost; heat-exchanger blockage or supply loss reduces service.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable cabin air-cycle refrigeration instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cabin_air_cycle_refrigeration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Cool compressed air through heat exchange and expansion-turbine work before conditioned cabin delivery.",
+      "operating_requirements": "Install a qualified air-cycle machine, heat exchangers and water separation with actual compressed-air supply and heat rejection.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local cabin air-cycle refrigeration trials.",
+        "partnership": "Share actual samples and operator time for cabin air-cycle refrigeration; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded cabin air-cycle refrigeration process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external cabin air-cycle refrigeration processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable cabin air-cycle refrigeration machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "pneumatic_deicing_boots",
+    "name": "Pneumatic Deicing Boots",
+    "field": "D11",
+    "status": "authored_draft",
+    "requires_all": [
+      "aircraft_icing_protection",
+      "synthetic_elastomers",
+      "pneumatic_cylinders"
+    ],
+    "requires_any": [],
+    "foundations": "aircraft_icing_protection,synthetic_elastomers,pneumatic_cylinders",
+    "mechanism": "Inflate and deflate attached flexible leading-edge tubes to fracture selected ice accretions.",
+    "operating_requirement": "Produce compatible boots, bonding and valves; pay compressed air, leak checks and representative icing tests.",
+    "consequence": "An equipped surface can shed demonstrated ice types during a permitted cycle; residual ice and out-of-envelope exposure still affect flight.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable pneumatic deicing boots instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pneumatic_deicing_boots",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Inflate and deflate attached flexible leading-edge tubes to fracture selected ice accretions.",
+      "operating_requirements": "Produce compatible boots, bonding and valves; pay compressed air, leak checks and representative icing tests.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local pneumatic deicing boots trials.",
+        "partnership": "Share actual samples and operator time for pneumatic deicing boots; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded pneumatic deicing boots process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external pneumatic deicing boots processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable pneumatic deicing boots machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/FAA-H-8083-31B_Aviation_Maintenance_Technician_Handbook.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]

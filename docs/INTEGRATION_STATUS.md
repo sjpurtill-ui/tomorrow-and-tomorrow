@@ -1,3 +1,9 @@
+## September 13 — aviation subsystem coverage
+
+Authored24 distinct D11 mechanisms covering wing flow/control hardware, fuel routing and gauging, emergency/auxiliary power, electrical isolation, fire sensing, rotor drives/damping, landing-gear behavior, air-cycle cooling and pneumatic deicing. Each proposal names paid hardware, measured limits and a real proposed consumer. Crossfeed is not tank transfer; emergency airflow power and auxiliary turbines have actual energy sources; detection does not extinguish fires. See `technology-review/Aviation Systems Review.md`.
+
+Ledger: **750 integrated +2,679 drafts =3,429 identities**, leaving **1,571 to author and4,250 to implement**. D11 now91/160 authored coverage. Parent/duplicate/reachability checks and15ledger tests pass. Runtime750/532/434/20 and art172/750 remain unchanged. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/aviation-systems-coverage`, base `4af5831e81f2470c1bd0f8817ea702c1c01175f2`. Catalog-only changes have no save-format impact or runtime shared-file conflict. No player launch or package rebuild.
+
 ## September 13 — 750 verified operating discoveries
 
 Formed-metal runtime/art commit `991ef0778aafced0bac3af208daf7262009128f8` is integrated and verified. Five original identities retain exact predicates: metal spinning, rotary swaging, rotary-draw bending, roll forming and centrifugal tube casting. Eighteen paid recipes turn distinct tooling and prepared components into actual motors, qualified pressure fittings and a commissioned pneumatic workshop. Raw blanks and untested frames cannot substitute for finished parts.
