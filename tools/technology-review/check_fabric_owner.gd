@@ -19,6 +19,7 @@ func run()->void:
   state.simulation_metrics.labor_efficiency=1.0
   var method:String="building_shading_design"
   state.known_discoveries.append(method)
+  state.known_discoveries.append_array(["seasonal_patterns","geometric_survey"])
   state.discovery_adoption[method]=1.0
   state.resource_stockpiles["Building Shade Lattices"]=1.0
   var plot:Dictionary=state.settlement_plots[0]

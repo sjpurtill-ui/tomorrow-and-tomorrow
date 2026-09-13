@@ -25,6 +25,8 @@ static func start(plot:Dictionary,method:String,stock:Dictionary,known:Array,ado
  if day<0 or not COMPONENTS.has(method):return {"ok":false,"reason":"Unknown method or invalid day."}
  if int(plot.get("id",0))<=0 or String(plot.get("status","")) not in ["active","stressed","damaged"]:
   return {"ok":false,"reason":"Requires an existing occupied plot."}
+ if not compatible(plot,method):return {"ok":false,"reason":"This method does not fit the recorded building fabric."}
+ if not foundations_met(method,known):return {"ok":false,"reason":"Required local foundations are absent."}
  if not plot.get("fabric_job",{}).is_empty():return {"ok":false,"reason":"This plot already has work pending."}
  if method not in known or float(adoption.get(method,0))<.25:return {"ok":false,"reason":"Local adoption is insufficient."}
  var component:String=COMPONENTS[method]
@@ -64,3 +66,26 @@ static func valid_job(value:Variant)->bool:
 static func needs_work(plot:Dictionary)->bool:
  var job:Variant=plot.get("fabric_job",{})
  return valid_job(job) and not job.is_empty() and String(job.state)=="assembling" and String(plot.get("status","")) in ["active","stressed","damaged"]
+
+static func foundations_met(method:String,known:Array)->bool:
+ for entry:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
+  if String(entry.id)!=method:continue
+  for parent:String in entry.requires_all:
+   if parent not in known:return false
+  for group:Array in entry.requires_any:
+   var found:=false
+   for parent:String in group:
+    if parent in known:found=true
+   if not found:return false
+  return true
+ return false
+
+static func compatible(plot:Dictionary,method:String)->bool:
+ if not COMPONENTS.has(method):return false
+ var use:String=String(plot.get("land_use",""))
+ if use not in ["residential_compound","mixed_household","workshop","storage","market","civic","communal","sacred","dirty_industry","hospitality"]:return false
+ var family:String=String(plot.get("material_family",""))
+ if method in ["timber_post_beam_connections","timber_splice_connections","timber_lateral_bracing","timber_moisture_movement_design"]:
+  return family in ["organic","timber"]
+ if method=="building_capillary_breaks":return family in ["stone","earth"]
+ return family in ["organic","timber","stone","earth"]

@@ -58,3 +58,9 @@ SettlementModel.start_fabric_retrofit now starts against the selected city's exi
 Actual-owner headless probe passes: debit, positive monthly work, repeat-month guard, JSON plot persistence and malformed job rejection. Log /tmp/tt-fabric-owner.log, exit 0. Initial probe compile failed because direct SceneTree scripts cannot resolve the autoload identifier at compile time; runtime root lookup corrected the probe. The module probe also passes after integration. These checks do not prove whole-save reload, all cities, all ten daily acquisition routes or workforce balance under a mature campaign.
 
 Automatic selection, method compatibility and qualification, inspection, installed records, paid repair, renderer/cache/bounds changes remain unfinished. No registration or promotion.
+
+## Branch and compatible-fabric guards
+
+Retrofit start now checks every authored ALL parent and one member of each OR group directly from the unregistered knowledge definitions before payment. Occupied building land uses and recorded material families constrain applicability: timber methods require timber/organic fabric, capillary breaks require stone/earth, and fields or encampments are excluded. This is a coarse first compatibility boundary, not qualified geometry or engineering acceptance.
+
+Expanded headless module checks pass for each missing ALL parent, absent OR group and each alternate OR member, plus incompatible-use rejection without payment. Actual settlement-owner probe passes with the shading foundations present. Logs /tmp/tt-fabric-all-or.log and /tmp/tt-fabric-owner-branches.log, both exit 0. Exact branch checks do not prove research acquisition or global reachability. Inspection and final installed service remain pending.
