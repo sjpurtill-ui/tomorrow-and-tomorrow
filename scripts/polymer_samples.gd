@@ -19,7 +19,7 @@ static func retire_completed()->void:
 	ids.sort_custom(func(a:String,b:String)->bool:return int(a)<int(b))
 	for id:String in ids:
 		if ledger.records.size()<=LIMIT/2:break
-		if ledger.records[id].status!="measured_unqualified":continue
+		if ledger.records[id].status not in ["measured_unqualified","measurement_failed"]:continue
 		ledger.records.erase(id)
 		ledger["retired_count"]=int(ledger.get("retired_count",0))+1
 static func completed(item:String,quantity:int)->void:

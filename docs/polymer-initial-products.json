@@ -1168,12 +1168,11 @@
     }
   },
   "characterized_controlled_peg": {
-    "name": "Reference-compared PEG chain-size batch",
+    "name": "Recover the quantitatively characterized PEG batch",
     "output": "Size-Qualified PEG",
     "gate": "polymer_molecular_weight_control",
     "materials": {
-      "Controlled-Chain PEG": 1.04,
-      "PEG Diol": 0.02,
+      "Size-Characterized PEG Batches": 1,
       "Freshwater": 0.2
     },
     "days": 4,

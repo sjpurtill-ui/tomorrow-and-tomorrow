@@ -421,7 +421,7 @@ func test_recovery_does_not_accept_fresh_water_as_process_condensate()->void:
 		var started:Dictionary=WorldSimulation.military.start_production_line("recovered_peg_process_water",1)
 		assert_bool(started.get("ok",false)).is_false()
 		assert_str(String(started.get("error",""))).contains("PEG Dryer Condensate"))
-func test_controlled_peg_requires_measured_starter_and_reaches_binder()->void:
+func test_controlled_peg_requires_measured_starter_and_cannot_self_certify_size()->void:
 	WorldSimulation.scoped("polymers",func()->void:
 		prepare();var s=WorldSimulation.state
 		Ops.data().last_day=0;Ops.data().services={"electricity":100.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
@@ -431,13 +431,13 @@ func test_controlled_peg_requires_measured_starter_and_reaches_binder()->void:
 		var denied:Dictionary=WorldSimulation.military.start_production_line("controlled_chain_peg",1)
 		assert_bool(denied.get("ok",false)).is_false()
 		assert_str(String(denied.get("error",""))).contains("Metered PEG Starter")
-		var items:Array[String]=["metered_peg_starter","controlled_chain_peg","characterized_controlled_peg","size_qualified_peg_binder","aqueous_peg_binder"]
-		var targets:Array[int]=[1,3,2,1,1]
+		var items:Array[String]=["metered_peg_starter","controlled_chain_peg"]
+		var targets:Array[int]=[1,3]
 		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
 		assert_float(float(s.resource_stockpiles["Metered PEG Starter"])).is_equal_approx(.88,.000001)
-		assert_float(float(s.resource_stockpiles["Controlled-Chain PEG"])).is_equal_approx(.92,.000001)
-		assert_float(float(s.resource_stockpiles["Size-Qualified PEG"])).is_equal_approx(.98,.000001)
-		assert_float(float(s.resource_stockpiles["Aqueous PEG Binder"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["Controlled-Chain PEG"])).is_equal(3.0)
+		assert_float(float(s.resource_stockpiles.get("Size-Qualified PEG",0))).is_equal(0.0)
+		assert_bool(WorldSimulation.military.start_production_line("characterized_controlled_peg",1).get("ok",false)).is_false()
 		assert_float(Ops.service("polymer_stirred_work")).is_equal_approx(6.4,.000001)
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(7.0))
 func test_formulated_foam_panels_supply_paid_cold_storage_and_stop_without_power()->void:
