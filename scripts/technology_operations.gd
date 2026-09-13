@@ -87,6 +87,9 @@ static func workshop_power_demand()->float:
 		if recipe.get("alloy_phase_trial",false) and job.has("alloy_trial"):
 			if job.alloy_trial.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
 			continue
+		if recipe.has("slitting_curvature") and job.has("slitting_pending"):
+			if job.slitting_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.daily_power)
+			continue
 		if recipe.has("induction_frequency") and job.has("induction_pending"):
 			if job.induction_pending.site==WorldSimulation.state.resource_settlement_id:demand+=float(recipe.get("daily_power",0))
 			continue

@@ -104,3 +104,27 @@ func test_calendar_outage_cools_hot_case_and_cannot_substitute_for_quench()->voi
 		assert_int(line.induction_pending.run.trace.back().idle_days).is_equal(2)
 		assert_bool(C.valid(line.induction_pending.run)).is_true()
 	)
+
+func test_target_stock_suspension_cools_hot_piece_in_actual_production_day()->void:
+	WorldSimulation.scoped("induction_work",func()->void:
+		var state=WorldSimulation.state;var spec:=I.product("induction_hardened_shafts")
+		state.settlement_site_committed=true;state.convoy_traveling=false
+		state.population_allocations.Crafting=100;state.population_allocations.Logistics=100
+		state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
+		for resource:String in spec.materials:state.resource_stockpiles[resource]=spec.materials[resource]
+		for resource:String in spec.tooling:state.resource_stockpiles[resource]=10.0
+		state.resource_stockpiles.Freshwater=3.0
+		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":100.0}
+		assert_bool(WorldSimulation.military.start_production_line("induction_hardened_shafts",1).get("ok",false)).is_true()
+		var line:Dictionary=WorldSimulation.military.equipment_queue.back()
+		P.advance(WorldSimulation.military,line,1.0)
+		var hot:=float(line.induction_pending.run.temperatures[0])
+		state.resource_stockpiles[spec.output]=1.0
+		state.elapsed_days+=1
+		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":100.0}
+		WorldSimulation.military._process_equipment_production_day()
+		assert_int(line.induction_pending.run.tick).is_equal(20)
+		assert_float(float(line.induction_pending.run.temperatures[0])).is_less(hot)
+		assert_int(line.induction_pending.run.trace.back().idle_days).is_equal(1)
+		assert_str(P.validate_saved({"equipment_queue":[line]})).is_empty()
+	)

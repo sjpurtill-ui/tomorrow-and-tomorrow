@@ -3,6 +3,7 @@ extends RefCounted
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
 const Machine=preload("res://scripts/machine_workshop.gd")
+const Slitting=preload("res://scripts/slitting_workshop.gd")
 const Induction=preload("res://scripts/induction_workshop.gd")
 const Metallurgy=preload("res://scripts/metallurgy_workshop.gd")
 const AlloyTrials=preload("res://scripts/alloy_phase_trials.gd")
@@ -147,6 +148,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		Exposure.clear(job)
 		Abrasive.clear(job)
 		Machine.clear(job)
+		Slitting.clear(job)
 		Induction.clear(job)
 		Metallurgy.clear(job)
 		AlloyTrials.clear(job)
@@ -174,6 +176,9 @@ static func state(host: Node, job: Dictionary) -> String:
 	if Industry.product(String(job.item)).has("abrasive_candidate") and not Abrasive.capacity():return "Abrasive lot register full"
 	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
 	var inspection:Dictionary=Industry.product(String(job.item))
+	if inspection.has("slitting_curvature") and job.has("slitting_pending"):
+		if job.slitting_pending.site!=WorldSimulation.state.resource_settlement_id:return "Specimen belongs to another store"
+		return "Working"
 	if inspection.has("induction_frequency") and job.has("induction_pending"):
 		if job.induction_pending.site!=WorldSimulation.state.resource_settlement_id:return "Workpiece belongs to another store"
 		return "Working"
@@ -229,11 +234,15 @@ static func workforce() -> Dictionary:
 
 static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
-	Induction.synchronize_idle(job,work)
-	if not eligible(host,job) or work<=0:
+	var can_run:=eligible(host,job)
+	Induction.synchronize_idle(job,work if can_run else 0.0)
+	if not can_run or work<=0:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.has("slitting_curvature"):
+		Slitting.advance(job,exposure_spec,work)
+		return
 	if exposure_spec.has("induction_frequency"):
 		Induction.advance(job,exposure_spec,work)
 		return
@@ -354,6 +363,8 @@ static func validate_saved(payload: Dictionary) -> String:
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
 		var machine_error:=Machine.validate_job(job,Industry.product(String(job.item)))
 		if not machine_error.is_empty():return machine_error
+		var slitting_error:=Slitting.validate_job(job,Industry.product(String(job.item)))
+		if not slitting_error.is_empty():return slitting_error
 		var induction_error:=Induction.validate_job(job,Industry.product(String(job.item)))
 		if not induction_error.is_empty():return induction_error
 		var metallurgy_error:=Metallurgy.validate_job(job,Industry.product(String(job.item)))
