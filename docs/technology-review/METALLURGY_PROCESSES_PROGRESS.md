@@ -59,6 +59,18 @@ sensitivity, serialized partial thermal continuation, retained hot exposure,
 air cooling, coolant-limited quenching and malformed progress. Existing
 precursor tests were not repeated because this module does not change them.
 
+New `metallurgy_workshop.gd` adapter reserves one source-bound workpiece,
+debits actual Ops electricity and quench water receipts, records spent water,
+retains partial work, and stops at inspection without issuing accepted stock.
+`test_metallurgy_workshop.gd` passes 2/2 tests, zero errors/failures/skips/orphans
+(`/tmp/tt-metallurgy-workshop-tests.log`): the final free feed is reserved once,
+an energy outage cannot advance active heating, serialized work resumes to
+inspection, unpaid tooling blocks reservation, and retool disposal gives no
+refund. These use an explicit test recipe; final recipes, actual apparatus
+construction, inspection/acceptance, calendar-time passive cooling and the
+daily production/save hooks are not yet wired. Do not present this as a
+completed heat-treatment discovery.
+
 Also pending: full material closure audit, acquisition checks, save validation,
 imagery and canonical integration. The integrator owns imagery and the shared
 manufacturing merge. Do not edit PersistentProduction or the machine adapters
