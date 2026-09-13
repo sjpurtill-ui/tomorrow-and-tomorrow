@@ -1,3 +1,9 @@
+## September 12 — grain equipment quotas and two construction illustrations
+
+INTEGRATED grain fix `b7d35a857da79d410e7eaca13608ac6bd3079828`: installed mill capacity is shared across every grain input stock for the day. Paid handmills can handle the same remaining stock after powered capacity is used. All 59 focused worktree checks pass, including the final 20-case grain rerun; no discovery IDs or save fields change. See `GRAIN_MACHINE_CAPACITY_HANDOFF.md`.
+
+Reviewed art source `e4fd8ee` is integrated as `a228f0e`, adding roof tiles and rammed-earth construction while retaining thatching and all other subject bindings. Both use the approved paper style, mipmaps and 768-pixel runtime textures. The refreshed inventory is **106 verified /651 live**, with 545 queued. Runtime remains **651 discoveries /433 routes /303 recipes /17 facilities**. Water conveyance is in isolated development; no new player launch.
+
 ## September 12 — supplied construction and food lots: 651 integrated
 
 INTEGRATED runtime merge `174f80f4fbcb3d581d6ac7a418dd252f0ed3d624`, from canonical `ff0084b` with food `b43d312` and construction `9ce865b` / `42aa579`. Canonical now contains **651 discoveries, 433 explicit learning routes, 303 civilian recipes and 17 operating facility types**. Fifteen food methods use finite cereal lots, paid processing and lot-specific inspection; 22 construction methods connect manufactured materials to actual building work, supplied curing, condition and compatible upkeep. Both use existing owned stocks and labor. Save validation retains grain, food and building state checks together; old saves initialize missing food state and accept absent building profiles.

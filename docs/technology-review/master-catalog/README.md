@@ -5,7 +5,7 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 ## Authoritative baselines
 
 - Verified canonical runtime `174f80f4fbcb3d581d6ac7a418dd252f0ed3d624`: **651 discoveries, 433 learning routes, 303 civilian recipes and 17 facilities**. All 215 combined runtime/ownership/kit/atlas cases and 68 canonical cases pass. The separate settlement visual suite passes 82 of 83; its remaining river-edge fixture is disclosed in `../../FOOD_CONSTRUCTION_INTEGRATION.md`.
-- Food and construction promote 37 previously authored identities without adding identities. The stored 651 definitions exactly match the loaded canonical snapshot. The separately reviewed thatching illustration brings verified subject art to 104; 547 remain queued for current live discoveries.
+- Food and construction promote 37 previously authored identities without adding identities. The stored 651 definitions exactly match the loaded canonical snapshot. The reviewed thatching, roof-tile and rammed-earth illustrations bring verified subject art to 106; 545 remain queued for current live discoveries.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 

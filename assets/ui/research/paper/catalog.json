@@ -4599,7 +4599,7 @@
       "domain": "infrastructure",
       "id": "rammed_earth_construction",
       "name": "Rammed-Earth Construction",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/thatched_roofing.png",
@@ -4615,7 +4615,7 @@
       "domain": "infrastructure",
       "id": "fired_roof_tiles",
       "name": "Fired Roof Tiles",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/shallow_foundation_assessment.png",
@@ -5213,9 +5213,9 @@
   "live_art_complete": false,
   "live_count": 651,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 547,
+  "queued_count": 545,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 104
+  "verified_count": 106
 }
