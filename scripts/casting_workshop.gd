@@ -1,6 +1,7 @@
 extends RefCounted
 ## Selected small copper bracket process; retained stages own no global ledger.
 const T=preload("res://scripts/metallurgy_thermal_cycle.gd")
+const BURNOUT_HOT_WORK:=.2 # Selected small pattern exposure, in normalized work units.
 const Ops=preload("res://scripts/technology_operations.gd")
 static func run_for(stage:Dictionary)->Dictionary:
 	return T.start([{"duration":float(stage.work),"target":float(stage.get("temperature",20)),
@@ -44,7 +45,7 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 		if not T.complete(p.run):return
 		if stage.kind=="coat":p.shell_layers+=1
 		if stage.kind=="burnout":
-			p.pattern_mass*=1.0-clampf((float(p.run.peak)-700.0)/150.0,0,1)
+			p.pattern_mass*=burnout_remaining(p.run)
 		if stage.kind=="pour":
 			p.pour_pattern_mass=float(p.pattern_mass)
 			p.pour_moisture=float(p.moisture)
@@ -60,6 +61,10 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 			if next.kind in ["cool","inspect"]:
 				p.run.temperature=previous_temperature;p.run.peak=previous_temperature
 	if int(p.stage)==spec.casting_stages.size():finish(job,spec)
+static func burnout_remaining(run:Dictionary)->float:
+	var reached:=clampf((float(run.peak)-700.0)/150.0,0,1)
+	var exposure:=clampf(float(run.hot_work)/BURNOUT_HOT_WORK,0,1)
+	return 1.0-minf(reached,exposure)
 static func completed_work(spec:Dictionary,count:int)->float:
 	var total:=0.0
 	for index:int in range(count):total+=float(spec.casting_stages[index].work)
@@ -137,7 +142,7 @@ static func validate_balance(p:Dictionary,spec:Dictionary,finished:bool)->String
 			moisture-=removed;evaporated+=removed
 		if done:
 			if stage.kind=="coat":layers+=1
-			if stage.kind=="burnout":pattern*=1.0-clampf((float(frame.thermal.peak)-700.0)/150.0,0,1)
+			if stage.kind=="burnout":pattern*=burnout_remaining(frame.thermal)
 			if stage.kind=="pour":
 				pour={"pour_pattern_mass":pattern,"pour_moisture":moisture,"pour_temperature":float(frame.thermal.temperature)}
 				if spec.casting_kind=="lost_foam":pattern=0.0

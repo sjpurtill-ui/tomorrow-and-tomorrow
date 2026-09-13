@@ -113,3 +113,22 @@ func test_cast_metal_retains_heat_until_cooling_and_paused_days_do_not_add_work(
 			assert_float(float(line.casting_last.observation.readings.temperature)).is_less(150.0)
 			assert_str(C.validate_job(line,spec)).is_empty()
 	)
+
+func test_brief_hot_burnout_cannot_remove_pattern_before_an_interruption()->void:
+	WorldSimulation.scoped("casting_work",func()->void:
+		var line:=prepare("investment_copper_brackets");var spec:=I.product(line.item)
+		P.advance(WorldSimulation.military,line,6.3)
+		assert_str(spec.casting_stages[int(line.casting_pending.stage)].kind).is_equal("burnout")
+		assert_float(float(line.casting_pending.run.peak)).is_equal_approx(850,.000001)
+		assert_float(C.burnout_remaining(line.casting_pending.run)).is_greater(.1)
+		line.paused=true;WorldSimulation.state.elapsed_days+=100
+		P.advance(WorldSimulation.military,line,1)
+		line=bytes_to_var(var_to_bytes(line));line.paused=false
+		assert_str(C.validate_job(line,spec)).is_empty()
+		Ops.data().last_day=int(WorldSimulation.state.elapsed_days);Ops.data().services={"electricity":100.0}
+		P.advance(WorldSimulation.military,line,float(spec.days)-6.3)
+		assert_float(float(line.casting_last.pour_pattern_mass)).is_greater(.1)
+		assert_bool(line.casting_last.accepted).is_false()
+		assert_float(float(WorldSimulation.state.resource_stockpiles[spec.casting_reject])).is_equal(1.0)
+		assert_str(C.validate_job(line,spec)).is_empty()
+	)
