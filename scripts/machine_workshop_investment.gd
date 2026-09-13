@@ -5,7 +5,7 @@ const Ops=preload("res://scripts/technology_operations.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Supply=preload("res://scripts/civilian_production_planner.gd")
 const Power=preload("res://scripts/power_investment_planner.gd")
-const TYPES=["programmable_workshop","sequenced_workshop","geared_workshop","controlled_workshop","powered_workshop","pneumatic_workshop"]
+const TYPES=["programmable_workshop","sequenced_workshop","geared_workshop","controlled_workshop","belt_workshop","powered_workshop","pneumatic_workshop"]
 
 static func supplied_work_days()->float:
 	var host=WorldSimulation.military
@@ -28,6 +28,8 @@ static func supplied_work_days()->float:
 	return work/rate
 
 static func recommendation()->Dictionary:
+	var hammer:Dictionary=load("res://scripts/water_hammer_investment.gd").recommendation()
+	if not hammer.is_empty():return hammer
 	var state=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
 	if WorldSimulation.military.production_labor_share<=0 or supplied_work_days()<30.0:return {}
