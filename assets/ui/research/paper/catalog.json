@@ -6744,14 +6744,118 @@
       "id": "textile_dye_extraction",
       "name": "Textile-Dye Extraction",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/fluid_film_bearings.png",
+      "description": "Support moving surfaces through a maintained fluid film",
+      "domain": "production",
+      "id": "fluid_film_bearings",
+      "name": "Fluid-Film Bearings",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/cutting_fluid_management.png",
+      "description": "Maintain a qualified fluid supply for a machining duty",
+      "domain": "production",
+      "id": "cutting_fluid_management",
+      "name": "Cutting-Fluid Management",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/machine_tool_stiffness_assessment.png",
+      "description": "Measure machine deformation under representative working loads",
+      "domain": "production",
+      "id": "machine_tool_stiffness_assessment",
+      "name": "Machine-Tool Stiffness Assessment",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/machine_condition_monitoring.png",
+      "description": "Track observed machine behavior against a maintained condition baseline",
+      "domain": "production",
+      "id": "machine_condition_monitoring",
+      "name": "Machine-Condition Monitoring",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/numerical_machine_control.png",
+      "description": "Drive qualified machine motion from a defined numerical program",
+      "domain": "production",
+      "id": "numerical_machine_control",
+      "name": "Numerical Machine Control",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/gear_power_skiving.png",
+      "description": "Synchronized crossed-axis rotation creates a continuous gear cutting action.",
+      "domain": "production",
+      "id": "gear_power_skiving",
+      "name": "Gear Power Skiving",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/wire_electrical_discharge_machining.png",
+      "description": "A traveling electrode wire erodes conductive stock by discharges.",
+      "domain": "production",
+      "id": "wire_electrical_discharge_machining",
+      "name": "Wire Electrical-Discharge Machining",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/sinker_electrical_discharge_machining.png",
+      "description": "A shaped electrode erodes a matching conductive cavity.",
+      "domain": "production",
+      "id": "sinker_electrical_discharge_machining",
+      "name": "Sinker Electrical-Discharge Machining",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/electrochemical_machining.png",
+      "description": "Controlled anodic dissolution removes conductive workpiece material.",
+      "domain": "production",
+      "id": "electrochemical_machining",
+      "name": "Electrochemical Machining",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/abrasive_waterjet_cutting.png",
+      "description": "Pressurized water carries abrasive through a cutting jet.",
+      "domain": "production",
+      "id": "abrasive_waterjet_cutting",
+      "name": "Abrasive Waterjet Cutting",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ultrasonic_abrasive_machining.png",
+      "description": "A vibrating tool drives loose abrasive against brittle material.",
+      "domain": "production",
+      "id": "ultrasonic_abrasive_machining",
+      "name": "Ultrasonic Abrasive Machining",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/incremental_sheet_forming.png",
+      "description": "Localized tool passes gradually shape a supported sheet.",
+      "domain": "production",
+      "id": "incremental_sheet_forming",
+      "name": "Incremental Sheet Forming",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ultrasonic_metal_joining.png",
+      "description": "Vibration under pressure creates a solid-state metal joint.",
+      "domain": "production",
+      "id": "ultrasonic_metal_joining",
+      "name": "Ultrasonic Metal Joining",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
-  "live_count": 843,
+  "live_count": 856,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 282
+  "verified_count": 295
 }

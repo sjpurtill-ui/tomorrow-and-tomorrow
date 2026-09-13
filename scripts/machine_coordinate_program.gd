@@ -63,6 +63,7 @@ static func valid(run:Variant)->bool:
 		var endpoint:Dictionary=run.program[index]
 		var length:=distance(origin,endpoint)
 		expected_distance+=length;expected_work+=length/float(endpoint.feed)
+		if absf(float(run.trace[index].work)-expected_work)>.000001:return false
 		origin=endpoint
 	if int(run.cursor)<run.program.size():
 		var target:Dictionary=run.program[int(run.cursor)]

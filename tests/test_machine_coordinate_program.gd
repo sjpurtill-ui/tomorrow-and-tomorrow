@@ -36,3 +36,11 @@ func test_program_is_copied_and_partial_save_cannot_skip_instruction()->void:
 	P.advance(run,2,100,2)
 	run.cursor=1
 	assert_bool(P.valid(run)).is_false()
+
+func test_saved_trace_cannot_move_a_completed_instruction_to_unpaid_work()->void:
+	var run:=P.start(path());P.advance(run,20,100,2)
+	assert_bool(P.valid(run)).is_true()
+	# Total and final position still agree; an earlier frame falsely claims
+	# the three-unit first move happened without work or energy.
+	run.trace[0].work=0.0;run.trace[0].energy=0.0
+	assert_bool(P.valid(run)).is_false()

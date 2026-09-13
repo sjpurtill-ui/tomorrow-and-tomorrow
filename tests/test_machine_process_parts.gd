@@ -270,3 +270,42 @@ func test_machine_capital_recipes_pay_inputs_and_complete_after_partial_work()->
 			assert_float(float(state.resource_stockpiles[spec.output])).is_equal(1.0)
 			for resource:String in spec.materials:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(float(stocks[resource])-float(spec.materials[resource]),.000001)
 	)
+
+func test_daily_generator_resumes_reserved_last_feed_after_fuel_outage()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("wire_edm_qualified_parts");var spec:=I.product(line.item)
+		var state=WorldSimulation.state
+		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
+		for gate:String in ["electrical_generators","steam_propulsion"]:
+			if gate not in state.known_discoveries:state.known_discoveries.append(gate)
+			state.discovery_adoption[gate]=1.0
+		for item:String in Ops.PLANTS.steam_generator.cost:state.resource_stockpiles[item]=100.0
+		state.resource_stockpiles["Coal"]=10.0;state.resource_stockpiles["Freshwater"]=100.0
+		assert_bool(Ops.install("steam_generator").get("ok",false)).is_true()
+		for day:int in range(1,11):state.elapsed_days=day;Ops.advance(day)
+		assert_int(int(Ops.data().plants.steam_generator.installed)).is_equal(1)
+		assert_float(Ops.service("electricity")).is_equal(0.0)
+		state.resource_stockpiles["Steel Sheets"]=float(spec.materials["Steel Sheets"])
+		state.elapsed_days=11;Ops.advance(11)
+		assert_float(Ops.service("electricity")).is_equal_approx(2.0,.000001)
+		P.advance(WorldSimulation.military,line,1)
+		assert_float(float(state.resource_stockpiles["Steel Sheets"])).is_equal(0.0)
+		assert_float(Ops.workshop_power_demand()).is_equal_approx(2.0,.000001)
+		line.paused=true;assert_float(Ops.workshop_power_demand()).is_equal(0.0);line.paused=false
+		state.elapsed_days=12;Ops.advance(12);P.advance(WorldSimulation.military,line,1)
+		assert_float(float(line.machine_pending.run.work)).is_equal_approx(2.0,.000001)
+		state.resource_stockpiles["Coal"]=0.0
+		var retained:Dictionary=line.machine_pending.duplicate(true)
+		state.elapsed_days=13;Ops.advance(13);P.advance(WorldSimulation.military,line,1)
+		assert_float(Ops.service("electricity")).is_equal(0.0)
+		assert_dict(line.machine_pending).is_equal(retained)
+		state.resource_stockpiles["Coal"]=1.0
+		for day:int in [14,15]:
+			state.elapsed_days=day;Ops.advance(day);P.advance(WorldSimulation.military,line,1)
+		assert_float(float(state.resource_stockpiles["Steel Sheets"])).is_equal(0.0)
+		assert_float(float(state.resource_stockpiles.get(spec.output,0))).is_equal(1.0)
+		assert_bool(line.machine_last.accepted).is_true()
+		assert_float(float(state.resource_stockpiles["Coal"])).is_equal_approx(.8,.000001)
+		assert_float(Ops.workshop_power_demand()).is_equal(0.0)
+		assert_str(P.validate_saved({"equipment_queue":[line]})).is_empty()
+	)
