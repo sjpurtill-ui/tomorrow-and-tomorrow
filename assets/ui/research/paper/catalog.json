@@ -4119,7 +4119,7 @@
       "domain": "production",
       "id": "metal_annealing_control",
       "name": "Metal Annealing Control",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/surface_carburization.png",
@@ -4127,7 +4127,7 @@
       "domain": "production",
       "id": "surface_carburization",
       "name": "Surface Carburization",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/metal_casting_feed_design.png",
@@ -4135,7 +4135,7 @@
       "domain": "production",
       "id": "metal_casting_feed_design",
       "name": "Metal Casting Feed Design",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/brazed_joint_qualification.png",
@@ -4143,7 +4143,7 @@
       "domain": "production",
       "id": "brazed_joint_qualification",
       "name": "Brazed Joint Qualification",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/arc_welding_processes.png",
@@ -4151,7 +4151,7 @@
       "domain": "production",
       "id": "arc_welding_processes",
       "name": "Arc Welding Processes",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/resistance_welding.png",
@@ -4159,7 +4159,7 @@
       "domain": "production",
       "id": "resistance_welding",
       "name": "Resistance Welding",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/continuous_metal_casting.png",
@@ -4167,7 +4167,7 @@
       "domain": "production",
       "id": "continuous_metal_casting",
       "name": "Continuous Metal Casting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/bolt_blank_forging.png",
@@ -5605,9 +5605,9 @@
   "live_art_complete": false,
   "live_count": 700,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 585,
+  "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 115
+  "verified_count": 122
 }
