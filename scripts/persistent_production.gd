@@ -2,6 +2,7 @@ extends RefCounted
 ## Persistent workshop lines share the existing Crafting pool with civilian work.
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
+const Machine=preload("res://scripts/machine_workshop.gd")
 const Abrasive=preload("res://scripts/abrasive_inspection.gd")
 const Samples=preload("res://scripts/polymer_samples.gd")
 const Exposure=preload("res://scripts/exposure_production.gd")
@@ -141,6 +142,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		job.efficiency=maxf(.10,float(job.efficiency)*retention)
 		Exposure.clear(job)
 		Abrasive.clear(job)
+		Machine.clear(job)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
 		job.required_days=job.work_per_item
 		job.erase("planner_managed")
@@ -164,6 +166,9 @@ static func state(host: Node, job: Dictionary) -> String:
 	if Industry.product(String(job.item)).has("abrasive_candidate") and not Abrasive.capacity():return "Abrasive lot register full"
 	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
 	var inspection:Dictionary=Industry.product(String(job.item))
+	if inspection.has("machine_program") and job.has("machine_pending"):
+		if job.machine_pending.site!=WorldSimulation.state.resource_settlement_id:return "Workpiece belongs to another store"
+		return "Working" if preload("res://scripts/technology_operations.gd").service("electricity")>0 else "Waiting for electricity"
 	if inspection.has("abrasive_inspection") and not job.has("abrasive_pending") and Abrasive.selected(inspection).is_empty():return "No traceable abrasive candidates"
 	if job.has("abrasive_pending") and job.abrasive_pending.source_store!=WorldSimulation.state.resource_settlement_id:return "Inspection belongs to another store"
 	var needs_specimen:=Industry.product(String(job.item)).has("exposure_days") and not job.has("exposure_started_day")
@@ -206,6 +211,9 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var exposure_spec:=Industry.product(String(job.item))
+	if exposure_spec.has("machine_program"):
+		Machine.advance(job,exposure_spec,work)
+		return
 	if exposure_spec.has("abrasive_inspection"):
 		Abrasive.advance(job,work)
 		return
@@ -309,6 +317,8 @@ static func validate_saved(payload: Dictionary) -> String:
 		if String(job.job_type)=="civilian":
 			var definition:=Industry.product(String(job.item))
 			if definition.is_empty() or job.materials!=definition.materials or float(job.work_per_item)!=float(definition.days):return "Invalid civilian production recipe."
+		var machine_error:=Machine.validate_job(job,Industry.product(String(job.item)))
+		if not machine_error.is_empty():return machine_error
 		var abrasive_error:=Abrasive.validate_job(job)
 		if not abrasive_error.is_empty():return abrasive_error
 		var exposure_error:=Exposure.validate(job,Industry.product(String(job.item)))
