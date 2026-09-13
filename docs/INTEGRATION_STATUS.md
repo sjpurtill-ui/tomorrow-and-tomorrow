@@ -1,3 +1,11 @@
+## September 12 — 724 verified operating discoveries
+
+Integrated armor source `08cd91b` and leather source `d4988fd` as canonical `9c688d27b44bd3dc081b7ec8a0477b1413464776`. Six armor methods manufacture physical components and complete infantry kits; issued fractions now determine actual armor and penetration. Two leather methods turn actual hunting byproducts into paid tanning, fitting, garment use and compatible repairs. General-led operations and existing stock/labor/save owners remain authoritative.
+
+**193 distinct worktree cases and 102 canonical cases pass**, with zero errors, failures, skips or orphans. Graph: **724 discoveries / 506 routes / 379 recipes / 18 facilities**, no dependency errors. All 724 canonical definitions match the ledger; 15 catalog-tool tests pass. Ledger: **724 integrated + 2,489 drafts = 3,213 identities**, leaving **1,787 to author and 4,276 to implement**. Art: **138 verified / 724 live, 586 queued**; eight new illustrations are in preparation.
+
+The one additive recipe conflict retained both complete families. Armor fitting's surgical-anatomy parent was explicitly reconciled to standard measures, preserving the hand-formed/rolled-sheet alternatives and original predicate in the review record. Existing cart quotes use actual Cart Assembly Kits; the stale test was corrected. A standalone audit preload-order error was corrected with runtime loading. Normal headless boot reaches the direction screen cleanly. No player launch, package rebuild or full historical pacing claim. See `ARMOR_LEATHER_INTEGRATION.md` and individual handoffs for bounded material and process abstractions.
+
 ## September 12 — glass and earthen illustrations verified
 
 Integrated `02e882d`: seven visually reviewed discovery illustrations and explicit 768px mipmapped import settings. All seven textures load correctly in the canonical checkout, and all 12 worktree atlas cases pass. Art now covers **138 of 716 live discoveries**, with **578 queued**. No runtime or save changes; the runtime remains 716 discoveries, 498 routes, 365 recipes and 18 facilities. Ledger remains 3,213 identities, with 1,787 still to author and 4,284 to implement. The next armor delivery includes six existing identities, including fitted shields. No player launch or package rebuild.

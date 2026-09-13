@@ -1671,37 +1671,6 @@
   },
   {
     "field": "D07",
-    "id": "hide_tanning",
-    "name": "Hide Tanning",
-    "foundations": "curing_regimens,herbal_classification",
-    "mechanism": "Stabilize suitable hides through a qualified tanning process",
-    "operating_requirement": "Actual hides, compatible agents, water and skilled handling",
-    "consequence": "Produce usable leather with process, durability and waste constraints",
-    "status": "authored_draft",
-    "requires_all": [
-      "curing_regimens",
-      "herbal_classification"
-    ],
-    "requires_any": [],
-    "recovery": "For Hide Tanning: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "hide_tanning",
-      "local_demonstration": "Stabilize suitable hides through a qualified tanning process",
-      "operating_requirements": "Actual hides, compatible agents, water and skilled handling",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
     "id": "felt_fabric_making",
     "name": "Felt-Fabric Making",
     "foundations": "fiber_grading",
@@ -2783,37 +2752,6 @@
       "destination": "household_appliance_interoperability",
       "local_demonstration": "Verify selected service or control interfaces among domestic devices",
       "operating_requirements": "Compatible equipment, declared interfaces and tests",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "leather_goods_patterning",
-    "name": "Leather-Goods Patterning",
-    "foundations": "hide_tanning,garment_pattern_cutting",
-    "mechanism": "Fit and assemble qualified leather pieces for a declared flexible product",
-    "operating_requirement": "Suitable leather, tools, hardware and skilled fitting",
-    "consequence": "Produce durable goods with stretching, moisture and repair requirements",
-    "status": "authored_draft",
-    "requires_all": [
-      "hide_tanning",
-      "garment_pattern_cutting"
-    ],
-    "requires_any": [],
-    "recovery": "For Leather-Goods Patterning: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "leather_goods_patterning",
-      "local_demonstration": "Fit and assemble qualified leather pieces for a declared flexible product",
-      "operating_requirements": "Suitable leather, tools, hardware and skilled fitting",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",

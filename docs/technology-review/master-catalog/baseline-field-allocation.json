@@ -5135,6 +5135,62 @@
       "source_domain": "production",
       "name": "Punched-Card Loom Control",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "leather_goods_patterning",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Leather-Goods Patterning",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "shield_equipment_fitting",
+      "field": "D20",
+      "source_domain": "security",
+      "name": "Shield-Equipment Fitting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_armor_layering",
+      "field": "D20",
+      "source_domain": "security",
+      "name": "Textile Armor Layering",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "lamellar_armor_assembly",
+      "field": "D20",
+      "source_domain": "security",
+      "name": "Lamellar-Armor Assembly",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "scale_armor_attachment",
+      "field": "D20",
+      "source_domain": "security",
+      "name": "Scale Armor Attachment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "mail_armor_fabrication",
+      "field": "D20",
+      "source_domain": "security",
+      "name": "Mail-Armor Fabrication",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "articulated_plate_armor",
+      "field": "D20",
+      "source_domain": "security",
+      "name": "Articulated Plate Armor",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "hide_tanning",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Hide Tanning",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

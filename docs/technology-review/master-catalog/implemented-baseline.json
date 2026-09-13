@@ -1,5 +1,5 @@
 {
-  "source_commit": "2d0048225faccc4fc1f7563a510e74c8c6565aa9",
+  "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -16666,6 +16666,95 @@
         ],
         "social_consequence": "Reliable nourishment supports denser settlement and frees labor from repeated emergency food searches",
         "subcategory": "Daily supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "leather_goods_patterning",
+      "name": "Leather-Goods Patterning",
+      "foundations": "hide_tanning,garment_pattern_cutting",
+      "mechanism": "Fit and assemble qualified leather pieces for a declared flexible product",
+      "operating_requirement": "Suitable leather, tools, hardware and skilled fitting",
+      "consequence": "Produce durable goods with stretching, moisture and repair requirements",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Leather-Goods Patterning: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "leather_goods_patterning",
+        "local_demonstration": "Fit and assemble qualified leather pieces for a declared flexible product",
+        "operating_requirements": "Suitable leather, tools, hardware and skilled fitting",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "hide_tanning",
+          "garment_pattern_cutting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "leather_goods_patterning",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "leather_goods_patterning",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Leather-Goods Patterning",
+            "missing_all": [
+              "hide_tanning",
+              "garment_pattern_cutting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "hide_tanning",
+              "garment_pattern_cutting"
+            ],
+            "requires_all": [
+              "hide_tanning",
+              "garment_pattern_cutting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Leather-Goods Patterning",
+        "observation": "Cut and fit compatible flexible leather into sewn outer garments; repair worn pieces with leather patches.",
+        "production_contract": "Paid fitting tools, flexible leather, thread and shared Logistics work create bounded garment lots. Actual issued condition affects coverage; wet exposure increases wear. Textile washing, wicking and cloth repairs do not service leather. Compatible patch repairs consume leather and thread without creating garments. Imported finished leather does not grant tanning mastery.",
+        "requires": [
+          "hide_tanning",
+          "garment_pattern_cutting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {
@@ -51503,6 +51592,661 @@
       }
     },
     {
+      "field": "D20",
+      "id": "shield_equipment_fitting",
+      "name": "Shield-Equipment Fitting",
+      "foundations": "shield_wall,timber_grading",
+      "mechanism": "Match shield shape, grip and carrying arrangements to the user's formation role",
+      "operating_requirement": "Suitable shields, trained wearers and practical load trials",
+      "consequence": "Trade coverage against visibility, fatigue and movement rather than adding universal defense",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "role_design_targets": [
+        "Shielded infantry"
+      ],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "shield_equipment_fitting",
+        "instruction": "A competent source teaches Shield-Equipment Fitting through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Match shield shape, grip and carrying arrangements to the user's formation role",
+        "retained_operating_requirements": "Suitable shields, trained wearers and practical load trials",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "formation_adoption": "Train actual assigned people and demonstrate the role with issued equipment and delivered support. Foreign instruction cannot instantly retrain all formations; general authority exists before this discovery."
+      },
+      "recovery": "For Shield-Equipment Fitting: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "shield_wall",
+          "timber_grading"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "security",
+        "dynamic": "security",
+        "effects": {},
+        "id": "shield_equipment_fitting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Shield-Equipment Fitting",
+            "missing_all": [
+              "shield_wall",
+              "timber_grading"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "shield_wall",
+              "timber_grading"
+            ],
+            "requires_all": [
+              "shield_wall",
+              "timber_grading"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "security",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Shield-Equipment Fitting",
+        "observation": "Match shield shape, grip and carrying arrangements to the user's formation role",
+        "production_contract": "Manufacture a fitted shield with selected wood, binding and covering; pay assembly and carrying-fit work. Complete spear-and-shield equipment must enter inventory and be issued to infantry before its coverage contributes to defense.",
+        "production_items": [
+          "fitted_shields"
+        ],
+        "requires": [
+          "shield_wall",
+          "timber_grading"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "security",
+          "research"
+        ],
+        "social_consequence": "Defense shifts from isolated household action toward organized provision, command, training, and public accountability",
+        "subcategory": "Public safety"
+      }
+    },
+    {
+      "field": "D20",
+      "id": "textile_armor_layering",
+      "name": "Textile Armor Layering",
+      "foundations": "plain_weaving,shield_equipment_fitting",
+      "mechanism": "Qualify layered textile protection against defined equipment and environmental conditions",
+      "operating_requirement": "Suitable cloth, assembly labor and inspection",
+      "consequence": "Provide a distinct protection option with weight, heat and durability costs",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "role_design_targets": [
+        "Light infantry",
+        "auxiliaries"
+      ],
+      "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+      "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_armor_layering",
+        "local_demonstration": "Qualify layered textile protection against defined equipment and environmental conditions",
+        "operating_requirements": "Suitable cloth, assembly labor and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "actual staff, information or equipment delivery",
+          "finite training and local qualification",
+          "continuing equipment, supplies, repairs and personnel"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+          "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+          "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+          "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+          "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+        }
+      },
+      "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "military-equipment-depth.json",
+        "previous_requires_all": [
+          "plain_weaving",
+          "shield_equipment_fitting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "security",
+        "dynamic": "security",
+        "effects": {},
+        "id": "textile_armor_layering",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile Armor Layering",
+            "missing_all": [
+              "plain_weaving",
+              "shield_equipment_fitting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "plain_weaving",
+              "shield_equipment_fitting"
+            ],
+            "requires_all": [
+              "plain_weaving",
+              "shield_equipment_fitting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "security",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile Armor Layering",
+        "observation": "Qualify layered textile protection against defined equipment and environmental conditions",
+        "production_contract": "Manufacture Padded Armor with paid local material, fitted assembly and workshop labor; assemble complete spear equipment for existing infantry. Protection applies only to issued equipment, is reduced by enemy penetration, and grants no knowledge-only force bonus. Suitable cloth, assembly labor and inspection.",
+        "production_items": [
+          "padded_armor"
+        ],
+        "requires": [
+          "plain_weaving",
+          "shield_equipment_fitting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "security",
+          "research"
+        ],
+        "social_consequence": "Defense shifts from isolated household action toward organized provision, command, training, and public accountability",
+        "subcategory": "Public safety"
+      }
+    },
+    {
+      "field": "D20",
+      "id": "lamellar_armor_assembly",
+      "name": "Lamellar-Armor Assembly",
+      "foundations": "cordage",
+      "mechanism": "Join overlapping protective elements into a wearable articulated assembly",
+      "operating_requirement": "Qualified plates, fastening materials, makers and fit assessment",
+      "consequence": "Provide replaceable protection with weight, coverage and fastening weaknesses",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "bronze_alloying",
+          "hardened_edges"
+        ]
+      ],
+      "branching_note": "Different qualified plate materials can support the same assembly practice.",
+      "role_design_targets": [
+        "Armored infantry",
+        "Armored cavalry"
+      ],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "lamellar_armor_assembly",
+        "instruction": "A competent source teaches Lamellar-Armor Assembly through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Join overlapping protective elements into a wearable articulated assembly",
+        "retained_operating_requirements": "Qualified plates, fastening materials, makers and fit assessment",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "formation_adoption": "Train actual assigned people and demonstrate the role with issued equipment and delivered support. Foreign instruction cannot instantly retrain all formations; general authority exists before this discovery."
+      },
+      "recovery": "For Lamellar-Armor Assembly: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "cordage"
+        ],
+        "previous_requires_any": [
+          [
+            "bronze_alloying",
+            "hardened_edges"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "security",
+        "dynamic": "security",
+        "effects": {},
+        "id": "lamellar_armor_assembly",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Lamellar-Armor Assembly",
+            "missing_all": [
+              "cordage"
+            ],
+            "missing_any": [
+              [
+                "bronze_alloying",
+                "hardened_edges"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "cordage",
+              "bronze_alloying",
+              "hardened_edges"
+            ],
+            "requires_all": [
+              "cordage"
+            ],
+            "requires_any": [
+              [
+                "bronze_alloying",
+                "hardened_edges"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "security",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Lamellar-Armor Assembly",
+        "observation": "Join overlapping protective elements into a wearable articulated assembly",
+        "production_contract": "Manufacture Lamellar Armor with paid local material, fitted assembly and workshop labor; assemble complete spear equipment for existing infantry. Protection applies only to issued equipment, is reduced by enemy penetration, and grants no knowledge-only force bonus. Qualified plates, fastening materials, makers and fit assessment.",
+        "production_items": [
+          "lamellar_armor"
+        ],
+        "requires": [
+          "cordage"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "bronze_alloying",
+            "hardened_edges"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "security",
+          "research"
+        ],
+        "social_consequence": "Defense shifts from isolated household action toward organized provision, command, training, and public accountability",
+        "subcategory": "Public safety"
+      }
+    },
+    {
+      "field": "D20",
+      "id": "scale_armor_attachment",
+      "name": "Scale Armor Attachment",
+      "foundations": "plain_weaving",
+      "mechanism": "Attach overlapping protective elements to a qualified backing while retaining intended flexibility",
+      "operating_requirement": "Compatible scales, backing, fastenings and armorers",
+      "consequence": "Support evaluated armor assemblies with maintenance and movement costs",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "lamellar_armor_assembly",
+          "shield_equipment_fitting"
+        ]
+      ],
+      "role_design_targets": [
+        "Armored infantry",
+        "armored cavalry"
+      ],
+      "role_status": "Proposed capability consumers, not new live unit IDs or additional discovery identities.",
+      "recovery": "Obtain a competent paid specialist, reciprocal research, licensed equipment or an inspectable delivered specimen. Pay travel, delivery, training and local qualification costs. Foreign equipment remains supply-dependent and does not grant domestic mastery or troops.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "scale_armor_attachment",
+        "local_demonstration": "Attach overlapping protective elements to a qualified backing while retaining intended flexibility",
+        "operating_requirements": "Compatible scales, backing, fastenings and armorers",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "actual staff, information or equipment delivery",
+          "finite training and local qualification",
+          "continuing equipment, supplies, repairs and personnel"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay travel, board and finite instruction by a competent specialist; actual crews qualify the capability using available equipment.",
+          "partnership": "Contribute staff, trials, material or comparable evidence; shared access, trust and delivery times remain costs.",
+          "purchased_research": "Commission an equipment or service question and review evidence; payment does not guarantee a successful design or tactical result.",
+          "licensed_or_imported_service": "Pay for actual compatible equipment, support or supplies within supplier capacity; local crews and command responsibility remain, and domestic mastery is not granted.",
+          "reverse_engineering": "Study a real delivered component or inspectable record with finite analysis; a specimen does not automatically reveal production history, reliability, training or all operating limits."
+        }
+      },
+      "command_contract": "Generals execute operations in every era. The player communicates objectives through existing conversation. Discovery grants no direct unit controls, free personnel, equipment, current enemy knowledge or automatic victory.",
+      "branching_note": "Overlapping scales on a backing are a distinct attachment arrangement; modern screw-thread metrology is not required.",
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "military-equipment-depth.json",
+        "previous_requires_all": [
+          "plain_weaving"
+        ],
+        "previous_requires_any": [
+          [
+            "lamellar_armor_assembly",
+            "shield_equipment_fitting"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "security",
+        "dynamic": "security",
+        "effects": {},
+        "id": "scale_armor_attachment",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Scale Armor Attachment",
+            "missing_all": [
+              "plain_weaving"
+            ],
+            "missing_any": [
+              [
+                "lamellar_armor_assembly",
+                "shield_equipment_fitting"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "plain_weaving",
+              "lamellar_armor_assembly",
+              "shield_equipment_fitting"
+            ],
+            "requires_all": [
+              "plain_weaving"
+            ],
+            "requires_any": [
+              [
+                "lamellar_armor_assembly",
+                "shield_equipment_fitting"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "security",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Scale Armor Attachment",
+        "observation": "Attach overlapping protective elements to a qualified backing while retaining intended flexibility",
+        "production_contract": "Manufacture Scale Armor with paid local material, fitted assembly and workshop labor; assemble complete spear equipment for existing infantry. Protection applies only to issued equipment, is reduced by enemy penetration, and grants no knowledge-only force bonus. Compatible scales, backing, fastenings and armorers.",
+        "production_items": [
+          "scale_armor"
+        ],
+        "requires": [
+          "plain_weaving"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "lamellar_armor_assembly",
+            "shield_equipment_fitting"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "security",
+          "research"
+        ],
+        "social_consequence": "Defense shifts from isolated household action toward organized provision, command, training, and public accountability",
+        "subcategory": "Public safety"
+      }
+    },
+    {
+      "field": "D20",
+      "id": "mail_armor_fabrication",
+      "name": "Mail-Armor Fabrication",
+      "foundations": "wire_drawing,hardened_edges",
+      "mechanism": "Make a flexible protective mesh from joined metal elements",
+      "operating_requirement": "Skilled makers, suitable metal, inspection and repair labor",
+      "consequence": "Offer flexible protection whose performance varies with the threat and underlayers",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "role_design_targets": [
+        "Armored infantry",
+        "Armored cavalry"
+      ],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "mail_armor_fabrication",
+        "instruction": "A competent source teaches Mail-Armor Fabrication through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Make a flexible protective mesh from joined metal elements",
+        "retained_operating_requirements": "Skilled makers, suitable metal, inspection and repair labor",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "formation_adoption": "Train actual assigned people and demonstrate the role with issued equipment and delivered support. Foreign instruction cannot instantly retrain all formations; general authority exists before this discovery."
+      },
+      "recovery": "For Mail-Armor Fabrication: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "wire_drawing",
+          "hardened_edges"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "security",
+        "dynamic": "security",
+        "effects": {},
+        "id": "mail_armor_fabrication",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Mail-Armor Fabrication",
+            "missing_all": [
+              "wire_drawing",
+              "hardened_edges"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "wire_drawing",
+              "hardened_edges"
+            ],
+            "requires_all": [
+              "wire_drawing",
+              "hardened_edges"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "security",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Mail-Armor Fabrication",
+        "observation": "Make a flexible protective mesh from joined metal elements",
+        "production_contract": "Manufacture Mail Armor with paid local material, fitted assembly and workshop labor; assemble complete spear equipment for existing infantry. Protection applies only to issued equipment, is reduced by enemy penetration, and grants no knowledge-only force bonus. Skilled makers, suitable metal, inspection and repair labor.",
+        "production_items": [
+          "mail_armor"
+        ],
+        "requires": [
+          "wire_drawing",
+          "hardened_edges"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "security",
+          "research"
+        ],
+        "social_consequence": "Defense shifts from isolated household action toward organized provision, command, training, and public accountability",
+        "subcategory": "Public safety"
+      }
+    },
+    {
+      "field": "D20",
+      "id": "articulated_plate_armor",
+      "name": "Articulated Plate Armor",
+      "foundations": "hardened_edges,standard_measures",
+      "mechanism": "Fit shaped protective plates so joints retain useful movement",
+      "operating_requirement": "Forming capability, tailored fitting, attendants and maintenance",
+      "consequence": "Increase selected protection while imposing weight, cost and fit constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "sheet_steel_rolling",
+          "structural_load_testing"
+        ]
+      ],
+      "branching_note": "Armor fitting requires measured dimensions and practical movement trials, not surgical practice. Hand-formed and assessed armor need not wait for industrial sheet rolling; actual forming and fit remain mandatory.",
+      "role_design_targets": [
+        "Armored close-combat troops"
+      ],
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "articulated_plate_armor",
+        "instruction": "A competent source teaches Articulated Plate Armor through delivered records, visiting specialists or a negotiated partnership.",
+        "disadvantage": "Source availability, negotiated payment or reciprocal work, travel or delivery, local adaptation and finite instructor time.",
+        "local_demonstration": "Fit shaped protective plates so joints retain useful movement",
+        "retained_operating_requirements": "Forming capability, tailored fitting, attendants and maintenance",
+        "imported_service": "Pay an actual capable supplier for bounded service; capacity and access remain supplier-dependent and do not grant local mastery.",
+        "grants_instant_mastery": false,
+        "formation_adoption": "Train actual assigned people and demonstrate the role with issued equipment and delivered support. Foreign instruction cannot instantly retrain all formations; general authority exists before this discovery."
+      },
+      "recovery": "For Articulated Plate Armor: paid visiting specialists, a reciprocal partnership or delivered research can support learning after local foundations are rebuilt where missing. Demonstrate the stated mechanism with the actual operating requirements. Foreign service can bridge a capability shortage at recurring cost and access risk; it does not award mastery. Cost coefficients and runtime mappings remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "military-and-transport.json",
+        "previous_requires_all": [
+          "hardened_edges",
+          "standard_measures"
+        ],
+        "previous_requires_any": [
+          [
+            "sheet_steel_rolling",
+            "structural_load_testing"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.0025,
+        "day": 0,
+        "direction": "security",
+        "dynamic": "security",
+        "effects": {},
+        "id": "articulated_plate_armor",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Articulated Plate Armor",
+            "missing_all": [
+              "hardened_edges",
+              "standard_measures"
+            ],
+            "missing_any": [
+              [
+                "sheet_steel_rolling",
+                "structural_load_testing"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "hardened_edges",
+              "standard_measures",
+              "sheet_steel_rolling",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "hardened_edges",
+              "standard_measures"
+            ],
+            "requires_any": [
+              [
+                "sheet_steel_rolling",
+                "structural_load_testing"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "security",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Articulated Plate Armor",
+        "observation": "Fit shaped protective plates so joints retain useful movement",
+        "production_contract": "Manufacture Fitted Plate Armor with paid local material, fitted assembly and workshop labor; assemble complete spear equipment for existing infantry. Protection applies only to issued equipment, is reduced by enemy penetration, and grants no knowledge-only force bonus. Forming capability, tailored fitting, attendants and maintenance.",
+        "production_items": [
+          "forged_plate_armor",
+          "sheet_plate_armor"
+        ],
+        "requires": [
+          "hardened_edges",
+          "standard_measures"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "sheet_steel_rolling",
+            "structural_load_testing"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "security",
+          "research"
+        ],
+        "social_consequence": "Defense shifts from isolated household action toward organized provision, command, training, and public accountability",
+        "subcategory": "Public safety"
+      }
+    },
+    {
       "id": "fiber_pulp_beating",
       "name": "Fiber Pulp Beating",
       "domain": "production",
@@ -52937,6 +53681,103 @@
         "requires": [
           "clay_testing",
           "refractory_furnaces"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "hide_tanning",
+      "name": "Hide Tanning",
+      "foundations": "curing_regimens,herbal_classification",
+      "mechanism": "Stabilize suitable hides through a qualified tanning process",
+      "operating_requirement": "Actual hides, compatible agents, water and skilled handling",
+      "consequence": "Produce usable leather with process, durability and waste constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Hide Tanning: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "hide_tanning",
+        "local_demonstration": "Stabilize suitable hides through a qualified tanning process",
+        "operating_requirements": "Actual hides, compatible agents, water and skilled handling",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "9c688d27b44bd3dc081b7ec8a0477b1413464776",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "curing_regimens",
+          "herbal_classification"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "hide_tanning",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Hide Tanning",
+            "missing_all": [
+              "curing_regimens",
+              "herbal_classification"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "curing_regimens",
+              "herbal_classification"
+            ],
+            "requires_all": [
+              "curing_regimens",
+              "herbal_classification"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Hide Tanning",
+        "observation": "Prepare suitable hides and selected plant extracts, then tan and finish flexible leather.",
+        "production_contract": "Actual hunting supplies bounded raw hides and recovered fat once per local day; untreated stock decays. Paid preparation, selected tannin extraction, tanning and finishing consume water, agents, rejected feed and finite workshop work. Flexible leather supplies actual fitted garments. Inputs represent compatible material classes and work coefficients abstract process duration; no species assay, chemical bath simulation or universal leather certification.",
+        "production_items": [
+          "rendered_leather_fat",
+          "prepared_tanning_hides",
+          "plant_tannin_extract",
+          "vegetable_tanned_leather",
+          "finished_flexible_leather"
+        ],
+        "requires": [
+          "curing_regimens",
+          "herbal_classification"
         ],
         "requires_all": [],
         "requires_any": [],

@@ -63,3 +63,5 @@ Shared-file conflicts are additive armor entries in CivilianIndustry, DiscoveryS
 No top-level save schema changes. Existing generic military inventories, formations and partial workshop jobs carry the new item identifiers. Full binary save/load of a partial mail job, issued formation and damaged kit passed in the initial tests. A saved old weapon remains that weapon; there is no automatic conversion of formations.
 
 This is a partial contribution to the 5,000-discovery goal. The full history ledger, acquisition coverage, historical progression and complete illustration set remain outstanding. No player launch, canonical promotion or full-campaign pacing claim is made by this worktree.
+
+Canonical acceptance: integrated at `9c688d27b44bd3dc081b7ec8a0477b1413464776`. Combined 193 distinct worktree / 102 canonical cases pass; 724-node exact snapshot reconciled. See `ARMOR_LEATHER_INTEGRATION.md`. Earlier READY/pending statements above describe the source handoff.

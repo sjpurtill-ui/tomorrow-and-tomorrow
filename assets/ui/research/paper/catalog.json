@@ -1802,6 +1802,14 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/leather_goods_patterning.png",
+      "description": "Cut and fit compatible flexible leather into sewn outer garments; repair worn pieces with leather patches.",
+      "domain": "production",
+      "id": "leather_goods_patterning",
+      "name": "Leather-Goods Patterning",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/knitted_loop_fabrics.png",
       "description": "Build a fabric from intermeshed yarn loops. Suitable yarn, tools and skilled work",
       "domain": "production",
@@ -5242,6 +5250,54 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/shield_equipment_fitting.png",
+      "description": "Match shield shape, grip and carrying arrangements to the user's formation role",
+      "domain": "security",
+      "id": "shield_equipment_fitting",
+      "name": "Shield-Equipment Fitting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_armor_layering.png",
+      "description": "Qualify layered textile protection against defined equipment and environmental conditions",
+      "domain": "security",
+      "id": "textile_armor_layering",
+      "name": "Textile Armor Layering",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
+      "description": "Join overlapping protective elements into a wearable articulated assembly",
+      "domain": "security",
+      "id": "lamellar_armor_assembly",
+      "name": "Lamellar-Armor Assembly",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/scale_armor_attachment.png",
+      "description": "Attach overlapping protective elements to a qualified backing while retaining intended flexibility",
+      "domain": "security",
+      "id": "scale_armor_attachment",
+      "name": "Scale Armor Attachment",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mail_armor_fabrication.png",
+      "description": "Make a flexible protective mesh from joined metal elements",
+      "domain": "security",
+      "id": "mail_armor_fabrication",
+      "name": "Mail-Armor Fabrication",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/articulated_plate_armor.png",
+      "description": "Fit shaped protective plates so joints retain useful movement",
+      "domain": "security",
+      "id": "articulated_plate_armor",
+      "name": "Articulated Plate Armor",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
       "description": "Repeated wet beating separates and fibrillates prepared plant fibers so they bond into a sheet.",
       "domain": "production",
@@ -5384,6 +5440,14 @@
       "id": "high_fire_stoneware",
       "name": "High-Fire Stoneware",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/hide_tanning.png",
+      "description": "Prepare suitable hides and selected plant extracts, then tan and finish flexible leather.",
+      "domain": "production",
+      "id": "hide_tanning",
+      "name": "Hide Tanning",
+      "status": "queued"
     },
     {
       "asset": "res://assets/ui/research/paper/carbon_resistors.png",
@@ -5731,9 +5795,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 716,
+  "live_count": 724,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 578,
+  "queued_count": 586,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
