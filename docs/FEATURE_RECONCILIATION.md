@@ -1,5 +1,13 @@
 ## September 12 — reviewed civilian response coverage
 
+## September 12 — 708 verified operating discoveries
+
+Integrated glass and ceramic processes at `5449d0f3bbdb7c691cfe30e869549f92b22454bb`: five existing identities and eleven paid recipes. Compatible cullet remelts with losses; annealed blanks supply actual lenses; plaster molds and prepared bodies produce green forms that need firing and compatible glazing before entering the brine workshop. Original prerequisite predicates remain intact.
+
+**65 distinct worktree cases and 40 canonical cases pass**. Graph and exact loaded snapshot: **708 discoveries /490 routes /352 recipes /18 facilities**; all definitions match and 15 ledger tests pass. Normal headless boot reaches the direction screen without errors. Ledger: **708 integrated + 2,474 drafts = 3,182 identities**, with **1,818 still to author and 4,292 to implement**. Art: **125 verified /708 live, 583 queued**.
+
+Physical processes use compatible material classes and paid trial losses, without detailed thermal/chemistry histories or universal vessel certification. No save schema changes. New subject art and full historical pacing remain outstanding. Textile implementation is active in its separate task. No player launch or package rebuild. See `GLASS_CERAMIC_PROCESS_HANDOFF.md`.
+
 ## September 12 — 703 verified operating discoveries
 
 Integrated civilian clinical care `9c6ec61` as `45891f6`, and its three illustrations `16e5cd5` as canonical `851a0cad29aa55e6a7fd689d58b5775af3cf7bba`. Observation and pulse assessment consume dated clay records and local Knowledge duty; nursing consumes water and cloth, with paid continuous care contributing bounded recovery through the existing health owner. Research capacity excludes reserved carers after injuries and absent scholars. Selected-city reports, delayed supplies and optional legacy save state are verified.

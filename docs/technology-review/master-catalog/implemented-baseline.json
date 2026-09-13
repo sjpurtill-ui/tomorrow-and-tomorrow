@@ -1,5 +1,5 @@
 {
-  "source_commit": "851a0cad29aa55e6a7fd689d58b5775af3cf7bba",
+  "source_commit": "5449d0f3bbdb7c691cfe30e869549f92b22454bb",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -51633,6 +51633,525 @@
         "requires": [
           "glass_tube_drawing",
           "chemical_distillation"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "glass_batch_composition_control",
+      "name": "Glass Batch Composition Control",
+      "foundations": "glassmaking,material_accounting",
+      "mechanism": "Control measured batch constituents against a qualified glass composition",
+      "operating_requirement": "Characterized minerals or cullet, weighing, melting plant and analysis",
+      "consequence": "Produce consistent composition while impurities and furnace history affect quality",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "glass_batch_composition_control",
+        "local_demonstration": "Control measured batch constituents against a qualified glass composition",
+        "operating_requirements": "Characterized minerals or cullet, weighing, melting plant and analysis",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "5449d0f3bbdb7c691cfe30e869549f92b22454bb",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "glassmaking",
+          "material_accounting"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "glass_batch_composition_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Glass Batch Composition Control",
+            "missing_all": [
+              "glassmaking",
+              "material_accounting"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "glassmaking",
+              "material_accounting"
+            ],
+            "requires_all": [
+              "glassmaking",
+              "material_accounting"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Glass Batch Composition Control",
+        "observation": "Control measured batch constituents against a qualified glass composition",
+        "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification.",
+        "production_items": [
+          "graded_glass_cullet"
+        ],
+        "requires": [
+          "glassmaking",
+          "material_accounting"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "glass_annealing_schedules",
+      "name": "Glass Annealing Schedules",
+      "foundations": "glassmaking",
+      "mechanism": "Control cooling through an evaluated stress-relief range for a specified glass article",
+      "operating_requirement": "Suitable annealing equipment, measured thermal conditions and inspection",
+      "consequence": "Reduce retained stress without making glass unbreakable",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "precision_thermometry",
+          "kiln_control"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "glass_annealing_schedules",
+        "local_demonstration": "Control cooling through an evaluated stress-relief range for a specified glass article",
+        "operating_requirements": "Suitable annealing equipment, measured thermal conditions and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Practical stress-relieving cooling can precede calibrated thermometry; each article and process still need suitable evidence.",
+      "implementation_reconciliation": {
+        "source_commit": "5449d0f3bbdb7c691cfe30e869549f92b22454bb",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "glassmaking"
+        ],
+        "previous_requires_any": [
+          [
+            "precision_thermometry",
+            "kiln_control"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "glass_annealing_schedules",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Glass Annealing Schedules",
+            "missing_all": [
+              "glassmaking"
+            ],
+            "missing_any": [
+              [
+                "precision_thermometry",
+                "kiln_control"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "glassmaking",
+              "precision_thermometry",
+              "kiln_control"
+            ],
+            "requires_all": [
+              "glassmaking"
+            ],
+            "requires_any": [
+              [
+                "precision_thermometry",
+                "kiln_control"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Glass Annealing Schedules",
+        "observation": "Control cooling through an evaluated stress-relief range for a specified glass article",
+        "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification.",
+        "production_items": [
+          "annealed_glass_blanks"
+        ],
+        "requires": [
+          "glassmaking"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "precision_thermometry",
+            "kiln_control"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "ceramic_slip_casting",
+      "name": "Ceramic Slip Casting",
+      "foundations": "clay_levigation,clay_shaping",
+      "mechanism": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
+      "operating_requirement": "Prepared slip, molds, drying space and skilled operators",
+      "consequence": "Produce selected shapes while suspension stability and drying constrain quality",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "ceramic_slip_casting",
+        "local_demonstration": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
+        "operating_requirements": "Prepared slip, molds, drying space and skilled operators",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "5449d0f3bbdb7c691cfe30e869549f92b22454bb",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "clay_levigation",
+          "clay_shaping"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "ceramic_slip_casting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Ceramic Slip Casting",
+            "missing_all": [
+              "clay_levigation",
+              "clay_shaping"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "clay_levigation",
+              "clay_shaping"
+            ],
+            "requires_all": [
+              "clay_levigation",
+              "clay_shaping"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Ceramic Slip Casting",
+        "observation": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
+        "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification.",
+        "production_items": [
+          "pottery_plaster_molds",
+          "slip_cast_stoneware"
+        ],
+        "requires": [
+          "clay_levigation",
+          "clay_shaping"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "ceramic_glaze_formulation",
+      "name": "Ceramic-Glaze Formulation",
+      "foundations": "glassmaking,clay_testing,kiln_control",
+      "mechanism": "Fit a fired glassy surface to a compatible ceramic body",
+      "operating_requirement": "Suitable ingredients, prepared bodies, controlled firing and surface tests",
+      "consequence": "Change permeability, appearance and cleanability while fit or chemistry can cause failure",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Ceramic-Glaze Formulation: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "ceramic_glaze_formulation",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Ceramic-Glaze Formulation",
+        "local_demonstration": "Fit a fired glassy surface to a compatible ceramic body",
+        "operating_requirements": "Suitable ingredients, prepared bodies, controlled firing and surface tests",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "5449d0f3bbdb7c691cfe30e869549f92b22454bb",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "glassmaking",
+          "clay_testing",
+          "kiln_control"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "ceramic_glaze_formulation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Ceramic-Glaze Formulation",
+            "missing_all": [
+              "glassmaking",
+              "clay_testing",
+              "kiln_control"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "glassmaking",
+              "clay_testing",
+              "kiln_control"
+            ],
+            "requires_all": [
+              "glassmaking",
+              "clay_testing",
+              "kiln_control"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Ceramic-Glaze Formulation",
+        "observation": "Fit a fired glassy surface to a compatible ceramic body",
+        "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification.",
+        "production_items": [
+          "glazed_stoneware_vessels"
+        ],
+        "requires": [
+          "glassmaking",
+          "clay_testing",
+          "kiln_control"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "high_fire_stoneware",
+      "name": "High-Fire Stoneware",
+      "foundations": "clay_testing,refractory_furnaces",
+      "mechanism": "Produce a qualified dense ceramic body through controlled high-temperature firing",
+      "operating_requirement": "Suitable clay blend, kiln, energy and firing control",
+      "consequence": "Provide durable vessels or components with shrinkage and fracture limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For High-Fire Stoneware: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "high_fire_stoneware",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for High-Fire Stoneware",
+        "local_demonstration": "Produce a qualified dense ceramic body through controlled high-temperature firing",
+        "operating_requirements": "Suitable clay blend, kiln, energy and firing control",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Demonstrate material properties for the actual feedstock and process; a purchased sample does not establish manufacturing capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "5449d0f3bbdb7c691cfe30e869549f92b22454bb",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "clay_testing",
+          "refractory_furnaces"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "high_fire_stoneware",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "High-Fire Stoneware",
+            "missing_all": [
+              "clay_testing",
+              "refractory_furnaces"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "clay_testing",
+              "refractory_furnaces"
+            ],
+            "requires_all": [
+              "clay_testing",
+              "refractory_furnaces"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "High-Fire Stoneware",
+        "observation": "Produce a qualified dense ceramic body through controlled high-temperature firing",
+        "production_contract": "Finite workshop routes pay for prepared feedstock, rejected trial material, fuel, molds and work. Graded cullet remelts into usable glass; annealed blanks feed lens grinding. Slip-cast forms need a separate firing route, and fired stoneware needs paid glaze-fit trials before supplying the glazed brine workshop. These are bounded compatible material classes, not arbitrary glass mixing, universal refractory ware or food/medical certification.",
+        "production_items": [
+          "stoneware_body",
+          "formed_stoneware_vessels",
+          "fired_cast_stoneware"
+        ],
+        "requires": [
+          "clay_testing",
+          "refractory_furnaces"
         ],
         "requires_all": [],
         "requires_any": [],

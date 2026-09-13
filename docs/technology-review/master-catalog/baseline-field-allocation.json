@@ -5044,6 +5044,41 @@
       "source_domain": "health",
       "name": "Nursing Care Organization",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "glass_batch_composition_control",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Glass Batch Composition Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "glass_annealing_schedules",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Glass Annealing Schedules",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ceramic_slip_casting",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Ceramic Slip Casting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ceramic_glaze_formulation",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Ceramic-Glaze Formulation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "high_fire_stoneware",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "High-Fire Stoneware",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

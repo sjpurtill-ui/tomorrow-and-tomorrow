@@ -5282,6 +5282,46 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/glass_batch_composition_control.png",
+      "description": "Control measured batch constituents against a qualified glass composition",
+      "domain": "production",
+      "id": "glass_batch_composition_control",
+      "name": "Glass Batch Composition Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/glass_annealing_schedules.png",
+      "description": "Control cooling through an evaluated stress-relief range for a specified glass article",
+      "domain": "production",
+      "id": "glass_annealing_schedules",
+      "name": "Glass Annealing Schedules",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ceramic_slip_casting.png",
+      "description": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
+      "domain": "production",
+      "id": "ceramic_slip_casting",
+      "name": "Ceramic Slip Casting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
+      "description": "Fit a fired glassy surface to a compatible ceramic body",
+      "domain": "production",
+      "id": "ceramic_glaze_formulation",
+      "name": "Ceramic-Glaze Formulation",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/high_fire_stoneware.png",
+      "description": "Produce a qualified dense ceramic body through controlled high-temperature firing",
+      "domain": "production",
+      "id": "high_fire_stoneware",
+      "name": "High-Fire Stoneware",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/carbon_resistors.png",
       "description": "A measured carbon path supplies repeatable electrical resistance between metal contacts.",
       "domain": "production",
@@ -5627,9 +5667,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 703,
+  "live_count": 708,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 578,
+  "queued_count": 583,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

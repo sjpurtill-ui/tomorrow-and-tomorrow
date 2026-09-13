@@ -1313,87 +1313,6 @@
   },
   {
     "field": "D04",
-    "id": "glass_batch_composition_control",
-    "name": "Glass Batch Composition Control",
-    "foundations": "glassmaking,material_accounting",
-    "mechanism": "Control measured batch constituents against a qualified glass composition",
-    "operating_requirement": "Characterized minerals or cullet, weighing, melting plant and analysis",
-    "consequence": "Produce consistent composition while impurities and furnace history affect quality",
-    "status": "authored_draft",
-    "requires_all": [
-      "glassmaking",
-      "material_accounting"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "glass_batch_composition_control",
-      "local_demonstration": "Control measured batch constituents against a qualified glass composition",
-      "operating_requirements": "Characterized minerals or cullet, weighing, melting plant and analysis",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
-  },
-  {
-    "field": "D04",
-    "id": "glass_annealing_schedules",
-    "name": "Glass Annealing Schedules",
-    "foundations": "glassmaking",
-    "mechanism": "Control cooling through an evaluated stress-relief range for a specified glass article",
-    "operating_requirement": "Suitable annealing equipment, measured thermal conditions and inspection",
-    "consequence": "Reduce retained stress without making glass unbreakable",
-    "status": "authored_draft",
-    "requires_all": [
-      "glassmaking"
-    ],
-    "requires_any": [
-      [
-        "precision_thermometry",
-        "kiln_control"
-      ]
-    ],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "glass_annealing_schedules",
-      "local_demonstration": "Control cooling through an evaluated stress-relief range for a specified glass article",
-      "operating_requirements": "Suitable annealing equipment, measured thermal conditions and inspection",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
-    "branching_note": "Practical stress-relieving cooling can precede calibrated thermometry; each article and process still need suitable evidence."
-  },
-  {
-    "field": "D04",
     "id": "glass_thermal_tempering",
     "name": "Glass Thermal Tempering",
     "foundations": "glass_annealing_schedules,residual_stress_assessment",
@@ -1640,44 +1559,6 @@
       "destination": "glass_ceramic_crystallization",
       "local_demonstration": "Control crystallization within a suitable glass to achieve evaluated composite microstructure",
       "operating_requirements": "Qualified composition, thermal treatment and structural testing",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent available source",
-        "negotiated payment or reciprocal contribution",
-        "actual record or specimen delivery",
-        "finite local trials and qualification",
-        "continuing feedstocks, energy, staff and waste handling"
-      ],
-      "route_terms": {
-        "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
-        "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
-        "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
-        "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
-        "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
-      }
-    },
-    "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending."
-  },
-  {
-    "field": "D04",
-    "id": "ceramic_slip_casting",
-    "name": "Ceramic Slip Casting",
-    "foundations": "clay_levigation,clay_shaping",
-    "mechanism": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
-    "operating_requirement": "Prepared slip, molds, drying space and skilled operators",
-    "consequence": "Produce selected shapes while suspension stability and drying constrain quality",
-    "status": "authored_draft",
-    "requires_all": [
-      "clay_levigation",
-      "clay_shaping"
-    ],
-    "requires_any": [],
-    "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "ceramic_slip_casting",
-      "local_demonstration": "Form qualified ceramic shapes by draining or consolidating a controlled suspension in suitable molds",
-      "operating_requirements": "Prepared slip, molds, drying space and skilled operators",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent available source",
