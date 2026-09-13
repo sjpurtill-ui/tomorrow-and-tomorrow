@@ -752,3 +752,38 @@ func test_polymer_service_save_limits_reject_unknown_or_excess_capacity()->void:
 		assert_bool(Ops.valid(bad)).is_false()
 	ledger.inputs["Invented Catalyst"]=1.0
 	assert_bool(Ops.valid(ledger)).is_false()
+
+func test_nmr_capital_chain_commissions_unqualified_time_and_stops_without_maintenance()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		for item:String in ["Wrought Iron","Copper Wire","Insulated Cable","Steel","Radio Oscillators","Frequency Mixers","Amplifier Modules","Tuned Circuits","Glass Tubes","Pressure Pipe Fittings"]:s.resource_stockpiles[item]=100.0
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		for item:String in ["nmr_field_assembly","nmr_probe_receiver","nmr_bench_assembly"]:
+			assert_int(int(run_batch(item,1).get("completed",0))).is_equal(1)
+		assert_float(float(s.resource_stockpiles["NMR Field Assemblies"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["NMR Probe Receivers"])).is_equal(0.0)
+		s.known_discoveries.append("electrical_measurement");s.discovery_adoption.electrical_measurement=1.0
+		assert_bool(Ops.install("nmr_analytical_bench").get("ok",false)).is_true()
+		assert_float(float(s.resource_stockpiles["Unqualified NMR Benches"])).is_equal(0.0)
+		assert_float(Ops.service("nmr_unqualified_time")).is_equal(0.0)
+		provision_plants()
+		for day:int in range(1,65):s.elapsed_days=day;Ops.advance(day)
+		assert_int(int(Ops.data().plants.nmr_analytical_bench.installed)).is_equal(1)
+		assert_float(Ops.service("nmr_unqualified_time")).is_greater(0.0)
+		assert_bool(Ops.valid(Ops.data())).is_true()
+		assert_bool(Ops.data().get("polymer_samples",{}).is_empty()).is_true()
+		assert_float(float(s.resource_stockpiles.get("Sequence-Qualified Copolymer",0))).is_equal(0.0)
+		s.resource_stockpiles["Insulated Cable"]=0.0
+		s.elapsed_days=65;Ops.advance(65)
+		assert_float(Ops.service("nmr_unqualified_time")).is_equal(0.0))
+
+func test_nmr_keeps_all_authored_parents_and_does_not_reuse_mri()->void:
+	var entries=preload("res://scripts/polymer_knowledge.gd").entries()
+	var found:=false
+	for entry:Dictionary in entries:
+		if entry.id!="nuclear_magnetic_resonance_spectroscopy":continue
+		found=true
+		assert_bool(entry.requires_all==["atomic_physics","spectroscopy","resonant_tuned_circuits","precision_thermometry"]).is_true()
+		assert_bool(entry.requires_any.is_empty()).is_true()
+		assert_bool(entry.effects.is_empty()).is_true()
+	assert_bool(found).is_true()

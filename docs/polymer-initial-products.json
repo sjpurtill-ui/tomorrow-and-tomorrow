@@ -1892,5 +1892,61 @@
     },
     "power": 0,
     "specimen_source": "Controlled-Chain PEG"
+  },
+  "nmr_field_assembly": {
+    "name": "Adjustable NMR electromagnet assembly",
+    "output": "NMR Field Assemblies",
+    "gate": "nuclear_magnetic_resonance_spectroscopy",
+    "materials": {
+      "Wrought Iron": 12,
+      "Copper Wire": 6,
+      "Insulated Cable": 2,
+      "Steel": 3
+    },
+    "days": 18,
+    "tooling": {
+      "Precision Machine Tool Sets": 1
+    },
+    "power": 6,
+    "daily_power": 0.3333333333333333
+  },
+  "nmr_probe_receiver": {
+    "name": "NMR RF probe and thermal-control receiver assembly",
+    "output": "NMR Probe Receivers",
+    "gate": "nuclear_magnetic_resonance_spectroscopy",
+    "materials": {
+      "Radio Oscillators": 1,
+      "Frequency Mixers": 1,
+      "Amplifier Modules": 2,
+      "Tuned Circuits": 2,
+      "Copper Wire": 1,
+      "Glass Tubes": 1,
+      "Pressure Pipe Fittings": 1
+    },
+    "days": 12,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Precision Machine Tool Sets": 1
+    },
+    "power": 3,
+    "daily_power": 0.25
+  },
+  "nmr_bench_assembly": {
+    "name": "Assembled NMR bench awaiting reference qualification",
+    "output": "Unqualified NMR Benches",
+    "gate": "nuclear_magnetic_resonance_spectroscopy",
+    "materials": {
+      "NMR Field Assemblies": 1,
+      "NMR Probe Receivers": 1,
+      "Insulated Cable": 2,
+      "Steel": 2
+    },
+    "days": 8,
+    "tooling": {
+      "Precision Machine Tool Sets": 1,
+      "Laboratory Glassware": 3
+    },
+    "power": 4,
+    "daily_power": 0.5
   }
 }

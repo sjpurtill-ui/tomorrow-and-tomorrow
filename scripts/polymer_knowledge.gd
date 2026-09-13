@@ -1620,5 +1620,45 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "metered_propene_ethene_feed"
     ]
+  },
+  {
+    "id": "nuclear_magnetic_resonance_spectroscopy",
+    "name": "Nuclear Magnetic Resonance Spectroscopy",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "atomic_physics",
+      "spectroscopy",
+      "resonant_tuned_circuits",
+      "precision_thermometry"
+    ],
+    "requires_all": [
+      "atomic_physics",
+      "spectroscopy",
+      "resonant_tuned_circuits",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Nuclear Magnetic Resonance Spectroscopy",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Observe radio-frequency responses of selected nuclear spins in a stable magnetic field to distinguish resolved chemical environments.",
+    "effects": {},
+    "production_items": [
+      "nmr_field_assembly",
+      "nmr_probe_receiver",
+      "nmr_bench_assembly"
+    ],
+    "production_contract": "Physical field and RF/thermal assemblies consume real capital, work and energy. The installed bench supplies unqualified instrument time only; reference qualification, sample-specific resolved spectra and downstream grade acceptance remain required."
   }
 ]
