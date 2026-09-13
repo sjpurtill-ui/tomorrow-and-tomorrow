@@ -148,6 +148,7 @@ static func advance(day:int,current_context:Variant=null)->void:
 		record.work+=staff*condition;available-=staff;ledger.workers+=staff
 		var completed:=mini(int(record.building),floori((float(record.work)+.00000001)/float(spec.work)))
 		record.installed+=completed;record.building-=completed;record.work=maxf(0,float(record.work)-completed*float(spec.work))
+	preload("res://scripts/nmr_acquisition.gd").advance_pending()
 static func _consumer_staff(power:float,condition:float)->float:
 	var staff:=0.0
 	for id:String in PLANTS:

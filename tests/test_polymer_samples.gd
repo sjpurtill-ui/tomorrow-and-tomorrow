@@ -66,3 +66,71 @@ func test_save_rejects_changed_provenance_or_unearned_qualification()->void:
 			bad.polymer_samples.records["1"].merge(alteration,true)
 			assert_bool(Ops.valid(bad)).is_false()
 		assert_bool(Ops.valid(Ops.empty_state())).is_true())
+
+func test_acquisition_consumes_one_specimen_and_only_available_paid_bench_time()->void:
+	WorldSimulation.scoped("samples",func()->void:
+		var job:=start();P.advance(WorldSimulation.military,job,2)
+		var acquisition=preload("res://scripts/nmr_acquisition.gd")
+		var s=WorldSimulation.state;s.resource_stockpiles.Freshwater=1.0
+		assert_bool(acquisition.start("1").has("error")).is_true()
+		Ops.data().last_day=0;Ops.data().services={"nmr_unqualified_time":.5}
+		assert_bool(acquisition.start("1").get("ok",false)).is_true()
+		assert_float(float(s.resource_stockpiles["Sealed Copolymer Specimens"])).is_equal(1.0)
+		assert_bool(acquisition.start("1").has("error")).is_true()
+		assert_float(acquisition.advance("1",100)).is_equal(.5)
+		assert_float(acquisition.advance("1",100)).is_equal(0.0)
+		Ops.data().services.nmr_unqualified_time=3.5
+		assert_float(acquisition.advance("1",100)).is_equal(3.5)
+		var sample:Dictionary=Samples.data().records["1"]
+		assert_str(sample.status).is_equal("measured_unqualified")
+		assert_int(sample.observation.trace.size()).is_equal(401)
+		assert_bool(sample.observation.qualified).is_false()
+		assert_bool(sample.observation.has("resonances")).is_false()
+		assert_float(float(s.resource_stockpiles["Raw Propene-Ethene Copolymer"])).is_equal_approx(.8,.000001)
+		assert_bool(Ops.valid(Ops.data())).is_true())
+
+func test_partial_acquisition_survives_save_and_does_not_reserve_twice()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	WorldSimulation.scoped("samples",func()->void:
+		var job:=start();P.advance(WorldSimulation.military,job,1)
+		WorldSimulation.state.resource_stockpiles.Freshwater=1.0
+		Ops.data().last_day=0;Ops.data().services={"nmr_unqualified_time":1.0}
+		var acquisition=preload("res://scripts/nmr_acquisition.gd")
+		assert_bool(acquisition.start("1").get("ok",false)).is_true()
+		acquisition.advance("1",1.0))
+	var slot:="polymer_acquisition_%d"%OS.get_process_id()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear();var result:=SaveSystem.load_game(slot)
+	DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
+	if not result.get("ok",false):return
+	WorldSimulation.scoped("samples",func()->void:
+		var acquisition=preload("res://scripts/nmr_acquisition.gd")
+		assert_float(float(Samples.data().records["1"].acquisition.work)).is_equal(1.0)
+		assert_float(acquisition.advance("1",10)).is_equal(0.0)
+		Ops.data().services.nmr_unqualified_time=3.0
+		acquisition.advance("1",10)
+		assert_str(Samples.data().records["1"].status).is_equal("measured_unqualified")
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Sealed Copolymer Specimens"])).is_equal(0.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.Freshwater)).is_equal_approx(.8,.000001))
+
+func test_daily_operations_advance_prepared_samples_and_stop_when_bench_loses_power()->void:
+	WorldSimulation.scoped("samples",func()->void:
+		var job:=start();P.advance(WorldSimulation.military,job,1)
+		var s=WorldSimulation.state
+		s.population_allocations.Crafting=20;s.population_health=1.0;s.simulation_metrics.labor_efficiency=1.0
+		for item:String in ["Coal","Freshwater","Insulated Cable"]:s.resource_stockpiles[item]=100.0
+		for id:String in ["nmr_analytical_bench","steam_generator"]:Ops.data().plants[id]={"installed":1,"building":0,"work":0.0,"enabled":true}
+		s.elapsed_days=1;Ops.advance(1)
+		var sample:Dictionary=Samples.data().records["1"]
+		assert_str(sample.status).is_equal("acquiring")
+		var progress:=float(sample.acquisition.work)
+		assert_float(progress).is_greater(0.0)
+		Ops.advance(1)
+		assert_float(float(sample.acquisition.work)).is_equal(progress)
+		s.resource_stockpiles.Coal=0.0;s.elapsed_days=2;Ops.advance(2)
+		assert_float(float(sample.acquisition.work)).is_equal(progress)
+		s.resource_stockpiles.Coal=100.0
+		for day:int in range(3,12):s.elapsed_days=day;Ops.advance(day)
+		assert_str(sample.status).is_equal("measured_unqualified")
+		assert_bool(Ops.valid(Ops.data())).is_true())
