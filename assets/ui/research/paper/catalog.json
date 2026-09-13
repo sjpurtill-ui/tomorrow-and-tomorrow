@@ -5058,6 +5058,30 @@
       "status": "verified"
     },
     {
+      "asset": "res://assets/ui/research/paper/clinical_observation_rounds.png",
+      "description": "Repeat and record a patient's condition rather than relying on one encounter",
+      "domain": "health",
+      "id": "clinical_observation_rounds",
+      "name": "Clinical Observation Rounds",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
+      "description": "Compare pulse features and their change over time in clinical context",
+      "domain": "health",
+      "id": "clinical_pulse_assessment",
+      "name": "Clinical Pulse Assessment",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/nursing_care_organization.png",
+      "description": "Organize continuous practical care, monitoring and handover around patient needs",
+      "domain": "health",
+      "id": "nursing_care_organization",
+      "name": "Nursing Care Organization",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/fiber_retting.png",
       "description": "Water treatment and careful separation loosen useful stem fibers before they are dried for spinning.",
       "domain": "production",
@@ -5603,11 +5627,11 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 700,
+  "live_count": 703,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 122
+  "verified_count": 125
 }

@@ -167,3 +167,7 @@ campaign pacing evidence. Output: `/tmp/tt-clinical-graph.log`.
 
 Normal headless project boot (`--quit-after 2`) exited 0 and reached
 `DIRECTION_SCREEN_READY` without script errors; `/tmp/tt-clinical-boot.log`.
+
+## Canonical acceptance
+
+INTEGRATED: source `9c6ec61`, runtime merge `45891f6`, runtime plus art canonical `851a0cad29aa55e6a7fd689d58b5775af3cf7bba`. Combined worktree acceptance: 114 cases across clinical care, city resources, owned civilizations, research foundations/redistribution, record media, metal processes, civilian production planning, technology operations and atlas. Canonical: 43 cases across clinical care, city resources and atlas. All pass with zero errors/failures/skips/orphans. Logs `/tmp/tt-clinical-combined-results.json` and `/tmp/tt-clinical-canonical-canonical-results.json`. Clean graph and exact snapshot contain703, not the older worker696. Three art textures pass canonical768px/mipmap loads. Human/actor and local-city save continuation pass; no new population authority. The headless boot reaches the direction screen with an exit-time resource cleanup warning; no player launch, package rebuild or historical pacing claim.

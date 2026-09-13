@@ -1,5 +1,5 @@
 {
-  "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+  "source_commit": "851a0cad29aa55e6a7fd689d58b5775af3cf7bba",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -49637,6 +49637,302 @@
         ],
         "social_consequence": "Distant communities can sustain exchange and shared obligations instead of remaining isolated by carrying distance",
         "subcategory": "Carrying capacity"
+      }
+    },
+    {
+      "field": "D14",
+      "id": "clinical_observation_rounds",
+      "name": "Clinical Observation Rounds",
+      "foundations": "case_records",
+      "mechanism": "Repeat and record a patient's condition rather than relying on one encounter",
+      "operating_requirement": "Care staff, records and a consistent observation schedule",
+      "consequence": "Detect changes during care while consuming finite staff time",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "birth_attendants",
+          "civic_infirmaries"
+        ]
+      ],
+      "branching_note": "Repeated observation can develop in community care without a hospital institution.",
+      "recovery_profile": "clinical",
+      "recovery": "For Clinical Observation Rounds: Supervised clinical teaching with de-identified records and demonstrated service practice. Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Supervised clinical teaching with de-identified records and demonstrated service practice",
+        "local_demonstration": "Repeat and record a patient's condition rather than relying on one encounter",
+        "verification": "Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence",
+        "reconverges_on": "clinical_observation_rounds",
+        "grants_instant_mastery": false,
+        "operation_requires": "Care staff, records and a consistent observation schedule"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "851a0cad29aa55e6a7fd689d58b5775af3cf7bba",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "case_records"
+        ],
+        "previous_requires_any": [
+          [
+            "birth_attendants",
+            "civic_infirmaries"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clinical_care_method": "clinical_observation_rounds",
+        "day": 0,
+        "direction": "health",
+        "dynamic": "health",
+        "effects": {},
+        "id": "clinical_observation_rounds",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local clinical practice",
+            "missing_all": [
+              "case_records"
+            ],
+            "missing_any": [
+              [
+                "birth_attendants",
+                "civic_infirmaries"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "case_records",
+              "birth_attendants",
+              "civic_infirmaries"
+            ],
+            "requires_all": [
+              "case_records"
+            ],
+            "requires_any": [
+              [
+                "birth_attendants",
+                "civic_infirmaries"
+              ]
+            ],
+            "signals": [
+              "health",
+              "illness",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Clinical Observation Rounds",
+        "observation": "Repeat and record a patient's condition rather than relying on one encounter",
+        "production_contract": "Reserves a configurable share of available local Knowledge labor for dated observations, consuming clay for records. Fresh assessments establish priority and make subsequent nursing possible; observations alone grant no health recovery.",
+        "requires": [
+          "case_records"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "birth_attendants",
+            "civic_infirmaries"
+          ]
+        ],
+        "signals": [
+          "health",
+          "illness",
+          "information"
+        ],
+        "social_consequence": "Preserved lives and skills strengthen households while creating demand for durable systems of care",
+        "subcategory": "General health"
+      }
+    },
+    {
+      "field": "D14",
+      "id": "clinical_pulse_assessment",
+      "name": "Clinical Pulse Assessment",
+      "foundations": "clinical_observation_rounds,standard_measures",
+      "mechanism": "Compare pulse features and their change over time in clinical context",
+      "operating_requirement": "Trained observers and consistent records",
+      "consequence": "Recognize some deterioration while retaining diagnostic uncertainty",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "clinical",
+      "recovery": "For Clinical Pulse Assessment: Supervised clinical teaching with de-identified records and demonstrated service practice. Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Supervised clinical teaching with de-identified records and demonstrated service practice",
+        "local_demonstration": "Compare pulse features and their change over time in clinical context",
+        "verification": "Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence",
+        "reconverges_on": "clinical_pulse_assessment",
+        "grants_instant_mastery": false,
+        "operation_requires": "Trained observers and consistent records"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "851a0cad29aa55e6a7fd689d58b5775af3cf7bba",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "clinical_observation_rounds",
+          "standard_measures"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clinical_care_method": "clinical_pulse_assessment",
+        "day": 0,
+        "direction": "health",
+        "dynamic": "health",
+        "effects": {},
+        "id": "clinical_pulse_assessment",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local clinical practice",
+            "missing_all": [
+              "clinical_observation_rounds",
+              "standard_measures"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "clinical_observation_rounds",
+              "standard_measures"
+            ],
+            "requires_all": [
+              "clinical_observation_rounds",
+              "standard_measures"
+            ],
+            "requires_any": [],
+            "signals": [
+              "health",
+              "illness",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Clinical Pulse Assessment",
+        "observation": "Compare pulse features and their change over time in clinical context",
+        "production_contract": "Spends additional observation time to distinguish severity within coarse assessment groups, improving the order of subsequent care rounds. Pulse assessment needs the local observation service and record supplies; it grants no recovery by itself.",
+        "requires": [
+          "clinical_observation_rounds",
+          "standard_measures"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "health",
+          "illness",
+          "information"
+        ],
+        "social_consequence": "Preserved lives and skills strengthen households while creating demand for durable systems of care",
+        "subcategory": "General health"
+      }
+    },
+    {
+      "field": "D14",
+      "id": "nursing_care_organization",
+      "name": "Nursing Care Organization",
+      "foundations": "clinical_observation_rounds,crew_handoffs",
+      "mechanism": "Organize continuous practical care, monitoring and handover around patient needs",
+      "operating_requirement": "Trained nurses, supplies and sustainable rosters",
+      "consequence": "Provide care continuity while consuming real labor capacity",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery_profile": "clinical",
+      "recovery": "For Nursing Care Organization: Supervised clinical teaching with de-identified records and demonstrated service practice. Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "methods": [
+          "scholar_envoy",
+          "partnership",
+          "commissioned_research"
+        ],
+        "evidence": "Supervised clinical teaching with de-identified records and demonstrated service practice",
+        "local_demonstration": "Organize continuous practical care, monitoring and handover around patient needs",
+        "verification": "Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence",
+        "reconverges_on": "nursing_care_organization",
+        "grants_instant_mastery": false,
+        "operation_requires": "Trained nurses, supplies and sustainable rosters"
+      },
+      "implementation_reconciliation": {
+        "source_commit": "851a0cad29aa55e6a7fd689d58b5775af3cf7bba",
+        "editorial_source": "medicine-biology-computation.json",
+        "previous_requires_all": [
+          "clinical_observation_rounds",
+          "crew_handoffs"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clinical_care_method": "nursing_care_organization",
+        "day": 0,
+        "direction": "health",
+        "dynamic": "health",
+        "effects": {},
+        "id": "nursing_care_organization",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Local clinical practice",
+            "missing_all": [
+              "clinical_observation_rounds",
+              "crew_handoffs"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "clinical_observation_rounds",
+              "crew_handoffs"
+            ],
+            "requires_all": [
+              "clinical_observation_rounds",
+              "crew_handoffs"
+            ],
+            "requires_any": [],
+            "signals": [
+              "health",
+              "illness",
+              "information"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Nursing Care Organization",
+        "observation": "Organize continuous practical care, monitoring and handover around patient needs",
+        "production_contract": "Shares the observation workforce to provide supportive care using actual local water and woven cloth. Fresh observations and uninterrupted care improve bounded recovery; missing staff or supplies breaks continuity. Treatment competes with research for available Knowledge labor.",
+        "requires": [
+          "clinical_observation_rounds",
+          "crew_handoffs"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "health",
+          "illness",
+          "information"
+        ],
+        "social_consequence": "Preserved lives and skills strengthen households while creating demand for durable systems of care",
+        "subcategory": "General health"
       }
     },
     {

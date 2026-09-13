@@ -5023,6 +5023,27 @@
       "source_domain": "production",
       "name": "Continuous Metal Casting",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "clinical_observation_rounds",
+      "field": "D14",
+      "source_domain": "health",
+      "name": "Clinical Observation Rounds",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "clinical_pulse_assessment",
+      "field": "D14",
+      "source_domain": "health",
+      "name": "Clinical Pulse Assessment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "nursing_care_organization",
+      "field": "D14",
+      "source_domain": "health",
+      "name": "Nursing Care Organization",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

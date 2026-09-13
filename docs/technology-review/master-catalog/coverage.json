@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 700,
+  "verified_baseline_discoveries": 703,
   "pending_communications": 0,
-  "new_authored_drafts": 2482,
+  "new_authored_drafts": 2479,
   "distinct_accounted_identities": 3182,
   "remaining_identities_to_author": 1818,
   "target": 5000,
@@ -2349,7 +2349,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 464,
+  "branch_alternatives": 463,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 115,
@@ -2365,7 +2365,7 @@
     "D11": 60,
     "D12": 67,
     "D13": 116,
-    "D14": 176,
+    "D14": 173,
     "D15": 127,
     "D16": 135,
     "D17": 115,
@@ -2512,9 +2512,9 @@
       "id": "D14",
       "name": "Medicine and care",
       "target": 280,
-      "implemented_baseline": 13,
+      "implemented_baseline": 16,
       "pending_communications": 0,
-      "authored_drafts": 176,
+      "authored_drafts": 173,
       "accounted": 189,
       "remaining_to_target": 91
     },

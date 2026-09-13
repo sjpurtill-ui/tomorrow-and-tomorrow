@@ -2033,42 +2033,6 @@
   },
   {
     "field": "D14",
-    "id": "clinical_observation_rounds",
-    "name": "Clinical Observation Rounds",
-    "foundations": "case_records",
-    "mechanism": "Repeat and record a patient's condition rather than relying on one encounter",
-    "operating_requirement": "Care staff, records and a consistent observation schedule",
-    "consequence": "Detect changes during care while consuming finite staff time",
-    "status": "authored_draft",
-    "requires_all": [
-      "case_records"
-    ],
-    "requires_any": [
-      [
-        "birth_attendants",
-        "civic_infirmaries"
-      ]
-    ],
-    "branching_note": "Repeated observation can develop in community care without a hospital institution.",
-    "recovery_profile": "clinical",
-    "recovery": "For Clinical Observation Rounds: Supervised clinical teaching with de-identified records and demonstrated service practice. Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "methods": [
-        "scholar_envoy",
-        "partnership",
-        "commissioned_research"
-      ],
-      "evidence": "Supervised clinical teaching with de-identified records and demonstrated service practice",
-      "local_demonstration": "Repeat and record a patient's condition rather than relying on one encounter",
-      "verification": "Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence",
-      "reconverges_on": "clinical_observation_rounds",
-      "grants_instant_mastery": false,
-      "operation_requires": "Care staff, records and a consistent observation schedule"
-    }
-  },
-  {
-    "field": "D14",
     "id": "clinical_temperature_records",
     "name": "Clinical Temperature Records",
     "foundations": "precision_thermometry,clinical_observation_rounds",
@@ -2096,37 +2060,6 @@
       "reconverges_on": "clinical_temperature_records",
       "grants_instant_mastery": false,
       "operation_requires": "Thermometers, hygienic handling and trained care workers"
-    }
-  },
-  {
-    "field": "D14",
-    "id": "clinical_pulse_assessment",
-    "name": "Clinical Pulse Assessment",
-    "foundations": "clinical_observation_rounds,standard_measures",
-    "mechanism": "Compare pulse features and their change over time in clinical context",
-    "operating_requirement": "Trained observers and consistent records",
-    "consequence": "Recognize some deterioration while retaining diagnostic uncertainty",
-    "status": "authored_draft",
-    "requires_all": [
-      "clinical_observation_rounds",
-      "standard_measures"
-    ],
-    "requires_any": [],
-    "recovery_profile": "clinical",
-    "recovery": "For Clinical Pulse Assessment: Supervised clinical teaching with de-identified records and demonstrated service practice. Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "methods": [
-        "scholar_envoy",
-        "partnership",
-        "commissioned_research"
-      ],
-      "evidence": "Supervised clinical teaching with de-identified records and demonstrated service practice",
-      "local_demonstration": "Compare pulse features and their change over time in clinical context",
-      "verification": "Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence",
-      "reconverges_on": "clinical_pulse_assessment",
-      "grants_instant_mastery": false,
-      "operation_requires": "Trained observers and consistent records"
     }
   },
   {
@@ -2261,37 +2194,6 @@
       "reconverges_on": "clinical_referral_networks",
       "grants_instant_mastery": false,
       "operation_requires": "Communication, receiving capacity and actual transport"
-    }
-  },
-  {
-    "field": "D14",
-    "id": "nursing_care_organization",
-    "name": "Nursing Care Organization",
-    "foundations": "clinical_observation_rounds,crew_handoffs",
-    "mechanism": "Organize continuous practical care, monitoring and handover around patient needs",
-    "operating_requirement": "Trained nurses, supplies and sustainable rosters",
-    "consequence": "Provide care continuity while consuming real labor capacity",
-    "status": "authored_draft",
-    "requires_all": [
-      "clinical_observation_rounds",
-      "crew_handoffs"
-    ],
-    "requires_any": [],
-    "recovery_profile": "clinical",
-    "recovery": "For Nursing Care Organization: Supervised clinical teaching with de-identified records and demonstrated service practice. Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence. All outside routes require an actually competent source, paid access or reciprocal work, delivery or travel, and local adaptation; the shared AND/OR foundations remain necessary. Route coefficients and runtime mappings are pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "methods": [
-        "scholar_envoy",
-        "partnership",
-        "commissioned_research"
-      ],
-      "evidence": "Supervised clinical teaching with de-identified records and demonstrated service practice",
-      "local_demonstration": "Organize continuous practical care, monitoring and handover around patient needs",
-      "verification": "Observe qualified care, train local practitioners, and demonstrate the stated practice within available facilities; purchased outcomes or medical products do not certify competence",
-      "reconverges_on": "nursing_care_organization",
-      "grants_instant_mastery": false,
-      "operation_requires": "Trained nurses, supplies and sustainable rosters"
     }
   },
   {

@@ -1,5 +1,13 @@
 ## September 12 — reviewed civilian response coverage
 
+## September 12 — 703 verified operating discoveries
+
+Integrated civilian clinical care `9c6ec61` as `45891f6`, and its three illustrations `16e5cd5` as canonical `851a0cad29aa55e6a7fd689d58b5775af3cf7bba`. Observation and pulse assessment consume dated clay records and local Knowledge duty; nursing consumes water and cloth, with paid continuous care contributing bounded recovery through the existing health owner. Research capacity excludes reserved carers after injuries and absent scholars. Selected-city reports, delayed supplies and optional legacy save state are verified.
+
+**114 combined worktree cases and 43 canonical cases pass**, with zero errors, failures, skips or orphans. All three new canonical textures load at 768 pixels with mipmaps. Graph: **703 discoveries /485 routes /341 recipes /18 facilities**, no dependency errors. All 703 canonical snapshot definitions match the ledger; 15 catalog-tool tests pass. Ledger: **703 integrated + 2,479 drafts = 3,182 identities**, leaving **1,818 to author and 4,297 to implement**. Art: **125 verified /703 live, 578 queued**.
+
+Supportive care uses generic burden and clay records, not disease-specific therapies; unused standing duty remains reserved until adjusted. The headless boot reached DIRECTION_SCREEN_READY without script errors but emitted an exit-time ObjectDB/resource cleanup warning. Full historical pacing remains unproven. No player launch or package rebuild. The next six textile-process identities are assigned independently from this verified runtime.
+
 ## September 12 — seven metal-process illustrations verified
 
 Integrated art and explicit import settings through `29188168066b538a195d8cf10dfa1fdfa9a3e65e`. All seven canonical textures load at 768 × 768 with mipmaps; 12 worktree atlas cases pass. Art now covers **122 of 700 live discoveries**, with **578 queued**. Runtime remains 700; the ledger remains 3,182 identities. Clinical runtime delivery `9c6ec61` is READY for combined integration review.
