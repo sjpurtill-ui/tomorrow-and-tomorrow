@@ -12624,6 +12624,326 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "c2710dad0c16aa78d56d4bde9ab308be43a2011065f66adf2cf414a988fe16a6"
+    },
+    {
+      "id": "vehicle_differential_gearing",
+      "name": "Vehicle Differential Gearing",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "6b835d885570c0051f5b2b0d8eb380cf0d10623f1ae9abe60e6899dcf847b44c"
+    },
+    {
+      "id": "constant_velocity_drive_joints",
+      "name": "Constant Velocity Drive Joints",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3a2dbab4f7162ffa51e71a97d5e1a12855cef273a7eff2df4d253c40da0ee3bd"
+    },
+    {
+      "id": "synchronized_gear_shifting",
+      "name": "Synchronized Gear Shifting",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "270de4a731acb0877af293fba4245a7af31bbbe45d2c2eed01683be8949166be"
+    },
+    {
+      "id": "automatic_transmission_hydraulics",
+      "name": "Automatic Transmission Hydraulics",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "4d8cfc9d00bfe833fc77f9cdd6e27d5a280ca24f4f825e954a731be808a1cd0a"
+    },
+    {
+      "id": "continuously_variable_transmission",
+      "name": "Continuously Variable Transmission",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "7c65155be9b70c73e59e631d4b97975ed96b067875f0651819a5da748488342f"
+    },
+    {
+      "id": "torque_converter_hydrodynamics",
+      "name": "Torque Converter Hydrodynamics",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "136282d21b6f1d8c9526de15befcf6887908c5cd7690c758151a0708f3c22ea1"
+    },
+    {
+      "id": "dual_clutch_shift_control",
+      "name": "Dual Clutch Shift Control",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "809eaffb78bc8fd500fb5d2478390460aa015fa0c8753aeae26592d073e0048f"
+    },
+    {
+      "id": "vehicle_regenerative_brake_blending",
+      "name": "Vehicle Regenerative Brake Blending",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2caadf68e263a91d7bc805f7f533ddd10d8b94793b3b5cc0ccf61667ce8feea0"
+    },
+    {
+      "id": "anti_lock_brake_modulation",
+      "name": "Anti-lock Brake Modulation",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3177c5a1bd56d9b6c4fc2f4a304f4d60f4e16221acf04d96392791b1a6027dbf"
+    },
+    {
+      "id": "traction_slip_control",
+      "name": "Traction Slip Control",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "04b106ce1893c54226227e67845fac0ace1c08e1095d5eebf28a3491c85d5d5e"
+    },
+    {
+      "id": "yaw_stability_control",
+      "name": "Yaw Stability Control",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3527d21992183c0f347eec8d52a34e8c8b6b0b16aefc00c736b398aeb6d31652"
+    },
+    {
+      "id": "electric_power_steering_assist",
+      "name": "Electric Power Steering Assist",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "2afb10c2777e72e888e86dee8fa9a3505f684c6f5ead6cf1d93ceefe3722f860"
+    },
+    {
+      "id": "vehicle_crash_energy_paths",
+      "name": "Vehicle Crash Energy Paths",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "173902775dcb10acf600f1e2a8dd969c8a893be4e114bffb05ba26a2331c9890"
+    },
+    {
+      "id": "occupant_restraint_load_limiting",
+      "name": "Occupant Restraint Load Limiting",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "e5ff1ec9210546e8bd9b6b914c5ea5222eecf5a4e67581c92a267a9124cb2743"
+    },
+    {
+      "id": "tire_pressure_monitoring",
+      "name": "Tire Pressure Monitoring",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c9e6f8aa4a6d39400ac69a5133faa0e41b1129f9c9fff07b53a083b8ebf85475"
+    },
+    {
+      "id": "tire_tread_water_displacement",
+      "name": "Tire Tread Water Displacement",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "8a1d1a63a1b0df72fd32a6da0b31bc8ef167fdb5bc426a5174f982f3a1a7735b"
+    },
+    {
+      "id": "radial_tire_carcass",
+      "name": "Radial Tire Carcass",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "958d19afefa68c6aaa979cba87b080be9050d0c5dde3943dc0104854adef912a"
+    },
+    {
+      "id": "wheel_balance_measurement",
+      "name": "Wheel Balance Measurement",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "521af3d9fbb7c8e9b30763664cd00f728919c593b14cd86cf441fdf7cf66cf77"
+    },
+    {
+      "id": "vehicle_three_way_catalysis",
+      "name": "Vehicle Three-way Catalysis",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "8ae7426d061142eabf311cbc3a2ebc1b996e638c828df4024ab454957c6464ee"
+    },
+    {
+      "id": "diesel_particulate_filtration",
+      "name": "Diesel Particulate Filtration",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "7c2bb203c8889342c9a4b869bdccb4c11ca91b8eeb5df425a02d3e799ac96f89"
+    },
+    {
+      "id": "selective_catalytic_reduction",
+      "name": "Selective Catalytic Reduction",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "df89ac3d29c4036315656bb8518b4c633a99ce99cbf035485456d252a05e4d1c"
+    },
+    {
+      "id": "vehicle_evaporative_fuel_capture",
+      "name": "Vehicle Evaporative Fuel Capture",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "3842dc5d973427dd06910c13cb882d88a94958a54dca7cd8f674f004a2f74d8f"
+    },
+    {
+      "id": "vehicle_onboard_diagnostics",
+      "name": "Vehicle Onboard Diagnostics",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "7f7f9e4b20bc4a649d0046f29c5d6d10100089dad2ab8337cd9d72863598ea3b"
+    },
+    {
+      "id": "vehicle_crash_test_instrumentation",
+      "name": "Vehicle Crash Test Instrumentation",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "df13b80e70608704a170c90d96512eb59c97821b05b3ec7da6bbb2b6a19ac546"
+    },
+    {
+      "id": "road_vehicle_aerodynamic_drag",
+      "name": "Road Vehicle Aerodynamic Drag",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "63352ad32d5c6fae1123d0008deda0b5e9edf4dc92bed0e1522e70a39bced985"
+    },
+    {
+      "id": "heavy_vehicle_load_securement",
+      "name": "Heavy Vehicle Load Securement",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "093bdc52e20ca95623901b14aee880e2495d28e1b779c25300a65ae5da55892c"
+    },
+    {
+      "id": "weigh_in_motion_axle_measurement",
+      "name": "Weigh-in-motion Axle Measurement",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "d563622f88493c37232c002ba3ce40b5c110c4a4423fc68edff878d1b8df5602"
+    },
+    {
+      "id": "road_pavement_fatigue_design",
+      "name": "Road Pavement Fatigue Design",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "95c0f20cd340f3eff2fdc31c1141191c9ee71d58cbd8149ef2fdc671aa228628"
+    },
+    {
+      "id": "road_skid_resistance_testing",
+      "name": "Road Skid Resistance Testing",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "157ab4e6f538f148194b0b038d8b7e164a39615bf679b727470e6dc6ec029b32"
+    },
+    {
+      "id": "bridge_bearing_expansion_design",
+      "name": "Bridge Bearing Expansion Design",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "c5dfe6cbbbee6f526a0ffb8a737e37f9733fd5a242648c79f3ae357ad8692da2"
+    },
+    {
+      "id": "bridge_scour_monitoring",
+      "name": "Bridge Scour Monitoring",
+      "horizon": "H05",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "68350766be108e9cd323e1547ad899e45160fb7a4ce86e7d972a4d3e733a8fef"
+    },
+    {
+      "id": "road_rutting_material_response",
+      "name": "Road Rutting Material Response",
+      "horizon": "H04",
+      "source_file": "road-vehicle-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "a612e460315d43dddb80c6fee221fc99b07efb168f234b2eec9c0557f34065c1"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

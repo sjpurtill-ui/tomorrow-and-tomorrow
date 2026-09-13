@@ -1,0 +1,1160 @@
+[
+  {
+    "id": "vehicle_differential_gearing",
+    "name": "Vehicle Differential Gearing",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_transmission_design",
+      "vehicle_steering_geometry"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_transmission_design,vehicle_steering_geometry",
+    "mechanism": "Split axle torque through differential gearing while allowing driven wheels to rotate at different speeds in a turn.",
+    "operating_requirement": "Pay matched gears, bearings, lubricated housing, assembly work and loaded turning trials; retain wear and the traction limit imposed by unequal wheel grip.",
+    "consequence": "Provide a qualified driven axle for a road vehicle; an open differential is not a locking device or automatic terrain access.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable vehicle differential gearing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vehicle_differential_gearing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Split axle torque through differential gearing while allowing driven wheels to rotate at different speeds in a turn.",
+      "operating_requirements": "Pay matched gears, bearings, lubricated housing, assembly work and loaded turning trials; retain wear and the traction limit imposed by unequal wheel grip.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local vehicle differential gearing trials.",
+        "partnership": "Share actual samples and operator time for vehicle differential gearing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded vehicle differential gearing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external vehicle differential gearing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable vehicle differential gearing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.eaton.com/us/en-us/products/differentials-traction-control/locking-differentials.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "constant_velocity_drive_joints",
+    "name": "Constant Velocity Drive Joints",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_transmission_design",
+      "vehicle_suspension_control"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_transmission_design,vehicle_suspension_control",
+    "mechanism": "Transmit rotation through articulated joints while preserving angular-velocity correspondence as suspension and steering change shaft angle.",
+    "operating_requirement": "Pay matched joint tracks and rolling elements, shafts, boots, grease and articulation/load trials; reject binding, damaged sealing and incompatible travel.",
+    "consequence": "Supply a qualified articulated half-shaft to a compatible road vehicle with maintenance demand; no unlimited joint angle or torque rating follows.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable constant velocity drive joints instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "constant_velocity_drive_joints",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Transmit rotation through articulated joints while preserving angular-velocity correspondence as suspension and steering change shaft angle.",
+      "operating_requirements": "Pay matched joint tracks and rolling elements, shafts, boots, grease and articulation/load trials; reject binding, damaged sealing and incompatible travel.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local constant velocity drive joints trials.",
+        "partnership": "Share actual samples and operator time for constant velocity drive joints; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded constant velocity drive joints process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external constant velocity drive joints processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable constant velocity drive joints machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gknautomotive.com/en/aftermarket/portfolio/constant-velocity-joints/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "synchronized_gear_shifting",
+    "name": "Synchronized Gear Shifting",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_transmission_design",
+      "friction_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_transmission_design,friction_measurement",
+    "mechanism": "Use frictional synchronizer engagement to bring a selected gear and shaft toward matching speed before positive engagement.",
+    "operating_requirement": "Pay synchronizer rings, hubs and gears, lubricant, assembly and shift-cycle work; retain wear, heat and rejected mismatched engagement.",
+    "consequence": "Provide a tested manual shift assembly for an actual gearbox; synchronizing does not create an automatic shift controller.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable synchronized gear shifting instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "synchronized_gear_shifting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use frictional synchronizer engagement to bring a selected gear and shaft toward matching speed before positive engagement.",
+      "operating_requirements": "Pay synchronizer rings, hubs and gears, lubricant, assembly and shift-cycle work; retain wear, heat and rejected mismatched engagement.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local synchronized gear shifting trials.",
+        "partnership": "Share actual samples and operator time for synchronized gear shifting; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded synchronized gear shifting process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external synchronized gear shifting processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable synchronized gear shifting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.zf.com/mobile/en/company/strategy/heritage_zf/stories/all_synchronous_transmission.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "automatic_transmission_hydraulics",
+    "name": "Automatic Transmission Hydraulics",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_transmission_design",
+      "hydraulic_power_machinery"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_transmission_design,hydraulic_power_machinery",
+    "mechanism": "Route regulated hydraulic pressure through valves to apply the selected transmission clutches and brakes.",
+    "operating_requirement": "Pay pump, fluid passages, valve body, seals, fluid and pressure/shift trials; finite pumping and cooling must cover leakage and clutch engagement losses.",
+    "consequence": "Supply a qualified hydraulic actuation unit to a compatible automatic gearbox; low pressure, contamination or bad timing can stop correct engagement.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable automatic transmission hydraulics instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "automatic_transmission_hydraulics",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Route regulated hydraulic pressure through valves to apply the selected transmission clutches and brakes.",
+      "operating_requirements": "Pay pump, fluid passages, valve body, seals, fluid and pressure/shift trials; finite pumping and cooling must cover leakage and clutch engagement losses.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local automatic transmission hydraulics trials.",
+        "partnership": "Share actual samples and operator time for automatic transmission hydraulics; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded automatic transmission hydraulics process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external automatic transmission hydraulics processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable automatic transmission hydraulics machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://aftermarket.zf.com/en/aftermarket-portal/knowledge-hub/zf-parts-sets-for-automatic-transmissions/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "continuously_variable_transmission",
+    "name": "Continuously Variable Transmission",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_transmission_design",
+      "friction_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_transmission_design,friction_measurement",
+    "mechanism": "Vary effective pulley radii while maintaining clamping force on a compatible belt or chain to change transmission ratio continuously.",
+    "operating_requirement": "Pay matched variable pulleys and transmission element, actuators, lubricant and load trials; account for slip, clamping work, heat and ratio limits.",
+    "consequence": "Provide a tested variable-ratio drivetrain assembly with a recorded operating envelope; it neither creates infinite ratio range nor eliminates losses.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable continuously variable transmission instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "continuously_variable_transmission",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Vary effective pulley radii while maintaining clamping force on a compatible belt or chain to change transmission ratio continuously.",
+      "operating_requirements": "Pay matched variable pulleys and transmission element, actuators, lubricant and load trials; account for slip, clamping work, heat and ratio limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local continuously variable transmission trials.",
+        "partnership": "Share actual samples and operator time for continuously variable transmission; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded continuously variable transmission process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external continuously variable transmission processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable continuously variable transmission machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.jatco.co.jp/wp-jatco/wp-content/themes/JATCO/assets/document/review/english/2020/JTR20_06_EN.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "torque_converter_hydrodynamics",
+    "name": "Torque Converter Hydrodynamics",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_transmission_design",
+      "flow_continuity"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_transmission_design,flow_continuity",
+    "mechanism": "Exchange momentum through pump, turbine and stator fluid flow to transmit drive with speed-dependent slip.",
+    "operating_requirement": "Pay shaped rotating elements, sealed housing, fluid, cooling and load tests; separate fluid-coupling losses from any paid lockup-clutch behavior.",
+    "consequence": "Supply a qualified launch coupling to a compatible automatic gearbox; stall operation consumes power and creates heat rather than free torque energy.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable torque converter hydrodynamics instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "torque_converter_hydrodynamics",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Exchange momentum through pump, turbine and stator fluid flow to transmit drive with speed-dependent slip.",
+      "operating_requirements": "Pay shaped rotating elements, sealed housing, fluid, cooling and load tests; separate fluid-coupling losses from any paid lockup-clutch behavior.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local torque converter hydrodynamics trials.",
+        "partnership": "Share actual samples and operator time for torque converter hydrodynamics; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded torque converter hydrodynamics process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external torque converter hydrodynamics processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable torque converter hydrodynamics machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.zf.com/products/en/cars/products_65854.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "dual_clutch_shift_control",
+    "name": "Dual Clutch Shift Control",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_transmission_design",
+      "electronic_machine_control"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_transmission_design,electronic_machine_control",
+    "mechanism": "Preselect a ratio on one of two input paths and coordinate clutch transfer between the active and prepared gear paths.",
+    "operating_requirement": "Pay two clutch paths, actuators, position/speed observations and calibrated shift trials; retain wear, heat, timing errors and torque interruption limits.",
+    "consequence": "Deliver a validated shift-control configuration for a specified gearbox; untested gear pairs and failed observations cannot grant uninterrupted drive.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable dual clutch shift control instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dual_clutch_shift_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Preselect a ratio on one of two input paths and coordinate clutch transfer between the active and prepared gear paths.",
+      "operating_requirements": "Pay two clutch paths, actuators, position/speed observations and calibrated shift trials; retain wear, heat, timing errors and torque interruption limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local dual clutch shift control trials.",
+        "partnership": "Share actual samples and operator time for dual clutch shift control; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded dual clutch shift control process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external dual clutch shift control processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable dual clutch shift control machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.zf.com/public/org/pkw_a_aktiveanfahrsysteme_2017_72036.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "vehicle_regenerative_brake_blending",
+    "name": "Vehicle Regenerative Brake Blending",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "battery_road_traction",
+      "hydraulic_vehicle_brakes",
+      "electronic_machine_control"
+    ],
+    "requires_any": [],
+    "foundations": "battery_road_traction,hydraulic_vehicle_brakes,electronic_machine_control",
+    "mechanism": "Allocate requested deceleration between motor regeneration and friction braking according to available motor torque and battery acceptance.",
+    "operating_requirement": "Pay inverter/control hardware, observations and braking trials; debit actual recovered energy limits, conversion losses and friction wear when charge acceptance or traction is limited.",
+    "consequence": "Provide tested braking behavior to a compatible electric vehicle; a full battery or unavailable regeneration leaves friction-brake capacity necessary.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable vehicle regenerative brake blending instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vehicle_regenerative_brake_blending",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Allocate requested deceleration between motor regeneration and friction braking according to available motor torque and battery acceptance.",
+      "operating_requirements": "Pay inverter/control hardware, observations and braking trials; debit actual recovered energy limits, conversion losses and friction wear when charge acceptance or traction is limited.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local vehicle regenerative brake blending trials.",
+        "partnership": "Share actual samples and operator time for vehicle regenerative brake blending; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded vehicle regenerative brake blending process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external vehicle regenerative brake blending processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable vehicle regenerative brake blending machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.bosch-mobility.com/media/global/mobility-topics/experience-days-highlights/onepager/boschexperiencedays2024_motion_ebraking_to_zero.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "anti_lock_brake_modulation",
+    "name": "Anti-lock Brake Modulation",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydraulic_vehicle_brakes",
+      "electronic_machine_control"
+    ],
+    "requires_any": [],
+    "foundations": "hydraulic_vehicle_brakes,electronic_machine_control",
+    "mechanism": "Use wheel-speed observations and hydraulic modulation to reduce sustained wheel lock during braking.",
+    "operating_requirement": "Pay wheel sensors, hydraulic modulator, controller, electricity and surface-specific stopping trials; retain observation faults and available tire-road grip limits.",
+    "consequence": "Install a qualified anti-lock controller on a compatible vehicle; it does not guarantee shorter stopping distance on every surface or prevent every collision.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable anti-lock brake modulation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "anti_lock_brake_modulation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use wheel-speed observations and hydraulic modulation to reduce sustained wheel lock during braking.",
+      "operating_requirements": "Pay wheel sensors, hydraulic modulator, controller, electricity and surface-specific stopping trials; retain observation faults and available tire-road grip limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local anti-lock brake modulation trials.",
+        "partnership": "Share actual samples and operator time for anti-lock brake modulation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded anti-lock brake modulation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external anti-lock brake modulation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable anti-lock brake modulation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.bosch-mobility.com/en/solutions/driving-safety/electronic-stability-program/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "traction_slip_control",
+    "name": "Traction Slip Control",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "anti_lock_brake_modulation",
+      "road_motor_vehicles"
+    ],
+    "requires_any": [],
+    "foundations": "anti_lock_brake_modulation,road_motor_vehicles",
+    "mechanism": "Detect excessive driven-wheel slip and limit drive torque or apply selected brake intervention within the vehicle's available actuators.",
+    "operating_requirement": "Pay calibrated wheel observations, drive/brake interfaces and acceleration trials; retain brake heat, power limits and degraded-sensor behavior.",
+    "consequence": "Provide tested launch and acceleration slip management for a vehicle; control cannot create grip absent from its tires and road.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable traction slip control instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "traction_slip_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Detect excessive driven-wheel slip and limit drive torque or apply selected brake intervention within the vehicle's available actuators.",
+      "operating_requirements": "Pay calibrated wheel observations, drive/brake interfaces and acceleration trials; retain brake heat, power limits and degraded-sensor behavior.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local traction slip control trials.",
+        "partnership": "Share actual samples and operator time for traction slip control; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded traction slip control process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external traction slip control processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable traction slip control machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.bosch-mobility.com/en/solutions/driving-safety/electronic-stability-program/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "yaw_stability_control",
+    "name": "Yaw Stability Control",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "anti_lock_brake_modulation",
+      "micromachined_inertial_sensors",
+      "vehicle_steering_geometry"
+    ],
+    "requires_any": [],
+    "foundations": "anti_lock_brake_modulation,micromachined_inertial_sensors,vehicle_steering_geometry",
+    "mechanism": "Compare observed yaw response with a steering-based reference and use individual braking and drive intervention to address excessive deviation.",
+    "operating_requirement": "Pay steering/yaw observations, calibrated vehicle model, controller and maneuver trials; retain load, tire, saturation and sensor-fault limits.",
+    "consequence": "Provide a validated stability-control configuration for the tested vehicle; it does not make physically impossible maneuvers safe or control every rollover.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable yaw stability control instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "yaw_stability_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compare observed yaw response with a steering-based reference and use individual braking and drive intervention to address excessive deviation.",
+      "operating_requirements": "Pay steering/yaw observations, calibrated vehicle model, controller and maneuver trials; retain load, tire, saturation and sensor-fault limits.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local yaw stability control trials.",
+        "partnership": "Share actual samples and operator time for yaw stability control; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded yaw stability control process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external yaw stability control processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable yaw stability control machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.bosch-mobility.com/en/solutions/driving-safety/electronic-stability-program/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "electric_power_steering_assist",
+    "name": "Electric Power Steering Assist",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_steering_geometry",
+      "electronic_machine_control"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_steering_geometry,electronic_machine_control",
+    "mechanism": "Use an electric actuator to assist steering according to measured driver torque and vehicle operating context.",
+    "operating_requirement": "Pay motor, reduction mechanism, torque observation, power electronics and effort/response trials; account for electrical demand, overheating and loss-of-assist behavior.",
+    "consequence": "Supply qualified steering assistance to a compatible rack or column; assistance alone supplies neither autonomous navigation nor a new steering geometry.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable electric power steering assist instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electric_power_steering_assist",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use an electric actuator to assist steering according to measured driver torque and vehicle operating context.",
+      "operating_requirements": "Pay motor, reduction mechanism, torque observation, power electronics and effort/response trials; account for electrical demand, overheating and loss-of-assist behavior.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local electric power steering assist trials.",
+        "partnership": "Share actual samples and operator time for electric power steering assist; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded electric power steering assist process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external electric power steering assist processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable electric power steering assist machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.bosch-mobility.com/en/solutions/steering/electric-power-steering-systems/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "vehicle_crash_energy_paths",
+    "name": "Vehicle Crash Energy Paths",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "structural_load_testing",
+      "stress_strain_relations"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,structural_load_testing,stress_strain_relations",
+    "mechanism": "Arrange load paths and deformable vehicle structures to manage impact energy while preserving a specified occupant survival space.",
+    "operating_requirement": "Pay structural materials, joints, prototypes and destructive impact work; record deformation and intrusion under declared impact and restraint conditions.",
+    "consequence": "Provide bounded crash evidence for a tested vehicle body design; a successful specimen does not certify all speeds, impact directions or occupant conditions.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable vehicle crash energy paths instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vehicle_crash_energy_paths",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Arrange load paths and deformable vehicle structures to manage impact energy while preserving a specified occupant survival space.",
+      "operating_requirements": "Pay structural materials, joints, prototypes and destructive impact work; record deformation and intrusion under declared impact and restraint conditions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local vehicle crash energy paths trials.",
+        "partnership": "Share actual samples and operator time for vehicle crash energy paths; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded vehicle crash energy paths process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external vehicle crash energy paths processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable vehicle crash energy paths machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nhtsa.gov/research-data/crashworthiness"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "occupant_restraint_load_limiting",
+    "name": "Occupant Restraint Load Limiting",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_crash_energy_paths",
+      "cyclic_fatigue"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_crash_energy_paths,cyclic_fatigue",
+    "mechanism": "Control restraint force through designed load-limiting behavior coordinated with belt geometry and occupant travel.",
+    "operating_requirement": "Pay qualified webbing, anchors, retractor/load-limiter hardware and destructive occupant-surrogate trials; retain fit, slack, aging and replacement requirements after activation.",
+    "consequence": "Supply a tested belt-restraint assembly for a specified seat/body configuration; no universal injury prevention or reusable activated hardware is implied.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable occupant restraint load limiting instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "occupant_restraint_load_limiting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Control restraint force through designed load-limiting behavior coordinated with belt geometry and occupant travel.",
+      "operating_requirements": "Pay qualified webbing, anchors, retractor/load-limiter hardware and destructive occupant-surrogate trials; retain fit, slack, aging and replacement requirements after activation.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local occupant restraint load limiting trials.",
+        "partnership": "Share actual samples and operator time for occupant restraint load limiting; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded occupant restraint load limiting process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external occupant restraint load limiting processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable occupant restraint load limiting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.autoliv.com/seatbelt"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "tire_pressure_monitoring",
+    "name": "Tire Pressure Monitoring",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "pneumatic_road_tires",
+      "electronic_machine_control"
+    ],
+    "requires_any": [],
+    "foundations": "pneumatic_road_tires,electronic_machine_control",
+    "mechanism": "Observe tire inflation state through a specified sensing method and report persistent pressure departure with bounded measurement uncertainty.",
+    "operating_requirement": "Pay installed sensors or qualified inference hardware, calibration, energy and leak/temperature trials; preserve tire identity, observation age and failed-sensor status.",
+    "consequence": "Provide an actionable inflation warning to the vehicle maintenance owner; warnings do not inflate tires or certify tread, load rating and structural condition.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable tire pressure monitoring instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tire_pressure_monitoring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Observe tire inflation state through a specified sensing method and report persistent pressure departure with bounded measurement uncertainty.",
+      "operating_requirements": "Pay installed sensors or qualified inference hardware, calibration, energy and leak/temperature trials; preserve tire identity, observation age and failed-sensor status.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local tire pressure monitoring trials.",
+        "partnership": "Share actual samples and operator time for tire pressure monitoring; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded tire pressure monitoring process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external tire pressure monitoring processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable tire pressure monitoring machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nhtsa.gov/vehicle-safety/tires"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "tire_tread_water_displacement",
+    "name": "Tire Tread Water Displacement",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "pneumatic_road_tires",
+      "rubber_vulcanization"
+    ],
+    "requires_any": [],
+    "foundations": "pneumatic_road_tires,rubber_vulcanization",
+    "mechanism": "Use tread channels and contact geometry to evacuate water from the rolling tire-road interface.",
+    "operating_requirement": "Pay compound, patterned molds and wet-surface trials across declared depth/load/speed conditions; record worn-tread limits and water-clearing losses.",
+    "consequence": "Qualify a particular wet-road tire design for fleet procurement; tread does not eliminate aquaplaning or guarantee stopping behavior on every surface.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable tire tread water displacement instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tire_tread_water_displacement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use tread channels and contact geometry to evacuate water from the rolling tire-road interface.",
+      "operating_requirements": "Pay compound, patterned molds and wet-surface trials across declared depth/load/speed conditions; record worn-tread limits and water-clearing losses.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local tire tread water displacement trials.",
+        "partnership": "Share actual samples and operator time for tire tread water displacement; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded tire tread water displacement process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external tire tread water displacement processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable tire tread water displacement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.continental-tires.com/ca/en/tire-knowledge/aquaplaning/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "radial_tire_carcass",
+    "name": "Radial Tire Carcass",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "pneumatic_road_tires",
+      "rubber_vulcanization"
+    ],
+    "requires_any": [],
+    "foundations": "pneumatic_road_tires,rubber_vulcanization",
+    "mechanism": "Arrange carcass cords radially with a supporting belt structure so sidewall flex and tread support follow different load paths.",
+    "operating_requirement": "Pay compatible cords, rubber, belt materials, building tooling and curing/loaded endurance tests; record adhesion defects, heat and size/load compatibility.",
+    "consequence": "Supply a qualified radial tire casing for a matching wheel and vehicle load class; radial layout alone grants no universal grip or durability bonus.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable radial tire carcass instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "radial_tire_carcass",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Arrange carcass cords radially with a supporting belt structure so sidewall flex and tread support follow different load paths.",
+      "operating_requirements": "Pay compatible cords, rubber, belt materials, building tooling and curing/loaded endurance tests; record adhesion defects, heat and size/load compatibility.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local radial tire carcass trials.",
+        "partnership": "Share actual samples and operator time for radial tire carcass; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded radial tire carcass process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external radial tire carcass processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable radial tire carcass machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.continental-tires.com/content/dam/conti-tires-cms/continental/market-content/pl/download-/cst/Continental_Technical_Data_Book_OTR_Tires_24.01.2020-12.01.28.pdf.coredownload.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "wheel_balance_measurement",
+    "name": "Wheel Balance Measurement",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "pneumatic_road_tires",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "pneumatic_road_tires,dimensional_metrology",
+    "mechanism": "Measure rotating wheel-assembly mass imbalance on a correctly centered fixture and determine compensating mass placement.",
+    "operating_requirement": "Pay balancing equipment, calibration, weights and operator work; distinguish imbalance from tire force variation, bent rims and mounting error.",
+    "consequence": "Issue a measured correction for the actual wheel assembly and verify residual imbalance; balancing does not repair carcass damage or substitute for alignment.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable wheel balance measurement instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "wheel_balance_measurement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure rotating wheel-assembly mass imbalance on a correctly centered fixture and determine compensating mass placement.",
+      "operating_requirements": "Pay balancing equipment, calibration, weights and operator work; distinguish imbalance from tire force variation, bent rims and mounting error.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local wheel balance measurement trials.",
+        "partnership": "Share actual samples and operator time for wheel balance measurement; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded wheel balance measurement process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external wheel balance measurement processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable wheel balance measurement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.hunter.com/globalassets/hunter/products/wheel-balancers/road-force-elite/documents/bal-rfe-ops-7118-t.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "vehicle_three_way_catalysis",
+    "name": "Vehicle Three-way Catalysis",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "industrial_catalyst_design",
+      "electronic_machine_control"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,industrial_catalyst_design,electronic_machine_control",
+    "mechanism": "Use a suitable catalyst with controlled exhaust composition to convert carbon monoxide, hydrocarbons and nitrogen oxides in a compatible gasoline engine.",
+    "operating_requirement": "Pay qualified catalyst/substrate, fuel-mixture feedback, installation and emissions trials; retain warmup, poisoning, aging and restricted operating-window losses.",
+    "consequence": "Provide measured exhaust-treatment performance for a tested engine configuration; it does not remove carbon dioxide or automatically suit lean diesel exhaust.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable vehicle three-way catalysis instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vehicle_three_way_catalysis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use a suitable catalyst with controlled exhaust composition to convert carbon monoxide, hydrocarbons and nitrogen oxides in a compatible gasoline engine.",
+      "operating_requirements": "Pay qualified catalyst/substrate, fuel-mixture feedback, installation and emissions trials; retain warmup, poisoning, aging and restricted operating-window losses.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local vehicle three-way catalysis trials.",
+        "partnership": "Share actual samples and operator time for vehicle three-way catalysis; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded vehicle three-way catalysis process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external vehicle three-way catalysis processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable vehicle three-way catalysis machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://hero.epa.gov/reference/5935129/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "diesel_particulate_filtration",
+    "name": "Diesel Particulate Filtration",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "structural_technical_ceramics"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,structural_technical_ceramics",
+    "mechanism": "Capture particulate matter in a suitable exhaust filter and manage accumulated soot through controlled regeneration and service.",
+    "operating_requirement": "Pay filter housing/media, back-pressure and temperature observations, regeneration energy and maintenance work; retain ash accumulation and rejected operating conditions.",
+    "consequence": "Reduce measured particulate output for a qualified diesel installation with finite filter life; filtration alone does not remove gaseous nitrogen oxides.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable diesel particulate filtration instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "diesel_particulate_filtration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Capture particulate matter in a suitable exhaust filter and manage accumulated soot through controlled regeneration and service.",
+      "operating_requirements": "Pay filter housing/media, back-pressure and temperature observations, regeneration energy and maintenance work; retain ash accumulation and rejected operating conditions.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local diesel particulate filtration trials.",
+        "partnership": "Share actual samples and operator time for diesel particulate filtration; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded diesel particulate filtration process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external diesel particulate filtration processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable diesel particulate filtration machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P10006JV.TXT"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "selective_catalytic_reduction",
+    "name": "Selective Catalytic Reduction",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "industrial_catalyst_design",
+      "urea_synthesis"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,industrial_catalyst_design,urea_synthesis",
+    "mechanism": "Meter a qualified urea-derived reagent into compatible exhaust treatment so the selected catalyst reduces nitrogen oxides.",
+    "operating_requirement": "Pay reagent preparation and delivery, catalyst, dosing hardware, observations and emissions trials; retain reagent depletion, deposits, temperature-window limits and unwanted ammonia release.",
+    "consequence": "Supply a tested nitrogen-oxide treatment service for a specified diesel system; raw urea is not automatically qualified exhaust fluid and treatment does not remove all pollutants.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable selective catalytic reduction instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "selective_catalytic_reduction",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Meter a qualified urea-derived reagent into compatible exhaust treatment so the selected catalyst reduces nitrogen oxides.",
+      "operating_requirements": "Pay reagent preparation and delivery, catalyst, dosing hardware, observations and emissions trials; retain reagent depletion, deposits, temperature-window limits and unwanted ammonia release.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local selective catalytic reduction trials.",
+        "partnership": "Share actual samples and operator time for selective catalytic reduction; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded selective catalytic reduction process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external selective catalytic reduction processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable selective catalytic reduction machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.epa.gov/sites/default/files/2020-07/documents/nonroad_ria_final-nonroad-diesel-engines_2004-05.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "vehicle_evaporative_fuel_capture",
+    "name": "Vehicle Evaporative Fuel Capture",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "granular_carbon_adsorption"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,granular_carbon_adsorption",
+    "mechanism": "Store fuel vapor in a compatible carbon adsorption canister and later meter purge into an operating engine.",
+    "operating_requirement": "Pay vapor-tight plumbing, qualified carbon, valves, controls and leak/capacity tests; retain saturation, purge requirements, degraded seals and replacement demand.",
+    "consequence": "Provide measured evaporative-emission control for a compatible fuel system; capture has finite capacity and does not remove tailpipe combustion products.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable vehicle evaporative fuel capture instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vehicle_evaporative_fuel_capture",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Store fuel vapor in a compatible carbon adsorption canister and later meter purge into an operating engine.",
+      "operating_requirements": "Pay vapor-tight plumbing, qualified carbon, valves, controls and leak/capacity tests; retain saturation, purge requirements, degraded seals and replacement demand.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local vehicle evaporative fuel capture trials.",
+        "partnership": "Share actual samples and operator time for vehicle evaporative fuel capture; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded vehicle evaporative fuel capture process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external vehicle evaporative fuel capture processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable vehicle evaporative fuel capture machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.epa.gov/sites/production/files/2020-11/documents/420r20012.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "vehicle_onboard_diagnostics",
+    "name": "Vehicle Onboard Diagnostics",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "electronic_machine_control"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,electronic_machine_control",
+    "mechanism": "Evaluate installed sensor and actuator observations against defined diagnostic checks, retaining readiness and detected fault evidence.",
+    "operating_requirement": "Pay compatible observations, controller/storage, diagnostic definitions and fault-injection trials; distinguish incomplete monitors, intermittent faults and confirmed tests.",
+    "consequence": "Deliver scoped diagnostic records to fleet maintenance for paid inspection and repair; a code is not a guaranteed root cause and clearing it does not repair the vehicle.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable vehicle onboard diagnostics instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vehicle_onboard_diagnostics",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Evaluate installed sensor and actuator observations against defined diagnostic checks, retaining readiness and detected fault evidence.",
+      "operating_requirements": "Pay compatible observations, controller/storage, diagnostic definitions and fault-injection trials; distinguish incomplete monitors, intermittent faults and confirmed tests.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local vehicle onboard diagnostics trials.",
+        "partnership": "Share actual samples and operator time for vehicle onboard diagnostics; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded vehicle onboard diagnostics process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external vehicle onboard diagnostics processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable vehicle onboard diagnostics machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.bosch-mobility.com/en/solutions/sensors/nox-sensor/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "vehicle_crash_test_instrumentation",
+    "name": "Vehicle Crash Test Instrumentation",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "vehicle_crash_energy_paths",
+      "piezoresistive_strain_sensing",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "vehicle_crash_energy_paths,piezoresistive_strain_sensing,experimental_controls",
+    "mechanism": "Record calibrated acceleration, force or deformation time histories during a controlled impact with declared specimen and occupant-surrogate conditions.",
+    "operating_requirement": "Pay sensors, synchronized acquisition, fixtures, surrogates and destructive specimens; retain calibration, clipping, timing and configuration provenance.",
+    "consequence": "Provide attributable impact evidence for vehicle-body and restraint comparison; missing channels or a single test cannot establish universal occupant protection.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable vehicle crash test instrumentation instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "vehicle_crash_test_instrumentation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Record calibrated acceleration, force or deformation time histories during a controlled impact with declared specimen and occupant-surrogate conditions.",
+      "operating_requirements": "Pay sensors, synchronized acquisition, fixtures, surrogates and destructive specimens; retain calibration, clipping, timing and configuration provenance.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local vehicle crash test instrumentation trials.",
+        "partnership": "Share actual samples and operator time for vehicle crash test instrumentation; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded vehicle crash test instrumentation process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external vehicle crash test instrumentation processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable vehicle crash test instrumentation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.nhtsa.gov/research-data/event-data-recorder"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "road_vehicle_aerodynamic_drag",
+    "name": "Road Vehicle Aerodynamic Drag",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "aerodynamics"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,aerodynamics",
+    "mechanism": "Relate measured vehicle drag to body configuration, relative airflow, reference area and test conditions.",
+    "operating_requirement": "Pay actual models or vehicles, instrumented airflow/coastdown trials and analysis; separate rolling losses and retain crosswind, speed and configuration uncertainty.",
+    "consequence": "Supply a bounded aerodynamic load estimate to vehicle energy-demand and body-design decisions; a coefficient without its reference area and conditions is insufficient.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable road vehicle aerodynamic drag instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "road_vehicle_aerodynamic_drag",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Relate measured vehicle drag to body configuration, relative airflow, reference area and test conditions.",
+      "operating_requirements": "Pay actual models or vehicles, instrumented airflow/coastdown trials and analysis; separate rolling losses and retain crosswind, speed and configuration uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local road vehicle aerodynamic drag trials.",
+        "partnership": "Share actual samples and operator time for road vehicle aerodynamic drag; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded road vehicle aerodynamic drag process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external road vehicle aerodynamic drag processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable road vehicle aerodynamic drag machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/drag-equation/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "heavy_vehicle_load_securement",
+    "name": "Heavy Vehicle Load Securement",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_freight_fleet_maintenance",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "road_freight_fleet_maintenance,structural_load_testing",
+    "mechanism": "Restrain a declared cargo using compatible anchors, blocking and tiedowns against expected transport inertial loads.",
+    "operating_requirement": "Pay rated restraints, anchors, loading work and load-specific checks; retain damaged-equipment rejection, cargo movement and inspection needs.",
+    "consequence": "Release an actual inspected freight load for its qualified route/vehicle conditions; paperwork alone does not secure cargo or improve axle capacity.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable heavy vehicle load securement instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "heavy_vehicle_load_securement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Restrain a declared cargo using compatible anchors, blocking and tiedowns against expected transport inertial loads.",
+      "operating_requirements": "Pay rated restraints, anchors, loading work and load-specific checks; retain damaged-equipment rejection, cargo movement and inspection needs.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local heavy vehicle load securement trials.",
+        "partnership": "Share actual samples and operator time for heavy vehicle load securement; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded heavy vehicle load securement process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external heavy vehicle load securement processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable heavy vehicle load securement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fmcsa.dot.gov/regulations/cargo-securement/cargo-securement-rules"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "weigh_in_motion_axle_measurement",
+    "name": "Weigh-in-motion Axle Measurement",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_motor_vehicles",
+      "dimensional_metrology"
+    ],
+    "requires_any": [],
+    "foundations": "road_motor_vehicles,dimensional_metrology",
+    "mechanism": "Infer axle loads from calibrated pavement sensors as a vehicle passes through a defined measurement site.",
+    "operating_requirement": "Pay installed sensors, electronics, reference weighing, site maintenance and repeated calibration; retain speed, temperature, pavement and dynamic-response uncertainty.",
+    "consequence": "Provide dated axle-load observations for pavement analysis and targeted stationary weighing; dynamic estimates are not automatically enforcement-grade static weights.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable weigh-in-motion axle measurement instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "weigh_in_motion_axle_measurement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Infer axle loads from calibrated pavement sensors as a vehicle passes through a defined measurement site.",
+      "operating_requirements": "Pay installed sensors, electronics, reference weighing, site maintenance and repeated calibration; retain speed, temperature, pavement and dynamic-response uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local weigh-in-motion axle measurement trials.",
+        "partnership": "Share actual samples and operator time for weigh-in-motion axle measurement; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded weigh-in-motion axle measurement process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external weigh-in-motion axle measurement processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable weigh-in-motion axle measurement machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/policyinformation/knowledgecenter/wim_guide/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "road_pavement_fatigue_design",
+    "name": "Road Pavement Fatigue Design",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "aggregate_road_foundations",
+      "cyclic_fatigue"
+    ],
+    "requires_any": [],
+    "foundations": "aggregate_road_foundations,cyclic_fatigue",
+    "mechanism": "Relate repeated wheel-load stress or strain in a layered pavement to a calibrated fatigue-damage model.",
+    "operating_requirement": "Pay material characterization, traffic/load observations, layer surveys and computation; retain calibration domain, drainage support and uncertainty in accumulated cycles.",
+    "consequence": "Provide a bounded layer-design or repair comparison for the surveyed road; predicted fatigue life does not prevent rutting, frost damage or unobserved overloads.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable road pavement fatigue design instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "road_pavement_fatigue_design",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Relate repeated wheel-load stress or strain in a layered pavement to a calibrated fatigue-damage model.",
+      "operating_requirements": "Pay material characterization, traffic/load observations, layer surveys and computation; retain calibration domain, drainage support and uncertainty in accumulated cycles.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local road pavement fatigue design trials.",
+        "partnership": "Share actual samples and operator time for road pavement fatigue design; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded road pavement fatigue design process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external road pavement fatigue design processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable road pavement fatigue design machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/publications/research/infrastructure/pavements/11045/004.cfm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "road_skid_resistance_testing",
+    "name": "Road Skid Resistance Testing",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_condition_surveys",
+      "friction_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "road_condition_surveys,friction_measurement",
+    "mechanism": "Measure pavement friction and texture using a declared device and controlled surface/test conditions.",
+    "operating_requirement": "Pay calibrated equipment, traffic access, water where specified, operator work and repeat measurements; preserve location, temperature, speed, contamination and measurement method.",
+    "consequence": "Supply dated friction evidence for targeted pavement maintenance; values are not universal vehicle stopping distances and missing measurements remain unknown.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable road skid resistance testing instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "road_skid_resistance_testing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure pavement friction and texture using a declared device and controlled surface/test conditions.",
+      "operating_requirements": "Pay calibrated equipment, traffic access, water where specified, operator work and repeat measurements; preserve location, temperature, speed, contamination and measurement method.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local road skid resistance testing trials.",
+        "partnership": "Share actual samples and operator time for road skid resistance testing; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded road skid resistance testing process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external road skid resistance testing processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable road skid resistance testing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/pavement/t504038.cfm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "bridge_bearing_expansion_design",
+    "name": "Bridge Bearing Expansion Design",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "structural_load_testing",
+      "stress_strain_relations"
+    ],
+    "requires_any": [],
+    "foundations": "structural_load_testing,stress_strain_relations",
+    "mechanism": "Transfer bridge loads through bearings that permit the specified rotations and thermal movement while retaining required restraints.",
+    "operating_requirement": "Pay load/movement analysis, qualified bearing materials, fabrication, installation and inspection; retain seizure, debris, travel limits and load-path consequences.",
+    "consequence": "Provide a qualified bearing arrangement for a specific bridge support system; bearings do not increase unsupported span strength or eliminate movement-joint maintenance.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable bridge bearing expansion design instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bridge_bearing_expansion_design",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Transfer bridge loads through bearings that permit the specified rotations and thermal movement while retaining required restraints.",
+      "operating_requirements": "Pay load/movement analysis, qualified bearing materials, fabrication, installation and inspection; retain seizure, debris, travel limits and load-path consequences.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local bridge bearing expansion design trials.",
+        "partnership": "Share actual samples and operator time for bridge bearing expansion design; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded bridge bearing expansion design process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external bridge bearing expansion design processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable bridge bearing expansion design machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/bridge/pubs/nhi15047.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "bridge_scour_monitoring",
+    "name": "Bridge Scour Monitoring",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "road_condition_surveys",
+      "hydraulic_jump_dissipation"
+    ],
+    "requires_any": [],
+    "foundations": "road_condition_surveys,hydraulic_jump_dissipation",
+    "mechanism": "Track measured bed-level change and flow context around bridge foundations to detect potential loss of supporting material.",
+    "operating_requirement": "Pay site surveys or installed observations, access, calibration and repeated interpretation; retain unobserved flood intervals, foundation uncertainty and instrument failure.",
+    "consequence": "Issue scoped scour evidence to bridge inspection and route-closure decisions; monitoring does not stabilize the bed or certify unseen foundation depth.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable bridge scour monitoring instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bridge_scour_monitoring",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Track measured bed-level change and flow context around bridge foundations to detect potential loss of supporting material.",
+      "operating_requirements": "Pay site surveys or installed observations, access, calibration and repeated interpretation; retain unobserved flood intervals, foundation uncertainty and instrument failure.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local bridge scour monitoring trials.",
+        "partnership": "Share actual samples and operator time for bridge scour monitoring; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded bridge scour monitoring process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external bridge scour monitoring processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable bridge scour monitoring machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/hydraulics/scourtech/scour.cfm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H05 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  },
+  {
+    "id": "road_rutting_material_response",
+    "name": "Road Rutting Material Response",
+    "field": "D09",
+    "status": "authored_draft",
+    "requires_all": [
+      "bituminous_road_surfaces",
+      "stress_strain_relations"
+    ],
+    "requires_any": [],
+    "foundations": "bituminous_road_surfaces,stress_strain_relations",
+    "mechanism": "Characterize permanent pavement deformation under repeated loading and temperature-dependent material response.",
+    "operating_requirement": "Pay representative mixtures, compaction, loaded specimen trials and field-profile checks; distinguish densification and shear response from fatigue cracking.",
+    "consequence": "Provide a qualified mixture or maintenance comparison for the tested road load and climate range; improved rut resistance does not establish every pavement durability property.",
+    "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+    "recovery": "Acquire attributable road rutting material response instruction or working samples, then pay for local setup and acceptance trials.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "road_rutting_material_response",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Characterize permanent pavement deformation under repeated loading and temperature-dependent material response.",
+      "operating_requirements": "Pay representative mixtures, compaction, loaded specimen trials and field-profile checks; distinguish densification and shear response from fatigue cracking.",
+      "route_terms": {
+        "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local road rutting material response trials.",
+        "partnership": "Share actual samples and operator time for road rutting material response; independently inspect the partner output.",
+        "purchased_research": "Fund a bounded road rutting material response process trial with recorded materials, failures and output checks.",
+        "licensed_or_imported_service": "Pay for finite external road rutting material response processing; delivered material does not grant local manufacture.",
+        "reverse_engineering": "Inspect an attributable road rutting material response machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fhwa.dot.gov/engineering/geotech/pubs/05037/ad.cfm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires paid capital, actual compatible components or attributable observations, finite work/energy/material accounting, operating limits, saved state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+    "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences."
+  }
+]

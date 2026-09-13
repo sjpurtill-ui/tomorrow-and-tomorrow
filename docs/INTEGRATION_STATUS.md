@@ -1,3 +1,9 @@
+## September 13 — road vehicle and infrastructure coverage
+
+Reviewed 32 distinct drivetrain, vehicle control, tire, impact-evidence, emissions and road/bridge assessment proposals. Each requires compatible paid equipment or actual observations, finite work, operating limits and a downstream consumer. Existing broad vehicle/transmission/brake knowledge is not recounted. Grip, injury prevention, emissions control and road condition remain bounded by actual equipment and test evidence rather than global bonuses. See `technology-review/Road Vehicle Review.md`.
+
+Ledger: **740 integrated +2,647 drafts =3,387 identities**, leaving **1,613 to author and 4,260 to implement**. D09 accounts for 140/180 planned identities. All parents resolve, normalized names are distinct and 15 ledger tests pass. Runtime 740/522/402/20 and art 162/740 remain unchanged. No player launch or package rebuild. Integrator worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/road-vehicle-coverage`, final base `5c0d455`. Catalog-only changes have no save-format impact; shared ledger additions preserve the polymer prerequisites. Polymer runtime closure continues in its isolated task.
+
 ## September 13 — polymer condensation prerequisites
 
 Authored four worker-requested prerequisites: wood methanol recovery, silver cupellation, formaldehyde synthesis and urea synthesis. Original requested foundations are retained. Each requires typed feed, finite equipment/work and qualification with losses; crude wood condensate is not pure methanol, and ordinary lead stock has no implicit silver content. These remain proposals pending the isolated polymer implementation and integration checks. See `technology-review/Polymer Condensation Prerequisites.md`.
