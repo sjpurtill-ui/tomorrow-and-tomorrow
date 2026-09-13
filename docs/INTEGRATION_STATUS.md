@@ -1,3 +1,9 @@
+## September 13 — polymer size-exclusion prerequisite
+
+Authored `size_exclusion_chromatography` with mandatory solution-processing, glass-tube, optical, experimental-control and uncertainty foundations. The selected aqueous PEG route requires real column/flow/detection, attributable media and reference supply, observed finite-resolution calibration and distribution evidence used in a paid process or material choice. The existing NMR number mean remains complementary and is not relabeled as a measured distribution. See `technology-review/Polymer SEC Prerequisite.md`.
+
+Ledger: **752 integrated +2,695 drafts =3,447 identities**, leaving **1,553 to author and4,248 to implement**. All parent/duplicate/reachability checks and15ledger tests pass. Runtime752/534/436/20 and art174/752 remain unchanged. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/polymer-sec-prerequisite`, base `0947d0efc8db5c6a5696526b67ffb6e33dec40f1`. Catalog/docs only, no save or runtime conflict. Polymer remains HELD for distribution-route supply and final acceptance; thirty reviewed family images are delivered to its worker but not promoted here. External column/standard supply must actually exist and be finite; an import label creates no supplier stock. No player launch or package rebuild.
+
 ## September 13 — 752 verified operating discoveries
 
 Braided/quilted clothing runtime/art commit `d51889615deb6145c6e3bdb7129c9c198a931012` is integrated and verified. Two original identities retain exact predicates. Paid braids fasten actual woven wraps; prepared plant-fiber filling, cloth faces and thread make quilt garments. Worn quilts require replacement filling during repair, including planner demand when clothing counts already meet population needs. Existing daily labor, issue, wear and save owners remain in use.

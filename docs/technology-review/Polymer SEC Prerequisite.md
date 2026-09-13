@@ -1,0 +1,23 @@
+# Polymer size-exclusion prerequisite
+
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/polymer-sec-prerequisite`, base `0947d0efc8db5c6a5696526b67ffb6e33dec40f1`. Catalog and integration documentation only. The isolated polymer worker owns runtime implementation.
+
+`size_exclusion_chromatography` has mandatory parents `polymer_solution_processing`, `glass_tube_drawing`, `optical_lenses`, `experimental_controls` and `measurement_uncertainty`, with no OR group. These express the chosen solution, column/detection and evidence foundations. They are game design choices, not an exclusive historical chronology. The existing biological chromatographic-separation draft concerns different stationary/mobile phase interactions and is not silently reused as a polymer-size identity.
+
+The original molecular-weight-control proposal includes distribution characterization. A conditional NMR number mean is complementary evidence: samples can share that mean and have different distributions. The selected completion route therefore needs real size-dependent separation, observed elution/concentration data, calibration and finite resolution. A bounded relative distribution over a declared compatible PEG range is sufficient. Universal absolute masses, all polymer conformations and exact continuous distributions are not required or implied.
+
+[Waters' aqueous PEG/PEO application](https://www.waters.com/nextgen/in/en/library/application-notes/2021/arc-hplc-aqueous-sec-gpc-separation-of-peo-peg.html) uses stable flow and PEG/PEO standards for relative retention calibration and distribution analysis. Its commercial performance numbers are not game coefficients. [Waters' calibration primer](https://www.waters.com/nextgen/ca/en/education/primers/beginners-guide-to-size-exclusion-chromatography/calibration-of-the-gpc-system1.html) distinguishes relative calibration and chemistry/conformation-dependent interpretation. An unrelated calibrant or out-of-range elution cannot establish an absolute PEG distribution.
+
+## Column and reference preparation boundary
+
+The runtime slice must pay for pump, column and concentration-sensitive detector capital, operation, compatible medium, eluent, retained specimens and references. Column preparation includes packing compatible pore-size material, flushing/conditioning and reference-based recovery, flow and resolution checks. Media wear, fouling or missing supply must affect operation. Generic glass beads are not automatically porous size-exclusion packing, and generic polymer gel is not automatically nonadsorbing and solvent-compatible.
+
+[Waters identifies its Ultrahydrogel medium](https://support.waters.com/KB_Chem/Columns/WKB62515_What_is_the_Ultrahydrogel_columns_made_of) as hydroxylated polymethacrylate-based gel. That is an example of specialized media chemistry, not permission to convert an unrelated existing resin into an equivalent column. A finite, paid, actually delivered compatible packing supply from a reachable qualified external source is an acceptable first operating slice. Local synthesis of that commercial-style medium is a separate capability and must not be claimed by importing it.
+
+[Agilent's polymer-standard guide](https://www.agilent.com/cs/library/usermanuals/public/5991-7911EN.pdf) describes characterized calibration standards and complementary characterization methods. Preparation of reference solutions consumes attributable standards, measured solvent, vessels and work. Their assigned range/identity must survive delivery and preparation. NMR mean alone does not prove a stock's narrow distribution. Ordinary PEG cannot be renamed into a narrow certified standard without a supporting route. An actual finite external standard supply is permitted under the same paid delivery and local calibration boundary; no free knowledge or unlimited reagents.
+
+## Acceptance
+
+Require different measured profiles for at least two supported same-mean/different-distribution specimens. Check finite flow/work, capital and reagent shortages, bounded resolution, uncertainty, out-of-range rejection and calibration changes. Bind observed evidence to the retained specimen and use it in a paid material/process choice. Never copy the latent distribution directly into the reported measurement. Preserve the existing mean assay and its honest limits. Save continuation and duplicate-call/material-release checks remain required. External supply is an explicit bootstrap boundary, not a claim of a full historical campaign starting from raw terrain.
+
+This new row remains authored only until the actual runtime route is integrated and verified. No save schema, player package or live session changes here.

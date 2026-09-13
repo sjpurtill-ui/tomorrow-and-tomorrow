@@ -13534,6 +13534,16 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "2c52c35dc969177797855de1e1e7d28684c9244db974245b1cb324459ae12e18"
+    },
+    {
+      "id": "size_exclusion_chromatography",
+      "name": "Size-Exclusion Chromatography",
+      "horizon": "H05",
+      "source_file": "polymer-sec-prerequisite.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified chromatography measures a bounded distribution through actual separation and calibration; no exclusive invention date or runtime time gate is implied.",
+      "scope_digest": "1fcba8910c20827cc9b7aa264f317a145ccc716409a32c5a73d9db7169f6a9b5"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
