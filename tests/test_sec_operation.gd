@@ -129,3 +129,25 @@ func test_column_expiry_during_outage_loses_run_without_free_grade()->void:
 		assert_float(float(s.resource_stockpiles.get("Distribution-Qualified PEG Batches",0))).is_equal(0.0)
 		assert_float(float(s.resource_stockpiles["Sealed SEC PEG Batches"])).is_equal(0.0)
 		assert_bool(Ops.valid(Ops.data())).is_true())
+
+func test_live_sec_panel_reports_supplies_capacity_results_and_pause_without_side_effects()->void:
+	WorldSimulation.scoped("sec",func()->void:
+		var panel:VBoxContainer=auto_free(preload("res://scripts/hud/technology_operations_panel.gd").new())
+		panel.subject="size_exclusion_chromatography";add_child(panel)
+		assert_str(panel.specimen_report.text).contains("Missing for preparation:")
+		assert_str(panel.specimen_report.text).contains("Packed Aqueous SEC Columns")
+		prepare(1)
+		var s=WorldSimulation.state
+		for day:int in range(9,19):s.elapsed_days=day;Ops.advance(day)
+		var before:Dictionary=Ops.data().duplicate(true);var stocks:Dictionary=s.resource_stockpiles.duplicate(true)
+		panel.refresh();panel.refresh()
+		assert_str(panel.specimen_report.text).contains("7 runs remaining")
+		assert_str(panel.specimen_report.text).contains("Relative size bins")
+		assert_str(panel.specimen_report.text).contains("selected binder route")
+		assert_dict(Ops.data()).is_equal(before);assert_dict(s.resource_stockpiles).is_equal(stocks)
+		panel.rows.sec_analytical_bench.pause.pressed.emit()
+		assert_bool(Ops.data().plants.sec_analytical_bench.enabled).is_false()
+		s.elapsed_days=19;Ops.advance(19);panel.refresh()
+		assert_float(Ops.service("sec_column_time")).is_equal(0.0)
+		assert_str(panel.rows.sec_analytical_bench.label.text).contains("Paused")
+		assert_str(preload("res://scripts/nmr_acquisition.gd").report_text()).is_equal("No prepared NMR specimens."))

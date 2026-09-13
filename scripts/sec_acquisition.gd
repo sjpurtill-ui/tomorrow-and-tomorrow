@@ -122,3 +122,31 @@ static func dependency_routes()->Dictionary:
 	for output:String in ["Distribution-Qualified PEG Batches","Broad-Range Recovered PEG Batches"]:
 		result["sec_analysis_"+output]={"gate":"size_exclusion_chromatography","requires":[],"output":output,"materials":{"Sealed SEC PEG Batches":1.0,"Packed Aqueous SEC Columns":1.0,"SEC PEG Reference Sets":1.0,"Freshwater":3.5,"Paper":.15},"tooling":{},"days":10.0,"power":0.0,"services":{"sec_column_time":10.0},"conditional":true}
 	return result
+
+static func report_text()->String:
+	var c:=column();var lines:PackedStringArray=[]
+	if c.get("status")=="conditioning":
+		lines.append("Column preparation and reference checks: %.1f / 6 paid time units."%float(c.work))
+	elif usable():
+		lines.append("Calibrated column: %d runs remaining; calibration expires after day %d."%[int(c.remaining_runs),int(c.checked_day)+30])
+	else:lines.append("No ready column. Prepare a packed aqueous column and assigned PEG reference solutions.")
+	if c.get("status")!="conditioning" and (not usable() or int(c.get("remaining_runs",0))==0):
+		var missing:PackedStringArray=[]
+		for item:String in {"Packed Aqueous SEC Columns":1.0,"SEC PEG Reference Sets":1.0,"Freshwater":3.0,"Paper":.1}:
+			var required:float={"Packed Aqueous SEC Columns":1.0,"SEC PEG Reference Sets":1.0,"Freshwater":3.0,"Paper":.1}[item]
+			var shortage:=maxf(0,required-float(WorldSimulation.state.resource_stockpiles.get(item,0)))
+			if shortage>0:missing.append("%.2f %s"%[shortage,item])
+		if not missing.is_empty():lines.append("Missing for preparation: "+", ".join(missing)+".")
+	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
+	var ids:Array=[]
+	for id:String in records:
+		if records[id].get("recipe")==PREPARATION:ids.append(id)
+	ids.sort_custom(func(a:String,b:String)->bool:return int(a)<int(b))
+	if ids.is_empty():lines.append("Prepare a retained PEG batch for size separation through workshop production.")
+	for index:int in range(maxi(0,ids.size()-6),ids.size()):
+		var id:=String(ids[index]);var result:=report(records[id])
+		lines.append("Sample "+id+": "+String(result.message))
+		if result.status=="resolved":
+			var fractions:Array=result.interpretation.observed_mass_fractions
+			lines.append("Relative size bins 10–20 / 20–40 / 40–80 / 80–160: %.1f%% / %.1f%% / %.1f%% / %.1f%%."%[100*float(fractions[0]),100*float(fractions[1]),100*float(fractions[2]),100*float(fractions[3])])
+	return "\n".join(lines)

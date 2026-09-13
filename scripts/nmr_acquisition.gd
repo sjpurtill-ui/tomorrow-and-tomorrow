@@ -158,7 +158,10 @@ static func report_text()->String:
 	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
 	if records.is_empty():return "No prepared specimens. Prepare a sealed specimen through workshop production."
 	var lines:PackedStringArray=[]
-	var ids:Array=records.keys()
+	var ids:Array=[]
+	for id:String in records:
+		if records[id].get("recipe")!="sec_traceable_peg_batch":ids.append(id)
+	if ids.is_empty():return "No prepared NMR specimens."
 	for index:int in range(maxi(0,ids.size()-6),ids.size()):
 		var id:=String(ids[index]);lines.append("Sample "+id+": "+String(report(id).message))
 	return "\n".join(lines)

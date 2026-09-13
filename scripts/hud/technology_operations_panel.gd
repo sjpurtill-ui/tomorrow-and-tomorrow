@@ -28,7 +28,8 @@ func _process(delta:float)->void:
 	elapsed+=delta
 	if elapsed>=1:elapsed=0;refresh()
 func refresh()->void:
-	if is_instance_valid(specimen_report):specimen_report.text=preload("res://scripts/nmr_acquisition.gd").report_text()
+	if is_instance_valid(specimen_report):
+		specimen_report.text=preload("res://scripts/sec_acquisition.gd").report_text() if subject=="size_exclusion_chromatography" else preload("res://scripts/nmr_acquisition.gd").report_text()
 	for id:String in rows:
 		var row:Dictionary=rows[id];var spec:Dictionary=Ops.PLANTS[id]
 		var record:Dictionary=Ops.data().plants.get(id,{})

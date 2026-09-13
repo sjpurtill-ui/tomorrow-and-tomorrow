@@ -52,9 +52,16 @@ or the complete technology overhaul.
 2. The finite preexisting external laboratory supply boundary is implemented and
    separately tested (20/20 material cases). It is not local packing/reference
    synthesis or a full historical bootstrap. See SEC_SPECIALIST_SUPPLY.md.
-3. Finish the remaining subject art and verify imported assets and bindings.
-4. Review final combined production/branching and UI evidence after the remaining
-   changes. Prior passing tests cover their stated cases, not the whole campaign.
+3. Finish the remaining seven subject illustrations and verify the final combined
+   import and bindings. Forty of 47 are currently bound.
+4. Final integrator review. The connected graph has zero structural errors or
+   blocked routes: 525 workshop recipes plus five conditional analytical routes,
+   27 installations. External-reserve and successful-analysis assumptions are
+   explicit; this is not campaign verification. All 47 authored AND/OR predicates
+   match their canonical draft sources exactly. The SEC live-panel test checks
+   missing supplies, capacity, measured bins, read-only refresh and real pause
+   control; SEC suite 5/5 passes. Prior tests cover their stated cases, not the
+   whole campaign.
 5. Deliver to the designated integrator for deliberate shared-file conflict
    resolution and canonical verification. No player launch or main merge here.
 
