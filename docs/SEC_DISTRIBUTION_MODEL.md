@@ -64,3 +64,14 @@ Accepted results release one corresponding physical batch into the selected or
 rework route. Both produce Binder-Grade PEG, then the existing aqueous binder
 consumer. The operations panel reports the selected result. Partial and completed
 full save/load checks preserve spent materials and prevent duplicate release.
+
+
+## Ownership and store scope
+
+SEC and NMR laboratories operate only at the primary settled home through the
+existing technology-operations service owner. Secondary stores cannot spend that
+service. Pending selection filters sample source stores before commissioning or
+calibration, so a remote-only specimen cannot consume primary supplies. Two
+civilizations can have the same local sample ID while keeping their columns,
+work, stocks and released grades independent. This is not support for secondary
+laboratories or automatic transport of retained samples.

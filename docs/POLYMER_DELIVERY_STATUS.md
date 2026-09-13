@@ -60,7 +60,9 @@ or the complete technology overhaul.
    explicit; this is not campaign verification. All 47 authored AND/OR predicates
    match their canonical draft sources exactly. The SEC live-panel test checks
    missing supplies, capacity, measured bins, read-only refresh and real pause
-   control; SEC suite 5/5 passes. Prior tests cover their stated cases, not the
+   control. SEC isolation also checks two actors with identical sample IDs and
+   remote-store exclusion before spending primary column supplies. NMR receives
+   the same pending-selection fix. Prior tests cover their stated cases, not the
    whole campaign.
 5. Deliver to the designated integrator for deliberate shared-file conflict
    resolution and canonical verification. No player launch or main merge here.

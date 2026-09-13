@@ -76,15 +76,16 @@ static func release(sample:Dictionary)->void:
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	stocks[output]=float(stocks.get(output,0))+1.0;sample["specimen_released"]=true
 static func advance_pending()->void:
+	if not WorldSimulation.state.resource_settlement_id.is_empty():return
 	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
 	var pending:=false;var acquiring:=false
 	for sample:Dictionary in records.values():
-		if sample.get("recipe")!=PREPARATION:continue
+		if sample.get("recipe")!=PREPARATION or sample.source_store!=WorldSimulation.state.resource_settlement_id:continue
 		pending=pending or sample.status=="unmeasured";acquiring=acquiring or sample.status=="acquiring"
 	if pending and not acquiring:start_column()
 	advance_column()
 	for sample:Dictionary in records.values():
-		if sample.get("recipe")!=PREPARATION:continue
+		if sample.get("recipe")!=PREPARATION or sample.source_store!=WorldSimulation.state.resource_settlement_id:continue
 		if sample.status=="unmeasured":start(sample)
 		advance(sample)
 static func report(sample:Dictionary)->Dictionary:

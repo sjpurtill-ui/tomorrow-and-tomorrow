@@ -151,3 +151,42 @@ func test_live_sec_panel_reports_supplies_capacity_results_and_pause_without_sid
 		assert_float(Ops.service("sec_column_time")).is_equal(0.0)
 		assert_str(panel.rows.sec_analytical_bench.label.text).contains("Paused")
 		assert_str(preload("res://scripts/nmr_acquisition.gd").report_text()).is_equal("No prepared NMR specimens."))
+
+func test_remote_store_specimen_cannot_spend_primary_column_supplies()->void:
+	WorldSimulation.scoped("sec",func()->void:
+		prepare(1);var s=WorldSimulation.state
+		Samples.data().records["1"].source_store="remote_store"
+		s.elapsed_days=9;Ops.advance(9)
+		assert_bool(SEC.column().is_empty()).is_true()
+		assert_float(float(s.resource_stockpiles["Packed Aqueous SEC Columns"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["SEC PEG Reference Sets"])).is_equal(1.0)
+		var before:Dictionary=s.resource_stockpiles.duplicate(true)
+		s.resource_settlement_id="remote_store"
+		assert_float(Ops.service("sec_column_time")).is_equal(0.0)
+		assert_bool(Ops.quote("sec_analytical_bench").has("error")).is_true()
+		SEC.advance_pending()
+		assert_dict(s.resource_stockpiles).is_equal(before)
+		assert_bool(SEC.column().is_empty()).is_true()
+		s.resource_settlement_id="")
+func test_two_civilizations_keep_identical_sample_ids_and_grades_separate()->void:
+	var initial:Dictionary={}
+	WorldSimulation.scoped("sec",func()->void:
+		prepare(1);var s=WorldSimulation.state
+		for day:int in range(9,16):s.elapsed_days=day;Ops.advance(day)
+		initial["stocks"]=s.resource_stockpiles.duplicate(true)
+		initial["ledger"]=Ops.data().duplicate(true))
+	WorldSimulation.create_actor("other_sec",5572)
+	WorldSimulation.scoped("other_sec",func()->void:
+		prepare(1);var s=WorldSimulation.state
+		for day:int in range(9,19):s.elapsed_days=day;Ops.advance(day)
+		assert_float(float(s.resource_stockpiles.get("Distribution-Qualified PEG Batches",0))).is_equal(1.0))
+	WorldSimulation.scoped("sec",func()->void:
+		var s=WorldSimulation.state
+		assert_dict(s.resource_stockpiles).is_equal(initial.stocks)
+		assert_dict(Ops.data()).is_equal(initial.ledger)
+		assert_float(float(Samples.data().records["1"].acquisition.work)).is_equal(1.0)
+		for day:int in range(16,19):s.elapsed_days=day;Ops.advance(day)
+		assert_float(float(s.resource_stockpiles.get("Distribution-Qualified PEG Batches",0))).is_equal(1.0))
+	WorldSimulation.scoped("other_sec",func()->void:
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get("Distribution-Qualified PEG Batches",0))).is_equal(1.0)
+		assert_int(int(SEC.column().remaining_runs)).is_equal(7))

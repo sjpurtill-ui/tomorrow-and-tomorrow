@@ -125,15 +125,16 @@ static func observe(sample:Dictionary)->Dictionary:
 	return response
 
 static func advance_pending()->void:
+	if not WorldSimulation.state.resource_settlement_id.is_empty():return
 	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
 	var calibration=load("res://scripts/nmr_calibration.gd")
 	var pending:=false
 	for sample:Dictionary in records.values():
-		if sample.status in ["unmeasured","acquiring"] and supported(sample):pending=true
+		if sample.status in ["unmeasured","acquiring"] and supported(sample) and sample.source_store==WorldSimulation.state.resource_settlement_id:pending=true
 	if pending:calibration.start()
 	calibration.advance()
 	for sample_id:String in records:
-		if not supported(records[sample_id]):continue
+		if not supported(records[sample_id]) or records[sample_id].source_store!=WorldSimulation.state.resource_settlement_id:continue
 		if records[sample_id].status=="unmeasured" and calibration.usable() and WorldSimulation.discovery.adoption("polymer_solution_processing")>=.1:start(sample_id)
 		advance(sample_id,required_work(records[sample_id]))
 	if not records.is_empty():load("res://scripts/polymer_samples.gd").retire_completed()

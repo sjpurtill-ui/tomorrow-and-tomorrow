@@ -271,3 +271,15 @@ func test_traceable_peg_requires_actual_controlled_synthesis_and_keeps_imports_u
 		assert_bool(Samples.valid(bad)).is_false()
 		Ops.data().services["nmr_unqualified_time"]=1.0
 		assert_bool(preload("res://scripts/nmr_acquisition.gd").start("1").has("error")).is_true())
+
+func test_remote_only_specimen_does_not_spend_primary_nmr_reference()->void:
+	WorldSimulation.scoped("samples",func()->void:
+		var job:=start();P.advance(WorldSimulation.military,job,1)
+		Samples.data().records["1"].source_store="remote_store"
+		var s=WorldSimulation.state;s.resource_stockpiles["NMR Methanol References"]=1.0
+		Ops.data().last_day=0;Ops.data().services={"nmr_unqualified_time":1.0}
+		preload("res://scripts/nmr_acquisition.gd").advance_pending()
+		assert_bool(preload("res://scripts/nmr_calibration.gd").data().is_empty()).is_true()
+		assert_float(float(s.resource_stockpiles["NMR Methanol References"])).is_equal(1.0)
+		assert_float(float(s.resource_stockpiles["Sealed Copolymer Specimens"])).is_equal(1.0)
+		assert_float(Ops.service("nmr_unqualified_time")).is_equal(1.0))
