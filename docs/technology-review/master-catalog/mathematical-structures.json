@@ -1,0 +1,891 @@
+[
+  {
+    "id": "group_symmetry_models",
+    "name": "Group Symmetry Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "axiomatic_reasoning",
+      "set_theoretic_models"
+    ],
+    "requires_any": [],
+    "foundations": "axiomatic_reasoning,set_theoretic_models",
+    "mechanism": "Represent composable reversible transformations by a group action.",
+    "operating_requirement": "Explicit transformation law, objects acted on and paid closure/inverse checks.",
+    "consequence": "Identifies equivalent configurations; assumed symmetry is not observed evidence.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable group symmetry models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "group_symmetry_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Represent composable reversible transformations by a group action.",
+      "operating_requirements": "Explicit transformation law, objects acted on and paid closure/inverse checks.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for group symmetry models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for group symmetry models.",
+        "purchased_research": "Pay for a bounded group symmetry models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external group symmetry models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied group symmetry models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/faeeeaf01f838584ce2172cfd85cf74d_MIT18_703S13_pra_l_1.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Compare qualified crystal or mechanical configurations under an explicit symmetry action. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "ring_ideal_arithmetic",
+    "name": "Ring and Ideal Arithmetic",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "symbolic_algebra",
+      "axiomatic_reasoning"
+    ],
+    "requires_any": [],
+    "foundations": "symbolic_algebra,axiomatic_reasoning",
+    "mechanism": "Compute with addition and multiplication while tracking ideals and quotient relations.",
+    "operating_requirement": "Declared coefficient ring, generators and finite symbolic work.",
+    "consequence": "Supports modular algebraic reductions; noninvertible elements remain distinct.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable ring and ideal arithmetic instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ring_ideal_arithmetic",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compute with addition and multiplication while tracking ideals and quotient relations.",
+      "operating_requirements": "Declared coefficient ring, generators and finite symbolic work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for ring and ideal arithmetic.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for ring and ideal arithmetic.",
+        "purchased_research": "Pay for a bounded ring and ideal arithmetic study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external ring and ideal arithmetic computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied ring and ideal arithmetic worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.ocw.mit.edu/courses/18-703-modern-algebra-spring-2013/pages/lecture-notes/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Reduce declared symbolic constraint systems modulo recorded relations. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "field_extension_models",
+    "name": "Field Extension Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "ring_ideal_arithmetic",
+      "polynomial_equations"
+    ],
+    "requires_any": [],
+    "foundations": "ring_ideal_arithmetic,polynomial_equations",
+    "mechanism": "Adjoin algebraic elements under defining polynomial relations.",
+    "operating_requirement": "Base field, irreducibility evidence and checked extension arithmetic.",
+    "consequence": "Represents roots beyond a base field without assuming all polynomials split there.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable field extension models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "field_extension_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Adjoin algebraic elements under defining polynomial relations.",
+      "operating_requirements": "Base field, irreducibility evidence and checked extension arithmetic.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for field extension models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for field extension models.",
+        "purchased_research": "Pay for a bounded field extension models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external field extension models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied field extension models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://live.ocw.mit.edu/courses/res-18-012-algebra-ii-student-notes-spring-2022/mit18_702s22_full_lec.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Represent exact algebraic quantities in checked model calculations. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "finite_field_arithmetic",
+    "name": "Finite Field Arithmetic",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "field_extension_models",
+      "modular_arithmetic"
+    ],
+    "requires_any": [],
+    "foundations": "field_extension_models,modular_arithmetic",
+    "mechanism": "Construct and calculate in finite fields of prime-power order.",
+    "operating_requirement": "Characteristic, irreducible defining polynomial and bounded arithmetic workspace.",
+    "consequence": "Supplies exact compatible arithmetic for codes; composite modular rings are not automatically fields.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable finite field arithmetic instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "finite_field_arithmetic",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Construct and calculate in finite fields of prime-power order.",
+      "operating_requirements": "Characteristic, irreducible defining polynomial and bounded arithmetic workspace.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for finite field arithmetic.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for finite field arithmetic.",
+        "purchased_research": "Pay for a bounded finite field arithmetic study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external finite field arithmetic computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied finite field arithmetic worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://doc.sagemath.org/html/en/reference/finite_rings/index.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Construct and verify compatible error-correcting code arithmetic. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "polynomial_groebner_bases",
+    "name": "Polynomial Groebner Bases",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "ring_ideal_arithmetic",
+      "algorithmic_procedures"
+    ],
+    "requires_any": [],
+    "foundations": "ring_ideal_arithmetic,algorithmic_procedures",
+    "mechanism": "Reduce polynomial ideals using a selected monomial ordering and completion procedure.",
+    "operating_requirement": "Generators, coefficient field, ordering and finite symbolic calculation budget.",
+    "consequence": "Supports ideal membership and elimination; resource exhaustion remains an unfinished result.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable polynomial groebner bases instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polynomial_groebner_bases",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Reduce polynomial ideals using a selected monomial ordering and completion procedure.",
+      "operating_requirements": "Generators, coefficient field, ordering and finite symbolic calculation budget.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for polynomial groebner bases.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for polynomial groebner bases.",
+        "purchased_research": "Pay for a bounded polynomial groebner bases study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external polynomial groebner bases computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied polynomial groebner bases worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://doc.sagemath.org/html/en/reference/polynomial_rings/sage/rings/polynomial/multi_polynomial_ideal.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Eliminate variables in bounded mechanical constraint problems. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "algebraic_curve_models",
+    "name": "Algebraic Curve Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "polynomial_equations",
+      "coordinate_geometry",
+      "field_extension_models"
+    ],
+    "requires_any": [],
+    "foundations": "polynomial_equations,coordinate_geometry,field_extension_models",
+    "mechanism": "Study one-dimensional solution sets of polynomial relations over a declared field.",
+    "operating_requirement": "Curve equations, ambient space and singularity checks.",
+    "consequence": "Supports intersection and structure calculations; singular curves need explicit treatment.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable algebraic curve models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "algebraic_curve_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Study one-dimensional solution sets of polynomial relations over a declared field.",
+      "operating_requirements": "Curve equations, ambient space and singularity checks.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for algebraic curve models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for algebraic curve models.",
+        "purchased_research": "Pay for a bounded algebraic curve models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external algebraic curve models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied algebraic curve models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://doc.sagemath.org/html/en/reference/curves/index.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Analyze qualified geometric intersections with singularity flags. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "projective_geometry",
+    "name": "Projective Geometry",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "coordinate_geometry",
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "coordinate_geometry,matrix_algebra",
+    "mechanism": "Use homogeneous coordinates and incidence relations under projective transformations.",
+    "operating_requirement": "Compatible point/line records and checked nondegenerate coordinate transformations.",
+    "consequence": "Handles perspective incidence and points at infinity without preserving ordinary distances.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable projective geometry instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "projective_geometry",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use homogeneous coordinates and incidence relations under projective transformations.",
+      "operating_requirements": "Compatible point/line records and checked nondegenerate coordinate transformations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for projective geometry.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for projective geometry.",
+        "purchased_research": "Pay for a bounded projective geometry study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external projective geometry computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied projective geometry worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://live.ocw.mit.edu/courses/18-900-geometry-and-topology-in-the-plane-spring-2023/mit18_900s23_lec26.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Transform measured image/survey correspondences with perspective-degeneracy checks. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "metric_space_analysis",
+    "name": "Metric Space Analysis",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "set_theoretic_models",
+      "limit_and_convergence_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "set_theoretic_models,limit_and_convergence_analysis",
+    "mechanism": "Define distance, convergence and completeness on a general metric space.",
+    "operating_requirement": "Specified distance function and checked metric properties.",
+    "consequence": "Tests convergence claims for qualifying spaces; a similarity score need not be a metric.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable metric space analysis instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "metric_space_analysis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Define distance, convergence and completeness on a general metric space.",
+      "operating_requirements": "Specified distance function and checked metric properties.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for metric space analysis.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for metric space analysis.",
+        "purchased_research": "Pay for a bounded metric space analysis study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external metric space analysis computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied metric space analysis worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-s190-introduction-to-metric-spaces-january-iap-2023/1iloo3fh6OuSc9MnUa6muaBV1HqX1uBiM_transcript.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Validate distance-based comparison and convergence assumptions for recorded model data. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "topological_continuity_models",
+    "name": "Topological Continuity Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "set_theoretic_models",
+      "axiomatic_reasoning"
+    ],
+    "requires_any": [],
+    "foundations": "set_theoretic_models,axiomatic_reasoning",
+    "mechanism": "Describe continuity through open sets and inverse-image conditions.",
+    "operating_requirement": "Declared topology and maps with paid compatibility checks.",
+    "consequence": "Separates connectedness and continuity from distances; it does not preserve geometric size.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable topological continuity models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "topological_continuity_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Describe continuity through open sets and inverse-image conditions.",
+      "operating_requirements": "Declared topology and maps with paid compatibility checks.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for topological continuity models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for topological continuity models.",
+        "purchased_research": "Pay for a bounded topological continuity models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external topological continuity models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied topological continuity models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-101-analysis-ii-fall-2005/babd982be745679b6d691f78b1c18f53_lectures.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Check connectivity/continuity claims for explicitly represented configuration spaces. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "differentiable_manifolds",
+    "name": "Differentiable Manifolds",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "topological_continuity_models",
+      "differential_calculus"
+    ],
+    "requires_any": [],
+    "foundations": "topological_continuity_models,differential_calculus",
+    "mechanism": "Represent smooth spaces through locally compatible coordinate charts.",
+    "operating_requirement": "Chart domains, transition maps and differentiability checks.",
+    "consequence": "Supports local calculus on curved spaces without assuming one global coordinate chart.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable differentiable manifolds instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "differentiable_manifolds",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Represent smooth spaces through locally compatible coordinate charts.",
+      "operating_requirements": "Chart domains, transition maps and differentiability checks.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for differentiable manifolds.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for differentiable manifolds.",
+        "purchased_research": "Pay for a bounded differentiable manifolds study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external differentiable manifolds computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied differentiable manifolds worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-755-lie-groups-and-lie-algebras-ii-spring-2024/mit18_755_s24_lec_full.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Represent robot or geometric configuration charts with transition checks. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "tensor_coordinate_calculus",
+    "name": "Tensor Coordinate Calculus",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "differentiable_manifolds",
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "differentiable_manifolds,matrix_algebra",
+    "mechanism": "Transform multilinear quantities consistently between coordinate bases.",
+    "operating_requirement": "Explicit tensor type, coordinate transitions and finite contraction work.",
+    "consequence": "Keeps modeled physical quantities consistent across charts; arbitrary arrays are not tensors by declaration.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable tensor coordinate calculus instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tensor_coordinate_calculus",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Transform multilinear quantities consistently between coordinate bases.",
+      "operating_requirements": "Explicit tensor type, coordinate transitions and finite contraction work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for tensor coordinate calculus.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for tensor coordinate calculus.",
+        "purchased_research": "Pay for a bounded tensor coordinate calculus study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external tensor coordinate calculus computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied tensor coordinate calculus worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-755-lie-groups-and-lie-algebras-ii-spring-2024/mit18_755_s24_lec_full.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Transform recorded stress, deformation or field components across bases. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "differential_forms",
+    "name": "Differential Forms",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "differentiable_manifolds",
+      "vector_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "differentiable_manifolds,vector_analysis",
+    "mechanism": "Combine alternating differential quantities with exterior differentiation and integration.",
+    "operating_requirement": "Oriented domains where required, form coefficients and boundary conventions.",
+    "consequence": "Relates qualified boundary and interior integrals while preserving orientation constraints.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable differential forms instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "differential_forms",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Combine alternating differential quantities with exterior differentiation and integration.",
+      "operating_requirements": "Oriented domains where required, form coefficients and boundary conventions.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for differential forms.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for differential forms.",
+        "purchased_research": "Pay for a bounded differential forms study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external differential forms computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied differential forms worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-755-lie-groups-and-lie-algebras-ii-spring-2024/mit18_755_s24_lec_full.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Check oriented modeled flux and boundary integrals. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "riemannian_geometry",
+    "name": "Riemannian Geometry",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "differentiable_manifolds",
+      "tensor_coordinate_calculus"
+    ],
+    "requires_any": [],
+    "foundations": "differentiable_manifolds,tensor_coordinate_calculus",
+    "mechanism": "Use a smoothly varying positive-definite metric to define intrinsic lengths and curvature.",
+    "operating_requirement": "Metric coefficients, chart compatibility and derivative calculations.",
+    "consequence": "Models intrinsic geometry; singular or indefinite metrics require a different qualification.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable riemannian geometry instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "riemannian_geometry",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use a smoothly varying positive-definite metric to define intrinsic lengths and curvature.",
+      "operating_requirements": "Metric coefficients, chart compatibility and derivative calculations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for riemannian geometry.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for riemannian geometry.",
+        "purchased_research": "Pay for a bounded riemannian geometry study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external riemannian geometry computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied riemannian geometry worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-950-differential-geometry-fall-2008/pages/lecture-notes/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Compute model geodesics or curvature under a supplied positive-definite metric. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "lie_group_analysis",
+    "name": "Lie Group Analysis",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "group_symmetry_models",
+      "differentiable_manifolds"
+    ],
+    "requires_any": [],
+    "foundations": "group_symmetry_models,differentiable_manifolds",
+    "mechanism": "Combine smooth continuous transformations with their local Lie algebra.",
+    "operating_requirement": "Group law, differentiable action and local generator calculations.",
+    "consequence": "Supports continuous symmetry models; local algebra alone need not determine global topology.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable lie group analysis instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lie_group_analysis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Combine smooth continuous transformations with their local Lie algebra.",
+      "operating_requirements": "Group law, differentiable action and local generator calculations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for lie group analysis.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for lie group analysis.",
+        "purchased_research": "Pay for a bounded lie group analysis study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external lie group analysis computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied lie group analysis worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-755-lie-groups-and-lie-algebras-ii-spring-2024/mit18_755_s24_lec_full.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Analyze bounded rotation or other continuous-symmetry control models. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "homology_computation",
+    "name": "Homology Computation",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "topological_continuity_models",
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "topological_continuity_models,matrix_algebra",
+    "mechanism": "Compute cycles modulo boundaries in a declared chain complex.",
+    "operating_requirement": "Finite complex, boundary maps, coefficient choice and reduction work.",
+    "consequence": "Extracts topological invariants; equal invariants do not establish identical shapes.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable homology computation instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "homology_computation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compute cycles modulo boundaries in a declared chain complex.",
+      "operating_requirements": "Finite complex, boundary maps, coefficient choice and reduction work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for homology computation.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for homology computation.",
+        "purchased_research": "Pay for a bounded homology computation study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external homology computation computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied homology computation worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://gudhi.inria.fr/doc/3.0.0/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Classify void/connectivity structure of a supplied finite shape complex. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "persistent_homology",
+    "name": "Persistent Homology",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "homology_computation",
+      "statistical_sampling"
+    ],
+    "requires_any": [],
+    "foundations": "homology_computation,statistical_sampling",
+    "mechanism": "Track homological features across a nested filtration.",
+    "operating_requirement": "Attributable sample, filtration rule, scale range and finite reduction work.",
+    "consequence": "Distinguishes persistent from short-lived features; sampling and filtration choices bound interpretation.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable persistent homology instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "persistent_homology",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Track homological features across a nested filtration.",
+      "operating_requirements": "Attributable sample, filtration rule, scale range and finite reduction work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for persistent homology.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for persistent homology.",
+        "purchased_research": "Pay for a bounded persistent homology study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external persistent homology computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied persistent homology worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://gudhi.inria.fr/doc/3.0.0/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Compare topological features over a recorded noisy sample filtration. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "measure_theoretic_probability",
+    "name": "Measure-Theoretic Probability",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "set_theoretic_models",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "foundations": "set_theoretic_models,probability_theory",
+    "mechanism": "Define random events and distributions using sigma-algebras and countably additive measures.",
+    "operating_requirement": "Sample space, measurable events and normalized probability assignment.",
+    "consequence": "Supports continuous probability constructions without making nonmeasurable events assignable.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable measure-theoretic probability instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "measure_theoretic_probability",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Define random events and distributions using sigma-algebras and countably additive measures.",
+      "operating_requirements": "Sample space, measurable events and normalized probability assignment.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for measure-theoretic probability.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for measure-theoretic probability.",
+        "purchased_research": "Pay for a bounded measure-theoretic probability study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external measure-theoretic probability computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied measure-theoretic probability worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-175-theory-of-probability-spring-2014/pages/lecture-slides/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Qualify measurable event and conditional model assumptions for uncertainty analysis. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "lebesgue_integration",
+    "name": "Lebesgue Integration",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "measure_theoretic_probability",
+      "integral_calculus"
+    ],
+    "requires_any": [],
+    "foundations": "measure_theoretic_probability,integral_calculus",
+    "mechanism": "Integrate measurable functions using simple-function approximation and qualified convergence.",
+    "operating_requirement": "Measure, measurable integrand and integrability or convergence conditions.",
+    "consequence": "Extends integration and limit interchange only where their hypotheses hold.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable lebesgue integration instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lebesgue_integration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Integrate measurable functions using simple-function approximation and qualified convergence.",
+      "operating_requirements": "Measure, measurable integrand and integrability or convergence conditions.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for lebesgue integration.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for lebesgue integration.",
+        "purchased_research": "Pay for a bounded lebesgue integration study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external lebesgue integration computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied lebesgue integration worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-102-introduction-to-functional-analysis-spring-2021/8fb8d5c170f1613151aca71de21027bc_MIT18_102s21_full_lec.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Check integrability and limit interchange in continuum expectation calculations. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "hilbert_space_methods",
+    "name": "Hilbert Space Methods",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "matrix_algebra",
+      "limit_and_convergence_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "matrix_algebra,limit_and_convergence_analysis",
+    "mechanism": "Use complete inner-product spaces and orthogonal projection for function problems.",
+    "operating_requirement": "Specified space, inner product and bounded operator or basis assumptions.",
+    "consequence": "Supports projection and operator analysis; finite truncations retain approximation error.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable hilbert space methods instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hilbert_space_methods",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Use complete inner-product spaces and orthogonal projection for function problems.",
+      "operating_requirements": "Specified space, inner product and bounded operator or basis assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for hilbert space methods.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for hilbert space methods.",
+        "purchased_research": "Pay for a bounded hilbert space methods study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external hilbert space methods computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied hilbert space methods worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-102-introduction-to-functional-analysis-spring-2021/3d4cc88026d44a01f936cd6a0aa995cb_MIT18_102s20_lec_FA.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Project recorded function models into a bounded approximation basis. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "distributional_derivatives",
+    "name": "Distributional Derivatives",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "lebesgue_integration",
+      "partial_differential_models"
+    ],
+    "requires_any": [],
+    "foundations": "lebesgue_integration,partial_differential_models",
+    "mechanism": "Define generalized derivatives by action on smooth test functions.",
+    "operating_requirement": "Distribution, test-function space, domain and boundary conventions.",
+    "consequence": "Represents singular sources and weak derivatives; arbitrary distribution products remain undefined.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable distributional derivatives instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "distributional_derivatives",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Define generalized derivatives by action on smooth test functions.",
+      "operating_requirements": "Distribution, test-function space, domain and boundary conventions.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for distributional derivatives.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for distributional derivatives.",
+        "purchased_research": "Pay for a bounded distributional derivatives study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external distributional derivatives computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied distributional derivatives worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-303-linear-partial-differential-equations-analysis-and-numerics-fall-2014/38a6fed1cff64343edd7759e486aef77_MIT18_303F14_Lecture34.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Represent singular loads or sources in an explicit field-equation model. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "sobolev_space_models",
+    "name": "Sobolev Space Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "distributional_derivatives",
+      "hilbert_space_methods"
+    ],
+    "requires_any": [],
+    "foundations": "distributional_derivatives,hilbert_space_methods",
+    "mechanism": "Classify functions by integrability of weak derivatives.",
+    "operating_requirement": "Derivative order, integrability exponent, domain and trace assumptions.",
+    "consequence": "Specifies admissible PDE solution spaces; boundary regularity can limit conclusions.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable sobolev space models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sobolev_space_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Classify functions by integrability of weak derivatives.",
+      "operating_requirements": "Derivative order, integrability exponent, domain and trace assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for sobolev space models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for sobolev space models.",
+        "purchased_research": "Pay for a bounded sobolev space models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external sobolev space models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied sobolev space models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-303-linear-partial-differential-equations-analysis-and-numerics-fall-2014/38a6fed1cff64343edd7759e486aef77_MIT18_303F14_Lecture34.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Qualify weak derivatives and boundary traces for a modeled PDE problem. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "calculus_of_variations",
+    "name": "Calculus of Variations",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "differential_calculus",
+      "integral_calculus"
+    ],
+    "requires_any": [],
+    "foundations": "differential_calculus,integral_calculus",
+    "mechanism": "Vary an admissible function or path to derive stationary functional conditions.",
+    "operating_requirement": "Functional, boundary constraints and justified variation class.",
+    "consequence": "Produces necessary stationarity equations; a stationary solution is not automatically a minimum.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable calculus of variations instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "calculus_of_variations",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Vary an admissible function or path to derive stationary functional conditions.",
+      "operating_requirements": "Functional, boundary constraints and justified variation class.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for calculus of variations.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for calculus of variations.",
+        "purchased_research": "Pay for a bounded calculus of variations study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external calculus of variations computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied calculus of variations worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-086-mathematical-methods-for-engineers-ii-spring-2006/e94c05947ed036cd6ad0150102087062_am72.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Derive stationary paths for a supplied mechanical or control functional. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "weak_variational_formulations",
+    "name": "Weak Variational Formulations",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "sobolev_space_models",
+      "calculus_of_variations"
+    ],
+    "requires_any": [],
+    "foundations": "sobolev_space_models,calculus_of_variations",
+    "mechanism": "State field equations against test functions with consistent boundary terms.",
+    "operating_requirement": "Trial/test spaces, bilinear or nonlinear forms and well-posedness checks.",
+    "consequence": "Defines qualified weak problems for downstream solvers without creating a numerical solution.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable weak variational formulations instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "weak_variational_formulations",
+      "grants_instant_mastery": false,
+      "local_demonstration": "State field equations against test functions with consistent boundary terms.",
+      "operating_requirements": "Trial/test spaces, bilinear or nonlinear forms and well-posedness checks.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for weak variational formulations.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for weak variational formulations.",
+        "purchased_research": "Pay for a bounded weak variational formulations study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external weak variational formulations computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied weak variational formulations worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-303-linear-partial-differential-equations-analysis-and-numerics-fall-2014/38a6fed1cff64343edd7759e486aef77_MIT18_303F14_Lecture34.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Prepare a qualified variational problem for existing finite-element methods. This is a future implementation contract, not an active game capability."
+  },
+  {
+    "id": "optimal_transport_models",
+    "name": "Optimal Transport Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "measure_theoretic_probability",
+      "constrained_linear_optimization"
+    ],
+    "requires_any": [],
+    "foundations": "measure_theoretic_probability,constrained_linear_optimization",
+    "mechanism": "Find cost-minimizing couplings between declared distributions.",
+    "operating_requirement": "Source/target masses, ground costs and finite optimization work.",
+    "consequence": "Compares or reallocates modeled mass under constraints; regularization changes the solved objective.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable optimal transport models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "optimal_transport_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Find cost-minimizing couplings between declared distributions.",
+      "operating_requirements": "Source/target masses, ground costs and finite optimization work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for optimal transport models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for optimal transport models.",
+        "purchased_research": "Pay for a bounded optimal transport models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external optimal transport models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied optimal transport models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://pythonot.github.io/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences.",
+    "proposed_consumer": "Compare attributable empirical distributions with an explicit coupling/cost model. This is a future implementation contract, not an active game capability."
+  }
+]

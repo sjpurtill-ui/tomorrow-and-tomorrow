@@ -11444,6 +11444,246 @@
       "classification_status": "editorial_review",
       "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
       "scope_digest": "5e125a4c2625034a2f76426d5faf7cc196303dc2391c2c11aa86c8fb4a6e32bc"
+    },
+    {
+      "id": "group_symmetry_models",
+      "name": "Group Symmetry Models",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "560f065b6d8c9cb819d72a60c8b19929ca55bd32813d8f103d26261c8340151b"
+    },
+    {
+      "id": "ring_ideal_arithmetic",
+      "name": "Ring and Ideal Arithmetic",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "24cb202e9e2d87bd64d3ec7afc3779e3d35ebfe52ea93c32d34c75fb1cb3fb78"
+    },
+    {
+      "id": "field_extension_models",
+      "name": "Field Extension Models",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "6cf542e3db2d08ade1742e553af2220ac75bffec55e5d9531048044bdc0ee82d"
+    },
+    {
+      "id": "finite_field_arithmetic",
+      "name": "Finite Field Arithmetic",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "eab25c3380c99f027148a1adebc856a7f80b1b50db36376ece89b69ab30bd834"
+    },
+    {
+      "id": "polynomial_groebner_bases",
+      "name": "Polynomial Groebner Bases",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "dd24fad17add056ad374e8073d2239eecaf0a33c55c67f00449b03d1a9299008"
+    },
+    {
+      "id": "algebraic_curve_models",
+      "name": "Algebraic Curve Models",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "d88c671e951013eb37fef9b131203478367eaa353ca99112ad24202e24f78671"
+    },
+    {
+      "id": "projective_geometry",
+      "name": "Projective Geometry",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "3fc9f8e7c75714252cf69a8b823d356cdccc01dec5109e788613b8dcfc6ebf90"
+    },
+    {
+      "id": "metric_space_analysis",
+      "name": "Metric Space Analysis",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "21b9f88917608a7bbb45f9c477edf065dd57e68a4c9ef58df16dce9e93924cb0"
+    },
+    {
+      "id": "topological_continuity_models",
+      "name": "Topological Continuity Models",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "c9c340acf310327d92a96276f0d5860614151a8fd863ac70e319bedf99adb725"
+    },
+    {
+      "id": "differentiable_manifolds",
+      "name": "Differentiable Manifolds",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "fc82f5f11a2366f9e26252f754e80840a745db5fbd83e987c724529ddcd56158"
+    },
+    {
+      "id": "tensor_coordinate_calculus",
+      "name": "Tensor Coordinate Calculus",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "cf849c4f3b9fa28e38a9158eb3a75f5be61aea7b61edd8c238fa3e985bc4aacf"
+    },
+    {
+      "id": "differential_forms",
+      "name": "Differential Forms",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "d4cf8aa6a1e95144f1ed202934fc9661ea23d80c283f3eedb9138fda1e60151e"
+    },
+    {
+      "id": "riemannian_geometry",
+      "name": "Riemannian Geometry",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "fd0a7414e5bcc0db952819516c138cf75c0d818b130e83f51a4839a43714a9ec"
+    },
+    {
+      "id": "lie_group_analysis",
+      "name": "Lie Group Analysis",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "3ecba9bdb889a6f45ea0cdcbbb9cecd8f8cca888a0de79c8eb1098b106aba5d5"
+    },
+    {
+      "id": "homology_computation",
+      "name": "Homology Computation",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "b8e1f45cebb67658965358b637a94d324ad815556761773219aab91466318d21"
+    },
+    {
+      "id": "persistent_homology",
+      "name": "Persistent Homology",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "65c95aa45dab7a2bec6402d5f079bfe58040fb5dbde8b2aa1ce2216d51075786"
+    },
+    {
+      "id": "measure_theoretic_probability",
+      "name": "Measure-Theoretic Probability",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "2401b2493de3c717f1d35901d1702bd89fddc98a43d461063b09d3428ca852f2"
+    },
+    {
+      "id": "lebesgue_integration",
+      "name": "Lebesgue Integration",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "70274e82f029ef7d40e82aeafa0eaeaf4a270902b87d71ec798e5a24239f920a"
+    },
+    {
+      "id": "hilbert_space_methods",
+      "name": "Hilbert Space Methods",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "4078bf0999a78ccf29b1c8ffd9e185cef9de42019f0c443160236478217c0ddf"
+    },
+    {
+      "id": "distributional_derivatives",
+      "name": "Distributional Derivatives",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "33337423a35ce97574a7da052065d8a4b81b384edf38822ff208297ae1d8fc95"
+    },
+    {
+      "id": "sobolev_space_models",
+      "name": "Sobolev Space Models",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "e2b728fb4d5a331cb458686454f574f46635a1b74725a1b67521c7b49102d689"
+    },
+    {
+      "id": "calculus_of_variations",
+      "name": "Calculus of Variations",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "d799124b61ff70fff16441250ed9e371fbc0836b22ab8dbf33d67e128f82b439"
+    },
+    {
+      "id": "weak_variational_formulations",
+      "name": "Weak Variational Formulations",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "34107935e343838422d9f5aa7f1b66fd570141d9f99b863e8a0f8ac4584b4568"
+    },
+    {
+      "id": "optimal_transport_models",
+      "name": "Optimal Transport Models",
+      "horizon": "H05",
+      "source_file": "mathematical-structures.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "e50043a5c3ad81aa967cd1fa3b37862d38959473ce3b61a10b3a9661843f3f71"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
