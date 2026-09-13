@@ -102,3 +102,56 @@ func test_retained_pp_tacticity_measurement_supplies_closures_without_certifying
 			WorldSimulation.military.cancel_equipment_job(int(line.id))
 		assert_float(float(s.resource_stockpiles.get("Water Wash Bottles",0))).is_equal(1.0)
 		assert_float(float(s.resource_stockpiles.get("Tacticity-Characterized PP Batches",0))).is_equal(0.0))
+
+func test_quantitative_peg_and_pp_resume_full_save_without_duplicate_materials()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	for recipe:String in ["traceable_peg_batch","traceable_pp_batch"]:
+		WorldSimulation.clear();WorldSimulation.create_actor("peg",5211)
+		WorldSimulation.scoped("peg",func()->void:
+			var s=WorldSimulation.state;s.elapsed_days=0;s.settlement_site_committed=true;s.convoy_traveling=false
+			s.population_allocations.Crafting=20;s.population_health=1.0;s.simulation_metrics.labor_efficiency=1.0
+			var spec:=I.product(recipe)
+			for item:String in spec.materials:s.resource_stockpiles[item]=float(spec.materials[item])
+			Ops.data().last_day=0;Ops.data().services={"electricity":10.0,"polymer_stirred_work":10.0,"polymer_heat_removal":10.0}
+			var job:=setup_line(recipe,1);P.advance(WorldSimulation.military,job,100)
+			WorldSimulation.military.cancel_equipment_job(int(job.id))
+			s.known_discoveries.append("polymer_solution_processing");s.discovery_adoption.polymer_solution_processing=1.0
+			for item:String in ["Coal","Freshwater","Insulated Cable","Paper","Toluene"]:s.resource_stockpiles[item]=100.0
+			s.resource_stockpiles["NMR Methanol References"]=4.0
+			for id:String in ["nmr_analytical_bench","steam_generator"]:Ops.data().plants[id]={"installed":1,"building":0,"work":0.0,"enabled":true}
+			for day:int in range(1,11):s.elapsed_days=day;Ops.advance(day)
+			assert_str(Samples.data().records["1"].status).is_equal("acquiring")
+			assert_float(float(Samples.data().records["1"].acquisition.work)).is_equal(2.0))
+		var slot:="quantitative_polymer_%s_%d"%[recipe,OS.get_process_id()]
+		assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+		WorldSimulation.clear();var restored:=SaveSystem.load_game(slot)
+		assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+		if restored.get("ok",false):
+			WorldSimulation.scoped("peg",func()->void:
+				var s=WorldSimulation.state;var before:Dictionary=s.resource_stockpiles.duplicate(true)
+				assert_float(Acquisition.advance("1",100)).is_equal(0.0)
+				assert_bool(s.resource_stockpiles==before).is_true()
+				for day:int in range(11,15):s.elapsed_days=day;Ops.advance(day)
+				assert_str(Acquisition.report("1").status).is_equal("resolved")
+				assert_float(float(s.resource_stockpiles.get(I.product(recipe).output,0))).is_equal(0.0))
+		assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+		var completed:=SaveSystem._read_payload(slot)
+		WorldSimulation.clear();restored=SaveSystem.load_game(slot)
+		assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+		if restored.get("ok",false):
+			WorldSimulation.scoped("peg",func()->void:
+				var s=WorldSimulation.state
+				var output:="Size-Characterized PEG Batches" if recipe=="traceable_peg_batch" else "Tacticity-Characterized PP Batches"
+				assert_float(float(s.resource_stockpiles.get(output,0))).is_equal(1.0)
+				assert_str(Acquisition.report("1").status).is_equal("resolved")
+				Acquisition.release_characterized_specimen(Samples.data().records["1"])
+				assert_float(float(s.resource_stockpiles.get(output,0))).is_equal(1.0))
+		# Exercise the actual full-load rejection boundary before world reset.
+		var observation:Dictionary=completed.curated_WorldSimulation.actors.peg.state.GameState.technology_operations.polymer_samples.records["1"].observation
+		if recipe=="traceable_peg_batch":observation.peg_observation="damaged"
+		else:observation.noise_estimate=[]
+		assert_bool(SaveSystem._write_payload(SaveSystem.slot_path(slot),completed).get("ok",false)).is_true()
+		assert_bool(SaveSystem.load_game(slot).has("error")).is_true()
+		assert_bool(WorldSimulation.export_state().actors.has("peg")).is_true()
+		DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
