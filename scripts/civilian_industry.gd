@@ -2,6 +2,11 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	# Earth mixes and woven framing require subsequent local building drying.
+	"adobe_mix":{"name": "Mold-ready adobe earth mix", "output": "Adobe Mix", "gate": "adobe_wall_construction", "materials": {"Clay": 2, "Fine Sand": 1, "Fiber Plants": 0.2, "Freshwater": 1}, "days": 1, "tooling": {"Timber": 2, "Stone": 2}},
+	"earthen_daub":{"name": "Fiber-reinforced earthen daub", "output": "Earthen Daub", "gate": "wattle_and_daub_walls", "materials": {"Clay": 1.2, "Fine Sand": 0.5, "Fiber Plants": 0.2, "Freshwater": 0.8}, "days": 1, "tooling": {"Timber": 2, "Stone": 2}},
+	"wattle_lattices":{"name": "Bound wattle lattices", "output": "Wattle Lattices", "gate": "wattle_and_daub_walls", "materials": {"Timber": 1, "Fiber Plants": 0.2}, "days": 2, "tooling": {"Stone": 1}},
+
 	# Glass batch preparation, controlled cooling and ceramic forming/firing.
 	"graded_glass_cullet":{"name": "Weighed and recorded compatible cullet", "output": "Graded Glass Cullet", "gate": "glass_batch_composition_control", "materials": {"Glass": 1.25, "Clay Record Tablets": 0.02}, "days": 2, "tooling": {"Stone": 3, "Refined Copper": 1}},
 	"cullet_glass":{"name": "Remelted graded glass", "output": "Glass", "gate": "glassmaking", "materials": {"Graded Glass Cullet": 1, "Timber": 1.8}, "days": 2, "tooling": {"Refractory Bricks": 6, "Ceramic Crucibles": 1}},

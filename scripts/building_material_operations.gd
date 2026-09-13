@@ -1,7 +1,10 @@
 extends RefCounted
 ## Per-building paid fabric. This module owns no population, clock or stock ledger.
-const METHODS=["concrete_curing_control","concrete_compaction_practice","masonry_moisture_management","masonry_bond_patterns","mortar_compatibility_assessment","masonry_repointing","shallow_foundation_assessment","foundation_settlement_monitoring","masonry_buttressing","vaulted_masonry_roofs","domed_masonry_roofs"]
+const METHODS=["adobe_wall_construction","wattle_and_daub_walls","concrete_curing_control","concrete_compaction_practice","masonry_moisture_management","masonry_bond_patterns","mortar_compatibility_assessment","masonry_repointing","shallow_foundation_assessment","foundation_settlement_monitoring","masonry_buttressing","vaulted_masonry_roofs","domed_masonry_roofs"]
 const PROFILES={
+	"adobe_units":{"name": "Protected adobe-unit walls", "gate": "adobe_wall_construction", "family": "earth", "form": "adobe_household", "cost": {"Adobe Mix": 4, "Stone": 1, "Timber": 1, "Thatch Panels": 1}, "work": 1.25, "curing_days": 28, "curing_water": 0, "decay": 0.9, "repair": "Adobe Mix"},
+	"wattle_daub":{"name": "Wattle and daub framed walls", "gate": "wattle_and_daub_walls", "family": "organic", "form": "wattle_daub_household", "cost": {"Wattle Lattices": 2, "Earthen Daub": 2, "Timber": 2, "Thatch Panels": 1}, "work": 1, "curing_days": 14, "curing_water": 0, "decay": 0.95, "repair": "Earthen Daub"},
+
 	"arched_masonry":{"name": "Arched masonry fabric", "gate": "voussoir_arch_assembly", "family": "stone", "form": "arched_masonry_household", "cost": {"Stone": 2, "Voussoir Stones": 2, "Arch Centering": 0.2, "Building Mortar": 1}, "work": 1.8, "curing_days": 30, "curing_water": 0.5, "decay": 0.65, "repair": "Building Mortar"},
 	"buttressed_masonry":{"name": "Buttressed masonry fabric", "gate": "masonry_buttressing", "family": "stone", "form": "buttressed_masonry_household", "cost": {"Stone": 6, "Building Mortar": 1.5, "Timber": 0.8}, "work": 1.7, "curing_days": 30, "curing_water": 0.7, "decay": 0.6, "repair": "Building Mortar"},
 	"vaulted_masonry":{"name": "Vaulted masonry roof", "gate": "vaulted_masonry_roofs", "family": "stone", "form": "vaulted_masonry_household", "cost": {"Stone": 3, "Voussoir Stones": 3, "Arch Centering": 0.5, "Building Mortar": 2}, "work": 2.5, "curing_days": 30, "curing_water": 1.0, "decay": 0.45, "repair": "Building Mortar"},
@@ -48,8 +51,14 @@ static func progress(plot:Dictionary,work:float,day:int)->float:
 	var profile:Dictionary=plot.get("building_materials",{})
 	var previous:=float(plot.get("construction_progress",0))
 	if profile.is_empty():return clampf(previous+work,0,1)
+	# Adobe units are molded and dried on this paid project before wall assembly.
+	if String(profile.id)=="adobe_units":
+		if work<=0 and not plot.has("curing_started_day"):return previous
+		if not earthen_drying_ready(plot,day):return previous
 	var amount:=clampf(previous+work/float(profile.work),0,1)
 	if amount<1:return amount
+	if String(profile.id)=="adobe_units":return 1.0
+	if String(profile.id)=="wattle_daub":return 1.0 if earthen_drying_ready(plot,day) else .99
 	if int(profile.curing_days)<=0:return 1.0
 	if not plot.has("curing_started_day"):
 		plot.curing_started_day=day;plot.curing_last_day=day;plot.curing_work_days=0.0
@@ -66,8 +75,31 @@ static func progress(plot:Dictionary,work:float,day:int)->float:
 	plot.curing_completed_day=day
 	return 1.0
 
+static func drying_factor(environment:Dictionary,day:int)->float:
+	var temperature:=PlanetEnvironment.ambient_temperature_c(environment,day)
+	return clampf((temperature-5.0)/15.0,0,1)*clampf((.8-float(environment.get("precipitation",.5)))/.6,0,1)
+static func earthen_drying_ready(plot:Dictionary,day:int)->bool:
+	var profile:Dictionary=plot.building_materials
+	if plot.has("curing_completed_day"):return true
+	if not plot.has("curing_started_day"):
+		plot.curing_started_day=day;plot.curing_last_day=day;plot.curing_work_days=0.0
+		return false
+	# The existing monthly owner samples this city's seasonal conditions. Long gaps
+	# grant at most one month's drying; repeated same-day calls grant none.
+	var elapsed:=minf(30,maxf(0,day-int(plot.curing_last_day)))
+	plot.curing_last_day=maxi(day,int(plot.curing_last_day))
+	var drying:=elapsed*drying_factor(WorldSimulation.food.current_environment_profile(),day)
+	plot.curing_work_days=minf(float(profile.curing_days),float(plot.curing_work_days)+drying)
+	if float(plot.curing_work_days)<float(profile.curing_days):return false
+	plot.curing_completed_day=day
+	return true
 static func decay_factor(plot:Dictionary)->float:
-	return float(plot.get("building_materials",{}).get("decay",1.0))
+	var profile:Dictionary=plot.get("building_materials",{})
+	var factor:=float(profile.get("decay",1.0))
+	if String(profile.get("id","")) in ["adobe_units","wattle_daub"]:
+		var rain:=clampf(float(WorldSimulation.food.current_environment_profile().get("precipitation",.5)),0,1)
+		factor*=1.0+rain*(.6 if String(profile.id)=="adobe_units" else .35)
+	return factor
 static func supplied_maintenance(plot:Dictionary,work:float)->float:
 	var profile:Dictionary=plot.get("building_materials",{})
 	if profile.is_empty() or work<=0:return work
@@ -105,6 +137,9 @@ static func valid_plot(plot:Dictionary)->bool:
 		if key=="curing_work_days" and float(plot[key])>float(profile.curing_days):return false
 		if key!="curing_work_days" and float(plot[key])!=floorf(float(plot[key])):return false
 	if int(plot.get("curing_last_day",0))<int(plot.get("curing_started_day",0)):return false
+	if String(profile.get("id","")) in ["adobe_units","wattle_daub"] and plot.has("curing_completed_day"):
+		if float(plot.get("curing_work_days",0))<float(profile.curing_days):return false
+		if int(plot.curing_completed_day)<int(plot.get("curing_started_day",0)) or int(plot.curing_completed_day)>int(plot.get("curing_last_day",0)):return false
 	return true
 static func valid_state(state:Dictionary)->bool:
 	var groups:Array=[state.get("settlement_plots",[])]
@@ -123,12 +158,15 @@ static func describe(plot:Dictionary)->String:
 	if profile.is_empty():return ""
 	var spec:Dictionary=PROFILES[profile.id]
 	var result:="Building fabric: %s. Maintenance consumes %s.\n" % [spec.name,spec.repair]
+	if String(profile.id) in ["adobe_units","wattle_daub"] and String(plot.get("status",""))=="under_construction":
+		result+="Local drying: %.1f / %d suitable days. %s Cold or wet conditions pause drying.\n" % [float(plot.get("curing_work_days",0)),int(profile.curing_days),"Adobe units dry before wall assembly." if String(profile.id)=="adobe_units" else "Applied daub must dry before occupancy."]
+		return result
 	if String(plot.get("status",""))=="under_construction" and plot.has("curing_started_day"):
 		result+="Curing: %.0f / %d supplied days. Needs %.2f Freshwater per 30-day interval; shortages pause curing.\n" % [float(plot.get("curing_work_days",0)),int(profile.curing_days),float(profile.curing_water)*30.0/maxf(1,float(profile.curing_days))]
 	return result
 static func visual_mix(cost:Dictionary)->Dictionary:
 	# Appearance equivalents only. These values never enter the resource ledger.
-	var equivalents:={"Building Mortar":{"Clay":.6,"Stone":.4},"Concrete Dry Mix":{"Stone":.8,"Clay":.2},"Roof Tiles":{"Clay":1.0},"Timber Trusses":{"Timber":1.0},"Thatch Panels":{"Fiber Plants":1.0},"Voussoir Stones":{"Stone":1.0},"Masonry Drainage Beds":{"Stone":1.0}}
+	var equivalents:={"Adobe Mix":{"Clay":.85,"Fiber Plants":.15},"Earthen Daub":{"Clay":.8,"Fiber Plants":.2},"Wattle Lattices":{"Timber":.85,"Fiber Plants":.15},"Building Mortar":{"Clay":.6,"Stone":.4},"Concrete Dry Mix":{"Stone":.8,"Clay":.2},"Roof Tiles":{"Clay":1.0},"Timber Trusses":{"Timber":1.0},"Thatch Panels":{"Fiber Plants":1.0},"Voussoir Stones":{"Stone":1.0},"Masonry Drainage Beds":{"Stone":1.0}}
 	var result:Dictionary={};var total:=0.0
 	for material:String in cost:
 		var parts:Dictionary=equivalents.get(material,{material:1.0} if material in ["Timber","Stone","Clay","Fiber Plants"] else {})
@@ -140,7 +178,7 @@ static func visual_mix(cost:Dictionary)->Dictionary:
 	return result
 static func roof_plan(profile:Dictionary,fallback:String)->String:
 	match String(profile.get("id","")):
-		"thatched_frame","trussed_roof":return "long_thatch"
+		"thatched_frame","trussed_roof","adobe_units","wattle_daub":return "long_thatch"
 		"tiled_masonry":return "fired_tile_roof"
 		"arched_masonry","vaulted_masonry","domed_masonry":return "masonry_roof"
 		"cast_concrete":return "concrete_roof"
