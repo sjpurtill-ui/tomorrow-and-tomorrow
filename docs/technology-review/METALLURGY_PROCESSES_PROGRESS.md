@@ -5,6 +5,39 @@ Branch: `codex/metallurgy-processes`.
 Base: verified 843 checkpoint `59f146e5fa9badfa24f147e3adad48d9a3bc968e`.
 Not an integration handoff. No new operating discoveries claimed.
 
+Updated deliberately from verified 856 main checkpoint
+`68cd6f66b1d13c7e05d0bcee94216d21168b3a14`; additive Industry merge was clean.
+The original manufacturing delivery and correction remain frozen and are now
+integrated by the designated integrator.
+
+Latest connected route: selected steel → retained thermal treatment → paid
+destructive section and reflected field → section-checked normalized stock →
+plain shaft blanks. Four additional recipes provide the furnace, selected
+steel, treatment and actual shaft consumer. This is one selected treatment,
+not universal steel qualification or the whole twelve-method batch.
+The section's source/job/site/ordinal, consumed 0.02 material, preparation
+supplies, work/energy, generated field and measured result remain attached to
+the workpiece; repeated calls cannot duplicate stock or reuse the section.
+
+Approved narrow PersistentProduction hooks now handle thermal dispatch,
+reserved-feed eligibility, retool disposal and validation. Ops requests power
+for retained local thermal pieces after free feed is exhausted. Thermal-model
+energy converts to existing game electricity through the recipe's explicit
+0.01 scale; section acquisition pays its separate 0.2 electricity. This keeps
+model thermal units separate from the game's service units.
+
+Connected metallurgy suites: 10/10 pass, zero errors/failures/skips/orphans,
+`/tmp/tt-metallurgy-connected-tests-final.log`. These include actual workshop
+setup, final-feed reservation, pending power demand, paid partial section
+reload, accepted stock and the shaft consumer. The initial connected test
+exposed missing reserved-feed eligibility; corrected before the passing run.
+Daily generator execution, full SaveSystem roundtrip, passive calendar cooling,
+stronger thermal-history provenance, supply audit and remaining methods still
+need implementation/verification. Definitions remain unregistered.
+Shared-hook regression: metallurgy workshop, existing machine parts and
+technology operations suites pass 32/32, zero errors/failures/skips/orphans
+(`/tmp/tt-metallurgy-shared-regression.log`, 12.755 seconds).
+
 The twelve definitions in `metallurgy_process_knowledge.gd` preserve the exact
 authored AND/OR predicates. They remain unregistered until their actual
 processes, observations, acquisition and downstream consumers are working.
