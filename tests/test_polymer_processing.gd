@@ -133,3 +133,18 @@ func test_imported_characterized_resin_enables_adopted_forming_without_synthesis
 		assert_float(float(WorldSimulation.state.resource_stockpiles["Characterized LDPE"])).is_equal_approx(.96,.00001)
 		assert_bool("radical_chain_polymerization" in WorldSimulation.state.known_discoveries).is_false()
 		assert_bool(P.recipe(WorldSimulation.military,"radical_ldpe_resin").has("error")).is_true())
+func test_injection_grade_and_formed_sheet_reach_real_telephone_assembly()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare()
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		WorldSimulation.state.resource_stockpiles["Molding-Grade LDPE"]=2.0
+		WorldSimulation.state.resource_stockpiles["LDPE Forming Sheet"]=2.0
+		WorldSimulation.state.resource_stockpiles["Compressed Air"]=2.0
+		assert_int(int(run_batch("injected_telephone_covers",1).get("completed",0))).is_equal(1)
+		assert_int(int(run_batch("formed_telephone_covers",2).get("completed",0))).is_equal(1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Molding-Grade LDPE"])).is_equal_approx(1.4,.00001)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["LDPE Forming Sheet"])).is_equal_approx(1.2,.00001)
+		for resource:String in ["Carbon Microphones","Telephone Earpieces","Insulated Cable","Timber"]:WorldSimulation.state.resource_stockpiles[resource]=10.0
+		assert_int(int(run_batch("polymer_cased_telephones",2).get("completed",0))).is_equal(2)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Polyethylene Telephone Covers"])).is_equal(0.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Telephone Sets"])).is_equal(2.0))

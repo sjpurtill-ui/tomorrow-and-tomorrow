@@ -1,5 +1,5 @@
 extends RefCounted
-## Initial operating branch of the larger polymer family; delivery remains HELD.
+## Partial polymer family; delivery remains HELD.
 static func entries()->Array[Dictionary]:
 	return [
   {
@@ -102,7 +102,8 @@ static func entries()->Array[Dictionary]:
     "observation": "Form a continuous qualified polymer film through controlled die flow and cooling",
     "effects": {},
     "production_items": [
-      "ldpe_film_extrusion"
+      "ldpe_film_extrusion",
+      "ldpe_formed_sheet"
     ],
     "production_contract": "Uses named feedstock batches, installed tooling, shared Crafting labor and specified daily power/services. Material qualification consumes the specific batch and samples; ownership of imported output grants no manufacturing mastery."
   },
@@ -136,7 +137,8 @@ static func entries()->Array[Dictionary]:
     "observation": "Measure flow response of a polymer melt under defined thermal and deformation conditions",
     "effects": {},
     "production_items": [
-      "ldpe_film_grade"
+      "ldpe_film_grade",
+      "ldpe_molding_grade"
     ],
     "production_contract": "Uses named feedstock batches, installed tooling, shared Crafting labor and specified daily power/services. Material qualification consumes the specific batch and samples; ownership of imported output grants no manufacturing mastery."
   },
@@ -287,5 +289,77 @@ static func entries()->Array[Dictionary]:
       "ldpe_pelletizing"
     ],
     "production_contract": "Uses named feedstock batches, installed tooling, shared Crafting labor and specified daily power/services. Material qualification consumes the specific batch and samples; ownership of imported output grants no manufacturing mastery."
+  },
+  {
+    "id": "polymer_injection_molding",
+    "name": "Polymer Injection Molding",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_melt_rheology",
+      "precision_machinery"
+    ],
+    "requires_all": [
+      "polymer_melt_rheology",
+      "precision_machinery"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Injection Molding",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Fill a qualified mold with controlled polymer flow and solidification",
+    "effects": {},
+    "production_contract": "Consumes compatible grade or formed sheet, paid process tooling, shared workshop work and energy into fitted low-load telephone covers. Covers retain a timber internal mounting base; they do not replace pressure vessels or structural machine parts.",
+    "production_items": [
+      "injected_telephone_covers"
+    ]
+  },
+  {
+    "id": "polymer_thermoforming",
+    "name": "Polymer Thermoforming",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "thermoplastic_processing"
+    ],
+    "requires_all": [
+      "thermoplastic_processing"
+    ],
+    "requires_any": [
+      [
+        "vacuum_pumps",
+        "compressed_air_systems",
+        "precision_machinery"
+      ]
+    ],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Thermoforming",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Shape a heated qualified polymer sheet against compatible tooling",
+    "effects": {},
+    "production_contract": "Consumes compatible grade or formed sheet, paid process tooling, shared workshop work and energy into fitted low-load telephone covers. Covers retain a timber internal mounting base; they do not replace pressure vessels or structural machine parts.",
+    "production_items": [
+      "formed_telephone_covers"
+    ]
   }
 ]

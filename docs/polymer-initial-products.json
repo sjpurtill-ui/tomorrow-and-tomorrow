@@ -189,5 +189,90 @@
     },
     "power": 3,
     "daily_power": 0.3
+  },
+  "ldpe_molding_grade": {
+    "name": "Flow-tested LDPE molding batch",
+    "output": "Molding-Grade LDPE",
+    "gate": "polymer_melt_rheology",
+    "materials": {
+      "LDPE Pellets": 1.04
+    },
+    "days": 3,
+    "tooling": {
+      "Pressure Vessels": 1,
+      "Laboratory Glassware": 2,
+      "Steel": 3
+    },
+    "power": 1,
+    "daily_power": 0.3333333333333333
+  },
+  "ldpe_formed_sheet": {
+    "name": "Extruded LDPE forming sheet",
+    "output": "LDPE Forming Sheet",
+    "gate": "polymer_film_extrusion",
+    "materials": {
+      "Film-Grade LDPE": 1.1,
+      "Freshwater": 1
+    },
+    "days": 3,
+    "tooling": {
+      "Electric Motors": 1,
+      "Steel": 6,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 3,
+    "daily_power": 1.0
+  },
+  "injected_telephone_covers": {
+    "name": "Injection-molded telephone covers",
+    "output": "Polyethylene Telephone Covers",
+    "gate": "polymer_injection_molding",
+    "materials": {
+      "Molding-Grade LDPE": 0.6,
+      "Freshwater": 0.5
+    },
+    "days": 2,
+    "tooling": {
+      "Electric Motors": 1,
+      "Steel": 6,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 2,
+    "daily_power": 1.0
+  },
+  "formed_telephone_covers": {
+    "name": "Pressure-formed and trimmed telephone covers",
+    "output": "Polyethylene Telephone Covers",
+    "gate": "polymer_thermoforming",
+    "materials": {
+      "LDPE Forming Sheet": 0.8,
+      "Compressed Air": 0.2
+    },
+    "days": 3,
+    "tooling": {
+      "Steel": 4,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 2,
+    "daily_power": 0.6666666666666666
+  },
+  "polymer_cased_telephones": {
+    "name": "Telephone sets with molded covers",
+    "output": "Telephone Sets",
+    "gate": "telephone_circuits",
+    "materials": {
+      "Polyethylene Telephone Covers": 1,
+      "Carbon Microphones": 1,
+      "Telephone Earpieces": 1,
+      "Insulated Cable": 2,
+      "Timber": 0.5
+    },
+    "days": 4,
+    "tooling": {
+      "Timber": 2,
+      "Wrought Iron": 1
+    },
+    "power": 0,
+    "daily_power": 0.0
   }
 }
