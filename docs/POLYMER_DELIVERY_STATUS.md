@@ -27,7 +27,10 @@ or the complete technology overhaul.
   the full load boundary. Integration suite 3/3, zero errors/failures/orphans.
 - `6cd8663`: 30 of 46 discovery-specific paper/gouache illustrations are bound.
   The sixth batch uses square source images with Godot import size limit 768 and
-  mipmaps. Remaining 16 illustrations are not yet bound here.
+  mipmaps. Headless import completed without script/import errors; the atlas
+  suite passed 12/12, including loading every bound subject texture and checking
+  its square dimensions and card path. Remaining 16 illustrations are not yet
+  bound here.
 
 ## Outstanding before family handoff
 
