@@ -159,3 +159,41 @@ func test_stone_and_fiber_catchments_belong_to_their_own_city()->void:
 	assert_array(GameState.resource_deposits).is_equal(before)
 	assert_dict(GameState.resource_stockpiles).is_equal(stores)
 	assert_int(SettlementModel.city_resource_snapshot("dawngate").deposits.size()).is_equal(2)
+
+func test_finished_conduits_travel_before_secondary_installation()->void:
+	var planner=preload("res://scripts/water_conveyance_investment.gd")
+	var water=preload("res://scripts/water_conveyance.gd")
+	var previous:Callable=WorldSimulation.context_provider
+	WorldSimulation.context_provider=func(origin:Vector2)->Dictionary:
+		return {"origin":Vector3(origin.x,1,origin.y),"terrain_height_at":func(x:float,_z:float)->float:return 11-x,"environment_profile":{},"water_conveyance_sources":[{"id":"upstream","position":Vector3(9,2,0),"revealed":true}]}
+	GameState.population_allocations.Construction=100
+	GameState.population_allocations.Logistics=100
+	GameState.population_health=1.0;GameState.simulation_metrics.labor_efficiency=1.0
+	GameState.society_capacities.logistics=.8;GameState.society_capacities.institutions=.8
+	for id:String in ["gravity_conduit_grade_control","joinery","clay_pipe_socket_jointing"]:
+		GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
+	GameState.water_metrics={"intake_ratio":1.0,"source_distance_km":0.0}
+	GameState.resource_stockpiles={"Wooden Conduits":10.0}
+	SettlementModel.with_city_resources("dawngate",func()->void:
+		GameState.simulation_metrics.labor_efficiency=1.0
+		GameState.water_metrics={"intake_ratio":.5,"source_distance_km":1.0}
+		GameState.resource_stockpiles={"Clay":2.0})
+	SettlementModel.process_city_trade()
+	var shipped:=0.0
+	for shipment:Dictionary in GameState.city_trade_shipments:
+		if shipment.resource=="Wooden Conduits":shipped+=float(shipment.quantity)
+	assert_float(shipped).is_equal(10.0)
+	assert_float(float(GameState.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+	planner.recommendation()
+	var city:Dictionary=SettlementModel.settlement_record("dawngate")
+	assert_array(city.local_resources.water_conveyance.lines).is_empty()
+	GameState.elapsed_days=20
+	GameState.society_capacities.logistics=0.0
+	SettlementModel.process_city_trade()
+	assert_float(float(city.local_resources.resource_stockpiles.get("Wooden Conduits",0))).is_equal(10.0)
+	planner.recommendation()
+	assert_int(city.local_resources.water_conveyance.lines.size()).is_equal(1)
+	assert_float(float(city.local_resources.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+	assert_array(water.data().lines).is_empty()
+	assert_bool("wooden_log_conduits" in GameState.known_discoveries).is_false()
+	WorldSimulation.context_provider=previous

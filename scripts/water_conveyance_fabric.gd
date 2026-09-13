@@ -23,6 +23,7 @@ static func quote(route:Dictionary,material:String,known:Array,stock:Dictionary)
 	var bill:Dictionary={String(spec.item):float(units),"Clay":float(units)*0.2}
 	var leakage:=float(spec.leakage)
 	var decay:=float(spec.decay)
+	var work_required:=float(units)*4.0
 	var applied:Array[String]=[String(spec.gate),"gravity_conduit_grade_control"]
 	if material=="ceramic" and "lime_mortar" in known and float(stock.get("Building Mortar",0))>=units*.1:
 		bill.erase("Clay");bill["Building Mortar"]=units*.1;leakage*=.8;applied.append("lime_mortar")
@@ -30,11 +31,15 @@ static func quote(route:Dictionary,material:String,known:Array,stock:Dictionary)
 		bill["Conduit Fit Gauges"]=.1;leakage*=.8;applied.append("ceramic_pipe_fit_gauges")
 	if "rigid_pipe_bedding" in known and float(stock.get("Conduit Bedding",0))>=units*.2:
 		bill["Conduit Bedding"]=units*.2;decay*=.7;applied.append("rigid_pipe_bedding")
-	if "buried_pipe_load_assessment" in known:
+	# Supported case: a rigid line on paid bedding, assessed during construction.
+	# Extra crew work covers checking support and correcting bedding placement;
+	# this does not certify arbitrary overburden, traffic loads, or pressure.
+	if "buried_pipe_load_assessment" in known and "rigid_pipe_bedding" in applied:
+		work_required+=float(units)
 		applied.append("buried_pipe_load_assessment");decay*=.85
 	for item:String in bill:
 		if float(stock.get(item,0))<float(bill[item]):return {"error":"Installation needs %.2f %s." % [float(bill[item]),item],"cost":bill}
-	return {"ok":true,"material":material,"cost":bill,"length_km":length,"work_required":float(units)*4.0,"leakage":leakage,"decay":decay,"applied":applied,"route":route.duplicate(true)}
+	return {"ok":true,"material":material,"cost":bill,"length_km":length,"work_required":work_required,"leakage":leakage,"decay":decay,"applied":applied,"route":route.duplicate(true)}
 
 static func begin(terms:Dictionary,stock:Dictionary,day:int)->Dictionary:
 	if not bool(terms.get("ok",false)):return {"error":"A feasible installation quote is required."}
