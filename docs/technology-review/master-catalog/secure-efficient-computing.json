@@ -1,0 +1,584 @@
+[
+  {
+    "id": "hardware_entropy_health_testing",
+    "name": "Hardware Entropy Health Testing",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "analog_digital_conversion"
+    ],
+    "requires_any": [
+      [
+        "statistical_inference",
+        "probability_theory"
+      ]
+    ],
+    "foundations": "analog_digital_conversion",
+    "mechanism": "Check a physical noise source for loss of usable randomness.",
+    "operating_requirement": "Sampled noise hardware, reference tests and failure reporting.",
+    "consequence": "Stops weak random supply; blocks dependent secure services until repaired.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hardware_entropy_health_testing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Check a physical noise source for loss of usable randomness. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Sampled noise hardware, reference tests and failure reporting.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://nvlpubs.nist.gov/nistpubs/specialpublications/nist.sp.800-90b.pdf"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "cryptographic_random_bit_expansion",
+    "name": "Cryptographic Random Bit Expansion",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardware_entropy_health_testing",
+      "cryptographic_protocol_design"
+    ],
+    "requires_any": [],
+    "foundations": "hardware_entropy_health_testing, cryptographic_protocol_design",
+    "mechanism": "Expand a qualified seed into a stateful random stream with reseeding.",
+    "operating_requirement": "Protected generator state and finite fresh entropy.",
+    "consequence": "Supplies bounded random requests; stale or compromised state requires recovery.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryptographic_random_bit_expansion",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Expand a qualified seed into a stateful random stream with reseeding. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Protected generator state and finite fresh entropy.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://nvlpubs.nist.gov/nistpubs/specialpublications/nist.sp.800-90b.pdf"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "hardware_root_key_isolation",
+    "name": "Hardware Root Key Isolation",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryptographic_identity_management",
+      "memory_protection"
+    ],
+    "requires_any": [
+      [
+        "integrated_circuit_fabrication",
+        "programmable_logic_arrays"
+      ]
+    ],
+    "foundations": "cryptographic_identity_management, memory_protection",
+    "mechanism": "Confine root secrets behind a hardware access boundary.",
+    "operating_requirement": "Provisioned protected device and controlled service interface.",
+    "consequence": "Allows authentication without exposing root keys to ordinary software.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hardware_root_key_isolation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Confine root secrets behind a hardware access boundary. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Provisioned protected device and controlled service interface.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/hw/ip/keymgr/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "hardware_key_derivation_states",
+    "name": "Hardware Key Derivation States",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardware_root_key_isolation",
+      "content_integrity_hashing"
+    ],
+    "requires_any": [],
+    "foundations": "hardware_root_key_isolation, content_integrity_hashing",
+    "mechanism": "Derive separate working keys from versioned one-way identity states.",
+    "operating_requirement": "Protected derivation engine and recorded device ownership transitions.",
+    "consequence": "Limits cross-context key reuse; state transitions can retire old access.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hardware_key_derivation_states",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Derive separate working keys from versioned one-way identity states. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Protected derivation engine and recorded device ownership transitions.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/hw/ip/keymgr/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "cryptographic_key_sideload",
+    "name": "Cryptographic Key Sideload",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardware_root_key_isolation"
+    ],
+    "requires_any": [
+      [
+        "cryptographic_block_acceleration",
+        "programmable_logic_arrays"
+      ]
+    ],
+    "foundations": "hardware_root_key_isolation",
+    "mechanism": "Transfer a working key directly between protected hardware blocks.",
+    "operating_requirement": "Compatible protected interfaces and qualified interconnect.",
+    "consequence": "Avoids ordinary memory copies while binding use to installed equipment.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryptographic_key_sideload",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Transfer a working key directly between protected hardware blocks. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Compatible protected interfaces and qualified interconnect.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/hw/ip/keymgr/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "cryptographic_block_acceleration",
+    "name": "Cryptographic Block Acceleration",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryptographic_protocol_design"
+    ],
+    "requires_any": [
+      [
+        "integrated_circuit_fabrication",
+        "programmable_logic_arrays"
+      ]
+    ],
+    "foundations": "cryptographic_protocol_design",
+    "mechanism": "Execute repeated cipher rounds in a dedicated datapath.",
+    "operating_requirement": "Qualified cipher hardware, power and data interface.",
+    "consequence": "Raises finite secure-message throughput; does not improve the underlying cipher guarantee.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryptographic_block_acceleration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Execute repeated cipher rounds in a dedicated datapath. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Qualified cipher hardware, power and data interface.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/hw/ip/aes/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "masked_cryptographic_datapaths",
+    "name": "Masked Cryptographic Datapaths",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryptographic_block_acceleration",
+      "cryptographic_random_bit_expansion"
+    ],
+    "requires_any": [],
+    "foundations": "cryptographic_block_acceleration, cryptographic_random_bit_expansion",
+    "mechanism": "Split sensitive intermediate values into randomized shares.",
+    "operating_requirement": "Additional logic, randomness bandwidth and qualification trials.",
+    "consequence": "Reduces tested leakage at extra area and execution cost; no universal immunity.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "masked_cryptographic_datapaths",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Split sensitive intermediate values into randomized shares. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Additional logic, randomness bandwidth and qualification trials.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/hw/ip/aes/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "constant_time_secret_operations",
+    "name": "Constant Time Secret Operations",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryptographic_protocol_design",
+      "software_verification"
+    ],
+    "requires_any": [],
+    "foundations": "cryptographic_protocol_design, software_verification",
+    "mechanism": "Remove secret-dependent branches and memory-access patterns from sensitive operations.",
+    "operating_requirement": "Reviewed code and timing measurements on the target machine.",
+    "consequence": "Reduces timing exposure with a possible throughput cost.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "constant_time_secret_operations",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Remove secret-dependent branches and memory-access patterns from sensitive operations. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Reviewed code and timing measurements on the target machine.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/doc/security/implementation_guidelines/hardware/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "cryptographic_leakage_qualification",
+    "name": "Cryptographic Leakage Qualification",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryptographic_protocol_design",
+      "instrumentation_amplifier_circuits"
+    ],
+    "requires_any": [],
+    "foundations": "cryptographic_protocol_design, instrumentation_amplifier_circuits",
+    "mechanism": "Measure timing, power and electromagnetic leakage against a declared threat model.",
+    "operating_requirement": "Instrumented samples, controlled experiments and analyst work.",
+    "consequence": "Reveals vulnerable implementations; testing itself does not repair them.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryptographic_leakage_qualification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Measure timing, power and electromagnetic leakage against a declared threat model. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Instrumented samples, controlled experiments and analyst work.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/doc/security/implementation_guidelines/hardware/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "fault_detecting_security_control",
+    "name": "Fault Detecting Security Control",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "finite_state_models",
+      "redundant_sensor_voting"
+    ],
+    "requires_any": [],
+    "foundations": "finite_state_models, redundant_sensor_voting",
+    "mechanism": "Check privileged control transitions with redundant encodings and error responses.",
+    "operating_requirement": "Qualified logic and fault trials on actual hardware.",
+    "consequence": "Detected corruption aborts a sensitive operation; faults outside the test model remain possible.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fault_detecting_security_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Check privileged control transitions with redundant encodings and error responses. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Qualified logic and fault trials on actual hardware.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://opentitan.org/book/doc/security/implementation_guidelines/hardware/"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "dynamic_voltage_frequency_scaling",
+    "name": "Dynamic Voltage and Frequency Scaling",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardware_timing_closure",
+      "operating_system_device_drivers"
+    ],
+    "requires_any": [
+      [
+        "linear_voltage_regulation",
+        "switch_mode_power_conversion"
+      ]
+    ],
+    "foundations": "hardware_timing_closure, operating_system_device_drivers",
+    "mechanism": "Choose qualified voltage and clock operating points as demand changes.",
+    "operating_requirement": "Adjustable hardware, stable supply and characterized operating points.",
+    "consequence": "Trades compute throughput against power; unsupported low voltage causes rejected settings or faults.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dynamic_voltage_frequency_scaling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Choose qualified voltage and clock operating points as demand changes. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Adjustable hardware, stable supply and characterized operating points.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://cdn.kernel.org/doc/html/latest/admin-guide/pm/cpufreq.html"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "idle_residency_governors",
+    "name": "Idle Residency Governors",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "hardware_interrupt_handling",
+      "process_scheduling"
+    ],
+    "requires_any": [],
+    "foundations": "hardware_interrupt_handling, process_scheduling",
+    "mechanism": "Select a low-power idle state from expected idle duration and wake latency.",
+    "operating_requirement": "Supported sleep states and measured entry and exit costs.",
+    "consequence": "Long idle periods save energy; frequent wakeups can erase the gain.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "idle_residency_governors",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Select a low-power idle state from expected idle duration and wake latency. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Supported sleep states and measured entry and exit costs.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://www.kernel.org/doc/html/latest/driver-api/pm/cpuidle.html"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "device_runtime_suspend",
+    "name": "Device Runtime Suspend",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "operating_system_device_drivers"
+    ],
+    "requires_any": [],
+    "foundations": "operating_system_device_drivers",
+    "mechanism": "Suspend an unused device while preserving a path to resume service.",
+    "operating_requirement": "Driver callbacks, usage tracking and a wake-capable device where needed.",
+    "consequence": "Reduces peripheral consumption; resume latency can delay work.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "device_runtime_suspend",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Suspend an unused device while preserving a path to resume service. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Driver callbacks, usage tracking and a wake-capable device where needed.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://docs.kernel.org/power/runtime_pm.html"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "power_domain_dependency_ordering",
+    "name": "Power Domain Dependency Ordering",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "device_runtime_suspend",
+      "finite_state_models"
+    ],
+    "requires_any": [],
+    "foundations": "device_runtime_suspend, finite_state_models",
+    "mechanism": "Order power transitions so a dependent device retains its required parent services.",
+    "operating_requirement": "Declared device dependencies and checked transition sequencing.",
+    "consequence": "Prevents powering down a live dependency; shared demand may keep a domain awake.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "power_domain_dependency_ordering",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Order power transitions so a dependent device retains its required parent services. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Declared device dependencies and checked transition sequencing.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://docs.kernel.org/power/runtime_pm.html"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "energy_aware_task_placement",
+    "name": "Energy Aware Task Placement",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "process_scheduling",
+      "compute_power_budgeting"
+    ],
+    "requires_any": [],
+    "foundations": "process_scheduling, compute_power_budgeting",
+    "mechanism": "Place runnable work using measured performance-state power models.",
+    "operating_requirement": "Calibrated processors, workload demand estimates and scheduling capacity.",
+    "consequence": "Can reduce work energy while respecting capacity; inaccurate models may select worse placements.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "energy_aware_task_placement",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Place runnable work using measured performance-state power models. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Calibrated processors, workload demand estimates and scheduling capacity.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://cdn.kernel.org/doc/html/latest/power/energy-model.html"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  },
+  {
+    "id": "latency_bounded_power_policy",
+    "name": "Latency Bounded Power Policy",
+    "field": "D21",
+    "status": "authored_draft",
+    "requires_all": [
+      "idle_residency_governors",
+      "dynamic_voltage_frequency_scaling",
+      "real_time_computing"
+    ],
+    "requires_any": [],
+    "foundations": "idle_residency_governors, dynamic_voltage_frequency_scaling, real_time_computing",
+    "mechanism": "Constrain power-state selection by service deadlines and wakeup latency.",
+    "operating_requirement": "Measured transition times, workload deadlines and qualified controller.",
+    "consequence": "Keeps urgent workloads responsive by forgoing some energy savings.",
+    "branching_note": "All required parents and one member of each alternative group are needed. Hardware may be purchased; manufacture and operational qualification remain distinct. No date, nation or civilization identity gate.",
+    "recovery": "Outside evidence accelerates local trials only after payment, delivery and competent study; imported service remains finite and provider-dependent.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "latency_bounded_power_policy",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Constrain power-state selection by service deadlines and wakeup latency. Demonstrate the stated consequence under the actual operating requirements.",
+      "operating_requirements": "Measured transition times, workload deadlines and qualified controller.",
+      "route_terms": {
+        "scholar_envoy": "Pay or trade for a reachable specialist; travel and supervised local trials take time.",
+        "partnership": "Contribute equipment time, test samples or reciprocal results; access depends on partner capacity.",
+        "purchased_research": "Commission a bounded question and pay for evidence; uncertain results still need local replication.",
+        "licensed_or_imported_service": "Purchase compatible equipment or metered provider service; ongoing supply does not confer manufacturing knowledge.",
+        "reverse_engineering": "Obtain a real sample and spend analysis time and consumables; hidden design knowledge may remain unresolved."
+      }
+    },
+    "evidence_sources": [
+      "https://www.kernel.org/doc/html/latest/driver-api/pm/cpuidle.html"
+    ],
+    "historical_scope": "Established modern engineering mechanism; proposed game consumer awaits implementation."
+  }
+]

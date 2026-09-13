@@ -9634,6 +9634,166 @@
       "classification_status": "editorial_review",
       "rationale": "Operation of sustained offworld surface infrastructure is the authored scope; laboratory heritage does not imply deployed settlement capability. This is not a date gate.",
       "scope_digest": "022aa41496a60f943a738b654df6fb68a2ff6cd0e18f66ab681c9e03d432397d"
+    },
+    {
+      "id": "hardware_entropy_health_testing",
+      "name": "Hardware Entropy Health Testing",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "e663e79d097c65938ab3e70ac04bd1d7653409db82f2916a01506476b2137789"
+    },
+    {
+      "id": "cryptographic_random_bit_expansion",
+      "name": "Cryptographic Random Bit Expansion",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "30e79eeebd14ed4390401579eef90c121a0f3f5418a7bb1418f67519703652ca"
+    },
+    {
+      "id": "hardware_root_key_isolation",
+      "name": "Hardware Root Key Isolation",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "0df318a2c98d304fa8255e54dda79ccf7307191a1ad3d5c2f135cf10234fe553"
+    },
+    {
+      "id": "hardware_key_derivation_states",
+      "name": "Hardware Key Derivation States",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "4dc03813f00f6c3f964e95ec91f6ba4e78f7e2a94337c8a9e2553287e1878ba4"
+    },
+    {
+      "id": "cryptographic_key_sideload",
+      "name": "Cryptographic Key Sideload",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "974690c74aa6714304823f7c5a8c50e4d170b9e559340ae4c63253d7c87e5ec0"
+    },
+    {
+      "id": "cryptographic_block_acceleration",
+      "name": "Cryptographic Block Acceleration",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "30c924dae862597559abbd0181dd4dc777f909ad81a582eb92ab9bb070457e8c"
+    },
+    {
+      "id": "masked_cryptographic_datapaths",
+      "name": "Masked Cryptographic Datapaths",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "459bac121ae4f5749ac37eb7585a6de0e379ed895a846c48da6d5b6d1aac0d37"
+    },
+    {
+      "id": "constant_time_secret_operations",
+      "name": "Constant Time Secret Operations",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "7721dc161a4e9efbd6cae82c8920afde9fd3cb54390ebfe6617fac50a4b06420"
+    },
+    {
+      "id": "cryptographic_leakage_qualification",
+      "name": "Cryptographic Leakage Qualification",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "de909c7296677ba175d95ad2a614120e35e412881a1f9ea7300e876cc16afed0"
+    },
+    {
+      "id": "fault_detecting_security_control",
+      "name": "Fault Detecting Security Control",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "b5780150366706b8ba51a962cb0fa7815577257d9bc4a2df840381793e1a9efc"
+    },
+    {
+      "id": "dynamic_voltage_frequency_scaling",
+      "name": "Dynamic Voltage and Frequency Scaling",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "a25e7e83ad9218f9019c409d4341fb41b5df0e5d01fb714c6ccacf8401429b68"
+    },
+    {
+      "id": "idle_residency_governors",
+      "name": "Idle Residency Governors",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "0134c0b128d59a93c17c3ee3a1f2dde8385d16b34d5ce4fc875fa4ab22e3912a"
+    },
+    {
+      "id": "device_runtime_suspend",
+      "name": "Device Runtime Suspend",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "42b9b5fd172d8fdfede54144217383cff32f8261390d7060319cbe72414c9db8"
+    },
+    {
+      "id": "power_domain_dependency_ordering",
+      "name": "Power Domain Dependency Ordering",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "6510c1698abee7eb99fb4bce240a4b9cef92dabb41a4e195d0ef1b1ce5a09139"
+    },
+    {
+      "id": "energy_aware_task_placement",
+      "name": "Energy Aware Task Placement",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "91448d267d3b53f774f3efb0c936666de90f9a2759c10478646c4868af789088"
+    },
+    {
+      "id": "latency_bounded_power_policy",
+      "name": "Latency Bounded Power Policy",
+      "horizon": "H05",
+      "source_file": "secure-efficient-computing.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
+      "scope_digest": "727254acf1968eda3866a83f7072841958b707d6f2106ab8c91d614582c83791"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

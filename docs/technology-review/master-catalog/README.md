@@ -19,7 +19,11 @@ The remaining fields must be authored through the substantial future. Avoid spen
 
 Implement and integrate cohesive operating systems while extending broad authored coverage and cross-field links. Validate identity uniqueness and causal reachability for the assembled graph, and generate subject artwork for stable identities. Run focused checks once per cohesive change; broad regression and long natural-history simulation belong at major milestones and must not block independent authoring.
 
-## Current authored coverage
+## Computing authoring follow-up
+
+[Secure and Efficient Computing Review](Secure%20and%20Efficient%20Computing%20Review.md) adds sixteen distinct H05 proposals. On this branch the combined catalog is **3,072 identities (657 integrated + 2,415 drafts), with 1,928 still to author**. Security-hardware authored scope is mapped; energy-proportional computing stays partial. The historical summaries below retain their publication counts; `coverage.json` is the derived current accounting. The full implementation and imagery remain unfinished.
+
+## Earlier authored coverage checkpoints
 
 The master expansion contains **2,405 draft identities** across all twenty-four fields. Alongside **651 integrated identities**, this accounts for **3,056 distinct IDs; 1,944 remain to author**. The pending communications bucket is empty. Integration and focused tests do not establish full-campaign pacing or completed artwork.
 
