@@ -1,3 +1,9 @@
+## September 13 — polymer isocyanate prerequisites
+
+Authored four worker-requested upstream identities: coal light-oil recovery, aromatic nitration, aromatic amine hydrogenation and isocyanate synthesis. Exact requested foundations are retained. Typed feeds, paid reaction/separation, catalyst compatibility and rejected fractions remain explicit. EPA's coke-recovery description supports the selected coal route; the initially suggested hydrocarbonization paper does not by itself establish it. See `technology-review/Polymer Isocyanate Prerequisites.md`.
+
+Ledger: **740 integrated +2,665 drafts =3,405 identities**, leaving **1,595 to author and 4,260 to implement**. Parent/duplicate checks and 15 ledger tests pass. Runtime 740/522/402/20 and art 162/740 are unchanged. Catalog-only commit in the integrator worktree on `codex/precision-component-processes`, based on `3e23d2b`; no save-format impact. Separate machining implementation has passed 91 isolated runtime cases but is not yet integrated. No player launch or package rebuild.
+
 ## September 13 — polymer oxide prerequisites
 
 Authored worker-requested ethylene_oxide_synthesis and ethylene_glycol_hydrolysis with exact requested mandatory foundations. Separate supported-catalyst oxidation and paid hydrolysis/separation retain named feeds, competing products and grade limits. The silver catalyst is reaction-specific. See `technology-review/Polymer Oxide Prerequisites.md`.

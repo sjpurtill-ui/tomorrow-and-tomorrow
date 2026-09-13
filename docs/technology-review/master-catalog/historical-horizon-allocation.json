@@ -13084,6 +13084,46 @@
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "f6f302a1089260bb58205a791f765786bb385521a114ac6471261528b0805296"
+    },
+    {
+      "id": "coal_light_oil_recovery",
+      "name": "Coal Light-oil Recovery",
+      "horizon": "H04",
+      "source_file": "polymer-isocyanate-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "59c6fb252309f425a406f9b68929aeb314b096a537f94f29c6cda9fdee83178e"
+    },
+    {
+      "id": "aromatic_nitration",
+      "name": "Aromatic Nitration",
+      "horizon": "H04",
+      "source_file": "polymer-isocyanate-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "ffa8ba8b3aea336adf6ba3ac3d6b79b3e5fe17da3cb822c760242f851a53686d"
+    },
+    {
+      "id": "aromatic_amine_hydrogenation",
+      "name": "Aromatic Amine Hydrogenation",
+      "horizon": "H04",
+      "source_file": "polymer-isocyanate-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "af0da75ab024cab6b7216f3942bf9e293de0b508ee2b48ae482c24aa28f47bd9"
+    },
+    {
+      "id": "isocyanate_synthesis",
+      "name": "Isocyanate Synthesis",
+      "horizon": "H04",
+      "source_file": "polymer-isocyanate-prerequisites.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
+      "scope_digest": "638464b3f8e05983e68c279b81be40464e3d01b5154c52eb97384b2f9c1428da"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
