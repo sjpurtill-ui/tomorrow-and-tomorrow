@@ -1,3 +1,11 @@
+## September 13 — 745 verified operating discoveries
+
+Precision component runtime/art commit `0ecb2a1f459625f4dd72d58abc4b4f63afc01462` is integrated and verified. Five existing identities retain original predicates: reamed bore finishing, reciprocating profile slotting, gear shaping, progressive broaching and interchangeable component fits. Fourteen paid routes supply distinct tooling, finished sleeves/shafts, family-specific bearing assemblies, keyed clutch hubs and generated gears; actual existing motors and commissioned geared workshops consume those parts. No global fit certificate, free mechanical power or extra labor owner is added.
+
+**91 isolated runtime cases and 59 canonical runtime cases pass**, plus 12 atlas cases on each checkout. Canonical graph: **745 discoveries /527 routes /416 recipes /20 facilities**, with all declared production reachable and no graph errors. Five new illustrations load at 768 pixels with mipmaps; art is **167 verified /745 live, 578 queued**. Exact canonical745-definition snapshot matches the promoted ledger, and 15 catalog-tool tests pass.
+
+Ledger: **745 integrated +2,660 drafts =3,405 identities**, leaving **1,595 to author and 4,255 to implement**. A three-frame startup produced two ObjectDB/one-resource shutdown cleanup warnings; the verbose repeat and a longer thirty-frame startup were clean. No unrelated engine changes were made or general cleanup guarantee claimed. Old jobs/recipes and save owners remain unchanged; new full binary save continuation and actor isolation pass. Dimensions and acceptance remain bounded named-grade abstractions; full historical bootstrap/pacing remains unverified. No player launch or package rebuild. See `PRECISION_COMPONENT_HANDOFF.md`. The other task's partial polymer family remains isolated.
+
 ## September 13 — polymer isocyanate prerequisites
 
 Authored four worker-requested upstream identities: coal light-oil recovery, aromatic nitration, aromatic amine hydrogenation and isocyanate synthesis. Exact requested foundations are retained. Typed feeds, paid reaction/separation, catalyst compatibility and rejected fractions remain explicit. EPA's coke-recovery description supports the selected coal route; the initially suggested hydrocarbonization paper does not by itself establish it. See `technology-review/Polymer Isocyanate Prerequisites.md`.

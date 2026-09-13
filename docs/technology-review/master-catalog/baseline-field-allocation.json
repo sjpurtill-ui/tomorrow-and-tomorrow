@@ -5303,6 +5303,41 @@
       "source_domain": "nutrition",
       "name": "Edible Resource Recognition",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "reamed_bore_finishing",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Reamed Bore Finishing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "reciprocating_profile_slotting",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Reciprocating Profile Slotting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "gear_shaping_generation",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Gear Shaping Generation",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "progressive_profile_broaching",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Progressive Profile Broaching",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "interchangeable_component_fits",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Interchangeable Component Fits",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

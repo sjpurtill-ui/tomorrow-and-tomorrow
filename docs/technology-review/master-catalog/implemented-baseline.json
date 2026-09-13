@@ -1,5 +1,5 @@
 {
-  "source_commit": "c1f13057d6dee1e53cce319d16fc7fc112c5820c",
+  "source_commit": "0ecb2a1f459625f4dd72d58abc4b4f63afc01462",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -38755,6 +38755,496 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Tool quality"
+      }
+    },
+    {
+      "id": "reamed_bore_finishing",
+      "name": "Reamed Bore Finishing",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "column_drilling_machines,dimensional_metrology",
+      "mechanism": "A multi-edge tool finishes an already prepared hole.",
+      "operating_requirement": "Pay a compatible reamer, undersize bore, work and lubrication; verify final diameter and alignment.",
+      "consequence": "Supply qualified mating bores to assembly; reaming cannot repair a grossly misplaced hole.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable reamed bore finishing instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "reamed_bore_finishing",
+        "grants_instant_mastery": false,
+        "local_demonstration": "A multi-edge tool finishes an already prepared hole.",
+        "operating_requirements": "Pay a compatible reamer, undersize bore, work and lubrication; verify final diameter and alignment.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local reamed bore finishing trials.",
+          "partnership": "Share actual samples and operator time for reamed bore finishing; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded reamed bore finishing process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external reamed bore finishing processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable reamed bore finishing machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://videos.sandvik.coromant.com/reaming-in-inconel-with-cororeamer"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "0ecb2a1f459625f4dd72d58abc4b4f63afc01462",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "column_drilling_machines",
+          "dimensional_metrology"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "reamed_bore_finishing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Reamed Bore Finishing",
+            "missing_all": [
+              "column_drilling_machines",
+              "dimensional_metrology"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "column_drilling_machines",
+              "dimensional_metrology"
+            ],
+            "requires_all": [
+              "column_drilling_machines",
+              "dimensional_metrology"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Reamed Bore Finishing",
+        "observation": "A multi-edge tool finishes an already prepared hole.",
+        "production_contract": "Produce paid finishing reamers and consume pilot-bored sleeves with reamer wear into gauged 20 mm sleeves. Rough holes and generic bearings do not satisfy the named finished-sleeve feed. These sleeves enter the separate fit-check and motor-assembly route.",
+        "production_items": [
+          "precision_reamers",
+          "reamed_sleeves_20"
+        ],
+        "requires": [
+          "column_drilling_machines",
+          "dimensional_metrology"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Tool quality"
+      }
+    },
+    {
+      "id": "reciprocating_profile_slotting",
+      "name": "Reciprocating Profile Slotting",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "crank_linkages,toolbit_heat_treatment",
+      "mechanism": "Repeated single-tool strokes remove material from a slot.",
+      "operating_requirement": "Consume cutting work, tool wear and a correctly fixtured blank; retain depth, feed and clearance limits.",
+      "consequence": "Supply inspected internal keyways to coupling assembly; do not substitute a shallow surface mark for a working slot.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable reciprocating profile slotting instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "reciprocating_profile_slotting",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Repeated single-tool strokes remove material from a slot.",
+        "operating_requirements": "Consume cutting work, tool wear and a correctly fixtured blank; retain depth, feed and clearance limits.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local reciprocating profile slotting trials.",
+          "partnership": "Share actual samples and operator time for reciprocating profile slotting; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded reciprocating profile slotting process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external reciprocating profile slotting processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable reciprocating profile slotting machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.hoffmann-group.com/HR/hr/rotometal/areas-of-application/machining/broaching-garant/e/68141/"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "0ecb2a1f459625f4dd72d58abc4b4f63afc01462",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "crank_linkages",
+          "toolbit_heat_treatment"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "reciprocating_profile_slotting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Reciprocating Profile Slotting",
+            "missing_all": [
+              "crank_linkages",
+              "toolbit_heat_treatment"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "crank_linkages",
+              "toolbit_heat_treatment"
+            ],
+            "requires_all": [
+              "crank_linkages",
+              "toolbit_heat_treatment"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Reciprocating Profile Slotting",
+        "observation": "Repeated single-tool strokes remove material from a slot.",
+        "production_contract": "Build guided crank-driven slotting rams, then pay single-tool cutting work and tool wear to make keyed clutch hubs. A hub is consumed by the existing clutch assembly operation; installed rams also support the separately known gear-shaping process.",
+        "production_items": [
+          "slotting_rams",
+          "slotted_drive_hubs"
+        ],
+        "requires": [
+          "crank_linkages",
+          "toolbit_heat_treatment"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Tool quality"
+      }
+    },
+    {
+      "id": "gear_shaping_generation",
+      "name": "Gear Shaping Generation",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "gear_tooth_generation,precision_machinery",
+      "mechanism": "A reciprocating cutter generates meshing tooth geometry.",
+      "operating_requirement": "Pay a shaped cutter, indexed blank, machine work and inspection; retain stroke-clearance constraints.",
+      "consequence": "Supply qualified internal or external gears to transmission assembly; an inaccessible shoulder blocks the cut.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable gear shaping generation instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "gear_shaping_generation",
+        "grants_instant_mastery": false,
+        "local_demonstration": "A reciprocating cutter generates meshing tooth geometry.",
+        "operating_requirements": "Pay a shaped cutter, indexed blank, machine work and inspection; retain stroke-clearance constraints.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local gear shaping generation trials.",
+          "partnership": "Share actual samples and operator time for gear shaping generation; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded gear shaping generation process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external gear shaping generation processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable gear shaping generation machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.liebherr.com/en-gb/gear-technology-and-automation-systems/information-service/customer-magazine/evotion-22/gear-shaping/double-helical-gears-4643204"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "0ecb2a1f459625f4dd72d58abc4b4f63afc01462",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "gear_tooth_generation",
+          "precision_machinery"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "gear_shaping_generation",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Gear Shaping Generation",
+            "missing_all": [
+              "gear_tooth_generation",
+              "precision_machinery"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "gear_tooth_generation",
+              "precision_machinery"
+            ],
+            "requires_all": [
+              "gear_tooth_generation",
+              "precision_machinery"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Gear Shaping Generation",
+        "observation": "A reciprocating cutter generates meshing tooth geometry.",
+        "production_contract": "Produce a relieved gear-shaping cutter and use it with a paid reciprocating ram, indexing setup, steel feed and cutter wear to generate compatible gears. Completed gears are consumed by existing geared-workshop commissioning; possession of gears grants no power or synthesis knowledge.",
+        "production_items": [
+          "gear_shaping_cutters",
+          "shaped_gear_sets"
+        ],
+        "requires": [
+          "gear_tooth_generation",
+          "precision_machinery"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "id": "progressive_profile_broaching",
+      "name": "Progressive Profile Broaching",
+      "field": "D06",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "foundations": "toolbit_heat_treatment,precision_machinery",
+      "mechanism": "Successively larger cutting teeth produce a finished profile.",
+      "operating_requirement": "Pay a dedicated broach, guided blank, cutting work and chip clearance; retained tooling fits only its qualified profile.",
+      "consequence": "Supply repeatable keyways or splines for shaft coupling; absent access or excessive cutting load prevents acceptance.",
+      "branching_note": "These are selected game production pathways, not claims that other historical implementations are impossible. All listed foundations apply; knowledge never supplies equipment or materials.",
+      "recovery": "Acquire attributable progressive profile broaching instruction or working samples, then pay for local setup and acceptance trials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "progressive_profile_broaching",
+        "grants_instant_mastery": false,
+        "local_demonstration": "Successively larger cutting teeth produce a finished profile.",
+        "operating_requirements": "Pay a dedicated broach, guided blank, cutting work and chip clearance; retained tooling fits only its qualified profile.",
+        "route_terms": {
+          "scholar_envoy": "Pay a reachable specialist, travel, consumable practice stock and supervised local progressive profile broaching trials.",
+          "partnership": "Share actual samples and operator time for progressive profile broaching; independently inspect the partner output.",
+          "purchased_research": "Fund a bounded progressive profile broaching process trial with recorded materials, failures and output checks.",
+          "licensed_or_imported_service": "Pay for finite external progressive profile broaching processing; delivered material does not grant local manufacture.",
+          "reverse_engineering": "Inspect an attributable progressive profile broaching machine or processed sample and pay to reproduce its result; hidden settings may prevent success."
+        }
+      },
+      "evidence_sources": [
+        "https://www.americanmachinist.com/cutting-tools/media-gallery/21135347/chapter-14-broaches-and-broaching-cutting-tool-applications"
+      ],
+      "implementation_status": "Authored proposal only. Promotion requires paid capital, actual typed feed and output lots, finite work/energy/material accounting, quality failures, saved partial state and the downstream consumer described above. Neither a catalog row nor a global percentage bonus establishes operation.",
+      "historical_scope": "H04 classifies this chosen operational capability, not an invention date or calendar unlock. Sources support the short mechanism description; game prerequisites, named ledger states and acceptance contracts are design inferences.",
+      "implementation_reconciliation": {
+        "source_commit": "0ecb2a1f459625f4dd72d58abc4b4f63afc01462",
+        "editorial_source": "manufacturing-process-depth.json",
+        "previous_requires_all": [
+          "toolbit_heat_treatment",
+          "precision_machinery"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "progressive_profile_broaching",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Progressive Profile Broaching",
+            "missing_all": [
+              "toolbit_heat_treatment",
+              "precision_machinery"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "toolbit_heat_treatment",
+              "precision_machinery"
+            ],
+            "requires_all": [
+              "toolbit_heat_treatment",
+              "precision_machinery"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Progressive Profile Broaching",
+        "observation": "Successively larger cutting teeth produce a finished profile.",
+        "production_contract": "Produce a progressive-tooth keyway broach and use a paid press/fixture with turned stock and broach wear to make keyed clutch hubs in less repeated cutting work than the slotting route. Expensive tooling and actual compatible stock are still required.",
+        "production_items": [
+          "progressive_keyway_broaches",
+          "broached_drive_hubs"
+        ],
+        "requires": [
+          "toolbit_heat_treatment",
+          "precision_machinery"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D06",
+      "id": "interchangeable_component_fits",
+      "name": "Interchangeable Component Fits",
+      "foundations": "dimensional_metrology,workshop_standards",
+      "mechanism": "Specify and verify compatible dimensional ranges across separately made components",
+      "operating_requirement": "Gauges, controlled production and inspection",
+      "consequence": "Permit qualified replacement without assuming every nominally similar part fits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Interchangeable Component Fits: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "interchangeable_component_fits",
+        "local_demonstration": "Specify and verify compatible dimensional ranges across separately made components",
+        "operating_requirements": "Gauges, controlled production and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "0ecb2a1f459625f4dd72d58abc4b4f63afc01462",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "dimensional_metrology",
+          "workshop_standards"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "interchangeable_component_fits",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Interchangeable Component Fits",
+            "missing_all": [
+              "dimensional_metrology",
+              "workshop_standards"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "dimensional_metrology",
+              "workshop_standards"
+            ],
+            "requires_all": [
+              "dimensional_metrology",
+              "workshop_standards"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Interchangeable Component Fits",
+        "observation": "Specify and verify compatible dimensional ranges across separately made components",
+        "production_contract": "Produce gauges for the selected nominal 20 mm shaft/sleeve family, then pay comparison/fit work, actual turned shafts, reamed sleeves, lubricant and sample material into interchangeable bearing assemblies. Those actual assemblies are consumed by a compatible electric-motor recipe. Sizes, tolerances and rejection yield are bounded product-grade abstractions, not a dimensional physics simulator or universal fit certificate.",
+        "production_items": [
+          "fit_gauges_20",
+          "interchangeable_bearings_20"
+        ],
+        "requires": [
+          "dimensional_metrology",
+          "workshop_standards"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {

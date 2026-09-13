@@ -12269,8 +12269,8 @@
       "id": "gear_shaping_generation",
       "name": "Gear Shaping Generation",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "c53b25685d0227b3ce552d14c3bb729999690b139fa87f18f33da47f1a566ae1"
@@ -12289,8 +12289,8 @@
       "id": "progressive_profile_broaching",
       "name": "Progressive Profile Broaching",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "b9770e2cc431516ddbfc26dd8df3109295bf927fa47b15f1b1e98eed02c8ee85"
@@ -12299,8 +12299,8 @@
       "id": "reciprocating_profile_slotting",
       "name": "Reciprocating Profile Slotting",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "a93627445af722754872b5983d9474df93df28d6bfd1a17863dfd5f894d2f117"
@@ -12309,8 +12309,8 @@
       "id": "reamed_bore_finishing",
       "name": "Reamed Bore Finishing",
       "horizon": "H04",
-      "source_file": "manufacturing-process-depth.json",
-      "source_status": "authored_draft",
+      "source_file": "implemented-baseline.json",
+      "source_status": "implemented_baseline",
       "classification_status": "editorial_review",
       "rationale": "The specified manual, mechanized or qualified process scope defines the capability class; no exclusive origin date or runtime gate is implied.",
       "scope_digest": "eccc1f8aa4dde0bed12b47fe2f311783c2ef68f2defbf1b79d87ea3d3ee11879"

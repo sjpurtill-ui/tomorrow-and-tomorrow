@@ -156,37 +156,6 @@
   },
   {
     "field": "D06",
-    "id": "interchangeable_component_fits",
-    "name": "Interchangeable Component Fits",
-    "foundations": "dimensional_metrology,workshop_standards",
-    "mechanism": "Specify and verify compatible dimensional ranges across separately made components",
-    "operating_requirement": "Gauges, controlled production and inspection",
-    "consequence": "Permit qualified replacement without assuming every nominally similar part fits",
-    "status": "authored_draft",
-    "requires_all": [
-      "dimensional_metrology",
-      "workshop_standards"
-    ],
-    "requires_any": [],
-    "recovery": "For Interchangeable Component Fits: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "interchangeable_component_fits",
-      "local_demonstration": "Specify and verify compatible dimensional ranges across separately made components",
-      "operating_requirements": "Gauges, controlled production and inspection",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Run the qualified process on actual equipment and inspect its output; a program or licensed design is not a working production line."
-    }
-  },
-  {
-    "field": "D06",
     "id": "production_line_balancing",
     "name": "Production-Line Balancing",
     "foundations": "material_accounting,work_motion_studies",
