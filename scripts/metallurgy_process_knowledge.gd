@@ -31,7 +31,12 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Map stable or observed phase relations against declared composition and conditions",
     "effects": {},
-    "operating_contract": "Characterized samples, controlled conditions and measurement evidence"
+    "operating_contract": "Characterized samples, controlled conditions and measurement evidence",
+    "production_items": [
+      "lead_tin_phase_survey",
+      "phase_selected_solder"
+    ],
+    "production_contract": "Characterized samples, controlled conditions and measurement evidence"
   },
   {
     "id": "steel_normalizing_control",
@@ -65,7 +70,11 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Apply a qualified thermal cycle to refine a steel's evaluated microstructure",
     "effects": {},
-    "operating_contract": "Known steel composition, suitable furnace and structural or mechanical tests"
+    "operating_contract": "Known steel composition, suitable furnace and structural or mechanical tests",
+    "production_items": [
+      "normalizing_steel_sections"
+    ],
+    "production_contract": "Known steel composition, suitable furnace and structural or mechanical tests"
   },
   {
     "id": "induction_surface_hardening",
@@ -96,7 +105,11 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Heat selected metal regions electromagnetically for a qualified hardening treatment",
     "effects": {},
-    "operating_contract": "Compatible power equipment, workpiece, thermal control and inspection"
+    "operating_contract": "Compatible power equipment, workpiece, thermal control and inspection",
+    "production_items": [
+      "induction_hardened_shafts"
+    ],
+    "production_contract": "Compatible power equipment, workpiece, thermal control and inspection"
   },
   {
     "id": "metal_grain_size_measurement",
@@ -130,7 +143,8 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Measure representative grain structure using a defined preparation and counting method",
     "effects": {},
-    "operating_contract": "Prepared samples, qualified imaging and analysts"
+    "operating_contract": "Prepared samples, qualified imaging and analysts",
+    "production_contract": "Prepared samples, qualified imaging and analysts"
   },
   {
     "id": "residual_stress_assessment",
@@ -161,7 +175,13 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Estimate retained internal stresses through qualified measurement and model assumptions",
     "effects": {},
-    "operating_contract": "Suitable specimens, instruments and interpretation expertise"
+    "operating_contract": "Suitable specimens, instruments and interpretation expertise",
+    "production_items": [
+      "external_residual_assessment",
+      "residual_slitting_surveys",
+      "calibrated_slitting_stations"
+    ],
+    "production_contract": "Suitable specimens, instruments and interpretation expertise"
   },
   {
     "id": "metal_fracture_toughness_testing",
@@ -195,7 +215,13 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Measure resistance to crack extension under a defined qualified specimen condition",
     "effects": {},
-    "operating_contract": "Representative material, calibrated loading equipment and trained analysis"
+    "operating_contract": "Representative material, calibrated loading equipment and trained analysis",
+    "production_items": [
+      "external_fracture_assessment",
+      "precracked_fracture_trials",
+      "fracture_reference_stations"
+    ],
+    "production_contract": "Representative material, calibrated loading equipment and trained analysis"
   },
   {
     "id": "welding_metallurgy",
@@ -226,7 +252,11 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Relate joining thermal history to local microstructure and mechanical performance",
     "effects": {},
-    "operating_contract": "Qualified joining equipment, known materials and inspection or test capacity"
+    "operating_contract": "Qualified joining equipment, known materials and inspection or test capacity",
+    "production_items": [
+      "welded_strap_qualification"
+    ],
+    "production_contract": "Qualified joining equipment, known materials and inspection or test capacity"
   },
   {
     "id": "vacuum_metal_melting",
@@ -257,7 +287,11 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Melt qualified metal under controlled reduced-pressure conditions to limit selected contamination",
     "effects": {},
-    "operating_contract": "Compatible furnace, vacuum equipment, power and composition testing"
+    "operating_contract": "Compatible furnace, vacuum equipment, power and composition testing",
+    "production_items": [
+      "vacuum_copper_casting"
+    ],
+    "production_contract": "Compatible furnace, vacuum equipment, power and composition testing"
   },
   {
     "id": "investment_casting_process",
@@ -288,7 +322,11 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "An expendable pattern creates a refractory casting mold.",
     "effects": {},
-    "operating_contract": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks."
+    "operating_contract": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks.",
+    "production_items": [
+      "investment_copper_brackets"
+    ],
+    "production_contract": "Pay pattern, shell layers, drying, pattern removal, molten alloy and cleanup work; retain shrinkage and shell-failure checks."
   },
   {
     "id": "lost_foam_casting",
@@ -319,7 +357,11 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Molten metal replaces an expendable foam pattern in a prepared mold.",
     "effects": {},
-    "operating_contract": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection."
+    "operating_contract": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection.",
+    "production_items": [
+      "lost_foam_copper_brackets"
+    ],
+    "production_contract": "Pay qualified foam patterns, coating, support media, metal and ventilation work; retain fill and residue inspection."
   },
   {
     "id": "honed_bore_finishing",
@@ -350,7 +392,12 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Abrasive contact and controlled motion refine bore geometry.",
     "effects": {},
-    "operating_contract": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition."
+    "operating_contract": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition.",
+    "production_items": [
+      "honing_head_sets",
+      "honing_qualified_parts"
+    ],
+    "production_contract": "Consume prepared bores, honing stones, fluid and machine work; inspect taper, roundness and surface condition."
   },
   {
     "id": "short_stroke_superfinishing",
@@ -381,6 +428,11 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Light abrasive oscillation removes surface peaks.",
     "effects": {},
-    "operating_contract": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry."
+    "operating_contract": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry.",
+    "production_items": [
+      "superfinishing_head_sets",
+      "superfinishing_qualified_parts"
+    ],
+    "production_contract": "Pay finishing media, fluid and controlled contact work on prequalified surfaces; measure retained roughness and geometry."
   }
 ]
