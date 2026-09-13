@@ -1,3 +1,11 @@
+## September 13 — early illustrations and observed pacing export
+
+Integrated eight reviewed paper illustrations from source commits `51d9fa57d4282c04aea551916f6b7b01e9a79cad` and `224b037`: seed selection, food drying, basketry, tallies, joinery, clean water, standard measures and supply groups. Native originals are retained; all eight imported textures load at 768 pixels with mipmaps, and 12 isolated atlas cases pass. ResearchVisuals binds them to their existing discoveries. Art: **231 verified / 801 live, 570 queued**. Runtime identities and save behavior are unchanged.
+
+Integrated pacing correction `e9f20af`: the exporter now reports recorded observations and provenance instead of generating the obsolete synthetic 3,000-year curve. Independent review preserved the historical report's two discovery samples and day 91,250 / 320-known endpoint, and rejected three malformed inputs. Archived files are preserved; neither this export nor graph reachability establishes full campaign pacing. See `technology-review/OBSERVED_PACING_EXPORT.md`.
+
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/campaign-service-integration`, base `121c9f870c852d10902fedb0c5b7b44675aa4d85`. Task-owned art/bindings and tool/docs only; no shared conflicts, player launch or package rebuild. Canonical texture and atlas verification follows the fast-forward.
+
 ## September 13 — campaign service proposal integration
 
 Integrated source proposals `9b74309` and historical evidence `8abca3b`, retaining nine distinct D20 drafts. The duplicate artillery survey datum proposal is excluded in favor of existing geodetic reference frames; sound and flash observation proposals require that foundation plus military cartographic reporting. Billeting follows actual institutional obligations, and inspected serviceable salvage can be reissued without mandatory repair. Generals retain operations and existing population/labor owners remain authoritative.

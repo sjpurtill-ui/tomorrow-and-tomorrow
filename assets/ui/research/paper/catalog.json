@@ -15,7 +15,7 @@
       "domain": "nutrition",
       "id": "seed_selection",
       "name": "Selective Planting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/food_drying.png",
@@ -23,7 +23,7 @@
       "domain": "nutrition",
       "id": "food_drying",
       "name": "Food Drying",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/smoking.png",
@@ -47,7 +47,7 @@
       "domain": "production",
       "id": "basketry",
       "name": "Basketry",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/charcoal.png",
@@ -79,7 +79,7 @@
       "domain": "infrastructure",
       "id": "joinery",
       "name": "Wood Joinery",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/drainage.png",
@@ -119,7 +119,7 @@
       "domain": "health",
       "id": "clean_water",
       "name": "Clean-Water Practice",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/tallies.png",
@@ -127,7 +127,7 @@
       "domain": "knowledge",
       "id": "tallies",
       "name": "Material Tallies",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/standard_measures.png",
@@ -135,7 +135,7 @@
       "domain": "knowledge",
       "id": "standard_measures",
       "name": "Shared Measures",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/route_memory.png",
@@ -191,7 +191,7 @@
       "domain": "security",
       "id": "supply_groups",
       "name": "Organized Supply Parties",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/animal_taming.png",
@@ -6413,9 +6413,9 @@
   "live_art_complete": false,
   "live_count": 801,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 578,
+  "queued_count": 570,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 223
+  "verified_count": 231
 }
