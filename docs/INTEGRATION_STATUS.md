@@ -1,3 +1,9 @@
+## September 13 — six geological interpretation proposals
+
+Authored six distinct D22 methods for ash and fossil correlation, cave-carbonate chronology, helium retention, fluid inclusions and clumped-isotope thermometry. Each retains actual specimen and observation requirements, uncertainty, paid instrument or external service, explicit failure cases and a downstream interpretation. Source review boundaries and semantic distinctions are documented in `technology-review/Geologic Interpretation Methods Review.md`. Historical horizons remain unassigned; existing definitions are unchanged.
+
+Ledger: **810 integrated + 2,660 drafts = 3,470 identities**, leaving **1,530 to author and 4,190 to implement**. D22 coverage is **146 / 160**. Parent, duplicate, reachability and horizon checks and 15 ledger tests pass. Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/geologic-interpretation-coverage`, base `1d4b4f986f14b55035f34b5a04ae93fe875d3588`. Catalog/docs only; runtime 810 and art 249/810/561 queued remain unchanged. No save effect, shared runtime conflicts, player launch or package rebuild.
+
 ## September 13 — 810 verified operating discoveries
 
 Integrated revised civic source `fa9b0185a2c6475887e9ebb3441a7ebeca3b0320` and four reviewed illustrations as canonical runtime/art commit `4e44916bff6de7e8ec810ef9890a9790071b4d86`. Existing government officials maintain settlement-and-subject jurisdictions, paid routine mandate reviews, actual pending-duty custody and condition-backed petitions. Explicit narrow, finite and revoked authority stays exceptional. AI and delegated player settlements handle routine records without manual renewal; automatic petition handling preserves the delegate's actual chosen priority. Shared Administration capacity pays for clerical work before other work consumers use the remainder.

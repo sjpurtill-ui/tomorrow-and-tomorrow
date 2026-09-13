@@ -1,0 +1,252 @@
+[
+  {
+    "id": "tephra_geochemical_correlation",
+    "name": "Tephra Geochemical Correlation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "relative_stratigraphy",
+      "mineral_thin_section_preparation",
+      "spectroscopy"
+    ],
+    "requires_any": [],
+    "foundations": "relative_stratigraphy, mineral_thin_section_preparation, spectroscopy",
+    "mechanism": "Compare measured glass or mineral composition and stratigraphic context to correlate attributable volcanic ash layers between sites.",
+    "operating_requirement": "Collect actual ash samples, separate and inspect components, pay calibrated compositional analyses and reference access, and retain contamination and competing matches.",
+    "consequence": "Supply a supported layer-correlation record to regional geological and hazard reconstruction; an age transfers only from an independently dated, defensible match.",
+    "semantic_boundary": "Petrography identifies constituents; this compares source fingerprints across retained layers. Similar bulk chemistry alone cannot establish a unique eruption or numerical date.",
+    "implementation_acceptance": [
+      "Mix two source layers and require an ambiguous result rather than silently selecting a reference; removing the dated reference removes numerical age transfer."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tephra_geochemical_correlation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Mix two source layers and require an ambiguous result rather than silently selecting a reference; removing the dated reference removes numerical age transfer.",
+      "operating_requirements": "Collect actual ash samples, separate and inspect components, pay calibrated compositional analyses and reference access, and retain contamination and competing matches.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or traceable observations and reproduce calibration through paid comparisons; an imported interpretation does not grant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/centers/gmeg/science/usgs-tephrochronology-tephra-project?page=1",
+      "https://pubs.usgs.gov/publication/70029863"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "Historical horizon remains unassigned pending capability-level chronology review. Sources support the method distinction; parent choices, physical-service requirements and acceptance scenarios are explicit game-design proposals, not historical prerequisites."
+  },
+  {
+    "id": "fossil_biostratigraphic_correlation",
+    "name": "Fossil Biostratigraphic Correlation",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "relative_stratigraphy",
+      "biological_classification"
+    ],
+    "requires_any": [],
+    "foundations": "relative_stratigraphy, biological_classification",
+    "mechanism": "Use identified fossil assemblages and their observed stratigraphic ranges to compare the relative positions of sedimentary sections.",
+    "operating_requirement": "Pay measured section sampling, specimen preparation, taxonomic comparison and specialist interpretation against attributable regional reference ranges.",
+    "consequence": "Constrain relative correlations for mapping and geological reconstruction; regional absences, reworked fossils and barren intervals remain explicit limits.",
+    "semantic_boundary": "Layer order and organism classification do not themselves correlate distant strata. Fossil similarity supports a contextual relative correlation, not an automatic absolute age.",
+    "implementation_acceptance": [
+      "Place a reworked older fossil above a younger assemblage and require review of the conflicting evidence; a barren interval must not acquire an invented zone."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fossil_biostratigraphic_correlation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Place a reworked older fossil above a younger assemblage and require review of the conflicting evidence; a barren interval must not acquire an invented zone.",
+      "operating_requirements": "Pay measured section sampling, specimen preparation, taxonomic comparison and specialist interpretation against attributable regional reference ranges.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or traceable observations and reproduce calibration through paid comparisons; an imported interpretation does not grant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/application-graphic-correlation-method-pliocene-marine-sequences",
+      "https://pubs.usgs.gov/of/1992/0539e/report.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "Historical horizon remains unassigned pending capability-level chronology review. Sources support the method distinction; parent choices, physical-service requirements and acceptance scenarios are explicit game-design proposals, not historical prerequisites."
+  },
+  {
+    "id": "speleothem_uranium_series_chronology",
+    "name": "Speleothem Uranium-Series Chronology",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiometric_geochronology",
+      "measurement_uncertainty",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "radiometric_geochronology, measurement_uncertainty, experimental_controls",
+    "mechanism": "Infer cave-carbonate formation timing from measured uranium-series disequilibrium with explicit initial-contamination and closed-system assumptions.",
+    "operating_requirement": "Use attributable sampled carbonate, paid clean preparation and isotope measurements, blanks and standards, replicate layers and a stated detrital correction model.",
+    "consequence": "Provide qualified sample ages and uncertainties for cave-water or environmental histories; disturbed or contaminated material can remain undated.",
+    "semantic_boundary": "This interprets carbonate disequilibrium rather than radiocarbon calibration or generic decay arithmetic. A date on one sampled layer does not date an entire cave.",
+    "implementation_acceptance": [
+      "Vary the assumed initial thorium contribution and retain the resulting uncertainty; a failed replicate or open-system flag blocks a precise accepted age."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "speleothem_uranium_series_chronology",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Vary the assumed initial thorium contribution and retain the resulting uncertainty; a failed replicate or open-system flag blocks a precise accepted age.",
+      "operating_requirements": "Use attributable sampled carbonate, paid clean preparation and isotope measurements, blanks and standards, replicate layers and a stated detrital correction model.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or traceable observations and reproduce calibration through paid comparisons; an imported interpretation does not grant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/data/uranium-thorium-strontium-carbon-and-oxygen-isotope-data-used-evaluate-a-300000-year-history"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "Historical horizon remains unassigned pending capability-level chronology review. Sources support the method distinction; parent choices, physical-service requirements and acceptance scenarios are explicit game-design proposals, not historical prerequisites."
+  },
+  {
+    "id": "helium_retention_thermochronology",
+    "name": "Helium-Retention Thermochronology",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiometric_geochronology",
+      "precision_thermometry",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "radiometric_geochronology, precision_thermometry, measurement_uncertainty",
+    "mechanism": "Interpret measured radiogenic helium and parent-element content in identified mineral grains through a stated helium-retention and thermal-history model.",
+    "operating_requirement": "Pay grain selection and geometry measurement, controlled gas extraction, helium and parent assays, blanks, references and comparison of candidate cooling histories.",
+    "consequence": "Constrain possible cooling or reheating histories of sampled minerals; report nonunique histories and grain-dependent behavior rather than a universal crystallization date.",
+    "semantic_boundary": "Helium loss and retention constrain thermal history differently from fission-track annealing or argon release spectra; none replaces the others as a universal clock.",
+    "implementation_acceptance": [
+      "Compare distinct cooling paths compatible with the observations and retain their ambiguity; changing the grain-retention assumptions must affect the supported history."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "helium_retention_thermochronology",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compare distinct cooling paths compatible with the observations and retain their ambiguity; changing the grain-retention assumptions must affect the supported history.",
+      "operating_requirements": "Pay grain selection and geometry measurement, controlled gas extraction, helium and parent assays, blanks, references and comparison of candidate cooling histories.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or traceable observations and reproduce calibration through paid comparisons; an imported interpretation does not grant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/of/2007/1047/ea/of2007-1047ea193.pdf",
+      "https://www.usgs.gov/publications/uranium-series-volcanic-rocks"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "Historical horizon remains unassigned pending capability-level chronology review. Sources support the method distinction; parent choices, physical-service requirements and acceptance scenarios are explicit game-design proposals, not historical prerequisites."
+  },
+  {
+    "id": "fluid_inclusion_microthermometry",
+    "name": "Fluid-Inclusion Microthermometry",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "mineral_thin_section_preparation",
+      "compound_microscopy",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "mineral_thin_section_preparation, compound_microscopy, precision_thermometry",
+    "mechanism": "Observe phase changes in qualified trapped-fluid inclusions during calibrated heating and cooling to constrain fluid properties under stated models.",
+    "operating_requirement": "Prepare suitable retained mineral sections, inspect inclusion integrity, pay a calibrated microscope heating/cooling stage and repeated observations, and preserve calibration and phase-identification uncertainty.",
+    "consequence": "Supply temperature and composition constraints to mineral-deposit or hydrothermal interpretation; homogenization temperature alone does not establish an unconditional trapping temperature.",
+    "semantic_boundary": "Microscopic inclusion phase behavior differs from measuring a rock's present bulk temperature or its crystallization age. Altered inclusions and ambiguous phase changes remain invalid or unresolved.",
+    "implementation_acceptance": [
+      "A damaged inclusion cannot produce a qualified result; changing the pressure or composition assumptions must preserve the corresponding interpretive limitation."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fluid_inclusion_microthermometry",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A damaged inclusion cannot produce a qualified result; changing the pressure or composition assumptions must preserve the corresponding interpretive limitation.",
+      "operating_requirements": "Prepare suitable retained mineral sections, inspect inclusion integrity, pay a calibrated microscope heating/cooling stage and repeated observations, and preserve calibration and phase-identification uncertainty.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or traceable observations and reproduce calibration through paid comparisons; an imported interpretation does not grant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://pubs.usgs.gov/of/2004/1066/of2004-1066.html",
+      "https://pubs.usgs.gov/sir/2010/5070/c/SIR10-5070-C.pdf"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "Historical horizon remains unassigned pending capability-level chronology review. Sources support the method distinction; parent choices, physical-service requirements and acceptance scenarios are explicit game-design proposals, not historical prerequisites."
+  },
+  {
+    "id": "carbonate_clumped_isotope_thermometry",
+    "name": "Carbonate Clumped-Isotope Thermometry",
+    "field": "D22",
+    "status": "authored_draft",
+    "requires_all": [
+      "paleoclimate_proxy_calibration",
+      "precision_thermometry",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "paleoclimate_proxy_calibration, precision_thermometry, measurement_uncertainty",
+    "mechanism": "Compare measured heavy-isotope association in carbonate with attributable calibration to constrain formation or resetting temperature under a declared model.",
+    "operating_requirement": "Pay retained carbonate sampling, controlled preparation, suitable isotope-ratio measurement, standards and corrections; assess disequilibrium and later alteration before interpretation.",
+    "consequence": "Provide qualified paleotemperature constraints for environmental or burial-history analysis with uncertainties and unresolved alternative explanations.",
+    "semantic_boundary": "Bulk isotope ratios and ordinary thermometry do not measure isotope association. Solution chemistry and subsequent alteration can prevent a unique formation-temperature interpretation.",
+    "implementation_acceptance": [
+      "A calibration failure blocks temperature release, and a disequilibrium or recrystallization flag prevents the result being labeled an unqualified formation temperature."
+    ],
+    "branching_note": "All named foundations apply. Instruments, samples and reference services remain separate paid physical requirements; knowledge does not create equipment or evidence.",
+    "recovery": "Acquire attributable method instruction, samples or specialist service through a reachable competent partner, then fund a local qualification.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "carbonate_clumped_isotope_thermometry",
+      "grants_instant_mastery": false,
+      "local_demonstration": "A calibration failure blocks temperature release, and a disequilibrium or recrystallization flag prevents the result being labeled an unqualified formation temperature.",
+      "operating_requirements": "Pay retained carbonate sampling, controlled preparation, suitable isotope-ratio measurement, standards and corrections; assess disequilibrium and later alteration before interpretation.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, instruction and local validation using actual samples and references.",
+        "partnership": "Contribute retained specimens, observations or laboratory capacity; preserve provenance and incompatible-data limits.",
+        "purchased_research": "Commission an explicit sample question; pay for the delivered measurements and assess uncertainty before using them.",
+        "licensed_or_imported_service": "Reserve a reachable qualified laboratory and deliver actual specimens; finite throughput, transport, preparation and continuing payment remain costs.",
+        "reverse_engineering": "Inspect actual apparatus or traceable observations and reproduce calibration through paid comparisons; an imported interpretation does not grant mastery."
+      }
+    },
+    "evidence_sources": [
+      "https://www.usgs.gov/publications/beyond-temperature-clumped-isotope-signatures-dissolved-inorganic-carbon-species-and",
+      "https://ngmdb.usgs.gov/Prodesc/proddesc_102117.htm"
+    ],
+    "implementation_status": "Authored proposal only. Requires real retained specimens and measured records, paid instrument or external service, bounded saved state, uncertainty and an actual consumer before promotion.",
+    "historical_scope": "Historical horizon remains unassigned pending capability-level chronology review. Sources support the method distinction; parent choices, physical-service requirements and acceptance scenarios are explicit game-design proposals, not historical prerequisites."
+  }
+]
