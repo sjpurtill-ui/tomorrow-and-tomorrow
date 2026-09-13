@@ -5,6 +5,7 @@ const LIMIT:=1000
 const WaterDrive=preload("res://scripts/water_hammer_site.gd")
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"sec_analytical_bench":{"name": "Aqueous size-exclusion bench", "gate": "size_exclusion_chromatography", "requires": ["electrical_measurement"], "cost": {"SEC Bench Assemblies": 1, "Steel": 2}, "work": 16, "workers": 1, "inputs": {"Freshwater": 1}, "power": 2, "services": {"sec_column_time": 1}},
 	"nmr_analytical_bench":{"name": "NMR analytical bench awaiting reference qualification", "gate": "nuclear_magnetic_resonance_spectroscopy", "requires": ["electrical_measurement"], "cost": {"Unqualified NMR Benches": 1, "Steel": 2}, "work": 24, "workers": 1, "inputs": {"Freshwater": 1, "Insulated Cable": 0.001}, "power": 8, "services": {"nmr_unqualified_time": 1}},
 	"foam_insulated_cold_store":{"name": "Foam-insulated electric cold store", "gate": "polymer_foam_cell_control", "requires": ["mechanical_refrigeration", "electric_motors"], "cost": {"Foam Cold-Store Panels": 2, "Electric Motors": 1, "Pressure Vessels": 1, "Glass": 1}, "work": 16, "workers": 1, "inputs": {"Bitumen": 0.01, "Foam Cold-Store Panels": 0.002}, "power": 2.2, "services": {"cold_storage": 200}},
 	"polymer_stirred_reactor":{"name": "Stirred polymer reactor", "gate": "pressure_vessels", "requires": ["precision_thermometry"], "cost": {"Polymer Stirred Reactors": 1, "Steel": 2}, "work": 18, "workers": 1, "inputs": {"Brazed Steel Fittings": 0.005}, "power": 2, "services": {"polymer_stirred_work": 1}},
@@ -149,6 +150,7 @@ static func advance(day:int,current_context:Variant=null)->void:
 		var completed:=mini(int(record.building),floori((float(record.work)+.00000001)/float(spec.work)))
 		record.installed+=completed;record.building-=completed;record.work=maxf(0,float(record.work)-completed*float(spec.work))
 	preload("res://scripts/nmr_acquisition.gd").advance_pending()
+	preload("res://scripts/sec_acquisition.gd").advance_pending()
 static func _consumer_staff(power:float,condition:float)->float:
 	var staff:=0.0
 	for id:String in PLANTS:
@@ -217,6 +219,7 @@ static func refrigeration_multiplier(capacity:float,stocks:Dictionary)->float:
 	return 1.0-.8*clampf(capacity/perishables,0,1)
 static func valid(value:Variant)->bool:
 	if not value is Dictionary or not value.has_all(["last_day","plants","services","workers","inputs"]):return false
+	if value.has("sec_column") and not preload("res://scripts/sec_acquisition.gd").valid_column(value.sec_column):return false
 	if value.has("nmr_calibration") and not preload("res://scripts/nmr_calibration.gd").valid(value.nmr_calibration):return false
 	if value.has("polymer_samples") and not preload("res://scripts/polymer_samples.gd").valid(value.polymer_samples):return false
 	if not value.plants is Dictionary or value.plants.size()>PLANTS.size():return false
@@ -224,13 +227,13 @@ static func valid(value:Variant)->bool:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
 	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>PLANTS.size()*2.0*LIMIT:return false
 	for field:String in ["services","inputs"]:
-		if not value[field] is Dictionary or value[field].size()>16:return false
+		if not value[field] is Dictionary or value[field].size()>(17 if field=="services" else 16):return false
 		for key:Variant in value[field]:
-			if field=="services" and key not in ["electricity","cold_storage","hammer_work","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records","polymer_reactor_work","polymer_heat_removal","polymer_stirred_work","nmr_unqualified_time"]:return false
+			if field=="services" and key not in ["electricity","cold_storage","hammer_work","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records","polymer_reactor_work","polymer_heat_removal","polymer_stirred_work","nmr_unqualified_time","sec_column_time"]:return false
 			if field=="inputs" and key not in ["Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils","Brazed Steel Fittings","Pressure Pipe Fittings","Foam Cold-Store Panels","Insulated Cable"]:return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
-	for name:String in {"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0}:
-		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0}[name])+.000001:return false
+	for name:String in {"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0,"sec_column_time":1000.0}:
+		if float(value.services.get(name,0))>float({"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0,"sec_column_time":1000.0}[name])+.000001:return false
 	for id:Variant in value.plants:
 		if not PLANTS.has(id):return false
 		var record:Variant=value.plants[id]

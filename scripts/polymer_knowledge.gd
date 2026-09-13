@@ -737,7 +737,8 @@ static func entries()->Array[Dictionary]:
     "production_items": [
       "ring_opened_peg_diol",
       "controlled_chain_peg",
-      "traceable_peg_batch"
+      "traceable_peg_batch",
+      "sec_traceable_peg_batch"
     ]
   },
   {
@@ -1257,7 +1258,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Characterize and control the distribution of polymer chain sizes",
     "effects": {},
-    "production_contract": "Assay and meter a finite starter stock, then characterize a separately synthesized PEG batch against reference material. Controlled synthesis still requires ring-opening knowledge and operating reactor/cooling services. Application testing remains separate; this does not certify arbitrary stock or grant monodispersity.",
+    "production_contract": "Assay and meter a finite starter stock, then characterize a separately synthesized PEG batch against reference material. Controlled synthesis still requires ring-opening knowledge and operating reactor/cooling services. Application testing remains separate; this does not certify arbitrary stock or grant monodispersity. Calibrated size-exclusion separation measures a bounded relative distribution for separately retained PEG batches and selects between actual binder-processing routes.",
     "production_items": [
       "metered_peg_starter",
       "characterized_controlled_peg"
@@ -1619,7 +1620,7 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Control and characterize incorporation of different monomer units within a specified copolymer",
     "effects": {},
-    "production_contract": "Metered mixed monomers supply a separate copolymer synthesis route. Raw composition alone does not establish sequence: sequence-sensitive analytical qualification and an application consumer remain required before family acceptance.",
+    "production_contract": "Metered mixed monomers supply a separate copolymer synthesis route. A retained specimen consumes calibrated solution NMR work; accepted selected dyads release only that specimen for drying, molding and a wash-bottle closure. Raw composition does not certify sequence, other specimens or the bulk pool.",
     "production_items": [
       "metered_propene_ethene_feed",
       "dried_characterized_copolymer"
@@ -1701,8 +1702,16 @@ static func entries()->Array[Dictionary]:
     ],
     "observation": "Separate compatible dissolved chains by their access to a qualified porous stationary phase and measure a calibrated elution profile within a finite size range.",
     "effects": {},
-    "production_items": [],
-    "production_contract": "Pay for compatible porous column medium, stable pump flow, concentration-sensitive detection, sample preparation, eluent, reference standards and finite acquisition; establish retention calibration, recovery and separation resolution before interpreting the trace. Distribution measurement and process consumer remain under implementation; external standards do not grant local synthesis.",
+    "production_items": [
+      "sec_metering_pump",
+      "sec_optical_flow_cell",
+      "sec_bench_assembly",
+      "sec_packed_column",
+      "sec_reference_solutions",
+      "sec_distribution_binder",
+      "sec_broad_recovered_binder"
+    ],
+    "production_contract": "A metering pump and differential optical flow cell form a paid bench. Compatible imported packing and assigned reference solutions are consumed by finite column preparation, observed calibration and retained sample separation. Measured relative PEG distribution selects a lower-input binder route or a more costly broad-range rework route. Column capacity, expiry, flow, resolution and range constrain evidence. The external laboratory reserve does not grant local synthesis or universal absolute mass certification.",
     "resource_requirements": [
       {
         "resource": "Qualified Aqueous SEC Packing",

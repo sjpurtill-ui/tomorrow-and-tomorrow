@@ -28,8 +28,8 @@ Qualified material names denote this archive's assigned material class, not an
 assay of generic PEG. Preparing solutions, packing/conditioning a column, paying
 instrument operation and verifying an observed calibration remain separate work.
 The separation instrument, distribution evidence and production consumer are
-still unfinished. The registered SEC identity is therefore not accepted as an
-implemented discovery for canonical counting.
+connected in the isolated branch; see SEC_DISTRIBUTION_MODEL.md. Canonical
+integration and final review are still required before implemented counting.
 
 Owned integration files are `sec_specialist_supply.gd`, `society_exchange.gd`,
 `research_materials.gd`, `resource_knowledge_catalog.gd`,

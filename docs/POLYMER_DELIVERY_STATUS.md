@@ -41,17 +41,15 @@ or the complete technology overhaul.
 
 ## Outstanding before family handoff
 
-1. Preserve the authored molecular-weight **distribution** requirement. Current
-   quantitative PEG evidence provides a conditional mean and interval, explicitly
-   not a measured chain-size distribution. A bounded aqueous size-exclusion route
-   is being authored; it must have real instrument, calibration, sample and
-   material costs and a distribution-dependent operating consequence.
-2. Resolve reachable supply of qualified column packing and reference standards.
-   The integrator approved a finite preexisting external laboratory boundary.
-   `SEC_SPECIALIST_SUPPLY.md` specifies the implemented daily eligibility, one-time
-   saved endowment, finite embassy cargo and exhaustion behavior. This is not
-   local synthesis or a full historical bootstrap. Instrument preparation and
-   consumption of these supplies remain unfinished.
+1. Final review of the connected size-exclusion route. It now builds physical
+   pump/flow-cell/bench capital, consumes imported packing and assigned references,
+   pays daily calibration and sample work, and selects an actual binder route
+   using measured relative distribution. Four SEC operating/save/expiry cases
+   and the related five-suite run (65/65) pass. Numerical performance and the
+   narrow-binder specification remain explicit bounded game assumptions.
+2. The finite preexisting external laboratory supply boundary is implemented and
+   separately tested (20/20 material cases). It is not local packing/reference
+   synthesis or a full historical bootstrap. See SEC_SPECIALIST_SUPPLY.md.
 3. Finish the remaining subject art and verify imported assets and bindings.
 4. Review final combined production/branching and UI evidence after the remaining
    changes. Prior passing tests cover their stated cases, not the whole campaign.

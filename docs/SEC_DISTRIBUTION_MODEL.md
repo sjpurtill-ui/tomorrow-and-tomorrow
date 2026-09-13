@@ -1,8 +1,8 @@
 # Bounded retained PEG distribution measurement
 
-Status: measured-response core implemented; instrument operation, paid acquisition
-and the distribution-dependent consumer are not yet connected. This is not an
-accepted runtime discovery or a campaign completion claim.
+Status: connected to a built instrument, finite column/reference supply, paid
+daily calibration and acquisition, saved retained specimens and two binder routes.
+This remains isolated and unintegrated; it is not a campaign completion claim.
 
 `sec_elution_model.gd` accepts an explicit retained mixture of chain sizes and
 number fractions. It forms a concentration-detector response weighted by chain
@@ -24,8 +24,8 @@ The report contains four observed mass-fraction bins (10–20, 20–40, 40–80 
 80–160), with instrumental broadening retained. It explicitly denies exact chain
 reconstruction or absolute mass certification. A conservative interior fraction
 for the 20–80 interval discounts measured reference width and receiver noise; a
-fraction of at least 0.9 is the proposed narrow-binder qualification. This rule
-still needs the paid manufacturing consumer. It is a selected game material
+fraction of at least 0.9 is the proposed narrow-binder qualification. The selected route uses one qualified batch and four work units; broad-range
+rework uses 1.2 recovered batches and six work units for the same binder output. It is a selected game material
 specification, not an empirical universal PEG adhesive-performance claim.
 
 Five focused cases pass: same-number-mean/different-distribution samples produce
@@ -42,3 +42,25 @@ Their commercial instrument coefficients are not used as game performance claims
 Compatible medium and assigned standards have the explicit finite supplier
 boundary documented in `SEC_SPECIALIST_SUPPLY.md`; generic polymer inventory does
 not supply reference provenance.
+
+
+## Connected operating evidence
+
+The bench is assembled from a manufactured metering pump and optical flow cell;
+column packing and reference-solution recipes consume the supplied materials.
+Commissioning costs actual bench capital, steel and 16 work units. One effective
+operator and two power units provide one daily column-time unit. Preparation
+consumes a packed column and reference set, water and paper, then spends six
+instrument-time units on conditioning and observed references. A column supports
+at most eight runs and expires after 30 days. A run reserves one retained batch,
+water and paper and spends four instrument-time units. Expiry during a run loses
+that run; no grade appears. Material shortages are atomic and duplicate calls
+cannot exceed the shared daily channel.
+
+The existing sample ledger holds separate SEC preparation records; NMR does not
+acquire them. Synthesized game samples have either a narrow three-component or
+broader two-component distribution, not a claim of perfectly monodisperse output.
+Accepted results release one corresponding physical batch into the selected or
+rework route. Both produce Binder-Grade PEG, then the existing aqueous binder
+consumer. The operations panel reports the selected result. Partial and completed
+full save/load checks preserve spent materials and prevent duplicate release.

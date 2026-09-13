@@ -36,7 +36,7 @@ func test_empty_storage_is_not_a_source_of_electricity()->void:
 func test_live_civilian_products_and_installations_have_structural_supply_paths()->void:
 	var ids:Array=[];DiscoverySystem.initialize()
 	for entry:Dictionary in DiscoverySystem.technology_catalog:ids.append(entry.id)
-	var result:=Audit.audit(preload("res://scripts/civilian_industry.gd").PRODUCTS,preload("res://scripts/technology_operations.gd").PLANTS,ResourceSystem.catalog.keys()+preload("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),ids,preload("res://scripts/nmr_acquisition.gd").dependency_routes())
+	var result:=Audit.audit(preload("res://scripts/civilian_industry.gd").PRODUCTS,preload("res://scripts/technology_operations.gd").PLANTS,ResourceSystem.catalog.keys()+preload("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),ids,preload("res://tools/production_dependency_audit.gd").operating_routes(),load("res://scripts/sec_specialist_supply.gd").RESERVE)
 	assert_array(result.errors).is_empty();assert_dict(result.blocked_products).is_empty();assert_dict(result.blocked_plants).is_empty()
 	assert_int(int(result.reachable_products)).is_equal(int(result.product_count))
 

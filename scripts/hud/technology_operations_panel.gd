@@ -21,7 +21,7 @@ func _ready()->void:
 			message.text=String(result.get("message",result.get("error","")));refresh())
 		pause.pressed.connect(func()->void:
 			Ops.set_enabled(id,not bool(Ops.data().plants.get(id,{}).get("enabled",true)));refresh())
-	if subject=="nuclear_magnetic_resonance_spectroscopy":
+	if subject in ["nuclear_magnetic_resonance_spectroscopy","size_exclusion_chromatography"]:
 		specimen_report=Label.new();specimen_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(specimen_report)
 	refresh()
 func _process(delta:float)->void:

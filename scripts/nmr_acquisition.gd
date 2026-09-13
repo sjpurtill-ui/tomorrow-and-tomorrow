@@ -133,6 +133,7 @@ static func advance_pending()->void:
 	if pending:calibration.start()
 	calibration.advance()
 	for sample_id:String in records:
+		if not supported(records[sample_id]):continue
 		if records[sample_id].status=="unmeasured" and calibration.usable() and WorldSimulation.discovery.adoption("polymer_solution_processing")>=.1:start(sample_id)
 		advance(sample_id,required_work(records[sample_id]))
 	if not records.is_empty():load("res://scripts/polymer_samples.gd").retire_completed()
@@ -140,6 +141,7 @@ static func advance_pending()->void:
 static func report(sample_id:String)->Dictionary:
 	var sample:=record(sample_id)
 	if sample.is_empty():return {"status":"unavailable","message":"Sample is unavailable."}
+	if sample.get("recipe")=="sec_traceable_peg_batch":return preload("res://scripts/sec_acquisition.gd").report(sample)
 	if sample.status=="unmeasured":return {"status":"unmeasured","message":"Prepared; awaiting a calibrated method, bench time and supplies."}
 	if sample.status=="acquiring":return {"status":"acquiring","message":"Acquiring: %.1f / %.1f instrument-time units." % [float(sample.acquisition.work),required_work(sample)]}
 	if sample.status=="measurement_failed":return {"status":"measurement_failed","message":String(sample.observation.error)}
