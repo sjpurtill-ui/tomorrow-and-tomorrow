@@ -29,7 +29,9 @@ or the complete technology overhaul.
   The sixth batch uses square source images with Godot import size limit 768 and
   mipmaps. Headless import completed without script/import errors; the atlas
   suite passed 12/12, including loading every bound subject texture and checking
-  its square dimensions and card path. Remaining 17 illustrations are not yet
+  its square dimensions and card path. Ten more reviewed metallurgy/chemistry illustrations are bound after that
+  checkpoint (40/47 total); the final combined import awaits the remaining seven.
+  Remaining seven illustrations are not yet
   bound here.
 
 - `edb9a0c`: finite external SEC supplier and paid consignment path; material
