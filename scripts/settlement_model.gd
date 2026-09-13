@@ -21,6 +21,7 @@ const SETTLEMENT_NAME_ROOTS:=["Alder","Ash","Bright","Cairn","Dawn","Deep","Elm"
 const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","haven","hearth","holm","landing","march","meadow","rest","ridge","stead","vale","watch","wick"]
 
 const CITY_RESOURCE_DEFAULTS:={
+	"civilian_care":{"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}},
 	"household_clothing":{"tools":{},"lots":[],"bone_stock":0.0,"last_day":-1,"report":{}},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
@@ -345,6 +346,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				for item:String in dock_needs:needs[item]=float(needs.get(item,0))+float(dock_needs[item])
 				var rail_needs:=preload("res://scripts/rail_freight_investment.gd").maintenance_targets(String(city.id))
 				for item:String in rail_needs:needs[item]=float(needs.get(item,0))+float(rail_needs[item])
+				var care_needs:=preload("res://scripts/civilian_care.gd").targets()
+				for item:String in care_needs:needs[item]=maxf(float(needs.get(item,0)),float(care_needs[item]))
 				return needs))
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:

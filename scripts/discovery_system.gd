@@ -128,6 +128,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/water_conveyance_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/naval_service_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/rail_freight_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/civilian_care_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/textile_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/textile_mechanization.gd").entries())
 	catalog.append_array(preload("res://scripts/paper_knowledge.gd").entries())
@@ -824,7 +825,7 @@ func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
 func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	var weight:=maxi(0,_subcategory_allocation(dynamic_id,subcategory))
 	var total_weight:=research_emphasis_total()
-	var total_researchers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Knowledge",0)))
+	var total_researchers:=maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge")))
 	var workforce_share:=float(weight)/maxf(1.0,float(total_weight)) if weight>0 else 0.0
 	var researchers:=total_researchers*workforce_share
 	var team_scale:=0.0
@@ -861,7 +862,7 @@ func research_program_summary()->Dictionary:
 			active_lines+=1
 			weighted_capacity+=float(research_capacity_for(String(dynamic_id),String(subcategory)).get("progress_multiplier",0.0))*float(weight)
 	return {
-		"researchers":maxi(0,int(WorldSimulation.state.population_allocations.get("Knowledge",0))),
+		"researchers":maxi(0,int(WorldSimulation.state.effective_workers("Knowledge"))),
 		"emphasis_total":total_weight,"active_lines":active_lines,
 		"average_line_capacity":weighted_capacity/maxf(1.0,float(total_weight))
 	}
@@ -1054,6 +1055,7 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
+	if not String(entry.get("clinical_care_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("rail_service_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("naval_service_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("grain_method","")).is_empty():return String(entry.production_contract)

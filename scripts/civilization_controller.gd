@@ -107,7 +107,8 @@ static func production_food_blocked(plan:Dictionary)->bool:
 
 static func civilian_orders(id:String,plan:Dictionary)->void:
 	if production_food_blocked(plan) or bool(plan.get("at_war",false)):return
-	var recommendation:=preload("res://scripts/power_investment_planner.gd").recommendation()
+	var recommendation:=preload("res://scripts/civilian_care_investment.gd").recommendation()
+	if recommendation.is_empty():recommendation=preload("res://scripts/power_investment_planner.gd").recommendation()
 	if recommendation.is_empty():recommendation=preload("res://scripts/scientific_instrument_planner.gd").recommendation()
 	if recommendation.is_empty():recommendation=preload("res://scripts/canning_investment_planner.gd").recommendation()
 	if recommendation.is_empty():recommendation=preload("res://scripts/machine_workshop_investment.gd").recommendation()

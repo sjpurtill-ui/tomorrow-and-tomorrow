@@ -33,6 +33,9 @@ func _city_health()->Dictionary:
 		"type":"line_chart","heading":"LIFE EXPECTANCY HISTORY","note":"monthly · up to 40 years","items":history,
 		"tip":"Projected life expectancy recorded from the simulation. Gold diamonds mark health-related discoveries; circles mark meaningful changes without a health discovery."
 	}]
+	blocks.append({"type":"text","heading":"CIVILIAN CARE","text":preload("res://scripts/civilian_care.gd").describe()})
+	var care_city:=GameState.resource_settlement_id
+	blocks.append({"type":"actions","items":[{"label":"STANDARD CARE DUTY","sub":"Reserve 25% of available Knowledge labor","on_press":func():SettlementModel.with_city_resources(care_city,func():preload("res://scripts/civilian_care.gd").set_share(.25));hud.request_immediate_dock_refresh()},{"label":"EXPAND CARE DUTY","sub":"Reserve 50%; less time remains for research","on_press":func():SettlementModel.with_city_resources(care_city,func():preload("res://scripts/civilian_care.gd").set_share(.5));hud.request_immediate_dock_refresh()},{"label":"PAUSE CARE DUTY","sub":"Return these workers to other Knowledge work","on_press":func():SettlementModel.with_city_resources(care_city,func():preload("res://scripts/civilian_care.gd").set_share(0));hud.request_immediate_dock_refresh()}]})
 	var changes:Array=[]
 	for index in range(history.size()-1,-1,-1):
 		var point:Dictionary=history[index]
@@ -75,6 +78,9 @@ func _health_brief(expectancy:float,delta:float,water_intake:int,housing:int)->D
 	return {"tone":"info","title":"Expected lifespan is %.1f years" % expectancy,"why":"This is the modeled lifespan of a newborn under current conditions, not the average age of everyone alive. The chart distinguishes research-linked changes from shifts in living conditions."}
 
 func signature()->Array:
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array:return SettlementModel.with_local_population(_city_signature))
+
+func _city_signature()->Array:
 	var history:Array[Dictionary]=GameState.health_history_snapshot()
 	var latest:Dictionary=history[-1] if not history.is_empty() else {}
-	return [roundi(GameState.projected_life_expectancy()*10.0),roundi(GameState.population_health*1000.0),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]
+	return [GameState.selected_player_settlement_id,GameState.civilian_care.duplicate(true),roundi(GameState.projected_life_expectancy()*10.0),roundi(GameState.population_health*1000.0),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]

@@ -191,6 +191,7 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	if not clothing.valid(state.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid household clothing records."}
 	if not preload("res://scripts/water_conveyance_state.gd").valid_state(state):return {"error":"Invalid water conveyance records."}
 	if not preload("res://scripts/rail_freight_state.gd").valid_state(state):return {"error":"Invalid rail freight records."}
+	if not preload("res://scripts/civilian_care_state.gd").valid_state(state):return {"error":"Invalid civilian clinical care records."}
 	var batches=preload("res://scripts/food_batches.gd")
 	if not batches.valid(state.get("food_batches",batches.empty_state())) or not batches.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid food batch records."}
 	if not preload("res://scripts/building_material_operations.gd").valid_state(state):return {"error":"Invalid building material or curing records."}

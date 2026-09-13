@@ -579,7 +579,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var carriers := float(WorldSimulation.state.population_allocations.get("Logistics",0))
-	var observers := float(WorldSimulation.state.population_allocations.get("Knowledge",0))
+	var observers := float(WorldSimulation.state.effective_workers("Knowledge"))
 	var stewards := float(WorldSimulation.state.population_allocations.get("Administration",0))
 	var guards := float(WorldSimulation.state.population_allocations.get("Defense",0))
 	var dynamics:=WorldSimulation.state.society_capacities
@@ -651,7 +651,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var process_health_cost:=(WorldSimulation.discovery.effect("health_risk")+WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity
 	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024*(1.0-float(clothing.get("cold",0)))+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
 	var exchange_pressure:Dictionary=preload("res://scripts/society_exchange.gd").pressure()
+	var clinical:=preload("res://scripts/civilian_care.gd").process_day(clampf((1.0-prior_health)*.6+disease_pressure*.25+malnutrition*.15,0,1))
 	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
+	health_target=clampf(health_target+float(clinical.get("health_relief",0)),.02,.97)
+	WorldSimulation.state.simulation_metrics["clinical_care"]=clinical.duplicate(true)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,0.022)
 	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
 	WorldSimulation.state.simulation_metrics["water_days"]=float(WorldSimulation.state.water_metrics.get("days",0.0))

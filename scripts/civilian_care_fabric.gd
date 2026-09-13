@@ -34,7 +34,7 @@ static func admit(data:Dictionary,population:float,amount:float,severity:float,d
 	var episode:={"id":int(data.next_id),"onset_day":day,"remaining":accepted,"severity":clampf(severity,0,1),"observed":0.0,"observation_day":-1,"prior_observation_day":-1,"assessed_severity":0.0,"cared":0.0,"care_day":-1,"continuity":0.0}
 	data.next_id=int(data.next_id)+1
 	if data.episodes.size()>=MAX_EPISODES:
-		# Merge only into an unobserved aggregate; do not let new admissions inherit
+		# Create an unobserved merged aggregate; do not let new admissions inherit
 		# somebody else's observation or nursing continuity.
 		var tail:Dictionary=data.episodes.back()
 		var merged:=float(tail.remaining)+accepted
@@ -87,7 +87,7 @@ static func serve(data:Dictionary,stock:Dictionary,workers:float,methods:Diction
 				episode.cared=treated;episode.care_day=day
 				# Continued observation and care improve a bounded recoverable burden;
 				# no observation alone, staffing alone or stock ownership grants recovery.
-				var followed:=int(episode.prior_observation_day)==day-1
+				var followed:=int(episode.prior_observation_day)>=0 and int(episode.prior_observation_day)==day-1
 				var recovered:=minf(remaining,treated*(.03+(.03*float(episode.continuity) if followed else 0.0)))
 				episode.remaining=maxf(0,remaining-recovered)
 				episode.observed=minf(float(episode.observed),float(episode.remaining))
