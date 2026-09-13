@@ -1807,7 +1807,7 @@
       "domain": "production",
       "id": "leather_goods_patterning",
       "name": "Leather-Goods Patterning",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/knitted_loop_fabrics.png",
@@ -5447,7 +5447,7 @@
       "domain": "production",
       "id": "hide_tanning",
       "name": "Hide Tanning",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/carbon_resistors.png",
@@ -5797,9 +5797,9 @@
   "live_art_complete": false,
   "live_count": 724,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 586,
+  "queued_count": 584,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 138
+  "verified_count": 140
 }
