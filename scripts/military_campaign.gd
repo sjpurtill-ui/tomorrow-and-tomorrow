@@ -529,6 +529,7 @@ func cancel_equipment_job(job_id:int)->Dictionary:
 		var job:Dictionary=equipment_queue[index]
 		if int(job.get("id",-1))!=job_id: continue
 		if bool(job.get("persistent",false)):
+			if not PersistentProduction.close(job):return {"error":"Return to the formed workpiece store before closing this line."}
 			equipment_queue.remove_at(index)
 			return {"cancelled":true,"job_id":job_id,"message":"Line closed. Finished goods remain in stores; consumed work in progress is not refunded."}
 		var count:=int(job.get("count",0))

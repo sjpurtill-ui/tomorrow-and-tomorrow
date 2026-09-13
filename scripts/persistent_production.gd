@@ -137,6 +137,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 	if definition.has("error"): return definition
 	for job in host.equipment_queue:
 		if int(job.id)!=id or not bool(job.get("persistent",false)): continue
+		if not Formed.can_clear(job):return {"error":"Return to the formed workpiece store before retooling this line."}
 		if String(job.item)==item: return {"ok":true,"message":"This line already makes that item."}
 		var installed:=installed_tooling(job)
 		var additions:=missing_tooling(definition.tooling,installed)
@@ -432,3 +433,6 @@ static func validate_saved(payload: Dictionary) -> String:
 		for value in job.materials.values():
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid material cost."
 	return Formed.validate_links(payload.get("equipment_queue",[]))
+
+static func close(job:Dictionary)->bool:
+	return Formed.clear(job)

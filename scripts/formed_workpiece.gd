@@ -46,11 +46,32 @@ static func validate_job(job:Dictionary,spec:Dictionary)->String:
 	if job.has("forming_pending"):
 		var p:Variant=job.forming_pending
 		if not spec.has("formed_source_curvature") or not p is Dictionary or p.get("source_job")!=job.id or p.get("recipe")!=job.item or p.get("ordinal")!=int(job.completed)+1 or p.get("reserved")!=spec.materials:return "Invalid forming source."
+		if not p.get("site") is String or p.site.length()>128:return "Invalid forming store."
+		if job.has("formed_piece") and not job.formed_piece.consumed:return "Uncollected formed piece overlaps unfinished forming."
 		if not preload("res://scripts/metallurgy_thermal_cycle.gd").number(p.get("work")) or p.work<0 or p.work>=2 or p.work!=job.progress_days:return "Invalid forming work."
 	elif spec.has("formed_source_curvature") and float(job.progress_days)>0:return "Missing forming workpiece."
 	return ""
-static func clear(job:Dictionary)->void:
+static func can_clear(job:Dictionary)->bool:
+	if not job.has("formed_piece") or bool(job.formed_piece.consumed):return true
+	var source:String=job.formed_piece.site
+	if source==WorldSimulation.state.resource_settlement_id:return true
+	var record:Dictionary=WorldSimulation.settlements.settlement_record(source)
+	# Primary stores cannot be accessed through a currently active secondary
+	# resource scope. Keep ownership intact until cleanup runs at that store.
+	return not record.is_empty() and not bool(record.get("primary",false))
+static func clear(job:Dictionary)->bool:
+	if not can_clear(job):return false
+	if job.has("formed_piece") and not bool(job.formed_piece.consumed):
+		var source:String=job.formed_piece.site
+		var downgrade:=func()->void:
+			var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+			var quantity:=minf(1.0,maxf(0,float(stocks.get(MATERIAL,0))))
+			stocks[MATERIAL]=float(stocks.get(MATERIAL,0))-quantity
+			stocks["Unqualified Formed Steel"]=float(stocks.get("Unqualified Formed Steel",0))+quantity
+		if source==WorldSimulation.state.resource_settlement_id:downgrade.call()
+		else:WorldSimulation.settlements.with_city_resources(source,downgrade)
 	job.erase("formed_piece");job.erase("forming_pending")
+	return true
 
 static func source_key(p:Dictionary)->String:
 	return var_to_str([p.site,p.source_job,p.ordinal])
