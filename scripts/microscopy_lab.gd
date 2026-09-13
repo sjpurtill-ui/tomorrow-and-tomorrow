@@ -93,7 +93,8 @@ static func advance(traveling:bool)->Dictionary:
 	for sample:Dictionary in ledger.specimens.duplicate():
 		if sample.site!=site():continue
 		var aseptic:bool="aseptic_laboratory_practice" in known and protocol_ready(ledger,String(sample.kind)) and int(ledger.tools.get("sterile_until",-1))>=day and int(ledger.tools.get("sterile_uses",0))>0
-		if "cell_culture_methods" in known and day>int(sample.last_day) and float(state.food_stocks.get("Dry staples",0))>=.03:
+		var can_culture:bool="cell_culture_methods" in known or (sample.kind=="starter" and "microbial_growth_measurement" in known)
+		if can_culture and day>int(sample.last_day) and float(state.food_stocks.get("Dry staples",0))>=.03:
 			if pay(ledger,stocks,{"Freshwater":.05,"Laboratory Glassware":.002},.05):
 				if Samples.grow(sample,day,.02,aseptic):
 					state.food_stocks["Dry staples"]-=.03
