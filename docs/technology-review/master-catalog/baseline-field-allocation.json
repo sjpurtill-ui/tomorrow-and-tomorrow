@@ -4974,6 +4974,55 @@
       "source_domain": "logistics",
       "name": "Rail-Vehicle Braking",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "metal_annealing_control",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Metal Annealing Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "surface_carburization",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Surface Carburization",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "metal_casting_feed_design",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Metal Casting Feed Design",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "brazed_joint_qualification",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Brazed Joint Qualification",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "arc_welding_processes",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Arc Welding Processes",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "resistance_welding",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Resistance Welding",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "continuous_metal_casting",
+      "field": "D04",
+      "source_domain": "production",
+      "name": "Continuous Metal Casting",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

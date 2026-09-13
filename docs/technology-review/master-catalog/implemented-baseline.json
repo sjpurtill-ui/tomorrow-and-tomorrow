@@ -1,5 +1,5 @@
 {
-  "source_commit": "e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3",
+  "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -38032,6 +38032,833 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Tool quality"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "metal_annealing_control",
+      "name": "Metal Annealing Control",
+      "foundations": "hardened_edges",
+      "mechanism": "Relate controlled thermal treatment to measured metal hardness and workability",
+      "operating_requirement": "Suitable metal, heating equipment, skilled handling and property checks",
+      "consequence": "Restore selected workability while altering other properties",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "precision_thermometry",
+          "kiln_control"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "metal_annealing_control",
+        "local_demonstration": "Relate controlled thermal treatment to measured metal hardness and workability",
+        "operating_requirements": "Suitable metal, heating equipment, skilled handling and property checks",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Empirical furnace practice can precede calibrated thermometry; qualified property checks remain required.",
+      "implementation_reconciliation": {
+        "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "hardened_edges"
+        ],
+        "previous_requires_any": [
+          [
+            "precision_thermometry",
+            "kiln_control"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "metal_annealing_control",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Metal Annealing Control",
+            "missing_all": [
+              "hardened_edges"
+            ],
+            "missing_any": [
+              [
+                "precision_thermometry",
+                "kiln_control"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "hardened_edges",
+              "precision_thermometry",
+              "kiln_control"
+            ],
+            "requires_all": [
+              "hardened_edges"
+            ],
+            "requires_any": [
+              [
+                "precision_thermometry",
+                "kiln_control"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Metal Annealing Control",
+        "observation": "Relate controlled thermal treatment to measured metal hardness and workability. Suitable metal, heating equipment, skilled handling and property checks.",
+        "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification.",
+        "production_items": [
+          "annealed_copper"
+        ],
+        "requires": [
+          "hardened_edges"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "precision_thermometry",
+            "kiln_control"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "surface_carburization",
+      "name": "Surface Carburization",
+      "foundations": "hardened_edges,charcoal",
+      "mechanism": "Enrich a suitable metal surface with carbon through a qualified thermal process",
+      "operating_requirement": "Compatible metal, controlled carbon source, thermal equipment and case assessment",
+      "consequence": "Create a graded surface condition while retaining core and distortion constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "surface_carburization",
+        "local_demonstration": "Enrich a suitable metal surface with carbon through a qualified thermal process",
+        "operating_requirements": "Compatible metal, controlled carbon source, thermal equipment and case assessment",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "hardened_edges",
+          "charcoal"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "surface_carburization",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Surface Carburization",
+            "missing_all": [
+              "hardened_edges",
+              "charcoal"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "hardened_edges",
+              "charcoal"
+            ],
+            "requires_all": [
+              "hardened_edges",
+              "charcoal"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Surface Carburization",
+        "observation": "Enrich a suitable metal surface with carbon through a qualified thermal process. Compatible metal, controlled carbon source, thermal equipment and case assessment.",
+        "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification.",
+        "production_items": [
+          "case_hardened_gears"
+        ],
+        "requires": [
+          "hardened_edges",
+          "charcoal"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "metal_casting_feed_design",
+      "name": "Metal Casting Feed Design",
+      "foundations": "copper_casting",
+      "mechanism": "Arrange mold filling and solidification feed paths for an evaluated casting",
+      "operating_requirement": "Suitable mold, melt, casting staff and defect inspection",
+      "consequence": "Reduce selected shrinkage and filling defects without guaranteeing zero porosity",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "flow_continuity",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "metal_casting_feed_design",
+        "local_demonstration": "Arrange mold filling and solidification feed paths for an evaluated casting",
+        "operating_requirements": "Suitable mold, melt, casting staff and defect inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Comparative mold trials can precede formal flow models; actual melt and solidification evidence determine qualified designs.",
+      "implementation_reconciliation": {
+        "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "copper_casting"
+        ],
+        "previous_requires_any": [
+          [
+            "flow_continuity",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "metal_casting_feed_design",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Metal Casting Feed Design",
+            "missing_all": [
+              "copper_casting"
+            ],
+            "missing_any": [
+              [
+                "flow_continuity",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "copper_casting",
+              "flow_continuity",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "copper_casting"
+            ],
+            "requires_any": [
+              [
+                "flow_continuity",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Metal Casting Feed Design",
+        "observation": "Arrange mold filling and solidification feed paths for an evaluated casting. Suitable mold, melt, casting staff and defect inspection.",
+        "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification.",
+        "production_items": [
+          "fed_copper_castings"
+        ],
+        "requires": [
+          "copper_casting"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "flow_continuity",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "brazed_joint_qualification",
+      "name": "Brazed Joint Qualification",
+      "foundations": "copper_casting",
+      "mechanism": "Qualify a lower-melting filler joint between compatible surfaces without melting the base members",
+      "operating_requirement": "Suitable filler, surface preparation, heat source and inspection",
+      "consequence": "Join evaluated material combinations while filler and service temperature limit performance",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "forge_welding",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "brazed_joint_qualification",
+        "local_demonstration": "Qualify a lower-melting filler joint between compatible surfaces without melting the base members",
+        "operating_requirements": "Suitable filler, surface preparation, heat source and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Compatible filler joining can be qualified empirically; adhesive chemistry is not its necessary ancestor.",
+      "implementation_reconciliation": {
+        "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "copper_casting"
+        ],
+        "previous_requires_any": [
+          [
+            "forge_welding",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "brazed_joint_qualification",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Brazed Joint Qualification",
+            "missing_all": [
+              "copper_casting"
+            ],
+            "missing_any": [
+              [
+                "forge_welding",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "copper_casting",
+              "forge_welding",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "copper_casting"
+            ],
+            "requires_any": [
+              [
+                "forge_welding",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Brazed Joint Qualification",
+        "observation": "Qualify a lower-melting filler joint between compatible surfaces without melting the base members. Suitable filler, surface preparation, heat source and inspection.",
+        "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification.",
+        "production_items": [
+          "brazed_steel_fittings"
+        ],
+        "requires": [
+          "copper_casting"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "forge_welding",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "arc_welding_processes",
+      "name": "Arc Welding Processes",
+      "foundations": "electrical_measurement",
+      "mechanism": "Use a controlled electrical arc to form a qualified metal joint",
+      "operating_requirement": "Compatible power source, consumables, shielding where required and skilled operators",
+      "consequence": "Join suitable metals with real heat, defect and distortion limits",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "electric_arc_furnaces",
+          "electrical_generators"
+        ],
+        [
+          "forge_welding"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "arc_welding_processes",
+        "local_demonstration": "Use a controlled electrical arc to form a qualified metal joint",
+        "operating_requirements": "Compatible power source, consumables, shielding where required and skilled operators",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Power-source and joining traditions provide separate alternatives; a metal-melting arc furnace is not mandatory before arc joining.",
+      "implementation_reconciliation": {
+        "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "electrical_measurement"
+        ],
+        "previous_requires_any": [
+          [
+            "electric_arc_furnaces",
+            "electrical_generators"
+          ],
+          [
+            "welding_metallurgy",
+            "forge_welding"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "arc_welding_processes",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Arc Welding Processes",
+            "missing_all": [
+              "electrical_measurement"
+            ],
+            "missing_any": [
+              [
+                "electric_arc_furnaces",
+                "electrical_generators"
+              ],
+              [
+                "forge_welding"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "electrical_measurement",
+              "electric_arc_furnaces",
+              "electrical_generators",
+              "forge_welding"
+            ],
+            "requires_all": [
+              "electrical_measurement"
+            ],
+            "requires_any": [
+              [
+                "electric_arc_furnaces",
+                "electrical_generators"
+              ],
+              [
+                "forge_welding"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Arc Welding Processes",
+        "observation": "Use a controlled electrical arc to form a qualified metal joint. Compatible power source, consumables, shielding where required and skilled operators.",
+        "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification.",
+        "production_items": [
+          "arc_welded_panels"
+        ],
+        "requires": [
+          "electrical_measurement"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "electric_arc_furnaces",
+            "electrical_generators"
+          ],
+          [
+            "forge_welding"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "resistance_welding",
+      "name": "Resistance Welding",
+      "foundations": "electrical_measurement",
+      "mechanism": "Generate localized joining heat through controlled electrical resistance and force",
+      "operating_requirement": "Compatible equipment, joint surfaces, power and inspection",
+      "consequence": "Join selected assemblies with contact and geometry constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "forge_welding"
+        ]
+      ],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "resistance_welding",
+        "local_demonstration": "Generate localized joining heat through controlled electrical resistance and force",
+        "operating_requirements": "Compatible equipment, joint surfaces, power and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "branching_note": "Empirical joint qualification can precede formal welding metallurgy; real pressure, current and compatible contact surfaces remain necessary.",
+      "implementation_reconciliation": {
+        "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "electrical_measurement"
+        ],
+        "previous_requires_any": [
+          [
+            "welding_metallurgy",
+            "forge_welding"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "resistance_welding",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Resistance Welding",
+            "missing_all": [
+              "electrical_measurement"
+            ],
+            "missing_any": [
+              [
+                "forge_welding"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "electrical_measurement",
+              "forge_welding"
+            ],
+            "requires_all": [
+              "electrical_measurement"
+            ],
+            "requires_any": [
+              [
+                "forge_welding"
+              ]
+            ],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Resistance Welding",
+        "observation": "Generate localized joining heat through controlled electrical resistance and force. Compatible equipment, joint surfaces, power and inspection.",
+        "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification.",
+        "production_items": [
+          "spot_welded_panels"
+        ],
+        "requires": [
+          "electrical_measurement"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "forge_welding"
+          ]
+        ],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D04",
+      "id": "continuous_metal_casting",
+      "name": "Continuous Metal Casting",
+      "foundations": "steel_refining,metal_casting_feed_design",
+      "mechanism": "Solidify a controlled metal stream into a continuously withdrawn shape",
+      "operating_requirement": "Qualified caster, cooling, melt supply and operators",
+      "consequence": "Produce finite intermediate stock with thermal and surface-quality constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Obtain competent paid instruction, shared experimental evidence, commissioned research, licensed production or inspectable delivered material. Pay delivery and local qualification work; purchased material does not confer synthesis or process mastery and still needs a suitable operating application.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "continuous_metal_casting",
+        "local_demonstration": "Solidify a controlled metal stream into a continuously withdrawn shape",
+        "operating_requirements": "Qualified caster, cooling, melt supply and operators",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent available source",
+          "negotiated payment or reciprocal contribution",
+          "actual record or specimen delivery",
+          "finite local trials and qualification",
+          "continuing feedstocks, energy, staff and waste handling"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay transport, board and finite instruction by an available practitioner; qualify the process on actual local equipment.",
+          "partnership": "Contribute material specimens, instrument time, staff or interpretable evidence; shared access and communication retain real delays.",
+          "purchased_research": "Commission a specified material or process question; delivered evidence supports local investigation without guaranteed positive performance.",
+          "licensed_or_imported_service": "Purchase qualified material or finite external processing capacity with continuing fees and transport; domestic production knowledge is not granted.",
+          "reverse_engineering": "Obtain and analyze a real specimen or inspectable process record; composition alone does not reveal all thermal history, tooling, scale or lifetime behavior."
+        }
+      },
+      "implementation_status": "Authored mechanism only; recipes, installed processes, material properties, physical losses, paid acquisition and AI use remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "07a8085d9e962b805eddc695a42a0f08f29e5201",
+        "editorial_source": "materials-process-depth.json",
+        "previous_requires_all": [
+          "steel_refining",
+          "metal_casting_feed_design"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "continuous_metal_casting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Continuous Metal Casting",
+            "missing_all": [
+              "steel_refining",
+              "metal_casting_feed_design"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "steel_refining",
+              "metal_casting_feed_design"
+            ],
+            "requires_all": [
+              "steel_refining",
+              "metal_casting_feed_design"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "materials",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Continuous Metal Casting",
+        "observation": "Solidify a controlled metal stream into a continuously withdrawn shape. Qualified caster, cooling, melt supply and operators.",
+        "production_contract": "Paid workshop processes consume metal, fuel, water, tooling and finite work. Annealed wire, case-hardened gears, cast/brazed vessel parts and welded panels feed existing motors, generators and carts. Continuous casting prepares steel for subsequent rolling; it does not refine ore. Arc and spot welding require real shared electricity, and their panels have different qualified uses. Compatible imported parts can be used without manufacture mastery; quantities are game balances, not industrial certification.",
+        "production_items": [
+          "continuous_steel_slabs"
+        ],
+        "requires": [
+          "steel_refining",
+          "metal_casting_feed_design"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "materials",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
       }
     },
     {

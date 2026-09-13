@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 693,
+  "verified_baseline_discoveries": 700,
   "pending_communications": 0,
-  "new_authored_drafts": 2468,
+  "new_authored_drafts": 2461,
   "distinct_accounted_identities": 3161,
   "remaining_identities_to_author": 1839,
   "target": 5000,
@@ -2349,13 +2349,13 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 470,
+  "branch_alternatives": 464,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 115,
     "D02": 99,
     "D03": 97,
-    "D04": 119,
+    "D04": 112,
     "D05": 156,
     "D06": 59,
     "D07": 47,
@@ -2412,9 +2412,9 @@
       "id": "D04",
       "name": "Materials and chemical processes",
       "target": 300,
-      "implemented_baseline": 70,
+      "implemented_baseline": 77,
       "pending_communications": 0,
-      "authored_drafts": 119,
+      "authored_drafts": 112,
       "accounted": 189,
       "remaining_to_target": 111
     },

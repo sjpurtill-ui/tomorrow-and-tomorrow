@@ -1,3 +1,9 @@
+## September 12 — 700 verified operating discoveries
+
+INTEGRATED runtime `07a8085d9e962b805eddc695a42a0f08f29e5201`: seven metal-processing identities provide twelve paid recipes connecting annealing, carburization, casting, brazing and electric welding to actual wire, gears, vessels, cart beds and rolled sheet. All **68 distinct worktree cases and 40 canonical cases pass**, including demanded generator fuel, shared electricity depletion, imported parts, partial-job saves and existing autonomous production. See `METAL_PROCESS_HANDOFF.md`.
+
+Graph and exact canonical snapshot: **700 discoveries /482 explicit routes /341 recipes /18 facilities**. All 700 stored definitions match; 15 ledger-tool checks pass. Ledger: **700 integrated + 2,461 drafts = 3,161 identities**, with **1,839 still to author and 4,300 to implement**. Art: 115 verified /700 live, 585 queued. Civilian clinical care remains HELD in its isolated worker pending full ownership, staffing and behavioral acceptance. No player launch, package rebuild or full-history pacing claim.
+
 ## September 12 — optical instrument coverage
 
 Reviewed frozen optical delivery `b8873f6` is integrated as `e37aacb`: 22 distinct optical manufacturing, contrast, imaging and correction proposals, each with five paid recovery routes. Existing coronagraphy and confocal imaging identities were explicitly excluded as duplicates. All horizon mappings merge cleanly; coverage validation and 15 ledger-tool checks pass. See `technology-review/Optical Instrument Methods Review.md`.

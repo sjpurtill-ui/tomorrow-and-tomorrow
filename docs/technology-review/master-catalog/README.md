@@ -4,8 +4,8 @@ Target: 5,000 distinct discoveries across the approved 24 fields. This directory
 
 ## Authoritative baselines
 
-- Verified canonical runtime `e94ffa8e5d65684bf62e7f73b58a0c7b5ec77fc3`: **693 discoveries, 475 learning routes, 329 civilian recipes and 18 facilities**. Rail/conditioning integration passes 94 combined runtime and 71 canonical runtime/atlas checks. Earlier grain/food regressions bring distinct worktree runtime cases to 128. The separate river-edge fixture limitation remains documented in `../../FOOD_CONSTRUCTION_INTEGRATION.md`.
-- Rail and conditioning promote seven existing identities. All 693 stored definitions exactly match the loaded canonical snapshot; the prior animal-harness predicate is retained in the wagonway reconciliation, while the implemented mode uses human crews. The ledger contains 693 integrated + 2,468 drafts = 3,161 identities, leaving 1,839 to author and 4,307 to implement. Verified subject art: 115; 578 remain queued.
+- Verified canonical runtime `07a8085d9e962b805eddc695a42a0f08f29e5201`: **700 discoveries, 482 learning routes, 341 civilian recipes and 18 facilities**. Metal processing passes 68 distinct worktree and 40 canonical cases. Earlier integrations and the separate river-edge fixture limitation remain documented in the integration handoffs.
+- Seven metal-process identities are promoted from the exact loaded canonical snapshot. Their prior proposed welding-metallurgy alternatives remain in reconciliation; existing practical forge-welding foundations support the implemented routes. The ledger contains 700 integrated + 2,461 drafts = 3,161 identities, leaving 1,839 to author and 4,300 to implement. Verified subject art: 115; 585 remain queued.
 - `../candidate-atlas.json`: 600 review candidates. Reconcile synonyms with live identities before counting them; do not add 600 to the live total.
 - New master records use `authored_draft` status. Their mechanisms and prerequisite edges are explicit proposals, awaiting historical review, duplicate reconciliation and operating implementation. Dates are not unlock gates.
 

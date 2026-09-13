@@ -4114,6 +4114,62 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/metal_annealing_control.png",
+      "description": "Relate controlled thermal treatment to measured metal hardness and workability. Suitable metal, heating equipment, skilled handling and property checks.",
+      "domain": "production",
+      "id": "metal_annealing_control",
+      "name": "Metal Annealing Control",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/surface_carburization.png",
+      "description": "Enrich a suitable metal surface with carbon through a qualified thermal process. Compatible metal, controlled carbon source, thermal equipment and case assessment.",
+      "domain": "production",
+      "id": "surface_carburization",
+      "name": "Surface Carburization",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/metal_casting_feed_design.png",
+      "description": "Arrange mold filling and solidification feed paths for an evaluated casting. Suitable mold, melt, casting staff and defect inspection.",
+      "domain": "production",
+      "id": "metal_casting_feed_design",
+      "name": "Metal Casting Feed Design",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/brazed_joint_qualification.png",
+      "description": "Qualify a lower-melting filler joint between compatible surfaces without melting the base members. Suitable filler, surface preparation, heat source and inspection.",
+      "domain": "production",
+      "id": "brazed_joint_qualification",
+      "name": "Brazed Joint Qualification",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/arc_welding_processes.png",
+      "description": "Use a controlled electrical arc to form a qualified metal joint. Compatible power source, consumables, shielding where required and skilled operators.",
+      "domain": "production",
+      "id": "arc_welding_processes",
+      "name": "Arc Welding Processes",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/resistance_welding.png",
+      "description": "Generate localized joining heat through controlled electrical resistance and force. Compatible equipment, joint surfaces, power and inspection.",
+      "domain": "production",
+      "id": "resistance_welding",
+      "name": "Resistance Welding",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/continuous_metal_casting.png",
+      "description": "Solidify a controlled metal stream into a continuously withdrawn shape. Qualified caster, cooling, melt supply and operators.",
+      "domain": "production",
+      "id": "continuous_metal_casting",
+      "name": "Continuous Metal Casting",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/bolt_blank_forging.png",
       "description": "A headed metal blank is formed before its shank receives a thread, separating head shaping from fitting.",
       "domain": "production",
@@ -5547,9 +5603,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 693,
+  "live_count": 700,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 578,
+  "queued_count": 585,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
