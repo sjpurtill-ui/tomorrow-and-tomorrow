@@ -234,3 +234,26 @@ func test_sewing_supply_uses_collected_bone_and_real_yarn_production()->void:
 		assert_float(clothing.available(clothing.BONE_RESOURCE)).is_equal_approx(0,.000001)
 		assert_float(float(state.resource_stockpiles["Woven Cloth"])).is_equal_approx(8.6,.000001)
 	)
+
+func test_laundry_requests_real_soap_and_uses_completed_output()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup();var state=WorldSimulation.state;var clothing=preload("res://scripts/household_clothing.gd")
+		state.known_discoveries.erase("knitted_loop_fabrics")
+		for gate:String in ["mechanical_washing_machines","textile_laundering_practice","crank_linkages","electric_motors","soap_manufacture"]:
+			if gate not in state.known_discoveries:state.known_discoveries.append(gate)
+			state.discovery_adoption[gate]=1.0
+		clothing.data().tools.mechanical_washing_machines=1;clothing.add("sew",10,1,.8)
+		var spec:Dictionary=preload("res://scripts/civilian_industry.gd").product("laundry_soap")
+		for item:String in spec.materials:state.resource_stockpiles[item]=100.0
+		for item:String in spec.tooling:state.resource_stockpiles[item]=100.0
+		assert_str(String(F.clothing_recommendation().get("item",""))).is_equal("laundry_soap")
+		C.civilian_orders("paper_ruler",{})
+		var job:Dictionary=WorldSimulation.military.equipment_queue[0]
+		assert_str(String(job.item)).is_equal("laundry_soap")
+		preload("res://scripts/persistent_production.gd").advance(WorldSimulation.military,job,20)
+		assert_float(float(state.resource_stockpiles["Laundry Soap"])).is_equal(1.0)
+		state.technology_operations.last_day=int(state.elapsed_days);state.technology_operations.services.electricity=.5
+		clothing.operate("mechanical_washing_machines",1,10,int(state.elapsed_days),{"workers":0.0,"inputs":{},"methods":{},"discarded":0.0})
+		assert_float(float(state.resource_stockpiles["Laundry Soap"])).is_equal_approx(.8,.000001)
+		assert_float(float(clothing.coverage(10,int(state.elapsed_days)).issued)).is_equal(0.0)
+	)

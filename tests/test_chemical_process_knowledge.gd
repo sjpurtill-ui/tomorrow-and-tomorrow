@@ -19,7 +19,7 @@ func prepare(item:String)->Dictionary:
 	assert_bool(MilitaryCampaign.start_production_line(item,1).get("ok",false)).is_true()
 	return MilitaryCampaign.equipment_queue.back()
 func test_authored_chemical_capabilities_have_real_recipes()->void:
-	assert_int(Knowledge.entries().size()).is_equal(3)
+	assert_int(Knowledge.entries().size()).is_equal(4)
 	assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(Knowledge.entries(),DiscoverySystem.technology_catalog)).is_empty()
 func test_coproducts_arrive_together_only_after_a_complete_batch()->void:
 	var job:=prepare("chloralkali_batch")
@@ -76,3 +76,13 @@ func test_actual_brine_and_coproducts_feed_silicon_refining()->void:
 	assert_float(float(GameState.resource_stockpiles["Caustic Soda"])).is_equal(2.0)
 	assert_float(float(GameState.resource_stockpiles.Hydrogen)).is_equal(.75)
 	assert_float(float(GameState.resource_stockpiles["Hydrogen Chloride"])).is_equal(.5)
+
+func test_soap_requires_a_completed_material_consuming_batch()->void:
+	var job:=prepare("laundry_soap")
+	var before:Dictionary=GameState.resource_stockpiles.duplicate(true)
+	Production.advance(MilitaryCampaign,job,1.5)
+	assert_float(float(GameState.resource_stockpiles.get("Laundry Soap",0))).is_equal(0.0)
+	Production.advance(MilitaryCampaign,job,1.5)
+	assert_float(float(GameState.resource_stockpiles["Laundry Soap"])).is_equal(1.0)
+	for input:String in Industry.product("laundry_soap").materials:
+		assert_float(float(before[input])-float(GameState.resource_stockpiles[input])).is_equal_approx(float(Industry.product("laundry_soap").materials[input]),.000001)

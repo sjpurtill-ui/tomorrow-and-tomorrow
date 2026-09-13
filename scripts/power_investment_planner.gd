@@ -8,7 +8,7 @@ static func recommendation(proposed_demand:float=0.0)->Dictionary:
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1)
 	if condition<=0:return {}
-	var demand:=Ops.workshop_power_demand()+maxf(0,proposed_demand)
+	var demand:=Ops.workshop_power_demand()+Ops.auxiliary_power_demand()+maxf(0,proposed_demand)
 	var capacity:=0.0;var operators:=0.0
 	for id:String in Ops.data().plants:
 		var record:Dictionary=Ops.data().plants[id];var spec:Dictionary=Ops.PLANTS[id]
@@ -51,7 +51,7 @@ static func can_supply(proposed_demand:float)->bool:
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1)
 	if condition<=0:return false
 	var workers:=maxf(0,state.effective_workers("Crafting")+Ops.reserved_workers(state)-1.0)
-	var demand:=Ops.workshop_power_demand()+maxf(0,proposed_demand)
+	var demand:=Ops.workshop_power_demand()+Ops.auxiliary_power_demand()+maxf(0,proposed_demand)
 	var capacity:=0.0
 	for id:String in Ops.PLANTS:
 		var record:Dictionary=Ops.data().plants.get(id,{})

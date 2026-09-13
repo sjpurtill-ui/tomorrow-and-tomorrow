@@ -184,7 +184,11 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 			amount=0.0
 			for lot:Dictionary in clothing.data().lots:
 				if int(lot.ready)>int(state.elapsed_days):continue
-				if (spec.mode=="wash" and float(lot.soil)>=.35) or (spec.mode=="wick" and not lot.wick) or (spec.mode=="repair" and float(lot.condition)>=.15 and float(lot.condition)<.6):amount+=float(lot.amount)
+				if (spec.mode in ["wash","machine_wash"] and float(lot.soil)>=.35) or (spec.mode=="wick" and not lot.wick) or (spec.mode=="repair" and float(lot.condition)>=.15 and float(lot.condition)<.6):amount+=float(lot.amount)
+			if spec.mode=="test":
+				amount=1.0 if clothing.count()-population>=.25 else 0.0
+				for trial:Dictionary in clothing.data().get("trials",{}).values():
+					if int(trial.cycles)<5:amount+=1.0
 			amount=minf(10,amount)
 		if amount<=.000001:continue
 		var needed:Dictionary={}

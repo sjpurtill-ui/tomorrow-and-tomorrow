@@ -16,9 +16,9 @@ func equip(id:String)->void:
 	for item:String in spec.inputs:WorldSimulation.state.resource_stockpiles[item]=1000.0
 	assert_bool(C.install(id).get("ok",false)).is_true()
 func report()->Dictionary:return {"workers":0.0,"inputs":{},"methods":{},"discarded":0.0}
-func test_ten_methods_have_real_inputs_and_graph_contracts()->void:
+func test_twelve_methods_have_real_inputs_and_graph_contracts()->void:
 	WorldSimulation.scoped("clothes",func()->void:
-		assert_int(K.entries().size()).is_equal(10)
+		assert_int(K.entries().size()).is_equal(12)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 		var outputs:Array=WorldSimulation.resources.catalog.keys();outputs.append(C.BONE_RESOURCE)
 		for product:Dictionary in preload("res://scripts/civilian_industry.gd").PRODUCTS.values():outputs.append(product.output)
@@ -90,7 +90,7 @@ func test_malformed_and_secondary_city_states_are_rejected()->void:
 	assert_bool(C.valid_settlements([{"local_resources":{}}])).is_true()
 func test_owned_save_roundtrip_preserves_next_day_and_isolation()->void:
 	WorldSimulation.create_actor("other",443)
-	WorldSimulation.scoped("clothes",func()->void:prepare();equip("knitted_loop_fabrics");C.advance(100,100,false))
+	WorldSimulation.scoped("clothes",func()->void:prepare();equip("knitted_loop_fabrics");equip("textile_durability_testing");C.add("fit",150,.8);C.advance(100,100,false))
 	var saved:=WorldSimulation.export_state().duplicate(true)
 	WorldSimulation.scoped("clothes",func()->void:WorldSimulation.state.elapsed_days=1;C.advance(100,100,false))
 	var expected:Dictionary=WorldSimulation.actors.clothes.systems.GameState.household_clothing.duplicate(true)
@@ -108,7 +108,7 @@ func test_inspector_displays_service_and_paid_install()->void:
 func test_full_save_file_restores_clothes_and_accepts_missing_legacy_field()->void:
 	WorldSimulation.clear();GameState.reset_for_new_world(442);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize();CivilizationSystem.reset_for_new_world()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
-	prepare();equip("knitted_loop_fabrics");C.add("knit",12,.8,.2,false,false,3);C.add("fit",5,.5);C.data().bone_stock=.25
+	prepare();equip("knitted_loop_fabrics");C.add("knit",12,.8,.2,false,false,3);C.add("fit",5,.5);C.data().bone_stock=.25;equip("textile_durability_testing");C.operate("textile_durability_testing",1,0,0,report())
 	var expected:=C.data().duplicate(true);var slot:="clothing_%d"%OS.get_process_id()
 	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true();GameState.household_clothing=C.empty_state()
 	assert_bool(SaveSystem.load_game(slot).get("ok",false)).is_true();assert_dict(C.data()).is_equal(expected)
@@ -224,3 +224,105 @@ func test_bone_stock_is_optional_in_old_records_but_malformed_stock_is_rejected(
 	var old:=C.empty_state();old.erase("bone_stock");assert_bool(C.valid(old)).is_true()
 	old.bone_stock=INF;assert_bool(C.valid(old)).is_false()
 	old.bone_stock=-1;assert_bool(C.valid(old)).is_false()
+
+func test_powered_washing_pays_actual_power_soap_water_and_shared_capacity()->void:
+	WorldSimulation.scoped("clothes",func()->void:
+		prepare();equip("mechanical_washing_machines");C.add("sew",40,1,.8)
+		var state=WorldSimulation.state;state.technology_operations.last_day=int(state.elapsed_days);state.technology_operations.services.electricity=2.0
+		state.resource_stockpiles["Laundry Soap"]=1.0;state.resource_stockpiles.Freshwater=100.0
+		var r:=report();C.operate("mechanical_washing_machines",10,40,0,r)
+		assert_float(float(r.methods.mechanical_washing_machines)).is_equal(24.0)
+		assert_float(float(r.workers)).is_equal(1.0)
+		assert_float(float(r.inputs.Electricity)).is_equal_approx(1.2,.000001)
+		assert_float(float(state.resource_stockpiles["Laundry Soap"])).is_equal_approx(.52,.000001)
+		assert_float(float(state.resource_stockpiles.Freshwater)).is_equal_approx(92.8,.000001)
+		assert_float(float(C.coverage(40,0).issued)).is_equal(16.0)
+		assert_float(float(C.coverage(40,1).issued)).is_equal(40.0)
+		assert_float(C.count()).is_equal(40.0)
+		for lot:Dictionary in C.data().lots:
+			if int(lot.ready)==1:assert_float(float(lot.condition)).is_equal(.998)
+		var stocks:Dictionary=state.resource_stockpiles.duplicate(true)
+		C.operate("mechanical_washing_machines",10,40,0,r)
+		assert_dict(state.resource_stockpiles).is_equal(stocks)
+	)
+func test_unpowered_or_unsupplied_machine_does_not_consume_garments_or_materials()->void:
+	WorldSimulation.scoped("clothes",func()->void:
+		prepare();equip("mechanical_washing_machines");C.add("fit",5,.8,.8)
+		var state=WorldSimulation.state;state.technology_operations.last_day=int(state.elapsed_days)
+		for missing:String in ["electricity","Laundry Soap","Freshwater"]:
+			state.technology_operations.services.electricity=2.0;state.resource_stockpiles["Laundry Soap"]=2.0;state.resource_stockpiles.Freshwater=2.0
+			if missing=="electricity":state.technology_operations.services.electricity=0.0
+			else:state.resource_stockpiles[missing]=0.0
+			var lots:Array=C.data().lots.duplicate(true);var stocks:Dictionary=state.resource_stockpiles.duplicate(true)
+			var r:=report();C.operate("mechanical_washing_machines",1,5,0,r)
+			assert_float(float(r.workers)).is_equal(0.0);assert_array(C.data().lots).is_equal(lots);assert_dict(state.resource_stockpiles).is_equal(stocks)
+	)
+func test_power_demand_requires_dirty_local_supplied_stock()->void:
+	WorldSimulation.scoped("clothes",func()->void:
+		prepare();equip("mechanical_washing_machines");WorldSimulation.state.population_allocations.Logistics=100.0
+		C.add("sew",10,1,.8)
+		assert_float(C.power_demand()).is_equal(.5)
+		C.data().lots[0].soil=.33;assert_float(C.power_demand()).is_equal(.5)
+		WorldSimulation.state.resource_stockpiles["Laundry Soap"]=0.0
+		assert_float(C.power_demand()).is_equal(0.0)
+		WorldSimulation.state.resource_stockpiles["Laundry Soap"]=10.0;WorldSimulation.state.resource_settlement_id="secondary"
+		assert_float(C.power_demand()).is_equal(0.0)
+		assert_bool(C.quote("mechanical_washing_machines").has("error")).is_true()
+	)
+func test_durability_trials_remove_samples_and_require_five_paid_days()->void:
+	WorldSimulation.scoped("clothes",func()->void:
+		prepare();equip("textile_durability_testing");C.add("sew",2,.8)
+		var state=WorldSimulation.state;state.resource_stockpiles.Freshwater=1.0;state.resource_stockpiles.Paper=1.0
+		var r:=report();C.operate("textile_durability_testing",1,1,0,r)
+		assert_float(C.count()).is_equal(1.75);assert_int(int(C.data().trials.sew.cycles)).is_equal(1)
+		assert_float(float(r.workers)).is_equal(.5)
+		C.operate("textile_durability_testing",1,1,0,r)
+		assert_int(int(C.data().trials.sew.cycles)).is_equal(1)
+		state.resource_stockpiles.Paper=0.0;C.operate("textile_durability_testing",1,1,1,report())
+		assert_int(int(C.data().trials.sew.cycles)).is_equal(1)
+		state.resource_stockpiles.Paper=.08
+		state.household_clothing=JSON.parse_string(JSON.stringify(C.data()))
+		assert_bool(C.valid(C.data())).is_true()
+		for day:int in range(2,6):C.operate("textile_durability_testing",1,1,day,report())
+		assert_int(int(C.data().trials.sew.cycles)).is_equal(5)
+		assert_float(float(C.data().trials.sew.condition)).is_equal_approx(.7,.000001)
+		assert_float(float(C.data().lots[0].condition)).is_equal(.8)
+		assert_float(C.count()).is_equal(1.75)
+		assert_float(float(state.resource_stockpiles.Freshwater)).is_equal_approx(.5,.000001)
+		C.operate("textile_durability_testing",100,1,6,report());assert_float(C.count()).is_equal(1.75)
+		var invalid:Dictionary=C.data().duplicate(true);invalid.trials.sew.sample=100.0;assert_bool(C.valid(invalid)).is_false()
+		invalid=C.data().duplicate(true);invalid.trials.sew.condition=INF;assert_bool(C.valid(invalid)).is_false()
+	)
+func test_wear_trials_never_take_the_last_needed_garment()->void:
+	WorldSimulation.scoped("clothes",func()->void:
+		prepare();equip("textile_durability_testing");C.add("knit",1)
+		var stocks:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate(true)
+		C.operate("textile_durability_testing",20,1,0,report())
+		assert_float(C.count()).is_equal(1.0);assert_dict(C.data().trials).is_empty();assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(stocks)
+	)
+
+func test_actual_generator_responds_to_laundry_demand_and_pays_fuel()->void:
+	WorldSimulation.scoped("clothes",func()->void:
+		prepare();equip("mechanical_washing_machines")
+		var state=WorldSimulation.state;var ops=preload("res://scripts/technology_operations.gd")
+		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
+		state.population_allocations.Crafting=100.0;state.population_allocations.Logistics=100.0
+		var spec:Dictionary=ops.PLANTS.steam_generator
+		for gate:String in [spec.gate]+spec.requires:
+			if gate not in state.known_discoveries:state.known_discoveries.append(gate)
+			state.discovery_adoption[gate]=1.0
+		for item:String in spec.cost:state.resource_stockpiles[item]=100.0
+		for item:String in spec.inputs:state.resource_stockpiles[item]=100.0
+		C.add("sew",10,1,.8)
+		assert_str(String(preload("res://scripts/power_investment_planner.gd").recommendation().get("plant",""))).is_equal("steam_generator")
+		C.data().lots=[]
+		assert_bool(ops.install("steam_generator").get("ok",false)).is_true()
+		for day:int in range(1,12):state.elapsed_days=day;ops.advance(day)
+		assert_float(float(state.resource_stockpiles.Coal)).is_equal(100.0)
+		C.add("sew",10,1,.8);state.elapsed_days=12;ops.advance(12)
+		assert_float(ops.service("electricity")).is_equal(.5)
+		assert_float(float(state.resource_stockpiles.Coal)).is_less(100.0)
+		C.operate("mechanical_washing_machines",1,10,12,report())
+		assert_float(ops.service("electricity")).is_equal_approx(0,.000001)
+		assert_float(float(C.coverage(10,12).issued)).is_equal(0.0)
+	)

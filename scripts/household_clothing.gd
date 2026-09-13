@@ -16,6 +16,7 @@ static func spend(item:String,amount:float)->void:
 	else:WorldSimulation.state.resource_stockpiles[item]=maxf(0,available(item)-amount)
 static func quote(id:String)->Dictionary:
 	if not K.METHODS.has(id):return {"error":"Unknown clothing equipment."}
+	if float(K.METHODS[id].get("power",0))>0 and not WorldSimulation.state.resource_settlement_id.is_empty():return {"error":"This city has no connected electricity service for laundry."}
 	if WorldSimulation.state.convoy_traveling or not WorldSimulation.state.settlement_site_committed:return {"error":"Settle before installing clothing equipment."}
 	if id not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not R.evaluate(K.METHODS[id],WorldSimulation.state.known_discoveries).ready:return {"error":"Adopt the method and its foundations first."}
 	if int(data().tools.get(id,0))>=100:return {"error":"Equipment limit reached."}
@@ -54,21 +55,70 @@ static func coverage(population:float,day:int)->Dictionary:
 		cold+=service*minf(.8,insulation+(.25 if lot.layered else 0))
 		storm+=service*(.30 if lot.wick else .10)
 	return {"cold":clampf(cold/maxf(1,population),0,.8),"storm":clampf(storm/maxf(1,population),0,.3),"issued":worn}
+static func power_demand()->float:
+	var state=WorldSimulation.state
+	var id:="mechanical_washing_machines"
+	if not state.resource_settlement_id.is_empty() or state.convoy_traveling or not state.settlement_site_committed or id not in state.known_discoveries:return 0.0
+	var rate:=float(K.METHODS[id].rate)*clampf(WorldSimulation.discovery.adoption(id),0,1)
+	var amount:=minf(float(data().tools.get(id,0))*rate,maxf(0,state.effective_workers("Logistics"))*.2*rate)
+	var dirty:=0.0
+	var remaining_wear:=maxf(0,WorldSimulation.settlements.primary_population_exact())
+	for lot:Dictionary in data().lots:
+		if int(lot.ready)>int(state.elapsed_days):continue
+		var used:=minf(float(lot.amount),remaining_wear);remaining_wear-=used
+		var new_soil:=.025*used/maxf(.000001,float(lot.amount)) if int(data().last_day)<int(state.elapsed_days) else 0.0
+		if float(lot.soil)+new_soil>=.35:dirty+=float(lot.amount)
+	amount=minf(amount,dirty)
+	for item:String in K.METHODS[id].inputs:amount=minf(amount,maxf(0,available(item))/float(K.METHODS[id].inputs[item]))
+	return amount*float(K.METHODS[id].power)
+
+static func test_cycles(workers:float,population:float,day:int,report:Dictionary)->void:
+	var id:="textile_durability_testing"
+	if not data().has("trials"):data().trials={}
+	var before_work:=float(report.workers)
+	for kind:String in CREATION_MODES:
+		var trial:Dictionary=data().trials.get(kind,{})
+		if not trial.is_empty() and (int(trial.last_day)>=day or (int(trial.cycles)>=5 and day-int(trial.last_day)<30)):continue
+		if quota(id,maxf(0,workers-(float(report.workers)-before_work)),report)<1.0-.000000001:break
+		if trial.is_empty() or int(trial.cycles)>=5:
+			if count()-population<.25:continue
+			var sample:Dictionary={}
+			for lot:Dictionary in data().lots:
+				if lot.kind==kind and int(lot.ready)<=day and float(lot.amount)>=.25:sample=lot;break
+			if sample.is_empty():continue
+			trial={"started":day,"last_day":day,"cycles":0,"before":float(sample.condition),"condition":float(sample.condition),"sample":.25}
+			sample.amount-=.25;data().trials[kind]=trial
+		# A declared accelerated game protocol, not a clinical or textile rating.
+		# Each dated cycle needs real water, paper and finite equipment/crew time.
+		trial.condition=maxf(0,float(trial.condition)-.02)
+		trial.cycles+=1;trial.last_day=day
+		charge(id,1,report)
+	for i in range(data().lots.size()-1,-1,-1):
+		if float(data().lots[i].amount)<.000001:data().lots.remove_at(i)
+
 static func quota(id:String,workers:float,report:Dictionary)->float:
 	if id not in WorldSimulation.state.known_discoveries:return 0
 	var rate:=float(K.METHODS[id].rate)*clampf(WorldSimulation.discovery.adoption(id),0,1)
 	var amount:=minf(maxf(0,workers)*rate,maxf(0,float(data().tools.get(id,0))*rate-float(report.methods.get(id,0))))
 	for item:String in K.METHODS[id].inputs:amount=minf(amount,maxf(0,available(item))/float(K.METHODS[id].inputs[item]))
+	var power:=float(K.METHODS[id].get("power",0))
+	if power>0:amount=minf(amount,preload("res://scripts/technology_operations.gd").service("electricity")/power)
 	return amount
 static func charge(id:String,amount:float,report:Dictionary)->void:
 	for item:String in K.METHODS[id].inputs:
 		var used:=float(K.METHODS[id].inputs[item])*amount
 		spend(item,used)
 		report.inputs[item]=float(report.inputs.get(item,0))+used
+	var power:=float(K.METHODS[id].get("power",0))*amount
+	if power>0:
+		preload("res://scripts/technology_operations.gd").consume_electricity(power)
+		report.inputs["Electricity"]=float(report.inputs.get("Electricity",0))+power
 	report.methods[id]=float(report.methods.get(id,0))+amount
 	report.workers+=amount/maxf(.000001,float(K.METHODS[id].rate)*WorldSimulation.discovery.adoption(id))
 static func operate(id:String,workers:float,population:float,day:int,report:Dictionary)->void:
 	var mode:=String(K.METHODS[id].mode)
+	if mode=="test":test_cycles(workers,population,day,report);return
+	var washing:=mode in ["wash","machine_wash"]
 	if mode in CREATION_MODES:
 		var amount:=minf(quota(id,workers,report),maxf(0,population*1.1-count()))
 		if amount>0 and add(mode,amount):charge(id,amount,report)
@@ -77,7 +127,7 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 	for lot:Dictionary in data().lots.duplicate():
 		if int(lot.ready)>day:continue
 		if mode=="layer" and (lot.layered or float(lot.condition)<.7):continue
-		if mode=="wash" and float(lot.soil)<.35:continue
+		if washing and float(lot.soil)<.35:continue
 		if mode=="wick" and lot.wick:continue
 		if mode=="repair":
 			if float(lot.condition)>=.6 or float(lot.condition)<.15:continue
@@ -91,7 +141,7 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 		if mode=="layer":amount=minf(amount,maxf(0,count()-population))
 		if amount<=.000001:continue
 		# Admit output before withdrawing or charging; a full ledger waits safely.
-		if not add(String(lot.kind),amount,float(lot.condition),0 if mode=="wash" else float(lot.soil),bool(lot.layered) or mode=="layer",bool(lot.wick) or mode=="wick",day+1 if mode=="wash" else 0):continue
+		if not add(String(lot.kind),amount,maxf(0,float(lot.condition)-(.002 if mode=="machine_wash" else 0)),0 if washing else float(lot.soil),bool(lot.layered) or mode=="layer",bool(lot.wick) or mode=="wick",day+1 if washing else 0):continue
 		lot.amount-=amount*multiplier
 		charge(id,amount,report)
 	for i in range(data().lots.size()-1,-1,-1):
@@ -121,6 +171,7 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 		# Same paid steward for every owner; install only usable equipment.
 		for id:String in K.METHODS:
 			if int(data().tools.get(id,0))>0:continue
+			if K.METHODS[id].mode=="test" and count()-population<.25:continue
 			var supplied:=true
 			for item:String in K.METHODS[id].inputs:
 				if available(item)<float(K.METHODS[id].inputs[item]):supplied=false
@@ -144,6 +195,16 @@ static func valid(value:Variant)->bool:
 		for key:String in ["amount","condition","soil","ready"]:
 			if not number(lot[key]) or lot[key]<0 or lot[key]>1e12:return false
 		if lot.amount<=0 or lot.condition>1 or lot.soil>1 or lot.ready!=floorf(float(lot.ready)):return false
+	var trials:Variant=value.get("trials",{})
+	if not trials is Dictionary or trials.size()>CREATION_MODES.size():return false
+	for kind:Variant in trials:
+		if kind not in CREATION_MODES or not trials[kind] is Dictionary:return false
+		var trial:Dictionary=trials[kind]
+		if not trial.has_all(["started","last_day","cycles","before","condition","sample"]):return false
+		for key:String in ["started","last_day","cycles","before","condition","sample"]:
+			if not number(trial[key]) or float(trial[key])<0:return false
+		if trial.started+trial.cycles-1>trial.last_day or trial.last_day>1e12 or trial.started!=floorf(float(trial.started)) or trial.last_day!=floorf(float(trial.last_day)):return false
+		if trial.cycles<1 or trial.cycles>5 or trial.cycles!=floorf(float(trial.cycles)) or trial.before>1 or trial.condition>trial.before or trial.sample!=.25:return false
 	if not value.report is Dictionary or value.report.size()>4:return false
 	for key:Variant in value.report:
 		if key in ["inputs","methods"]:

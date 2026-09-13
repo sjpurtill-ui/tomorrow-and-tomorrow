@@ -32,4 +32,10 @@ func refresh()->void:
 	for item:String in K.METHODS[subject].inputs:inputs.append("%.2f %s"%[float(K.METHODS[subject].inputs[item]),item])
 	if K.METHODS[subject].mode=="layer":inputs.append("2 spare garments per layered assembly")
 	details.text+="\nInstall: "+", ".join(equipment)+".\nPer unit processed: "+", ".join(inputs)+".\nProcessed today: %.1f units; all clothing work today: %.2f handler-days."%[float(ledger.report.get("methods",{}).get(subject,0)),float(ledger.report.get("workers",0))]
+	if float(K.METHODS[subject].get("power",0))>0:details.text+="\nUses %.2f generated electricity per washed garment; powered washing causes 0.002 condition wear."%float(K.METHODS[subject].power)
+	if subject=="textile_durability_testing":
+		details.text+="\nTests remove a quarter-garment spare and run five dated wear/wash cycles. Results describe this game protocol, not a guaranteed service life."
+		for kind:String in ledger.get("trials",{}):
+			var trial:Dictionary=ledger.trials[kind]
+			details.text+="\n%s: %d/5 cycles, condition %.3f → %.3f, last observed day %d."%[kind,int(trial.cycles),float(trial.before),float(trial.condition),int(trial.last_day)]
 	var quote:=B.quote(subject);install_button.disabled=quote.has("error");install_button.tooltip_text=String(quote.get("message",quote.get("error","")))

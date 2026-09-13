@@ -71,6 +71,8 @@ static func workshop_power_demand()->float:
 			if float(recipe.materials[item])>0 and float(WorldSimulation.state.resource_stockpiles.get(item,0))<=.000000001:supplied=false
 		if supplied:demand+=float(recipe.daily_power)
 	return demand
+static func auxiliary_power_demand()->float:
+	return float(load("res://scripts/grain_processing.gd").power_demand())+float(load("res://scripts/household_clothing.gd").power_demand())
 static func consume_electricity(amount:float)->float:
 	var used:=minf(maxf(0,amount),service("electricity"))
 	if used>0:data().services.electricity-=used
@@ -87,7 +89,7 @@ static func advance(day:int)->void:
 	var available:float=state.effective_workers("Crafting")
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1.0)
 	if condition<=0 or available<=0:return
-	var workshop_demand:float=workshop_power_demand()+float(load("res://scripts/grain_processing.gd").power_demand())
+	var workshop_demand:float=workshop_power_demand()+auxiliary_power_demand()
 	var demand:=workshop_demand
 	for id:String in PLANTS:
 		var record:Dictionary=ledger.plants.get(id,{})
