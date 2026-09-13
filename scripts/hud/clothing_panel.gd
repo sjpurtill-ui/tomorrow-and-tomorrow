@@ -19,6 +19,14 @@ func refresh()->void:
 	if not is_instance_valid(details):return
 	var ledger:=B.data();var service:=B.coverage(WorldSimulation.state.population_exact,int(WorldSimulation.state.elapsed_days))
 	details.text="%d installed · %.0f units per handler-day. Shares remaining Logistics work.\n%.1f garments · %.1f issued · cold exposure reduced %.1f%% · storm exposure reduced %.1f%%.\nGarments wear during use. Washing consumes water and removes garments for one drying day. Layering pairs spare garments; moisture handling adds tested lining. These are aggregate game coefficients."%[int(ledger.tools.get(subject,0)),float(K.METHODS[subject].rate),B.count(),float(service.issued),float(service.cold)*100,float(service.storm)*100]
+	var garments:Array[String]=[]
+	var names:={"knit":"knitted","twill":"twill wraps","pile":"pile wraps","sew":"sewn","fit":"fitted","grade":"graded fit"}
+	for kind:String in B.CREATION_MODES:
+		var amount:=0.0
+		for lot:Dictionary in ledger.lots:
+			if lot.kind==kind:amount+=float(lot.amount)
+		if amount>0:garments.append("%.1f %s"%[amount,names[kind]])
+	details.text+="\nStock: "+", ".join(garments)+". Recovered bone: %.2f (from actual hunting)."%B.available(B.BONE_RESOURCE)
 	var equipment:Array[String]=[];var inputs:Array[String]=[]
 	for item:String in K.METHODS[subject].cost:equipment.append("%.2f %s"%[float(K.METHODS[subject].cost[item]),item])
 	for item:String in K.METHODS[subject].inputs:inputs.append("%.2f %s"%[float(K.METHODS[subject].inputs[item]),item])

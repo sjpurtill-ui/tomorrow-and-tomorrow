@@ -214,3 +214,23 @@ func test_saved_automatic_line_resumes_without_rebuying_existing_tools()->void:
 		job.planner_managed="yes"
 		assert_str(production.validate_saved({"equipment_queue":[job]})).is_not_empty()
 	)
+func test_sewing_supply_uses_collected_bone_and_real_yarn_production()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup();var state=WorldSimulation.state
+		var clothing=preload("res://scripts/household_clothing.gd")
+		state.known_discoveries.erase("knitted_loop_fabrics")
+		for gate:String in ["bone_needle_sewing","hafted_tools"]:
+			state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
+		state.resource_stockpiles["Woven Cloth"]=10.0;state.resource_stockpiles["Prepared Fibers"]=10.0
+		assert_dict(F.clothing_recommendation()).is_empty()
+		clothing.advance(0,100,false,50)
+		assert_str(String(F.clothing_recommendation().get("item",""))).is_equal("spun_yarn")
+		C.civilian_orders("paper_ruler",{})
+		var job:Dictionary=WorldSimulation.military.equipment_queue[0]
+		preload("res://scripts/persistent_production.gd").advance(WorldSimulation.military,job,20)
+		assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(1.0)
+		state.elapsed_days=1;clothing.advance(100,100,false)
+		assert_float(clothing.count()).is_equal(2.0)
+		assert_float(clothing.available(clothing.BONE_RESOURCE)).is_equal_approx(0,.000001)
+		assert_float(float(state.resource_stockpiles["Woven Cloth"])).is_equal_approx(8.6,.000001)
+	)

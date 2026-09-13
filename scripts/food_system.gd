@@ -77,7 +77,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var grain:=Grain.advance(float(nutrient_report.get("cultivated_harvest",0)),maxf(0,logistics-float(meal_plan.workers)),float(demand_breakdown.total),traveling)
 	WorldSimulation.state.food_stocks["Dry staples"]=maxf(0,float(WorldSimulation.state.food_stocks.get("Dry staples",0))-float(grain.routed))
 	var batches:=Batches.advance(maxf(0,logistics-float(meal_plan.workers)-float(grain.workers)),float(demand_breakdown.total),traveling)
-	var clothing:=preload("res://scripts/household_clothing.gd").advance(maxf(0,logistics-float(meal_plan.workers)-float(grain.workers)-float(batches.workers)),WorldSimulation.state.population_exact,traveling)
+	var clothing:=preload("res://scripts/household_clothing.gd").advance(maxf(0,logistics-float(meal_plan.workers)-float(grain.workers)-float(batches.workers)),WorldSimulation.state.population_exact,traveling,float(harvest.get("Fresh meat",0)))
 	var preservation_inputs:Dictionary={}
 	var preserved:=_preserve(maxf(0.0,logistics-float(meal_plan.workers)-float(grain.workers)-float(batches.workers)-float(clothing.workers)),makers,traveling,preservation_inputs)
 	var canned:Dictionary=preload("res://scripts/canning_preservation.gd").preserve(float(demand_breakdown.total),traveling)

@@ -180,11 +180,11 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 		var spec:Dictionary=knowledge.METHODS[id]
 		if id not in state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1 or not requirements.evaluate(spec,state.known_discoveries).ready:continue
 		var amount:=minf(10,deficit)
-		if spec.mode not in ["knit","twill","pile"]:
+		if spec.mode not in clothing.CREATION_MODES:
 			amount=0.0
 			for lot:Dictionary in clothing.data().lots:
 				if int(lot.ready)>int(state.elapsed_days):continue
-				if (spec.mode=="wash" and float(lot.soil)>=.35) or (spec.mode=="wick" and not lot.wick):amount+=float(lot.amount)
+				if (spec.mode=="wash" and float(lot.soil)>=.35) or (spec.mode=="wick" and not lot.wick) or (spec.mode=="repair" and float(lot.condition)>=.15 and float(lot.condition)<.6):amount+=float(lot.amount)
 			amount=minf(10,amount)
 		if amount<=.000001:continue
 		var needed:Dictionary={}
@@ -193,7 +193,7 @@ static func clothing_recommendation(plan_power:bool=false)->Dictionary:
 			for item:String in spec.cost:needed[item]=float(needed.get(item,0))+float(spec.cost[item])
 		var first:Dictionary={};var possible:=true;var work:=0.0
 		for item:String in needed:
-			if float(state.resource_stockpiles.get(item,0))>=float(needed[item]):continue
+			if clothing.available(item)>=float(needed[item]):continue
 			var order:=supply(item,ceili(float(needed[item])),{},plan_power)
 			if order.is_empty():possible=false;break
 			if first.is_empty():first=order
