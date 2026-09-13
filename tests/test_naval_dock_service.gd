@@ -123,3 +123,13 @@ func test_export_import_preserves_unfinished_dock_work_and_access_usage()->void:
 	Dock.pay_access(port,force,GameState.resource_stockpiles,1,12)
 	payload=op.export_state();op.reset();op.import_state(payload);port=op.base(id)
 	assert_float(Dock.remaining_access(port,1)).is_equal(8.0)
+
+func test_naval_summary_reports_dated_inspection_without_changing_condition()->void:
+	completed_dock();var force:=ship()
+	GameState.known_discoveries.append("hull_condition_surveys");GameState.discovery_adoption.hull_condition_surveys=1.0
+	op.repair_at_base(force,port)
+	var panel=load("res://scripts/hud/naval_command_panel.gd").new();auto_free(panel)
+	panel.op=op
+	var condition:=float(force.condition)
+	assert_str(panel._force_summary(force)).contains("Hull survey: day 0")
+	assert_float(float(force.condition)).is_equal(condition)
