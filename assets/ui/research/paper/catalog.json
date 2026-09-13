@@ -5255,7 +5255,7 @@
       "domain": "security",
       "id": "shield_equipment_fitting",
       "name": "Shield-Equipment Fitting",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/textile_armor_layering.png",
@@ -5263,7 +5263,7 @@
       "domain": "security",
       "id": "textile_armor_layering",
       "name": "Textile Armor Layering",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
@@ -5271,7 +5271,7 @@
       "domain": "security",
       "id": "lamellar_armor_assembly",
       "name": "Lamellar-Armor Assembly",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/scale_armor_attachment.png",
@@ -5279,7 +5279,7 @@
       "domain": "security",
       "id": "scale_armor_attachment",
       "name": "Scale Armor Attachment",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/mail_armor_fabrication.png",
@@ -5287,7 +5287,7 @@
       "domain": "security",
       "id": "mail_armor_fabrication",
       "name": "Mail-Armor Fabrication",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/articulated_plate_armor.png",
@@ -5295,7 +5295,7 @@
       "domain": "security",
       "id": "articulated_plate_armor",
       "name": "Articulated Plate Armor",
-      "status": "queued"
+      "status": "verified"
     },
     {
       "asset": "res://assets/ui/research/paper/fiber_pulp_beating.png",
@@ -5797,9 +5797,9 @@
   "live_art_complete": false,
   "live_count": 724,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 584,
+  "queued_count": 578,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 140
+  "verified_count": 146
 }

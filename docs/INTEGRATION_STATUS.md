@@ -1,3 +1,7 @@
+## September 12 — armor and leather art verified
+
+Leather illustrations `0905774` and armor art source `4a4ec9c` (integrated as `9b80339`) are visually reviewed. All eight canonical textures load at 768px with mipmaps; 12 canonical atlas cases pass, and import logs are clean. Art now covers **146 of 724 live discoveries**, with **578 queued**. Runtime and ledger totals remain unchanged. The additive ResearchVisuals conflict retained all eight new bindings and all prior subjects. No save changes, player launch or package rebuild.
+
 ## September 12 — 724 verified operating discoveries
 
 Integrated armor source `08cd91b` and leather source `d4988fd` as canonical `9c688d27b44bd3dc081b7ec8a0477b1413464776`. Six armor methods manufacture physical components and complete infantry kits; issued fractions now determine actual armor and penetration. Two leather methods turn actual hunting byproducts into paid tanning, fitting, garment use and compatible repairs. General-led operations and existing stock/labor/save owners remain authoritative.
