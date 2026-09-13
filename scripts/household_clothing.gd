@@ -5,6 +5,7 @@ const K=preload("res://scripts/clothing_knowledge.gd")
 const R=preload("res://scripts/technology_requirements.gd")
 const Barriers=preload("res://scripts/textile_barriers.gd")
 const LIMIT:=48
+const FINISH_FABRICS:={"tannin":"tannin dyed","resist":"resist patterned","printed":"block printed","calendered":"calendered"}
 const QUILT_REPAIR_INPUTS:={"Plant-Fiber Quilt Batts":.08,"Woven Cloth":.08,"Spun Yarn":.03}
 const HUNTING_BYPRODUCTS:={"Pancreatic Tissue": "Selected gland tissue from actual newly hunted rations, bounded and rapidly decaying","Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay"}
 const BONE_RESOURCE:="Recovered Bone"
@@ -73,18 +74,20 @@ static func count()->float:
 	var n:=0.0
 	for lot:Dictionary in data().lots:n+=float(lot.amount)
 	return n
-static func add(kind:String,amount:float,condition:float=1,soil:float=0,layered:bool=false,wick:bool=false,ready:int=0,fabric:String="plain",barrier:Dictionary={})->bool:
-	if amount<=0 or fabric not in ["plain","figured"]:return false
+static func add(kind:String,amount:float,condition:float=1,soil:float=0,layered:bool=false,wick:bool=false,ready:int=0,fabric:String="plain",barrier:Dictionary={},finish_strength:float=1.0)->bool:
+	if amount<=0 or (fabric not in ["plain","figured"] and not FINISH_FABRICS.has(fabric)) or not is_finite(finish_strength) or finish_strength<0 or finish_strength>1:return false
 	if kind=="rain_shell" and barrier.is_empty():barrier=Barriers.fresh()
 	for lot:Dictionary in data().lots:
 		if lot.kind==kind and lot.layered==layered and lot.wick==wick and int(lot.ready)==ready and String(lot.get("fabric","plain"))==fabric and (kind!="rain_shell" or lot.get("barrier",Barriers.fresh())==barrier):
 			var total:=float(lot.amount)+amount
 			lot.condition=(float(lot.condition)*float(lot.amount)+condition*amount)/total
 			lot.soil=(float(lot.soil)*float(lot.amount)+soil*amount)/total
+			if FINISH_FABRICS.has(fabric):lot.finish_strength=(float(lot.get("finish_strength",1))*float(lot.amount)+finish_strength*amount)/total
 			lot.amount=total;return true
 	if data().lots.size()>=LIMIT:return false
 	var added:={"kind":kind,"amount":amount,"condition":condition,"soil":soil,"layered":layered,"wick":wick,"ready":ready,"fabric":fabric}
 	if kind=="rain_shell":added.barrier=barrier.duplicate(true)
+	if FINISH_FABRICS.has(fabric):added.finish_strength=finish_strength
 	data().lots.append(added);return true
 static func coverage(population:float,day:int)->Dictionary:
 	var cold:=0.0;var storm:=0.0;var worn:=0.0
@@ -181,7 +184,7 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 				lot.condition=float(lot.condition)+minf(.3,.85-float(lot.condition))*repaired/float(lot.amount)
 				charge(id,repaired,report,patches)
 		var amount:=minf(quota(id,maxf(0,workers-(float(report.workers)-spent_before)),report),maxf(0,population*1.1-count()))
-		var fabric:="figured" if materials(id).has("Figured Cloth") else "plain"
+		var fabric:=String(K.METHODS[id].get("fabric","figured" if materials(id).has("Figured Cloth") else "plain"))
 		if amount>0 and add(mode,amount,1,0,false,false,0,fabric):charge(id,amount,report)
 		return
 	var used_before:=float(report.workers)
@@ -202,7 +205,7 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 		if mode=="layer":amount=minf(amount,maxf(0,count()-population))
 		if amount<=.000001:continue
 		# Admit output before withdrawing or charging; a full ledger waits safely.
-		if not add(String(lot.kind),amount,maxf(0,float(lot.condition)-(.002 if mode=="machine_wash" else 0)),0 if washing else float(lot.soil),bool(lot.layered) or mode=="layer",bool(lot.wick) or mode=="wick",day+1 if washing else 0,String(lot.get("fabric","plain"))):continue
+		if not add(String(lot.kind),amount,maxf(0,float(lot.condition)-(.002 if mode=="machine_wash" else 0)),0 if washing else float(lot.soil),bool(lot.layered) or mode=="layer",bool(lot.wick) or mode=="wick",day+1 if washing else 0,String(lot.get("fabric","plain")),{},float(lot.get("finish_strength",1))*(.6 if lot.get("fabric")=="calendered" else .96) if washing else float(lot.get("finish_strength",1))):continue
 		lot.amount-=amount*multiplier
 		charge(id,amount,report)
 	for i in range(data().lots.size()-1,-1,-1):
@@ -245,6 +248,7 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 			if lot.kind=="leather":wear+=.004*clampf(float(WorldSimulation.food.current_environment_profile().get("precipitation",.5)),0,1)
 			lot.condition=maxf(0,float(lot.condition)-wear*share)
 			lot.soil=minf(1,float(lot.soil)+.025*share)
+			if FINISH_FABRICS.has(String(lot.get("fabric","plain"))):lot.finish_strength=maxf(0,float(lot.get("finish_strength",1))-(.003 if lot.fabric=="calendered" else .001)*share)
 	for i in range(data().lots.size()-1,-1,-1):
 		if float(data().lots[i].condition)<.15:report.discarded+=float(data().lots[i].amount);data().lots.remove_at(i)
 	var budget:=maxf(0,workers)*.2
@@ -275,7 +279,8 @@ static func valid(value:Variant)->bool:
 		if not lot is Dictionary or not lot.has_all(["kind","amount","condition","soil","layered","wick","ready"]):return false
 		if lot.kind not in CREATION_MODES or not lot.layered is bool or not lot.wick is bool:return false
 		if lot.kind=="rain_shell" and not Barriers.valid(lot.get("barrier",Barriers.fresh())):return false
-		if not lot.get("fabric","plain") is String or lot.get("fabric","plain") not in ["plain","figured"]:return false
+		if not lot.get("fabric","plain") is String or (lot.get("fabric","plain") not in ["plain","figured"] and not FINISH_FABRICS.has(lot.get("fabric"))):return false
+		if lot.has("finish_strength") and (not FINISH_FABRICS.has(lot.get("fabric")) or not number(lot.finish_strength) or lot.finish_strength<0 or lot.finish_strength>1):return false
 		for key:String in ["amount","condition","soil","ready"]:
 			if not number(lot[key]) or lot[key]<0 or lot[key]>1e12:return false
 		if lot.amount<=0 or lot.condition>1 or lot.soil>1 or lot.ready!=floorf(float(lot.ready)):return false

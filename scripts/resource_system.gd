@@ -6,6 +6,7 @@ var initialized := false
 # Identification follows observations and existing methods, never campaign age.
 # These gates apply to unknown occurrences only; saved recognition is retained.
 const RECOGNITION_RULES={
+	"Ochre Earth":{"requires_all":["stone_sorting","clay_testing"]},
 	"Rutile Ore":{"requires_all":["ore_assaying"]},
 	"Bauxite":{"requires_all":["ore_assaying"]},
 	"Nickel Ore":{"requires_all":["ore_assaying"]},
@@ -72,7 +73,8 @@ var catalog := {
 	"Silver Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","lead_smelting"],"signals":["materials","trade"],"base":0.0012},
 	"Nickel Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","nickel_metal_recovery"],"signals":["materials","crafting"],"base":0.0010},
 	"Bauxite":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","alumina_refining"],"signals":["materials","crafting"],"base":0.0012},
-	"Rutile Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","industrial_catalyst_design"],"signals":["materials","crafting"],"base":0.0010}
+	"Rutile Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","industrial_catalyst_design"],"signals":["materials","crafting"],"base":0.0010},
+	"Ochre Earth":{"family":"Earth","renewable":false,"recognition_year":0,"access":["labor","containers"],"processing":["mineral_pigment_preparation"],"signals":["materials","survey"],"base":0.006}
 }
 
 func initialize() -> void:

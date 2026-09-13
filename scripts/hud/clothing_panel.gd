@@ -4,11 +4,13 @@ const K=preload("res://scripts/clothing_knowledge.gd")
 var subject:=""
 var details:Label
 var install_button:Button
+var finishes:HBoxContainer
 var elapsed:=0.0
 func _ready()->void:
 	if not K.METHODS.has(subject):return
 	details=Label.new();details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(details)
 	install_button=Button.new();install_button.text="Install clothing equipment";install_button.custom_minimum_size.y=34;add_child(install_button)
+	finishes=HBoxContainer.new();add_child(finishes)
 	install_button.pressed.connect(func()->void:
 		var result:=B.install(subject);install_button.tooltip_text=String(result.get("message",result.get("error","")));refresh())
 	refresh()
@@ -29,6 +31,19 @@ func refresh()->void:
 	details.text+="\nStock: "+", ".join(garments)+". Recovered bone: %.2f (from actual hunting)."%B.available(B.BONE_RESOURCE)
 	details.text+="\nLeather garments: %.1f. Raw hides: %.1f; flexible leather: %.1f. Wet exposure wears leather; fitted leather patches repair it without textile laundering."%[B.leather_count(),B.available("Raw Hides"),B.available("Flexible Leather")]
 	details.text+="\nFigured-fabric garments: %.1f. Patterned cloth retains its identity through use and washing; decoration adds no protection."%B.figured_count()
+	for child:Node in finishes.get_children():finishes.remove_child(child);child.queue_free()
+	for fabric:String in B.FINISH_FABRICS:
+		var amount:=0.0;var retained:=0.0
+		for lot:Dictionary in ledger.lots:
+			if lot.get("fabric","plain")==fabric:
+				amount+=float(lot.amount);retained+=float(lot.amount)*float(lot.get("finish_strength",1))
+		if amount<=0:continue
+		var swatch=preload("res://scripts/hud/textile_finish_swatch.gd").new()
+		swatch.fabric=fabric;swatch.strength=retained/amount;swatch.custom_minimum_size=Vector2(64,32)
+		swatch.tooltip_text="%.1f %s garments · finish %.0f%%"%[amount,B.FINISH_FABRICS[fabric],100*swatch.strength]
+		finishes.add_child(swatch)
+		details.text+="\n"+swatch.tooltip_text+"."
+	if finishes.get_child_count()>0:details.text+="\nColor and surface finish fade with use and laundering; they add no exposure protection."
 	var equipment:Array[String]=[];var inputs:Array[String]=[]
 	var costs:=B.materials(subject,true)
 	for item:String in costs:equipment.append("%.2f %s"%[float(costs[item]),item])

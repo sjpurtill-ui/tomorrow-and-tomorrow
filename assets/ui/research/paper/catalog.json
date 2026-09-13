@@ -1842,6 +1842,38 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/textile_dye_fixation.png",
+      "description": "Qualify a dyeing process that retains intended color on a specific fiber",
+      "domain": "production",
+      "id": "textile_dye_fixation",
+      "name": "Textile-Dye Fixation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/resist_dye_patterning.png",
+      "description": "Prevent dye access to selected areas through a qualified resist method",
+      "domain": "production",
+      "id": "resist_dye_patterning",
+      "name": "Resist-Dye Patterning",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_printing.png",
+      "description": "Apply qualified color patterns to a textile surface through repeatable printing",
+      "domain": "production",
+      "id": "textile_printing",
+      "name": "Textile Printing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_calendering.png",
+      "description": "Finish a qualified fabric through controlled pressure and surface contact",
+      "domain": "production",
+      "id": "textile_calendering",
+      "name": "Textile Calendering",
+      "status": "verified"
+    },
+    {
       "asset": "res://assets/ui/research/paper/textile_waterproofing.png",
       "description": "Coat a compatible woven backing, assemble a rain shell and pay for three dated wet-flex checks before relying on its limited water barrier.",
       "domain": "production",
@@ -6696,14 +6728,30 @@
       "id": "live_cell_time_lapse",
       "name": "Live Cell Time Lapse",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+      "description": "Separate and prepare mineral colorants with observed consistency and compatibility",
+      "domain": "production",
+      "id": "mineral_pigment_preparation",
+      "name": "Mineral-Pigment Preparation",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_dye_extraction.png",
+      "description": "Prepare characterized colorants from suitable sources for textile use",
+      "domain": "production",
+      "id": "textile_dye_extraction",
+      "name": "Textile-Dye Extraction",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
-  "live_count": 837,
+  "live_count": 843,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 276
+  "verified_count": 282
 }

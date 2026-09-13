@@ -186,7 +186,7 @@ func test_silver_has_geographic_potential_and_old_ore_keys_keep_order()->void:
 	var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(100,200))
 	assert_bool(profile.resource_potentials.has("Silver Ore")).is_true()
 	assert_float(float(profile.resource_potentials["Silver Ore"])).is_between(0.0,1.0)
-	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Rutile Ore")
+	assert_array(ResourceSystem.catalog.keys().slice(-5)).is_equal(["Silver Ore","Nickel Ore","Bauxite","Rutile Ore","Ochre Earth"])
 	assert_bool(bool(ResourceSystem.catalog["Silver Ore"].renewable)).is_false()
 func test_appended_silver_does_not_change_existing_generated_deposits()->void:
 	WorldSimulation.scoped("polymers",func()->void:
@@ -195,23 +195,24 @@ func test_appended_silver_does_not_change_existing_generated_deposits()->void:
 		var nickel:Dictionary=resource.catalog["Nickel Ore"].duplicate(true)
 		var bauxite:Dictionary=resource.catalog["Bauxite"].duplicate(true)
 		var rutile:Dictionary=resource.catalog["Rutile Ore"].duplicate(true)
+		var ochre:Dictionary=resource.catalog["Ochre Earth"].duplicate(true)
 		var potentials:Dictionary={}
 		for key:String in resource.catalog:potentials[key]=.8
 		var profile:={"resource_potentials":potentials,"signature":"silver-regression"}
 		var seen_silver:=false
 		for seed_value:int in range(10,18):
 			WorldSimulation.state.world_seed=seed_value
-			resource.catalog.erase("Silver Ore");resource.catalog.erase("Nickel Ore");resource.catalog.erase("Bauxite");resource.catalog.erase("Rutile Ore")
+			resource.catalog.erase("Silver Ore");resource.catalog.erase("Nickel Ore");resource.catalog.erase("Bauxite");resource.catalog.erase("Rutile Ore");resource.catalog.erase("Ochre Earth")
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var old: Array=WorldSimulation.state.resource_deposits.duplicate(true)
-			resource.catalog["Silver Ore"]=silver;resource.catalog["Nickel Ore"]=nickel;resource.catalog["Bauxite"]=bauxite;resource.catalog["Rutile Ore"]=rutile
+			resource.catalog["Silver Ore"]=silver;resource.catalog["Nickel Ore"]=nickel;resource.catalog["Bauxite"]=bauxite;resource.catalog["Rutile Ore"]=rutile;resource.catalog["Ochre Earth"]=ochre
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var unchanged:Array=[]
 			for deposit:Dictionary in WorldSimulation.state.resource_deposits:
 				if deposit.resource=="Silver Ore":seen_silver=true
-				elif deposit.resource in ["Nickel Ore","Bauxite","Rutile Ore"]:pass
+				elif deposit.resource in ["Nickel Ore","Bauxite","Rutile Ore","Ochre Earth"]:pass
 				else:unchanged.append(deposit)
 			assert_array(unchanged).is_equal(old)
 		assert_bool(seen_silver).is_true())
