@@ -13,6 +13,14 @@
   "log": "artifacts/technology-pacing/catalog-476-250-profile.log",
   "status_at_record": "running; tool handle polled live; first annual snapshot emitted",
   "recorded_utc": "2026-09-12T06:05:28.547665+00:00",
-  "terminal_result": null,
-  "full_campaign_verified": false
+  "terminal_result": {
+    "stop_reason": "target reached",
+    "target_reached": true,
+    "simulated_days": 91250,
+    "wall_seconds": 12595.441,
+    "report_sha256": "8da7f707e819eca779585ff86dfcd07bdc79d29e743c2baa8d99a9d1b9729757",
+    "evidence": "Complete report and final log record agree; tool handle 52497 no longer exists and no matching audit process is running."
+  },
+  "full_campaign_verified": false,
+  "current_status": "terminal; requested 250-year diagnostic target reached"
 }
