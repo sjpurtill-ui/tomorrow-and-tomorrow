@@ -1197,5 +1197,91 @@
     },
     "power": 1,
     "daily_power": 0.5
+  },
+  "polymer_carbonate_filler": {
+    "name": "Milled and screened carbonate additive",
+    "output": "Polymer Carbonate Filler",
+    "gate": "polymer_additive_formulation",
+    "materials": {
+      "Limestone": 1.1,
+      "Freshwater": 0.2
+    },
+    "days": 3,
+    "tooling": {
+      "Steel": 3,
+      "Laboratory Glassware": 2,
+      "Electric Motors": 1
+    },
+    "power": 1,
+    "daily_power": 0.3333333333333333
+  },
+  "formulated_foam_ldpe": {
+    "name": "Mixed and trial-tested foam formulation",
+    "output": "Foam-Formulated LDPE",
+    "gate": "polymer_additive_formulation",
+    "materials": {
+      "LDPE Pellets": 1.05,
+      "Polymer Carbonate Filler": 0.02
+    },
+    "days": 3,
+    "tooling": {
+      "Steel": 3,
+      "Laboratory Glassware": 2,
+      "Electric Motors": 1
+    },
+    "power": 2,
+    "daily_power": 0.6666666666666666
+  },
+  "expanded_ldpe_foam": {
+    "name": "Gas-expanded polyethylene foam",
+    "output": "Unqualified LDPE Foam",
+    "gate": "polymer_foam_cell_control",
+    "materials": {
+      "Foam-Formulated LDPE": 1.1,
+      "Carbon Dioxide": 0.15,
+      "Freshwater": 0.5
+    },
+    "days": 4,
+    "tooling": {
+      "Steel": 6,
+      "Pressure Vessels": 3,
+      "Electric Motors": 1,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 4,
+    "daily_power": 1
+  },
+  "qualified_ldpe_foam": {
+    "name": "Cell and compression-tested foam batch",
+    "output": "Insulation-Grade LDPE Foam",
+    "gate": "polymer_foam_cell_control",
+    "materials": {
+      "Unqualified LDPE Foam": 1.08
+    },
+    "days": 3,
+    "tooling": {
+      "Laboratory Glassware": 2,
+      "Optical Lenses": 1,
+      "Steel": 2
+    },
+    "power": 1,
+    "daily_power": 0.3333333333333333
+  },
+  "foam_cold_store_panels": {
+    "name": "Enclosed cold-store insulation panels",
+    "output": "Foam Cold-Store Panels",
+    "gate": "polymer_foam_cell_control",
+    "materials": {
+      "Insulation-Grade LDPE Foam": 1.1,
+      "Steel Sheets": 0.5,
+      "Bitumen": 0.03
+    },
+    "days": 3,
+    "tooling": {
+      "Steel": 3,
+      "Basic Machine Tool Sets": 1
+    },
+    "power": 1,
+    "daily_power": 0.3333333333333333
   }
 }

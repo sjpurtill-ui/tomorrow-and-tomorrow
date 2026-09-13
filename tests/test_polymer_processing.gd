@@ -438,3 +438,26 @@ func test_controlled_peg_requires_measured_starter_and_reaches_binder()->void:
 		assert_float(float(s.resource_stockpiles["Aqueous PEG Binder"])).is_equal(1.0)
 		assert_float(Ops.service("polymer_stirred_work")).is_equal_approx(6.4,.000001)
 		assert_float(Ops.service("polymer_heat_removal")).is_equal(7.0))
+func test_formulated_foam_panels_supply_paid_cold_storage_and_stop_without_power()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		for resource:String in ["Limestone","LDPE Pellets","Carbon Dioxide","Steel Sheets","Bitumen"]:s.resource_stockpiles[resource]=100.0
+		var items:Array[String]=["polymer_carbonate_filler","formulated_foam_ldpe","expanded_ldpe_foam","qualified_ldpe_foam","foam_cold_store_panels"]
+		var targets:Array[int]=[1,6,5,4,3]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(s.resource_stockpiles["Carbon Dioxide"])).is_equal_approx(99.25,.000001)
+		assert_float(float(s.resource_stockpiles["Unqualified LDPE Foam"])).is_equal_approx(.68,.000001)
+		provision_plants()
+		for gate:String in ["mechanical_refrigeration","electric_motors"]:
+			if gate not in s.known_discoveries:s.known_discoveries.append(gate)
+			s.discovery_adoption[gate]=1.0
+		for item:String in ["Electric Motors","Pressure Vessels","Glass"]:s.resource_stockpiles[item]=100.0
+		assert_bool(Ops.install("foam_insulated_cold_store").get("ok",false)).is_true()
+		assert_float(float(s.resource_stockpiles["Foam Cold-Store Panels"])).is_equal(1.0)
+		assert_float(Ops.service("cold_storage")).is_equal(0.0)
+		for day:int in range(1,36):s.elapsed_days=day;Ops.advance(day)
+		assert_float(Ops.service("cold_storage")).is_equal(200.0)
+		assert_float(float(s.resource_stockpiles["Foam Cold-Store Panels"])).is_less(1.0)
+		s.resource_stockpiles["Coal"]=0.0;s.elapsed_days=36;Ops.advance(36)
+		assert_float(Ops.service("cold_storage")).is_equal(0.0))

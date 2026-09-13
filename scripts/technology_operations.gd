@@ -5,6 +5,7 @@ const LIMIT:=1000
 const WaterDrive=preload("res://scripts/water_hammer_site.gd")
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"foam_insulated_cold_store":{"name": "Foam-insulated electric cold store", "gate": "polymer_foam_cell_control", "requires": ["mechanical_refrigeration", "electric_motors"], "cost": {"Foam Cold-Store Panels": 2, "Electric Motors": 1, "Pressure Vessels": 1, "Glass": 1}, "work": 16, "workers": 1, "inputs": {"Bitumen": 0.01, "Foam Cold-Store Panels": 0.002}, "power": 2.2, "services": {"cold_storage": 200}},
 	"polymer_stirred_reactor":{"name": "Stirred polymer reactor", "gate": "pressure_vessels", "requires": ["precision_thermometry"], "cost": {"Polymer Stirred Reactors": 1, "Steel": 2}, "work": 18, "workers": 1, "inputs": {"Brazed Steel Fittings": 0.005}, "power": 2, "services": {"polymer_stirred_work": 1}},
 	"polymer_passive_cooling":{"name": "Low-throughput polymer cooling bath", "gate": "calorimetry", "requires": ["pressure_vessels"], "cost": {"Pressure Vessels": 1, "Refined Copper": 2, "Steel": 2}, "work": 12, "workers": 0.5, "inputs": {"Freshwater": 2}, "power": 0, "services": {"polymer_heat_removal": 0.2}},
 	"polymer_pressure_reactor":{"name": "High-pressure polymer reactor", "gate": "radical_chain_polymerization", "requires": ["pressure_vessels", "precision_thermometry"], "cost": {"Polymer Pressure Reactors": 1, "Steel": 4}, "work": 30, "workers": 2, "inputs": {"Brazed Steel Fittings": 0.01}, "power": 4, "services": {"polymer_reactor_work": 1}},

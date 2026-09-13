@@ -1247,5 +1247,79 @@ static func entries()->Array[Dictionary]:
       "metered_peg_starter",
       "characterized_controlled_peg"
     ]
+  },
+  {
+    "id": "polymer_additive_formulation",
+    "name": "Polymer-Additive Formulation",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "thermoplastic_processing",
+      "experimental_controls"
+    ],
+    "requires_all": [
+      "thermoplastic_processing",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer-Additive Formulation",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Assess modifiers against declared material properties and exposure conditions",
+    "effects": {},
+    "production_contract": "Finite screened carbonate and LDPE feed a tested formulation. Gas expansion and destructive cell/compression qualification produce enclosed insulation panels; cold storage still requires refrigeration machinery, operators, power and maintenance. No structural, fireproof or universal polymer-grade claim.",
+    "production_items": [
+      "polymer_carbonate_filler",
+      "formulated_foam_ldpe"
+    ]
+  },
+  {
+    "id": "polymer_foam_cell_control",
+    "name": "Polymer Foam Cell Control",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "polymer_additive_formulation",
+      "polymer_melt_rheology"
+    ],
+    "requires_all": [
+      "polymer_additive_formulation",
+      "polymer_melt_rheology"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Polymer Foam Cell Control",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Control and measure cell structure in a qualified expanded polymer material",
+    "effects": {},
+    "production_contract": "Finite screened carbonate and LDPE feed a tested formulation. Gas expansion and destructive cell/compression qualification produce enclosed insulation panels; cold storage still requires refrigeration machinery, operators, power and maintenance. No structural, fireproof or universal polymer-grade claim.",
+    "production_items": [
+      "expanded_ldpe_foam",
+      "qualified_ldpe_foam",
+      "foam_cold_store_panels"
+    ],
+    "operating_plants": [
+      "foam_insulated_cold_store"
+    ]
   }
 ]
