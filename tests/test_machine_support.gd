@@ -21,6 +21,10 @@ func test_paid_deterioration_measurement_requires_repair_and_recheck()->void:
 		assert_float(float(state.resource_stockpiles.Steel)).is_equal(.8)
 		assert_float(S.prepare(restored,{},1)).is_equal(.5)
 		assert_bool(restored.machine_support.observations[-1].failed).is_false()
+		assert_bool(S.valid(restored.machine_support,0)).is_true()
+		var forged:Dictionary=restored.machine_support.duplicate(true)
+		forged.observations[-1].failed=true
+		assert_bool(S.valid(forged,0)).is_false()
 	)
 func test_water_film_and_filter_require_actual_fluid_and_discard_spent_water()->void:
 	WorldSimulation.scoped("machine_support",func()->void:
@@ -59,6 +63,7 @@ func test_bearing_load_speed_and_flow_constrain_supported_work()->void:
 		assert_float(float(job.machine_support.film_observation.separation)).is_greater(.8)
 		assert_float(float(job.machine_support.film_observation.water)).is_equal(.05)
 		assert_float(S.film_separation(1,10,0)).is_equal(0.0)
+		assert_bool(S.valid(job.machine_support,0)).is_true()
 	)
 func test_clogged_filter_stops_work_until_paid_partial_service_finishes()->void:
 	WorldSimulation.scoped("machine_support",func()->void:

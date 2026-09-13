@@ -41,3 +41,40 @@ func test_worn_waterjet_rejects_part_without_granting_accepted_stock()->void:
 		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.machine_reject,0))).is_equal(1.0)
 		assert_bool(line.machine_last.accepted).is_false()
 	)
+func test_joint_witness_cannot_be_omitted_or_reused_after_partial_inspection()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("joining_qualified_parts");var spec:=I.product(line.item)
+		P.advance(WorldSimulation.military,line,3)
+		var missing:=line.duplicate(true);missing.machine_pending.erase("witness")
+		M.inspect(missing,spec,1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal(0.0)
+		assert_str(M.validate_job(missing,spec)).is_not_empty()
+		P.advance(WorldSimulation.military,line,.5)
+		assert_str(line.machine_pending.witness.disposition).is_equal("prepared")
+		var paper:=float(WorldSimulation.state.resource_stockpiles.Paper)
+		var restored:Dictionary=bytes_to_var(var_to_bytes(line))
+		assert_str(M.validate_job(restored,spec)).is_empty()
+		P.advance(WorldSimulation.military,restored,.5)
+		assert_str(restored.machine_last.witness.disposition).is_equal("destroyed")
+		assert_float(float(WorldSimulation.state.resource_stockpiles.Paper)).is_equal(paper)
+		assert_bool(restored.machine_last.observation.readings.has("unbonded_fraction")).is_false()
+		assert_bool(restored.machine_last.observation.readings.has("proof_slip")).is_true()
+	)
+func test_recast_inspection_waits_for_paid_section_supplies_and_correct_apparatus()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("wire_edm_qualified_parts");var spec:=I.product(line.item)
+		P.advance(WorldSimulation.military,line,3)
+		WorldSimulation.state.resource_stockpiles["Specimen Slides"]=0.0
+		P.advance(WorldSimulation.military,line,1)
+		assert_bool(line.machine_pending.has("inspection_paid")).is_false()
+		WorldSimulation.state.resource_stockpiles["Specimen Slides"]=1.0
+		line.tooling["Compound Microscopes"]=0.0
+		M.inspect(line,spec,1)
+		assert_bool(line.machine_pending.has("inspection_paid")).is_false()
+		line.tooling["Compound Microscopes"]=1.0
+		P.advance(WorldSimulation.military,line,1)
+		assert_str(line.machine_last.observation.method).is_equal("cut_polish_and_view_edge_section")
+		assert_str(line.machine_last.witness.disposition).is_equal("destroyed")
+		assert_float(float(line.machine_last.witness.amount)).is_equal(.02)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Specimen Slides"])).is_equal(.99)
+	)

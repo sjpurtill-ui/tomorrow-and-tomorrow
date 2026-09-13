@@ -125,3 +125,38 @@ static func service_filter(job:Dictionary,work:float)->float:
 	support.filter_load=0.0;support.filter_paid=false;support.filter_service_work=0.0
 	support.filter_changes=int(support.get("filter_changes",0))+1
 	return work
+static func valid(value:Variant,completed:int)->bool:
+	var numeric=preload("res://scripts/machine_coordinate_program.gd")
+	if not value is Dictionary or not value.get("installed") is Dictionary or not value.get("observations") is Array or value.observations.size()>8 or not value.get("blocked") is String:return false
+	for method:Variant in value.installed:
+		if method not in ["fluid_film_bearings","cutting_fluid_management","machine_tool_stiffness_assessment","machine_condition_monitoring"] or not value.installed[method] is int or value.installed[method]<0:return false
+	for key:String in ["repair_work","measurement_credit","film_work","filtered_work","filter_load","filter_service_work","vibration_baseline"]:
+		if not numeric.finite(value.get(key,0),1e9) or float(value.get(key,0))<0:return false
+	if float(value.get("repair_work",0))>.5 or float(value.get("measurement_credit",0))>.25 or float(value.get("filter_load",0))>1 or float(value.get("filter_service_work",0))>.2:return false
+	for key:String in ["repair_needed","repair_paid","filter_paid"]:
+		if value.has(key) and not value[key] is bool:return false
+	if float(value.get("repair_work",0))>0 and not bool(value.get("repair_paid",false)):return false
+	if float(value.get("filter_service_work",0))>0 and not bool(value.get("filter_paid",false)):return false
+	for key:String in ["repairs","filter_changes"]:
+		if not value.get(key,0) is int or int(value.get(key,0))<0:return false
+	if not value.get("measured_at_part",-1) is int or int(value.get("measured_at_part",-1))< -1 or int(value.get("measured_at_part",-1))>completed:return false
+	for row:Variant in value.observations:
+		if not row is Dictionary or not row.get("day") is int or row.day<0 or not row.get("part") is int or row.part<0 or row.part>completed:return false
+		if row.get("work")!=.25 or row.get("uncertainty")!=.025 or not row.get("failed") is bool or not row.get("revision") is int or row.revision<0 or row.revision>int(value.get("repairs",0)):return false
+		if row.get("method")=="machine_tool_stiffness_assessment":
+			if row.get("load")!=1.0 or row.get("unloaded")!=0.0 or row.get("limit")!=.3 or not numeric.finite(row.get("loaded"),1) or row.loaded<0:return false
+			if row.failed!=(float(row.loaded)+.025>.3):return false
+		elif row.get("method")=="machine_condition_monitoring":
+			if row.get("limit")!=.4 or not numeric.finite(row.get("vibration"),1) or not numeric.finite(row.get("baseline"),1) or row.vibration<0 or row.baseline<0:return false
+			if row.failed!=(float(row.vibration)+.025>.4 or float(row.vibration)-float(row.baseline)>.2):return false
+		else:return false
+	for field:String in ["film_request","film_observation"]:
+		if not value.has(field):continue
+		var film:Variant=value[field]
+		if not film is Dictionary:return false
+		for key:String in ["load","speed","flow","separation"]:
+			if not numeric.finite(film.get(key),100) or film[key]<0:return false
+		if film.get("minimum")!=.8 or absf(float(film.separation)-film_separation(float(film.load),float(film.speed),float(film.flow)))>.000001:return false
+		if field=="film_observation":
+			if not film.get("day") is int or film.day<0 or not numeric.finite(film.get("work")) or film.work<=0 or not numeric.finite(film.get("water")) or absf(float(film.water)-.05*float(film.work))>.000001 or film.separation<.8:return false
+	return true
