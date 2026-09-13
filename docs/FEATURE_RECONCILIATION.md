@@ -1,5 +1,9 @@
 ## September 12 — reviewed civilian response coverage
 
+## September 12 — seven metal-process illustrations verified
+
+Integrated art and explicit import settings through `29188168066b538a195d8cf10dfa1fdfa9a3e65e`. All seven canonical textures load at 768 × 768 with mipmaps; 12 worktree atlas cases pass. Art now covers **122 of 700 live discoveries**, with **578 queued**. Runtime remains 700; the ledger remains 3,182 identities. Clinical runtime delivery `9c6ec61` is READY for combined integration review.
+
 Twenty-one new disaster-response and recovery drafts extend incident assignments, finite evacuation destinations, damage accounting and debris handling. Three overlapping proposed methods were excluded and mapped conceptually to existing procurement, continuity and regulatory review. All 15 ledger-tool checks pass; no duplicate names, missing parents or unreachable drafts. See `technology-review/Disaster Response Service Review.md` for primary sources and future operating acceptance.
 
 Live remains **700 discoveries /482 routes /341 recipes /18 facilities**, with 115 verified illustrations. The authored ledger is **700 integrated + 2,482 drafts = 3,182 identities**, leaving **1,818 to author and 4,300 to implement**. These proposals add no functioning incident system or save state. Clinical care remains HELD in its separate implementation task.
