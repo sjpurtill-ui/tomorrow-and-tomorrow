@@ -2,7 +2,7 @@
 
 Added reviewed paper artwork for customary law, public stores, organized watch and formation drill. Native originals and built-in imagegen prompts are retained in `assets/ui/research/paper/EARLY_INSTITUTION_PROMPTS.md`. Four textures pass 768-pixel/mipmap checks and 12 isolated atlas tests pass. Art is **245 verified / 806 live, 561 queued**. Runtime definitions, ledger counts and save behavior are unchanged.
 
-Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/early-institutions-art`, base `1709da22f661eacb60122cbfc3a58c8e8b01467b`. Owns four images/imports, bindings and art records only. No shared conflicts, player launch or package rebuild. Canonical verification follows integration.
+Worktree `/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow`, branch `codex/early-institutions-art`, base `1709da22f661eacb60122cbfc3a58c8e8b01467b`. Owns four images/imports, bindings and art records only. No shared conflicts, player launch or package rebuild. Canonical import, all four texture checks and 12 atlas tests also pass at integrated art commit `de382aa01b8be23684620af6baed7f4da45251f7`.
 
 ## September 13 — military horizon evidence review
 
