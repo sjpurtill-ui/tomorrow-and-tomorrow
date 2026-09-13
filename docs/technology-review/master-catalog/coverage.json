@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 843,
+  "verified_baseline_discoveries": 856,
   "pending_communications": 0,
-  "new_authored_drafts": 2627,
+  "new_authored_drafts": 2614,
   "distinct_accounted_identities": 3470,
   "remaining_identities_to_author": 1530,
   "target": 5000,
@@ -2340,9 +2340,9 @@
         "target": 900,
         "assigned": 706,
         "target_slots_not_yet_assigned": 194,
-        "implemented_baseline": 8,
+        "implemented_baseline": 16,
         "pending_communications": 0,
-        "authored_drafts": 698
+        "authored_drafts": 690
       },
       {
         "id": "H06",
@@ -2365,7 +2365,7 @@
     "D03": 96,
     "D04": 76,
     "D05": 155,
-    "D06": 70,
+    "D06": 57,
     "D07": 69,
     "D08": 94,
     "D09": 111,
@@ -2440,9 +2440,9 @@
       "id": "D06",
       "name": "Machinery and mechanical production",
       "target": 240,
-      "implemented_baseline": 99,
+      "implemented_baseline": 112,
       "pending_communications": 0,
-      "authored_drafts": 70,
+      "authored_drafts": 57,
       "accounted": 169,
       "remaining_to_target": 71
     },

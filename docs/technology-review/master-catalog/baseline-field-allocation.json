@@ -6024,6 +6024,97 @@
       "source_domain": "production",
       "name": "Textile-Dye Extraction",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "fluid_film_bearings",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Fluid-Film Bearings",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "cutting_fluid_management",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Cutting-Fluid Management",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "machine_tool_stiffness_assessment",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Machine-Tool Stiffness Assessment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "machine_condition_monitoring",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Machine-Condition Monitoring",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "numerical_machine_control",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Numerical Machine Control",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "gear_power_skiving",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Gear Power Skiving",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "wire_electrical_discharge_machining",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Wire Electrical-Discharge Machining",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "sinker_electrical_discharge_machining",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Sinker Electrical-Discharge Machining",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "electrochemical_machining",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Electrochemical Machining",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "abrasive_waterjet_cutting",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Abrasive Waterjet Cutting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ultrasonic_abrasive_machining",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Ultrasonic Abrasive Machining",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "incremental_sheet_forming",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Incremental Sheet Forming",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "ultrasonic_metal_joining",
+      "field": "D06",
+      "source_domain": "production",
+      "name": "Ultrasonic Metal Joining",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [
