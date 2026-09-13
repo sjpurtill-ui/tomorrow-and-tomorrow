@@ -22,6 +22,7 @@ func run()->void:
   state.known_discoveries.append(method)
   state.known_discoveries.append_array(["seasonal_patterns","geometric_survey"])
   state.discovery_adoption[method]=1.0
+  state.resource_stockpiles["Stone"]=2.0
   state.resource_stockpiles["Timber"]=10.0
   state.resource_stockpiles["Fiber Plants"]=2.0
   var recommendation:Dictionary=load("res://scripts/building_material_investment.gd").fabric_recommendation()

@@ -149,7 +149,7 @@ static func mesh_for_plot(plot:Dictionary)->ArrayMesh:
 static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->void:
 	var wood:=Color("624831")
 	if flags&1:
-		for x in [-3.8,0.0,3.8]:_box(surface,Vector3(x,height*.5,5.12),Vector3(.18,height,.18),wood)
+		for x in [-3.8,-1.2,1.2,3.8]:_box(surface,Vector3(x,height*.5,5.12),Vector3(.18,height,.18),wood)
 		_box(surface,Vector3(0,height-.12,5.12),Vector3(8,.22,.18),wood)
 	if flags&2:
 		var bottom:=Vector3(-3.5,.35,5.15)
@@ -168,10 +168,13 @@ static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->
 		_box(surface,Vector3(4.3,height*.5,4.8),Vector3(.16,height,.16),Color("827969"))
 	if flags&16:_box(surface,Vector3(0,height+.04,5.12),Vector3(8.4,.08,.28),Color("977251"))
 	if flags&32:
-		for x in 16:_box(surface,Vector3(-3.75+float(x)*.5,height*.5,5.2),Vector3(.34,height,.12),Color("a28b6c"))
+		for x in 16:
+			if x in [6,7,8,9]:continue # Retain the central entrance.
+			_box(surface,Vector3(-3.75+float(x)*.5,height*.5,5.2),Vector3(.34,height,.12),Color("a28b6c"))
 	if flags&64:
-		for x in 9:_box(surface,Vector3(-3.6+float(x)*.9,2.5,5.65),Vector3(.18,.12,1.3),wood)
-		_box(surface,Vector3(0,2.5,6.22),Vector3(8,.12,.12),wood)
+		var shade_height:=minf(2.5,height*.85)
+		for x in 9:_box(surface,Vector3(-3.6+float(x)*.9,shade_height,5.65),Vector3(.18,.12,1.3),wood)
+		_box(surface,Vector3(0,shade_height,6.22),Vector3(8,.12,.12),wood)
 	if flags&128:_box(surface,Vector3(0,.18,0),Vector3(8.2,.12,10.2),Color("524e46"))
 
 static func detail_mesh(bounds:AABB,features:int,wall_ratio:float=.8)->ArrayMesh:
@@ -186,3 +189,31 @@ static func detail_mesh(bounds:AABB,features:int,wall_ratio:float=.8)->ArrayMesh
 	var origin:=Vector3(bounds.get_center().x,bounds.position.y,bounds.get_center().z)
 	baked.append_from(source,0,Transform3D(Basis.from_scale(scale),origin))
 	var result:=baked.commit();cache[key]=result;return result
+
+static func early_detail_mesh(bounds:AABB,name:String,features:int)->ArrayMesh:
+	# Finite authored asset profiles: roof envelopes are not wall dimensions.
+	var round_wall:=name=="round_household"
+	var ratio:=.58 if round_wall else (.9 if name in ["earthen_household","rubble_household","covered_workshop","raised_store"] else .55)
+	var width_ratio:=.88 if round_wall else .9
+	var size:=Vector3(bounds.size.x*width_ratio,bounds.size.y*ratio,bounds.size.z*width_ratio)
+	var center:=bounds.get_center()
+	var walls:=AABB(Vector3(center.x-size.x*.5,bounds.position.y,center.z-size.z*.5),size)
+	var source:=detail_mesh(walls,features,1.0)
+	if not round_wall:return source
+	var key:="round_details:"+str(bounds)+":"+str(features)
+	if cache.has(key):return cache[key]
+	var arrays:=source.surface_get_arrays(0)
+	var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+	var colors:PackedColorArray=arrays[Mesh.ARRAY_COLOR]
+	var indices:PackedInt32Array=arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
+	if indices.is_empty():
+		for i in vertices.size():indices.append(i)
+	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for index in indices:
+		var v:=vertices[index]
+		var relative_x:float=(v.x-center.x)/maxf(.1,size.x*.5)
+		if v.z>center.z+size.z*.4 and absf(relative_x)<=1.0:
+			v.z+=size.z*.5*(sqrt(maxf(0,1-relative_x*relative_x))-1.0)
+		surface.set_color(colors[index]);surface.add_vertex(v)
+	surface.generate_normals()
+	var mesh:=surface.commit();cache[key]=mesh;return mesh

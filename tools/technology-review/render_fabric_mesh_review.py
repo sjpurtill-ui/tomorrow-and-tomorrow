@@ -12,13 +12,13 @@ up = np.array([-.3, .8660254, -.4])
 depth = np.cross(right, up)
 light = np.array([.3, .85, .4]); light /= np.linalg.norm(light)
 
-def render(record):
+def render(record, scale, origin):
     pixels = np.full((size, size, 3), [242, 239, 230], dtype=np.uint8)
     buffer = np.full((size, size), -np.inf)
     for row in record['triangles']:
         v = np.array(row[:3], dtype=float)
-        x = v @ right * 20 + size / 2
-        y = size - 110 - v @ up * 20
+        x = v @ right * scale + origin[0]
+        y = origin[1] - v @ up * scale
         z = v @ depth
         lo = np.maximum([0, 0], np.floor([min(x), min(y)]).astype(int))
         hi = np.minimum([size-1, size-1], np.ceil([max(x), max(y)]).astype(int))
@@ -42,10 +42,19 @@ def render(record):
 canvas=Image.new('RGB',(size*4,size*2+70),'#f2efe6')
 draw=ImageDraw.Draw(canvas)
 draw.text((16,10),'EXPORTED GODOT GEOMETRY — CPU PROJECTION, NOT IN-GAME LIGHTING',fill='#242422')
-for row, path in enumerate(sys.argv[1:3]):
-    records=json.load(open(path))
+sets=[json.load(open(path)) for path in sys.argv[1:3]]
+fits={}
+for record in sets[0]:
+    name=record['name']
+    points=np.array([v for records in sets for r in records if r['name']==name for t in r['triangles'] for v in t[:3]])
+    projected=np.column_stack((points@right,points@up))
+    lo,hi=projected.min(axis=0),projected.max(axis=0)
+    scale=min((size-80)/max(.1,hi[0]-lo[0]),(size-95)/max(.1,hi[1]-lo[1]))
+    center=(lo+hi)*.5
+    fits[name]=(scale,(size*.5-center[0]*scale,size*.5+25+center[1]*scale))
+for row, records in enumerate(sets):
     for col, record in enumerate(records):
         x,y=col*size,row*size+50
-        canvas.paste(render(record),(x,y))
+        canvas.paste(render(record,*fits[record["name"]]),(x,y))
         draw.text((x+15,y+5),('BEFORE' if row==0 else 'AFTER')+' / '+record['name'],fill='#242422')
 canvas.save(sys.argv[3])

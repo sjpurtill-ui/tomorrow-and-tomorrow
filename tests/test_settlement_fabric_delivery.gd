@@ -14,6 +14,7 @@ func test_secondary_demand_orders_and_transports_components_without_free_stock()
 		state.known_discoveries.assign(["building_shading_design","seasonal_patterns","geometric_survey"])
 		state.discovery_adoption.building_shading_design=1.0
 		state.population_allocations.Construction=20;state.population_allocations.Crafting=20;state.population_allocations.Logistics=100
+		state.resource_stockpiles.Stone=2.0
 		state.resource_stockpiles.Timber=20.0;state.resource_stockpiles["Fiber Plants"]=10.0
 		state.player_settlements.append({"id":"second","name":"Second","primary":false,"position":Vector2(10,0),"population_share":.25,"founded_day":0})
 		WorldSimulation.system("CivilizationSystem").register_player_origin(Vector2.ZERO)

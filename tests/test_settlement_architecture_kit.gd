@@ -61,3 +61,24 @@ func test_installed_details_preserve_the_open_courtyard_entrance()->void:
 			# The front opening between the two wings must remain traversable;
 			# façade details belong on the wings and the recessed rear block.
 			assert_bool(absf(vertex.x)<1.5 and vertex.z>5.0 and vertex.y>.5).is_false()
+
+func test_early_details_keep_finite_geometry_below_the_roof_envelope()->void:
+	var names:Array=EARLY.KIT.duplicate()
+	names.append_array(preload("res://scripts/organic_town_visual.gd").KIT)
+	for name:String in names:
+		var source:Mesh
+		if name in EARLY.KIT:source=EARLY.kit_mesh(name)
+		else:source=preload("res://scripts/organic_town_visual.gd").kit_mesh(preload("res://scripts/organic_town_visual.gd").KIT.find(name))
+		var bounds:=source.get_aabb()
+		for flag in [1,2,4,8,16,32,64,128]:
+			var details:=KIT.early_detail_mesh(bounds,name,flag)
+			assert_object(details).is_same(KIT.early_detail_mesh(bounds,name,flag))
+			assert_float(details.get_aabb().end.y).is_less_equal(bounds.end.y+.3)
+			assert_float(details.get_aabb().size.x).is_less_equal(bounds.size.x*1.5)
+			assert_float(details.get_aabb().size.z).is_less_equal(bounds.size.z*1.5)
+			var arrays:=details.surface_get_arrays(0)
+			var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+			assert_int(vertices.size()).is_less(20000)
+			assert_int(arrays[Mesh.ARRAY_COLOR].size()).is_equal(vertices.size())
+			assert_int(arrays[Mesh.ARRAY_NORMAL].size()).is_equal(vertices.size())
+			for vertex:Vector3 in vertices:assert_bool(vertex.is_finite()).is_true()

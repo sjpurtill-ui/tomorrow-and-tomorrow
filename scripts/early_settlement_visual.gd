@@ -74,7 +74,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			var reserved:=Vector2.ZERO
 			for variant in TOWN.KIT.size():
 				var bounds:=TOWN.kit_mesh(variant).get_aabb()
-				bounds=bounds.merge(LATE.detail_mesh(bounds,LATE.installed_features(plot)).get_aabb())
+				bounds=bounds.merge(LATE.early_detail_mesh(bounds,"town",LATE.installed_features(plot)).get_aabb())
 				var extent:=bounds.position.abs().max(bounds.end.abs())
 				reserved=reserved.max(Vector2(extent.x,extent.z)*.001)
 			plot["placement_half_extent"]=reserved
@@ -82,7 +82,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		if kind(plot) in KIT or LATE.kind(plot)!="":
 			var envelope := (LATE.mesh_for_plot(plot) if LATE.kind(plot)!="" else kit_mesh(kind(plot))).get_aabb()
 			if LATE.kind(plot)=="" and LATE.installed_features(plot)>0:
-				envelope=envelope.merge(LATE.detail_mesh(envelope,LATE.installed_features(plot)).get_aabb())
+				envelope=envelope.merge(LATE.early_detail_mesh(envelope,kind(plot),LATE.installed_features(plot)).get_aabb())
 			var extent := envelope.position.abs().max(envelope.end.abs())
 			plot["placement_half_extent"] = Vector2(extent.x, extent.z) * .001
 		# Reuse the checked footprint/road/water solver, retaining plot identity and
@@ -187,7 +187,7 @@ static func _render_installed_early_details(plan:Dictionary,center:Vector3,heigh
 		if name in KIT:source=kit_mesh(name)
 		elif TOWN.supports(plot):source=TOWN.kit_mesh(clampi(int(record.get("variant",0)),0,TOWN.KIT.size()-1))
 		else:continue
-		var mesh:=LATE.detail_mesh(source.get_aabb(),flags)
+		var mesh:=LATE.early_detail_mesh(source.get_aabb(),name,flags)
 		var key:=str(mesh.get_instance_id())
 		if not groups.has(key):groups[key]={"mesh":mesh,"records":[]}
 		groups[key].records.append(record)
