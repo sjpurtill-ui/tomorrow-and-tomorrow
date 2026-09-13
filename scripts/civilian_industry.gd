@@ -2,6 +2,11 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	# Untanned skins are stretched for parchment; finished leather is not interchangeable.
+	"parchment_prepared_skins":{"name": "Cleaned parchment skins", "output": "Parchment Prepared Skins", "gate": "parchment_record_preparation", "materials": {"Raw Hides": 1.25, "Slaked Lime": 0.15, "Freshwater": 3}, "days": 4, "tooling": {"Timber": 3, "Stone": 2}},
+	"parchment_sheets":{"name": "Stretched and finished parchment sheets", "output": "Parchment Sheets", "gate": "parchment_record_preparation", "materials": {"Parchment Prepared Skins": 1.1, "Freshwater": 0.5, "Limestone": 0.05}, "days": 5, "tooling": {"Timber": 4, "Fiber Plants": 1, "Stone": 2}},
+	"parchment_record_books":{"name": "Bound parchment record volumes", "output": "Bound Record Books", "gate": "bookbinding_assemblies", "materials": {"Parchment Sheets": 2, "Spun Yarn": 0.1, "Timber": 0.2}, "days": 3, "tooling": {"Timber": 2, "Stone": 1}},
+
 	"rendered_leather_fat":{"name": "Rendered fat for leather finishing", "output": "Rendered Animal Fat", "gate": "hide_tanning", "materials": {"Recovered Animal Fat": 1.25, "Timber": 0.3, "Freshwater": 0.2}, "days": 1, "tooling": {"Clay": 2, "Stone": 1}},
 	# Selected compatible hides/plants; costs include rejected feed and finishing losses.
 	"prepared_tanning_hides":{"name": "Cleaned and prepared tanning hides", "output": "Prepared Tanning Hides", "gate": "hide_tanning", "materials": {"Raw Hides": 1.2, "Salt": 0.2, "Freshwater": 2, "Slaked Lime": 0.1}, "days": 3, "tooling": {"Stone": 3, "Timber": 4, "Clay": 2}},

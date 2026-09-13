@@ -7,6 +7,7 @@ const MEDIA:={
 	"Printed Sheets":{"per_work":PAPER_PER_WORK,"bonus":PRINTED_BONUS},
 	"Bound Record Books":{"per_work":.005,"bonus":.25},
 	"Paper":{"per_work":PAPER_PER_WORK,"bonus":BONUS},
+	"Parchment Sheets":{"per_work":.006,"bonus":.2},
 	"Clay Record Tablets":{"per_work":.02,"bonus":.15},
 	"Record Cords":{"per_work":.01,"bonus":.12}
 }

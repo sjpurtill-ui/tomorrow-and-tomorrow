@@ -37,8 +37,8 @@ func test_mixed_media_share_one_work_budget_and_cannot_overshoot()->void:
 	WorldSimulation.scoped("recorder",func()->void:
 		var state=WorldSimulation.state;state.known_discoveries.append("knotted_record_systems");state.discovery_adoption.knotted_record_systems=1.0
 		for resource:String in S.MEDIA:state.resource_stockpiles[resource]=float(S.MEDIA[resource].per_work)
-		var result:=S.use(5,100,note("specimen"))
-		assert_float(float(result.work)).is_equal_approx(5,.000001);assert_float(float(result.progress)).is_equal_approx(6.02,.000001)
+		var result:=S.use(6,100,note("specimen"))
+		assert_float(float(result.work)).is_equal_approx(6,.000001);assert_float(float(result.progress)).is_equal_approx(7.22,.000001)
 		for resource:String in S.MEDIA:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(0,.000001)
 		state.resource_stockpiles["Clay Record Tablets"]=1.0
 		result=S.use(10,.115)

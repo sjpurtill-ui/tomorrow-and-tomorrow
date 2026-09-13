@@ -205,9 +205,11 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 	# The existing once-per-day clothing guard also owns decay and collection.
 	var fat:=maxf(0,available("Recovered Animal Fat"))*.75
 	var raw:=maxf(0,available("Raw Hides"))*.75
-	if "hide_tanning" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("hide_tanning")>=.1 and is_finite(hunted_rations):
-		raw+=maxf(0,hunted_rations)*.001
-		fat+=maxf(0,hunted_rations)*.0005
+	var tanning:="hide_tanning" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("hide_tanning")>=.1
+	var parchment:="parchment_record_preparation" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("parchment_record_preparation")>=.1
+	if is_finite(hunted_rations):
+		if tanning or parchment:raw+=maxf(0,hunted_rations)*.001
+		if tanning:fat+=maxf(0,hunted_rations)*.0005
 	WorldSimulation.state.resource_stockpiles["Recovered Animal Fat"]=minf(maxf(0,population)*.01,fat)
 	WorldSimulation.state.resource_stockpiles["Raw Hides"]=minf(maxf(0,population)*.02,raw)
 	# Non-edible byproduct of actual newly hunted food, never imported meat,
