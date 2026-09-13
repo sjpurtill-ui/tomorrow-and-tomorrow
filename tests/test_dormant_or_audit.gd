@@ -54,13 +54,23 @@ func test_expanded_route_factorization_preserves_predicates_and_acquisition_requ
 	expanded[3].learning_routes[0].requires_all.push_front("missing_local_instrument")
 	factored=D.factor_common(expanded,catalog)
 	assert_array(R.validate(factored,D.pending(factored))).contains(["plant_transpiration_measurement: unknown prerequisite missing_local_instrument"])
+func authored_fixture(ids:Array,source:String)->Array:
+	var drafts:Array=JSON.parse_string(FileAccess.get_file_as_string(source))
+	var baseline:Dictionary=JSON.parse_string(FileAccess.get_file_as_string(D.BASELINE))
+	var result:Array=[]
+	for id:String in ids:
+		var row:=D.resolve_authored(id,drafts,baseline.items,source.get_file())
+		assert_dict(row).override_failure_message("Missing preserved authored fixture: "+id).is_not_empty()
+		result.append(row.duplicate(true))
+	return result
+
 func promoted(row:Dictionary,source:String)->Dictionary:
 	return {"id":row.id,"status":"implemented_baseline","requires_all":[],"requires_any":[],"runtime_definition":{"id":row.id,"requires_all":[],"requires_any":[]},"implementation_reconciliation":{"editorial_source":source,"previous_requires_all":row.requires_all.duplicate(),"previous_requires_any":row.requires_any.duplicate(true)}}
 func test_post_promotion_ledger_uses_preserved_authored_edges_for_child_and_parent()->void:
 	var catalog:=graph();var index:Dictionary={}
 	for entry:Dictionary in catalog:index[entry.id]=entry
-	var draft:Array=JSON.parse_string(FileAccess.get_file_as_string(D.SOURCE))
-	var parents:Array=JSON.parse_string(FileAccess.get_file_as_string(D.PARENT_SOURCE))
+	var draft:=authored_fixture(["plant_transpiration_measurement","plant_pathology_diagnosis"],D.SOURCE)
+	var parents:=authored_fixture(["photosynthetic_process_analysis","germ_theory"],D.PARENT_SOURCE)
 	var implemented:Array=[]
 	for id:String in ["plant_transpiration_measurement","plant_pathology_diagnosis"]:
 		for row:Dictionary in draft.duplicate():
@@ -79,8 +89,8 @@ func test_post_promotion_ledger_uses_preserved_authored_edges_for_child_and_pare
 func test_missing_or_ambiguous_promotion_provenance_is_rejected()->void:
 	var catalog:=graph();var index:Dictionary={}
 	for entry:Dictionary in catalog:index[entry.id]=entry
-	var draft:Array=JSON.parse_string(FileAccess.get_file_as_string(D.SOURCE))
-	var parents:Array=JSON.parse_string(FileAccess.get_file_as_string(D.PARENT_SOURCE))
+	var draft:=authored_fixture(["plant_transpiration_measurement","plant_pathology_diagnosis"],D.SOURCE)
+	var parents:=authored_fixture(["photosynthetic_process_analysis","germ_theory"],D.PARENT_SOURCE)
 	var row:Dictionary={}
 	for candidate:Dictionary in draft:
 		if candidate.id=="plant_transpiration_measurement":row=candidate;break
