@@ -1,3 +1,9 @@
+## September 12 — numerical and statistical coverage checkpoint
+
+Reviewed 24 distinct D12 proposals with explicit input/work requirements, uncertainty/failure limits and paid outside acquisition routes. Existing dimensional analysis, numerical integration/root finding and least-squares were excluded from duplicate counting. Ledger now holds **724 integrated + 2,513 drafts = 3,237 identities**, leaving **1,763 to author and 4,276 to implement**. All parents resolve, no normalized-name duplicates, and 15 catalog-tool tests pass. These drafts add no runtime capabilities. See `technology-review/Numerical and Statistical Methods Review.md`.
+
+Runtime remains **724 discoveries / 506 routes / 379 recipes / 18 facilities**; art remains **146 / 724, 578 queued**. Six early machinery methods are under implementation in the other task, including physical site-bound water-drive service. No player launch or package rebuild.
+
 ## September 12 — armor and leather art verified
 
 Leather illustrations `0905774` and armor art source `4a4ec9c` (integrated as `9b80339`) are visually reviewed. All eight canonical textures load at 768px with mipmaps; 12 canonical atlas cases pass, and import logs are clean. Art now covers **146 of 724 live discoveries**, with **578 queued**. Runtime and ledger totals remain unchanged. The additive ResearchVisuals conflict retained all eight new bindings and all prior subjects. No save changes, player launch or package rebuild.

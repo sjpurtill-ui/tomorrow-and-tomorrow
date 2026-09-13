@@ -1,0 +1,861 @@
+[
+  {
+    "id": "pivoted_elimination",
+    "name": "Pivoted Elimination",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "matrix_algebra",
+      "numerical_conditioning_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "matrix_algebra,numerical_conditioning_analysis",
+    "mechanism": "Reorder elimination steps to avoid unsuitable pivots in a linear solve.",
+    "operating_requirement": "Recorded coefficient system and finite calculation/checking work.",
+    "consequence": "Produces a residual-checked solution; singular systems remain unresolved.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable pivoted elimination instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pivoted_elimination",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Reorder elimination steps to avoid unsuitable pivots in a linear solve.",
+      "operating_requirements": "Recorded coefficient system and finite calculation/checking work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for pivoted elimination.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for pivoted elimination.",
+        "purchased_research": "Pay for a bounded pivoted elimination study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external pivoted elimination computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied pivoted elimination worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/linalg.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "orthogonal_matrix_factorization",
+    "name": "Orthogonal Matrix Factorization",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "matrix_algebra",
+    "mechanism": "Separate a matrix into orthogonal and triangular factors.",
+    "operating_requirement": "Coefficient records and paid transformation work.",
+    "consequence": "Supports repeated solves without forming normal equations; rank limits remain.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable orthogonal matrix factorization instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "orthogonal_matrix_factorization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate a matrix into orthogonal and triangular factors.",
+      "operating_requirements": "Coefficient records and paid transformation work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for orthogonal matrix factorization.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for orthogonal matrix factorization.",
+        "purchased_research": "Pay for a bounded orthogonal matrix factorization study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external orthogonal matrix factorization computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied orthogonal matrix factorization worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/linalg.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "singular_value_decomposition",
+    "name": "Singular-Value Decomposition",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "matrix_algebra",
+      "eigenvalue_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "matrix_algebra,eigenvalue_analysis",
+    "mechanism": "Separate a matrix into orthogonal directions and nonnegative gains.",
+    "operating_requirement": "Finite matrix workspace and checked factor calculations.",
+    "consequence": "Exposes weakly determined directions; truncation discards information explicitly.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable singular-value decomposition instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "singular_value_decomposition",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate a matrix into orthogonal directions and nonnegative gains.",
+      "operating_requirements": "Finite matrix workspace and checked factor calculations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for singular-value decomposition.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for singular-value decomposition.",
+        "purchased_research": "Pay for a bounded singular-value decomposition study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external singular-value decomposition computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied singular-value decomposition worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/linalg.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "cholesky_factorization",
+    "name": "Cholesky Factorization",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "matrix_algebra",
+    "mechanism": "Factor a positive-definite symmetric system through triangular square-root factors.",
+    "operating_requirement": "Symmetry/definiteness checks and finite arithmetic work.",
+    "consequence": "Reduces repeated-solve work for qualifying systems; rejects unsuitable matrices.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable cholesky factorization instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cholesky_factorization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Factor a positive-definite symmetric system through triangular square-root factors.",
+      "operating_requirements": "Symmetry/definiteness checks and finite arithmetic work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for cholesky factorization.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for cholesky factorization.",
+        "purchased_research": "Pay for a bounded cholesky factorization study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external cholesky factorization computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied cholesky factorization worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/linalg.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "krylov_subspace_iteration",
+    "name": "Krylov Subspace Iteration",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "sparse_matrix_methods",
+      "numerical_conditioning_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "sparse_matrix_methods,numerical_conditioning_analysis",
+    "mechanism": "Build an iterative solution in spaces generated by repeated matrix action.",
+    "operating_requirement": "Matrix-action access, residual records and bounded iteration budget.",
+    "consequence": "Solves some large systems without dense factors; nonconvergence is retained.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable krylov subspace iteration instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "krylov_subspace_iteration",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Build an iterative solution in spaces generated by repeated matrix action.",
+      "operating_requirements": "Matrix-action access, residual records and bounded iteration budget.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for krylov subspace iteration.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for krylov subspace iteration.",
+        "purchased_research": "Pay for a bounded krylov subspace iteration study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external krylov subspace iteration computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied krylov subspace iteration worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.netlib.org/linalg/html_templates/node1.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "matrix_preconditioning",
+    "name": "Matrix Preconditioning",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "sparse_matrix_methods",
+      "numerical_conditioning_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "sparse_matrix_methods,numerical_conditioning_analysis",
+    "mechanism": "Transform a solve using a cheaper approximate inverse action.",
+    "operating_requirement": "Paid setup, compatible operator and repeated application work.",
+    "consequence": "Can improve convergence; setup cost and ineffective conditioning remain visible.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable matrix preconditioning instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "matrix_preconditioning",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Transform a solve using a cheaper approximate inverse action.",
+      "operating_requirements": "Paid setup, compatible operator and repeated application work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for matrix preconditioning.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for matrix preconditioning.",
+        "purchased_research": "Pay for a bounded matrix preconditioning study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external matrix preconditioning computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied matrix preconditioning worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.netlib.org/linalg/html_templates/node1.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "floating_point_error_accounting",
+    "name": "Floating-Point Error Accounting",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "rational_approximation_methods",
+      "numerical_conditioning_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "rational_approximation_methods,numerical_conditioning_analysis",
+    "mechanism": "Track finite significand/exponent arithmetic, rounding and exceptional values.",
+    "operating_requirement": "Declared precision model and checked calculation records.",
+    "consequence": "Distinguishes arithmetic loss from data uncertainty; cancellation can defeat a result.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable floating-point error accounting instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "floating_point_error_accounting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Track finite significand/exponent arithmetic, rounding and exceptional values.",
+      "operating_requirements": "Declared precision model and checked calculation records.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for floating-point error accounting.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for floating-point error accounting.",
+        "purchased_research": "Pay for a bounded floating-point error accounting study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external floating-point error accounting computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied floating-point error accounting worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/ieee754.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "polynomial_interpolation",
+    "name": "Polynomial Interpolation",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "symbolic_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "symbolic_algebra",
+    "mechanism": "Construct a polynomial passing through distinct supplied data points.",
+    "operating_requirement": "Dated point records, distinct abscissas and calculation work.",
+    "consequence": "Provides intermediate estimates; oscillation and extrapolation limits remain explicit.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable polynomial interpolation instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "polynomial_interpolation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Construct a polynomial passing through distinct supplied data points.",
+      "operating_requirements": "Dated point records, distinct abscissas and calculation work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for polynomial interpolation.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for polynomial interpolation.",
+        "purchased_research": "Pay for a bounded polynomial interpolation study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external polynomial interpolation computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied polynomial interpolation worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/interp.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "piecewise_spline_interpolation",
+    "name": "Piecewise Spline Interpolation",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "polynomial_interpolation",
+      "differential_calculus"
+    ],
+    "requires_any": [],
+    "foundations": "polynomial_interpolation,differential_calculus",
+    "mechanism": "Join local polynomial segments with prescribed continuity and end conditions.",
+    "operating_requirement": "Ordered points, boundary choices and coefficient-solving work.",
+    "consequence": "Supplies smooth local curves; boundary assumptions can dominate sparse data.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable piecewise spline interpolation instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "piecewise_spline_interpolation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Join local polynomial segments with prescribed continuity and end conditions.",
+      "operating_requirements": "Ordered points, boundary choices and coefficient-solving work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for piecewise spline interpolation.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for piecewise spline interpolation.",
+        "purchased_research": "Pay for a bounded piecewise spline interpolation study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external piecewise spline interpolation computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied piecewise spline interpolation worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/interp.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "shape_preserving_interpolation",
+    "name": "Shape-Preserving Interpolation",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "piecewise_spline_interpolation"
+    ],
+    "requires_any": [],
+    "foundations": "piecewise_spline_interpolation",
+    "mechanism": "Restrict segment derivatives to preserve local monotonicity.",
+    "operating_requirement": "Ordered data and qualified slope constraints.",
+    "consequence": "Avoids invented local extrema while accepting weaker smoothness at joins.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable shape-preserving interpolation instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "shape_preserving_interpolation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Restrict segment derivatives to preserve local monotonicity.",
+      "operating_requirements": "Ordered data and qualified slope constraints.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for shape-preserving interpolation.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for shape-preserving interpolation.",
+        "purchased_research": "Pay for a bounded shape-preserving interpolation study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external shape-preserving interpolation computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied shape-preserving interpolation worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/interp.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "constrained_linear_optimization",
+    "name": "Constrained Linear Optimization",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "matrix_algebra",
+    "mechanism": "Optimize a linear objective over explicit linear constraints.",
+    "operating_requirement": "Finite resource coefficients, declared objective and solving work.",
+    "consequence": "Returns feasible allocations or infeasibility; it creates no resources.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable constrained linear optimization instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "constrained_linear_optimization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Optimize a linear objective over explicit linear constraints.",
+      "operating_requirements": "Finite resource coefficients, declared objective and solving work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for constrained linear optimization.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for constrained linear optimization.",
+        "purchased_research": "Pay for a bounded constrained linear optimization study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external constrained linear optimization computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied constrained linear optimization worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://stanford.edu/~boyd/cvxbook/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "convex_optimality_conditions",
+    "name": "Convex Optimality Conditions",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "differential_calculus",
+      "matrix_algebra"
+    ],
+    "requires_any": [],
+    "foundations": "differential_calculus,matrix_algebra",
+    "mechanism": "Check primal/dual conditions for a qualifying convex problem.",
+    "operating_requirement": "Declared convex formulation and verified constraint assumptions.",
+    "consequence": "Can certify a bounded optimum; failed qualification leaves the claim unproved.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable convex optimality conditions instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "convex_optimality_conditions",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Check primal/dual conditions for a qualifying convex problem.",
+      "operating_requirements": "Declared convex formulation and verified constraint assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for convex optimality conditions.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for convex optimality conditions.",
+        "purchased_research": "Pay for a bounded convex optimality conditions study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external convex optimality conditions computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied convex optimality conditions worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://stanford.edu/~boyd/cvxbook/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "interior_point_optimization",
+    "name": "Interior-Point Optimization",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "convex_optimality_conditions",
+      "numerical_root_finding"
+    ],
+    "requires_any": [],
+    "foundations": "convex_optimality_conditions,numerical_root_finding",
+    "mechanism": "Follow constrained interior iterates while reducing a barrier or primal-dual gap.",
+    "operating_requirement": "Feasible initialization or infeasibility treatment, linear solves and finite iterations.",
+    "consequence": "Computes qualifying constrained optima with explicit residual and stopping limits.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable interior-point optimization instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "interior_point_optimization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Follow constrained interior iterates while reducing a barrier or primal-dual gap.",
+      "operating_requirements": "Feasible initialization or infeasibility treatment, linear solves and finite iterations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for interior-point optimization.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for interior-point optimization.",
+        "purchased_research": "Pay for a bounded interior-point optimization study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external interior-point optimization computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied interior-point optimization worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://stanford.edu/~boyd/cvxbook/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "integer_programming_search",
+    "name": "Integer Programming Search",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "constrained_linear_optimization",
+      "graph_theory"
+    ],
+    "requires_any": [],
+    "foundations": "constrained_linear_optimization,graph_theory",
+    "mechanism": "Branch on discrete choices and prune using valid relaxation bounds.",
+    "operating_requirement": "Finite search budget, integral variables and checked bounds.",
+    "consequence": "Returns an incumbent and remaining gap; timeout does not prove optimality.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable integer programming search instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "integer_programming_search",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Branch on discrete choices and prune using valid relaxation bounds.",
+      "operating_requirements": "Finite search budget, integral variables and checked bounds.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for integer programming search.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for integer programming search.",
+        "purchased_research": "Pay for a bounded integer programming search study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external integer programming search computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied integer programming search worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.scipopt.org/doc/html/BRANCH.php"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "importance_sampling_estimators",
+    "name": "Importance-Sampling Estimators",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "monte_carlo_methods"
+    ],
+    "requires_any": [],
+    "foundations": "monte_carlo_methods",
+    "mechanism": "Sample a proposal distribution and correct estimates with likelihood weights.",
+    "operating_requirement": "Proposal with adequate support and finite model evaluations.",
+    "consequence": "Concentrates effort on important regions; poor weights can increase variance.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable importance-sampling estimators instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "importance_sampling_estimators",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Sample a proposal distribution and correct estimates with likelihood weights.",
+      "operating_requirements": "Proposal with adequate support and finite model evaluations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for importance-sampling estimators.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for importance-sampling estimators.",
+        "purchased_research": "Pay for a bounded importance-sampling estimators study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external importance-sampling estimators computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied importance-sampling estimators worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.gnu.org/software/gsl/doc/html/montecarlo.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "control_variate_estimators",
+    "name": "Control-Variate Estimators",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "monte_carlo_methods",
+      "least_squares_estimation"
+    ],
+    "requires_any": [],
+    "foundations": "monte_carlo_methods,least_squares_estimation",
+    "mechanism": "Adjust sampled estimates using correlated quantities with known expectations.",
+    "operating_requirement": "Paired samples, justified control expectations and fitting work.",
+    "consequence": "Can reduce simulation variance; inaccurate control means can bias the result.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable control-variate estimators instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "control_variate_estimators",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Adjust sampled estimates using correlated quantities with known expectations.",
+      "operating_requirements": "Paired samples, justified control expectations and fitting work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for control-variate estimators.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for control-variate estimators.",
+        "purchased_research": "Pay for a bounded control-variate estimators study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external control-variate estimators computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied control-variate estimators worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://web.stanford.edu/~glynn/papers/2002/GSzechtman02.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "bootstrap_resampling",
+    "name": "Bootstrap Resampling",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_sampling",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "foundations": "statistical_sampling,statistical_inference",
+    "mechanism": "Estimate statistic variation by repeated sampling with replacement from observed data.",
+    "operating_requirement": "Attributable data, resampling rule and finite calculations.",
+    "consequence": "Provides qualified uncertainty estimates; poor tail/support representation remains.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable bootstrap resampling instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bootstrap_resampling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Estimate statistic variation by repeated sampling with replacement from observed data.",
+      "operating_requirements": "Attributable data, resampling rule and finite calculations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for bootstrap resampling.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for bootstrap resampling.",
+        "purchased_research": "Pay for a bounded bootstrap resampling study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external bootstrap resampling computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied bootstrap resampling worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.itl.nist.gov/div898/handbook/eda/section3/bootplot.htm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "permutation_randomization_tests",
+    "name": "Permutation Randomization Tests",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_inference",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "statistical_inference,experimental_controls",
+    "mechanism": "Compare a statistic against permitted label rearrangements under a declared null.",
+    "operating_requirement": "Exchangeability or design justification, observed outcomes and finite permutations.",
+    "consequence": "Tests a specific null; arbitrary relabeling does not establish causation.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable permutation randomization tests instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "permutation_randomization_tests",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Compare a statistic against permitted label rearrangements under a declared null.",
+      "operating_requirements": "Exchangeability or design justification, observed outcomes and finite permutations.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for permutation randomization tests.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for permutation randomization tests.",
+        "purchased_research": "Pay for a bounded permutation randomization tests study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external permutation randomization tests computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied permutation randomization tests worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.itl.nist.gov/div898/software/dataplot/refman1/auxillar/ksamperm.htm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "sequential_likelihood_testing",
+    "name": "Sequential Likelihood Testing",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "probability_theory",
+      "statistical_inference"
+    ],
+    "requires_any": [],
+    "foundations": "probability_theory,statistical_inference",
+    "mechanism": "Update a likelihood comparison against predeclared sequential decision boundaries.",
+    "operating_requirement": "Dated incoming samples, error targets and a stopping/truncation rule.",
+    "consequence": "Can stop evidence collection early; repeated looks require the declared rule.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable sequential likelihood testing instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sequential_likelihood_testing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Update a likelihood comparison against predeclared sequential decision boundaries.",
+      "operating_requirements": "Dated incoming samples, error targets and a stopping/truncation rule.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for sequential likelihood testing.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for sequential likelihood testing.",
+        "purchased_research": "Pay for a bounded sequential likelihood testing study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external sequential likelihood testing computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied sequential likelihood testing worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.itl.nist.gov/div898/handbook/pmc/section2/pmc254.htm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "censored_survival_estimation",
+    "name": "Censored Survival Estimation",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_inference",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "foundations": "statistical_inference,probability_theory",
+    "mechanism": "Estimate event survival while retaining observation-ending times separately from events.",
+    "operating_requirement": "At-risk records, event times and stated censoring assumptions.",
+    "consequence": "Uses incomplete follow-up without inventing event dates; informative censoring remains a limitation.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable censored survival estimation instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "censored_survival_estimation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Estimate event survival while retaining observation-ending times separately from events.",
+      "operating_requirements": "At-risk records, event times and stated censoring assumptions.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for censored survival estimation.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for censored survival estimation.",
+        "purchased_research": "Pay for a bounded censored survival estimation study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external censored survival estimation computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied censored survival estimation worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://www.itl.nist.gov/div898/handbook/apr/apr_d.htm"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "stochastic_differential_models",
+    "name": "Stochastic Differential Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "differential_calculus",
+      "integral_calculus",
+      "probability_theory"
+    ],
+    "requires_any": [],
+    "foundations": "differential_calculus,integral_calculus,probability_theory",
+    "mechanism": "Represent continuous evolution with declared drift and stochastic forcing.",
+    "operating_requirement": "Specified noise interpretation, coefficients and finite simulation/analysis work.",
+    "consequence": "Produces distributional trajectories; a single realization is not a certain forecast.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable stochastic differential models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "stochastic_differential_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Represent continuous evolution with declared drift and stochastic forcing.",
+      "operating_requirements": "Specified noise interpretation, coefficients and finite simulation/analysis work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for stochastic differential models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for stochastic differential models.",
+        "purchased_research": "Pay for a bounded stochastic differential models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external stochastic differential models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied stochastic differential models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/18-642-topics-in-mathematics-with-applications-in-finance-fall-2024/resources/mit18_642_f24_lec24_pdf/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "bifurcation_analysis",
+    "name": "Bifurcation Analysis",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "ordinary_equation_stability",
+      "linearization_methods"
+    ],
+    "requires_any": [],
+    "foundations": "ordinary_equation_stability,linearization_methods",
+    "mechanism": "Locate parameter changes that alter qualitative equilibrium or orbit structure.",
+    "operating_requirement": "Explicit dynamical equations, parameter ranges and continuation/checking work.",
+    "consequence": "Identifies modeled regime changes; unmodeled forces invalidate transfer.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable bifurcation analysis instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bifurcation_analysis",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Locate parameter changes that alter qualitative equilibrium or orbit structure.",
+      "operating_requirements": "Explicit dynamical equations, parameter ranges and continuation/checking work.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for bifurcation analysis.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for bifurcation analysis.",
+        "purchased_research": "Pay for a bounded bifurcation analysis study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external bifurcation analysis computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied bifurcation analysis worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://math.mit.edu/classes/18.385/Notes/index.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "lyapunov_stability_certificates",
+    "name": "Lyapunov Stability Certificates",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "ordinary_equation_stability",
+      "differential_calculus"
+    ],
+    "requires_any": [],
+    "foundations": "ordinary_equation_stability,differential_calculus",
+    "mechanism": "Verify a scalar function and its change to establish stability in a declared region.",
+    "operating_requirement": "Candidate function, dynamics and domain inequality checks.",
+    "consequence": "Supports a regional stability claim; failure to find a certificate proves no instability.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable lyapunov stability certificates instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "lyapunov_stability_certificates",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Verify a scalar function and its change to establish stability in a declared region.",
+      "operating_requirements": "Candidate function, dynamics and domain inequality checks.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for lyapunov stability certificates.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for lyapunov stability certificates.",
+        "purchased_research": "Pay for a bounded lyapunov stability certificates study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external lyapunov stability certificates computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied lyapunov stability certificates worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://underactuated.mit.edu/lyapunov.html"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  },
+  {
+    "id": "nondimensional_similarity_models",
+    "name": "Nondimensional Similarity Models",
+    "field": "D12",
+    "status": "authored_draft",
+    "requires_all": [
+      "dimensional_analysis",
+      "experimental_controls"
+    ],
+    "requires_any": [],
+    "foundations": "dimensional_analysis,experimental_controls",
+    "mechanism": "Match governing dimensionless groups between model tests and intended conditions.",
+    "operating_requirement": "Measured scales, relevant governing variables and physical comparison trials.",
+    "consequence": "Transfers qualified trends across scale; unmatched effects restrict similarity.",
+    "branching_note": "All listed foundations apply. Methods solve declared problems under explicit assumptions; theoretical knowledge does not provide measurements, computation or automatic adoption.",
+    "recovery": "Acquire attributable nondimensional similarity models instruction or worked evidence, then pay for local reconstruction and independent checking.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nondimensional_similarity_models",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Match governing dimensionless groups between model tests and intended conditions.",
+      "operating_requirements": "Measured scales, relevant governing variables and physical comparison trials.",
+      "route_terms": {
+        "scholar_envoy": "Fund a reachable instructor, travel, worked examples and local checking for nondimensional similarity models.",
+        "partnership": "Contribute actual problem data and analyst time; compare independent solutions for nondimensional similarity models.",
+        "purchased_research": "Pay for a bounded nondimensional similarity models study with input provenance, assumptions and residual/error evidence.",
+        "licensed_or_imported_service": "Contract finite external nondimensional similarity models computation or analysis; output does not grant local mastery or hidden source data.",
+        "reverse_engineering": "Reconstruct a supplied nondimensional similarity models worked result using attributable inputs and paid checks; missing assumptions can prevent reproduction."
+      }
+    },
+    "evidence_sources": [
+      "https://ocw.mit.edu/courses/2-25-advanced-fluid-mechanics-fall-2013/pages/dimensional-analysis/"
+    ],
+    "implementation_status": "Authored proposal only. Promotion requires bounded paid analytical work, actual input records, saved result/provenance/uncertainty, explicit failure states and a real downstream decision consumer. No global knowledge bonus or invented observations.",
+    "historical_scope": "H05 classifies the reviewed analytical capability; it is neither an invention date nor a calendar unlock. Sources support mechanisms; prerequisites and operating contracts are game-design inferences."
+  }
+]

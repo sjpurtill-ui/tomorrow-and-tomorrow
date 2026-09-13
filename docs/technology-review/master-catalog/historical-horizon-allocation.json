@@ -11204,6 +11204,246 @@
       "classification_status": "editorial_review",
       "rationale": "Field, laboratory and instrument requirements define the capability class; this is not a date or runtime unlock.",
       "scope_digest": "b832f9fa092da1838533684312f7e52a829b289678547d3a72ca75a04e0907d8"
+    },
+    {
+      "id": "pivoted_elimination",
+      "name": "Pivoted Elimination",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "2cea37229ad16cf4d866a9bb77b562c32339e6e7dfb18a71d41ef78af4d11084"
+    },
+    {
+      "id": "orthogonal_matrix_factorization",
+      "name": "Orthogonal Matrix Factorization",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "9b944cc59d36a3e95e971aa0e8a765cdd0b66d956aa4d40d8a5295a49b15d75e"
+    },
+    {
+      "id": "singular_value_decomposition",
+      "name": "Singular-Value Decomposition",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "a3d349566d955b98e1b78bb85c3e1d40dd1578b475800289b90ca3d23c6fe552"
+    },
+    {
+      "id": "cholesky_factorization",
+      "name": "Cholesky Factorization",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "5decd3f7c9b8125b5cee16385cdbcb871c223bd9acbcf05ab2d68f9d95d1b33a"
+    },
+    {
+      "id": "krylov_subspace_iteration",
+      "name": "Krylov Subspace Iteration",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "1b829f385b6533e55472092dd1b888b8304e37934d8b417c8f578c7a69b395cc"
+    },
+    {
+      "id": "matrix_preconditioning",
+      "name": "Matrix Preconditioning",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "1de7ca899e0bd8e8728e1973d6bdc662f81623afa28365c70d60b6b5c588fb60"
+    },
+    {
+      "id": "floating_point_error_accounting",
+      "name": "Floating-Point Error Accounting",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "296ff26496f76a0b9588553df3ebafcf1c02fdc0e554151a0e9dfe6dfef791b9"
+    },
+    {
+      "id": "polynomial_interpolation",
+      "name": "Polynomial Interpolation",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "375a3e22ee0ac003f0ac882bf128a801bc0a25ff674d1e651eeda9402c3a78a0"
+    },
+    {
+      "id": "piecewise_spline_interpolation",
+      "name": "Piecewise Spline Interpolation",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "2c37c743eedd5a79e2d5e0913b13efd1a0697af6a85dfff79a3298a4fd51d2bf"
+    },
+    {
+      "id": "shape_preserving_interpolation",
+      "name": "Shape-Preserving Interpolation",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "07aaf38ffc0a364e24b9498b02b4e901a05b5fc7b89b9c2cedac616ef178e530"
+    },
+    {
+      "id": "constrained_linear_optimization",
+      "name": "Constrained Linear Optimization",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "37a843be3ac00c710eab38a0ef220a887b63f5b27bb4a7fda6eda742a27521d6"
+    },
+    {
+      "id": "convex_optimality_conditions",
+      "name": "Convex Optimality Conditions",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "d1f91183f9d97ed067c22d03a13107cbb21392c547e92571e33bd90e33e34b68"
+    },
+    {
+      "id": "interior_point_optimization",
+      "name": "Interior-Point Optimization",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "91671bce703876c9c4736e65f1374b73c8ed4ec5bad5678dfd739614072b732c"
+    },
+    {
+      "id": "integer_programming_search",
+      "name": "Integer Programming Search",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "427e9bc6c6011e5191478015d042301c07b562d61db9caa097cff3d553ed13e2"
+    },
+    {
+      "id": "importance_sampling_estimators",
+      "name": "Importance-Sampling Estimators",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "3f73915f57f023c57e4bd84d61a112cc1c828b57a00a18b58f1ab211b578863e"
+    },
+    {
+      "id": "control_variate_estimators",
+      "name": "Control-Variate Estimators",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "ad1117cd7651f13226e85a96dc5356bf029c0caae540736c73a7706f259e78e1"
+    },
+    {
+      "id": "bootstrap_resampling",
+      "name": "Bootstrap Resampling",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "6c13ef4ed43cdf250dd3897d89805f8b7b1ed75b397f9bdf2b5a044ecd3b554d"
+    },
+    {
+      "id": "permutation_randomization_tests",
+      "name": "Permutation Randomization Tests",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "067b0acfb337026cacaf4d0079afa9a7f0a9ff20f88d7bbd5a17c01e940302f4"
+    },
+    {
+      "id": "sequential_likelihood_testing",
+      "name": "Sequential Likelihood Testing",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "ed38404a7d2ba283cb08259edbbe6f06aefebe376b98e4c14abf192e28438c52"
+    },
+    {
+      "id": "censored_survival_estimation",
+      "name": "Censored Survival Estimation",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "a9c7d0e715bcf6a53957126c63ddf0553da85478121487460651766255f8f8c5"
+    },
+    {
+      "id": "stochastic_differential_models",
+      "name": "Stochastic Differential Models",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "6cb66f933c8770cbeb947916b32a92e326e4ef978016810226b66cc2bfebfb15"
+    },
+    {
+      "id": "bifurcation_analysis",
+      "name": "Bifurcation Analysis",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "b3177d7a1a4849e4d08b20a68db7fafae35aa2896c73ca3135245ff4783b56ff"
+    },
+    {
+      "id": "lyapunov_stability_certificates",
+      "name": "Lyapunov Stability Certificates",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "f97a5e3b52df4e74fbade45434820fc309f14b6a74dd9b2ac1c25744a186b680"
+    },
+    {
+      "id": "nondimensional_similarity_models",
+      "name": "Nondimensional Similarity Models",
+      "horizon": "H05",
+      "source_file": "numerical-statistical-methods.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Qualified analytical problem, evidence and calculation requirements define this capability class, not an invention date or runtime gate.",
+      "scope_digest": "5e125a4c2625034a2f76426d5faf7cc196303dc2391c2c11aa86c8fb4a6e32bc"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."
