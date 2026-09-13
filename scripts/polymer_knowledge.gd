@@ -408,7 +408,8 @@ static func entries()->Array[Dictionary]:
       "qualified_nickel_hydrogenation_catalyst",
       "formed_alumina_supports",
       "formed_ethene_catalyst",
-      "anhydrous_aluminum_chloride"
+      "anhydrous_aluminum_chloride",
+      "refined_alumina_supports"
     ]
   },
   {
@@ -1428,6 +1429,40 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Reserves a finite sealant specimen batch and requires thirty distinct observed exposure days with paid operators and power. Qualification remains bounded to that exposure; it does not grant indefinite service life. Tested material feeds a separate panel assembly recipe.",
     "production_items": [
       "exposed_panel_sealant"
+    ]
+  },
+  {
+    "id": "alumina_refining",
+    "name": "Alumina Refining",
+    "direction": "Materials",
+    "day": 0,
+    "chance": 0.002,
+    "requires": [
+      "ore_assaying",
+      "metallurgical_mass_balances"
+    ],
+    "requires_all": [
+      "ore_assaying",
+      "metallurgical_mass_balances"
+    ],
+    "requires_any": [],
+    "learning_routes": [
+      {
+        "id": "local",
+        "label": "Alumina Refining",
+        "requires_all": []
+      }
+    ],
+    "signals": [
+      "crafting",
+      "materials",
+      "research"
+    ],
+    "observation": "Separate a qualified aluminum-oxide feed from suitable mineral sources",
+    "effects": {},
+    "production_contract": "Finite recognized bauxite is digested, separated, precipitated and calcined with paid chemical plant, water, reagents, fuel and power. Refined alumina supplies separately formed and qualified catalyst supports.",
+    "production_items": [
+      "bauxite_alumina_refining"
     ]
   }
 ]

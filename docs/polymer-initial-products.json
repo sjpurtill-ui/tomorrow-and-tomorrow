@@ -1492,5 +1492,42 @@
     },
     "power": 1,
     "daily_power": 0.5
+  },
+  "bauxite_alumina_refining": {
+    "name": "Digested, precipitated and calcined alumina",
+    "output": "Refined Alumina",
+    "gate": "alumina_refining",
+    "materials": {
+      "Bauxite": 2.5,
+      "Caustic Soda": 0.3,
+      "Freshwater": 3,
+      "Timber": 2
+    },
+    "days": 8,
+    "tooling": {
+      "Pressure Vessels": 4,
+      "Refractory Bricks": 6,
+      "Laboratory Glassware": 3
+    },
+    "power": 3,
+    "daily_power": 0.375
+  },
+  "refined_alumina_supports": {
+    "name": "Formed and tested refined-alumina supports",
+    "output": "Alumina Catalyst Supports",
+    "gate": "industrial_catalyst_design",
+    "materials": {
+      "Refined Alumina": 1.08,
+      "Freshwater": 0.5,
+      "Timber": 0.5
+    },
+    "days": 4,
+    "tooling": {
+      "Steel": 3,
+      "Refractory Bricks": 4,
+      "Laboratory Glassware": 2
+    },
+    "power": 2,
+    "daily_power": 0.5
   }
 }

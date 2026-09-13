@@ -186,30 +186,31 @@ func test_silver_has_geographic_potential_and_old_ore_keys_keep_order()->void:
 	var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(100,200))
 	assert_bool(profile.resource_potentials.has("Silver Ore")).is_true()
 	assert_float(float(profile.resource_potentials["Silver Ore"])).is_between(0.0,1.0)
-	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Nickel Ore")
+	assert_str(String(ResourceSystem.catalog.keys().back())).is_equal("Bauxite")
 	assert_bool(bool(ResourceSystem.catalog["Silver Ore"].renewable)).is_false()
 func test_appended_silver_does_not_change_existing_generated_deposits()->void:
 	WorldSimulation.scoped("polymers",func()->void:
 		var resource=WorldSimulation.resources
 		var silver:Dictionary=resource.catalog["Silver Ore"].duplicate(true)
 		var nickel:Dictionary=resource.catalog["Nickel Ore"].duplicate(true)
+		var bauxite:Dictionary=resource.catalog["Bauxite"].duplicate(true)
 		var potentials:Dictionary={}
 		for key:String in resource.catalog:potentials[key]=.8
 		var profile:={"resource_potentials":potentials,"signature":"silver-regression"}
 		var seen_silver:=false
 		for seed_value:int in range(10,18):
 			WorldSimulation.state.world_seed=seed_value
-			resource.catalog.erase("Silver Ore");resource.catalog.erase("Nickel Ore")
+			resource.catalog.erase("Silver Ore");resource.catalog.erase("Nickel Ore");resource.catalog.erase("Bauxite")
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var old: Array=WorldSimulation.state.resource_deposits.duplicate(true)
-			resource.catalog["Silver Ore"]=silver;resource.catalog["Nickel Ore"]=nickel
+			resource.catalog["Silver Ore"]=silver;resource.catalog["Nickel Ore"]=nickel;resource.catalog["Bauxite"]=bauxite
 			WorldSimulation.state.resource_deposits.clear();resource.reset_for_new_world()
 			resource.register_local_occurrences([],"Hills",profile)
 			var unchanged:Array=[]
 			for deposit:Dictionary in WorldSimulation.state.resource_deposits:
 				if deposit.resource=="Silver Ore":seen_silver=true
-				elif deposit.resource=="Nickel Ore":pass
+				elif deposit.resource in ["Nickel Ore","Bauxite"]:pass
 				else:unchanged.append(deposit)
 			assert_array(unchanged).is_equal(old)
 		assert_bool(seen_silver).is_true())
@@ -555,3 +556,47 @@ func test_exposure_save_validation_rejects_impossible_days()->void:
 	var spec:=I.product("exposed_panel_sealant")
 	assert_str(helper.validate({"exposure_started_day":0,"exposure_last_day":1,"exposure_day_work":1,"progress_days":20},spec)).is_not_empty()
 	assert_str(helper.validate({"exposure_started_day":0},spec)).is_not_empty()
+
+func test_natural_bauxite_occurrence_can_be_recognized_and_worked()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state;var resource=WorldSimulation.resources
+		var found:Dictionary={}
+		for x:int in range(-19000,19001,1000):
+			for y:int in range(-9000,9001,1000):
+				var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(x,y))
+				if float(profile.resource_potentials["Bauxite"])<.14:continue
+				s.resource_deposits.clear();resource.reset_for_new_world()
+				resource.register_local_occurrences([],"Hills",profile)
+				for deposit:Dictionary in s.resource_deposits:
+					if deposit.resource=="Bauxite":found=deposit;break
+				if not found.is_empty():break
+			if not found.is_empty():break
+		assert_bool(found.is_empty()).override_failure_message("Natural terrain must supply reachable bauxite; no synthetic potential override").is_false()
+		if found.is_empty():return
+		s.resource_deposits.assign([found]);found.clues=1.0
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(found.stage)).is_equal("unknown")
+		for gate:String in ["ore_assaying","alumina_refining"]:
+			s.known_discoveries.append(gate);s.discovery_adoption[gate]=1.0
+		resource.process_day({"origin":Vector3.ZERO,"settled":false})
+		assert_str(String(found.stage)).is_equal("recognized")
+		assert_float(float(s.resource_stockpiles.get("Bauxite",0))).is_equal(0.0)
+		found.stage="surveyed";found.route=1.0
+		var initial:float=float(found.remaining)
+		s.population_allocations.Extraction=8;s.population_allocations.Logistics=8;s.population_allocations.Knowledge=5;s.population_allocations.Construction=10
+		resource.process_day({"origin":Vector3.ZERO,"settled":false,"tools":1.0})
+		assert_float(float(found.lifetime_extracted)).is_greater(0.0)
+		assert_float(float(found.remaining)+float(found.lifetime_extracted)).is_equal_approx(initial,.00001))
+func test_bauxite_refining_supplies_operating_oxidation_catalyst()->void:
+	WorldSimulation.scoped("polymers",func()->void:
+		prepare();var s=WorldSimulation.state
+		Ops.data().last_day=0;Ops.data().services={"electricity":100.0}
+		for resource:String in ["Caustic Soda","Timber","Refined Silver","Polymer-Grade Ethene","Oxygen"]:s.resource_stockpiles[resource]=100.0
+		s.resource_stockpiles["Bauxite"]=5.0
+		var items:Array[String]=["bauxite_alumina_refining","refined_alumina_supports","ethene_oxidation_catalyst","separated_ethylene_oxide"]
+		var targets:Array[int]=[2,1,1,1]
+		for n:int in items.size():assert_int(int(run_batch(items[n],targets[n]).get("completed",0))).override_failure_message(items[n]).is_equal(targets[n])
+		assert_float(float(s.resource_stockpiles["Bauxite"])).is_equal(0.0)
+		assert_float(float(s.resource_stockpiles["Refined Alumina"])).is_equal_approx(.92,.000001)
+		assert_float(float(s.resource_stockpiles["Ethene Oxidation Catalyst"])).is_equal_approx(.98,.000001)
+		assert_float(float(s.resource_stockpiles["Ethylene Oxide"])).is_equal(1.0))
