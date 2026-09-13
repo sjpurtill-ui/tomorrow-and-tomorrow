@@ -1,0 +1,829 @@
+[
+  {
+    "id": "nut_kernel_shelling",
+    "name": "Nut Kernel Shelling",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [
+      [
+        "food_pounding_mortars",
+        "controlled_flaking"
+      ]
+    ],
+    "foundations": "edible_resource_recognition",
+    "mechanism": "Separate edible kernels from hard shells with controlled breakage.",
+    "operating_requirement": "Known suitable nuts, fitted tools and sorting labor.",
+    "consequence": "Adds recovered kernels and shell waste; breakage reduces usable yield.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "nut_kernel_shelling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate edible kernels from hard shells with controlled breakage.",
+      "operating_requirements": "Known suitable nuts, fitted tools and sorting labor.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for nut kernel shelling; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for nut kernel shelling; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded nut kernel shelling investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible nut kernel shelling service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to nut kernel shelling; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/X5043E/x5043E03.htm"
+    ],
+    "historical_scope": "H01 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "acorn_leaching",
+    "name": "Acorn Leaching",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_resource_recognition",
+      "food_pounding_mortars"
+    ],
+    "requires_any": [],
+    "foundations": "edible_resource_recognition, food_pounding_mortars",
+    "mechanism": "Apply locally qualified leaching to identified acorn meal.",
+    "operating_requirement": "Suitable acorns, clean water, retained meal and established preparation practice.",
+    "consequence": "Makes an additional seasonal resource usable at water and labor cost; it is not universal plant detoxification.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "acorn_leaching",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Apply locally qualified leaching to identified acorn meal.",
+      "operating_requirements": "Suitable acorns, clean water, retained meal and established preparation practice.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for acorn leaching; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for acorn leaching; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded acorn leaching investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible acorn leaching service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to acorn leaching; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://home.nps.gov/articles/000/recipes-acorn-bread-chia-pudding.htm"
+    ],
+    "historical_scope": "H01 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "root_grating_dewatering",
+    "name": "Root Grating and Dewatering",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [
+      [
+        "controlled_flaking",
+        "food_pounding_mortars"
+      ]
+    ],
+    "foundations": "edible_resource_recognition",
+    "mechanism": "Disrupt root tissue and press liquid from the resulting pulp.",
+    "operating_requirement": "Suitable roots, grating surfaces, pressable containers and qualified subsequent processing.",
+    "consequence": "Supplies pulp for further preparation; pressing alone does not establish edibility or recover every constituent.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "root_grating_dewatering",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Disrupt root tissue and press liquid from the resulting pulp.",
+      "operating_requirements": "Suitable roots, grating surfaces, pressable containers and qualified subsequent processing.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for root grating and dewatering; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for root grating and dewatering; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded root grating and dewatering investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible root grating and dewatering service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to root grating and dewatering; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/x5415e/x5415e05.htm"
+    ],
+    "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "pulse_splitting",
+    "name": "Pulse Splitting",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_pounding_mortars",
+      "edible_resource_recognition"
+    ],
+    "requires_any": [],
+    "foundations": "food_pounding_mortars, edible_resource_recognition",
+    "mechanism": "Separate pulse skins and divide suitable cotyledons with controlled treatment.",
+    "operating_requirement": "Identified pulses, conditioning capacity and sorting tools.",
+    "consequence": "Produces cooking-ready split fractions with paid handling and broken-material losses.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pulse_splitting",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate pulse skins and divide suitable cotyledons with controlled treatment.",
+      "operating_requirements": "Identified pulses, conditioning capacity and sorting tools.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for pulse splitting; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for pulse splitting; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded pulse splitting investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible pulse splitting service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to pulse splitting; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.icar-iipr.org.in/wp-content/themes/ICAR-wp/images/pdf/postbulletins2may13.pdf"
+    ],
+    "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "grain_parboiling",
+    "name": "Grain Parboiling",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "cereal_dehulling",
+      "food_drying"
+    ],
+    "requires_any": [
+      [
+        "earth_oven_cooking",
+        "food_steaming_vessels"
+      ]
+    ],
+    "foundations": "cereal_dehulling, food_drying",
+    "mechanism": "Condition suitable grain with moisture and heat before drying and hulling.",
+    "operating_requirement": "Water, heating vessels, fuel and drying capacity.",
+    "consequence": "Changes milling performance; consumed water, energy and drying time limit throughput.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "grain_parboiling",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Condition suitable grain with moisture and heat before drying and hulling.",
+      "operating_requirements": "Water, heating vessels, fuel and drying capacity.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for grain parboiling; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for grain parboiling; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded grain parboiling investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible grain parboiling service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to grain parboiling; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/v5380e/v5380e06.htm"
+    ],
+    "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "fruit_pulp_screening",
+    "name": "Fruit Pulp Screening",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_resource_recognition"
+    ],
+    "requires_any": [
+      [
+        "basketry",
+        "flour_sifting"
+      ]
+    ],
+    "foundations": "edible_resource_recognition",
+    "mechanism": "Separate usable fruit pulp from coarse skins and seeds.",
+    "operating_requirement": "Suitable fruit, screens, collection vessels and cleaning work.",
+    "consequence": "Supplies pulp for preserves or drying while retaining a real waste fraction.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "fruit_pulp_screening",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate usable fruit pulp from coarse skins and seeds.",
+      "operating_requirements": "Suitable fruit, screens, collection vessels and cleaning work.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for fruit pulp screening; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for fruit pulp screening; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded fruit pulp screening investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible fruit pulp screening service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to fruit pulp screening; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/v5030e/V5030E0y.htm"
+    ],
+    "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "pectin_gel_preservation",
+    "name": "Pectin Gel Preservation",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "fruit_pulp_screening",
+      "hearth_heat_retention"
+    ],
+    "requires_any": [],
+    "foundations": "fruit_pulp_screening, hearth_heat_retention",
+    "mechanism": "Qualify fruit gels through suitable pectin, acid and soluble-solids balance.",
+    "operating_requirement": "Matched fruit or pectin, concentrated ingredients, heat and clean containers.",
+    "consequence": "Creates preserved fruit products; failed setting or storage conditions cause loss rather than guaranteed preservation.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pectin_gel_preservation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Qualify fruit gels through suitable pectin, acid and soluble-solids balance.",
+      "operating_requirements": "Matched fruit or pectin, concentrated ingredients, heat and clean containers.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for pectin gel preservation; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for pectin gel preservation; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded pectin gel preservation investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible pectin gel preservation service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to pectin gel preservation; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/V5030E/V5030E0c.htm"
+    ],
+    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "cheese_ripening_control",
+    "name": "Cheese Ripening Control",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "cheese_curd_processing",
+      "fermentation_control"
+    ],
+    "requires_any": [],
+    "foundations": "cheese_curd_processing, fermentation_control",
+    "mechanism": "Manage product-specific maturation after curd formation.",
+    "operating_requirement": "Suitable curds, conditioned space and repeated inspection.",
+    "consequence": "Adds aged products at storage, labor and spoilage cost; an occupied room has finite batch capacity.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cheese_ripening_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Manage product-specific maturation after curd formation.",
+      "operating_requirements": "Suitable curds, conditioned space and repeated inspection.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for cheese ripening control; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for cheese ripening control; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded cheese ripening control investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible cheese ripening control service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to cheese ripening control; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/t0755e/t0755e01.htm"
+    ],
+    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "cultured_milk_processing",
+    "name": "Cultured Milk Processing",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "clean_milk_handling",
+      "fermentation_control"
+    ],
+    "requires_any": [],
+    "foundations": "clean_milk_handling, fermentation_control",
+    "mechanism": "Maintain qualified milk fermentation for a defined cultured product.",
+    "operating_requirement": "Suitable milk, maintained inoculum and controlled vessels.",
+    "consequence": "Diversifies dairy output; failed fermentation consumes the batch and does not confer indefinite storage.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cultured_milk_processing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Maintain qualified milk fermentation for a defined cultured product.",
+      "operating_requirements": "Suitable milk, maintained inoculum and controlled vessels.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for cultured milk processing; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for cultured milk processing; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded cultured milk processing investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible cultured milk processing service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to cultured milk processing; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/dairy-production-products/processing/milk-processing/en"
+    ],
+    "historical_scope": "H02 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "milk_fat_clarification",
+    "name": "Milk Fat Clarification",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "butter_churning",
+      "hearth_heat_retention"
+    ],
+    "requires_any": [],
+    "foundations": "butter_churning, hearth_heat_retention",
+    "mechanism": "Concentrate milk fat by removing water and separated milk solids.",
+    "operating_requirement": "Butter or cream, heat and clean collection vessels.",
+    "consequence": "Produces clarified fat with heating and separation losses; residues remain separate materials.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "milk_fat_clarification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Concentrate milk fat by removing water and separated milk solids.",
+      "operating_requirements": "Butter or cream, heat and clean collection vessels.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for milk fat clarification; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for milk fat clarification; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded milk fat clarification investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible milk fat clarification service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to milk fat clarification; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/dairy-production-products/processing/milk-processing/en"
+    ],
+    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "whey_protein_recovery",
+    "name": "Whey Protein Recovery",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "cheese_curd_processing",
+      "hearth_heat_retention"
+    ],
+    "requires_any": [],
+    "foundations": "cheese_curd_processing, hearth_heat_retention",
+    "mechanism": "Recover suitable whey proteins through evaluated coagulation and collection.",
+    "operating_requirement": "Fresh suitable whey, heating vessels and separating media.",
+    "consequence": "Recovers an additional dairy fraction at fuel cost; remaining liquid is not erased from the balance.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "whey_protein_recovery",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Recover suitable whey proteins through evaluated coagulation and collection.",
+      "operating_requirements": "Fresh suitable whey, heating vessels and separating media.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for whey protein recovery; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for whey protein recovery; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded whey protein recovery investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible whey protein recovery service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to whey protein recovery; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/t0755e/t0755e01.htm"
+    ],
+    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "centrifugal_cream_separation",
+    "name": "Centrifugal Cream Separation",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "clean_milk_handling",
+      "centrifugal_material_separation"
+    ],
+    "requires_any": [],
+    "foundations": "clean_milk_handling, centrifugal_material_separation",
+    "mechanism": "Separate cream from milk through qualified centrifugal operation.",
+    "operating_requirement": "A maintained separator, drive power and hygienic containers.",
+    "consequence": "Raises separation throughput; cream and skim outputs share the input mass and require further handling.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "centrifugal_cream_separation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate cream from milk through qualified centrifugal operation.",
+      "operating_requirements": "A maintained separator, drive power and hygienic containers.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for centrifugal cream separation; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for centrifugal cream separation; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded centrifugal cream separation investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible centrifugal cream separation service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to centrifugal cream separation; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/fileadmin/user_upload/ags/publications/econf-proc-english.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "indirect_solar_food_drying",
+    "name": "Indirect Solar Food Drying",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_drying"
+    ],
+    "requires_any": [],
+    "foundations": "food_drying",
+    "mechanism": "Dry suitable foods using solar-heated air in a protected chamber.",
+    "operating_requirement": "Collector, airflow path, trays and favorable weather.",
+    "consequence": "Reduces purchased fuel demand; weather and chamber capacity constrain output.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "indirect_solar_food_drying",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Dry suitable foods using solar-heated air in a protected chamber.",
+      "operating_requirements": "Collector, airflow path, trays and favorable weather.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for indirect solar food drying; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for indirect solar food drying; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded indirect solar food drying investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible indirect solar food drying service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to indirect solar food drying; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/V5030E/V5030E0c.htm"
+    ],
+    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "edible_oil_winterization",
+    "name": "Edible Oil Winterization",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "edible_oil_clarification",
+      "precision_thermometry"
+    ],
+    "requires_any": [],
+    "foundations": "edible_oil_clarification, precision_thermometry",
+    "mechanism": "Separate selected crystallizing fractions from cooled edible oil.",
+    "operating_requirement": "Controlled cooling, holding vessels and filtration.",
+    "consequence": "Produces oil suited to specified temperature conditions, with cooling costs and retained solid fractions.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "edible_oil_winterization",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Separate selected crystallizing fractions from cooled edible oil.",
+      "operating_requirements": "Controlled cooling, holding vessels and filtration.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for edible oil winterization; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for edible oil winterization; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded edible oil winterization investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible edible oil winterization service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to edible oil winterization; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/a1090e/a1090e00.pdf"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "sugar_crystal_recovery",
+    "name": "Sugar Crystal Recovery",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "hearth_heat_retention",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "foundations": "hearth_heat_retention, standard_measures",
+    "mechanism": "Recover sugar crystals from a qualified concentrated feed.",
+    "operating_requirement": "Suitable sugar-bearing liquor, heat, vessels and crystal separation.",
+    "consequence": "Produces transportable crystals and residual syrup; concentration consumes fuel and does not create sugar.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "sugar_crystal_recovery",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Recover sugar crystals from a qualified concentrated feed.",
+      "operating_requirements": "Suitable sugar-bearing liquor, heat, vessels and crystal separation.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for sugar crystal recovery; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for sugar crystal recovery; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded sugar crystal recovery investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible sugar crystal recovery service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to sugar crystal recovery; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/ae374e/ae374e00.pdf"
+    ],
+    "historical_scope": "H03 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "refractometric_food_solids",
+    "name": "Refractometric Food Solids Testing",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "experimental_optics",
+      "measurement_uncertainty"
+    ],
+    "requires_any": [],
+    "foundations": "experimental_optics, measurement_uncertainty",
+    "mechanism": "Infer soluble-solids concentration from calibrated optical response.",
+    "operating_requirement": "Reference standards, suitable samples and clean optics.",
+    "consequence": "Supports batch consistency; matrix interference prevents a universal purity or safety reading.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "refractometric_food_solids",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Infer soluble-solids concentration from calibrated optical response.",
+      "operating_requirements": "Reference standards, suitable samples and clean optics.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for refractometric food solids testing; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for refractometric food solids testing; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded refractometric food solids testing investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible refractometric food solids testing service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to refractometric food solids testing; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/v5030e/V5030E0y.htm"
+    ],
+    "historical_scope": "H04 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "modified_atmosphere_food_packing",
+    "name": "Modified Atmosphere Food Packing",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_package_barrier_testing",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "food_package_barrier_testing, food_process_hazard_analysis",
+    "mechanism": "Seal food within a product-qualified gas composition.",
+    "operating_requirement": "Compatible packages, gas supply, seals and required temperature control.",
+    "consequence": "Can reduce selected deterioration; unsuitable gas or storage conditions can spoil the batch despite an intact seal.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "modified_atmosphere_food_packing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Seal food within a product-qualified gas composition.",
+      "operating_requirements": "Compatible packages, gas supply, seals and required temperature control.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for modified atmosphere food packing; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for modified atmosphere food packing; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded modified atmosphere food packing investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible modified atmosphere food packing service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to modified atmosphere food packing; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fda.gov/media/184685/download"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "food_metal_detection",
+    "name": "Food Metal Detection",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "electromagnetic_induction",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "electromagnetic_induction, food_process_hazard_analysis",
+    "mechanism": "Detect specified metal inclusions in a qualified product stream.",
+    "operating_requirement": "Calibrated detector, challenge samples and rejection capacity.",
+    "consequence": "Rejects suspect units with throughput and false-reject costs; undetectable material is not certified absent.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_metal_detection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Detect specified metal inclusions in a qualified product stream.",
+      "operating_requirements": "Calibrated detector, challenge samples and rejection capacity.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for food metal detection; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for food metal detection; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded food metal detection investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible food metal detection service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to food metal detection; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fda.gov/files/food/published/Fish-and-Fishery-Products-Hazards-and-Controls-Guidance-Chapter-20--Metal-Inclusion-Download.pdf"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "food_xray_foreign_body_inspection",
+    "name": "Food X-ray Foreign Body Inspection",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "radiation_measurement",
+      "food_process_hazard_analysis",
+      "electron_physics"
+    ],
+    "requires_any": [],
+    "foundations": "radiation_measurement, food_process_hazard_analysis, electron_physics",
+    "mechanism": "Assess food images for qualified foreign-material contrast.",
+    "operating_requirement": "Shielded imaging equipment, calibration and rejection handling.",
+    "consequence": "Adds inspection coverage at equipment and energy cost; low-contrast contaminants can remain undetected.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_xray_foreign_body_inspection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Assess food images for qualified foreign-material contrast.",
+      "operating_requirements": "Shielded imaging equipment, calibration and rejection handling.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for food x-ray foreign body inspection; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for food x-ray foreign body inspection; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded food x-ray foreign body inspection investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible food x-ray foreign body inspection service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to food x-ray foreign body inspection; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://arxiv.org/abs/2104.05326"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "membrane_food_fractionation",
+    "name": "Membrane Food Fractionation",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "membrane_integrity_testing",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "membrane_integrity_testing, food_process_hazard_analysis",
+    "mechanism": "Partition suitable food streams through qualified selective membranes.",
+    "operating_requirement": "Compatible membranes, pressure supply and cleaning capacity.",
+    "consequence": "Recovers distinct streams; fouling, cleaning loss and rejected fractions constrain usable output.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "membrane_food_fractionation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Partition suitable food streams through qualified selective membranes.",
+      "operating_requirements": "Compatible membranes, pressure supply and cleaning capacity.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for membrane food fractionation; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for membrane food fractionation; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded membrane food fractionation investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible membrane food fractionation service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to membrane food fractionation; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/y2515e/y2515e07.htm"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "high_pressure_food_processing",
+    "name": "High Pressure Food Processing",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydrostatic_pressure",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "hydrostatic_pressure, food_process_hazard_analysis",
+    "mechanism": "Apply product-qualified pressure treatment to control selected deterioration organisms.",
+    "operating_requirement": "Qualified pressure equipment, compatible food or packaging and process monitoring.",
+    "consequence": "Offers a preservation option at capital and energy cost; unqualified products receive no universal safety benefit.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "high_pressure_food_processing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Apply product-qualified pressure treatment to control selected deterioration organisms.",
+      "operating_requirements": "Qualified pressure equipment, compatible food or packaging and process monitoring.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for high pressure food processing; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for high pressure food processing; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded high pressure food processing investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible high pressure food processing service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to high pressure food processing; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.efsa.europa.eu/en/news/high-pressure-processing-food-safety-without-compromising-quality"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "pulsed_electric_food_treatment",
+    "name": "Pulsed Electric Food Treatment",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "food_process_hazard_analysis",
+      "electronic_machine_control"
+    ],
+    "requires_any": [
+      [
+        "electrochemical_cells",
+        "electromagnetic_induction"
+      ]
+    ],
+    "foundations": "food_process_hazard_analysis, electronic_machine_control",
+    "mechanism": "Treat a suitable food stream with qualified electric pulses.",
+    "operating_requirement": "Compatible chamber, power supply and monitored process conditions.",
+    "consequence": "Offers a product-specific treatment route; throughput, composition and equipment limits determine successful output.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "pulsed_electric_food_treatment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Treat a suitable food stream with qualified electric pulses.",
+      "operating_requirements": "Compatible chamber, power supply and monitored process conditions.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for pulsed electric food treatment; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for pulsed electric food treatment; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded pulsed electric food treatment investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible pulsed electric food treatment service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to pulsed electric food treatment; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.ars.usda.gov/research/publications/publication/?seqNo115=369869"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  },
+  {
+    "id": "food_enzyme_process_control",
+    "name": "Food Enzyme Process Control",
+    "field": "D01",
+    "status": "authored_draft",
+    "requires_all": [
+      "enzyme_catalysis",
+      "food_process_hazard_analysis"
+    ],
+    "requires_any": [],
+    "foundations": "enzyme_catalysis, food_process_hazard_analysis",
+    "mechanism": "Apply characterized enzyme activity to a defined food-processing duty.",
+    "operating_requirement": "Qualified enzyme supply, substrate and controlled treatment conditions.",
+    "consequence": "Can improve recovery or clarification while consuming enzyme and process time; uncontrolled activity can damage quality.",
+    "branching_note": "All mandatory parents and one member of each alternative group are required. Compatible tools or ingredients may be imported without manufacture knowledge. Early empirical practices do not require modern laboratory discoveries. Calendar, homeland and cultural identity never grant mastery.",
+    "recovery": "Acquire delayed instruction, trials or compatible service through a reachable capable partner. Payment or trade consumes resources; supervised local demonstration remains necessary and provider capacity is finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "food_enzyme_process_control",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Apply characterized enzyme activity to a defined food-processing duty.",
+      "operating_requirements": "Qualified enzyme supply, substrate and controlled treatment conditions.",
+      "route_terms": {
+        "scholar_envoy": "Pay travel, provisions and instructor time for food enzyme process control; contribute local ingredients and lose trial batches while the method is learned.",
+        "partnership": "Share ingredients, trials and observations for food enzyme process control; negotiate access to results and accept delays from shared capacity.",
+        "purchased_research": "Commission a bounded food enzyme process control investigation with paid samples and uncertain delivery; demonstrate the result under local conditions.",
+        "licensed_or_imported_service": "Buy a compatible food enzyme process control service or supplied equipment; supplier queues, transport, maintenance and local ingredient costs remain. Purchase does not unlock manufacturing.",
+        "reverse_engineering": "Analyze an acquired product, tool or record relevant to food enzyme process control; pay for trials and reconstruct missing process evidence. A finished food does not prove its preparation or keeping quality."
+      }
+    },
+    "evidence_sources": [
+      "https://www.fao.org/4/v5030e/V5030E0o.htm"
+    ],
+    "historical_scope": "H05 is an editorial capability class, not an invention date or unlock gate. Sources support mechanisms; learning dependencies and economic consequences are game-design proposals."
+  }
+]
