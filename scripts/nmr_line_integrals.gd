@@ -41,7 +41,8 @@ static func fit(response:Dictionary,centers:Array[float],width:float=.21,shift:f
 		for col:int in n:prediction+=areas[col]*float(basis[index][col])
 		residual+=pow(float(response.trace[index])-prediction,2)
 	var rms:=sqrt(residual/(401-n))
-	var noise:float=response.get("noise_estimate",0)
+	if not (response.get("noise_estimate") is int or response.get("noise_estimate") is float):return {"error":"Invalid receiver noise estimate."}
+	var noise:float=response.noise_estimate
 	if not is_finite(noise) or noise<=0 or rms>noise*5:return {"error":"Observed response does not fit the declared line shape."}
 	var errors:Array[float]=[]
 	for row:int in n:

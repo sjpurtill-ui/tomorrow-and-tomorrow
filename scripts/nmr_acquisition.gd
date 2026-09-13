@@ -78,6 +78,11 @@ static func valid(sample:Dictionary)->bool:
 		if not sample.get("observation") is Dictionary:return false
 		var observed:Dictionary=sample.observation
 		if observed.get("sample_id")!=sample.sample_id or observed.get("qualified",true)!=false or not observed.get("trace") is Array or observed.trace.size()!=401:return false
+		var evidence=load("res://scripts/polymer_spectral_evidence.gd")
+		for key:String in ["step","origin","noise_estimate"]:
+			if not evidence.finite_number(observed.get(key)):return false
+		if float(observed.step)!=.1 or float(observed.origin)!=0.0 or float(observed.noise_estimate)<=0:return false
+		if sample.recipe=="traceable_peg_batch" and not observed.get("peg_observation") is Dictionary:return false
 		for point:Variant in observed.trace:
 			if not (point is int or point is float) or not is_finite(float(point)) or absf(float(point))>10000:return false
 		if observed.get("reference",{})!=acquisition.get("reference",{}):return false

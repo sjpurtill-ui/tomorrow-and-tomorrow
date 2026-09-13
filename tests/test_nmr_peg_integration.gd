@@ -39,6 +39,17 @@ func test_retained_peg_quantitative_acquisition_supplies_paid_binder_without_bul
 		assert_float(float(s.resource_stockpiles.get("Size-Characterized PEG Batches",0))).is_equal(2.0)
 		assert_float(float(s.resource_stockpiles["Controlled-Chain PEG"])).is_equal(50.0)
 		assert_bool(Ops.valid(Ops.data())).is_true()
+		# Corrupt persisted nested evidence must reject before report evaluation.
+		for key:String in ["step","origin","noise_estimate"]:
+			for invalid:Variant in ["bad",[],{},NAN]:
+				var damaged:=Ops.data().duplicate(true)
+				damaged.polymer_samples.records["1"].observation[key]=invalid
+				assert_bool(Ops.valid(damaged)).is_false()
+		if Samples.data().records["1"].recipe=="traceable_peg_batch":
+			for invalid:Variant in ["bad",[],null]:
+				var damaged:=Ops.data().duplicate(true)
+				damaged.polymer_samples.records["1"].observation.peg_observation=invalid
+				assert_bool(Ops.valid(damaged)).is_false()
 		s.resource_stockpiles["Alumina Catalyst Supports"]=1.0
 		Ops.data().services["electricity"]=10.0
 		for item:String in ["characterized_controlled_peg","size_qualified_peg_binder","aqueous_peg_binder"]:
@@ -72,6 +83,17 @@ func test_retained_pp_tacticity_measurement_supplies_closures_without_certifying
 		assert_float(float(s.resource_stockpiles.get("Tacticity-Characterized PP Batches",0))).is_equal(2.0)
 		assert_float(float(s.resource_stockpiles["Raw Polypropylene"])).is_equal(50.0)
 		assert_bool(Ops.valid(Ops.data())).is_true()
+		# Corrupt persisted nested evidence must reject before report evaluation.
+		for key:String in ["step","origin","noise_estimate"]:
+			for invalid:Variant in ["bad",[],{},NAN]:
+				var damaged:=Ops.data().duplicate(true)
+				damaged.polymer_samples.records["1"].observation[key]=invalid
+				assert_bool(Ops.valid(damaged)).is_false()
+		if Samples.data().records["1"].recipe=="traceable_peg_batch":
+			for invalid:Variant in ["bad",[],null]:
+				var damaged:=Ops.data().duplicate(true)
+				damaged.polymer_samples.records["1"].observation.peg_observation=invalid
+				assert_bool(Ops.valid(damaged)).is_false()
 		Ops.data().services["electricity"]=10.0;s.resource_stockpiles["LDPE Wash Bottle Bodies"]=1.0
 		for item:String in ["spectrally_qualified_polypropylene","polypropylene_molding_grade","injected_pp_wash_closures","pp_closure_wash_bottles"]:
 			var line:=setup_line(item,2 if item=="spectrally_qualified_polypropylene" else 1)
