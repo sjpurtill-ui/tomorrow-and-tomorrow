@@ -9794,6 +9794,206 @@
       "classification_status": "editorial_review",
       "rationale": "Requires modern electronic computation and tested device operation; this is not a speculative future-only mechanism.",
       "scope_digest": "727254acf1968eda3866a83f7072841958b707d6f2106ab8c91d614582c83791"
+    },
+    {
+      "id": "marine_cargo_lashing",
+      "name": "Marine Cargo Lashing",
+      "horizon": "H03",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H03 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "1c4a577d90ffd635f6302fc104048a9ee70bbb19f3efd64e8bf113dc7037044e"
+    },
+    {
+      "id": "grain_shift_restraints",
+      "name": "Grain Shift Restraints",
+      "horizon": "H03",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H03 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "cb43df90807ad2009ef03c375f7a12d8d65e0494d5a799f9d7bb776a5fb400e8"
+    },
+    {
+      "id": "bulk_cargo_moisture_qualification",
+      "name": "Bulk Cargo Moisture Qualification",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "97dbbb7832accf1c9bc683392fc199b0058d441c020569dfbede9277fe1868cc"
+    },
+    {
+      "id": "bulk_hold_loading_sequences",
+      "name": "Bulk Hold Loading Sequences",
+      "horizon": "H04",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "cd24ee7f74cce7b8981f9b090058b25e2d3ccce06ab6cdcc8fd72c0991249d1f"
+    },
+    {
+      "id": "tanker_inert_atmospheres",
+      "name": "Tanker Inert Atmospheres",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "ca7b5ab034dfd5d17862c39c8669570c36d2eb8fe87e0fd3cf2327060f5d3b31"
+    },
+    {
+      "id": "cryogenic_marine_cargo_containment",
+      "name": "Cryogenic Marine Cargo Containment",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "1275b415bab4f6a745e1bffec962bb8b6e98b3d069a5e1063dd219e8baa0f7fd"
+    },
+    {
+      "id": "marine_boiloff_management",
+      "name": "Marine Boiloff Management",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "0a4b845395278703ea2d37fd664c857a7a668e30619a21f44adc0910b4781723"
+    },
+    {
+      "id": "cargo_transfer_emergency_isolation",
+      "name": "Cargo Transfer Emergency Isolation",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "f2d6eb531d70f51be0e017b61b1490ccd00d4a09cd826e20f4aea4ca9c90f76a"
+    },
+    {
+      "id": "ship_ballast_biota_treatment",
+      "name": "Ship Ballast Biota Treatment",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "2dc34fb14c34552f98496888843d990031d4c5bb7f7a113bf0a2dbb52fcb7f7b"
+    },
+    {
+      "id": "shore_to_ship_power_connection",
+      "name": "Shore to Ship Power Connection",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "11379fddb12304c629d7d8356b6a9b94a8d01d4f69d526e868e280cb099198b4"
+    },
+    {
+      "id": "multibeam_bathymetric_survey",
+      "name": "Multibeam Bathymetric Survey",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "85d0a67efdc92aac3814763d58ead75ed0df7bfcaaf64e0595f8c130d9666a7f"
+    },
+    {
+      "id": "side_scan_seabed_imaging",
+      "name": "Side Scan Seabed Imaging",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "6278487e87589a0cfe3eefe6177ece9e5932a4cbaa806ce1630d1867d0caddd4"
+    },
+    {
+      "id": "survey_vessel_motion_compensation",
+      "name": "Survey Vessel Motion Compensation",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "7efa3f959536cbc2d598a1cc5c54a1d4fc77e8c2bd4db13b4dde80c87e9998de"
+    },
+    {
+      "id": "electronic_nautical_chart_display",
+      "name": "Electronic Nautical Chart Display",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "a4c3b43421b4eb9f5b097da5b38a186c7cd1168eba380014816fd050ab5b3ff4"
+    },
+    {
+      "id": "automatic_vessel_identity_broadcast",
+      "name": "Automatic Vessel Identity Broadcast",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "02f2b330247439bf912c1b972c859771a683e0cbb3af99338dc7e62a4514600f"
+    },
+    {
+      "id": "shore_vessel_traffic_coordination",
+      "name": "Shore Vessel Traffic Coordination",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "724d617b17c100aa30a813601a00725e0579758acaf8e349c6339e29fe974026"
+    },
+    {
+      "id": "marine_traffic_separation_routes",
+      "name": "Marine Traffic Separation Routes",
+      "horizon": "H04",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "30b5ac9b93af8e87c574846cea65d3c6357c52acff6cd633c88bb44f060dde4b"
+    },
+    {
+      "id": "dynamic_vessel_stationkeeping",
+      "name": "Dynamic Vessel Stationkeeping",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "34cbd062dc0a987748a3462a3479cd81a3aa689e22bbcf6b0796ce08eac3ff12"
+    },
+    {
+      "id": "cargo_hold_flood_detection",
+      "name": "Cargo Hold Flood Detection",
+      "horizon": "H05",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "c73cf7a764bfc25ca10c8ef49b50b348d1afba68607d7f08103703467390e251"
+    },
+    {
+      "id": "hull_inspection_access_design",
+      "name": "Hull Inspection Access Design",
+      "horizon": "H04",
+      "source_file": "maritime-cargo-survey-depth.json",
+      "source_status": "authored_draft",
+      "classification_status": "editorial_review",
+      "rationale": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor.",
+      "scope_digest": "2972bb0c4c52fbe763812e4a9cbf97eb7d36189564c1fd4fc946f5b3f922af46"
     }
   ],
   "limitations": "Primary editorial horizon records the scope of the authored capability, not an exclusive historical origin, exact date or unlock condition. Unassigned identities are unknown, not absent from a horizon. Mechanism classification does not verify historical accuracy or physical feasibility."

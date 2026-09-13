@@ -1,0 +1,736 @@
+[
+  {
+    "id": "marine_cargo_lashing",
+    "name": "Marine Cargo Lashing",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "cordage",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "cordage, structural_load_testing",
+    "mechanism": "Restrain discrete cargo against ship motions through qualified lashings and attachment points.",
+    "operating_requirement": "Ropes or chains, sound attachment points and crew inspection.",
+    "consequence": "Limits cargo displacement at a cost in handling time and carrying fittings.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "marine_cargo_lashing",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Restrain discrete cargo against ship motions through qualified lashings and attachment points.",
+      "operating_requirements": "Ropes or chains, sound attachment points and crew inspection.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/cargosecuring-default.aspx"
+    ],
+    "historical_scope": "Horizon H03 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "grain_shift_restraints",
+    "name": "Grain Shift Restraints",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "ship_stability_assessment"
+    ],
+    "requires_any": [
+      [
+        "joinery",
+        "structural_load_testing"
+      ]
+    ],
+    "foundations": "ship_stability_assessment",
+    "mechanism": "Limit the movement of loose grain with supported divisions and stowage arrangements.",
+    "operating_requirement": "Suitable holds, installed restraints and recorded grain loading.",
+    "consequence": "Allows qualified grain loads while restraint weight and uneven filling limit payload.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "grain_shift_restraints",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Limit the movement of loose grain with supported divisions and stowage arrangements.",
+      "operating_requirements": "Suitable holds, installed restraints and recorded grain loading.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/cargosecuring-default.aspx"
+    ],
+    "historical_scope": "Horizon H03 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "bulk_cargo_moisture_qualification",
+    "name": "Bulk Cargo Moisture Qualification",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "statistical_sampling",
+      "standard_measures"
+    ],
+    "requires_any": [],
+    "foundations": "statistical_sampling, standard_measures",
+    "mechanism": "Test representative cargo moisture against its assessed tendency to lose strength under motion.",
+    "operating_requirement": "Representative samples, test equipment and protected cargo storage.",
+    "consequence": "Rejects or delays unsuitable bulk loads instead of treating all dry-looking ore as safe.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bulk_cargo_moisture_qualification",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Test representative cargo moisture against its assessed tendency to lose strength under motion.",
+      "operating_requirements": "Representative samples, test equipment and protected cargo storage.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/mediacentre/pages/whatsnew-988.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "bulk_hold_loading_sequences",
+    "name": "Bulk Hold Loading Sequences",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "ship_stability_assessment",
+      "quay_load_handling"
+    ],
+    "requires_any": [],
+    "foundations": "ship_stability_assessment, quay_load_handling",
+    "mechanism": "Sequence hold loading and unloading within hull stress and local load limits.",
+    "operating_requirement": "Vessel load model, actual cargo weights and coordinated terminal crews.",
+    "consequence": "Supports heavy bulk trade while berth time and hull constraints limit transfer rate.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "bulk_hold_loading_sequences",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Sequence hold loading and unloading within hull stress and local load limits.",
+      "operating_requirements": "Vessel load model, actual cargo weights and coordinated terminal crews.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/cargoesinbulk-default.aspx"
+    ],
+    "historical_scope": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "tanker_inert_atmospheres",
+    "name": "Tanker Inert Atmospheres",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "gas_composition_analysis",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "foundations": "gas_composition_analysis, pressure_vessels",
+    "mechanism": "Maintain a qualified low-reactivity atmosphere above flammable liquid cargo.",
+    "operating_requirement": "Conditioned gas supply, monitoring, maintained tanks and trained crew.",
+    "consequence": "Reduces supported ignition risk while gas supply failures restrict cargo operations.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "tanker_inert_atmospheres",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Maintain a qualified low-reactivity atmosphere above flammable liquid cargo.",
+      "operating_requirements": "Conditioned gas supply, monitoring, maintained tanks and trained crew.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/oiltankers.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "cryogenic_marine_cargo_containment",
+    "name": "Cryogenic Marine Cargo Containment",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "insulated_process_heat_piping",
+      "pressure_vessels"
+    ],
+    "requires_any": [],
+    "foundations": "insulated_process_heat_piping, pressure_vessels",
+    "mechanism": "Contain cold liquefied cargo with compatible barriers and thermal movement allowance.",
+    "operating_requirement": "Qualified tanks, insulation, monitored barriers and specialized port interfaces.",
+    "consequence": "Enables liquefied-gas carriage with lost hold volume, heat ingress and maintenance costs.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cryogenic_marine_cargo_containment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Contain cold liquefied cargo with compatible barriers and thermal movement allowance.",
+      "operating_requirements": "Qualified tanks, insulation, monitored barriers and specialized port interfaces.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/environment/pages/igccode.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "marine_boiloff_management",
+    "name": "Marine Boiloff Management",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "cryogenic_marine_cargo_containment"
+    ],
+    "requires_any": [
+      [
+        "mechanical_refrigeration",
+        "combustion_air_regulation"
+      ]
+    ],
+    "foundations": "cryogenic_marine_cargo_containment",
+    "mechanism": "Manage cargo vapor generated by unavoidable heat ingress.",
+    "operating_requirement": "Qualified vapor machinery and either reliquefaction or controlled fuel use.",
+    "consequence": "Bounds tank pressure while consuming energy or reducing delivered cargo.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "marine_boiloff_management",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Manage cargo vapor generated by unavoidable heat ingress.",
+      "operating_requirements": "Qualified vapor machinery and either reliquefaction or controlled fuel use.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/environment/pages/igccode.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "cargo_transfer_emergency_isolation",
+    "name": "Cargo Transfer Emergency Isolation",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "industrial_interlock_logic",
+      "fail_safe_actuator_states"
+    ],
+    "requires_any": [],
+    "foundations": "industrial_interlock_logic, fail_safe_actuator_states",
+    "mechanism": "Stop and isolate connected ship-shore cargo transfer when an unsafe state is detected.",
+    "operating_requirement": "Compatible linked shutdown controls, qualified valves and periodic drills.",
+    "consequence": "Limits supported release duration at the cost of interrupted transfers and restart work.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cargo_transfer_emergency_isolation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Stop and isolate connected ship-shore cargo transfer when an unsafe state is detected.",
+      "operating_requirements": "Compatible linked shutdown controls, qualified valves and periodic drills.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/environment/pages/igccode.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "ship_ballast_biota_treatment",
+    "name": "Ship Ballast Biota Treatment",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "ballast_trim_management"
+    ],
+    "requires_any": [
+      [
+        "membrane_microfiltration",
+        "water_disinfection_control"
+      ]
+    ],
+    "foundations": "ballast_trim_management",
+    "mechanism": "Treat ballast water to reduce viable transported organisms before discharge.",
+    "operating_requirement": "Qualified treatment plant, monitoring, energy and maintained consumables.",
+    "consequence": "Reduces biological transfer for tested conditions; bypasses and unsuitable water restrict discharge.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "ship_ballast_biota_treatment",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Treat ballast water to reduce viable transported organisms before discharge.",
+      "operating_requirements": "Qualified treatment plant, monitoring, energy and maintained consumables.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/environment/pages/ballastwatermanagement.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "shore_to_ship_power_connection",
+    "name": "Shore to Ship Power Connection",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "electrical_measurement",
+      "electrical_generators"
+    ],
+    "requires_any": [],
+    "foundations": "electrical_measurement, electrical_generators",
+    "mechanism": "Connect compatible port electricity to a berthed vessel through a qualified protected interface.",
+    "operating_requirement": "Port supply, compatible ship switchgear, cables and trained connection crew.",
+    "consequence": "Replaces some onboard generation at berth; capacity and grid energy costs remain real.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery. Ships need compatible onboard electrical distribution, not electric propulsion.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "shore_to_ship_power_connection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Connect compatible port electricity to a berthed vessel through a qualified protected interface.",
+      "operating_requirements": "Port supply, compatible ship switchgear, cables and trained connection crew.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.epa.gov/ports-initiative/shore-power-technology-assessment-us-ports"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "multibeam_bathymetric_survey",
+    "name": "Multibeam Bathymetric Survey",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "marine_echo_sounding",
+      "analog_digital_conversion"
+    ],
+    "requires_any": [],
+    "foundations": "marine_echo_sounding, analog_digital_conversion",
+    "mechanism": "Resolve many acoustic directions to survey a swath of seabed depths.",
+    "operating_requirement": "Calibrated array, position and attitude records, computation and survey vessel time.",
+    "consequence": "Expands measured coverage per pass while uncertainty and shadowing remain visible.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "multibeam_bathymetric_survey",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Resolve many acoustic directions to survey a swath of seabed depths.",
+      "operating_requirements": "Calibrated array, position and attitude records, computation and survey vessel time.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://nauticalcharts.noaa.gov/learn/hydrographic-survey-equipment.html"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "side_scan_seabed_imaging",
+    "name": "Side Scan Seabed Imaging",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "marine_echo_sounding"
+    ],
+    "requires_any": [],
+    "foundations": "marine_echo_sounding",
+    "mechanism": "Map acoustic backscatter patterns to identify seafloor features between survey tracks.",
+    "operating_requirement": "Side-looking transducer and georeferenced survey passes.",
+    "consequence": "Reveals candidate obstructions and wrecks; imagery alone does not establish safe clearance depth.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "side_scan_seabed_imaging",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Map acoustic backscatter patterns to identify seafloor features between survey tracks.",
+      "operating_requirements": "Side-looking transducer and georeferenced survey passes.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://nauticalcharts.noaa.gov/learn/hydrographic-survey-equipment.html"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "survey_vessel_motion_compensation",
+    "name": "Survey Vessel Motion Compensation",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "marine_echo_sounding",
+      "inertial_navigation_platforms"
+    ],
+    "requires_any": [],
+    "foundations": "marine_echo_sounding, inertial_navigation_platforms",
+    "mechanism": "Correct survey observations for measured vessel motion and sensor alignment.",
+    "operating_requirement": "Synchronized attitude/heave observations and measured installation geometry.",
+    "consequence": "Reduces motion-related map distortion within calibration limits.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "survey_vessel_motion_compensation",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Correct survey observations for measured vessel motion and sensor alignment.",
+      "operating_requirements": "Synchronized attitude/heave observations and measured installation geometry.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://nauticalcharts.noaa.gov/learn/hydrographic-survey-equipment.html"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "electronic_nautical_chart_display",
+    "name": "Electronic Nautical Chart Display",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydrographic_charting",
+      "microprocessor_architecture"
+    ],
+    "requires_any": [
+      [
+        "satellite_navigation",
+        "dead_reckoning_navigation"
+      ]
+    ],
+    "foundations": "hydrographic_charting, microprocessor_architecture",
+    "mechanism": "Display maintained chart data with a referenced vessel position and route checks.",
+    "operating_requirement": "Chart updates, functioning display, position estimates and trained watchkeepers.",
+    "consequence": "Supports route monitoring while stale data or poor positioning can still mislead.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "electronic_nautical_chart_display",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Display maintained chart data with a referenced vessel position and route checks.",
+      "operating_requirements": "Chart updates, functioning display, position estimates and trained watchkeepers.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/OurWork/Safety/Pages/ElectronicCharts.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "automatic_vessel_identity_broadcast",
+    "name": "Automatic Vessel Identity Broadcast",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "radio_telegraphy",
+      "microprocessor_architecture"
+    ],
+    "requires_any": [
+      [
+        "satellite_navigation",
+        "dead_reckoning_navigation"
+      ]
+    ],
+    "foundations": "radio_telegraphy, microprocessor_architecture",
+    "mechanism": "Transmit vessel identity and motion reports to equipped nearby ships and shore stations.",
+    "operating_requirement": "Transponder, radio access and maintained identity and position inputs.",
+    "consequence": "Improves reported traffic awareness but does not reveal silent vessels or guarantee truthful data.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery. Identity broadcast is not authenticated cryptographic identity; encryption is not a prerequisite and messages may be false.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "automatic_vessel_identity_broadcast",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Transmit vessel identity and motion reports to equipped nearby ships and shore stations.",
+      "operating_requirements": "Transponder, radio access and maintained identity and position inputs.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/ais.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "shore_vessel_traffic_coordination",
+    "name": "Shore Vessel Traffic Coordination",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "harbor_pilotage",
+      "port_berth_scheduling"
+    ],
+    "requires_any": [
+      [
+        "marine_radar_piloting",
+        "automatic_vessel_identity_broadcast"
+      ]
+    ],
+    "foundations": "harbor_pilotage, port_berth_scheduling",
+    "mechanism": "Coordinate reported vessel movements through a staffed shore traffic service.",
+    "operating_requirement": "Qualified shore operators, observation links and accepted traffic procedures.",
+    "consequence": "Reduces conflicting movements in a supported area; crews retain responsibility and service coverage is bounded.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "shore_vessel_traffic_coordination",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Coordinate reported vessel movements through a staffed shore traffic service.",
+      "operating_requirements": "Qualified shore operators, observation links and accepted traffic procedures.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/vesseltrafficservices.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "marine_traffic_separation_routes",
+    "name": "Marine Traffic Separation Routes",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "hydrographic_charting",
+      "harbor_pilotage"
+    ],
+    "requires_any": [],
+    "foundations": "hydrographic_charting, harbor_pilotage",
+    "mechanism": "Organize opposing vessel flows into charted lanes with defined crossing practices.",
+    "operating_requirement": "Surveyed route, communicated procedures and participating watchkeepers.",
+    "consequence": "Reduces meeting conflicts while lengthening some voyages and leaving noncompliance risk.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "marine_traffic_separation_routes",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Organize opposing vessel flows into charted lanes with defined crossing practices.",
+      "operating_requirements": "Surveyed route, communicated procedures and participating watchkeepers.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/shipsrouteing.aspx"
+    ],
+    "historical_scope": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "dynamic_vessel_stationkeeping",
+    "name": "Dynamic Vessel Stationkeeping",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "feedback_stability_analysis"
+    ],
+    "requires_any": [
+      [
+        "electric_ship_propulsion",
+        "marine_diesel_machinery"
+      ],
+      [
+        "satellite_navigation",
+        "marine_radar_piloting"
+      ]
+    ],
+    "foundations": "feedback_stability_analysis",
+    "mechanism": "Control available thrust to hold vessel position against measured environmental disturbance.",
+    "operating_requirement": "Position references, controllable thrusters, energy reserves and qualified control equipment.",
+    "consequence": "Supports offshore work without an anchor inside tested wind, wave and failure limits.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery. A qualified local position reference may replace satellite positioning; no globally perfect position is assumed.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "dynamic_vessel_stationkeeping",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Control available thrust to hold vessel position against measured environmental disturbance.",
+      "operating_requirements": "Position references, controllable thrusters, energy reserves and qualified control equipment.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/mediacentre/meetingsummaries/pages/sse-4th-session.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "cargo_hold_flood_detection",
+    "name": "Cargo Hold Flood Detection",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "watertight_subdivision",
+      "electrical_measurement"
+    ],
+    "requires_any": [],
+    "foundations": "watertight_subdivision, electrical_measurement",
+    "mechanism": "Detect rising water in normally dry holds and report it to the watch.",
+    "operating_requirement": "Installed sensors, alarm power, access for checks and a response crew.",
+    "consequence": "Provides warning for response; alarms alone do not stop flooding or restore stability.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "cargo_hold_flood_detection",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Detect rising water in normally dry holds and report it to the watch.",
+      "operating_requirements": "Installed sensors, alarm power, access for checks and a response crew.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/bulkcarriers.aspx"
+    ],
+    "historical_scope": "Horizon H05 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  },
+  {
+    "id": "hull_inspection_access_design",
+    "name": "Hull Inspection Access Design",
+    "field": "D10",
+    "status": "authored_draft",
+    "requires_all": [
+      "hull_condition_surveys",
+      "structural_load_testing"
+    ],
+    "requires_any": [],
+    "foundations": "hull_condition_surveys, structural_load_testing",
+    "mechanism": "Build access routes that let inspectors reach otherwise hidden hull spaces.",
+    "operating_requirement": "Integrated access structures, lighting or inspection equipment and maintained safe entry.",
+    "consequence": "Allows recurring condition evidence at a cost in structure, space and inspection work.",
+    "branching_note": "Every mandatory parent and one member of each alternative group are required. Operating equipment can be imported without granting its manufacture. Dates, geography labels and civilization identity do not grant mastery.",
+    "recovery": "Obtain delayed evidence or service from a reachable capable supplier; pay, trade or contribute trials, then perform local qualification. External capacity remains finite.",
+    "recovery_contract": {
+      "status": "design_proposal",
+      "destination": "hull_inspection_access_design",
+      "grants_instant_mastery": false,
+      "local_demonstration": "Build access routes that let inspectors reach otherwise hidden hull spaces.",
+      "operating_requirements": "Integrated access structures, lighting or inspection equipment and maintained safe entry.",
+      "route_terms": {
+        "scholar_envoy": "Pay for specialist travel and supervised local trials; unavailable experts cannot teach remotely without a working link.",
+        "partnership": "Contribute vessel time, samples or harbor trials and share qualified evidence; partner capacity and trust limit access.",
+        "purchased_research": "Commission a bounded vessel or route question with payment and uncertain delivery; local acceptance work remains.",
+        "licensed_or_imported_service": "Buy compatible equipment or bounded port/vessel service; maintenance, crews and access remain necessary.",
+        "reverse_engineering": "Study a delivered or recovered sample at material and analysis cost; drawings and hidden qualification knowledge may remain missing."
+      }
+    },
+    "evidence_sources": [
+      "https://www.imo.org/en/ourwork/safety/pages/bulkcarriers.aspx"
+    ],
+    "historical_scope": "Horizon H04 is an editorial capability classification, not a calendar unlock or claim of a unique historical inventor."
+  }
+]
