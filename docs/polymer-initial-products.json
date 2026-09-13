@@ -1844,5 +1844,53 @@
       "polymer_stirred_work": 1,
       "polymer_heat_removal": 2
     }
+  },
+  "sealed_copolymer_specimens": {
+    "name": "Weighed and sealed Copolymer specimens",
+    "output": "Sealed Copolymer Specimens",
+    "gate": "spectroscopy",
+    "materials": {
+      "Raw Propene-Ethene Copolymer": 0.1,
+      "Glass Tubes": 0.05,
+      "Paper": 0.01
+    },
+    "days": 1,
+    "tooling": {
+      "Laboratory Glassware": 2
+    },
+    "power": 0,
+    "specimen_source": "Raw Propene-Ethene Copolymer"
+  },
+  "sealed_polypropylene_specimens": {
+    "name": "Weighed and sealed Polypropylene specimens",
+    "output": "Sealed Polypropylene Specimens",
+    "gate": "spectroscopy",
+    "materials": {
+      "Raw Polypropylene": 0.1,
+      "Glass Tubes": 0.05,
+      "Paper": 0.01
+    },
+    "days": 1,
+    "tooling": {
+      "Laboratory Glassware": 2
+    },
+    "power": 0,
+    "specimen_source": "Raw Polypropylene"
+  },
+  "sealed_peg_specimens": {
+    "name": "Weighed and sealed PEG specimens",
+    "output": "Sealed PEG Specimens",
+    "gate": "spectroscopy",
+    "materials": {
+      "Controlled-Chain PEG": 0.1,
+      "Glass Tubes": 0.05,
+      "Paper": 0.01
+    },
+    "days": 1,
+    "tooling": {
+      "Laboratory Glassware": 2
+    },
+    "power": 0,
+    "specimen_source": "Controlled-Chain PEG"
   }
 }

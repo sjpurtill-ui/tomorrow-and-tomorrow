@@ -2,6 +2,7 @@ extends RefCounted
 ## Persistent workshop lines share the existing Crafting pool with civilian work.
 ## This adapter owns no citizens, stockpiles, clock, or separate save authority.
 const Industry=preload("res://scripts/civilian_industry.gd")
+const Samples=preload("res://scripts/polymer_samples.gd")
 const Exposure=preload("res://scripts/exposure_production.gd")
 const MAX_TARGET := 1000000000
 
@@ -155,6 +156,7 @@ static func state(host: Node, job: Dictionary) -> String:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(String(job.item))
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
+	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
 	var needs_specimen:=Industry.product(String(job.item)).has("exposure_days") and not job.has("exposure_started_day")
 	for resource in job.materials:
 		if job.has("exposure_started_day"):continue
@@ -203,6 +205,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	if int(job.target_stock)>0:
 		units=minf(units,maxf(0.0,int(job.target_stock)-stock(host,job)-float(job.progress_days)/per_item))
 	var possible:=units
+	if exposure_spec.has("specimen_source"):possible=minf(possible,1000000000.0)
 	for resource in job.materials:
 		var cost:=float(job.materials[resource])
 		if cost>0: possible=minf(possible,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0)))/cost)
@@ -227,6 +230,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	elif String(job.job_type)=="civilian":
 		# Yield belongs to the authored recipe, never mutable saved job metadata.
 		var definition:=Industry.product(String(job.item))
+		Samples.completed(String(job.item),produced)
 		var yields:Dictionary=definition.get("co_products",{}).duplicate()
 		yields[String(definition.output)]=1.0
 		for resource:String in yields:
