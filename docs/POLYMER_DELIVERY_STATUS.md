@@ -1,83 +1,94 @@
-# Polymer implementation delivery status
+# Polymer family integration handoff
 
-Status: **HELD — isolated worktree, not integrated into the current game.**
+Status: **READY for integrator merge and canonical verification. Source frozen.**
+This is an isolated feature branch, not an integrated player build or completion
+of the full overhaul.
 
 Worktree: `/Users/seanpurtill/Documents/Codex/tt-polymer-processing`  
 Branch: `codex/polymer-processing`  
-Base: `6d89ae93ada82b4d12e70a7211dd820dff44a6c5`
+Base: `6d89ae93ada82b4d12e70a7211dd820dff44a6c5`  
+Runtime connection: `3d50024`; UI: `fbe1a08`; store isolation: `e628dc6`; all artwork
+bound: `8312694`.
 
-The branch registers 47 discovery identities (including the unfinished SEC prerequisite), polymer production and operating
-installations, retained-sample analysis, and downstream civilian consumers.
-These identities are already counted in the authored catalog; integrating them
-must not increase the distinct authored total a second time. Canonical coverage
-at `24cfea7d76295608099335083ee2c59956fd32d1` is 752 implemented and
-3,447 authored identities toward 5,000. This file does not certify campaign pacing
-or the complete technology overhaul.
+## Delivered behavior
 
-## Completed acceptance evidence
+47 discovery identities retain their exact authored AND/OR predicates. The
+polymer family connects finite raw extraction and chemical feedstocks to paid
+reactors, cooling, forming and real civilian consumers: insulation, telephone
+parts, wash bottles, laminated panels, leather treatment, drive belts, binder,
+catalyst supports and cold storage. Recipes are recorded in
+`polymer-initial-products.json`.
 
-- `257c1ad`: actual paid envoy license, imported measured PEG feed, 65% work
-  efficiency, no local mastery and expiry halt; research license suite 24/24.
-  Also rejects malformed nested PEG evidence and invalid numeric observation
-  metadata before report evaluation. PEG/PP integration plus line fitter 5/5.
-- `4d2e86f`: actual full save/load while PEG and PP quantitative work is partial,
-  followed by completion; completed save/load preserves report and exactly one
-  released batch. Repeated same-day work earns no progress and no second material
-  reservation. Damaged nested PEG evidence or PP noise metadata is rejected by
-  the full load boundary. Integration suite 3/3, zero errors/failures/orphans.
-- `6cd8663`: 30 of 47 discovery-specific paper/gouache illustrations are bound.
-  The sixth batch uses square source images with Godot import size limit 768 and
-  mipmaps. Headless import completed without script/import errors; the atlas
-  suite passed 12/12, including loading every bound subject texture and checking
-  its square dimensions and card path. Ten more reviewed metallurgy/chemistry illustrations are bound after that
-  checkpoint (40/47 total); the final combined import awaits the remaining seven.
-  Remaining seven illustrations are not yet
-  bound here.
+Retained copolymer, PEG and polypropylene specimens consume physical preparation,
+reference materials and paid instrument work. Selected chemical-environment,
+conditional mean-size and tacticity evidence releases only the retained material.
+Size-exclusion chromatography adds measured relative PEG distributions and two
+binder routes with different material and work costs. It builds pump, optical
+cell and bench capital, consumes packed columns and assigned references, and
+limits calibration/run work through one daily channel. A column supports at most
+eight runs and expires after 30 days. Expiry during acquisition loses that run.
 
-- `edb9a0c`: finite external SEC supplier and paid consignment path; material
-  suite 20/20, including whole-game exhausted-reserve reload.
-- `8aa36b3`: structural dependency audit now includes conditional retained
-  analytical transformations with sample/reference/service costs, rather than
-  treating their outputs as raw resources. Dependency suite 10/10. This remains
-  structural reachability, not a campaign or guaranteed-assay-success proof.
+The research controls expose installation and pause actions, preparation deficits,
+calibration progress, remaining runs, expiry and observed distribution bins.
+Laboratories operate at the primary settled home. Remote-store specimens cannot
+spend primary calibration resources. Separate civilizations retain independent
+sample IDs, columns, work, stocks and grades.
 
-## Outstanding before family handoff
+All 47 discovery-specific illustrations are supplied and bound in the approved
+paper/gouache aesthetic. Original source images are retained; imported textures
+are square, limited to 768 pixels and mipmapped.
 
-1. Final review of the connected size-exclusion route. It now builds physical
-   pump/flow-cell/bench capital, consumes imported packing and assigned references,
-   pays daily calibration and sample work, and selects an actual binder route
-   using measured relative distribution. Four SEC operating/save/expiry cases
-   and the related five-suite run (65/65) pass. Numerical performance and the
-   narrow-binder specification remain explicit bounded game assumptions.
-2. The finite preexisting external laboratory supply boundary is implemented and
-   separately tested (20/20 material cases). It is not local packing/reference
-   synthesis or a full historical bootstrap. See SEC_SPECIALIST_SUPPLY.md.
-3. Finish the remaining seven subject illustrations and verify the final combined
-   import and bindings. Forty of 47 are currently bound.
-4. Final integrator review. The connected graph has zero structural errors or
-   blocked routes: 525 workshop recipes plus five conditional analytical routes,
-   27 installations. External-reserve and successful-analysis assumptions are
-   explicit; this is not campaign verification. All 47 authored AND/OR predicates
-   match their canonical draft sources exactly. The SEC live-panel test checks
-   missing supplies, capacity, measured bins, read-only refresh and real pause
-   control. SEC isolation also checks two actors with identical sample IDs and
-   remote-store exclusion before spending primary column supplies. NMR receives
-   the same pending-selection fix. Prior tests cover their stated cases, not the
-   whole campaign.
-5. Deliver to the designated integrator for deliberate shared-file conflict
-   resolution and canonical verification. No player launch or main merge here.
+## Evidence and limits
 
-## Compatibility and integration
+- 47/47 runtime predicates matched canonical authored draft sources exactly.
+- Connected family check: 65/65 across SEC operation, SEC distribution, polymer
+  processing, retained samples and PEG/PP integration suites. Subsequent bounded
+  changes were checked separately: SEC UI/isolation plus NMR samples 18/18;
+  final NMR remote-store regression suite 12/12. No failures or orphans.
+- Paid recovery: 24/24 research-license checks, including actual envoy payment,
+  65% manufacturing work, imported measured feed, no mastery and expiry halt.
+- Finite laboratory supply: 20/20 material checks, including supplier deduction,
+  return delivery, exhaustion, refunds, serialized actor restore and full save.
+- Full SEC, PEG and PP saves preserve partial/completed work, spent materials and
+  results; duplicate calls cannot pay or release twice. Invalid nested evidence
+  is rejected. UI refresh is read-only and pause stops next-day service.
+- Dependency audit: 10/10. The connected graph has zero structural errors/blocks,
+  with 787 registered discoveries in this older-base branch, 525 workshop recipes,
+  five conditional analytical transformations and 27 installations. It explicitly
+  assumes successful compatible analysis and availability of the declared external
+  archive. It does not simulate campaign timing or stock exhaustion.
+- Final combined artwork import exited successfully without script/import errors.
+  Final atlas suite passed 12/12, loading every bound subject texture and checking
+  its square size, correct card path, UI layout and controls.
 
-Existing canonical saves have no polymer sample ledger and retain the optional
-empty state. New retained samples and paid calibration live inside the existing
-technology-operations owner. No second clock, workforce owner or save system is
-introduced. Old intermediate worktree-only raw-certification recipes are not a
-canonical compatibility promise.
+The finite preexisting external laboratory archive is an explicit approved game
+boundary, not local synthesis of specialized packing or narrow references. Its
+once-only saved grant, eligibility and finite stock transfer are documented in
+`SEC_SPECIALIST_SUPPLY.md`. Analytical coefficients and binder specifications are
+bounded game assumptions; no universal exact polymer distribution, absolute mass
+certificate or monodispersity is claimed. See `SEC_DISTRIBUTION_MODEL.md` and the
+NMR/PEG assay documents for measurement limits.
 
-Expected conflict areas include `scripts/civilian_industry.gd`,
-`scripts/household_clothing.gd` and `scripts/hud/research_visuals.gd`; preserve
-integrated formed-metal, precision-component, clothing and quilting work. The
-branch also changes shared discovery registration and technology operations;
-merge their additive behavior deliberately. Keep canonical GovernmentPeopleSystem
-labor ownership and aggregate population behavior intact.
+## Integration and compatibility
+
+The designated integrator must merge from current main and preserve its 12 newer
+runtime discoveries and associated formed-metal, precision-component and clothing
+work. Expected conflicts include `scripts/civilian_industry.gd`,
+`scripts/household_clothing.gd` and `scripts/hud/research_visuals.gd`. Also review
+additive registration, technology operations, society exchange, research-material
+consignments and dependency-audit changes. No player launch or main merge occurred
+in this worktree.
+
+Existing canonical saves have no polymer/column ledger and retain optional empty
+state. New state stays inside existing technology-operations, society-exchange and
+sample owners. There is no new clock, workforce authority or save owner. Primary
+home machinery restrictions remain. Intermediate worktree-only raw-certification
+recipes are not a canonical compatibility promise. Generated local Godot caches,
+UID files and test reports are not part of the handoff.
+
+Canonical checkpoint `24cfea7d76295608099335083ee2c59956fd32d1` has 752 implemented
+and 3,447 authored identities toward 5,000. These 47 identities are already counted
+in that authored total; integration must not count them twice. Final canonical
+behavior, implementation count and launch status belong to the integrator. The
+full 5,000-discovery overhaul and 2,500–3,000-year campaign verification remain
+unfinished.

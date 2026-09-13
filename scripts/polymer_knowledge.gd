@@ -1,5 +1,5 @@
 extends RefCounted
-## Partial polymer family; delivery remains HELD.
+## Polymer family ready for integration; canonical delivery tracked separately.
 static func entries()->Array[Dictionary]:
 	return [
   {
