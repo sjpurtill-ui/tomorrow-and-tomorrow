@@ -4792,6 +4792,34 @@
       "source_domain": "infrastructure",
       "name": "Sewer Rodding Service",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "bone_needle_sewing",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Bone-Needle Sewing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "garment_pattern_cutting",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Garment-Pattern Cutting",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "garment_size_grading",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Garment-Size Grading",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "textile_repair_methods",
+      "field": "D07",
+      "source_domain": "production",
+      "name": "Textile Repair Methods",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

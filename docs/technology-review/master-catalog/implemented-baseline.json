@@ -1,5 +1,5 @@
 {
-  "source_commit": "04d0dcb1e5d151cb3d0ad360fd2f1bb9466b58e8",
+  "source_commit": "638629a669cb62946f88fa51761793941df07e61",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -16996,6 +16996,362 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "bone_needle_sewing",
+      "name": "Bone-Needle Sewing",
+      "foundations": "hafted_tools,cordage",
+      "mechanism": "Join suitable flexible material using a prepared needle and thread",
+      "operating_requirement": "Needles, thread, material and practiced hands",
+      "consequence": "Make fitted or repaired assemblies with finite labor and seam strength",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Bone-Needle Sewing: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "bone_needle_sewing",
+        "local_demonstration": "Join suitable flexible material using a prepared needle and thread",
+        "operating_requirements": "Needles, thread, material and practiced hands",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "638629a669cb62946f88fa51761793941df07e61",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "hafted_tools",
+          "cordage"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "bone_needle_sewing",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "bone_needle_sewing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Bone-Needle Sewing",
+            "missing_all": [
+              "hafted_tools",
+              "cordage"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "hafted_tools",
+              "cordage"
+            ],
+            "requires_all": [
+              "hafted_tools",
+              "cordage"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Bone-Needle Sewing",
+        "observation": "Join suitable flexible material using a prepared needle and thread. Needles, thread, material and practiced hands",
+        "production_contract": "Actual post-siege hunting harvest supplies bounded recovered bone for paid needles. Cloth and yarn are consumed to sew garments; cutting templates reduce cloth offcuts, and graded patterns support repeated fitted work. Repairs consume compatible cloth, yarn and shared Logistics time to restore the treated share of existing garment condition, never new garment quantity. Supply, equipment and daily quotas constrain operation.",
+        "requires": [
+          "hafted_tools",
+          "cordage"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "garment_pattern_cutting",
+      "name": "Garment-Pattern Cutting",
+      "foundations": "bone_needle_sewing,standard_measures",
+      "mechanism": "Translate a declared fit into cut pieces and assembly references",
+      "operating_requirement": "Suitable material, measurements, tools and skilled fitting",
+      "consequence": "Produce repeatable garment forms while bodies and materials vary",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Garment-Pattern Cutting: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "garment_pattern_cutting",
+        "local_demonstration": "Translate a declared fit into cut pieces and assembly references",
+        "operating_requirements": "Suitable material, measurements, tools and skilled fitting",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "638629a669cb62946f88fa51761793941df07e61",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "bone_needle_sewing",
+          "standard_measures"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "garment_pattern_cutting",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "garment_pattern_cutting",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Garment-Pattern Cutting",
+            "missing_all": [
+              "bone_needle_sewing",
+              "standard_measures"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "bone_needle_sewing",
+              "standard_measures"
+            ],
+            "requires_all": [
+              "bone_needle_sewing",
+              "standard_measures"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Garment-Pattern Cutting",
+        "observation": "Translate a declared fit into cut pieces and assembly references. Suitable material, measurements, tools and skilled fitting",
+        "production_contract": "Actual post-siege hunting harvest supplies bounded recovered bone for paid needles. Cloth and yarn are consumed to sew garments; cutting templates reduce cloth offcuts, and graded patterns support repeated fitted work. Repairs consume compatible cloth, yarn and shared Logistics time to restore the treated share of existing garment condition, never new garment quantity. Supply, equipment and daily quotas constrain operation.",
+        "requires": [
+          "bone_needle_sewing",
+          "standard_measures"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Tool quality"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "garment_size_grading",
+      "name": "Garment-Size Grading",
+      "foundations": "garment_pattern_cutting,statistical_sampling",
+      "mechanism": "Develop a declared family of garment dimensions from representative body evidence",
+      "operating_requirement": "Measurements, pattern expertise and fit trials",
+      "consequence": "Support repeatable sizing while individual fit can still require alteration",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Garment-Size Grading: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "garment_size_grading",
+        "local_demonstration": "Develop a declared family of garment dimensions from representative body evidence",
+        "operating_requirements": "Measurements, pattern expertise and fit trials",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "638629a669cb62946f88fa51761793941df07e61",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "garment_pattern_cutting",
+          "statistical_sampling"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "garment_size_grading",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "garment_size_grading",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Garment-Size Grading",
+            "missing_all": [
+              "garment_pattern_cutting",
+              "statistical_sampling"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "garment_pattern_cutting",
+              "statistical_sampling"
+            ],
+            "requires_all": [
+              "garment_pattern_cutting",
+              "statistical_sampling"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Garment-Size Grading",
+        "observation": "Develop a declared family of garment dimensions from representative body evidence. Measurements, pattern expertise and fit trials",
+        "production_contract": "Actual post-siege hunting harvest supplies bounded recovered bone for paid needles. Cloth and yarn are consumed to sew garments; cutting templates reduce cloth offcuts, and graded patterns support repeated fitted work. Repairs consume compatible cloth, yarn and shared Logistics time to restore the treated share of existing garment condition, never new garment quantity. Supply, equipment and daily quotas constrain operation.",
+        "requires": [
+          "garment_pattern_cutting",
+          "statistical_sampling"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D07",
+      "id": "textile_repair_methods",
+      "name": "Textile Repair Methods",
+      "foundations": "bone_needle_sewing,fiber_grading",
+      "mechanism": "Restore selected damaged textile structures through compatible repair",
+      "operating_requirement": "Suitable material, tools and practiced workers",
+      "consequence": "Extend some garment or fabric life while original strength may not return",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Textile Repair Methods: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "textile_repair_methods",
+        "local_demonstration": "Restore selected damaged textile structures through compatible repair",
+        "operating_requirements": "Suitable material, tools and practiced workers",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal contribution",
+          "real travel or information delivery",
+          "finite teaching and local practice",
+          "local qualification and continuing inputs"
+        ],
+        "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "638629a669cb62946f88fa51761793941df07e61",
+        "editorial_source": "machinery-fibers-earth.json",
+        "previous_requires_all": [
+          "bone_needle_sewing",
+          "fiber_grading"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "clothing_method": "textile_repair_methods",
+        "day": 0,
+        "direction": "production",
+        "dynamic": "production",
+        "effects": {},
+        "id": "textile_repair_methods",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Textile Repair Methods",
+            "missing_all": [
+              "bone_needle_sewing",
+              "fiber_grading"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "bone_needle_sewing",
+              "fiber_grading"
+            ],
+            "requires_all": [
+              "bone_needle_sewing",
+              "fiber_grading"
+            ],
+            "requires_any": [],
+            "signals": [
+              "crafting",
+              "research"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Textile Repair Methods",
+        "observation": "Restore selected damaged textile structures through compatible repair. Suitable material, tools and practiced workers",
+        "production_contract": "Actual post-siege hunting harvest supplies bounded recovered bone for paid needles. Cloth and yarn are consumed to sew garments; cutting templates reduce cloth offcuts, and graded patterns support repeated fitted work. Repairs consume compatible cloth, yarn and shared Logistics time to restore the treated share of existing garment condition, never new garment quantity. Supply, equipment and daily quotas constrain operation.",
+        "requires": [
+          "bone_needle_sewing",
+          "fiber_grading"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "crafting",
+          "research"
+        ],
+        "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
+        "subcategory": "Tool quality"
       }
     },
     {

@@ -1834,6 +1834,38 @@
       "status": "queued"
     },
     {
+      "asset": "res://assets/ui/research/paper/bone_needle_sewing.png",
+      "description": "Join suitable flexible material using a prepared needle and thread. Needles, thread, material and practiced hands",
+      "domain": "production",
+      "id": "bone_needle_sewing",
+      "name": "Bone-Needle Sewing",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/garment_pattern_cutting.png",
+      "description": "Translate a declared fit into cut pieces and assembly references. Suitable material, measurements, tools and skilled fitting",
+      "domain": "production",
+      "id": "garment_pattern_cutting",
+      "name": "Garment-Pattern Cutting",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/garment_size_grading.png",
+      "description": "Develop a declared family of garment dimensions from representative body evidence. Measurements, pattern expertise and fit trials",
+      "domain": "production",
+      "id": "garment_size_grading",
+      "name": "Garment-Size Grading",
+      "status": "queued"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/textile_repair_methods.png",
+      "description": "Restore selected damaged textile structures through compatible repair. Suitable material, tools and practiced workers",
+      "domain": "production",
+      "id": "textile_repair_methods",
+      "name": "Textile Repair Methods",
+      "status": "queued"
+    },
+    {
       "asset": "res://assets/ui/research/paper/root_cellars.png",
       "description": "Below-ground stores buffer temperature swings while drainage keeps stored roots away from standing water.",
       "domain": "nutrition",
@@ -5339,9 +5371,9 @@
     }
   ],
   "live_art_complete": false,
-  "live_count": 667,
+  "live_count": 671,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
-  "queued_count": 559,
+  "queued_count": 563,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,

@@ -1,3 +1,9 @@
+## September 12 — sewn garments and material-consuming repair
+
+INTEGRATED runtime `638629a669cb62946f88fa51761793941df07e61`: four existing textile identities now implement paid sewing, cutting patterns, size grading and proportional repair. Actual hunting supplies a bounded local bone reserve for needles; stored meat and forecasts cannot create bone. Real cloth, yarn, paper, tools and daily work constrain outputs. All **90 worktree cases and 35 canonical clothing/planner cases pass**; ordinary headless boot is clean. See `SEWING_REPAIR_HANDOFF.md` and `/tmp/tt-sewing-canonical-results.json`.
+
+Canonical snapshot: **671 discoveries /453 explicit routes /309 civilian recipes /17 facilities**. All 671 ledger definitions exactly match `/tmp/tt-671-canonical-snapshot.json`; 15 ledger-tool checks pass. Counts are **671 integrated + 2,421 drafts = 3,092 identities**, leaving **1,908 to author and 4,329 to implement**. Art inventory is **108 verified /671 live**, with 563 queued. Naval dock work remains held in its isolated worker pending acceptance. This checkpoint does not update the packaged player or establish full historical pacing.
+
 ## September 12 — grain equipment quotas and two construction illustrations
 
 ## September 12 — sustained workshop supply and reviewed coverage

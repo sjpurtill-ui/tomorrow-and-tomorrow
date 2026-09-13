@@ -1919,68 +1919,6 @@
   },
   {
     "field": "D07",
-    "id": "bone_needle_sewing",
-    "name": "Bone-Needle Sewing",
-    "foundations": "hafted_tools,cordage",
-    "mechanism": "Join suitable flexible material using a prepared needle and thread",
-    "operating_requirement": "Needles, thread, material and practiced hands",
-    "consequence": "Make fitted or repaired assemblies with finite labor and seam strength",
-    "status": "authored_draft",
-    "requires_all": [
-      "hafted_tools",
-      "cordage"
-    ],
-    "requires_any": [],
-    "recovery": "For Bone-Needle Sewing: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "bone_needle_sewing",
-      "local_demonstration": "Join suitable flexible material using a prepared needle and thread",
-      "operating_requirements": "Needles, thread, material and practiced hands",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "garment_pattern_cutting",
-    "name": "Garment-Pattern Cutting",
-    "foundations": "bone_needle_sewing,standard_measures",
-    "mechanism": "Translate a declared fit into cut pieces and assembly references",
-    "operating_requirement": "Suitable material, measurements, tools and skilled fitting",
-    "consequence": "Produce repeatable garment forms while bodies and materials vary",
-    "status": "authored_draft",
-    "requires_all": [
-      "bone_needle_sewing",
-      "standard_measures"
-    ],
-    "requires_any": [],
-    "recovery": "For Garment-Pattern Cutting: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "garment_pattern_cutting",
-      "local_demonstration": "Translate a declared fit into cut pieces and assembly references",
-      "operating_requirements": "Suitable material, measurements, tools and skilled fitting",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
     "id": "felt_fabric_making",
     "name": "Felt-Fabric Making",
     "foundations": "fiber_grading",
@@ -2568,37 +2506,6 @@
       "destination": "sewing_machine_mechanisms",
       "local_demonstration": "Coordinate needle, thread and material feed in a qualified machine stitch",
       "operating_requirements": "Suitable mechanism, thread, power or human drive and maintenance",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "garment_size_grading",
-    "name": "Garment-Size Grading",
-    "foundations": "garment_pattern_cutting,statistical_sampling",
-    "mechanism": "Develop a declared family of garment dimensions from representative body evidence",
-    "operating_requirement": "Measurements, pattern expertise and fit trials",
-    "consequence": "Support repeatable sizing while individual fit can still require alteration",
-    "status": "authored_draft",
-    "requires_all": [
-      "garment_pattern_cutting",
-      "statistical_sampling"
-    ],
-    "requires_any": [],
-    "recovery": "For Garment-Size Grading: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "garment_size_grading",
-      "local_demonstration": "Develop a declared family of garment dimensions from representative body evidence",
-      "operating_requirements": "Measurements, pattern expertise and fit trials",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",
@@ -3354,37 +3261,6 @@
       "destination": "household_appliance_interoperability",
       "local_demonstration": "Verify selected service or control interfaces among domestic devices",
       "operating_requirements": "Compatible equipment, declared interfaces and tests",
-      "grants_instant_mastery": false,
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal contribution",
-        "real travel or information delivery",
-        "finite teaching and local practice",
-        "local qualification and continuing inputs"
-      ],
-      "qualification_focus": "Demonstrate the method with suitable fibers, products and users; imported textiles or appliances do not teach manufacture or create maintenance capacity."
-    }
-  },
-  {
-    "field": "D07",
-    "id": "textile_repair_methods",
-    "name": "Textile Repair Methods",
-    "foundations": "bone_needle_sewing,fiber_grading",
-    "mechanism": "Restore selected damaged textile structures through compatible repair",
-    "operating_requirement": "Suitable material, tools and practiced workers",
-    "consequence": "Extend some garment or fabric life while original strength may not return",
-    "status": "authored_draft",
-    "requires_all": [
-      "bone_needle_sewing",
-      "fiber_grading"
-    ],
-    "requires_any": [],
-    "recovery": "For Textile Repair Methods: invite a competent paid specialist, receive delivered research, contribute to a partnership or commission a defined study. Pay the actual access, travel or transmission and local adaptation costs; rebuild missing foundations and demonstrate the mechanism. Purchased output or service remains supplier-dependent and does not grant local mastery. Runtime mappings and balanced work coefficients remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "textile_repair_methods",
-      "local_demonstration": "Restore selected damaged textile structures through compatible repair",
-      "operating_requirements": "Suitable material, tools and practiced workers",
       "grants_instant_mastery": false,
       "outside_costs": [
         "competent source availability",
