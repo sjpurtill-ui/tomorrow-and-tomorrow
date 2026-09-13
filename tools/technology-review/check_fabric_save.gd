@@ -25,6 +25,22 @@ func run()->void:
   assert(W.settlements.start_fabric_retrofit(int(plot.id),method).ok)
   assert(F.advance(plot,.5,31)==.5)
   state.elapsed_days=31
+  var secondary_plot:Dictionary=plot.duplicate(true)
+  secondary_plot.erase("fabric_job")
+  state.resource_stockpiles["Building Shade Lattices"]=5.0
+  state.player_settlements.append({"id":"fabric_secondary","name":"Second Fabric City","position":Vector2(10,0),"primary":false,"population_share":.25})
+  W.settlements.with_city_resources("fabric_secondary",func()->void:
+   state.settlement_plots.assign([secondary_plot])
+   state.resource_stockpiles["Building Shade Lattices"]=0.0
+   assert(not W.settlements.start_fabric_retrofit(int(secondary_plot.id),method).ok)
+   state.resource_stockpiles["Building Shade Lattices"]=1.0
+   assert(W.settlements.start_fabric_retrofit(int(secondary_plot.id),method).ok)
+   assert(F.advance(secondary_plot,.25,32)==.25)
+   assert(state.resource_stockpiles["Building Shade Lattices"]==0.0)
+  )
+  assert(state.resource_stockpiles["Building Shade Lattices"]==5.0)
+  assert(float(plot.fabric_job.work)==.5)
+  state.elapsed_days=32
  )
  var saved:Dictionary=S.save_game(slot)
  if not saved.get("ok",false):push_error(str(saved));quit(1);return
@@ -36,7 +52,14 @@ func run()->void:
   var state=W.state
   var plot:Dictionary=state.settlement_plots[0]
   assert(float(plot.fabric_job.work)==.5)
-  assert(float(state.resource_stockpiles["Building Shade Lattices"])==0.0)
+  W.settlements.with_city_resources("fabric_secondary",func()->void:
+   var secondary:Dictionary=state.settlement_plots[0]
+   assert(float(secondary.fabric_job.work)==.25)
+   assert(float(state.resource_stockpiles["Building Shade Lattices"])==0.0)
+   assert(F.advance(secondary,1.0,32)==0.0)
+   assert(F.valid_plot_records(secondary))
+  )
+  assert(float(state.resource_stockpiles["Building Shade Lattices"])==5.0)
   assert(F.advance(plot,1,31)==0.0)
   assert(F.advance(plot,10,32)==1.5)
   state.resource_stockpiles["Timber"]=1.0;state.resource_stockpiles["Fiber Plants"]=1.0

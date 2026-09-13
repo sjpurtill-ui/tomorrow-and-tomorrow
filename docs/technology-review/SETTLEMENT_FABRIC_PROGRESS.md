@@ -150,3 +150,9 @@ Added a combined production probe: each candidate contract validates against a l
 Adapted the existing production/dependency audit as a new worker tool. It verifies exact authored names/ALL/OR against both source files, production bindings, complete candidate graph and current workshop/plant source closure. Result: 868 integrated +10 local candidates =878 graph definitions, 741 recipes including five conditional analyses, 27 facilities, nine closure rounds, zero errors or blocked products/plants. /tmp/tt-fabric-supply-audit.log, exit 0. This assumes knowledge, raw resources and conditional quality success; it does not establish quantities, calendar, site performance, operating capital or acquisition. The ten local candidates are not integrated discoveries. Deferred site-trial bills still need explicit audit alongside workshop inputs.
 
 Remaining acceptance includes disadvantaged acquisition routes, secondary cities, outstanding environmental consumers, player/secondary production scheduling coverage and actual rendered review. HELD.
+
+## Two-city saved work isolation
+
+Extended the real SaveSystem probe with a secondary city holding a separate plot/job and local stores. An empty secondary component stock rejects start even while the primary city holds five spare batches. Supplying one local batch permits secondary work without changing primary stock or progress. Full reload retains .5 primary assembly work and .25 secondary work, independently, and rejects duplicate-day secondary advancement. Primary acceptance and a second installed-save reload still pass.
+
+/tmp/tt-fabric-two-city-save.log passes, exit 0. This verifies scoped city work/stores and saved records, not autonomous secondary manufacture or every method in multiple cities. Test-created slot cleanup remains explicit. Remaining environmental consumers, acquisition routes, daily production coverage and rendered QA are still open. HELD.
