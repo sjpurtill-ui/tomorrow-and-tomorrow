@@ -67,9 +67,9 @@ static func clear(job:Dictionary)->void:
 	job.erase("machine_support")
 static func validate_job(job:Dictionary,spec:Dictionary)->String:
 	var history:Variant=job.get("machine_wear_history",{})
-	if not history is Dictionary or history.size()>8:return "Invalid retained machine heads."
+	if not history is Dictionary or history.size()>10:return "Invalid retained machine heads."
 	for kind:Variant in history:
-		if kind not in ["skiving","wire_edm","sinker_edm","ecm","waterjet","ultrasonic","forming","joining"] or not Program.finite(history[kind],2) or history[kind]<0:return "Invalid retained head wear."
+		if kind not in ["skiving","wire_edm","sinker_edm","ecm","waterjet","ultrasonic","forming","joining","honing","superfinishing"] or not Program.finite(history[kind],2) or history[kind]<0:return "Invalid retained head wear."
 	if not spec.has("machine_program"):
 		for key:String in ["machine_pending","machine_last","machine_wear","machine_support"]:
 			if job.has(key):return "Unexpected machine state."

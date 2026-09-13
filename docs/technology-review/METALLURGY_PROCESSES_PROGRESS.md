@@ -38,6 +38,27 @@ Shared-hook regression: metallurgy workshop, existing machine parts and
 technology operations suites pass 32/32, zero errors/failures/skips/orphans
 (`/tmp/tt-metallurgy-shared-regression.log`, 12.755 seconds).
 
+Honing and superfinishing now run through the existing reserved machine
+workpiece/inspection path. Two additive machine kinds retain three long
+reciprocating passes or thirty short oscillating passes, respectively. The
+selected model retains 32 surface-height samples and three eight-angle
+diameter stations; contact-comparator inspection quantizes those samples and
+computes mean absolute profile deviation, roundness and taper. These are
+normalized game metrology values, not industrial dimensional tolerances.
+Wear affects manufactured profiles and can cause rejection. Prequalified
+reamed sleeves/ground shafts are required; this route does not claim to repair
+arbitrary deep defects or turn unqualified blanks into precision stock.
+
+Eight additional recipes provide the comparator, finishing stones, two heads,
+two finished parts and two real bearing-assembly consumers. The wear-history
+validator now permits ten named machine kinds; original eight methods retain
+their behavior. `test_surface_finishing.gd` plus existing machine parts pass
+15/15, zero errors/failures/skips/orphans
+(`/tmp/tt-surface-finishing-tests.log`, 7.108 seconds). Includes partial-motion
+reload, observed profiles, worn-tool rejection and actual consumer stock debit.
+Full acquisition, supply closure, capital recipe coverage, art and canonical
+integration remain pending; neither discovery is registered yet.
+
 The twelve definitions in `metallurgy_process_knowledge.gd` preserve the exact
 authored AND/OR predicates. They remain unregistered until their actual
 processes, observations, acquisition and downstream consumers are working.
