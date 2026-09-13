@@ -1,9 +1,9 @@
 {
   "verified_baseline_discoveries": 657,
   "pending_communications": 0,
-  "new_authored_drafts": 2399,
-  "distinct_accounted_identities": 3056,
-  "remaining_identities_to_author": 1944,
+  "new_authored_drafts": 2415,
+  "distinct_accounted_identities": 3072,
+  "remaining_identities_to_author": 1928,
   "target": 5000,
   "draft_missing_parents": [],
   "draft_unreachable_nodes": [],
@@ -11,8 +11,8 @@
   "atlas_coverage": {
     "candidate_count": 600,
     "mapped_candidate_count": 475,
-    "fully_mapped_subject_count": 468,
-    "partial_candidate_count": 7,
+    "fully_mapped_subject_count": 469,
+    "partial_candidate_count": 6,
     "unmapped_candidate_count": 125,
     "partial_subjects": [
       {
@@ -40,12 +40,6 @@
         "note": "Product development and delivery are present; rapid platform adaptation, requalification and scaled response integration are not yet authored as a complete mechanism chain."
       },
       {
-        "review_id": "D21-20",
-        "candidate_name": "Cryptographic hardware",
-        "source": "atlas-reconciliation-electronic-control.json",
-        "note": "Cryptographic methods and verified boot exist, but dedicated key-protection hardware, side-channel qualification and accelerator integration are not yet authored as a complete physical chain."
-      },
-      {
         "review_id": "D21-21",
         "candidate_name": "Fault tolerant quantum computing",
         "source": "atlas-reconciliation-electronic-control.json",
@@ -55,7 +49,7 @@
         "review_id": "D21-25",
         "candidate_name": "Energy proportional computing",
         "source": "atlas-reconciliation-electronic-control.json",
-        "note": "Power budgeting is present; workload-dependent voltage, frequency, clock gating and sleep-state integration remain incomplete."
+        "note": "Workload voltage/frequency control, idle governance, device suspend, dependency ordering and latency limits are now authored. Dedicated clock gating and retention/isolation circuit qualification remain open; the whole subject stays partial."
       }
     ],
     "unmapped_candidate_ids": [
@@ -189,7 +183,7 @@
     "validation_scope": "Reference and coverage accounting only; subject_mapped is authored scope, not operating or historical verification."
   },
   "historical_horizon_coverage": {
-    "assigned_identities": 960,
+    "assigned_identities": 976,
     "unassigned_identities": 2096,
     "unassigned_ids": [
       "abrasive_grinding_control",
@@ -2336,11 +2330,11 @@
         "id": "H05",
         "name": "Modern scientific and networked systems",
         "target": 900,
-        "assigned": 450,
-        "target_slots_not_yet_assigned": 450,
+        "assigned": 466,
+        "target_slots_not_yet_assigned": 434,
         "implemented_baseline": 5,
         "pending_communications": 0,
-        "authored_drafts": 445
+        "authored_drafts": 461
       },
       {
         "id": "H06",
@@ -2355,7 +2349,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 457,
+  "branch_alternatives": 462,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 94,
@@ -2378,7 +2372,7 @@
     "D18": 92,
     "D19": 95,
     "D20": 113,
-    "D21": 180,
+    "D21": 196,
     "D22": 59,
     "D23": 135,
     "D24": 56
@@ -2590,9 +2584,9 @@
       "target": 300,
       "implemented_baseline": 48,
       "pending_communications": 0,
-      "authored_drafts": 180,
-      "accounted": 228,
-      "remaining_to_target": 72
+      "authored_drafts": 196,
+      "accounted": 244,
+      "remaining_to_target": 56
     },
     {
       "id": "D22",

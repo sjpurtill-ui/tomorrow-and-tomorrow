@@ -188,10 +188,20 @@
       "candidate_name": "Cryptographic hardware",
       "mapped_ids": [
         "cryptographic_protocol_design",
-        "verified_boot_chains"
+        "verified_boot_chains",
+        "hardware_entropy_health_testing",
+        "cryptographic_random_bit_expansion",
+        "hardware_root_key_isolation",
+        "hardware_key_derivation_states",
+        "cryptographic_key_sideload",
+        "cryptographic_block_acceleration",
+        "masked_cryptographic_datapaths",
+        "constant_time_secret_operations",
+        "cryptographic_leakage_qualification",
+        "fault_detecting_security_control"
       ],
-      "scope_status": "partial",
-      "note": "Cryptographic methods and verified boot exist, but dedicated key-protection hardware, side-channel qualification and accelerator integration are not yet authored as a complete physical chain."
+      "scope_status": "subject_mapped",
+      "note": "Authored scope now includes isolated keys, derivation/sideload, cipher hardware, entropy supply and leakage/fault qualification. These proposed consumers are not implemented or security-certified."
     },
     {
       "review_id": "D21-21",
@@ -236,10 +246,16 @@
       "review_id": "D21-25",
       "candidate_name": "Energy proportional computing",
       "mapped_ids": [
-        "compute_power_budgeting"
+        "compute_power_budgeting",
+        "dynamic_voltage_frequency_scaling",
+        "idle_residency_governors",
+        "device_runtime_suspend",
+        "power_domain_dependency_ordering",
+        "energy_aware_task_placement",
+        "latency_bounded_power_policy"
       ],
       "scope_status": "partial",
-      "note": "Power budgeting is present; workload-dependent voltage, frequency, clock gating and sleep-state integration remain incomplete."
+      "note": "Workload voltage/frequency control, idle governance, device suspend, dependency ordering and latency limits are now authored. Dedicated clock gating and retention/isolation circuit qualification remain open; the whole subject stays partial."
     }
   ]
 }
