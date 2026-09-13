@@ -5,7 +5,8 @@ const Ops=preload("res://scripts/technology_operations.gd")
 const M=preload("res://scripts/machine_workshop.gd")
 const ITEMS=["skiving_qualified_parts","wire_edm_qualified_parts","sinker_edm_qualified_parts","ecm_qualified_parts","waterjet_qualified_parts","ultrasonic_qualified_parts","forming_qualified_parts","joining_qualified_parts"]
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("machine_parts",1211)
-func after_test()->void:WorldSimulation.clear()
+func after_test()->void:
+	WorldSimulation.clear();GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
 func prepare(item:String)->Dictionary:
 	WorldSimulation.military.equipment_queue.clear()
 	var state=WorldSimulation.state
@@ -15,7 +16,7 @@ func prepare(item:String)->Dictionary:
 	state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0
 	for field:String in ["materials","tooling","machine_inspection"]:
 		for resource:String in spec[field]:state.resource_stockpiles[resource]=100.0
-	Ops.data().last_day=int(state.elapsed_days);Ops.data().services.electricity=100.0
+	Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":100.0}
 	var result:Dictionary=WorldSimulation.military.start_production_line(item,1)
 	assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
 	return WorldSimulation.military.equipment_queue.back() if result.get("ok",false) else {}
@@ -94,4 +95,95 @@ func test_skiving_requires_retained_opposed_rotation_with_axial_feed()->void:
 		assert_str(M.validate_job(missing,spec)).is_not_empty()
 		P.advance(WorldSimulation.military,restored,1)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal(1.0)
+	)
+
+func test_full_save_keeps_support_reserved_inspection_and_power_recovery()->void:
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	WorldSimulation.create_actor("other_machine",1213)
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("wire_edm_qualified_parts")
+		var state=WorldSimulation.state
+		state.known_discoveries.append_array(["fluid_film_bearings","cutting_fluid_management","machine_tool_stiffness_assessment","machine_condition_monitoring"])
+		for resource:String in ["Water-Film Bearing Sets","Machining Water Filter Sets","Machine Load Test Sets","Machine Vibration Test Sets","Woven Cloth","Refined Copper"]:state.resource_stockpiles[resource]=10.0
+		P.advance(WorldSimulation.military,line,3)
+		P.advance(WorldSimulation.military,line,1.5)
+		P.advance(WorldSimulation.military,line,.5)
+		assert_float(float(line.progress_days)).is_equal_approx(3.5,.000001)
+		assert_str(M.validate_job(line,I.product(line.item))).is_empty()
+		assert_bool(Ops.valid(Ops.data())).override_failure_message(str(Ops.data())).is_true()
+	)
+	WorldSimulation.scoped("other_machine",func()->void:
+		Ops.data()
+	)
+	var slot:="codex_machine_%d"%Time.get_ticks_usec()
+	assert_bool(SaveSystem.save_game(slot).get("ok",false)).is_true()
+	WorldSimulation.clear()
+	var restored:=SaveSystem.load_game(slot);DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	assert_bool(restored.get("ok",false)).override_failure_message(str(restored)).is_true()
+	if not restored.get("ok",false):return
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:Dictionary=WorldSimulation.military.equipment_queue.back()
+		var pending:Dictionary=line.machine_pending.duplicate(true)
+		assert_int(line.machine_support.installed.size()).is_equal(4)
+		var stock:=float(WorldSimulation.state.resource_stockpiles["Steel Sheets"])
+		Ops.data().services["electricity"]=0.0
+		P.advance(WorldSimulation.military,line,10)
+		assert_dict(line.machine_pending).is_equal(pending)
+		Ops.data().services["electricity"]=10.0
+		P.advance(WorldSimulation.military,line,.5)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Steel Sheets"])).is_equal(stock)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Wire-Cut Motor Plates"])).is_equal(1.0)
+		assert_str(M.validate_job(line,I.product(line.item))).is_empty()
+	)
+	WorldSimulation.scoped("other_machine",func()->void:
+		assert_array(WorldSimulation.military.equipment_queue).is_empty()
+		assert_float(float(WorldSimulation.state.resource_stockpiles.get("Wire-Cut Motor Plates",0))).is_equal(0.0)
+	)
+func test_each_accepted_part_enters_actual_downstream_assembly()->void:
+	var consumers:Array=["skived_drive_assembly","wire_plate_motor","sinker_die_shrouds","ecm_ventilation_rotor","jet_plate_motor","ultrasonic_insulator_finish","incremental_shroud_motor","ultrasonic_motor_leads"]
+	WorldSimulation.scoped("machine_parts",func()->void:
+		for index:int in range(ITEMS.size()):
+			var line:=prepare(ITEMS[index]);var part:=String(I.product(ITEMS[index]).output)
+			var spec:=I.product(consumers[index])
+			var required:=float(spec.materials.get(part,0))+float(spec.tooling.get(part,0))
+			assert_float(required).is_greater(0.0)
+			line.target_stock=int(ceil(required))
+			for unit:int in range(int(ceil(required))):
+				P.advance(WorldSimulation.military,line,3);P.advance(WorldSimulation.military,line,1)
+			var before:=float(WorldSimulation.state.resource_stockpiles.get(part,0))
+			assert_float(before).is_greater_equal(required)
+			WorldSimulation.military.equipment_queue.clear()
+			WorldSimulation.state.known_discoveries.append(spec.gate);WorldSimulation.state.discovery_adoption[spec.gate]=1.0
+			for field:String in ["materials","tooling"]:
+				for resource:String in spec[field]:
+					if resource!=part:WorldSimulation.state.resource_stockpiles[resource]=100.0
+			var produced:=float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))
+			var result:Dictionary=WorldSimulation.military.start_production_line(consumers[index],int(produced)+1)
+			assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
+			if not result.get("ok",false):return
+			var assembly:Dictionary=WorldSimulation.military.equipment_queue.back()
+			P.advance(WorldSimulation.military,assembly,float(spec.days))
+			assert_float(float(WorldSimulation.state.resource_stockpiles.get(spec.output,0))).is_equal_approx(produced+1,.000001)
+			assert_float(float(WorldSimulation.state.resource_stockpiles.get(part,0))).is_equal_approx(before-required,.000001)
+	)
+
+func test_retooling_retains_head_wear_and_abandons_reserved_material()->void:
+	WorldSimulation.scoped("machine_parts",func()->void:
+		var line:=prepare("waterjet_qualified_parts")
+		line.machine_wear=.7
+		P.advance(WorldSimulation.military,line,1)
+		var before:=float(WorldSimulation.state.resource_stockpiles["Steel Sheets"])
+		# Use actual retool API into a conventional route, then back into the
+		# retained original head. Setup tools remain installed under existing rules.
+		var ordinary:=I.product("motor_mount_plate_blanks")
+		WorldSimulation.state.known_discoveries.append(ordinary.gate);WorldSimulation.state.discovery_adoption[ordinary.gate]=1.0
+		for field:String in ["materials","tooling"]:
+			for resource:String in ordinary[field]:WorldSimulation.state.resource_stockpiles[resource]=100.0
+		assert_bool(P.retool(WorldSimulation.military,int(line.id),"motor_mount_plate_blanks").get("ok",false)).is_true()
+		assert_bool(line.has("machine_pending")).is_false()
+		assert_str(M.validate_job(line,ordinary)).is_empty()
+		assert_bool(P.retool(WorldSimulation.military,int(line.id),"waterjet_qualified_parts").get("ok",false)).is_true()
+		P.advance(WorldSimulation.military,line,.1)
+		assert_float(float(line.machine_wear)).is_greater(.7)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Steel Sheets"])).is_equal_approx(before-1.2,.000001)
 	)

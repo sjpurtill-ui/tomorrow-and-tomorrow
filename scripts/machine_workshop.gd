@@ -9,6 +9,8 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	var state=WorldSimulation.state
 	var ops=preload("res://scripts/technology_operations.gd")
 	if work<=0 or not spec.has("machine_program") or not Program.valid_program(spec.machine_program):return
+	if spec.has("machine_kind") and not job.has("machine_wear"):
+		job.machine_wear=float(job.get("machine_wear_history",{}).get(spec.machine_kind,0))
 	if not job.has("machine_pending") and spec.has("machine_kind"):
 		work=Support.prepare(job,spec,work)
 		if work<=0:return
@@ -50,12 +52,24 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 			pending.physical=physical(spec,pending)
 			pending.inspection_work=0.0
 static func clear(job:Dictionary)->void:
+	# Retained installed heads keep wear across retooling. A partly used head
+	# also retains its spent machining share; abandoning a part cannot renew it.
+	var spec:Dictionary=load("res://scripts/civilian_industry.gd").product(String(job.get("item","")))
+	if spec.has("machine_kind"):
+		if not job.has("machine_wear_history"):job.machine_wear_history={}
+		var wear:=float(job.get("machine_wear",job.machine_wear_history.get(spec.machine_kind,0)))
+		if job.has("machine_pending"):wear+=.08*minf(1,float(job.machine_pending.run.work)/3.0)
+		job.machine_wear_history[spec.machine_kind]=minf(2,wear)
 	# Changing production abandons the reserved workpiece; no free refund.
 	job.erase("machine_pending")
 	job.erase("machine_last")
 	job.erase("machine_wear")
 	job.erase("machine_support")
 static func validate_job(job:Dictionary,spec:Dictionary)->String:
+	var history:Variant=job.get("machine_wear_history",{})
+	if not history is Dictionary or history.size()>8:return "Invalid retained machine heads."
+	for kind:Variant in history:
+		if kind not in ["skiving","wire_edm","sinker_edm","ecm","waterjet","ultrasonic","forming","joining"] or not Program.finite(history[kind],2) or history[kind]<0:return "Invalid retained head wear."
 	if not spec.has("machine_program"):
 		for key:String in ["machine_pending","machine_last","machine_wear","machine_support"]:
 			if job.has(key):return "Unexpected machine state."

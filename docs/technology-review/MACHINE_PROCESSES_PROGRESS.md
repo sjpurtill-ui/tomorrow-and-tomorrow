@@ -57,3 +57,14 @@ Next: actual whole-save job/support/inspection continuity and power restoration,
 Skiving now executes and retains opposed cutter/workpiece turns for one explicitly selected external 30-tooth workpiece / 10-tooth cutter configuration at a 20-degree crossing angle. Axial feed progresses alongside those rotations. Loaded phase deviation depends on retained apparatus wear and contributes to the measured pitch-error channel. A completed XYZ path without a matching spindle record cannot pass inspection or saved-state validation. This is a bounded selected configuration, not a general involute tooth-surface solver or arbitrary gear program.
 
 `/tmp/tt-machine-skiving.log`:5/5 process/witness tests pass, including all eight part recipes, partial spindle serialization/resume and missing-synchronization rejection. Full-save/integrated support continuity, product-change wear ownership, downstream/input reachability and acquisition/registration remain; no discovery-count increase.
+
+
+## Full save, downstream consumption and retool wear
+
+Actual SaveSystem save/load now verifies a half-complete paid wire-section inspection, installed/recorded support, rival isolation, power exhaustion and restoration without another feed debit. Eight downstream assembly/finishing routes consume the accepted locally machined parts (including die tooling and multi-part vane/tab quantities); no accepted feed was seeded into those consumer checks.
+
+Retooling now retains wear per installed process head, including the spent fraction of an abandoned workpiece, across conventional recipes and back. Old workpieces remain abandoned without a material refund. Dedicated support fixtures/observations are discarded on retool and must be installed/re-measured again; head wear itself cannot be refreshed by switching products. A newly paid line/head remains distinct. Existing persistent installed-tool ownership is unchanged.
+
+`/tmp/tt-machine-retool.log`:8/8 process cases pass, including the full-save/power/rival test, all eight downstream consumers and actual retool API wear continuity. Earlier lifecycle fixture failures were corrected by supplying required measurement copper, using serialized String service keys (not StringName shorthand), and tolerant fractional-work comparisons; production save validation was not weakened.
+
+Remaining before freeze: all apparatus/raw-input reachability, paid acquisition/exact authored predicates, catalog registration and whole-graph/export evidence, bounded combined regression and root integration/art. Still no new operating count claimed.
