@@ -1,12 +1,16 @@
 extends RefCounted
 ## Adapter for retained machine work inside the existing persistent workshop job.
 ## The pending workpiece remains in its job; it is never fungible accepted stock.
+const Support=preload("res://scripts/machine_support.gd")
 const Measurement=preload("res://scripts/machine_process_measurement.gd")
 const Program=preload("res://scripts/machine_coordinate_program.gd")
 static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 	var state=WorldSimulation.state
 	var ops=preload("res://scripts/technology_operations.gd")
 	if work<=0 or not spec.has("machine_program") or not Program.valid_program(spec.machine_program):return
+	if not job.has("machine_pending") and spec.has("machine_kind"):
+		work=Support.prepare(job,spec,work)
+		if work<=0:return
 	if not job.has("machine_pending"):
 		if int(job.target_stock)>0 and float(state.resource_stockpiles.get(spec.output,0))>=int(job.target_stock):return
 		for resource:String in spec.materials:
@@ -22,7 +26,11 @@ static func advance(job:Dictionary,spec:Dictionary,work:float)->void:
 		inspect(job,spec,work)
 		return
 	var rate:=float(spec.power)/float(spec.days)
-	var receipt:=Program.advance(pending.run,work,ops.service("electricity"),rate)
+	var receipt:=Program.advance(pending.run,Support.limit_work(job,work),ops.service("electricity"),rate)
+	Support.consume(job,float(receipt.work))
+	var installed:Dictionary=job.get("machine_support",{}).get("installed",{})
+	pending.film_work=float(pending.get("film_work",0))+(float(receipt.work) if installed.has("fluid_film_bearings") else 0.0)
+	pending.filtered_work=float(pending.get("filtered_work",0))+(float(receipt.work) if installed.has("cutting_fluid_management") else 0.0)
 	ops.consume_electricity(float(receipt.energy))
 	job.last_work=float(job.last_work)+float(receipt.work)
 	# Inspection belongs to the same reserved workpiece and will consume the
@@ -38,6 +46,7 @@ static func clear(job:Dictionary)->void:
 	job.erase("machine_pending")
 	job.erase("machine_last")
 	job.erase("machine_wear")
+	job.erase("machine_support")
 static func validate_job(job:Dictionary,spec:Dictionary)->String:
 	if not spec.has("machine_program"):
 		for key:String in ["machine_pending","machine_last","machine_wear"]:
@@ -57,6 +66,8 @@ static func valid_piece(p:Variant,job:Dictionary,spec:Dictionary,finished:bool)-
 	if not p.site is String or p.site.length()>128 or p.phase not in ["machining","inspection"]:return false
 	if not Program.valid(p.run) or p.run.program!=spec.machine_program or not Program.finite(p.tool_wear,2) or p.tool_wear<0:return false
 	if Program.complete(p.run)!=(p.phase=="inspection"):return false
+	for field:String in ["film_work","filtered_work"]:
+		if not Program.finite(p.get(field,0)) or float(p.get(field,0))<0 or float(p.get(field,0))>float(p.run.work)+.000001:return false
 	var checked:Variant=p.get("inspection_work",0)
 	if not Program.finite(checked) or checked<0 or float(checked)+float(p.run.work)>float(spec.days)+.000001:return false
 	if p.has("inspection_paid") and p.inspection_paid!=spec.get("machine_inspection",{}):return false
@@ -94,7 +105,10 @@ static func inspect(job:Dictionary,spec:Dictionary,work:float)->void:
 	var output:=String(spec.output if passed else spec.machine_reject)
 	state.resource_stockpiles[output]=float(state.resource_stockpiles.get(output,0))+1.0
 	job.machine_last=pending.duplicate(true);job.machine_last.accepted=passed
-	job.machine_wear=minf(2,float(job.get("machine_wear",0))+.08)
+	var total_work:=maxf(.000001,float(pending.run.work))
+	var film_fraction:=clampf(float(pending.get("film_work",0))/total_work,0,1)
+	var filtered_fraction:=clampf(float(pending.get("filtered_work",0))/total_work,0,1)
+	job.machine_wear=minf(2,float(job.get("machine_wear",0))+.08*(1-.4*film_fraction-.2*filtered_fraction))
 	job.completed+=1;job.progress_days=0.0
 	job.last_output=int(job.get("last_output",0))+(1 if passed else 0)
 	job.erase("machine_pending")
