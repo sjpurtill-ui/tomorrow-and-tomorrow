@@ -12,6 +12,7 @@ func run()->void:
 	var graph:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:graph.append(pathways.graph_entry(entry))
 	var errors:Array=requirements.validate(graph)
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/civilian_care_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/food_preparation.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/grain_processing.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/food_batch_knowledge.gd").entries(),discovery.technology_catalog))

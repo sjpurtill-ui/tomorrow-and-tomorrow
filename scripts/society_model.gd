@@ -124,7 +124,7 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 		definitions_by_id.clear()
 		for definition in catalog: definitions_by_id[String(definition.get("id",""))]=definition
 	var population:=maxf(1.0,WorldSimulation.state.population_exact)
-	var observers:=float(WorldSimulation.state.population_allocations.get("Knowledge",0))
+	var observers:=float(WorldSimulation.state.effective_workers("Knowledge"))
 	var stewards:=float(WorldSimulation.state.population_allocations.get("Administration",0))
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
 	var preserved:=clampf(float(WorldSimulation.state.simulation_metrics.get("knowledge",0.18))+effect("knowledge_preservation"),0.05,1.2)
@@ -219,7 +219,7 @@ func evaluate_capacities(_context:Dictionary)->Dictionary:
 	var ecology:=clampf(float(metrics.get("ecology",0.88)),0.0,1.0)
 	var security:=clampf(float(metrics.get("security",0.38)),0.0,1.0)
 	var legitimacy:=clampf(float(metrics.get("legitimacy",0.62)),0.0,1.0)
-	var observers:=float(WorldSimulation.state.population_allocations.get("Knowledge",0))
+	var observers:=float(WorldSimulation.state.effective_workers("Knowledge"))
 	var inquiry_total:=0.0
 	var active_directions:=0
 	for allocation in WorldSimulation.state.research_allocations.values():
@@ -384,7 +384,7 @@ func evaluate_subcategories(_context:Dictionary)->Dictionary:
 	var ecology:=clampf(float(metrics.get("ecology",0.88)),0.0,1.0)
 	var security:=clampf(float(metrics.get("security",0.38)),0.0,1.0)
 	var legitimacy:=clampf(float(metrics.get("legitimacy",0.62)),0.0,1.0)
-	var observers:=float(WorldSimulation.state.population_allocations.get("Knowledge",0))
+	var observers:=float(WorldSimulation.state.effective_workers("Knowledge"))
 	var inquiry_total:=0.0
 	var active_directions:=0
 	for allocation in WorldSimulation.state.research_allocations.values():

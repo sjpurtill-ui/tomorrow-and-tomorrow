@@ -144,7 +144,7 @@ func refresh(refit:bool)->void:
 	leader_filter="" if chosen!="" and not people.has(chosen) else chosen
 	for index in leaders.item_count:
 		if (index==0 and leader_filter=="") or (index>0 and String(leaders.get_item_metadata(index))==leader_filter):leaders.select(index)
-	stats.text="%d researchers  ·  %d staffed / %d projects" % [maxi(0,int(GameState.population_allocations.get("Knowledge",0))),staffed,active]
+	stats.text="%d researchers  ·  %d staffed / %d projects" % [maxi(0,int(GameState.effective_workers("Knowledge"))),staffed,active]
 	tabs.active.text="Being researched · %d" % active;tabs.known.text="Established · %d" % known
 	for id:String in tabs:tabs[id].modulate=T.GOLD if id==view_mode else Color.WHITE
 	records.clear()

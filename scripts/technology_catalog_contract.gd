@@ -101,9 +101,11 @@ static func validate(additions:Array,catalog:Array)->Array[String]:
 		if nutrients and id!=preload("res://scripts/crop_nutrition.gd").GATE:errors.append(id+": no implemented nutrient application")
 		var repair:=String(entry.get("repair_method",""))
 		if not repair.is_empty() and (repair!=id or repair!=preload("res://scripts/field_repair.gd").ID):errors.append(id+": no implemented repair method")
+		var clinical:=String(entry.get("clinical_care_method",""))
+		if not clinical.is_empty() and (clinical!=id or clinical not in preload("res://scripts/civilian_care.gd").IDS.values()):errors.append(id+": unknown clinical service")
 		var medical:=String(entry.get("medical_method",""))
 		if not medical.is_empty() and (medical!=id or not preload("res://scripts/field_medicine.gd").METHODS.has(medical)):errors.append(id+": no implemented medical method")
 		var doctrine:=String(entry.get("doctrine",""))
 		if not doctrine.is_empty() and (doctrine!=id or not preload("res://scripts/combined_arms_doctrine.gd").RULES.has(doctrine)):errors.append(id+": no implemented doctrine")
-		if naval.is_empty() and clothing.is_empty() and conveyance.is_empty() and building.is_empty() and batch.is_empty() and grain.is_empty() and meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
+		if clinical.is_empty() and naval.is_empty() and clothing.is_empty() and conveyance.is_empty() and building.is_empty() and batch.is_empty() and grain.is_empty() and meal.is_empty() and not nutrients and repair.is_empty() and agronomy.is_empty() and medical.is_empty() and doctrine.is_empty() and effects.is_empty() and profile.is_empty() and training.is_empty() and children.is_empty() and products.is_empty() and plants.is_empty() and prospecting.is_empty():errors.append(id+": no implemented consequence")
 	return errors

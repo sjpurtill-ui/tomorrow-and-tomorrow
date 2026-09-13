@@ -380,6 +380,7 @@ func validate_payload(payload:Dictionary)->String:
 		var nutrition:=preload("res://scripts/crop_nutrition.gd")
 		var clothing=preload("res://scripts/household_clothing.gd")
 		if not clothing.valid(actor.state.GameState.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization clothing records."
+		if not preload("res://scripts/civilian_care_state.gd").valid_state(actor.state.GameState):return "Invalid civilian clinical care records."
 		var batches=preload("res://scripts/food_batches.gd")
 		if not batches.valid(actor.state.GameState.get("food_batches",batches.empty_state())) or not batches.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization food batch records."
 		var grain=preload("res://scripts/grain_processing.gd")
