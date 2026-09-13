@@ -247,3 +247,27 @@ func test_full_register_retires_old_completed_reports_without_refunds_or_id_reus
 		assert_bool(Samples.data().records.has("257")).is_true()
 		assert_int(int(Samples.data().next_serial)).is_equal(258)
 		assert_bool(Samples.valid(JSON.parse_string(JSON.stringify(Samples.data())))).is_true())
+
+func test_traceable_peg_requires_actual_controlled_synthesis_and_keeps_imports_unknown()->void:
+	WorldSimulation.scoped("samples",func()->void:
+		var s=WorldSimulation.state;s.elapsed_days=0;s.settlement_site_committed=true;s.convoy_traveling=false
+		var industry=preload("res://scripts/civilian_industry.gd")
+		var spec:Dictionary=industry.product("traceable_peg_batch")
+		s.known_discoveries.append(spec.gate);s.discovery_adoption[spec.gate]=1.0
+		for item:String in spec.materials:s.resource_stockpiles[item]=spec.materials[item]
+		for item:String in spec.tooling:s.resource_stockpiles[item]=100.0
+		Ops.data().last_day=0;Ops.data().services={"electricity":10.0,"polymer_stirred_work":10.0,"polymer_heat_removal":0.0}
+		assert_bool(WorldSimulation.military.start_production_line("traceable_peg_batch",1).get("ok",false)).is_true()
+		var job:Dictionary=WorldSimulation.military.equipment_queue.back()
+		P.advance(WorldSimulation.military,job,100)
+		assert_int(Samples.data().records.size()).is_equal(0)
+		Ops.data().services.polymer_heat_removal=1.0;P.advance(WorldSimulation.military,job,100)
+		assert_int(int(job.completed)).is_equal(1)
+		assert_float(float(s.resource_stockpiles["Ethylene Oxide"])).is_equal(0.0)
+		assert_str(Samples.data().records["1"].response_model.structure_basis).is_equal("retained_controlled_synthesis")
+		assert_bool(Samples.valid(Samples.data())).is_true()
+		# Stock labels alone cannot acquire the controlled-process premise.
+		var bad:=Samples.data().duplicate(true);bad.records["1"].recipe="sealed_peg_specimens";bad.records["1"].source_material="Controlled-Chain PEG"
+		assert_bool(Samples.valid(bad)).is_false()
+		Ops.data().services["nmr_unqualified_time"]=1.0
+		assert_bool(preload("res://scripts/nmr_acquisition.gd").start("1").has("error")).is_true())

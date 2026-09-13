@@ -736,7 +736,8 @@ static func entries()->Array[Dictionary]:
     "production_contract": "Consumes named cyclic oxide and glycol initiation feed through paid stirred-reactor and cooling capacity into a distinct PEG diol. No isocyanate, polyurethane or universal resin is granted.",
     "production_items": [
       "ring_opened_peg_diol",
-      "controlled_chain_peg"
+      "controlled_chain_peg",
+      "traceable_peg_batch"
     ]
   },
   {

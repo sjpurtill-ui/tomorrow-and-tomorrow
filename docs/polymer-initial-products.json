@@ -1997,5 +1997,31 @@
     },
     "power": 1,
     "daily_power": 1
+  },
+  "traceable_peg_batch": {
+    "name": "Synthesize and retain a traceable linear PEG batch",
+    "output": "Sealed Traceable PEG Batches",
+    "gate": "ring_opening_polymerization",
+    "materials": {
+      "Ethylene Oxide": 1.15,
+      "Metered PEG Starter": 0.04,
+      "Caustic Soda": 0.01,
+      "Sulfuric Acid": 0.01,
+      "Freshwater": 0.3,
+      "Glass Tubes": 0.1,
+      "Paper": 0.01
+    },
+    "days": 6,
+    "tooling": {
+      "Laboratory Glassware": 3,
+      "Steel": 2
+    },
+    "power": 1.2,
+    "daily_power": 0.2,
+    "services": {
+      "polymer_stirred_work": 1.2,
+      "polymer_heat_removal": 1
+    },
+    "specimen_source": "Locally synthesized linear PEG batch"
   }
 }

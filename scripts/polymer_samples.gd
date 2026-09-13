@@ -30,6 +30,7 @@ static func completed(item:String,quantity:int)->void:
 	ledger.next_serial=serial+1
 	ledger.records[str(serial)]={"sample_id":str(serial),"recipe":item,"quantity":quantity,"prepared_day":floori(WorldSimulation.state.elapsed_days),"source_store":WorldSimulation.state.resource_settlement_id,"source_material":spec.specimen_source,"status":"unmeasured"}
 	if item=="sealed_copolymer_specimens":ledger.records[str(serial)]["response_model"]={"kind":"synthetic_copolymer_v1","seed":serial}
+	if item=="traceable_peg_batch":ledger.records[str(serial)]["response_model"]={"kind":"synthetic_linear_peg_v1","seed":serial,"structure_basis":"retained_controlled_synthesis"}
 static func valid(value:Variant)->bool:
 	if not value is Dictionary or not value.has_all(["next_serial","records"]):return false
 	if not integer(value.next_serial,1,MAX_SERIAL) or not value.records is Dictionary or value.records.size()>LIMIT:return false
@@ -44,7 +45,12 @@ static func valid(value:Variant)->bool:
 		var spec:=Industry.product(record.recipe)
 		if not spec.has("specimen_source") or record.source_material!=spec.specimen_source:return false
 		if record.has("response_model"):
-			if not record.response_model is Dictionary or record.recipe!="sealed_copolymer_specimens" or record.response_model.get("kind")!="synthetic_copolymer_v1" or not integer(record.response_model.get("seed"),1,MAX_SERIAL):return false
+			if not record.response_model is Dictionary or not integer(record.response_model.get("seed"),1,MAX_SERIAL):return false
+			if record.recipe=="sealed_copolymer_specimens":
+				if record.response_model.get("kind")!="synthetic_copolymer_v1":return false
+			elif record.recipe=="traceable_peg_batch":
+				if record.response_model.get("kind")!="synthetic_linear_peg_v1" or record.response_model.get("structure_basis")!="retained_controlled_synthesis":return false
+			else:return false
 		if not integer(record.quantity,1,1000000000) or not integer(record.prepared_day,0,1000000000):return false
 		if not preload("res://scripts/nmr_acquisition.gd").valid(record):return false
 	return true

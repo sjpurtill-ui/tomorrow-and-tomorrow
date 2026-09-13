@@ -3,10 +3,12 @@ extends RefCounted
 const WORK=4.0
 static func record(sample_id:String)->Dictionary:
 	return WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{}).get(sample_id,{})
+static func supported(sample:Dictionary)->bool:
+	return sample.get("response_model",{}).get("kind")=="synthetic_copolymer_v1"
 static func start(sample_id:String)->Dictionary:
 	var sample:=record(sample_id)
 	if sample.is_empty() or sample.status!="unmeasured":return {"error":"Choose an unmeasured prepared sample."}
-	if not sample.has("response_model"):return {"error":"This sample has no supported response model."}
+	if not supported(sample):return {"error":"This sample has no supported acquisition method."}
 	if sample.source_store!=WorldSimulation.state.resource_settlement_id:return {"error":"Sample is held in a different store."}
 	var ops=load("res://scripts/technology_operations.gd")
 	if ops.service("nmr_unqualified_time")<=0:return {"error":"No operating NMR bench time is available."}
@@ -96,7 +98,7 @@ static func advance_pending()->void:
 	var calibration=load("res://scripts/nmr_calibration.gd")
 	var pending:=false
 	for sample:Dictionary in records.values():
-		if sample.status in ["unmeasured","acquiring"] and sample.has("response_model"):pending=true
+		if sample.status in ["unmeasured","acquiring"] and supported(sample):pending=true
 	if pending:calibration.start()
 	calibration.advance()
 	for sample_id:String in records:

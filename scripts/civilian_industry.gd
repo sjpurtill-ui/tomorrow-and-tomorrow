@@ -2,6 +2,7 @@ extends RefCounted
 ## Manufactured batches use the same physical stocks and finite workshop lines
 ## as equipment. Quantities are game batches, not claims of industrial SI units.
 const PRODUCTS={
+	"traceable_peg_batch":{"name": "Synthesize and retain a traceable linear PEG batch", "output": "Sealed Traceable PEG Batches", "gate": "ring_opening_polymerization", "materials": {"Ethylene Oxide": 1.15, "Metered PEG Starter": 0.04, "Caustic Soda": 0.01, "Sulfuric Acid": 0.01, "Freshwater": 0.3, "Glass Tubes": 0.1, "Paper": 0.01}, "days": 6, "tooling": {"Laboratory Glassware": 3, "Steel": 2}, "power": 1.2, "daily_power": 0.2, "services": {"polymer_stirred_work": 1.2, "polymer_heat_removal": 1}, "specimen_source": "Locally synthesized linear PEG batch"},
 	"dried_characterized_copolymer":{"name": "Recover the characterized copolymer microbatch", "output": "Characterized Copolymer Microbatches", "gate": "copolymer_sequence_control", "materials": {"Sequence-Characterized Copolymer Specimens": 1, "Freshwater": 0.1}, "days": 2, "tooling": {"Laboratory Glassware": 3, "Pressure Vessels": 1}, "power": 1, "daily_power": 0.5},
 	"injected_copolymer_microclosure":{"name": "Mold and leak-test a characterized copolymer closure", "output": "PP Wash Bottle Closures", "gate": "polymer_injection_molding", "materials": {"Characterized Copolymer Microbatches": 1, "Freshwater": 0.1}, "days": 1, "tooling": {"Electric Motors": 1, "Steel": 3, "Basic Machine Tool Sets": 1}, "power": 1, "daily_power": 1},
 
