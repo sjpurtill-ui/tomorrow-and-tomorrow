@@ -21,6 +21,7 @@ const SETTLEMENT_NAME_ROOTS:=["Alder","Ash","Bright","Cairn","Dawn","Deep","Elm"
 const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","haven","hearth","holm","landing","march","meadow","rest","ridge","stead","vale","watch","wick"]
 
 const CITY_RESOURCE_DEFAULTS:={
+	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
 	"grain_processing":{"stocks":{"grain":0.0,"clean":0.0,"tested":0.0,"dry":0.0,"flour":0.0,"fine":0.0,"bran":0.0,"malt":0.0},"tools":{},"batches":[],"last_day":-1,"report":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
@@ -1288,7 +1289,11 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
 	var builders:=WorldSimulation.state.effective_workers("Construction")
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
-	var builders_per_site:=builders/float(maxi(1,active_construction.size()))
+	var water_sites:=0
+	for line:Dictionary in WorldSimulation.state.water_conveyance.lines:
+		if String(line.status)=="under_construction":water_sites+=1
+	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites))
+	preload("res://scripts/water_conveyance.gd").construction_work(builders_per_site*water_sites*labor_efficiency*0.10,month_day)
 	for plot in WorldSimulation.state.settlement_plots:
 		plot["last_update_day"]=month_day
 		if String(plot.get("status",""))=="under_construction":

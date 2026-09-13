@@ -1336,7 +1336,11 @@ func _sample_civilization_geography(origin:Vector2)->Dictionary:
 	var ground:=_survey_ground_at(origin)
 	var water_distance:=_river_distance_at(origin.x,origin.y)*KM_PER_WORLD_UNIT
 	var catchments:=_surface_material_catchments(Vector3(origin.x,0,origin.y))
-	return {"environment_profile":PlanetEnvironment.profile_at(origin,ground),"surface_water_distance_km":water_distance,"surface_water_recognized":water_distance<=72.0,"surface_material_catchments":catchments,"woodland_catchment":catchments.Timber,"terrain_height_at":Callable(self,"_height_at"),"buildable_land_at":func(x:float,z:float)->bool:return _height_at(x,z)>SEA_LEVEL+.012,"river_distance_at":Callable(self,"_river_distance_at"),"drainage_tangent_at":Callable(self,"_drainage_tangent_at"),"moisture_at":Callable(self,"_land_moisture_at")}
+	var water_sources:=_surface_water_sources(Vector3(origin.x,0,origin.y),6.0)
+	for source:Dictionary in water_sources:
+		source.id="surface:%s:%.5f:%.5f" % [source.kind,source.position.x,source.position.z]
+		source.revealed=true
+	return {"water_conveyance_sources":water_sources,"environment_profile":PlanetEnvironment.profile_at(origin,ground),"surface_water_distance_km":water_distance,"surface_water_recognized":water_distance<=72.0,"surface_material_catchments":catchments,"woodland_catchment":catchments.Timber,"terrain_height_at":Callable(self,"_height_at"),"buildable_land_at":func(x:float,z:float)->bool:return _height_at(x,z)>SEA_LEVEL+.012,"river_distance_at":Callable(self,"_river_distance_at"),"drainage_tangent_at":Callable(self,"_drainage_tangent_at"),"moisture_at":Callable(self,"_land_moisture_at")}
 
 func _discovery_context()->Dictionary:
 	if WorldSimulation.enabled:
