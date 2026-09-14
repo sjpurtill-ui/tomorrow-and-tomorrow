@@ -15,8 +15,16 @@ static func inquiry(domain:String="",query:String="")->Array[Dictionary]:
 		item["subcategory"]=String(entry.get("subcategory",""))
 		item["exposed"]=exposed
 		item["assignment"]=DiscoverySystem.research_assignment(entry) if exposed and not known else {}
+		item["discovered_day"]=_discovered_day(String(entry.id)) if known else -1
 		result.append(item)
 	return result
+static func _discovered_day(id:String)->int:
+	var origins:Dictionary=GameState.society_exchange.get("origins",{})
+	var origin:Dictionary=origins.get(id,{})
+	if origin.has("day"):return int(origin.day)
+	for event:Dictionary in GameState.discovery_log:
+		if String(event.get("id",""))==id and event.has("day"):return int(event.day)
+	return -1
 static func materials()->Array[Dictionary]:
 	var entries:Dictionary={}
 	for deposit:Dictionary in ResourceSystem.visible_deposits():

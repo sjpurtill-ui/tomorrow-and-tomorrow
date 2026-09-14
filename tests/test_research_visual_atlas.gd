@@ -111,6 +111,27 @@ func test_cards_stay_compact_and_use_the_available_row_for_more_discoveries()->v
 	for card:Dictionary in view.bindings.values():
 		assert_float(card.frame.size.x).is_equal_approx(view.CARD_WIDTH,0.5)
 		assert_float(card.painting.custom_minimum_size.y).is_equal(view.CARD_IMAGE_HEIGHT)
+		assert_int(card.frame.mouse_filter).is_equal(Control.MOUSE_FILTER_PASS)
+func test_established_cards_show_the_recorded_discovery_year_and_day()->void:
+	GameState.known_discoveries.append("stone_sorting")
+	GameState.discovery_log.push_front({"id":"stone_sorting","day":730})
+	var view:=fixture();view.set_view("known")
+	assert_int(view.records[0].discovered_day).is_equal(730)
+	assert_str(view.bindings.stone_sorting.date.text).is_equal("DISCOVERED · YEAR 3, DAY 1")
+	assert_str(view.detail_body.get_child(4).text).is_equal("Discovered · Year 3, Day 1")
+func test_established_grid_scrolls_through_a_long_catalogue()->void:
+	var ids:Array[String]=[]
+	for entry:Dictionary in DiscoverySystem.technology_tree():
+		ids.append(String(entry.id))
+		if ids.size()>=60:break
+	GameState.known_discoveries.assign(ids)
+	var view:=fixture(800,600);view.set_view("known")
+	for frame in 5:await get_tree().process_frame
+	assert_bool(view.scroll.get_v_scroll_bar().visible).is_true()
+	assert_float(view.scroll.get_v_scroll_bar().max_value).is_greater(view.scroll.size.y)
+	view.scroll.scroll_vertical=1000
+	for frame in 2:await get_tree().process_frame
+	assert_int(view.scroll.scroll_vertical).is_greater(0)
 func test_every_research_field_has_a_distinct_painted_asset()->void:
 	var paths:Dictionary={}
 	for id:String in Art.NAMES:
