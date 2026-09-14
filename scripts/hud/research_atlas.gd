@@ -6,6 +6,9 @@ const Art=preload("res://scripts/hud/research_visuals.gd")
 const TreePlot=preload("res://scripts/hud/research_tree_plot.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const Gauge=preload("res://scripts/hud/military_roster_gauge.gd")
+const CARD_WIDTH:=220.0
+const CARD_IMAGE_HEIGHT:=92.0
+const CARD_GAP:=10.0
 var mode:="inquiry"
 var terrain:Node
 var hud:Node
@@ -85,7 +88,7 @@ func _ready()->void:
 	main=BoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",14);box.add_child(main)
 	content=VBoxContainer.new();content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;content.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_child(content)
 	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;content.add_child(scroll)
-	grid=GridContainer.new();grid.columns=3;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);scroll.add_child(grid)
+	grid=GridContainer.new();grid.columns=3;grid.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;grid.add_theme_constant_override("h_separation",int(CARD_GAP));grid.add_theme_constant_override("v_separation",10);scroll.add_child(grid)
 	plot=TreePlot.new();plot.owner_view=self;plot.size_flags_vertical=Control.SIZE_EXPAND_FILL;plot.custom_minimum_size=Vector2(0,140);content.add_child(plot)
 	empty=VBoxContainer.new();content.add_child(empty)
 	detail_scroll=ScrollContainer.new();detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_child(detail_scroll)
@@ -103,10 +106,14 @@ func _layout()->void:
 	detail_scroll.custom_minimum_size=Vector2(0,0) if narrow else Vector2(300,0)
 	detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	detail_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL if narrow else Control.SIZE_FILL
-	grid.columns=maxi(1,floori((size.x-(90 if narrow else 416))/270.0))
+	grid.columns=maxi(1,floori((size.x-(90 if narrow else 416))/(CARD_WIDTH+CARD_GAP)))
+	_update_grid_columns.call_deferred()
 	if size.x<900:stats.hide();filter.custom_minimum_size.x=170;leaders.custom_minimum_size.x=145
 	else:stats.show();filter.custom_minimum_size.x=192;leaders.custom_minimum_size.x=176
 	plot.queue_redraw()
+func _update_grid_columns()->void:
+	if not is_instance_valid(scroll) or not is_instance_valid(grid):return
+	grid.columns=maxi(1,floori((scroll.size.x+CARD_GAP)/(CARD_WIDTH+CARD_GAP)))
 func set_view(value:String)->void:
 	view_mode=value;narrow_details=false;_layout();refresh(true)
 func _close()->void:
@@ -180,9 +187,9 @@ func _build_cards()->void:
 	bindings.clear()
 	if view_mode=="tree":return
 	for item:Dictionary in records:
-		var frame:=PanelContainer.new();frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;frame.custom_minimum_size.x=250;grid.add_child(frame)
+		var frame:=PanelContainer.new();frame.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;frame.custom_minimum_size.x=CARD_WIDTH;grid.add_child(frame)
 		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",0);frame.add_child(box)
-		var painting:=Art.paint_discovery(box,item,104)
+		var painting:=Art.paint_discovery(box,item,CARD_IMAGE_HEIGHT)
 		var margin:=MarginContainer.new()
 		for edge:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,10)
 		box.add_child(margin)
