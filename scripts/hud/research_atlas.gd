@@ -87,7 +87,7 @@ func _ready()->void:
 	detail_back=Art.button(box,"← Back to research",func()->void:narrow_details=false;_layout())
 	main=BoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",14);box.add_child(main)
 	content=VBoxContainer.new();content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;content.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_child(content)
-	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;content.add_child(scroll)
+	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;content.add_child(scroll)
 	grid=GridContainer.new();grid.columns=3;grid.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;grid.add_theme_constant_override("h_separation",int(CARD_GAP));grid.add_theme_constant_override("v_separation",10);scroll.add_child(grid)
 	plot=TreePlot.new();plot.owner_view=self;plot.size_flags_vertical=Control.SIZE_EXPAND_FILL;plot.custom_minimum_size=Vector2(0,140);content.add_child(plot)
 	empty=VBoxContainer.new();content.add_child(empty)
@@ -196,22 +196,27 @@ func _build_cards()->void:
 		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",5);margin.add_child(body)
 		var name:=Art.label(body,String(item.name),17,T.INK,true)
 		var status:=Art.label(body,"",11,Art.color(item.domain))
+		var date:=Art.label(body,"",10,T.GOLD)
 		var lead:=Art.label(body,"",12,T.BODY,true)
 		var team:=Art.label(body,"",13,T.BODY)
 		var meter:ProgressBar=Gauge.new();meter.ink=Art.color(item.domain);body.add_child(meter)
 		var note:=Art.label(body,"",11,T.TEXT_SOFT,true)
-		frame.mouse_filter=Control.MOUSE_FILTER_STOP
+		# PASS preserves card clicks while allowing wheel/trackpad scrolling to
+		# bubble to the Established-page ScrollContainer.
+		frame.mouse_filter=Control.MOUSE_FILTER_PASS
 		var id:=String(item.id)
 		frame.gui_input.connect(func(event:InputEvent)->void:if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:select(id,true))
 		for node:Node in frame.find_children("*","Control",true,false):node.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		frame.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-		bindings[id]={"frame":frame,"name":name,"status":status,"lead":lead,"team":team,"meter":meter,"note":note,"painting":painting}
+		bindings[id]={"frame":frame,"name":name,"status":status,"date":date,"lead":lead,"team":team,"meter":meter,"note":note,"painting":painting}
 func _update_cards()->void:
 	for item:Dictionary in records:
 		if not bindings.has(item.id):continue
 		var card:Dictionary=bindings[item.id]
 		card.frame.add_theme_stylebox_override("panel",T.flat(Color("172830"),T.GOLD if item.id==selected_id else T.BORDER,2 if item.id==selected_id else 1,6,1))
 		card.status.text=Art.status(item).to_upper()+" · "+Art.name_for(item.domain)
+		card.date.text=_discovery_date(item)
+		card.date.visible=bool(item.known)
 		card.lead.text="Supervised by "+Art.lead(item) if not Art.lead(item).is_empty() else String(item.subcategory).capitalize()
 		card.team.text=Art.workforce(Art.team(item))+" · %d%% evidence" % roundi(float(item.progress)*100)
 		card.team.visible=item.assignment.get("active",false);card.meter.visible=card.team.visible;card.meter.value=clampf(float(item.progress),0,1)*100
@@ -233,6 +238,7 @@ func select(id:String,open_detail:bool=false)->void:
 		Art.label(detail_body,Art.name_for(item.domain).to_upper(),11,Art.color(item.domain))
 		Art.label(detail_body,item.name,21,T.INK,true)
 		Art.label(detail_body,Art.status(item),13,Art.color(item.domain))
+		if item.known:Art.label(detail_body,_discovery_date(item).capitalize(),11,T.GOLD)
 		if item.known:
 			var operations:VBoxContainer=preload("res://scripts/hud/technology_operations_panel.gd").new()
 			operations.subject=String(item.id);detail_body.add_child(operations)
@@ -325,6 +331,11 @@ func select(id:String,open_detail:bool=false)->void:
 		detail_scroll.set_deferred("scroll_vertical",old_scroll);return
 	detail=Art.label(detail_body,"Select a discovery to see its team, supervising leader and findings.",14,T.TEXT_SOFT,true)
 	action=null
+
+func _discovery_date(item:Dictionary)->String:
+	var absolute_day:=int(item.get("discovered_day",-1))
+	if absolute_day<0:return "ESTABLISHED · DATE NOT RECORDED"
+	return "DISCOVERED · YEAR %d, DAY %d" % [absolute_day/365+1,absolute_day%365+1]
 func _act()->void:
 	var result:=DiscoverySystem.select_research_target(selected_id)
 	refresh(false)

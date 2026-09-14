@@ -18,6 +18,7 @@ func run()->void:
 	for office:String in ["Steward","Quartermaster","Scholar","Marshal","Envoy"]:
 		GameState.leadership_positions[office]={"name":{"Steward":"Mira Vale","Quartermaster":"Tarin Moss","Scholar":"Amara Sen","Marshal":"Ilan Reed","Envoy":"Sora Aven"}[office],"person_id":office.hash(),"skills":{"Knowledge":.8,"Administration":.7,"Construction":.6,"Provisioning":.5,"Diplomacy":.5,"Logistics":.5,"Defense":.5}}
 	GameState.known_discoveries.append("drainage");GameState.known_discoveries.append("cordage");GameState.known_discoveries.append("food_drying")
+	GameState.discovery_log.assign([{"id":"drainage","day":969},{"id":"cordage","day":540},{"id":"food_drying","day":120}])
 	DiscoverySystem.initialize();DiscoverySystem._refresh_active_investigations()
 	var n:=0
 	for id in GameState.active_investigations.values():GameState.discovery_progress[id]=.17+(n%5)*.15;n+=1
