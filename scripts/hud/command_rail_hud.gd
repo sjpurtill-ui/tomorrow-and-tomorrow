@@ -92,7 +92,7 @@ func _layout()->void:
 		# The status strip is a fixed-height top-bar component. At the minimum
 		# supported canvas, retain the urgent food, survival and GDP outcomes and
 		# hide duplicate context instead of wrapping downward over the map.
-		var compact_top:=view.x<1080
+		var compact_top:=view.x<1280
 		(kpi_chips.get("population",{}).get("chip") as Control).visible=not compact_top
 		(kpi_chips.get("water",{}).get("chip") as Control).visible=not compact_top
 		if kpi_separators.size()>=2:
@@ -343,7 +343,8 @@ const KPI_DEFS:Array[Dictionary]=[
 	{"id":"population","label":"POPULATION","width":140.0,"accent":Tokens.GREEN,"section":"settlement","sub":0},
 	{"id":"food","label":"FOOD","width":112.0,"accent":Tokens.AMBER,"section":"economy","sub":0},
 	{"id":"water","label":"WATER","width":112.0,"accent":Tokens.TEAL,"section":"economy","sub":0},
-	{"id":"health","label":"SURVIVAL","width":152.0,"accent":Tokens.TEAL,"section":"health","sub":0},
+	{"id":"health","label":"HEALTH","width":152.0,"accent":Tokens.TEAL,"section":"health","sub":0},
+	{"id":"science","label":"SCIENCE","width":140.0,"accent":Tokens.GOLD,"section":"inquiry","sub":0},
 	{"id":"gdp","label":"REAL GDP / DAY","width":136.0,"accent":Tokens.BLUE,"section":"economy","sub":3},
 ]
 
@@ -400,10 +401,13 @@ func _build_kpi_strip()->void:
 		text_column.add_child(value_row)
 		var value:=Tokens.make_label("—",15,Tokens.INK)
 		value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		value.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		value.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		value_row.add_child(value)
 		var delta:=Tokens.make_label("",10,Tokens.MUTED)
 		delta.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		delta.custom_minimum_size.x=52
+		delta.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		delta.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 		value_row.add_child(delta)
@@ -838,6 +842,7 @@ func _refresh_local_kpis()->void:
 	var expectancy:=float(survival.life_expectancy)
 	var infant_mortality:=float(survival.infant_mortality_per_1000)
 	var economy:=Indicators.economy()
+	var science:=Indicators.science()
 	var food_days:=float(metrics.get("food_days",0.0))
 	var food_balance:=float(metrics.get("food_balance",0.0))
 	var vital_balance:Dictionary=_overall_vitals
@@ -851,7 +856,7 @@ func _refresh_local_kpis()->void:
 	var idle:=maxi(0,able-assigned)
 	var water_days:=float(water.get("days",0.0))
 	var water_intake:=roundi(float(water.get("intake_ratio",1.0))*100.0)
-	var signature:="%d|%.1f|%.1f|%.1f|%.1f|%d|%d|%d|%.1f|%d" % [population,expectancy,infant_mortality,float(economy.gdp),food_balance,births,deaths,idle,water_days,water_intake]
+	var signature:="%d|%.1f|%.1f|%.1f|%.1f|%.1f|%d|%d|%d|%.1f|%d" % [population,expectancy,infant_mortality,float(science.capacity),float(economy.gdp),food_balance,births,deaths,idle,water_days,water_intake]
 	signature+="|%d|%s" % [_overall_population,GameState.selected_player_settlement_id]
 	if signature==_kpi_signature: return
 	_kpi_signature=signature
@@ -865,6 +870,7 @@ func _refresh_local_kpis()->void:
 		_update_kpi("food","%.1f d" % food_days,"▲",Tokens.GREEN,"Days of adult-equivalent rations in store. Net %+.1f/day." % food_balance)
 	_update_kpi("water","%.1f d" % water_days,"NEED %d%%" % water_intake,Tokens.GREEN if water_intake>=100 else Tokens.RED,"%.1f reserve days remain after today's use. NEED %d%% is the share of today's drinking requirement that was actually met; it is not storage fullness." % [water_days,water_intake])
 	_update_kpi("health","%.1f yr" % expectancy,"IMR %.0f‰" % infant_mortality,Tokens.RED if infant_mortality>=50.0 else Tokens.AMBER if infant_mortality>=20.0 else Tokens.GREEN,"Life expectancy at birth under current conditions. Infant mortality is projected deaths during the first month per 1,000 live births.")
+	_update_kpi("science","%.1f" % float(science.capacity),"%d%% edu" % roundi(float(science.education)*100.0),Tokens.GOLD,"Science capacity: %.1f researcher-equivalent minds currently doing science × %d%% average education." % [float(science.minds),roundi(float(science.education)*100.0)])
 	_update_kpi("gdp","%.1f" % float(economy.gdp),"%.2f / person" % float(economy.gdp_per_capita),Tokens.BLUE,"Selected city real GDP: %.1f output-equivalent units per day. This is effective assigned worker-days × %.0f%% labor productivity; %.0f workers are assigned and %d are idle." % [float(economy.gdp),float(economy.productivity)*100.0,float(economy.assigned_workers),idle])
 	kpi_strip.reset_size()
 	_layout()
