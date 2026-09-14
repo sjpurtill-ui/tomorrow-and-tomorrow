@@ -7,6 +7,7 @@ const Live:=preload("res://scripts/hud/live_value_binding.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const HealthHistoryChart:=preload("res://scripts/hud/health_history_chart.gd")
 const ExpeditionChart:=preload("res://scripts/hud/expedition_chart.gd")
+const ResearchVisuals:=preload("res://scripts/hud/research_visuals.gd")
 
 
 static func render(container:VBoxContainer,blocks:Array)->void:
@@ -73,6 +74,10 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 	var heading:=String(block.get("kind","discovery")).to_upper()
 	if block.has("distance_km"): heading+="   /   %s KM FROM HOME" % str(int(block.distance_km))
 	column.add_child(Tokens.make_label(heading,10,accent))
+	var discovery_id:=String(block.get("discovery_id",""))
+	if discovery_id!="":
+		var definition:=DiscoverySystem.discovery_definition(discovery_id)
+		if not definition.is_empty():ResearchVisuals.paint_discovery(column,definition,120)
 	var title:=Tokens.make_label(String(block.get("title","A new discovery")),23,Tokens.INK)
 	var serif:=SystemFont.new()
 	serif.font_names=PackedStringArray(["Georgia","Noto Serif","serif"])

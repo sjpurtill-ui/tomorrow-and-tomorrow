@@ -33,7 +33,7 @@ func tab(_sub:int)->Dictionary:
 	var contacts:Array=report.get("contacts",[])
 	var kpis:Array=[
 		{"label":"RETURNED","value":"%d of %d" % [returned,personnel],"delta":"%d lost · %d stayed" % [lost,stayed] if lost+stayed>0 else "all came home","delta_color":Tokens.RED if lost>0 else (Tokens.AMBER if stayed>0 else Tokens.GREEN),"accent":Tokens.RED if lost>0 else Tokens.GREEN,"tip":"The party that left against the party that came home"},
-		{"label":"DAYS AWAY","value":str(int(report.get("actual_days",report.get("duration_days",0)))),"delta":"actual" if report.has("actual_days") else "planned · older record","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Elapsed days from departure to return, when recorded"},
+		{"label":"DAYS AWAY","value":str(int(report.get("actual_days",report.get("duration_days",0)))),"delta":"from "+String(report.get("origin_label","home")),"delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Elapsed days from departure to return, when recorded"},
 		{"label":"JOURNEY","value":"%d km" % int(report.get("distance_km",0)),"delta":"out & back","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Total route distance, including the journey home"},
 		{"label":"NEWCOMERS","value":"+%d" % recruits if recruits>0 else "0","delta":"joined","delta_color":Tokens.GREEN if recruits>0 else Tokens.MUTED,"accent":Tokens.GREEN,"tip":"Wanderers who threw in their lot with the settlement"},
 	]
@@ -44,7 +44,7 @@ func tab(_sub:int)->Dictionary:
 		brief={"tone":"warn","title":"Some chose another life","why":"%d of the party remained with people met on the road — alive, but no longer ours." % stayed}
 	elif is_recruitment and recruits>0:
 		brief={"tone":"info","title":"%d people chose to join" % recruits,"why":String(recruitment.get("summary","The recruitment party returned with newcomers."))}
-	elif is_recruitment and int(recruitment.get("encountered",0))>0:
+	elif is_recruitment and (int(recruitment.get("encountered",0))>0 or bool(recruitment.get("met_community",false))):
 		brief={"tone":"warn","title":"They found people; no one came","why":String(recruitment.get("summary","Everyone approached declined the settlement's offer."))}
 	elif is_recruitment:
 		brief={"tone":"warn","title":"The recruitment party returned alone","why":String(recruitment.get("summary","No one willing to join was found."))}
@@ -58,10 +58,10 @@ func tab(_sub:int)->Dictionary:
 	if is_recruitment:
 		blocks.append({"type":"text","heading":"RECRUITMENT OUTCOME","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
 		var encountered:=int(recruitment.get("encountered",0))
-		if encountered>0:
+		if encountered>0 or bool(recruitment.get("met_community",false)):
 			blocks.append({"type":"rows","heading":"WHO THEY MET","items":[{
 				"name":String(recruitment.get("group","People on the road")).capitalize(),
-				"sub":"%d approached · %d joined · %d declined" % [encountered,recruits,int(recruitment.get("declined",maxi(0,encountered-recruits)))],
+				"sub":"%d traveling · %d joined" % [encountered,recruits] if encountered>0 else "community visited · no household transfer",
 				"value":"%d JOINED" % recruits if recruits>0 else "NONE","value_color":Tokens.GREEN if recruits>0 else Tokens.AMBER,"accent":Tokens.GREEN if recruits>0 else Tokens.AMBER,
 			}]})
 		var reason_lines:Array[String]=[]

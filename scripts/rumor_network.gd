@@ -130,21 +130,22 @@ func sample(day:int)->void:
 func visit_at(mission:Dictionary,observer:String,position:Vector2,hosts:Array[Dictionary],day:int)->void:
 	for host:Dictionary in hosts:
 		if host.id!=observer and position.distance_to(host.position)<=12: exchange(mission,observer,host.id,position,day)
-func search_point(observer:String,lead:Dictionary,sequence:int,max_range:float)->Vector2:
+func search_point(observer:String,lead:Dictionary,sequence:int,max_range:float,origin_override:Vector2=Vector2.INF)->Vector2:
 	# Same deterministic area sampling for player and AI. No hidden city lookup.
 	var center:=vector(lead.center)
 	var angle:=fposmod(float(abs(String(lead.id).hash()+observer.hash()))*.000001+float(sequence)*2.39996323,TAU)
 	var radius:=float(lead.radius)*sqrt(fposmod(float(sequence+1)*.61803398875,1.0))
 	var target:Vector2=system._bounded_world_point(center+Vector2.from_angle(angle)*radius)
-	var origin:=home(observer)
+	var origin:=home(observer) if not is_finite(origin_override.x) or not is_finite(origin_override.y) else origin_override
 	if target.distance_to(origin)>max_range: target=origin+origin.direction_to(target)*max_range
 	return target
-func plan(observer:String,id:String,sequence:int,max_range:float,day:int)->Dictionary:
+func plan(observer:String,id:String,sequence:int,max_range:float,day:int,origin_override:Vector2=Vector2.INF)->Dictionary:
 	var lead:=known(observer,id,day)
 	if lead.is_empty() or int(lead.age)>MAX_AGE: return {"ok":false,"reason":"That lead is no longer available."}
-	var target:=search_point(observer,lead,sequence,max_range)
+	var origin:=home(observer) if not is_finite(origin_override.x) or not is_finite(origin_override.y) else origin_override
+	var target:=search_point(observer,lead,sequence,max_range,origin)
 	if target.distance_to(vector(lead.center))>float(lead.radius): return {"ok":false,"reason":"The reported region is beyond this expedition's reach. Choose a longer journey."}
-	var route:Dictionary=system._plan_scout_land_route(home(observer),target)
+	var route:Dictionary=system._plan_scout_land_route(origin,target)
 	if not bool(route.get("ok",false)): return route
 	if float(route.get("distance_km",INF))>max_range: return {"ok":false,"reason":"The land route to this search corridor exceeds the expedition's range."}
 	route["search_position"]=point(target); route["lead"]=lead

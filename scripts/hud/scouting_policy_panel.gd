@@ -37,6 +37,7 @@ var detail_body: VBoxContainer
 var focus_hint: Label
 var close_button: Button
 var done_button: Button
+var origin_selector: OptionButton
 var ancient := true
 
 func label(parent: Node, text: String, font_size := 14, color: Color = Art.INK) -> Label:
@@ -139,6 +140,12 @@ func _ready() -> void:
 		choice.alignment = HORIZONTAL_ALIGNMENT_LEFT; choice.toggle_mode = true; choice.custom_minimum_size.y = 40
 		focus_buttons[key] = choice
 		choice.tooltip_text = "New ground, resources, specimens and knowledge." if key=="exploration" else "Goodwill, knowledge and willing households. Visits continue when there is no room for newcomers."
+	label(focuses, "WHERE SHOULD THEY LEAVE FROM?", 11, Art.GOLD)
+	origin_selector = OptionButton.new(); origin_selector.name="ScoutOrigin"; origin_selector.custom_minimum_size.y=36
+	origin_selector.size_flags_horizontal=SIZE_EXPAND_FILL; focuses.add_child(origin_selector)
+	_refresh_origin_options()
+	origin_selector.item_selected.connect(func(index:int):
+		CivilizationSystem.scouting_staff.set_origin(String(origin_selector.get_item_metadata(index))); refresh())
 	focus_hint = label(focuses, "", 12, Art.SOFT)
 	var summary_card := _card(body); var summary_body := _stack(summary_card, 5)
 	var summary_top := HBoxContainer.new(); summary_body.add_child(summary_top)
@@ -184,15 +191,34 @@ func _layout() -> void:
 	panel.size = Vector2(minf(800,size.x-24), minf(maxf(430,desired_height),minf(790,size.y-24)))
 	panel.position = (size-panel.size)*.5
 
+func _refresh_origin_options(selected_id:String="") -> void:
+	if not is_instance_valid(origin_selector):return
+	var options:=CivilizationSystem.scout_origin_options()
+	var signature_parts:Array[String]=[]
+	for option:Dictionary in options:signature_parts.append("%s:%s" % [String(option.id),String(option.label)])
+	var signature:="|".join(signature_parts)
+	if String(origin_selector.get_meta("signature",""))!=signature:
+		origin_selector.clear()
+		for option:Dictionary in options:
+			origin_selector.add_item(String(option.label).capitalize())
+			origin_selector.set_item_metadata(origin_selector.item_count-1,String(option.id))
+		origin_selector.set_meta("signature",signature)
+	for index in origin_selector.item_count:
+		if String(origin_selector.get_item_metadata(index))==selected_id:
+			origin_selector.select(index)
+			return
+	if origin_selector.item_count>0:origin_selector.select(0)
+
 func refresh() -> void:
 	if not is_instance_valid(slider): return
 	var view: Dictionary = CivilizationSystem.scouting_staff.snapshot()
+	_refresh_origin_options(String(view.get("origin_city_id","")))
 	# Changes made elsewhere update the controls without issuing another order.
 	slider.set_value_no_signal(float(view.share)*100)
 	allocation.text = ("%d%%" % roundi(slider.value)) if is_equal_approx(slider.value,roundf(slider.value)) else "%.1f%%" % slider.value
 	staffing.text = "of our population\nUp to %d scouts · %d away" % [int(view.target),int(view.away)]
 	for key: String in focus_buttons: focus_buttons[key].set_pressed_no_signal(key==view.focus)
-	focus_hint.text = "New ground, samples & new knowledge." if view.focus=="exploration" else "Build ties. Invite households when home has room."
+	focus_hint.text = ("New ground, samples & new knowledge." if view.focus=="exploration" else "Build ties. Invite households when home has room.")+" New parties depart from %s." % String(view.get("origin_label","home"))
 	party_heading.text = "%d %s in the field" % [int(view.parties),"party" if int(view.parties)==1 else "parties"] if int(view.parties)>0 else "No parties away"
 	status.text = String(view.status)
 	review.text = "Staff review in %d days" % int(view.review_in) if float(view.share)>0 and int(view.review_in)>0 else "Staff review on the next game day" if float(view.share)>0 else "No new departures. Existing parties will return."
@@ -200,8 +226,18 @@ func refresh() -> void:
 	reception_card.visible = view.focus=="recruitment"
 	if reception_card.visible:
 		var capacity := int(view.reception.capacity)
-		reception_heading.text = "Visits continue · invitations on hold" if capacity<2 else "Room to invite %d people" % capacity
-		reception.text = ("INVITATIONS ON HOLD · Visits can still build goodwill\n" if capacity<2 else "INVITATIONS · ")+String(view.reception.message)
+		var recruitment:Dictionary=view.get("recruitment",{})
+		var known:=int(recruitment.get("known_targets",0))
+		var outlook:Dictionary=recruitment.get("outlook",{})
+		if capacity<2:
+			reception_heading.text = "Visits continue · invitations on hold"
+			reception.text = "INVITATIONS ON HOLD · Visits can still build goodwill\n"+String(view.reception.message)
+		elif known==0:
+			reception_heading.text = "No known community to invite"
+			reception.text = "SEARCHING · Recruiters are scouting for real communities. They cannot return with people unless they physically meet one. Exploration is the faster choice if charting land and finding artifacts is your priority."
+		else:
+			reception_heading.text = "Invitations viable at %s" % String(recruitment.get("target_label","a known community")) if bool(outlook.get("ready",false)) else "Building trust at %s" % String(recruitment.get("target_label","a known community"))
+			reception.text = "%d known destination%s · room for %d\n%s" % [known,"" if known==1 else "s",capacity,String(outlook.get("reason",view.reception.message))]
 	var keys: Array = [int(GameState.elapsed_days)]
 	for mission: Dictionary in CivilizationSystem.scout_missions:
 		keys.append([mission.get("mission_id",0),mission.get("personnel",0),mission.get("return_day",0),mission.get("route_status","")])
@@ -225,7 +261,7 @@ func _update_parties() -> void:
 		var duration := maxi(1,int(mission.return_day)-int(mission.get("start_day",0)))
 		entry.bar.value = clampf(100.0*(int(GameState.elapsed_days)-int(mission.get("start_day",0)))/duration,0,100)
 		entry.bar.tooltip_text = "Time through the planned journey, not live knowledge of their position. Returns may be delayed."
-		entry.detail.text = "%s\n%d food packed · %d days planned\n%s" % [String(mission.get("target_label","Open exploration")).capitalize(),roundi(float(mission.get("provisions",0))),duration,"Awaiting their return; no new report has arrived." if remaining<0 else "Their account and finds arrive when they return."]
+		entry.detail.text = "From %s · %s\n%d food packed · %d days planned\n%s" % [String(mission.get("origin_label","Home settlement")),String(mission.get("target_label","Open exploration")).capitalize(),roundi(float(mission.get("provisions",0))),duration,"Awaiting their return; no new report has arrived." if remaining<0 else "Their account and finds arrive when they return."]
 	for id: int in mission_rows.keys():
 		if not active.has(id):
 			var node: Control = mission_rows[id].card; parties.remove_child(node); node.queue_free(); mission_rows.erase(id); expanded.erase(id)

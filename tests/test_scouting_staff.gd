@@ -18,6 +18,18 @@ func test_policy_setting_and_repeated_views_never_move_spend_or_reveal()->void:
 	assert_dict(system.fog_snapshot()).is_equal(fog)
 	assert_bool(system.scouting_staff.set_policy(.5,"exploration").has("error")).is_true()
 	assert_bool(system.scouting_staff.set_policy(.05,"unknown").has("error")).is_true()
+
+func test_expansion_city_can_be_selected_as_the_physical_scout_origin()->void:
+	GameState.player_settlements.append({"id":"rivermeet","name":"Rivermeet","position":Vector2(500,0),"primary":false,"population_share":.2,"occupied_by":"player"})
+	assert_bool(bool(system.scouting_staff.set_origin("rivermeet").get("ok",false))).is_true()
+	var quote:Dictionary=system.scout_mission_quote(30,"open_world","east",4,false,"rivermeet")
+	assert_bool(bool(quote.get("can_dispatch",false))).override_failure_message(str(quote)).is_true()
+	assert_str(String(quote.origin_label)).is_equal("Rivermeet")
+	assert_dict(quote.route_plan.route[0]).is_equal({"x":500.0,"z":0.0})
+	var sent:Dictionary=system.dispatch_scouts(30,"open_world","east",4,false,"rivermeet")
+	assert_bool(bool(sent.get("ok",false))).override_failure_message(str(sent)).is_true()
+	assert_str(String(system.scout_missions[0].origin_city_id)).is_equal("rivermeet")
+	assert_str(String(system.scout_missions[0].origin_label)).is_equal("Rivermeet")
 func test_staff_obey_allocation_depart_once_and_wait_for_returns()->void:
 	system.scouting_staff.set_policy(.05,"exploration")
 	for day in 28:
@@ -104,6 +116,7 @@ func test_goodwill_requires_actual_returned_city_observation_and_has_revisit_coo
 	var reports:Array[Dictionary]=[{"controller":id,"observed_day":20,"observation_days":4}]
 	assert_int(system.scouting_staff.returned_influence(mission,reports,30).size()).is_equal(1)
 	assert_float(float(civ.player_relation.opinion)).is_greater(before)
+	assert_float(float(preload("res://scripts/society_exchange.gd").known_relation(id).familiarity)).is_greater(0.0)
 	assert_array(system.scouting_staff.returned_influence(mission,reports,31)).is_empty()
 
 func test_spatial_index_matches_exact_old_chart_queries_including_large_diagonals()->void:
@@ -156,6 +169,7 @@ func test_recruitment_without_known_communities_searches_without_creating_people
 	assert_int(system.scout_missions.size()).is_equal(1)
 	assert_str(system.scout_missions[0].target_kind).is_equal("recruit_people")
 	assert_str(system.scouting_staff.data.status).contains("find communities")
+	assert_int(int(system.scouting_staff.snapshot().recruitment.known_targets)).is_equal(0)
 	assert_float(GameState.population_exact).is_equal(population)
 	assert_dict(system.fog_snapshot()).is_equal(fog)
 	assert_bool(system._scout_route_is_land(system.scout_missions[0].route)).is_true()

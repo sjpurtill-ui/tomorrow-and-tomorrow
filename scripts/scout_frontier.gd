@@ -8,9 +8,11 @@ var bearing:float
 var surveyed:Dictionary={}
 var chart:RefCounted
 var active_chart:RefCounted
+var origin:Vector2
 
-func _init(owner:Node,distance:float,angle:float)->void:
+func _init(owner:Node,distance:float,angle:float,start:Vector2=Vector2.INF)->void:
 	world=owner;budget=distance;bearing=angle
+	origin=world.player_world_origin if not is_finite(start.x) or not is_finite(start.y) else start
 	chart=preload("res://scripts/scout_chart_index.gd").new(world.revealed_areas)
 	var active:Array=[]
 	for party:Dictionary in world.scout_missions:active.append({"kind":"trail","points":party.get("route",[]),"radius":24.0})
@@ -46,7 +48,6 @@ func refine(fallback:Dictionary)->Dictionary:
 	return best
 
 func search(step:float,node_limit:int=NODE_LIMIT)->Dictionary:
-	var origin:Vector2=world.player_world_origin
 	var nodes:Array[Dictionary]=[{"point":origin,"distance":0.0,"fresh":0.0,"parent":-1,"score":0.0}]
 	var visited:Dictionary={Vector2i.ZERO:true}
 	var pending:Array[int]=[0]

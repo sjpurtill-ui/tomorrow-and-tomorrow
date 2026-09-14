@@ -74,6 +74,37 @@ func test_households_transfer_once_and_preserve_world_population_and_mortality()
 	assert_float(float(E.pressure().unsettled)).is_equal(float(count))
 	assert_int(int(E.known_relation("neighbor").arrivals)).is_equal(count)
 
+func test_a_comparable_known_community_can_send_real_households_on_the_first_viable_visit()->void:
+	# Equal material conditions are a credible offer; this used to fail the hard
+	# six-point advantage gate forever despite spare homes and peaceful contact.
+	WorldSimulation.scoped("neighbor",func()->void:
+		WorldSimulation.state.housing_capacity=280
+		WorldSimulation.state.food_security=1;WorldSimulation.state.population_health=.95
+		WorldSimulation.state.water_metrics={"intake_ratio":1.0}
+		WorldSimulation.state.simulation_metrics={"food_days":60,"food_intake_ratio":1.0,"security":.9,"cohesion":.9}
+		WorldSimulation.state.population_allocations.Administration=12)
+	CivilizationSystem.civilizations[0].player_relation.opinion=0.0
+	var outlook:=E.invitation_outlook("neighbor")
+	assert_bool(outlook.ready).override_failure_message(str(outlook)).is_true()
+	var trip:=mission("recruit_people_visit");E.invite_households(trip,"neighbor","Neighbor",10)
+	assert_bool(trip.has("migrant_reservation")).is_true()
+	assert_int(int(trip.migrant_reservation.count)).is_greater_equal(2)
+
+func test_failed_invitation_records_the_real_community_and_a_useful_reason()->void:
+	WorldSimulation.scoped("neighbor",func()->void:
+		WorldSimulation.state.housing_capacity=500
+		WorldSimulation.state.food_security=1;WorldSimulation.state.population_health=1
+		WorldSimulation.state.water_metrics={"intake_ratio":1.0}
+		WorldSimulation.state.simulation_metrics={"food_days":120,"food_intake_ratio":1.0,"security":1.0,"cohesion":1.0})
+	CivilizationSystem.civilizations[0].player_relation.opinion=-.2
+	var trip:=mission("recruit_people_visit");E.invite_households(trip,"neighbor","Neighbor",10)
+	assert_bool(trip.has("migrant_reservation")).is_false()
+	assert_str(String(trip.recruitment_encounter.source_name)).is_equal("Neighbor")
+	assert_str(String(trip.recruitment_reason)).contains("living conditions")
+	var account:=CivilizationSystem._recruitment_return_account(trip,40,0)
+	assert_bool(account.met_community).is_true()
+	assert_str(String(account.group)).is_equal("Neighbor")
+
 func test_repeated_recruitment_without_an_encounter_never_creates_people()->void:
 	var before:=GameState.population_exact
 	for day in 400:

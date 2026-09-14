@@ -249,12 +249,14 @@ func generate_travel_item(stage: String,data: Dictionary) -> Dictionary:
 			text="Sovereign, your directive is given. The convoy is halting here to establish a permanent home. Stores stand at %.1f days, and %d nearby resource %s known. The builders are organizing the first Hearth Circle from the roles you assigned." % [food_days,known_resources,"site is" if known_resources==1 else "sites are"]
 		"halt":
 			text="Sovereign, the column has stopped. %s" % String(data.get("reason","Continuing would endanger the population."))
+		"forage_ready":
+			text="Sovereign, the camp has rebuilt a viable marching reserve. %s" % String(data.get("reason","The Travel Council judges that another leg can now be attempted."))
 		_:
 			text="Sovereign, the travel council reports that the convoy is %d%% through its present route." % progress
 	var item:={
 		"id":"travel_%s_%d_%d" % [stage,int(WorldSimulation.state.elapsed_days*24.0),rng.randi()],
 		"advisor":advisor_name,"office":office,"topic":"settlement" if stage=="settlement" else "travel","act":{"type":"report"},
-		"text":text,"urgency":0.82 if stage in ["provisions_low","halt"] else (0.58 if stage=="settlement" else 0.42),
+		"text":text,"urgency":0.82 if stage in ["provisions_low","halt"] else (0.58 if stage in ["settlement","forage_ready"] else 0.42),
 		"day":int(WorldSimulation.state.elapsed_days),"hour":int(WorldSimulation.state.elapsed_days*24.0)%24,"status":"unread",
 		"responses":[{"label":"Acknowledge","effect":"","magnitude":0.0,"days":1.0,"ripple":"The chosen ground enters the founding record; the convoy will no longer march." if stage=="settlement" else "The report is entered into the journey record."}]
 	}
