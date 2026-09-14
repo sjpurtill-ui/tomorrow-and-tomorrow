@@ -1577,6 +1577,21 @@ Preserve saves, existing uncommitted files and active player sessions. A running
 
 Copy-ready worker instructions are in `docs/WORKER_HANDOFF.md`.
 
+## September 14 — artifact illustration bank
+
+Integrated the reviewed portion of `codex/artifact-paper-art` into canonical
+main while preserving the newer scouting, recruitment, research-supply and
+collection-pagination systems. The collection now renders exact catalogue art:
+946 approved prehistoric finds and 21 separately gated civilization-made
+objects. Existing ownerless artifact records use their stable catalogue ID for
+presentation; missing approvals show the generic object glyph and never borrow
+unrelated research imagery. New exploration finds are explicitly prehistoric,
+while civilization art requires a real source civilization and adopted maker
+knowledge. Both artwork audits report zero errors, all 967 imported textures
+resolve, and 81 focused artifact/exchange tests pass with zero failures. The
+full 4,096-image request remains incomplete; 3,143 prehistoric catalogue entries
+still lack approved art and retain the honest generic fallback.
+
 ## Verification at this checkpoint
 
 The broad suite ran 522 cases (two skipped). It exposed four assertions in one recruitment-report test and an orphan HUD label. Both causes were fixed. The final combined focused run passed 66 cases with zero errors, failures or orphans (dialogue continuity, 39 UI cases, scout return speed, injuries/geometry and century focus). The earlier broad suite covered century-scale rivals, billion-population bounded state and military accounting. It was not rerun in full after the isolated fixes.

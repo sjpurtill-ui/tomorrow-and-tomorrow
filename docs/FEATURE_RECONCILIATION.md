@@ -1356,3 +1356,16 @@ Integrated e493ab5; 11 canonical checks pass. Bare map dismisses docks/help with
 ## September 10 — scouting allocation, city evidence and recruitment groups
 
 Integrated `ce7ed7a` on canonical Mac main, release 2026.09.10.2. Standing scouting replaces repeated general expedition buttons; connected physical routes, paid provisions and returned evidence apply to all civilizations. Compact city intelligence and map labels agree on observed population; targeted observation time improves estimates. Recruitment keeps existing soldiers and fills only missing people in supplied groups that fit free training places. HUD route-planning and hidden monthly vegetation rebuilds are removed; the actual year-31 release replay reaches 2.832 days/second at the 3-day setting. All 158 combined canonical checks pass, plus native UI/click verification. Frame stalls remain; no constant 3-day or smooth-FPS guarantee. See INTEGRATION_STATUS.md and SCOUTING_RECRUITMENT_CLARITY_HANDOFF.md for compatibility, evidence and held work. No player relaunch is part of this delivery.
+
+## September 14 — artifact imagery correction
+
+The reviewed `codex/artifact-paper-art` bank is reconciled with the newer
+artifact economy and scouting implementation. Artifact cards no longer display
+their linked research-field paintings. Exact approved object art is selected by
+origin namespace and stable catalogue ID; legacy ownerless finds are presented
+through that same prehistoric ID, and missing IDs use a generic object glyph.
+The integrated bank contains 946 reviewed prehistoric images and 21 gated
+living-civilization images. The remaining 3,143 prehistoric catalogue IDs are
+still unillustrated rather than falsely mapped. Focused canonical validation:
+81/81 artifact and exchange cases, two clean artwork audits, and zero missing
+imported texture targets.

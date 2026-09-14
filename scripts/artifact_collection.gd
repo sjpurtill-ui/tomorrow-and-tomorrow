@@ -1,5 +1,6 @@
 extends RefCounted
 ## Deterministic material culture, owned by the existing society_exchange ledger.
+const PREHISTORY=preload("res://scripts/prehistoric_artifacts.gd")
 const FORMS := ["cutting blade", "carved bead", "counting token", "ceremonial bowl", "woven fragment", "engraved tablet", "measuring rod", "pendant", "seal", "figurine", "flute", "painted panel", "storage jar", "spindle", "route marker", "calendar stone"]
 const STYLES := ["etched", "painted", "banded", "dotted", "spiraling", "paired", "interlaced", "radiating", "bordered", "repeated", "angular", "flowing", "layered", "faded", "polished", "miniature"]
 const FORM_MATERIALS := ["flint", "shell", "bone", "clay", "fiber", "slate", "wood", "amber", "soapstone", "clay", "bone", "wood", "clay", "wood", "basalt", "limestone"]
@@ -20,7 +21,9 @@ static func find_at(seed:int, position:Vector2, day:int)->Dictionary:
 	var variant := code % 4096
 	var roll := (code / 4096) % 1000
 	var tier := 4 if roll>=997 else 3 if roll>=975 else 2 if roll>=880 else 1 if roll>=600 else 0
-	return {"id":"artifact:"+str(seed)+":"+site,"kind":"artifact","name":"%s %s · %s %s" % [String(FORM_MATERIALS[variant%16]).capitalize(),FORMS[variant%16],STYLES[(variant/16)%16],MOTIFS[(variant/256)%16]],"source_id":"","source_name":"Survey site "+site,"position":{"x":position.x,"z":position.y},"observed_day":day,"returned_day":day,"discovery_id":SUBJECTS[variant%16],"study":0.0,"work":20.0+tier*20.0,"signals":["survey","culture","research"],"rarity":tier,"catalogue_id":variant,"held_days":0.0,"exhibited":false,"acquisition":"Recovered during a journey into uncharted ground"}
+	var ancient:=PREHISTORY.definition(variant)
+	ancient.merge({"id":"artifact:"+str(seed)+":"+site,"kind":"artifact","source_id":"","source_name":"Prehistoric find at "+site,"position":{"x":position.x,"z":position.y},"observed_day":day,"returned_day":day,"study":0.0,"work":20.0+tier*20.0,"signals":["survey","culture","research"],"rarity":tier,"held_days":0.0,"exhibited":false,"acquisition":"Prehistoric remnant recovered on physically visited uncharted ground"})
+	return ancient
 
 static func prestige(item:Dictionary)->float:
 	return pow(2.5,int(item.get("rarity",0)))*(1.0+log(1.0+float(item.get("held_days",0))/360.0))

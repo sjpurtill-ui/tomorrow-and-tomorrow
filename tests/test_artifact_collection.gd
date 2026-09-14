@@ -91,16 +91,16 @@ func test_populated_collection_pages_searches_and_fits()->void:
 		view.page=0;view.search.text="no such artifact";view.refresh(true)
 		assert_int(view.cards.get_child_count()).is_equal(1)
 
-func test_returned_artifact_card_uses_its_bound_subject_painting()->void:
-	var record:=held();record.discovery_id="stone_sorting";record.name="Selected cutting stone"
+func test_returned_artifact_card_uses_its_artifact_painting_not_subject_art()->void:
+	var record:=held();record.discovery_id="stone_sorting";record.name="Selected cutting stone";record.catalogue_id=0
 	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(960,720);add_child(viewport)
 	var view:=CollectionPanel.new();viewport.add_child(view)
 	for frame:int in range(4):await get_tree().process_frame
 	var card:PanelContainer=view.cards.get_child(0)
 	var row:HBoxContainer=card.get_child(0)
 	var painting:TextureRect=row.get_child(0)
-	assert_vector(painting.custom_minimum_size).is_equal(Vector2(112,84))
-	assert_str(painting.texture.resource_path).contains("stone_sorting")
+	assert_vector(painting.custom_minimum_size).is_equal(Vector2(160,160))
+	assert_str(painting.texture.resource_path).contains("artifacts/prehistoric-v1/artifact-0000")
 
 func test_artifact_state_roundtrip_and_legacy_defaults()->void:
 	var record:=held();A.advance(360)

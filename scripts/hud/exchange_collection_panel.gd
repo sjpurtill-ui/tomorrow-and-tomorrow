@@ -1,4 +1,5 @@
 extends Control
+const ArtifactArt=preload("res://scripts/hud/artifact_visuals.gd")
 const A=preload("res://scripts/artifact_collection.gd")
 var pause=preload("res://scripts/hud/simulation_pause.gd").new()
 var search:LineEdit
@@ -98,11 +99,24 @@ func refresh(force:bool)->void:
 	for item:Dictionary in matching.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE):
 		var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.TEAL if float(item.study)>=1 else T.BORDER,1,6,12));cards.add_child(card)
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
+		var presented:=ArtifactArt.presentation(item)
 		var definition:=DiscoverySystem.discovery_definition(String(item.discovery_id))
-		var icon:=TextureRect.new();icon.texture=ResearchVisuals.for_discovery(definition) if not definition.is_empty() else V.icon("population" if item.kind=="culture" else "production" if item.kind in ["artifact","specimen"] else "logistics");icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED if not definition.is_empty() else TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(112,84) if not definition.is_empty() else Vector2(36,36);row.add_child(icon)
+		var artifact_texture:=ArtifactArt.texture(item)
+		var icon:=TextureRect.new()
+		if item.kind=="artifact":
+			icon.texture=artifact_texture if artifact_texture!=null else V.icon("production")
+			icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			var artifact_size:=72.0 if size.x<480 else 160.0
+			icon.custom_minimum_size=Vector2(artifact_size,artifact_size) if artifact_texture!=null else Vector2(36,36)
+		else:
+			icon.texture=ResearchVisuals.for_discovery(definition) if not definition.is_empty() else V.icon("population" if item.kind=="culture" else "production" if item.kind=="specimen" else "logistics")
+			icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED if not definition.is_empty() else TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.custom_minimum_size=Vector2(112,84) if not definition.is_empty() else Vector2(36,36)
+		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;row.add_child(icon)
 		var content:=VBoxContainer.new();content.size_flags_horizontal=SIZE_EXPAND_FILL;row.add_child(content)
-		label(content,String(item.kind).to_upper(),10,T.GOLD);label(content,String(item.name),18,T.INK)
+		label(content,"PREHISTORIC FIND" if presented.get("artifact_origin","")=="prehistoric" else "CIVILIZATION-MADE" if presented.get("artifact_origin","")=="civilization" else String(item.kind).to_upper(),10,T.GOLD);label(content,String(presented.get("name",item.name)),18,T.INK)
 		label(content,"%s · encountered day %d · home day %d" % [item.source_name,int(item.observed_day),int(item.returned_day)],12,T.TEXT_SOFT)
+		if not String(presented.get("insight","")).is_empty():label(content,String(presented.insight),13,T.BODY)
 		var bar:=ProgressBar.new();bar.show_percentage=false;bar.value=float(item.study)*100;bar.custom_minimum_size.y=6;content.add_child(bar)
 		var known:=String(item.discovery_id) in GameState.known_discoveries
 		label(content,"Recorded in our cultural and knowledge collection" if known else (("Ready to exchange findings" if item.get("partnership_protocol",false) else "Evidence ready: "+String(definition.get("name","related investigation"))) if float(item.study)>=1 else "Being examined · %d%%" % roundi(float(item.study)*100)),12,T.TEAL)

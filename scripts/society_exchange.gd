@@ -4,6 +4,7 @@ extends RefCounted
 const PERSONALITY=preload("res://scripts/leader_personality.gd")
 const COLLECTION_LIMIT:=32768 # Multiple acquisition records across the 5,000-discovery history.
 const CONTACT_LIMIT:=1024
+const EarlyArt=preload("res://scripts/early_civ_artifacts.gd")
 const Artifacts=preload("res://scripts/artifact_collection.gd")
 const CONTACT_RADIUS:=2.0
 const OBJECTS:={"clay_shaping":["Clay trial vessel","Clay"],"pit_firing":["Fired clay trial piece","Clay"],"cordage":["Braided cord sample","Fiber Plants"],"basketry":["Woven container sample","Fiber Plants"],"stone_sorting":["Selected cutting stone","Stone"],"joinery":["Fitted timber joint","Timber"],"tallies":["Marked counting stick","Timber"]}
@@ -101,6 +102,16 @@ static func valid_item(item:Variant)->bool:
 	for field:String in ["rarity","catalogue_id","held_days"]:
 		if item.has(field) and (not number(item[field]) or item[field]<0):return false
 	if item.get("rarity",0)>4 or item.get("catalogue_id",0)>4095:return false
+	if item.has("insight") and not short_text(item.insight,600):return false
+	if item.has("artifact_origin") and item.artifact_origin not in ["prehistoric","civilization"]:return false
+	if item.has("art_collection"):
+		if item.art_collection=="prehistoric-v1":
+			if item.get("artifact_origin")!="prehistoric" or item.source_id!="" or not item.has("catalogue_id"):return false
+		elif item.art_collection=="early-civ-v1":
+			if item.get("artifact_origin")!="civilization" or item.source_id=="" or not item.has("catalogue_id"):return false
+			if not text_list(item.get("maker_requirements"),16):return false
+			if item.maker_requirements!=EarlyArt.REQUIREMENTS[int(item.catalogue_id)%16]:return false
+		else:return false
 	if item.has("gift_receipts") and not text_list(item.gift_receipts,64):return false
 	if item.has("exhibited") and not item.exhibited is bool:return false
 	return item.study<=1 and item.work>=1 and item.work<=100000 and item.position is Dictionary and number(item.position.get("x")) and number(item.position.get("z")) and text_list(item.signals,30)
@@ -277,6 +288,7 @@ static func encounter(mission:Dictionary,source:String,source_name:String,positi
 					return true)
 				if paid:kind="artifact";name=String(OBJECTS[id][0])
 			material={"id":key,"kind":kind,"name":name,"source_id":owner_id(source),"source_name":source_name,"position":position.duplicate(),"observed_day":day,"returned_day":day,"discovery_id":id,"study":0.0,"work":60.0 if kind=="culture" else 90.0,"signals":definition.get("signals",[]).duplicate(),"acquisition":"Shared during a peaceful visit"}
+			EarlyArt.apply(material,source_state.known_discoveries,source_state.discovery_adoption)
 			mission.carried_collections.append(material)
 			break
 	# The contact itself exposes both traveling and receiving households to the

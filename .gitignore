@@ -33,3 +33,7 @@ desktop.ini
 .env
 .env.*
 *.save
+
+# Runtime artifact illustrations are game assets, not test captures.
+!assets/ui/artifacts/
+!assets/ui/artifacts/**

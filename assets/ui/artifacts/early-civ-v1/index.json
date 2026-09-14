@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "expected_count": 4096,
+  "approved": {
+    "0": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0000.png",
+      "sha256": "bd08903afb351bc978d6a1136443bd2d2d1d1fce2ca925e508c7c797dec16b82"
+    },
+    "1": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0001.png",
+      "sha256": "e6ca61f611b0564f52f8ef3b95b35917c6701955cbd3d01e5688441112b01d70"
+    },
+    "2": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0002.png",
+      "sha256": "b815b5c21dc9a4f23460c7ed155be678f7f68a08f284cd28b538dbb273a15135"
+    },
+    "3": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0003.png",
+      "sha256": "1cc4a5304f3d7b1c5e3faf8dcdf76d861667843f5ea1f252d6767704fb0bc1ac"
+    },
+    "4": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0004.png",
+      "sha256": "fd247bcb60bac6dffa07088117ec90de22fccda432eb50c66c8254bb147ad4e9"
+    },
+    "5": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0005.png",
+      "sha256": "22eb14324166c78bdede8b2fb75b6aa03a2964ca4b99ded3482e2080dd85e734"
+    },
+    "6": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0006.png",
+      "sha256": "084f5a271f2bb43beae041e934b3e54311365fa477e734a80e2daa9c00d79fea"
+    },
+    "7": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0007.png",
+      "sha256": "7b1cb99141b66e42a28b30452d21726f9b8699894338b7ae5e1e09976df0d7d7"
+    },
+    "8": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0008.png",
+      "sha256": "0e353b9c976511b6d39ba5b78852e1db3011213d50d41ae534ec1f92f053041a"
+    },
+    "9": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0009.png",
+      "sha256": "ae65ab668e232c2977c7589b0c4ac6c1073a117362a1af1fe00123b7ecfa4d31"
+    },
+    "10": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0010.png",
+      "sha256": "0ed7f6c51c255e44ff02e52b98c828365794ae4515c5635a3aa85dbfc40f2a94"
+    },
+    "11": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0011.png",
+      "sha256": "3ebc37311c0117a85c2ae316c855a5b566db275b2ca9f4b9ebab674e01f1637d"
+    },
+    "12": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0012.png",
+      "sha256": "6a12bdec3c887e1f805c5ea01994fc14ea93ec1a783216e37fbe71348f9be5cb"
+    },
+    "13": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0013.png",
+      "sha256": "c0cfe959fc156632c525d57db724e2e335c527cf600c4d38f92eb5372de8c43d"
+    },
+    "14": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0014.png",
+      "sha256": "bc2092f22c7bfa0cf711382659e1957dd4f962e7fff1dc6639ebeafa44d8a0bc"
+    },
+    "15": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0015.png",
+      "sha256": "df69acd4d841c27e5bd87d303f741d593fda1c0feb687bb5626566572b9b1654"
+    },
+    "17": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0017.png",
+      "sha256": "85964ad13035ca9af6131d7ba70c68c4c09b49cfac579449a2a9383f304eacc3"
+    },
+    "18": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0018.png",
+      "sha256": "657c481e4f838f504894dcb0a8b0e1e7f755b9442ee6e8a085e12ea4b020ee39"
+    },
+    "19": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0019.png",
+      "sha256": "0125d69dbdce3449f827299e2d3c9e993080d7e5f8f7648815cc2ac283b635f6"
+    },
+    "20": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0020.png",
+      "sha256": "b8414af9baefac21f0280854cc1882fd7db1d3ab6e93291d372106535b8ed97f"
+    },
+    "21": {
+      "path": "res://assets/ui/artifacts/early-civ-v1/artifact-0021.png",
+      "sha256": "8b0e77973d2a08e972c7fcdb3ea2b7040c2f64af687a6047098c86fd71617af5"
+    }
+  }
+}
