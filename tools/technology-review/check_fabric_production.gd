@@ -9,7 +9,7 @@ func run()->void:
  var completed:Array[bool]=[false]
  W.scoped("fabric_production",func()->void:
   var catalog:Array=W.discovery.technology_catalog.duplicate(true)
-  catalog.append_array(K.entries())
+  for entry:Dictionary in K.entries():assert(W.discovery.catalog_by_id.has(entry.id))
   var errors:Array=load("res://scripts/technology_catalog_contract.gd").validate(K.entries(),catalog)
   if not errors.is_empty():push_error(str(errors))
   assert(errors.is_empty())
@@ -38,5 +38,5 @@ func run()->void:
  W.clear()
  if not completed[0]:
   printerr("FAIL: component production scenario stopped early");quit(1);return
- print("PASS: ten candidate catalog contracts and finite component production with missing-input/partial-work checks")
+ print("PASS: ten registered catalog contracts and finite component production with missing-input/partial-work checks")
  quit()

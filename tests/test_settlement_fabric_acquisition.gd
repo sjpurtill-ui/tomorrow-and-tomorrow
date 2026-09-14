@@ -24,15 +24,9 @@ func before_test()->void:
 		E.policy("balanced","open"))
 	CivilizationSystem.civilizations.clear();CivilizationSystem.civilizations.append({"id":"neighbor","name":"Neighbor","world_position":Vector2(30,0),"strategic_regions":[],"player_relation":{"opinion":.3,"at_war":false}})
 	DiscoverySystem.initialize()
-	# Isolated normalized candidates only; production registration remains integrator-owned.
+	# Exercise the registered, fully normalized production catalog.
 	for raw:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
-		var entry:Dictionary=DiscoverySystem._classify_discovery(raw)
-		entry=preload("res://scripts/society_model.gd").new().normalize_discovery(entry)
-		entry=preload("res://scripts/technology_branch_rules.gd").apply(entry)
-		entry=preload("res://scripts/mathematics_knowledge.gd").apply(entry)
-		entry=preload("res://scripts/mechanics_knowledge.gd").apply(entry)
-		DiscoverySystem.catalog_by_id[entry.id]=entry
-		DiscoverySystem.technology_catalog.append(entry)
+		assert_bool(DiscoverySystem.catalog_by_id.has(raw.id)).is_true()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 
 func after_test()->void:

@@ -24,15 +24,9 @@ func before_test()->void:
 		E.policy("balanced","open"))
 	CivilizationSystem.civilizations.clear();CivilizationSystem.civilizations.append({"id":"neighbor","name":"Neighbor","world_position":Vector2(30,0),"strategic_regions":[],"player_relation":{"opinion":.3,"at_war":false}})
 	DiscoverySystem.initialize()
-	# Isolated normalized candidates only; production registration remains integrator-owned.
+	# Exercise the registered, fully normalized production catalog.
 	for raw:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
-		var entry:Dictionary=DiscoverySystem._classify_discovery(raw)
-		entry=preload("res://scripts/society_model.gd").new().normalize_discovery(entry)
-		entry=preload("res://scripts/technology_branch_rules.gd").apply(entry)
-		entry=preload("res://scripts/mathematics_knowledge.gd").apply(entry)
-		entry=preload("res://scripts/mechanics_knowledge.gd").apply(entry)
-		DiscoverySystem.catalog_by_id[entry.id]=entry
-		DiscoverySystem.technology_catalog.append(entry)
+		assert_bool(DiscoverySystem.catalog_by_id.has(raw.id)).is_true()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 
 func after_test()->void:
@@ -78,7 +72,7 @@ func test_ten_joint_investigations_require_both_studies_and_paid_returned_findin
 		peer.elapsed_days=GameState.elapsed_days
 		WorldSimulation.scoped("neighbor",func()->void:
 			WorldSimulation.discovery.initialize()
-			WorldSimulation.discovery.catalog_by_id[subject]=normalized
+			assert_dict(WorldSimulation.discovery.catalog_by_id[subject]).is_equal(normalized)
 		)
 		for parent:String in entry.requires_all:
 			GameState.known_discoveries.append(parent);peer.known_discoveries.append(parent)

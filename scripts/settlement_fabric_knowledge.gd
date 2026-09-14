@@ -1,5 +1,5 @@
 extends RefCounted
-## Unregistered worker candidates; preserve authored ALL/OR predicates.
+## Operating construction methods with preserved authored ALL/OR predicates.
 static func entries()->Array[Dictionary]:
 	return [
   {

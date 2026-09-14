@@ -58,9 +58,18 @@ func run()->void:
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/fastener_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/communications_knowledge.gd").entries(),discovery.technology_catalog))
 	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/metallurgy_process_knowledge.gd").entries(),discovery.technology_catalog))
+	errors.append_array(load("res://scripts/technology_catalog_contract.gd").validate(load("res://scripts/settlement_fabric_knowledge.gd").entries(),discovery.technology_catalog))
 	var discovery_ids:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:discovery_ids.append(entry.id)
-	var production:Dictionary=load("res://tools/production_dependency_audit.gd").audit(load("res://scripts/civilian_industry.gd").PRODUCTS,load("res://scripts/technology_operations.gd").PLANTS,root.get_node("ResourceSystem").catalog.keys()+load("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),discovery_ids,load("res://tools/production_dependency_audit.gd").operating_routes(),load("res://scripts/sec_specialist_supply.gd").RESERVE)
+	var products:Dictionary=load("res://scripts/civilian_industry.gd").PRODUCTS.duplicate(true)
+	# Deferred settlement trials consume physical inputs after component manufacture.
+	# Include them only in this audit closure; generic recipes do not execute the
+	# machine-workshop inspection contract at runtime.
+	var fabric:Script=load("res://scripts/settlement_fabric_operations.gd")
+	for entry:Dictionary in load("res://scripts/settlement_fabric_knowledge.gd").entries():
+		for item:String in entry.get("production_items",[]):
+			if products.has(item):products[item].machine_inspection=fabric.trial_cost(String(entry.id))
+	var production:Dictionary=load("res://tools/production_dependency_audit.gd").audit(products,load("res://scripts/technology_operations.gd").PLANTS,root.get_node("ResourceSystem").catalog.keys()+load("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),discovery_ids,load("res://tools/production_dependency_audit.gd").operating_routes(),load("res://scripts/sec_specialist_supply.gd").RESERVE)
 	errors.append_array(production.errors)
 	for id:String in production.blocked_products:errors.append(id+": no structural manufacturing path "+JSON.stringify(production.blocked_products[id]))
 	for id:String in production.blocked_plants:errors.append(id+": no structural installation path "+JSON.stringify(production.blocked_plants[id]))
