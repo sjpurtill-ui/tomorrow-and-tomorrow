@@ -352,20 +352,37 @@ static func recruitment_target(system:Node)->String:
 	var targets:=recruitment_targets(system)
 	return targets[0] if not targets.is_empty() else ""
 
+static func invitation_outlook(source:String)->Dictionary:
+	var room:=reception_capacity()
+	if owner_state(source)==null:return {"ready":false,"score":-1.0,"threshold":-0.02,"reason":"The community is no longer available to visit."}
+	var index:=WorldSimulation.world._civilization_index(source)
+	var opinion:=float(WorldSimulation.world.civilizations[index].player_relation.get("opinion",0)) if index>=0 else 0.0
+	var ties:=connection(source)
+	var our_attraction:=attraction()
+	var their_attraction:float=WorldSimulation.scoped(owner_id(source),func()->float:return attraction())
+	# Households compare material conditions, but returned visits and goodwill make
+	# a marginal offer credible. This gives repeated influence journeys a real
+	# path toward recruitment without creating unaffiliated people from nothing.
+	var score:=our_attraction-their_attraction+float(ties.familiarity)*.12+maxf(0.0,opinion)*.08+float(ties.respect)*.04
+	var threshold:=-0.02
+	var reason:="Households can hear an invitation on the next visit." if score>=threshold else "Our living conditions and trusted ties are not yet persuasive enough. Improve life at home or keep building familiarity."
+	if room<2:reason=String(reception_snapshot().message)
+	return {"ready":room>=2 and score>=threshold,"score":score,"threshold":threshold,"room":room,"opinion":opinion,"familiarity":float(ties.familiarity),"reason":reason}
+
 static func invite_households(mission:Dictionary,source:String,source_name:String,day:int)->void:
 	if mission.has("migrant_reservation"):return
+	mission["recruitment_encounter"]={"source":source,"source_name":source_name}
 	if day<int(known_relation(source).get("recruitment_truce_until",0)):
 		mission["recruitment_reason"]="Our border understanding suspends invitations to each other’s households.";return
 	var room:=reception_capacity()
 	if room<2:mission["recruitment_reason"]="No invitation: "+String(reception_snapshot().message);return
 	var recipient:=WorldSimulation.actor_id
-	var our_attraction:=attraction()
-	var familiarity:=float(connection(source).familiarity)
+	var outlook:=invitation_outlook(source)
 	var remaining_days:=maxi(1,int(mission.get("actual_return_day",mission.return_day))-day)
 	var key:="%s:%s" % [recipient,str(mission.get("mission_id",0))]
 	var result:Dictionary=WorldSimulation.scoped(owner_id(source),func()->Dictionary:
-		var advantage:=our_attraction-attraction()+familiarity*.08
-		if advantage<.06:return {"reason":"The households prefer their present living conditions and ties."}
+		var advantage:=float(outlook.score)-float(outlook.threshold)+.02
+		if not bool(outlook.ready):return {"reason":String(outlook.reason)}
 		var free:=maxi(0,WorldSimulation.state.able_population()-WorldSimulation.military._mobilized_count()-WorldSimulation.world.mission_absent_personnel()-12)
 		var delegates:=clampi(int(mission.get("personnel",2)),2,80)
 		var people:=mini(room,mini(free,clampi(floori(advantage*delegates*4),2,delegates*2)))

@@ -365,16 +365,12 @@ func test_contact_sites_unlock_targeted_investigation_and_confirm_nearby_home_se
 	assert_array(system.validate_state()).is_empty()
 
 
-func test_returning_scouts_can_recruit_a_small_aggregate_wandering_group()->void:
+func test_open_exploration_never_invents_a_wandering_group_to_recruit()->void:
 	var population_before:=GameState.population_total
 	var recruitment_mission:Dictionary={"mission_id":99,"duration_days":365,"target_id":"open_world","target_kind":"explore"}
-	var recruited:=0
 	for day in range(1,200):
-		recruited=system._resolve_scout_recruitment(recruitment_mission,day)
-		if recruited>0: break
-	assert_int(recruited).is_between(2,12)
-	assert_int(GameState.population_total).is_equal(population_before+recruited)
-	assert_float(float(GameState.population_cohorts.get("working_age",0.0))).is_greater(0.0)
+		assert_int(system._resolve_scout_recruitment(recruitment_mission,day)).is_equal(0)
+	assert_int(GameState.population_total).is_equal(population_before)
 
 
 func test_recruitment_returns_a_distinct_social_account_even_when_nobody_joins()->void:
@@ -383,17 +379,21 @@ func test_recruitment_returns_a_distinct_social_account_even_when_nobody_joins()
 	assert_dict(empty_account).is_not_empty()
 	assert_str(String(empty_account.get("summary",""))).is_not_empty()
 	assert_array(empty_account.get("reasons",[])).is_not_empty()
-	assert_bool(String(empty_account.get("disposition","")) in ["none_found","all_declined"]).is_true()
+	assert_str(String(empty_account.get("disposition",""))).is_equal("none_joined")
+	assert_bool(bool(empty_account.get("met_community",true))).is_false()
+	mission["migrant_reservation"]={"count":7,"source_name":"River households"}
+	mission["recruitment_encounter"]={"source_name":"River households"}
 	var successful_account:Dictionary=system._recruitment_return_account(mission,551,7)
 	assert_int(int(successful_account.get("joined",0))).is_equal(7)
 	assert_int(int(successful_account.get("encountered",0))).is_greater_equal(7)
 	assert_str(String(successful_account.get("summary",""))).contains("7")
+	assert_bool(bool(successful_account.get("met_community",false))).is_true()
 	var distinct_returns:Dictionary={}
 	for expedition_number in range(8):
 		mission["mission_id"]=800+expedition_number
 		var varied_account:Dictionary=system._recruitment_return_account(mission,600+expedition_number*17,0)
 		distinct_returns[String(varied_account.get("summary",""))]=true
-	assert_int(distinct_returns.size()).is_greater(2)
+	assert_int(distinct_returns.size()).is_equal(1)
 
 
 func test_an_encounter_site_is_not_a_diplomatic_destination()->void:
@@ -1373,10 +1373,10 @@ func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:
 		system.civilizations[index]=civ
 	system.advance_to_day(36_500)
 	assert_int(system.civilizations.size()).is_between(system.MIN_RIVAL_CIVILIZATIONS,system.MAX_RIVAL_CIVILIZATIONS)
-	# Richer bounded war, intelligence, and travel histories increased the fixed
-	# record payload without making it depend on population; the payload scales
-	# only with the world's drawn rival count, never with entity counts.
-	assert_int(JSON.stringify(system.export_state()).length()).is_less(60_000+system.civilizations.size()*30_000)
+	# Richer bounded war, intelligence, travel, and collection histories increase
+	# the fixed record payload without making it depend on population; the payload
+	# scales only with the world's drawn rival count, never with entity counts.
+	assert_int(JSON.stringify(system.export_state()).length()).is_less(150_000+system.civilizations.size()*30_000)
 	assert_array(system.validate_state()).is_empty()
 
 

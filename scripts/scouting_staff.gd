@@ -5,7 +5,7 @@ const FOCI:={"exploration":"Exploration & discovery","recruitment":"Recruitment 
 var host:Node
 var data:Dictionary={}
 func _init(world:Node)->void:host=world;reset()
-func reset()->void:data={"share":0.0,"focus":"exploration","last_day":-1,"next_review":0,"status":"Choose a scouting allocation to begin.","food_spent":0.0,"last_visits":{},"target_cursor":0}
+func reset()->void:data={"share":0.0,"focus":"exploration","origin_city_id":"","last_day":-1,"next_review":0,"status":"Choose a scouting allocation to begin.","food_spent":0.0,"last_visits":{},"target_cursor":0}
 func valid(value:Variant)->bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return true
@@ -14,7 +14,7 @@ func valid(value:Variant)->bool:
 	if not visits is Dictionary or visits.size()>64:return false
 	for date in visits.values():
 		if not host.city_intelligence.number(date) or float(date)<0:return false
-	return host.city_intelligence.number(value.get("share")) and float(value.share)>=0 and float(value.share)<=.10 and String(value.get("focus","")) in FOCI and host.city_intelligence.number(value.get("last_day",-1)) and host.city_intelligence.number(value.get("next_review",0)) and host.city_intelligence.number(value.get("food_spent",0)) and float(value.get("food_spent",0))>=0 and value.get("status","") is String
+	return host.city_intelligence.number(value.get("share")) and float(value.share)>=0 and float(value.share)<=.10 and String(value.get("focus","")) in FOCI and value.get("origin_city_id","") is String and String(value.get("origin_city_id","")).length()<100 and host.city_intelligence.number(value.get("last_day",-1)) and host.city_intelligence.number(value.get("next_review",0)) and host.city_intelligence.number(value.get("food_spent",0)) and float(value.get("food_spent",0))>=0 and value.get("status","") is String
 func restore(value:Dictionary)->void:
 	reset();data.merge(value,true)
 func set_policy(share:float,focus:String)->Dictionary:
@@ -23,11 +23,27 @@ func set_policy(share:float,focus:String)->Dictionary:
 	data.share=share;data.focus=focus;data.next_review=int(WorldSimulation.state.elapsed_days);data.target_cursor=0
 	data.status="Staff will organize parties on the next day." if share>0 else "No new departures. Parties already away will finish and return."
 	return {"ok":true,"message":data.status}
+func set_origin(origin_city_id:String)->Dictionary:
+	var origin:Dictionary=host._scout_origin(origin_city_id)
+	if origin_city_id!="" and String(origin.get("id",""))!=origin_city_id:return {"error":"Choose a player-controlled settlement as the scouting origin."}
+	data.origin_city_id=String(origin.get("id",""));data.next_review=int(WorldSimulation.state.elapsed_days)
+	data.status="New scouting parties will organize from %s." % String(origin.get("label","the selected settlement"))
+	return {"ok":true,"message":data.status}
 func snapshot()->Dictionary:
 	var population:=maxi(0,floori(WorldSimulation.state.population_exact))
 	var assigned:=0
 	for mission:Dictionary in host.scout_missions:assigned+=int(mission.get("personnel",0))
-	return {"share":float(data.share),"focus":String(data.focus),"target":floori(population*float(data.share)),"away":assigned,"parties":host.scout_missions.size(),"status":String(data.status),"food_spent":float(data.food_spent),"daily_food":float(assigned)*.55,"review_in":maxi(0,int(data.next_review)-int(WorldSimulation.state.elapsed_days)),"reception":EXCHANGE.reception_snapshot() if data.focus=="recruitment" else {}}
+	var recruitment:Dictionary={}
+	if data.focus=="recruitment":
+		var targets:=EXCHANGE.recruitment_targets(host)
+		recruitment={"known_targets":targets.size(),"reception":EXCHANGE.reception_snapshot()}
+		if not targets.is_empty():
+			var option:Dictionary=host._scout_target_option(String(targets[0]))
+			if not option.is_empty():
+				recruitment["target_label"]=String(option.get("label","known community")).trim_prefix("VISIT ").capitalize()
+				recruitment["outlook"]=EXCHANGE.invitation_outlook(String(option.get("civ_id","")))
+	var origin:Dictionary=host._scout_origin(String(data.get("origin_city_id","")))
+	return {"share":float(data.share),"focus":String(data.focus),"origin_city_id":String(origin.get("id","")),"origin_label":String(origin.get("label","Home settlement")),"origins":host.scout_origin_options(),"target":floori(population*float(data.share)),"away":assigned,"parties":host.scout_missions.size(),"status":String(data.status),"food_spent":float(data.food_spent),"daily_food":float(assigned)*.55,"review_in":maxi(0,int(data.next_review)-int(WorldSimulation.state.elapsed_days)),"reception":EXCHANGE.reception_snapshot() if data.focus=="recruitment" else {},"recruitment":recruitment}
 func advance(day:int)->void:
 	if day<=int(data.last_day):return
 	data.last_day=day
@@ -66,20 +82,20 @@ func advance(day:int)->void:
 		for days:int in host.SCOUT_DURATIONS:
 			var party_size:=mini(people,floori(spendable/(days*.55)))
 			if party_size<2:break
-			var quote:Dictionary=host.scout_mission_quote(days,target,"",party_size,true)
+			var quote:Dictionary=host.scout_mission_quote(days,target,"",party_size,true,String(view.get("origin_city_id","")))
 			if not bool(quote.get("can_dispatch",false)):
 				last_reason=String(quote.get("blocker",quote.get("error",last_reason)));continue
 			if float(quote.provisions)>spendable:
 				last_reason="Waiting for provisions: this route needs %.0f food; %.0f is available after the home reserve." % [float(quote.provisions),spendable];continue
 			if search and float(quote.route_plan.get("novelty",0))<.38:
 				last_reason="No useful uncharted route found within the affordable travel budget. Staff will check again; no food was spent.";continue
-			var result:Dictionary=host.dispatch_scouts(days,target,"",party_size,true)
+			var result:Dictionary=host.dispatch_scouts(days,target,"",party_size,true,String(view.get("origin_city_id","")))
 			if result.has("error"):data.status=String(result.error);return
 			var party:Dictionary=host.scout_missions[-1];party["staff_managed"]=true;party["staff_focus"]=String(data.focus)
 			data.food_spent=float(data.food_spent)+float(party.provisions)
 			var purpose:="chart unvisited ground"
 			if data.focus=="recruitment":purpose="find communities and make contact" if search else "visit "+String(quote.target.label).trim_prefix("VISIT ")+" and build goodwill"
-			data.status="%d scouts departed to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),purpose,int(party.duration_days)]
+			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
 			return
 	data.status=last_reason
 
@@ -98,5 +114,8 @@ func returned_influence(mission:Dictionary,reports:Array[Dictionary],day:int)->A
 		var gain:=minf(.04,.005*maxi(1,int(report.get("observation_days",1))))
 		var before:=float(relation.get("opinion",0))
 		relation.opinion=minf(1,before+gain);data.last_visits[id]=day
-		outcomes.append("Visits to %s improved goodwill by %.1f points." % [host.city_intelligence.controller_label(id),(float(relation.opinion)-before)*100])
+		var ties:=EXCHANGE.connection(id)
+		var familiarity_before:=float(ties.familiarity)
+		ties.familiarity=minf(1.0,familiarity_before+minf(.12,.035+.005*maxi(1,int(report.get("observation_days",1)))))
+		outcomes.append("Visits to %s improved goodwill by %.1f points and familiarity by %.1f points. Future household invitations will weigh that trust." % [host.city_intelligence.controller_label(id),(float(relation.opinion)-before)*100,(float(ties.familiarity)-familiarity_before)*100])
 	return outcomes

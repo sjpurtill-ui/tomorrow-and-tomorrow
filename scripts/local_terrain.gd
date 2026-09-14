@@ -1051,6 +1051,7 @@ func advance_world_time(days_advanced:float)->void:
 		travel_active=bool(journey.active)
 		_check_travel_milestone_reports(progress)
 		if was_traveling and not travel_active:
+			travel_reported_milestones.erase("forage_ready")
 			if route_mesh:route_mesh.visible=false
 			_update_resource_proximity()
 			_issue_travel_council_report("arrival" if progress>=1 else "halt",progress,GameState.convoy_emergency_halt_reason)
@@ -10288,6 +10289,22 @@ func _move_settlers_to(destination:Vector3)->void:
 	_update_time_interface()
 	_issue_travel_council_report("departure",0.0)
 
+func _halt_founding_convoy_to_forage()->void:
+	var result:Dictionary=preload("res://scripts/civilization_travel.gd").camp_to_forage()
+	if result.has("error"):
+		if travel_status_label:travel_status_label.text=String(result.error)
+		return
+	travel_active=false
+	travel_reported_milestones.erase("forage_ready")
+	var point:Vector2=result.get("position",CivilizationSystem.player_world_origin)
+	if settler_marker:settler_marker.position=Vector3(point.x,_height_at(point.x,point.y)+.002,point.y)
+	if route_mesh:route_mesh.visible=false
+	var event:={"id":"convoy_forage_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),"title":"Founding Convoy Camps to Forage","description":String(result.message),"domain":"food","severity":"notice"}
+	GameState.simulation_events.push_front(event)
+	if GameState.simulation_events.size()>80:GameState.simulation_events.resize(80)
+	_issue_travel_council_report("halt",float(result.get("progress",0.0)),"the convoy deliberately camped to forage")
+	_update_time_interface()
+
 func _on_settlement_action_pressed()->void:
 	if not GameState.settlement_site_committed:
 		if settler_marker:_open_founding_site_guide(settler_marker.position)
@@ -10883,6 +10900,11 @@ func _estimated_convoy_endurance_days() -> float:
 
 func _evaluate_travel_survival() -> void:
 	if not travel_active:
+		if not GameState.settlement_site_committed and bool(GameState.founding_journey.get("camped_foraging",false)):
+			var camp_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
+			if bool(camp_advice.get("ready",false)) and not travel_reported_milestones.has("forage_ready"):
+				travel_reported_milestones["forage_ready"]=true
+				_issue_travel_council_report("forage_ready",1.0,String(camp_advice.get("reason","")))
 		return
 	var food_days:=float(GameState.simulation_metrics.get("food_days",0.0))
 	var production_ratio:=float(GameState.simulation_metrics.get("food_balance",-1.0))+1.0
@@ -11826,7 +11848,7 @@ func _map_help_presentation(site_committed:bool,targeting:bool,settlement_convoy
 	if not site_committed:
 		return {
 			"title":"FIND A HOME",
-			"body":"Click land to move the convoy.\nClick its card to review water and nearby settlement sites."
+			"body":"Click land—including black-map land—to move the convoy.\nClick its card to review water; use HALT & FORAGE between longer legs."
 		}
 	if settlement_convoy_active:
 		return {
@@ -12597,11 +12619,13 @@ func _refresh_nomad_sighting_markers()->void:
 		if stale and is_instance_valid(stale): stale.queue_free()
 		nomad_sighting_markers.erase(sighting_id)
 
-func _on_scout_report_returned(_report:Dictionary)->void:
+func _on_scout_report_returned(report:Dictionary)->void:
 	# The simulation owns report delivery and storage. Arrival is a notification,
 	# not a request to change the player's speed or replace the open detail panel.
 	if travel_status_label:
-		travel_status_label.text="SCOUT PARTY RETURNED — report available in WORLD > SCOUTING"
+		travel_status_label.text="SCOUT PARTY RETURNED — open the illustrated return report or find it in WORLD > SCOUTING"
+	if hud and is_instance_valid(hud):
+		preload("res://scripts/hud/scout_return_notice.gd").announce(self,hud,report)
 
 
 func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
@@ -18401,19 +18425,23 @@ func _update_time_interface() -> void:
 	if travel_active:
 		var remaining := maxf(0.0, travel_days_total - travel_days_elapsed)
 		var speed_factor:=roundi(float(GameState.simulation_metrics.get("travel_speed_factor",1.0))*100.0)
-		travel_status_label.text = "CONVOY MOVING  •  %s remaining  •  pace %d%%  •  food %.1f days  •  water %.1f days" % [_format_game_duration(remaining),speed_factor,float(GameState.simulation_metrics.get("food_days",0.0)),float(GameState.water_metrics.get("days",0.0))]
+		var moving_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
+		travel_status_label.text = "ADVISOR: %s  •  %s remaining  •  pace %d%%  •  food %.1f days  •  water %.1f days" % [String(moving_advice.get("status","CONTINUE")),_format_game_duration(remaining),speed_factor,float(GameState.simulation_metrics.get("food_days",0.0)),float(GameState.water_metrics.get("days",0.0))]
 	elif bool(GameState.settlement_convoy.get("active",false)):
 		var colony_convoy:Dictionary=GameState.settlement_convoy
 		var colony_remaining:=maxf(0.0,float(colony_convoy.get("arrival_day",GameState.elapsed_days))-GameState.elapsed_days)
 		travel_status_label.text="SETTLEMENT CONVOY EN ROUTE  •  %s people  •  %s remaining  •  %d%% complete" % [_compact_population(int(colony_convoy.get("population",0))),_format_game_duration(colony_remaining),roundi(float(colony_convoy.get("progress",0.0))*100.0)]
 	elif GameState.convoy_emergency_halt_reason!="":
 		travel_status_label.text="CONVOY HALTED  •  %s  •  PAUSED" % GameState.convoy_emergency_halt_reason
+	elif not GameState.settlement_site_committed and bool(GameState.founding_journey.get("camped_foraging",false)):
+		var camp_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
+		travel_status_label.text="ADVISOR: %s  •  FORAGING IN PLACE  •  ~%.0f KM NEXT-LEG REACH  •  FOOD %+.1f TODAY" % [String(camp_advice.get("status","KEEP FORAGING")),float(camp_advice.get("approximate_reach_km",0.0)),float(GameState.simulation_metrics.get("food_net",0.0))]
 	elif GameState.settlement_site_committed and "Hearth Circle" not in GameState.settlement_completed:
 		travel_status_label.text="SETTLEMENT FOUNDING  •  HEARTH CIRCLE EMERGING FROM CURRENT ROLES"
 	elif settlement_convoy_targeting:
 		travel_status_label.text="SELECT KNOWN LAND FOR THE NEW SETTLEMENT  •  click a viable destination or press the button again to cancel"
 	elif placement_building == "":
-		travel_status_label.text = ("FOUNDING CONVOY READY  •  LEFT-CLICK LAND TO TRAVEL  •  FOUND SETTLEMENT ON THE TOOLBAR BELOW" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
+		travel_status_label.text = ("FOUNDING CONVOY READY  •  LEFT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.
