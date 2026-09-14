@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 const DiscoveryPopup=preload("res://scripts/hud/discovery_popup.gd")
 const Pause=preload("res://scripts/hud/simulation_pause.gd")
+const Art=preload("res://scripts/hud/research_visuals.gd")
 class Host extends Node:
 	var game_speed:=3.0
 	func _set_game_speed(value:float)->void:game_speed=value
@@ -59,16 +60,16 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	var f:=fixture();GameState.known_discoveries.append("stone_sorting")
 	var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"stone_sorting","day":1129}])
 	assert_str(popup.heading.text).is_equal("Stone Selection")
-	assert_str(popup.hero.texture.resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
+	assert_str(Art.source_texture(popup.hero.texture).resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
 	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
 	assert_str(popup.effect_cards.survey_speed.value.text).is_equal("+3%")
 	assert_str(popup.effect_cards.tool_quality.value.text).is_equal("+4%")
 	popup.close()
-func test_generic_art_is_labeled_and_hidden_questions_do_not_reveal_subject_art()->void:
-	var Art=preload("res://scripts/hud/research_visuals.gd")
+func test_reviewed_art_is_cropped_and_hidden_questions_do_not_reveal_subject_art()->void:
 	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
-	assert_str(popup.hero.get_node("FieldIllustrationCaption").text).is_equal("FIELD ILLUSTRATION")
-	assert_float(popup.hero.get_node("FieldIllustrationCaption").size.x).is_greater(90.0)
+	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
+	assert_bool(popup.hero.texture is AtlasTexture).is_true()
+	assert_int(popup.hero.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_COVERED)
 	var hidden:={"id":"stone_sorting","domain":"production","exposed":false}
 	assert_str(Art.subject_art_key(hidden)).is_empty()
 	assert_str(Art.for_discovery(hidden).resource_path).is_equal("res://assets/ui/research/production-v1.png")

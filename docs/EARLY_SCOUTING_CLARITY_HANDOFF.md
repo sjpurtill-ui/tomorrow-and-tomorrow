@@ -43,3 +43,11 @@ Existing saves remain compatible. `camped_foraging`, its day and physical positi
 The separate `codex/artifact-paper-art` line ending at `8c817f4` remains HELD and is not included here. It contains a large partially reviewed raster bank, but its requested full set and final import audit were never completed. This delivery makes the already-bound research subject paintings visible now; it does not misrepresent that held image bank as finished.
 
 Shared integration conflicts are expected in `scripts/society_exchange.gd`, `scripts/discovery_system.gd`, `scripts/civilization_system.gd`, `scripts/local_terrain.gd` and the scouting/collection HUD. The origin-routing work also touches `scripts/scout_frontier.gd` and `scripts/rumor_network.gd`. Reconcile these two worker commits as a unit and rerun the listed suites on combined main. No canonical files were changed, no player/editor process was stopped, and no graphical/player build was launched.
+
+## Compact research artwork follow-up
+
+The Research atlas now uses fixed 220-pixel cards instead of stretching a short row across all available space. Column count is derived from the live scroll width, so larger windows fit additional discoveries while narrow windows continue to reflow safely. Card paintings are 92 pixels tall.
+
+Reviewed square paintings are presented through a non-destructive subject crop: the excessive upper paper margin is trimmed for display and the remaining painting covers the card or detail frame. The source PNGs are unchanged. This removes the white side gutters while making the people, tools and landscape materially larger and clearer. The same treatment is used by discovery announcements and other `paint_discovery` consumers.
+
+The research atlas and discovery popup suites cover 22 cases with zero errors or failures, including compact width, responsive column count, source-art identity, subject cropping, small-window bounds and discovery effects. Isolated graphical probes passed at 1440×900, 1200×900 and 800×600; the 1440×900 known-discovery capture shows three 220-pixel cards occupying only the space they need, with filled artwork in both cards and the inspector. No save data changes are involved. Integration conflicts for this follow-up are limited to `scripts/hud/research_atlas.gd`, `scripts/hud/research_visuals.gd` and their visual tests.

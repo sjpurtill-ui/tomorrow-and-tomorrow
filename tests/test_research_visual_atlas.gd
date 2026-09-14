@@ -99,10 +99,18 @@ func test_layout_stays_inside_small_and_large_windows_with_scrollable_details()-
 			view.select(view.selected_id,true)
 			for frame in 5:await get_tree().process_frame
 			assert_bool(view.detail_scroll.visible).is_true()
-		assert_float(view.detail_body.get_combined_minimum_size().x).is_less_equal(view.detail_scroll.size.x)
-		view.set_view("tree")
-		for i in 3:await get_tree().process_frame
-		assert_float(view.plot.size.y).is_greater(100)
+			assert_float(view.detail_body.get_combined_minimum_size().x).is_less_equal(view.detail_scroll.size.x)
+			view.set_view("tree")
+			for i in 3:await get_tree().process_frame
+			assert_float(view.plot.size.y).is_greater(100)
+func test_cards_stay_compact_and_use_the_available_row_for_more_discoveries()->void:
+	var view:=fixture(1440,900)
+	for frame in 5:await get_tree().process_frame
+	assert_int(view.grid.size_flags_horizontal).is_equal(Control.SIZE_SHRINK_BEGIN)
+	assert_int(view.grid.columns).is_greater_equal(4)
+	for card:Dictionary in view.bindings.values():
+		assert_float(card.frame.size.x).is_equal_approx(view.CARD_WIDTH,0.5)
+		assert_float(card.painting.custom_minimum_size.y).is_equal(view.CARD_IMAGE_HEIGHT)
 func test_every_research_field_has_a_distinct_painted_asset()->void:
 	var paths:Dictionary={}
 	for id:String in Art.NAMES:
@@ -112,20 +120,23 @@ func test_every_research_field_has_a_distinct_painted_asset()->void:
 func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
 	GameState.known_discoveries.append("stone_sorting")
 	var view:=fixture();view.set_view("known");view.select("stone_sorting")
-	assert_str(view.bindings.stone_sorting.painting.texture.resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
-	assert_str(view.detail_body.get_child(0).texture.resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
+	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
+	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
 
-func test_reviewed_paper_images_are_specific_and_preserve_the_full_square()->void:
+func test_reviewed_paper_images_are_specific_and_fill_a_subject_focused_frame()->void:
 	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
 	for id:String in Art.DISCOVERY_ART:
 		var item:Dictionary={"id":id,"domain":"knowledge","exposed":true}
 		var picture:=Art.paint_discovery(parent,item,104)
-		assert_str(picture.texture.resource_path).is_equal("res://assets/ui/research/paper/"+id+".png")
-		assert_int(picture.texture.get_width()).is_less_equal(768)
-		assert_int(picture.texture.get_width()).is_equal(picture.texture.get_height())
+		var source:=Art.source_texture(picture.texture)
+		assert_str(source.resource_path).is_equal("res://assets/ui/research/paper/"+id+".png")
+		assert_int(source.get_width()).is_equal(source.get_height())
 		assert_int(Art.subject_order.size()).is_less_equal(Art.SUBJECT_CACHE_LIMIT)
-		assert_int(picture.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
-		assert_bool(picture.has_node("PaperMat")).is_true()
+		assert_bool(picture.texture is AtlasTexture).is_true()
+		assert_float(picture.texture.region.position.y).is_greater(0.0)
+		assert_float(picture.texture.region.size.y).is_less(source.get_height())
+		assert_int(picture.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_COVERED)
+		assert_bool(picture.has_node("PaperMat")).is_false()
 		assert_bool(picture.has_node("FieldIllustrationCaption")).is_false()
 		item.exposed=false
 		assert_str(Art.subject_art_key(item)).is_empty()
