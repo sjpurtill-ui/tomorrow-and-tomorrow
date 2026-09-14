@@ -654,6 +654,27 @@ func record_player_travel(position:Vector2)->void:
 	if observation_moved>=1.0: _process_local_observation(int(WorldSimulation.state.elapsed_days),true)
 
 
+func record_founding_camp_survey(position:Vector2)->Dictionary:
+	## A moving convoy only knows its route. Once it stops, the founding party can
+	## walk the surrounding collection area, mark water, and recognize familiar
+	## surface materials. Keep this bounded to the same six-kilometre distance the
+	## founding-water rules allow households to use.
+	initialize()
+	player_world_origin=position
+	var already_recorded:=false
+	for area_variant in revealed_areas:
+		var area:Dictionary=area_variant
+		if String(area.get("source",""))!="founding caravan camp survey":continue
+		var center:=Vector2(float(area.get("x",0.0)),float(area.get("z",0.0)))
+		if center.distance_to(position)<=0.25:
+			already_recorded=true
+			break
+	if not already_recorded:_add_revealed_area(position,6.25,"founding caravan camp survey")
+	var resources:Dictionary=preload("res://scripts/civilization_resources.gd").survey_founding_camp(position)
+	_process_local_observation(int(WorldSimulation.state.elapsed_days),true)
+	return {"position":position,"radius_km":6.25,"day":int(WorldSimulation.state.elapsed_days),"resources":resources.get("recognized",[])}
+
+
 func fog_snapshot()->Dictionary:
 	return {"revision":fog_revision,"areas":revealed_areas.duplicate(true),"current_origin":{"x":player_world_origin.x,"z":player_world_origin.y}}
 

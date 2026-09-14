@@ -2,9 +2,11 @@ extends GdUnitTestSuite
 
 const Travel:=preload("res://scripts/civilization_travel.gd")
 var previous_route_provider:Callable
+var previous_context_provider:Callable
 
 func before_test()->void:
 	previous_route_provider=WorldSimulation.route_provider
+	previous_context_provider=WorldSimulation.context_provider
 	GameState.reset_for_new_world(4417)
 	GameState.initialize_population_model()
 	CivilizationSystem.reset_for_new_world()
@@ -15,9 +17,20 @@ func before_test()->void:
 	GameState.resource_stockpiles["Food"]=3000.0
 	WorldSimulation.route_provider=func(from:Vector3,to:Vector3)->Dictionary:
 		return {"valid":true,"distance_km":Vector2(from.x,from.z).distance_to(Vector2(to.x,to.z)),"terrain_modifier":1.0}
+	WorldSimulation.context_provider=func(origin:Vector2)->Dictionary:
+		return {
+			"environment_profile":{"signature":"test-grassland","resource_potentials":{"Fertile Soil":0.8,"Game":0.55}},
+			"surface_material_catchments":{
+				"Timber":{"density":0.3,"position":Vector3(origin.x+1.0,0.0,origin.y)},
+				"Stone":{"density":0.2,"position":Vector3(origin.x,0.0,origin.y+1.0)},
+				"Fiber Plants":{"density":0.25,"position":Vector3(origin.x-1.0,0.0,origin.y)}
+			},
+			"woodland_catchment":{"density":0.3,"position":Vector3(origin.x+1.0,0.0,origin.y)}
+		}
 
 func after_test()->void:
 	WorldSimulation.route_provider=previous_route_provider
+	WorldSimulation.context_provider=previous_context_provider
 
 func test_initial_convoy_can_enter_black_ground_then_camp_at_its_physical_position()->void:
 	var destination:=Vector2(48,0)
@@ -31,6 +44,14 @@ func test_initial_convoy_can_enter_black_ground_then_camp_at_its_physical_positi
 	assert_bool(GameState.convoy_traveling).is_false()
 	assert_bool(bool(GameState.founding_journey.get("camped_foraging",false))).is_true()
 	assert_bool(bool(GameState.founding_journey.get("active",true))).is_false()
+	assert_bool(CivilizationSystem._position_is_revealed(Vector2(30,0))).is_true()
+	assert_bool(CivilizationSystem._position_is_revealed(Vector2(24,41))).is_false()
+	assert_float(float((GameState.founding_journey.get("camp_survey",{}) as Dictionary).get("radius_km",0.0))).is_equal(6.25)
+	var recognized:Array[String]=[]
+	for deposit_variant in GameState.resource_deposits:
+		var deposit:Dictionary=deposit_variant
+		if String(deposit.get("stage",""))=="recognized":recognized.append(String(deposit.get("resource","")))
+	assert_array(recognized).contains(["Timber","Stone","Fiber Plants","Fertile Soil","Game"])
 
 func test_replenished_camp_stores_extend_the_next_possible_leg()->void:
 	GameState.resource_stockpiles["Food"]=200.0

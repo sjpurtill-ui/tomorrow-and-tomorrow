@@ -63,7 +63,11 @@ static func camp_to_forage()->Dictionary:
 	WorldSimulation.state.founding_journey=journey
 	WorldSimulation.state.convoy_traveling=false
 	WorldSimulation.state.convoy_emergency_halt_reason=""
-	return {"ok":true,"position":position,"progress":progress,"message":"The founding convoy has camped in place. Food workers now forage from this ground while time advances; growing stores extends the next travel leg."}
+	var survey:Dictionary=WorldSimulation.world.record_founding_camp_survey(position)
+	journey=WorldSimulation.state.founding_journey
+	journey["camp_survey"]=survey
+	WorldSimulation.state.founding_journey=journey
+	return {"ok":true,"position":position,"progress":progress,"survey":survey,"message":"The founding convoy has camped in place. Food workers now forage while the party charts water, site conditions, and obvious surface resources within 6 km; growing stores extends the next travel leg."}
 
 static func advance(days:float)->void:
 	var journey:=WorldSimulation.state.founding_journey
@@ -83,4 +87,8 @@ static func advance(days:float)->void:
 		journey["camp_position"]=point
 		WorldSimulation.state.founding_journey=journey
 		WorldSimulation.state.convoy_traveling=false
+		var survey:Dictionary=WorldSimulation.world.record_founding_camp_survey(point)
+		journey=WorldSimulation.state.founding_journey
+		journey["camp_survey"]=survey
+		WorldSimulation.state.founding_journey=journey
 		if halt:WorldSimulation.state.convoy_emergency_halt_reason="Poor health or insufficient provisions forced the journey to halt."

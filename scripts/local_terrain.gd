@@ -10299,6 +10299,8 @@ func _halt_founding_convoy_to_forage()->void:
 	var point:Vector2=result.get("position",CivilizationSystem.player_world_origin)
 	if settler_marker:settler_marker.position=Vector3(point.x,_height_at(point.x,point.y)+.002,point.y)
 	if route_mesh:route_mesh.visible=false
+	_update_resource_proximity()
+	_refresh_discovered_resource_overlays()
 	var event:={"id":"convoy_forage_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),"title":"Founding Convoy Camps to Forage","description":String(result.message),"domain":"food","severity":"notice"}
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80:GameState.simulation_events.resize(80)
