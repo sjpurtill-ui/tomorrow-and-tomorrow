@@ -5,6 +5,7 @@ const Data=preload("res://scripts/hud/atlas_data.gd")
 const Art=preload("res://scripts/hud/research_visuals.gd")
 const TreePlot=preload("res://scripts/hud/research_tree_plot.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
+const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const Gauge=preload("res://scripts/hud/military_roster_gauge.gd")
 const CARD_WIDTH:=220.0
 const CARD_IMAGE_HEIGHT:=92.0
@@ -18,6 +19,7 @@ var query:=""
 var leader_filter:=""
 var view_mode:="active"
 var show_locked:=false
+var tree_scope:="frontier"
 var selected_id:=""
 var records:Array[Dictionary]=[]
 var all_records:Array[Dictionary]=[]
@@ -38,6 +40,7 @@ var legend:Label
 var stats:Label
 var locked_toggle:CheckButton
 var tree_controls:HBoxContainer
+var tree_scope_selector:OptionButton
 var tabs:Dictionary={}
 var bindings:Dictionary={}
 var last_layout:=""
@@ -82,6 +85,8 @@ func _ready()->void:
 	legend=Art.label(box,"",12,T.TEXT_SOFT,true)
 	tree_controls=HBoxContainer.new();box.add_child(tree_controls)
 	Art.button(tree_controls,"−",func()->void:plot.zoom_at(1/1.15,plot.size*.5));Art.button(tree_controls,"+",func()->void:plot.zoom_at(1.15,plot.size*.5));Art.button(tree_controls,"Fit",func()->void:plot.fit());Art.button(tree_controls,"Find selected",func()->void:plot.center_selected())
+	tree_scope_selector=OptionButton.new();tree_scope_selector.add_item("Frontier & branches");tree_scope_selector.set_item_metadata(0,"frontier");tree_scope_selector.add_item("Entire knowledge map");tree_scope_selector.set_item_metadata(1,"all");tree_scope_selector.tooltip_text="Frontier keeps current investigations, their foundations, and their immediate possibilities readable. Entire map shows every matching question."
+	tree_scope_selector.item_selected.connect(func(index:int)->void:tree_scope=String(tree_scope_selector.get_item_metadata(index));refresh(true));tree_controls.add_child(tree_scope_selector)
 	locked_toggle=CheckButton.new();locked_toggle.text="Show unexplored paths";locked_toggle.add_theme_font_size_override("font_size",12);tree_controls.add_child(locked_toggle)
 	locked_toggle.toggled.connect(func(on:bool)->void:show_locked=on;refresh(true))
 	detail_back=Art.button(box,"← Back to research",func()->void:narrow_details=false;_layout())
@@ -151,7 +156,8 @@ func refresh(refit:bool)->void:
 	leader_filter="" if chosen!="" and not people.has(chosen) else chosen
 	for index in leaders.item_count:
 		if (index==0 and leader_filter=="") or (index>0 and String(leaders.get_item_metadata(index))==leader_filter):leaders.select(index)
-	stats.text="%d researchers  ·  %d staffed / %d projects" % [maxi(0,int(GameState.effective_workers("Knowledge"))),staffed,active]
+	var science:=Indicators.science()
+	stats.text="SCIENCE %.1f  ·  %.1f minds × %d%% education  ·  %d staffed / %d projects" % [float(science.capacity),float(science.minds),roundi(float(science.education)*100.0),staffed,active]
 	tabs.active.text="Being researched · %d" % active;tabs.known.text="Established · %d" % known
 	for id:String in tabs:tabs[id].modulate=T.GOLD if id==view_mode else Color.WHITE
 	records.clear()
@@ -164,8 +170,9 @@ func refresh(refit:bool)->void:
 		if view_mode=="known" and not item.known:continue
 		if view_mode=="tree" and not show_locked and not item.exposed:hidden+=1;continue
 		records.append(item)
+	if view_mode=="tree" and tree_scope=="frontier" and query.is_empty():records=_frontier_records(records)
 	if view_mode=="active":records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return Art.lead(a)+String(a.name)<Art.lead(b)+String(b.name))
-	legend.text="Named leaders supervise shared teams. Team sizes show equivalent full-time effort; evidence builds as people investigate." if view_mode=="active" else "%d unexplored questions hidden. Solid lines: original foundations. Dashed lines: alternative approaches; drag to pan, wheel to zoom." % hidden if view_mode=="tree" else "Discoveries your civilization has established. Select a card for its effects."
+	legend.text="Named leaders supervise shared teams. Team sizes show equivalent full-time effort; evidence builds as people investigate." if view_mode=="active" else _tree_legend(hidden) if view_mode=="tree" else "Discoveries your civilization has established. Select a card for its effects."
 	tree_controls.visible=view_mode=="tree";plot.visible=view_mode=="tree" and not records.is_empty();scroll.visible=view_mode!="tree" and not records.is_empty();empty.visible=records.is_empty()
 	if records.is_empty():
 		for child in empty.get_children():empty.remove_child(child);child.queue_free()
@@ -324,6 +331,11 @@ func select(id:String,open_detail:bool=false)->void:
 					if previous.id==req and previous.exposed:title=String(previous.name)
 				options.append(("✓ " if req in GameState.known_discoveries else "○ ")+title)
 			Art.label(detail_body,"ONE OF: "+" or ".join(options),12,T.TEXT_SOFT,true)
+		var possibilities:=_branching_possibilities(item)
+		if not possibilities.is_empty():
+			Art.label(detail_body,"BRANCHING POSSIBILITIES",10,T.GOLD)
+			for possibility:Dictionary in possibilities:
+				Art.label(detail_body,String(possibility.marker)+" "+String(possibility.name)+" · "+String(possibility.relation),12,possibility.color,true)
 		if not item.missing.is_empty():Art.label(detail_body,"Needs: "+", ".join(item.missing),12,T.AMBER,true)
 		action=Art.button(detail_body,"Team already investigating" if assignment.get("active",false) else "Established knowledge" if item.known else "Focus this team here" if item.ready else "More evidence needed",_act)
 		action.disabled=not item.ready or assignment.get("active",false)
@@ -331,6 +343,70 @@ func select(id:String,open_detail:bool=false)->void:
 		detail_scroll.set_deferred("scroll_vertical",old_scroll);return
 	detail=Art.label(detail_body,"Select a discovery to see its team, supervising leader and findings.",14,T.TEXT_SOFT,true)
 	action=null
+
+func _frontier_records(source:Array[Dictionary])->Array[Dictionary]:
+	# A useful default map follows work happening now. If there is no active
+	# investigation, show a bounded selection of questions that can be started.
+	var anchors:Array[String]=[]
+	for item:Dictionary in source:
+		if item.get("assignment",{}).get("active",false):anchors.append(String(item.id))
+	if anchors.is_empty():
+		for item:Dictionary in source:
+			if bool(item.get("ready",false)) and not bool(item.get("known",false)):
+				anchors.append(String(item.id))
+				if anchors.size()>=12:break
+	if anchors.is_empty() and not source.is_empty():anchors.append(String(source[-1].id))
+	var included:Dictionary={}
+	for id:String in anchors:included[id]=true
+	for item:Dictionary in source:
+		if String(item.id) not in anchors:continue
+		for parent:String in _tree_parents(item):included[parent]=true
+	# The next nodes make the consequence of choosing an active line visible.
+	# Bound each fan-out so one highly reused foundation cannot recreate the mess.
+	for anchor:String in anchors:
+		var shown:=0
+		for item:Dictionary in source:
+			if anchor in _tree_parents(item):included[String(item.id)]=true;shown+=1
+			if shown>=4:break
+	var result:Array[Dictionary]=[]
+	for item:Dictionary in source:
+		if included.has(String(item.id)):result.append(item)
+	return result
+
+func _tree_parents(item:Dictionary)->Array[String]:
+	var result:Array[String]=[]
+	for id:String in item.get("requires",[]):if id not in result:result.append(id)
+	for group:Array in item.get("requires_any",[]):
+		for id:String in group:if id not in result:result.append(id)
+	for route:Dictionary in item.get("pathways",[]):
+		for id:String in preload("res://scripts/technology_requirements.gd").parents(route):if id not in result:result.append(id)
+	return result
+
+func _tree_legend(hidden:int)->String:
+	var forks:=0;var approaches:=0
+	for item:Dictionary in records:
+		forks+=(item.get("requires_any",[]) as Array).size()
+		approaches+=maxi(0,(item.get("pathways",[]) as Array).size()-1)
+	var scope:="active frontier" if tree_scope=="frontier" and query.is_empty() else "matching map"
+	return "%s · %d questions · %d choice forks · %d alternate approaches. Solid: every foundation. Teal fork: one of several. Dotted: another inquiry route. Drag to pan; wheel to zoom. %d distant questions hidden." % [scope.capitalize(),records.size(),forks,approaches,hidden]
+
+func _branching_possibilities(item:Dictionary)->Array[Dictionary]:
+	var result:Array[Dictionary]=[];var id:=String(item.id)
+	for candidate:Dictionary in all_records:
+		if candidate.id==id:continue
+		var relation:="";var marker:=""
+		if id in candidate.get("requires",[]):relation="required foundation";marker="→"
+		else:
+			for group:Array in candidate.get("requires_any",[]):
+				if id in group:relation="one possible foundation";marker="◇";break
+		if relation.is_empty():
+			for route:Dictionary in candidate.get("pathways",[]):
+				if id in preload("res://scripts/technology_requirements.gd").parents(route):relation="supports another approach";marker="⋯";break
+		if relation.is_empty():continue
+		result.append({"name":String(candidate.name),"relation":relation,"marker":marker,"color":T.TEAL if marker=="◇" else T.GREEN if marker=="⋯" else T.TEXT_SOFT,"exposed":bool(candidate.exposed)})
+	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return ("0" if a.exposed else "1")+String(a.name)<("0" if b.exposed else "1")+String(b.name))
+	if result.size()>8:result.resize(8)
+	return result
 
 func _discovery_date(item:Dictionary)->String:
 	var absolute_day:=int(item.get("discovered_day",-1))

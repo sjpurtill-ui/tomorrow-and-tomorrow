@@ -856,11 +856,12 @@ func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	var material_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("material_capacity",WorldSimulation.state.society_capacities.get("production",0.12))),0.0,1.2)
 	var material_support:=lerpf(0.72,1.12,material_capacity/1.2)
 	var institutional_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25)),0.0,1.0)
-	var knowledge_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("knowledge",0.18)),0.0,1.0)
-	var support_multiplier:=food_support*material_support*lerpf(0.78,1.18,institutional_capacity)*lerpf(0.82,1.24,knowledge_capacity)
+	var education:=preload("res://scripts/civilization_indicators.gd").education_index()
+	var support_multiplier:=food_support*material_support*lerpf(0.78,1.18,institutional_capacity)*lerpf(0.55,1.45,education)
 	return {
 		"weight":weight,"total_weight":total_weight,"total_researchers":total_researchers,
 		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,
+		"education":education,"science_capacity":researchers*education,
 		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
 	}
 

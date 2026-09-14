@@ -1,5 +1,6 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
+const Indicators:=preload("res://scripts/civilization_indicators.gd")
 ## SETTLEMENT section: People & Labor / Works & Defense / History.
 ## Replaces the settlement dashboard, the settler side panel, and the
 ## population ledger summary.
@@ -47,7 +48,7 @@ func _city_tab(sub:int)->Dictionary:
 	var leader:Dictionary=management.get("leader",{})
 	var metrics:Dictionary=GameState.simulation_metrics
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
-	var health:=roundi(GameState.population_health*100.0)
+	var survival:=Indicators.health()
 	var productive:=maxi(0,roundi(float(profile.get("productive",terrain._able_population()))*local_share))
 	var efficiency:=roundi(float(metrics.get("labor_efficiency",0.0))*100.0)
 	var births:=roundi(float(metrics.get("births_expected_next_year",0.0))*local_share)
@@ -59,7 +60,7 @@ func _city_tab(sub:int)->Dictionary:
 		{"label":"LOCAL POP.","value":str(local_population),"delta":"+%d /yr" % births if births>0 else "—","delta_color":Tokens.GREEN if births>0 else Tokens.MUTED,"accent":Tokens.GREEN,"tip":"This settlement's bounded share of the civilization population"},
 		{"label":"LOCAL LEADER","value":leader_name.substr(0,15),"delta":"age %d" % leader_age if not leader.is_empty() else "vacant","accent":Tokens.TEAL if not leader.is_empty() else Tokens.RED,"tip":"A named person who ages, gains experience, and manages local needs"},
 		{"label":"FOCUS","value":String(management.get("focus_label","BALANCED")).replace(" THE PLACE","").substr(0,15),"delta":"delegated" if bool(management.get("auto_manage",true)) else "directed","accent":Tokens.BLUE,"tip":"%s %s" % [focus_reason,focus_effect]},
-		{"label":"EFFICIENCY","value":"%d%%" % efficiency,"delta":"health %d%%" % health,"accent":Tokens.AMBER,"tip":"Local labor efficiency from health, shelter, supplies and leadership"},
+		{"label":"EFFICIENCY","value":"%d%%" % efficiency,"delta":"LE %.1f · IMR %.0f‰" % [float(survival.life_expectancy),float(survival.infant_mortality_per_1000)],"accent":Tokens.AMBER,"tip":"Local labor efficiency. Health outcomes are life expectancy and projected infant deaths per 1,000 live births."},
 	]
 	var brief:Dictionary={"tone":"info" if not leader.is_empty() else "warn","title":"%s is managing %s" % [leader_name,String(settlement.get("name","this settlement"))] if not leader.is_empty() else "This settlement has no local leader","why":"WHY · %s\nEFFECT · %s" % [focus_reason,focus_effect] if not leader.is_empty() else "Appoint a person from the local governing pool so routine needs are handled without micromanagement."}
 	match sub:

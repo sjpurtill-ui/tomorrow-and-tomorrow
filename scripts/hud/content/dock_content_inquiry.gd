@@ -10,6 +10,7 @@ const DOMAIN_COLORS:Dictionary={
 }
 
 const ResourceIcons:=preload("res://scripts/resource_icons.gd")
+const Indicators:=preload("res://scripts/civilization_indicators.gd")
 
 ## What each domain's research actually improves — the end goal a player is
 ## buying when they raise its weight. Aligned with the frontier catalog's
@@ -45,12 +46,14 @@ func meta()->Dictionary:
 func tab(sub:int)->Dictionary:
 	var summary:Dictionary=DiscoverySystem.research_program_summary()
 	var observers:=int(summary.get("researchers",0))
+	var science:=Indicators.science()
 	var emphasis_total:=int(summary.get("emphasis_total",0))
 	var lines:=int(summary.get("active_lines",0))
 	var established_threads:=DiscoverySystem.established_knowledge_threads()
 	var established:=established_threads.size()
 	var kpis:Array=[
-		{"label":"OBSERVERS","value":str(observers),"delta":"auto-assigned","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Aggregate research workforce; the weights below divide all of it automatically — nobody sits idle"},
+		{"label":"SCIENCE CAPACITY","value":"%.1f" % float(science.capacity),"delta":"%.1f minds" % float(science.minds),"delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Researcher-equivalent minds currently doing science × their average education level"},
+		{"label":"AVG. EDUCATION","value":"%d%%" % roundi(float(science.education)*100.0),"delta":"research minds","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"Average usable education among the research workforce, based on preserved learning and the ability to communicate it"},
 		{"label":"EMPHASIS","value":str(emphasis_total),"delta":"total weight","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"Sum of domain weights; each domain receives its share of the observers"},
 		{"label":"ACTIVE","value":str(lines),"delta":"projects","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Viable investigations under way"},
 		{"label":"KNOWLEDGE LINES","value":str(established),"delta":"","accent":Tokens.GREEN,"tip":"Concrete bodies of knowledge. Each line consolidates its surveys, tests, standards, and later refinements."},
@@ -65,7 +68,7 @@ func tab(sub:int)->Dictionary:
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
-	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_attention_overview()}
+	return {"kpis":[kpis[0],kpis[1],kpis[3]],"brief":brief,"blocks":_attention_overview()}
 
 func _attention_blocks()->Array:
 	var latest:=_latest_discovery_block()

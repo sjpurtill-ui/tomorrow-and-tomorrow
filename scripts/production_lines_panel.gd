@@ -75,7 +75,8 @@ func refresh(editors:bool=false)->void:
 	var data:=WorldSimulation.military.production_lines_snapshot()
 	var workforce:Dictionary=data.workforce
 	var actual_share:=WorldSimulation.military.workshop_utilization()
-	summary.text="Crafting: %.1f effective workers · %.0f%% assigned to military work (limit %.0f%%)\nHealth %.0f%% · labor %.0f%% · workplaces %.0f%% · logistics %.0f%%" % [float(workforce.workers),actual_share*100,float(data.labor_share)*100,float(workforce.health)*100,float(workforce.labor_efficiency)*100,float(workforce.workplace_condition)*100,float(workforce.logistics)*100]
+	var survival:=preload("res://scripts/civilization_indicators.gd").health()
+	summary.text="Crafting: %.1f effective workers · %.0f%% assigned to military work (limit %.0f%%)\nLife expectancy %.1f years · infant mortality %.0f‰ · labor %.0f%% · workplaces %.0f%% · logistics %.0f%%" % [float(workforce.workers),actual_share*100,float(data.labor_share)*100,float(survival.life_expectancy),float(survival.infant_mortality_per_1000),float(workforce.labor_efficiency)*100,float(workforce.workplace_condition)*100,float(workforce.logistics)*100]
 	labor.set_value_no_signal(float(data.labor_share)*100)
 	var ids:Array=[]
 	for line in data.lines:ids.append([line.id,line.item])

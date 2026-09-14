@@ -1,4 +1,5 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
+const Indicators:=preload("res://scripts/civilization_indicators.gd")
 ## Dedicated health and longevity view opened directly from the HEALTH KPI.
 
 func meta()->Dictionary:
@@ -22,9 +23,10 @@ func _city_health()->Dictionary:
 	var observed_age:=float(profile.get("observed_age_at_death",-1.0))
 	var water_intake:=roundi(float(GameState.water_metrics.get("intake_ratio",1.0))*100.0)
 	var housing:=roundi(float(GameState.simulation_metrics.get("housing_ratio",1.0))*100.0)
+	var infant_mortality:=Indicators.infant_mortality_per_1000()
 	var kpis:Array=[
 		{"label":"LIFE EXPECTANCY","value":"%.1f years" % expectancy,"delta":"%+.1f" % expectancy_delta if absf(expectancy_delta)>=0.05 else "stable","delta_color":Tokens.GREEN if expectancy_delta>0.0 else (Tokens.RED if expectancy_delta<0.0 else Tokens.MUTED),"accent":Tokens.TEAL,"tip":"Expected lifespan at birth under current age-specific mortality and living conditions"},
-		{"label":"HEALTH","value":"%d%%" % roundi(GameState.population_health*100.0),"delta":"current","accent":Tokens.TEAL,"tip":"Current physical condition and freedom from preventable harm"},
+		{"label":"INFANT MORTALITY","value":"%.0f / 1,000" % infant_mortality,"delta":"projected now","accent":Tokens.RED if infant_mortality>=50.0 else Tokens.AMBER,"tip":"Projected deaths in the first month of life per 1,000 live births under current conditions"},
 		{"label":"DEATHS · 12M","value":str(int(vital.get("deaths",0))),"delta":"recorded","accent":Tokens.RED,"tip":"Actual deaths during the trailing 365 days"},
 		{"label":"MEAN AGE AT DEATH","value":"%.1f years" % observed_age if observed_age>=0.0 else "—","delta":"observed" if observed_age>=0.0 else "no deaths","accent":Tokens.AMBER,"tip":"Observed mean age among recorded deaths; unlike life expectancy, this depends on who has died so far"},
 	]
@@ -83,4 +85,4 @@ func signature()->Array:
 func _city_signature()->Array:
 	var history:Array[Dictionary]=GameState.health_history_snapshot()
 	var latest:Dictionary=history[-1] if not history.is_empty() else {}
-	return [GameState.selected_player_settlement_id,GameState.civilian_care.duplicate(true),roundi(GameState.projected_life_expectancy()*10.0),roundi(GameState.population_health*1000.0),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]
+	return [GameState.selected_player_settlement_id,GameState.civilian_care.duplicate(true),roundi(GameState.projected_life_expectancy()*10.0),roundi(Indicators.infant_mortality_per_1000()),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]

@@ -1,5 +1,6 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
+const Indicators:=preload("res://scripts/civilization_indicators.gd")
 ## ECONOMY section: Food & Water / Materials / Who Eats.
 ## Replaces the provisions panel, the materials panel, and their overlays.
 
@@ -231,11 +232,13 @@ func _trade_block()->Dictionary:
 	return {"type":"text","heading":"INTERCITY TRADE","text":"\n".join(lines)}
 
 func _wealth_tab()->Dictionary:
+	var economy:=Indicators.economy()
 	var blocks:Array=[Charts.stocks(GameState.selected_player_settlement_id)]
 	if GameState.economy_stage in ["currency","weighed_metal"]: blocks.append(Charts.finance(GameState.selected_player_settlement_id))
 	else: blocks.append({"type":"text","heading":"WEALTH BEFORE MONEY","text":"This economy uses direct allocation and reciprocity. Material stores above belong to the selected city. No issued-currency treasury or household-currency trend exists yet."})
-	blocks.append({"type":"text","heading":"WHAT THESE ACCOUNTS COVER","text":"Goods and reserves are physical wealth. Currency balances are separate city accounts and must not be added to material units. The current aggregate records do not provide a historical monetary valuation of buildings, land, private enterprises or household possessions."})
-	return {"kpis":[],"brief":{},"blocks":blocks}
+	blocks.append({"type":"text","heading":"WHAT REAL GDP MEANS","text":"Real GDP is %.1f output-equivalent units per day: %.1f effective assigned worker-days × %.0f%% economy-wide labor productivity. Per-capita output is %.2f. It is a flow of current work, not stored wealth or a currency balance." % [float(economy.gdp),float(economy.effective_workers),float(economy.productivity)*100.0,float(economy.gdp_per_capita)]})
+	blocks.append({"type":"text","heading":"WHAT THESE ACCOUNTS COVER","text":"Goods and reserves are physical wealth. Currency balances are separate city accounts and must not be added to GDP or material units. The current aggregate records do not provide a historical monetary valuation of buildings, land, private enterprises or household possessions."})
+	return {"kpis":[{"label":"REAL GDP / DAY","value":"%.1f" % float(economy.gdp),"delta":"selected city","accent":Tokens.BLUE,"tip":"Effective assigned worker-days × current labor productivity"},{"label":"GDP / PERSON","value":"%.2f" % float(economy.gdp_per_capita),"delta":"real output","accent":Tokens.TEAL,"tip":"Daily real GDP divided by the selected city's population"},{"label":"PRODUCTIVITY","value":"%d%%" % roundi(float(economy.productivity)*100.0),"delta":"per effective worker","accent":Tokens.AMBER,"tip":"The same labor productivity multiplier used to calculate real GDP"}],"brief":{},"blocks":blocks}
 
 func open_expanded_tab(sub:int)->bool:
 	if sub!=1:return false

@@ -57,7 +57,7 @@ func test_unstaffed_investigations_are_explicit_and_do_not_invent_people()->void
 	for item:Dictionary in view.records:
 		assert_str(Art.status(item)).is_equal("Waiting for workers")
 		assert_str(view.bindings[item.id].team.text).contains("No researchers")
-	assert_str(view.stats.text).contains("0 researchers")
+	assert_str(view.stats.text).contains("SCIENCE 0.0").contains("0.0 minds")
 func test_office_vacancy_and_acting_lead_agree_with_execution_authority()->void:
 	var assignment:=DiscoverySystem.research_leadership("knowledge")
 	assert_str(assignment.office).is_equal(GovernmentPeopleSystem.executing_office("Scholar"))
@@ -76,7 +76,7 @@ func test_leader_and_known_subject_filters_do_not_expose_locked_outcomes()->void
 		locked+=1;assert_str(item.name).is_equal("Unexplored question");assert_dict(item.assignment).is_empty()
 	assert_int(locked).is_greater(0)
 func test_focus_redirects_only_selected_channel_and_live_view_reports_it()->void:
-	var view:=fixture();view.set_view("tree")
+	var view:=fixture();view.tree_scope="all";view.set_view("tree")
 	var candidate:Dictionary={}
 	for item:Dictionary in view.records:
 		if item.ready and not item.assignment.active:candidate=item;break

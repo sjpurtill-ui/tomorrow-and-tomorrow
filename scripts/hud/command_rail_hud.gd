@@ -5,6 +5,7 @@ extends Control
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const DockPanelScript:=preload("res://scripts/hud/dock_panel.gd")
+const Indicators:=preload("res://scripts/civilization_indicators.gd")
 
 signal section_requested(section:String,sub:int)
 signal menu_requested
@@ -38,8 +39,9 @@ var time_text:RichTextLabel
 var pause_button:Button
 var speed_selector:OptionButton
 var last_running_speed:=1
-var kpi_strip:VBoxContainer
+var kpi_strip:PanelContainer
 var kpi_chips:Dictionary={}
+var kpi_separators:Array[ColorRect]=[]
 var queue_root:VBoxContainer
 var queue_footer:Label
 var toolbar:PanelContainer
@@ -87,7 +89,17 @@ func _layout()->void:
 		time_pill.position=Vector2(Tokens.DOCK_X,Tokens.DOCK_MARGIN_Y)
 	if kpi_strip:
 		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
-		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Tokens.DOCK_MARGIN_Y if view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x>time_pill.position.x+time_pill.size.x+12 else 66)
+		# The status strip is a fixed-height top-bar component. At the minimum
+		# supported canvas, retain the urgent food, survival and GDP outcomes and
+		# hide duplicate context instead of wrapping downward over the map.
+		var compact_top:=view.x<1080
+		(kpi_chips.get("population",{}).get("chip") as Control).visible=not compact_top
+		(kpi_chips.get("water",{}).get("chip") as Control).visible=not compact_top
+		if kpi_separators.size()>=2:
+			kpi_separators[0].visible=not compact_top
+			kpi_separators[1].visible=not compact_top
+		kpi_strip.reset_size()
+		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Tokens.DOCK_MARGIN_Y)
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,view.y-Tokens.EDGE_MARGIN-queue_root.size.y)
@@ -328,22 +340,26 @@ func _style_speed_controls(selected:int)->void:
 # --- KPI strip --------------------------------------------------------------
 
 const KPI_DEFS:Array[Dictionary]=[
-	{"id":"population","label":"POPULATION","width":158.0,"accent":Tokens.GREEN,"section":"settlement","sub":0},
-	{"id":"food","label":"FOOD","width":150.0,"accent":Tokens.AMBER,"section":"economy","sub":0},
-	{"id":"water","label":"WATER","width":128.0,"accent":Tokens.TEAL,"section":"economy","sub":0},
-	{"id":"health","label":"HEALTH","width":100.0,"accent":Tokens.TEAL,"section":"health","sub":0},
-	{"id":"labor","label":"LABOR","width":150.0,"accent":Tokens.BLUE,"section":"settlement","sub":0},
+	{"id":"population","label":"POPULATION","width":140.0,"accent":Tokens.GREEN,"section":"settlement","sub":0},
+	{"id":"food","label":"FOOD","width":112.0,"accent":Tokens.AMBER,"section":"economy","sub":0},
+	{"id":"water","label":"WATER","width":112.0,"accent":Tokens.TEAL,"section":"economy","sub":0},
+	{"id":"health","label":"SURVIVAL","width":152.0,"accent":Tokens.TEAL,"section":"health","sub":0},
+	{"id":"gdp","label":"REAL GDP / DAY","width":136.0,"accent":Tokens.BLUE,"section":"economy","sub":3},
 ]
 
 func _build_kpi_strip()->void:
-	kpi_strip=VBoxContainer.new()
+	kpi_strip=PanelContainer.new()
 	kpi_strip.name="KpiStrip"
-	kpi_strip.add_theme_constant_override("separation",6)
+	kpi_strip.add_theme_stylebox_override("panel",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER,1,22,2))
 	add_child(kpi_strip)
 	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",6)
+	row.add_theme_constant_override("separation",0)
 	kpi_strip.add_child(row)
-	for def in KPI_DEFS:
+	kpi_separators.clear()
+	for index:int in KPI_DEFS.size():
+		var def:Dictionary=KPI_DEFS[index]
+		if index>0:
+			var divider:=ColorRect.new();divider.color=Tokens.BORDER;divider.custom_minimum_size=Vector2(1,26);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;divider.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(divider);kpi_separators.append(divider)
 		var chip:=Button.new()
 		chip.name="Kpi"+String(def.id).capitalize()
 		# Reserve one stable width for every state. In particular, the longer
@@ -351,9 +367,9 @@ func _build_kpi_strip()->void:
 		# and jump from the first row to the second while the simulation runs.
 		chip.custom_minimum_size=Vector2(float(def.width),Tokens.CHIP_HEIGHT)
 		chip.clip_contents=true
-		chip.add_theme_stylebox_override("normal",Tokens.chip_style(false))
-		chip.add_theme_stylebox_override("hover",Tokens.chip_style(true))
-		chip.add_theme_stylebox_override("pressed",Tokens.chip_style(true))
+		chip.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
+		chip.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG))
+		chip.add_theme_stylebox_override("pressed",Tokens.flat(Tokens.ACTIVE_BG))
 		chip.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		chip.pressed.connect(func()->void: section_requested.emit(String(def.section),int(def.sub)))
 		row.add_child(chip)
@@ -364,7 +380,7 @@ func _build_kpi_strip()->void:
 		chip.add_child(inner)
 		var accent:=ColorRect.new()
 		accent.color=def.accent
-		accent.custom_minimum_size=Vector2(8,28)
+		accent.custom_minimum_size=Vector2(3,24)
 		accent.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		accent.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		inner.add_child(accent)
@@ -818,14 +834,16 @@ func _refresh_local_kpis()->void:
 	var metrics:Dictionary=GameState.simulation_metrics
 	var water:Dictionary=GameState.water_metrics
 	var population:=GameState.population_total
-	var health:=roundi(GameState.population_health*100.0)
+	var survival:=Indicators.health()
+	var expectancy:=float(survival.life_expectancy)
+	var infant_mortality:=float(survival.infant_mortality_per_1000)
+	var economy:=Indicators.economy()
 	var food_days:=float(metrics.get("food_days",0.0))
 	var food_balance:=float(metrics.get("food_balance",0.0))
 	var vital_balance:Dictionary=_overall_vitals
 	var births:=int(vital_balance.get("births",0))
 	var deaths:=int(vital_balance.get("deaths",0))
 	var vital_net:=int(vital_balance.get("net",births-deaths))
-	var efficiency:=roundi(float(metrics.get("labor_efficiency",0.0))*100.0)
 	var able:=int(terrain._able_population())
 	var assigned:=0
 	for role in GameState.population_allocations:
@@ -833,7 +851,7 @@ func _refresh_local_kpis()->void:
 	var idle:=maxi(0,able-assigned)
 	var water_days:=float(water.get("days",0.0))
 	var water_intake:=roundi(float(water.get("intake_ratio",1.0))*100.0)
-	var signature:="%d|%d|%.1f|%.1f|%d|%d|%d|%d|%.1f|%d" % [population,health,food_days,food_balance,births,deaths,efficiency,idle,water_days,water_intake]
+	var signature:="%d|%.1f|%.1f|%.1f|%.1f|%d|%d|%d|%.1f|%d" % [population,expectancy,infant_mortality,float(economy.gdp),food_balance,births,deaths,idle,water_days,water_intake]
 	signature+="|%d|%s" % [_overall_population,GameState.selected_player_settlement_id]
 	if signature==_kpi_signature: return
 	_kpi_signature=signature
@@ -842,12 +860,12 @@ func _refresh_local_kpis()->void:
 	_update_kpi("population","%d overall" % _overall_population,"%d · %s" % [population,city_name.left(18)],Tokens.MUTED,"Overall population: %d. Selected city — %s: %d.\nOverall trailing 12 months: %d births − %d deaths = %+d natural change. Click for people and labor." % [_overall_population,city_name,population,births,deaths,vital_net])
 	var projected:=float(metrics.get("food_projected_days",food_days))
 	if food_balance<0.0:
-		_update_kpi("food","%.1f d" % food_days,"▼ shortage %dd" % roundi(projected),Tokens.RED,"Days of adult-equivalent rations in store. Net %.1f/day." % food_balance)
+		_update_kpi("food","%.1f d" % food_days,"▼ %dd" % roundi(projected),Tokens.RED,"Food shortage: projected reserve %d days. Net %.1f/day." % [roundi(projected),food_balance])
 	else:
 		_update_kpi("food","%.1f d" % food_days,"▲",Tokens.GREEN,"Days of adult-equivalent rations in store. Net %+.1f/day." % food_balance)
 	_update_kpi("water","%.1f d" % water_days,"NEED %d%%" % water_intake,Tokens.GREEN if water_intake>=100 else Tokens.RED,"%.1f reserve days remain after today's use. NEED %d%% is the share of today's drinking requirement that was actually met; it is not storage fullness." % [water_days,water_intake])
-	_update_kpi("health","%d%%" % health,"—",Tokens.MUTED,"Physical condition and freedom from preventable harm.")
-	_update_kpi("labor","%d · %d%%" % [assigned,efficiency],"%d idle" % idle if idle>0 else "",Tokens.AMBER,"Assigned workers · effective work per assigned person. %d idle." % idle)
+	_update_kpi("health","%.1f yr" % expectancy,"IMR %.0f‰" % infant_mortality,Tokens.RED if infant_mortality>=50.0 else Tokens.AMBER if infant_mortality>=20.0 else Tokens.GREEN,"Life expectancy at birth under current conditions. Infant mortality is projected deaths during the first month per 1,000 live births.")
+	_update_kpi("gdp","%.1f" % float(economy.gdp),"%.2f / person" % float(economy.gdp_per_capita),Tokens.BLUE,"Selected city real GDP: %.1f output-equivalent units per day. This is effective assigned worker-days × %.0f%% labor productivity; %.0f workers are assigned and %d are idle." % [float(economy.gdp),float(economy.productivity)*100.0,float(economy.assigned_workers),idle])
 	kpi_strip.reset_size()
 	_layout()
 

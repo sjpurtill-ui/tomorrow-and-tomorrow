@@ -213,6 +213,10 @@ func test_inspector_install_button_uses_actual_quote()->void:
 		assert_int(B.data().tools.controlled_baking).is_equal(2)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Clay)).is_equal(before-6.0)
 		assert_str(panel.details.text).contains("2 installed")
+		assert_bool(panel.details.visible).is_false()
+		assert_int(panel.metrics.size()).is_equal(6)
+		assert_str(panel.metrics.installed.text).is_equal("2")
+		assert_str(panel.conditions.text).contains("Logistics workers")
 	)
 func test_repackaging_pays_again_and_requires_a_new_leak_check()->void:
 	WorldSimulation.scoped("batches",func()->void:
