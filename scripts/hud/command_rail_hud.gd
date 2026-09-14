@@ -328,11 +328,11 @@ func _style_speed_controls(selected:int)->void:
 # --- KPI strip --------------------------------------------------------------
 
 const KPI_DEFS:Array[Dictionary]=[
-	{"id":"population","label":"POPULATION","accent":Tokens.GREEN,"section":"settlement","sub":0},
-	{"id":"food","label":"FOOD","accent":Tokens.AMBER,"section":"economy","sub":0},
-	{"id":"water","label":"WATER","accent":Tokens.TEAL,"section":"economy","sub":0},
-	{"id":"health","label":"HEALTH","accent":Tokens.TEAL,"section":"health","sub":0},
-	{"id":"labor","label":"LABOR","accent":Tokens.BLUE,"section":"settlement","sub":0},
+	{"id":"population","label":"POPULATION","width":158.0,"accent":Tokens.GREEN,"section":"settlement","sub":0},
+	{"id":"food","label":"FOOD","width":150.0,"accent":Tokens.AMBER,"section":"economy","sub":0},
+	{"id":"water","label":"WATER","width":128.0,"accent":Tokens.TEAL,"section":"economy","sub":0},
+	{"id":"health","label":"HEALTH","width":100.0,"accent":Tokens.TEAL,"section":"health","sub":0},
+	{"id":"labor","label":"LABOR","width":150.0,"accent":Tokens.BLUE,"section":"settlement","sub":0},
 ]
 
 func _build_kpi_strip()->void:
@@ -346,7 +346,11 @@ func _build_kpi_strip()->void:
 	for def in KPI_DEFS:
 		var chip:=Button.new()
 		chip.name="Kpi"+String(def.id).capitalize()
-		chip.custom_minimum_size=Vector2(0,Tokens.CHIP_HEIGHT)
+		# Reserve one stable width for every state. In particular, the longer
+		# shortage wording must not make the whole strip collide with the clock
+		# and jump from the first row to the second while the simulation runs.
+		chip.custom_minimum_size=Vector2(float(def.width),Tokens.CHIP_HEIGHT)
+		chip.clip_contents=true
 		chip.add_theme_stylebox_override("normal",Tokens.chip_style(false))
 		chip.add_theme_stylebox_override("hover",Tokens.chip_style(true))
 		chip.add_theme_stylebox_override("pressed",Tokens.chip_style(true))
@@ -365,6 +369,8 @@ func _build_kpi_strip()->void:
 		accent.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		inner.add_child(accent)
 		var text_column:=VBoxContainer.new()
+		text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		text_column.clip_contents=true
 		text_column.add_theme_constant_override("separation",0)
 		text_column.alignment=BoxContainer.ALIGNMENT_CENTER
 		text_column.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -377,13 +383,15 @@ func _build_kpi_strip()->void:
 		value_row.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		text_column.add_child(value_row)
 		var value:=Tokens.make_label("—",15,Tokens.INK)
+		value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		value.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		value_row.add_child(value)
 		var delta:=Tokens.make_label("",10,Tokens.MUTED)
+		delta.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		delta.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 		value_row.add_child(delta)
-		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner}
+		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width)}
 
 func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color,tooltip:String)->void:
 	var parts:Dictionary=kpi_chips.get(id,{})
@@ -394,10 +402,9 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	delta.add_theme_color_override("font_color",delta_color)
 	var chip:Button=parts.chip
 	chip.tooltip_text=tooltip
-	# Buttons do not size to free-floating children; drive the chip width from
-	# the inner content so labels never clip.
-	var inner:Control=parts.inner
-	chip.custom_minimum_size=Vector2(inner.get_combined_minimum_size().x+26.0,Tokens.CHIP_HEIGHT)
+	# Width is intentionally independent of live text so a deficit cannot move
+	# the complete top bar. The tooltip retains the unabridged explanation.
+	chip.custom_minimum_size=Vector2(float(parts.width),Tokens.CHIP_HEIGHT)
 
 # --- Decision queue ---------------------------------------------------------
 

@@ -57,6 +57,10 @@ func test_digest_fits_small_viewport_without_a_fullscreen_input_surface()->void:
 	var digest:=Notices.announce(f.host,f.hud,[{"id":"drainage","day":1}])
 	for i in 5:await get_tree().process_frame
 	assert_bool(Rect2(0,0,360,640).encloses(digest.notice.get_global_rect())).is_true()
+	assert_bool(Rect2(0,0,360,640).encloses(digest.open_button.get_global_rect())).is_true()
+	assert_str(digest.latest_label.text).is_equal("Ground Drainage")
+	assert_str(digest.date_label.text).is_equal("Y1 · D2")
+	assert_bool(digest.open_button.clip_text).is_true()
 	assert_int(digest.get_child_count()).is_equal(1)
 
 func test_invalid_saved_preference_rejected_before_world_mutation()->void:
