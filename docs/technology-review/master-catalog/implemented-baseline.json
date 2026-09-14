@@ -1,5 +1,5 @@
 {
-  "source_commit": "41f5b51b21f3d0884d957374ab1b824d241e9e0b",
+  "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
   "status": "Integrated runtime identity snapshot; behavior evidence remains in the integration handoff",
   "items": [
     {
@@ -70990,6 +70990,1034 @@
         ],
         "social_consequence": "Dependable output supports specialization and exchange while making communities more reliant on linked crafts",
         "subcategory": "Material supply"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "timber_post_beam_connections",
+      "name": "Timber Post Beam Connections",
+      "foundations": "joinery,timber_grading",
+      "mechanism": "Qualify fitted connections between structural posts and beams for stated loads",
+      "operating_requirement": "Appropriate timber, craft tools, fitted joints and inspection",
+      "consequence": "Transfer supported frame loads with joint slip and decay constraints",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "timber_post_beam_connections",
+        "local_demonstration": "Qualify fitted connections between structural posts and beams for stated loads",
+        "operating_requirements": "Appropriate timber, craft tools, fitted joints and inspection",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "joinery",
+          "timber_grading"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "timber_post_beam_connections",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Timber Post Beam Connections",
+            "missing_all": [
+              "joinery",
+              "timber_grading"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "joinery",
+              "timber_grading"
+            ],
+            "requires_all": [
+              "joinery",
+              "timber_grading"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Timber Post Beam Connections",
+        "observation": "Qualify fitted connections between structural posts and beams for stated loads",
+        "operating_contract": "Appropriate timber, craft tools, fitted joints and inspection",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "fitted_post_beam_sets"
+        ],
+        "requires": [
+          "joinery",
+          "timber_grading"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "timber_splice_connections",
+      "name": "Timber Splice Connections",
+      "foundations": "joinery,timber_grading",
+      "mechanism": "Join structural timber lengths through an evaluated load-transfer connection",
+      "operating_requirement": "Suitable members, fitted connections and qualified craft work",
+      "consequence": "Extend supported members while connection capacity limits service",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "timber_splice_connections",
+        "local_demonstration": "Join structural timber lengths through an evaluated load-transfer connection",
+        "operating_requirements": "Suitable members, fitted connections and qualified craft work",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "joinery",
+          "timber_grading"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "timber_splice_connections",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Timber Splice Connections",
+            "missing_all": [
+              "joinery",
+              "timber_grading"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "joinery",
+              "timber_grading"
+            ],
+            "requires_all": [
+              "joinery",
+              "timber_grading"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Timber Splice Connections",
+        "observation": "Join structural timber lengths through an evaluated load-transfer connection",
+        "operating_contract": "Suitable members, fitted connections and qualified craft work",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "fitted_splice_sets"
+        ],
+        "requires": [
+          "joinery",
+          "timber_grading"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "timber_lateral_bracing",
+      "name": "Timber Lateral Bracing",
+      "foundations": "framed_construction",
+      "mechanism": "Provide evaluated paths for lateral loads through a timber frame",
+      "operating_requirement": "Qualified braces, connections, foundations and skilled construction",
+      "consequence": "Reduce unsupported frame movement without eliminating storm or seismic risk",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "structural_load_testing",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "timber_lateral_bracing",
+        "local_demonstration": "Provide evaluated paths for lateral loads through a timber frame",
+        "operating_requirements": "Qualified braces, connections, foundations and skilled construction",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "branching_note": "Practical frame trials can precede formal loading methods; real bracing and connection quality remain necessary.",
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "framed_construction"
+        ],
+        "previous_requires_any": [
+          [
+            "structural_load_testing",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "timber_lateral_bracing",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Timber Lateral Bracing",
+            "missing_all": [
+              "framed_construction"
+            ],
+            "missing_any": [
+              [
+                "structural_load_testing",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "framed_construction",
+              "structural_load_testing",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "framed_construction"
+            ],
+            "requires_any": [
+              [
+                "structural_load_testing",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Timber Lateral Bracing",
+        "observation": "Provide evaluated paths for lateral loads through a timber frame",
+        "operating_contract": "Qualified braces, connections, foundations and skilled construction",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "timber_brace_sets"
+        ],
+        "requires": [
+          "framed_construction"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "structural_load_testing",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "timber_moisture_movement_design",
+      "name": "Timber Moisture Movement Design",
+      "foundations": "timber_seasoning",
+      "mechanism": "Accommodate measured wood dimensional changes at building joints and interfaces",
+      "operating_requirement": "Known timber condition, suitable details and qualified installers",
+      "consequence": "Reduce some cracking or binding while moisture movement persists",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [
+        [
+          "masonry_moisture_management",
+          "experimental_controls"
+        ]
+      ],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "timber_moisture_movement_design",
+        "local_demonstration": "Accommodate measured wood dimensional changes at building joints and interfaces",
+        "operating_requirements": "Known timber condition, suitable details and qualified installers",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "branching_note": "Repeated wood movement observations can precede a general masonry-moisture discipline.",
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "timber_seasoning"
+        ],
+        "previous_requires_any": [
+          [
+            "masonry_moisture_management",
+            "experimental_controls"
+          ]
+        ]
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "timber_moisture_movement_design",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Timber Moisture Movement Design",
+            "missing_all": [
+              "timber_seasoning"
+            ],
+            "missing_any": [
+              [
+                "masonry_moisture_management",
+                "experimental_controls"
+              ]
+            ],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "timber_seasoning",
+              "masonry_moisture_management",
+              "experimental_controls"
+            ],
+            "requires_all": [
+              "timber_seasoning"
+            ],
+            "requires_any": [
+              [
+                "masonry_moisture_management",
+                "experimental_controls"
+              ]
+            ],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Timber Moisture Movement Design",
+        "observation": "Accommodate measured wood dimensional changes at building joints and interfaces",
+        "operating_contract": "Known timber condition, suitable details and qualified installers",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "movement_joint_sets"
+        ],
+        "requires": [
+          "timber_seasoning"
+        ],
+        "requires_all": [],
+        "requires_any": [
+          [
+            "masonry_moisture_management",
+            "experimental_controls"
+          ]
+        ],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "building_drainage_coordination",
+      "name": "Building-Drainage Coordination",
+      "foundations": "drainage,household_space_planning",
+      "mechanism": "Route building runoff and waste flows through compatible maintained connections",
+      "operating_requirement": "Suitable drains, gradients or pumps and receiving capacity",
+      "consequence": "Prevent some internal water accumulation without transferring unlimited flow downstream",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Building-Drainage Coordination: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "building_drainage_coordination",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Building-Drainage Coordination",
+        "local_demonstration": "Route building runoff and waste flows through compatible maintained connections",
+        "operating_requirements": "Suitable drains, gradients or pumps and receiving capacity",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "drainage",
+          "household_space_planning"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "building_drainage_coordination",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Building-Drainage Coordination",
+            "missing_all": [
+              "drainage",
+              "household_space_planning"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "drainage",
+              "household_space_planning"
+            ],
+            "requires_all": [
+              "drainage",
+              "household_space_planning"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Building-Drainage Coordination",
+        "observation": "Route building runoff and waste flows through compatible maintained connections",
+        "operating_contract": "Suitable drains, gradients or pumps and receiving capacity",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "building_runoff_channels"
+        ],
+        "requires": [
+          "drainage",
+          "household_space_planning"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "building_wind_load_assessment",
+      "name": "Building Wind-Load Assessment",
+      "foundations": "aerodynamics,structural_load_testing",
+      "mechanism": "Estimate and test wind effects on a structure and its components",
+      "operating_requirement": "Site evidence, qualified models or tests and declared assumptions",
+      "consequence": "Set a supported envelope while unusual exposure or model gaps remain",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Building Wind-Load Assessment: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "building_wind_load_assessment",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Building Wind-Load Assessment",
+        "local_demonstration": "Estimate and test wind effects on a structure and its components",
+        "operating_requirements": "Site evidence, qualified models or tests and declared assumptions",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "aerodynamics",
+          "structural_load_testing"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "building_wind_load_assessment",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Building Wind-Load Assessment",
+            "missing_all": [
+              "aerodynamics",
+              "structural_load_testing"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "aerodynamics",
+              "structural_load_testing"
+            ],
+            "requires_all": [
+              "aerodynamics",
+              "structural_load_testing"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Building Wind-Load Assessment",
+        "observation": "Estimate and test wind effects on a structure and its components",
+        "operating_contract": "Site evidence, qualified models or tests and declared assumptions",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "building_wind_trial_frames"
+        ],
+        "requires": [
+          "aerodynamics",
+          "structural_load_testing"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "building_capillary_breaks",
+      "name": "Building Capillary Breaks",
+      "foundations": "masonry_moisture_management",
+      "mechanism": "Interrupt supported liquid-water movement across an assembly interface",
+      "operating_requirement": "Compatible barrier materials, continuity and skilled installation",
+      "consequence": "Reduce selected capillary transfer without blocking every moisture pathway",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "building_capillary_breaks",
+        "local_demonstration": "Interrupt supported liquid-water movement across an assembly interface",
+        "operating_requirements": "Compatible barrier materials, continuity and skilled installation",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "masonry_moisture_management"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "building_capillary_breaks",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Building Capillary Breaks",
+            "missing_all": [
+              "masonry_moisture_management"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "masonry_moisture_management"
+            ],
+            "requires_all": [
+              "masonry_moisture_management"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Building Capillary Breaks",
+        "observation": "Interrupt supported liquid-water movement across an assembly interface",
+        "operating_contract": "Compatible barrier materials, continuity and skilled installation",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "capillary_break_courses"
+        ],
+        "requires": [
+          "masonry_moisture_management"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "roof_flashing_interfaces",
+      "name": "Roof Flashing Interfaces",
+      "foundations": "building_drainage_coordination",
+      "mechanism": "Direct water across roof edges, penetrations and adjoining surfaces through qualified interfaces",
+      "operating_requirement": "Compatible flashing, skilled installation and inspection access",
+      "consequence": "Reduce specific leakage paths while roof condition remains important",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "roof_flashing_interfaces",
+        "local_demonstration": "Direct water across roof edges, penetrations and adjoining surfaces through qualified interfaces",
+        "operating_requirements": "Compatible flashing, skilled installation and inspection access",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "building_drainage_coordination"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "roof_flashing_interfaces",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Roof Flashing Interfaces",
+            "missing_all": [
+              "building_drainage_coordination"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "building_drainage_coordination"
+            ],
+            "requires_all": [
+              "building_drainage_coordination"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Roof Flashing Interfaces",
+        "observation": "Direct water across roof edges, penetrations and adjoining surfaces through qualified interfaces",
+        "operating_contract": "Compatible flashing, skilled installation and inspection access",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "roof_flashing_pieces"
+        ],
+        "requires": [
+          "building_drainage_coordination"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "rainscreen_wall_assemblies",
+      "name": "Rainscreen Wall Assemblies",
+      "foundations": "building_drainage_coordination,building_wind_load_assessment",
+      "mechanism": "Separate an outer rain-shedding layer from a drained and protected inner wall",
+      "operating_requirement": "Compatible cladding, cavity, drainage and qualified supports",
+      "consequence": "Manage penetrating rain while joints and maintenance constrain performance",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "Learn from competent visiting builders or engineers, reciprocal project evidence, commissioned research or qualified external construction service. Pay travel, delivery and local qualification costs; purchased drawings do not construct a building or supply inspected materials.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "rainscreen_wall_assemblies",
+        "local_demonstration": "Separate an outer rain-shedding layer from a drained and protected inner wall",
+        "operating_requirements": "Compatible cladding, cavity, drainage and qualified supports",
+        "grants_instant_mastery": false,
+        "outside_costs": [
+          "available competent source",
+          "payment or reciprocal contribution",
+          "real travel or information/material delivery",
+          "finite local trials and qualified construction",
+          "continuing maintenance, staff and service inputs"
+        ],
+        "route_terms": {
+          "scholar_envoy": "Pay actual travel, board and finite instruction by a competent builder or engineer; local crews practice with suitable material and qualified supervision.",
+          "partnership": "Contribute project measurements, specimens, staff or trial work; shared access, travel and interpretation retain costs.",
+          "purchased_research": "Commission a defined design or evidence question; delivered plans do not supply a completed or inspected structure.",
+          "licensed_or_imported_service": "Pay for actual design, components or construction capacity within supplier limits; maintenance and qualified local operation remain dependent requirements.",
+          "reverse_engineering": "Inspect a real accessible assembly or delivered record with finite work; visible form alone does not disclose hidden supports, material condition or qualified loading."
+        }
+      },
+      "implementation_status": "Authored proposal; physical structures, material quantities, construction work, building services, acquisition penalties and AI behavior remain pending.",
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "buildings-settlements-depth.json",
+        "previous_requires_all": [
+          "building_drainage_coordination",
+          "building_wind_load_assessment"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "rainscreen_wall_assemblies",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Rainscreen Wall Assemblies",
+            "missing_all": [
+              "building_drainage_coordination",
+              "building_wind_load_assessment"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "building_drainage_coordination",
+              "building_wind_load_assessment"
+            ],
+            "requires_all": [
+              "building_drainage_coordination",
+              "building_wind_load_assessment"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Rainscreen Wall Assemblies",
+        "observation": "Separate an outer rain-shedding layer from a drained and protected inner wall",
+        "operating_contract": "Compatible cladding, cavity, drainage and qualified supports",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "rainscreen_batten_panels"
+        ],
+        "requires": [
+          "building_drainage_coordination",
+          "building_wind_load_assessment"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
+      }
+    },
+    {
+      "field": "D08",
+      "id": "building_shading_design",
+      "name": "Building-Shading Design",
+      "foundations": "seasonal_patterns,geometric_survey",
+      "mechanism": "Limit or admit solar exposure through qualified orientation and shading",
+      "operating_requirement": "Suitable geometry, materials and seasonal observations",
+      "consequence": "Reduce unwanted heat or glare while affecting daylight and winter gains",
+      "status": "implemented_baseline",
+      "requires_all": [],
+      "requires_any": [],
+      "recovery": "For Building-Shading Design: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
+      "recovery_contract": {
+        "status": "design_proposal",
+        "destination": "building_shading_design",
+        "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Building-Shading Design",
+        "local_demonstration": "Limit or admit solar exposure through qualified orientation and shading",
+        "operating_requirements": "Suitable geometry, materials and seasonal observations",
+        "outside_costs": [
+          "competent source availability",
+          "negotiated payment or reciprocal work",
+          "actual travel or evidence delivery",
+          "local adaptation and qualification",
+          "finite teacher and learner capacity"
+        ],
+        "grants_instant_mastery": false,
+        "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
+      },
+      "implementation_reconciliation": {
+        "source_commit": "e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722",
+        "editorial_source": "materials-construction-flight.json",
+        "previous_requires_all": [
+          "seasonal_patterns",
+          "geometric_survey"
+        ],
+        "previous_requires_any": []
+      },
+      "runtime_definition": {
+        "chance": 0.002,
+        "day": 0,
+        "direction": "infrastructure",
+        "dynamic": "infrastructure",
+        "effects": {},
+        "id": "building_shading_design",
+        "learning_routes": [
+          {
+            "collection_id": "",
+            "id": "local",
+            "label": "Building-Shading Design",
+            "missing_all": [
+              "seasonal_patterns",
+              "geometric_survey"
+            ],
+            "missing_any": [],
+            "progress_multiplier": 1.0,
+            "ready": false,
+            "requires": [
+              "seasonal_patterns",
+              "geometric_survey"
+            ],
+            "requires_all": [
+              "seasonal_patterns",
+              "geometric_survey"
+            ],
+            "requires_any": [],
+            "signals": [
+              "construction",
+              "crafting",
+              "materials"
+            ],
+            "support": 0.0
+          }
+        ],
+        "name": "Building-Shading Design",
+        "observation": "Limit or admit solar exposure through qualified orientation and shading",
+        "operating_contract": "Suitable geometry, materials and seasonal observations",
+        "production_contract": "Prepare finite components; installed plot work and accepted selected measurements are required separately. Component manufacture alone grants no building service.",
+        "production_items": [
+          "building_shade_lattices"
+        ],
+        "requires": [
+          "seasonal_patterns",
+          "geometric_survey"
+        ],
+        "requires_all": [],
+        "requires_any": [],
+        "signals": [
+          "construction",
+          "crafting",
+          "materials"
+        ],
+        "social_consequence": "Larger permanent settlements become possible, but their population also becomes dependent on continued maintenance",
+        "subcategory": "Housing"
       }
     }
   ]

@@ -1547,38 +1547,6 @@
   },
   {
     "field": "D08",
-    "id": "building_shading_design",
-    "name": "Building-Shading Design",
-    "foundations": "seasonal_patterns,geometric_survey",
-    "mechanism": "Limit or admit solar exposure through qualified orientation and shading",
-    "operating_requirement": "Suitable geometry, materials and seasonal observations",
-    "consequence": "Reduce unwanted heat or glare while affecting daylight and winter gains",
-    "status": "authored_draft",
-    "requires_all": [
-      "seasonal_patterns",
-      "geometric_survey"
-    ],
-    "requires_any": [],
-    "recovery": "For Building-Shading Design: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "building_shading_design",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Building-Shading Design",
-      "local_demonstration": "Limit or admit solar exposure through qualified orientation and shading",
-      "operating_requirements": "Suitable geometry, materials and seasonal observations",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
-    }
-  },
-  {
-    "field": "D08",
     "id": "thermal_mass_building_design",
     "name": "Thermal-Mass Building Design",
     "foundations": "calorimetry,passive_building_ventilation",
@@ -1733,38 +1701,6 @@
       "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Urban Fire-Response Services",
       "local_demonstration": "Organize detection, dispatch and staffed response to building fires",
       "operating_requirements": "Available crews, equipment, usable water and access",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
-    }
-  },
-  {
-    "field": "D08",
-    "id": "building_drainage_coordination",
-    "name": "Building-Drainage Coordination",
-    "foundations": "drainage,household_space_planning",
-    "mechanism": "Route building runoff and waste flows through compatible maintained connections",
-    "operating_requirement": "Suitable drains, gradients or pumps and receiving capacity",
-    "consequence": "Prevent some internal water accumulation without transferring unlimited flow downstream",
-    "status": "authored_draft",
-    "requires_all": [
-      "drainage",
-      "household_space_planning"
-    ],
-    "requires_any": [],
-    "recovery": "For Building-Drainage Coordination: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "building_drainage_coordination",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Building-Drainage Coordination",
-      "local_demonstration": "Route building runoff and waste flows through compatible maintained connections",
-      "operating_requirements": "Suitable drains, gradients or pumps and receiving capacity",
       "outside_costs": [
         "competent source availability",
         "negotiated payment or reciprocal work",
@@ -1964,38 +1900,6 @@
       "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Structural-Steel Connections",
       "local_demonstration": "Transfer assessed loads between steel members through qualified joints",
       "operating_requirements": "Suitable fasteners or welds, access, workmanship and inspection",
-      "outside_costs": [
-        "competent source availability",
-        "negotiated payment or reciprocal work",
-        "actual travel or evidence delivery",
-        "local adaptation and qualification",
-        "finite teacher and learner capacity"
-      ],
-      "grants_instant_mastery": false,
-      "qualification_focus": "Inspect local ground, structure, interfaces and installed services; a licensed plan is not an erected or maintained building."
-    }
-  },
-  {
-    "field": "D08",
-    "id": "building_wind_load_assessment",
-    "name": "Building Wind-Load Assessment",
-    "foundations": "aerodynamics,structural_load_testing",
-    "mechanism": "Estimate and test wind effects on a structure and its components",
-    "operating_requirement": "Site evidence, qualified models or tests and declared assumptions",
-    "consequence": "Set a supported envelope while unusual exposure or model gaps remain",
-    "status": "authored_draft",
-    "requires_all": [
-      "aerodynamics",
-      "structural_load_testing"
-    ],
-    "requires_any": [],
-    "recovery": "For Building Wind-Load Assessment: acquire attributable research or invite a competent paid specialist, contribute to a partnership, or commission a defined study. Wait for actual access and delivery, rebuild missing local foundations and demonstrate the stated mechanism with the required equipment and inputs. Imported material, construction or flight service remains supplier-dependent and does not grant mastery. Route costs and runtime mappings remain pending.",
-    "recovery_contract": {
-      "status": "design_proposal",
-      "destination": "building_wind_load_assessment",
-      "evidence": "Qualified observations, designs, specimens where applicable, and process or service records for Building Wind-Load Assessment",
-      "local_demonstration": "Estimate and test wind effects on a structure and its components",
-      "operating_requirements": "Site evidence, qualified models or tests and declared assumptions",
       "outside_costs": [
         "competent source availability",
         "negotiated payment or reciprocal work",

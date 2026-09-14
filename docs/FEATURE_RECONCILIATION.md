@@ -1,3 +1,7 @@
+## September 14 — paid settlement fabric methods
+
+Ten existing D08 identities are now registered with their authored AND/OR foundations, finite component production, plot-specific assembly and trial records, city-local delivery, repair demand, acquisition disadvantages and research-card artwork. Runtime commit `e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722`; frozen worker source `842f51d06d3fcd721ff43cfcacb03e975c5ed5ea`. The ledger remains 3,470 unique authored identities while the operating split advances to 878 integrated and 2,592 drafts. See `INTEGRATION_STATUS.md` and `technology-review/SETTLEMENT_FABRIC_READY_HANDOFF.md` for tests and limits.
+
 ## September 13 — 868 verified operating discoveries
 
 Integrated twelve metallurgy discoveries from frozen source `562d4aa2c58ca42d67a774bd39f6e7a89e6a8fb1` at canonical runtime/art `41f5b51b21f3d0884d957374ab1b824d241e9e0b`. Sixty additional workshop recipes supply apparatus, selected feedstocks, paid processes, destructive inspections and downstream assemblies. Phase surveys, steel normalizing, induction hardening, grain measurement, residual-stress and fracture trials, welding, vacuum melting, investment/lost-foam casting, honing and superfinishing retain workpiece history and produce accepted or rejected stock from measured outcomes. Twelve industrial illustrations use matching architecture, clothing and equipment.

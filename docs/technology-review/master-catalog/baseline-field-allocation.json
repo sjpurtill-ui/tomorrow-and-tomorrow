@@ -6199,6 +6199,76 @@
       "source_domain": "production",
       "name": "Short-Stroke Superfinishing",
       "source_status": "implemented_baseline"
+    },
+    {
+      "id": "timber_post_beam_connections",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Timber Post Beam Connections",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "timber_splice_connections",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Timber Splice Connections",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "timber_lateral_bracing",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Timber Lateral Bracing",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "timber_moisture_movement_design",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Timber Moisture Movement Design",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "building_drainage_coordination",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Building-Drainage Coordination",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "building_wind_load_assessment",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Building Wind-Load Assessment",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "building_capillary_breaks",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Building Capillary Breaks",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "roof_flashing_interfaces",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Roof Flashing Interfaces",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "rainscreen_wall_assemblies",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Rainscreen Wall Assemblies",
+      "source_status": "implemented_baseline"
+    },
+    {
+      "id": "building_shading_design",
+      "field": "D08",
+      "source_domain": "infrastructure",
+      "name": "Building-Shading Design",
+      "source_status": "implemented_baseline"
     }
   ],
   "classification_notes": [

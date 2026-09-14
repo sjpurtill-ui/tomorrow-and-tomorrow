@@ -1,7 +1,7 @@
 {
-  "verified_baseline_discoveries": 868,
+  "verified_baseline_discoveries": 878,
   "pending_communications": 0,
-  "new_authored_drafts": 2602,
+  "new_authored_drafts": 2592,
   "distinct_accounted_identities": 3470,
   "remaining_identities_to_author": 1530,
   "target": 5000,
@@ -2357,7 +2357,7 @@
     ],
     "validation_scope": "Explicit editorial assignments only. Unassigned identities may fill any horizon; target slots are not a measured authoring deficit. No dates, feasibility, operating implementation or campaign duration are certified."
   },
-  "branch_alternatives": 442,
+  "branch_alternatives": 440,
   "draft_reachability_rounds": 13,
   "draft_fields": {
     "D01": 109,
@@ -2367,7 +2367,7 @@
     "D05": 155,
     "D06": 53,
     "D07": 69,
-    "D08": 94,
+    "D08": 84,
     "D09": 111,
     "D10": 95,
     "D11": 84,
@@ -2460,9 +2460,9 @@
       "id": "D08",
       "name": "Buildings and settlements",
       "target": 220,
-      "implemented_baseline": 35,
+      "implemented_baseline": 45,
       "pending_communications": 0,
-      "authored_drafts": 94,
+      "authored_drafts": 84,
       "accounted": 129,
       "remaining_to_target": 91
     },

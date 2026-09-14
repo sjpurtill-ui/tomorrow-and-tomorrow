@@ -6944,14 +6944,94 @@
       "id": "short_stroke_superfinishing",
       "name": "Short-Stroke Superfinishing",
       "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_post_beam_connections.png",
+      "description": "Qualify fitted connections between structural posts and beams for stated loads",
+      "domain": "infrastructure",
+      "id": "timber_post_beam_connections",
+      "name": "Timber Post Beam Connections",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_splice_connections.png",
+      "description": "Join structural timber lengths through an evaluated load-transfer connection",
+      "domain": "infrastructure",
+      "id": "timber_splice_connections",
+      "name": "Timber Splice Connections",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_lateral_bracing.png",
+      "description": "Provide evaluated paths for lateral loads through a timber frame",
+      "domain": "infrastructure",
+      "id": "timber_lateral_bracing",
+      "name": "Timber Lateral Bracing",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/timber_moisture_movement_design.png",
+      "description": "Accommodate measured wood dimensional changes at building joints and interfaces",
+      "domain": "infrastructure",
+      "id": "timber_moisture_movement_design",
+      "name": "Timber Moisture Movement Design",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/building_drainage_coordination.png",
+      "description": "Route building runoff and waste flows through compatible maintained connections",
+      "domain": "infrastructure",
+      "id": "building_drainage_coordination",
+      "name": "Building-Drainage Coordination",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/building_wind_load_assessment.png",
+      "description": "Estimate and test wind effects on a structure and its components",
+      "domain": "infrastructure",
+      "id": "building_wind_load_assessment",
+      "name": "Building Wind-Load Assessment",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/building_capillary_breaks.png",
+      "description": "Interrupt supported liquid-water movement across an assembly interface",
+      "domain": "infrastructure",
+      "id": "building_capillary_breaks",
+      "name": "Building Capillary Breaks",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/roof_flashing_interfaces.png",
+      "description": "Direct water across roof edges, penetrations and adjoining surfaces through qualified interfaces",
+      "domain": "infrastructure",
+      "id": "roof_flashing_interfaces",
+      "name": "Roof Flashing Interfaces",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/rainscreen_wall_assemblies.png",
+      "description": "Separate an outer rain-shedding layer from a drained and protected inner wall",
+      "domain": "infrastructure",
+      "id": "rainscreen_wall_assemblies",
+      "name": "Rainscreen Wall Assemblies",
+      "status": "verified"
+    },
+    {
+      "asset": "res://assets/ui/research/paper/building_shading_design.png",
+      "description": "Limit or admit solar exposure through qualified orientation and shading",
+      "domain": "infrastructure",
+      "id": "building_shading_design",
+      "name": "Building-Shading Design",
+      "status": "verified"
     }
   ],
   "live_art_complete": false,
-  "live_count": 868,
+  "live_count": 878,
   "prompt_record": "res://assets/ui/research/paper/PROMPTS.md",
   "queued_count": 561,
   "schema": 1,
   "style_reference": "res://assets/ui/research/paper/apprentice_contracts.png",
   "target_discoveries": 5000,
-  "verified_count": 307
+  "verified_count": 317
 }
