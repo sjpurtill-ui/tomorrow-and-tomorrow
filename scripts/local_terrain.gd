@@ -105,6 +105,9 @@ var north_reset_active:=false
 var camera_input_msec:int=0
 var terrain_patch_job:RefCounted
 var terrain_patch_cache:Array[Dictionary]=[]
+var terrain_patch_sample_source:Dictionary={}
+var terrain_patch_last_reused_vertices:=0
+var terrain_patch_last_sampled_vertices:=0
 var regional_patch_resolution:=0
 var terrain_patch_cancellations:=0
 var terrain_patch_last_slice_usec:int=0
@@ -1731,7 +1734,45 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	# height/color authorities and is replaced by the final full-density mesh.
 	var same_patch:=regional_terrain_patch!=null and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span)
 	var next_resolution:=TERRAIN_LOD.next_resolution(span,regional_patch_resolution if same_patch else 0)
-	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at,_terrain_seasonality_at)
+	var prior:=_overlapping_terrain_samples(snapped,span,next_resolution)
+	# A small pan within completed coverage must not replace detailed ground with
+	# a coarse preview. Keep that mesh visible while reusing its overlap to build
+	# the next full-detail patch; large moves still get the rapid coverage pass.
+	if not same_patch and regional_patch_resolution==resolution and regional_patch_span==span and _regional_patch_covers_camera():
+		var fine_prior:=_overlapping_terrain_samples(snapped,span,resolution)
+		if not fine_prior.is_empty() and int(fine_prior.resolution)==resolution:
+			var shift:Vector2=(snapped-Vector2(fine_prior.center)).abs()
+			if maxf(shift.x,shift.y)<=span*0.125:next_resolution=resolution;prior=fine_prior
+	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at,_terrain_seasonality_at,prior)
+
+func _regional_patch_covers_camera()->bool:
+	if camera==null or regional_terrain_patch==null:return false
+	var size:=get_viewport().get_visible_rect().size
+	for corner:Vector2 in [Vector2.ZERO,Vector2(size.x,0),size,Vector2(0,size.y)]:
+		var direction:=camera.project_ray_normal(corner)
+		if direction.y>=-0.001:return false
+		var origin:=camera.project_ray_origin(corner)
+		var hit:=origin+direction*((camera_target.y-origin.y)/direction.y)
+		# Conservative margin for relief projecting beyond the target-height plane.
+		if absf(hit.x-regional_patch_center.x)>regional_patch_span*0.46 or absf(hit.z-regional_patch_center.y)>regional_patch_span*0.46:return false
+	return true
+
+func _overlapping_terrain_samples(center:Vector2,span:float,resolution:int)->Dictionary:
+	var best:Dictionary={};var best_score:=0.0
+	var candidates:=terrain_patch_cache.duplicate()
+	if not terrain_patch_sample_source.is_empty():candidates.append(terrain_patch_sample_source)
+	for candidate:Dictionary in candidates:
+		if not candidate.has("samples"):continue
+		if int(candidate.get("sample_seed",0))!=GameState.world_seed or int(candidate.get("sample_province",-1))!=GameState.active_province:continue
+		# Different spans are not assumed to share a lattice. Zoom refinement and
+		# neighbouring pan requests at one span can share exact completed samples.
+		if float(candidate.span)!=span:continue
+		var delta:Vector2=(center-Vector2(candidate.center)).abs()
+		var area:=maxf(0.0,span-delta.x)*maxf(0.0,span-delta.y)/(span*span)
+		var density:=minf(1.0,pow(float(int(candidate.resolution)-1)/float(resolution-1),2.0))
+		var score:=area*density
+		if score>best_score:best_score=score;best=candidate.samples
+	return best
 
 func _advance_terrain_patch()->void:
 	if terrain_patch_job==null: return
@@ -1741,14 +1782,17 @@ func _advance_terrain_patch()->void:
 	# obvious hitches even though the final terrain arrived sooner.
 	if not terrain_patch_job.advance(TERRAIN_PATCH_MOVING_BUDGET_USEC if _camera_in_motion() else TERRAIN_PATCH_IDLE_BUDGET_USEC): return
 	var started:=Time.get_ticks_usec()
-	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights}
+	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights,"samples":terrain_patch_job.completed_samples(),"sample_seed":GameState.world_seed,"sample_province":GameState.active_province}
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
+	terrain_patch_last_reused_vertices=terrain_patch_job.reused_vertices
+	terrain_patch_last_sampled_vertices=terrain_patch_job.sampled_vertices
 	terrain_patch_job=null
 	_install_regional_patch(completed)
 	TERRAIN_LOD.retain(terrain_patch_cache,completed)
 	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
 
 func _install_regional_patch(completed:Dictionary)->void:
+	terrain_patch_sample_source=completed if completed.has("samples") else {}
 	var replacement:=MeshInstance3D.new()
 	replacement.name="RegionalTerrainLOD"
 	replacement.mesh=completed.mesh

@@ -17,7 +17,11 @@ func covered(terrain:Terrain)->bool:
 func stream(terrain:Terrain,label:String)->void:
 	var start:=Time.get_ticks_msec();var preview_ms:=-1;var frames:Array[float]=[]
 	var commits:Array[Dictionary]=[];var last_resolution:=terrain.regional_patch_resolution
-	for frame in 3000:
+	# The guarded background renderer shares the host with a live player. Bound
+	# elapsed time as well as iterations: frame count alone prematurely timed out
+	# valid fine refinement under host load, then indexed an unfinished cache.
+	for frame in 12000:
+		if Time.get_ticks_msec()-start>180000:break
 		var frame_start:=Time.get_ticks_usec()
 		terrain._update_world_streaming();terrain._advance_terrain_patch();terrain._update_scale_lod()
 		if last_resolution!=terrain.regional_patch_resolution:
@@ -56,7 +60,20 @@ func run()->void:
 			# the live pipeline must supply every new regional refinement stage.
 			if index==2:terrain._install_regional_patch(terrain.terrain_patch_cache[0])
 		await stream(terrain,"distance-"+str(index));await settle()
+		if errors>0:
+			canvas.queue_free();WorldSimulation.clear();get_tree().quit(errors);return
 		canvas.get_texture().get_image().save_png(output+"distance-"+str(index)+"-after.png")
+	# A covered pan should preserve the finished mesh while the shared sample
+	# lattice supplies the next fine patch. Exercise the real request/install path.
+	var old_mesh:MeshInstance3D=terrain.regional_terrain_patch
+	terrain.camera_target.x+=terrain.regional_patch_span/12.0
+	terrain._update_camera();terrain._update_world_streaming()
+	check(terrain.terrain_patch_job!=null and terrain.terrain_patch_job.resolution==terrain.regional_patch_resolution,"covered pan requests full detail without a coarse replacement")
+	terrain._advance_terrain_patch()
+	check(terrain.regional_terrain_patch==old_mesh,"finished terrain stays visible during pan refinement")
+	await stream(terrain,"pan-close");await settle()
+	check(terrain.terrain_patch_last_reused_vertices>130000,"live pan reuses the overlapping completed samples")
+	canvas.get_texture().get_image().save_png(output+"pan-close-after.png")
 	# Cached and cancelled requests must still leave the real fallback behind.
 	terrain.set_camera_distance_level(3);camera.size=terrain.zoom_target_size;terrain.zoom_target_size=-1;terrain._update_camera()
 	terrain._update_world_streaming();terrain._advance_terrain_patch()

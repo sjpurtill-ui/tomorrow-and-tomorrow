@@ -19,8 +19,20 @@ var seasonal_amplitudes:=PackedFloat32Array()
 var climate_uv:=PackedVector2Array()
 var geology_uv:=PackedVector2Array()
 var max_slice_usec:=0
+var sampled_vertices:=0
+var reused_vertices:=0
+var reuse_center:=Vector2.ZERO
+var reuse_span:=0.0
+var reuse_resolution:=0
+var reuse_stride:=1
+var reuse_offset:=Vector2i.ZERO
+var reuse_vertices:=PackedVector3Array()
+var reuse_colors:=PackedColorArray()
+var reuse_climate:=PackedVector2Array()
+var reuse_geology:=PackedVector2Array()
+var reuse_seasons:=PackedFloat32Array()
 
-func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable,surface_fn:Callable=Callable(),season_fn:Callable=Callable())->void:
+func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:Callable,color_fn:Callable,surface_fn:Callable=Callable(),season_fn:Callable=Callable(),prior_samples:Dictionary={})->void:
 	resolution=grid_resolution; span=patch_span; center=patch_center
 	sample_height=height_fn; sample_color=color_fn
 	sample_surface=surface_fn
@@ -31,6 +43,47 @@ func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:C
 	if sample_surface.is_valid():
 		climate_uv.resize(vertices.size());geology_uv.resize(vertices.size())
 	if season_sampler.is_valid():seasonal_amplitudes.resize(vertices.size())
+	_configure_reuse(prior_samples)
+
+func _configure_reuse(source:Dictionary)->void:
+	var count:=int(source.get("resolution",0))
+	if count<2 or float(source.get("span",0.0))<=0.0:return
+	var size:=count*count
+	if source.get("vertices",PackedVector3Array()).size()!=size or source.get("colors",PackedColorArray()).size()!=size:return
+	if sample_surface.is_valid() and (source.get("climate",PackedVector2Array()).size()!=size or source.get("geology",PackedVector2Array()).size()!=size):return
+	if season_sampler.is_valid() and source.get("seasons",PackedFloat32Array()).size()!=size:return
+	reuse_center=source.center;reuse_span=source.span;reuse_resolution=count
+	reuse_vertices=source.vertices;reuse_colors=source.colors
+	reuse_climate=source.get("climate",PackedVector2Array());reuse_geology=source.get("geology",PackedVector2Array())
+	reuse_seasons=source.get("seasons",PackedFloat32Array())
+	if reuse_span==span:
+		var ratio:=float(resolution-1)/float(reuse_resolution-1)
+		var stride:=roundi(ratio)
+		var offset:=(reuse_center-center)/(span/float(resolution-1))
+		if stride>1 and ratio==float(stride) and offset.distance_squared_to(offset.round())<.000001:
+			reuse_stride=stride;reuse_offset=Vector2i(offset.round())
+
+func _copy_shared_sample(x:float,z:float)->bool:
+	var cells:=reuse_resolution-1
+	var column:=roundi((x-reuse_center.x)/reuse_span*float(cells)+float(cells)*0.5)
+	var row:=roundi((z-reuse_center.y)/reuse_span*float(cells)+float(cells)*0.5)
+	if column<0 or column>=reuse_resolution or row<0 or row>=reuse_resolution:return false
+	var index:=row*reuse_resolution+column
+	var point:=reuse_vertices[index]
+	# Never interpolate stored observations or accept a nearby cell. Only the
+	# identical renderable world coordinate can replace an authoritative sample.
+	if point.x!=x or point.z!=z:return false
+	vertices[cursor]=point;heights[cursor]=point.y;colors[cursor]=reuse_colors[index]
+	if sample_surface.is_valid():climate_uv[cursor]=reuse_climate[index];geology_uv[cursor]=reuse_geology[index]
+	if season_sampler.is_valid():seasonal_amplitudes[cursor]=reuse_seasons[index]
+	reused_vertices+=1
+	return true
+
+func completed_samples()->Dictionary:
+	assert(phase==2)
+	# Packed arrays share immutable storage until a writer detaches them. The
+	# owner retains only its bounded mesh cache plus the currently visible patch.
+	return {"center":center,"span":span,"resolution":resolution,"vertices":vertices,"colors":colors,"climate":climate_uv,"geology":geology_uv,"seasons":seasonal_amplitudes}
 
 func advance(budget_usec:int=2500)->bool:
 	var started:=Time.get_ticks_usec()
@@ -44,16 +97,24 @@ func advance(budget_usec:int=2500)->bool:
 		var x_index:=cursor%resolution
 		var z_index:=cursor/resolution
 		if phase==0:
-			var x:=center.x+(float(x_index)/float(resolution-1)-0.5)*span
-			var z:=center.y+(float(z_index)/float(resolution-1)-0.5)*span
-			var height:float=sample_height.call(x,z)+0.0006
-			vertices[cursor]=Vector3(x,height,z)
-			heights[cursor]=height
-			colors[cursor]=sample_color.call(x,z,height)
-			if sample_surface.is_valid():
-				var fields:Vector4=sample_surface.call(x,z,height)
-				climate_uv[cursor]=Vector2(fields.x,fields.y);geology_uv[cursor]=Vector2(fields.z,fields.w)
-			if season_sampler.is_valid():seasonal_amplitudes[cursor]=season_sampler.call(x,z,height)
+			# Sample at the coordinate actually stored by the float32 mesh. Adjacent
+			# patches then agree even when far-world arithmetic rounds differently.
+			var half_cells:=float(resolution-1)*0.5
+			var point:=Vector2(center.x+(float(x_index)-half_cells)*spacing,center.y+(float(z_index)-half_cells)*spacing)
+			var x:=float(point.x);var z:=float(point.y)
+			# A coarse preview shares only every third/fourth fine-grid node.
+			# Skip the impossible lookups before touching its packed sample arrays.
+			var shared_node:=reuse_resolution>0 and (reuse_stride==1 or ((x_index-reuse_offset.x)%reuse_stride==0 and (z_index-reuse_offset.y)%reuse_stride==0))
+			if not shared_node or not _copy_shared_sample(x,z):
+				var height:float=sample_height.call(x,z)+0.0006
+				vertices[cursor]=Vector3(x,height,z)
+				heights[cursor]=height
+				colors[cursor]=sample_color.call(x,z,height)
+				if sample_surface.is_valid():
+					var fields:Vector4=sample_surface.call(x,z,height)
+					climate_uv[cursor]=Vector2(fields.x,fields.y);geology_uv[cursor]=Vector2(fields.z,fields.w)
+				if season_sampler.is_valid():seasonal_amplitudes[cursor]=season_sampler.call(x,z,height)
+				sampled_vertices+=1
 		else:
 			var left:=maxi(0,x_index-normal_radius); var right:=mini(resolution-1,x_index+normal_radius)
 			var up:=maxi(0,z_index-normal_radius); var down:=mini(resolution-1,z_index+normal_radius)
