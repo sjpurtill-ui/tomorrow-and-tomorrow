@@ -3,6 +3,11 @@ extends GdUnitTestSuite
 func test_cartographic_relief_begins_after_close_ground_is_unresolved()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
 	assert_str(source).contains("float map_relief = smoothstep(0.035,0.28,pixel_world)")
+
+func test_subpixel_drainage_is_removed_from_regional_satellite_views()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	assert_str(source).contains("float drainage_resolved=1.0-smoothstep(0.025,0.11,pixel_world)")
+	assert_str(source).contains("if (drainage_resolved>0.0)")
 const LOD:=preload("res://scripts/terrain_lod.gd")
 const SURFACE:=preload("res://scripts/rendered_surface_height.gd")
 class Terrain extends "res://scripts/local_terrain.gd":
