@@ -1,4 +1,12 @@
 extends GdUnitTestSuite
+
+func test_unresolved_surface_noise_is_guarded_by_its_existing_lod_weight()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/ground_surface.gdshaderinc")
+	assert_str(source).contains("if (regional_grain>0.0)")
+	assert_str(source).contains("if (resolved>0.0)")
+	assert_str(source).contains("if (band_detail>0.0 && sediment>0.0)")
+	assert_str(source).contains("if (fine>0.0)")
+	assert_str(source).contains("if (soil_detail>0.0)")
 const REGIONAL:=preload("res://scripts/terrain_patch_builder.gd")
 const CLOSE:=preload("res://scripts/close_terrain_job.gd")
 class Terrain extends "res://scripts/local_terrain.gd":
