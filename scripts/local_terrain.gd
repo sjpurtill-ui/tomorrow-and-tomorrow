@@ -2155,7 +2155,6 @@ void fragment() {
 	// altitude multiplier disguised steep lowland faces as grassy ground.
 	float rock_mask = smoothstep(0.13,0.43,slope);
 	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(UV,UV2));
-	if (UV.x>=0.999 && world_position.y>0.0) { earth=seasonal_ground(earth,UV.y,UV.x-1.0,seasonal_amplitude,world_position.z,forest_mask); }
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2164,6 +2163,13 @@ void fragment() {
 	earth=mix(earth,earth*vec3(1.18,1.08,0.76),land_resources*productive_open*0.40);
 	float highland = smoothstep(5.8, 12.0, world_position.y) * (0.35 + slope * 0.65);
 	earth = mix(earth, vec3(0.40,0.39,0.36), highland * 0.36);
+	// Snow and hard frost sit above the final soil/rock material. Their extent is
+	// governed by the same temperature, rainfall and calendar used by the game,
+	// with existing regional fields breaking up the edge like satellite imagery.
+	if (UV.x>=0.999 && world_position.y>0.0) {
+		float cryosphere_pattern=regional*0.62+soil_patch*0.38;
+		earth=seasonal_terrain(earth,UV.y,UV.x-1.0,seasonal_amplitude,world_position.z,forest_mask,slope,cryosphere_pattern);
+	}
 	// A fixed north-west sun gives the orthographic world the same readable relief
 	// cues as satellite hillshade. Keep the effect restrained at close range where
 	// the scene lights and metre-scale texture already carry the form.

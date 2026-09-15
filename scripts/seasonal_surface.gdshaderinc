@@ -19,3 +19,22 @@ vec3 seasonal_ground(vec3 base,float warmth,float rain,float amplitude,float lat
 	vec3 woodland_litter=vec3(1.25,0.99,0.70)*luma;
 	return mix(base,mix(dry_stems,woodland_litter,woodland),strength);
 }
+
+// Terrain gets the same calendar authority as vegetation, plus a restrained
+// cryosphere layer. This is visual snow/frost only: it does not invent water,
+// alter fertility, or feed back into the simulation. Existing broad terrain
+// fields supply the breakup so there is no extra unresolved noise cost.
+vec3 seasonal_terrain(vec3 base,float warmth,float rain,float amplitude,float latitude_z,float woodland,float slope,float terrain_pattern) {
+	vec3 dormant_ground=seasonal_ground(base,warmth,rain,amplitude,latitude_z,woodland);
+	float temperature=landscape_temperature(warmth,amplitude,latitude_z);
+	float cold=1.0-smoothstep(-1.5,3.5,temperature);
+	float snow_supply=smoothstep(0.045,0.38,rain);
+	float sheltered=1.0-smoothstep(0.18,0.58,slope);
+	float drift=smoothstep(0.34,0.72,terrain_pattern);
+	float snow=cold*snow_supply*sheltered*drift;
+	// Very cold arid ground acquires pale frost, never a fictitious deep snowpack.
+	float hard_frost=(1.0-smoothstep(-16.0,-8.0,temperature))*(1.0-snow_supply)*sheltered;
+	float cover=clamp(snow*0.72+hard_frost*0.20*mix(0.45,1.0,drift),0.0,0.76);
+	vec3 snow_colour=mix(vec3(0.66,0.69,0.68),vec3(0.82,0.84,0.82),drift);
+	return mix(dormant_ground,snow_colour,cover);
+}

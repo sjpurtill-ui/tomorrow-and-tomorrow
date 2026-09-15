@@ -49,8 +49,10 @@ func run()->void:
 			print("SEASONAL_SITE ",JSON.stringify({"label":label,"seed":873421,"point":str(point),"height":h,"biome":terrain._biome_at(point.x,point.y,h).id,"rain":climate.precipitation,"warmth":climate.temperature,"seasonality_c":profile.seasonality_c,"day":day,"temperature_c":PlanetEnvironment.ambient_temperature_c(profile,day),"altitude_km":camera.position.y-h,"plants":plants.size(),"builder_slice_us":builder.max_slice_usec}))
 		check(geometry==terrain.regional_terrain_patch.mesh.get_rid() and plants==snapshot_plants(terrain),label+" calendar leaves geometry and crown identities unchanged")
 		var change:=difference(images[91],images[273]);print("SEASONAL_IMAGE_CHANGE ",label," ",change)
-		if label in ["drylands","tropical_woodland","cold_barrens"]:check(change<.0005,label+" does not acquire an invented winter climate or green desert")
+		if label in ["drylands","tropical_woodland"]:check(change<.0005,label+" does not acquire an invented winter climate or green desert")
 		else:check(change>.001,label+" visibly responds to its real seasonal temperature")
+		if label=="cold_barrens":
+			check(average(images[273]).get_luminance()>average(images[91]).get_luminance()+.015,"extreme winter cold adds restrained visible frost to arid barrens")
 		if label in ["north_woodland","south_woodland"]:
 			var early:=average(images[91]);var late:=average(images[273])
 			check(early.g/early.r>late.g/late.r+.02 if label=="north_woodland" else late.g/late.r>early.g/early.r+.02,label+" is greener in its own hemisphere's warm season")
