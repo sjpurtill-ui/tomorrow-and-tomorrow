@@ -16884,10 +16884,13 @@ func _capacity_band(value:float)->String:
 	return "Weak"
 
 func _appoint_leader() -> void:
-	if pending_advisor_office == "":
+	if pending_advisor_office == "" or inspected_leader<0 or inspected_leader>=leader_candidates.size():
 		return
 	var candidate: Dictionary = leader_candidates[inspected_leader]
-	AdvisorSystem.appoint(candidate.name,pending_advisor_office)
+	var result:=AdvisorSystem.appoint_person(int(candidate.get("person_id",0)),pending_advisor_office)
+	if not bool(result.get("ok",false)):
+		leader_explanation.text=String(result.get("error","Appointment could not be completed."))
+		return
 	var topics := {"Steward":"population","Quartermaster":"food","Scholar":"knowledge","Marshal":"security","Envoy":"resources"}
 	AdvisorSystem.generate_council_item(pending_advisor_office,topics.get(pending_advisor_office,"construction"),0.58)
 	leader_panel.visible = false
@@ -17019,22 +17022,26 @@ func _create_office_card(parent: Control, office: String, responsibility: String
 		mandate.tooltip_text="This office directly modifies these canonical society dynamics and their subcategories."
 		column.add_child(mandate)
 		var appoint := Button.new()
-		appoint.text = "REVIEW 5 SLATES" if occupied else "VIEW 5 INSTITUTIONAL SLATES"
-		appoint.tooltip_text = "Compare five governing arrangements using the twelve society dynamics."
+		var available:=int(GovernmentPeopleSystem.office_definition(office).get("unlock_stage",99))<=GovernmentPeopleSystem.government_stage
+		appoint.text = ("REVIEW PEOPLE" if occupied else "APPOINT OFFICEHOLDER") if available else "OFFICE NOT YET AVAILABLE"
+		appoint.disabled=not available
+		appoint.tooltip_text = "Choose a living person to hold this office." if available else "This portfolio opens as your government develops. Your steward handles the founding administration."
 		appoint.pressed.connect(_open_advisor_candidates.bind(office))
 		column.add_child(appoint)
 
 func _open_advisor_candidates(office: String) -> void:
+	if int(GovernmentPeopleSystem.office_definition(office).get("unlock_stage",99))>GovernmentPeopleSystem.government_stage:
+		return
 	pending_advisor_office = office
 	if GameState.society_subcategories.is_empty():
 		GameState.society_subcategories=DiscoverySystem.society_model.evaluate_subcategories(_discovery_context())
 	_generate_leader_candidates(office)
 	_rebuild_leader_candidate_list()
-	leader_heading.text = "COMMISSION %s INSTITUTION" % office.to_upper()
-	leader_explanation.text="Five institutional arrangements are available for the %s portfolio. Bars show projected influence on the same dynamics that govern the civilization." % office
+	leader_heading.text = "APPOINT %s" % office.to_upper()
+	leader_explanation.text="Choose a living officeholder. Reputation is incomplete; service will reveal their strengths and shortcomings."
 	appoint_button.text = "COMMISSION FOR %s" % office.to_upper()
-	appoint_button.disabled = false
-	_inspect_leader(0)
+	appoint_button.disabled = leader_candidates.is_empty()
+	if not leader_candidates.is_empty():_inspect_leader(0)
 	leader_panel.visible = true
 	if government_panel:
 		government_panel.queue_free()

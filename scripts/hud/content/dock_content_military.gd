@@ -10,6 +10,7 @@ var template_page:=0
 var equipment_page:=0
 var equipment_batch:=5
 var production_mode:=0
+var production_view:Dictionary={"mode":0}
 
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 
@@ -435,9 +436,7 @@ func _force_report(kind:String)->Dictionary:
 	return {"blocks":chosen}
 
 func _supply_overview()->Array:
-	var ammunition:=focused_action("MAKE AMMUNITION",_ammunition_access_text(),_ammunition_catalog)
-	ammunition.merge({"disabled":not _ammunition_known(),"tip":_ammunition_access_text(),"live_disabled":func()->bool:return not _ammunition_known(),"live_sub":_ammunition_access_text,"live_tip":_ammunition_access_text})
-	return _production_overview().blocks+[{"type":"text","heading":"KEEP THE FORCE EQUIPPED","text":"Training and deployment draw on real equipment and provisions. Persistent lines use citizen crafting labor and consume materials as work proceeds. Health, workplace condition and logistics affect output. Finished goods enter home stores."},{"type":"actions","items":[focused_action("CRAFTING ALLOCATION","Balance military production and civilian work",_production_labor_report),ammunition,focused_action("WORKSHOP & TRANSPORT","Existing jobs, repairs and carrying capacity",func()->Dictionary:return {"blocks":_supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())}),focused_action("CONDUCT IN WAR","Mercy, fear and grievance explained",_reputation_report),{"label":"CIVILIAN STORES","sub":"Materials available for production","on_press":jump("economy",1)}]}]
+	return _production_overview().blocks+[{"type":"actions","items":[focused_action("SUPPLY & REPAIRS","Transport, ammunition and damaged equipment",func()->Dictionary:return {"blocks":_supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())}),{"label":"CIVILIAN STORES","sub":"Materials and finished civilian goods","on_press":jump("economy",1)}]}]
 
 func _ammunition_known()->bool:
 	for item:String in MilitaryCampaign.CONSUMABLE_KNOWLEDGE:
@@ -563,7 +562,7 @@ func _production_labor_report()->Dictionary:
 	var actions:Array=[]
 	for share:float in [0.0,.25,.5,.75,1.0]:
 		actions.append({"label":"%d%% WORKSHOP LINES"%roundi(share*100),"on_press":func():_production_result(MilitaryCampaign.set_production_labor_share(share))})
-	return {"blocks":[{"type":"text","heading":"ONE CITIZEN WORKFORCE","text":"%.1f effective craftspeople · %.0f%% health · %.0f%% workplace condition · %.0f%% logistics.\nWorkshop lines may use %.0f%% of crafting labor. Currently %.0f%% remains for civilian work; idle lines release their allocation. Civic leaders still assign citizens to occupations."%[float(workers.workers),float(workers.health)*100,float(workers.workplace_condition)*100,float(workers.logistics)*100,MilitaryCampaign.production_labor_share*100,MilitaryCampaign.civilian_crafting_fraction()*100]},{"type":"actions","heading":"CRAFTING SHARE","items":actions}]}
+	return {"blocks":[{"type":"text","heading":"ONE CITIZEN WORKFORCE","text":"%.1f effective craftspeople · %.0f%% workplace condition · %.0f%% logistics.\nShared civilian and military lines may use %.0f%% of crafting labor. Currently %.0f%% remains for other crafting; idle lines release their allocation. Civic leaders still assign citizens to occupations."%[float(workers.workers),float(workers.workplace_condition)*100,float(workers.logistics)*100,MilitaryCampaign.production_labor_share*100,MilitaryCampaign.civilian_crafting_fraction()*100]},{"type":"actions","heading":"CRAFTING SHARE","items":actions}]}
 
 func _production_result(result:Dictionary)->void:
 	terrain._report_military_action(result);hud.request_immediate_dock_refresh()
@@ -602,11 +601,19 @@ func _line_materials_block(line:Dictionary)->Dictionary:
 
 func _production_overview()->Dictionary:
 	var data:=MilitaryCampaign.production_lines_snapshot()
-	var actions:Array=[]
-	for line:Dictionary in data.lines:
-		var id:=int(line.id)
-		actions.append(focused_action(MilitaryCampaign.PersistentProduction.product_name(String(line.item)).to_upper(),"%s · %.2f/day · stock %d · %s" % [String(line.get("state","Batch")),float(line.get("forecast_output_per_day",0)),int(line.get("stock",0)),("NO LIMIT" if int(line.get("target_stock",0))==0 else "target %d" % int(line.target_stock))],_workshop_job_report.bind(id)))
-	return {"blocks":[{"type":"text","heading":"MILITARY PRODUCTION","text":"%d of %d lines assigned. Equipment goes into stores; recruiting and training turns people and equipment into units." % [data.lines.size(),int(data.capacity)]},{"type":"actions","heading":"YOUR PRODUCTION LINES","items":actions},{"type":"actions","items":[focused_action("ADD PRODUCTION LINE","Choose equipment your people know how to make",_equipment_catalog),focused_action("CRAFTING SHARE","Allocate workshop effort; priorities divide it between active lines",_production_labor_report)]}]}
+	var manager=MilitaryCampaign.workshop
+	return {"blocks":[{"type":"text","heading":"SHARED WORKSHOPS · %d / %d LINES" % [data.lines.size(),int(data.capacity)],"text":("MANAGED · " if bool(manager.data.enabled) else "MANUAL · ")+manager.owner()+"\n"+String(manager.data.status)},
+		{"type":"production_board","lines":data.lines,"receipts":manager.data.receipts,"day":int(GameState.elapsed_days),"view_state":production_view,"on_open":func(id:int):
+			var action:=focused_action("PRODUCTION ORDER","Workshop detail",_workshop_job_report.bind(id))
+			(action.on_press as Callable).call()},
+		{"type":"actions","items":[focused_action("MANAGEMENT","Delegate routine scheduling or override it",_workshop_management_report),focused_action("ADD ORDER","Choose a product and stock target",_equipment_catalog)]}]}
+
+func _workshop_management_report()->Dictionary:
+	var manager=MilitaryCampaign.workshop
+	return {"blocks":[{"type":"text","heading":manager.owner(),"text":"Staff schedule civilian study supplies, clothing, agricultural and operating inputs, and equipment for armies you have asked to recruit. They use existing craftspeople, materials and known recipes. No extra armies or free resources. Manual orders stay yours until delegated."},{"type":"actions","items":[
+		{"label":"MANUAL SCHEDULING" if bool(manager.data.enabled) else "RESTORE DELEGATION","sub":"Existing production orders continue","on_press":func():_production_result(manager.set_enabled(not bool(manager.data.enabled)))},
+		{"label":"DELEGATE EXISTING LINES","sub":"Staff may change targets and reuse finished lines; paused lines remain yours","on_press":func():_production_result(manager.delegate_lines())},
+		focused_action("CRAFTING SHARE","Optional labor override",_production_labor_report)]}]}
 
 func _retool_report(id:int)->Dictionary:
 	var actions:Array=[]

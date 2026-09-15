@@ -2,6 +2,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## Detail dock: appoint an actual person to one evolving government office.
 
 var office:String="Steward"
+var candidates:Array[Dictionary]=[]
 
 # What each governing style is reputed to do well and badly. These descriptions
 # expose the nature of a tradeoff without collapsing it into a numerical answer.
@@ -17,6 +18,7 @@ func _init(terrain_node:Node,hud_node:Control,target_office:String="Steward")->v
 	super._init(terrain_node,hud_node)
 	office=target_office
 	terrain._generate_leader_candidates(office)
+	candidates.assign(terrain.leader_candidates.duplicate(true))
 
 func meta()->Dictionary:
 	var definition:=GovernmentPeopleSystem.office_definition(office)
@@ -32,13 +34,12 @@ func tab(_sub:int)->Dictionary:
 	var kpis:Array=[
 		{"label":"OFFICE","value":office_title.substr(0,15),"delta":"evolves","accent":Tokens.GOLD,"tip":"The title changes as the civilization's government develops."},
 		{"label":"HOLDER","value":String(incumbent.get("name","vacant")).substr(0,14) if not incumbent.is_empty() else "vacant","delta":"age %d" % int(incumbent.get("age",0)) if not incumbent.is_empty() else "","accent":Tokens.GREEN if not incumbent.is_empty() else Tokens.AMBER,"tip":"The living person holding this office."},
-		{"label":"SHORTLIST","value":str(terrain.leader_candidates.size()),"delta":"people","accent":Tokens.BLUE,"tip":"Known people put forward for consideration. Their order is not a ranking."},
+		{"label":"SHORTLIST","value":str(candidates.size()),"delta":"people","accent":Tokens.BLUE,"tip":"Known people put forward for consideration. Their order is not a ranking."},
 		{"label":"EVIDENCE","value":"partial","delta":"accounts","accent":Tokens.AMBER,"tip":"Reputation is incomplete. Actual performance becomes clearer through service and consequences."},
 	]
 	var brief:Dictionary={"tone":"warn" if incumbent.is_empty() else "info","title":"Choose an actual officeholder" if incumbent.is_empty() else "Review or replace the current officeholder","why":"These are reputations, witnessed habits, and political impressions—not measurements. Appointment reveals performance over time; governing style may help in one circumstance and fail in another."}
 	var blocks:Array=[]
-	for candidate_index in terrain.leader_candidates.size():
-		var candidate:Dictionary=terrain.leader_candidates[candidate_index]
+	for candidate:Dictionary in candidates:
 		var candidate_name:=String(candidate.get("name","INSTITUTION"))
 		var doctrine:=String(candidate.get("doctrine",""))
 		var notes:Dictionary=DOCTRINE_NOTES.get(doctrine,{"label":"UNSTRUCTURED","strength":"","risk":""})
@@ -57,21 +58,22 @@ func tab(_sub:int)->Dictionary:
 		blocks.append({"type":"actions","items":[{
 			"label":"APPOINT","sub":"entrust this office and learn through results","primary":false,
 			"disabled":candidate_name==String(incumbent.get("name","")),
-			"on_press":func()->void: _commission(candidate_name),
+			"on_press":_commission.bind(int(candidate.get("person_id",0))),
 			"tip":"Appoint %s as %s" % [candidate_name,office_title],
 		}]})
 	if blocks.is_empty():
 		blocks.append({"type":"text","text":"No eligible person is available for this office yet."})
 	return {"kpis":kpis,"brief":brief,"blocks":blocks}
 
-func _commission(candidate_name:String)->void:
-	if AdvisorSystem.appoint(candidate_name,office):
+func _commission(person_id:int)->void:
+	var result:=AdvisorSystem.appoint_person(person_id,office)
+	if bool(result.get("ok",false)):
 		var topics:Dictionary={"Steward":"population","Quartermaster":"food","Scholar":"knowledge","Marshal":"security","Envoy":"resources"}
 		AdvisorSystem.generate_council_item(office,String(topics.get(office,"construction")),0.58)
-		terrain._report_military_action({"message":"%s appointed as %s." % [candidate_name,String(GovernmentPeopleSystem.office_definition(office).get("title",office))]})
-	hud.live_refresh_dock()
+	terrain._report_military_action(result)
+	hud.request_immediate_dock_refresh()
 
 func signature()->Array:
 	# Reputation and incumbent status can change over time even though exact
 	# aptitude and execution remain deliberately hidden from the player.
-	return [office,int(GovernmentPeopleSystem.officeholder(office).get("person_id",0)),GovernmentPeopleSystem.revision,terrain.leader_candidates.size(),roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)*50.0),GameState.player_settlements.size(),int(GameState.elapsed_days/30.0)]
+	return [office,int(GovernmentPeopleSystem.officeholder(office).get("person_id",0)),GovernmentPeopleSystem.revision,candidates.size(),roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)*50.0),GameState.player_settlements.size(),int(GameState.elapsed_days/30.0)]

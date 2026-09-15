@@ -1,6 +1,7 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
+var workshop_content:RefCounted
 ## ECONOMY section: Food & Water / Materials / Who Eats.
 ## Replaces the provisions panel, the materials panel, and their overlays.
 
@@ -13,8 +14,13 @@ func meta()->Dictionary:
 
 func tab(sub:int)->Dictionary:
 	var data:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary: return SettlementModel.with_local_population(func()->Dictionary: return _local_tab(sub)))
+	if sub==1:data.blocks.push_front({"type":"actions","items":[focused_action("SHARED WORKSHOPS","Production, finished goods and delegated scheduling",_workshop_report)]})
 	if sub!=0: (data.blocks as Array).append({"type":"actions","items":[focused_action("CITY DELIVERIES","Routes, shipments and requirements",_economy_report.bind("trade"))]})
 	return data
+
+func _workshop_report()->Dictionary:
+	if workshop_content==null:workshop_content=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
+	return workshop_content._production_overview()
 
 func _local_tab(sub:int)->Dictionary:
 	if sub==3: return _wealth_tab()

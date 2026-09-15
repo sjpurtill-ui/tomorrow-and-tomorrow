@@ -3,6 +3,7 @@ extends Node
 const PersistentProduction = preload("res://scripts/persistent_production.gd")
 var training_staff=preload("res://scripts/military_training_staff.gd").new(self)
 var production_labor_share:float = .35
+var workshop=preload("res://scripts/workshop_steward.gd").new(self)
 var joint_operations=preload("res://scripts/joint_operations.gd").new(self)
 var command_hierarchy=preload("res://scripts/command_hierarchy.gd").new(self)
 
@@ -164,6 +165,7 @@ func reset_for_new_world()->void:
 	command_development={"command":0.0,"tactics":0.0,"logistics":0.0,"resolve":0.0}
 	training_program_cycles=0
 	equipment_queue.clear()
+	workshop.reset()
 	production_labor_share=.35
 	foreign_prisoners=0
 	held_generals.clear()
@@ -605,6 +607,8 @@ func production_lines_snapshot()->Dictionary:
 		var efficiency:=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
 		var remaining:=maxf(0.0,float(job.get("required_days",0.0))-float(job.get("progress_days",0.0)))
 		lines.append({"id":int(job.get("id",0)),"item":String(job.get("item","equipment")),"job_type":String(job.get("job_type","production")),"ordered":int(job.get("count",0)),"completed":int(job.get("completed",0)),"allocation":weight,"share":share,"efficiency":efficiency,"daily_work":total_rate*share*efficiency,"remaining_work":remaining})
+		var batch:Dictionary=lines.back()
+		batch.merge({"stock":PersistentProduction.stock(self,job),"work_per_item":float(job.get("work_per_item",1)),"progress_days":fmod(float(job.get("progress_days",0)),maxf(.001,float(job.get("work_per_item",1)))),"state":"Batch" if float(batch.daily_work)>0 else "Waiting for workshop labor","forecast_output_per_day":float(batch.daily_work)/maxf(.001,float(job.get("work_per_item",1)))})
 	return {"capacity":production_line_capacity(),"active":lines.size(),"idle":maxi(0,production_line_capacity()-lines.size()),"total_daily_work":total_rate,"labor_share":production_labor_share,"workforce":PersistentProduction.workforce(),"lines":lines}
 
 
@@ -2547,6 +2551,7 @@ func export_state()->Dictionary:
 		"training_program_cycles":training_program_cycles,
 		"equipment_queue":equipment_queue.duplicate(true),
 		"production_labor_share":production_labor_share,
+		"workshop_management":workshop.data.duplicate(true),
 		"foreign_prisoners":foreign_prisoners,
 		"held_generals":held_generals.duplicate(true),
 		"next_training_order_id":next_training_order_id,
@@ -2587,6 +2592,8 @@ func import_state(payload:Dictionary)->Dictionary:
 	command_error=command_hierarchy.validate_links(payload)
 	if command_error!="":return {"error":command_error}
 	var production_error:=PersistentProduction.validate_saved(payload)
+	var workshop_error:=preload("res://scripts/workshop_steward.gd").validate(payload.get("workshop_management",{}))
+	if not workshop_error.is_empty():return {"error":workshop_error}
 	if not production_error.is_empty(): return {"error":production_error}
 	if not payload.get("siege_recovery",{}) is Dictionary:return {"error":"Invalid siege recovery state."}
 	var recovery_errors:Array[String]=preload("res://scripts/siege_recovery.gd").validate(payload.get("siege_recovery",{}))
@@ -2886,6 +2893,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	training_program_cycles=maxi(0,int(payload.get("training_program_cycles",0)))
 	_ensure_training_program_state()
 	production_labor_share=float(payload.get("production_labor_share",.35))
+	workshop.restore(payload.get("workshop_management",{}))
 	equipment_queue.assign(payload.get("equipment_queue",[]))
 	_normalize_equipment_jobs()
 	foreign_prisoners=maxi(0,int(payload.get("foreign_prisoners",0)))
@@ -3484,6 +3492,7 @@ func _process_military_day()->void:
 	_process_service_rest_day()
 	_process_prisoner_custody_day()
 	_process_home_captives_day()
+	workshop.advance(last_processed_day)
 	_process_equipment_production_day()
 	_process_training_injuries_day()
 	_process_requested_templates()
@@ -3766,7 +3775,9 @@ func _process_equipment_production_day()->void:
 	var ordered:Array=equipment_queue.filter(func(job:Dictionary)->bool:return bool(job.get("persistent",false)))
 	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.allocation)>float(b.allocation) if not is_equal_approx(float(a.allocation),float(b.allocation)) else int(a.id)<int(b.id))
 	for job:Dictionary in ordered:
+		var before:Dictionary=workshop.output_stocks(job)
 		PersistentProduction.advance(self,job,crafting*float(job.allocation)/maxf(.05,weight_total)*float(job.efficiency))
+		workshop.record(job,before)
 	for index in range(equipment_queue.size()-1,-1,-1):
 		var job:Dictionary=equipment_queue[index]
 		if bool(job.get("persistent",false)):continue
@@ -3786,9 +3797,11 @@ func _process_equipment_production_day()->void:
 		var completed:=mini(int(job.count),floori(float(job.progress_days)/work_per_item))
 		var produced:=maxi(0,completed-previously_completed)
 		if produced>0:
+			var before:Dictionary=workshop.output_stocks(job)
 			if String(job.get("job_type","production"))=="consumable": military_consumables[String(job.item)]=int(military_consumables.get(String(job.item),0))+produced
 			elif String(job.get("job_type","production"))=="transport": WorldSimulation.state.resource_stockpiles["Transport Carts"]=float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0))+produced
 			else: military_inventory[String(job.item)]=int(military_inventory.get(String(job.item),0))+produced
+			workshop.record(job,before)
 		job["completed"]=completed
 		if completed>=int(job.count): equipment_queue.remove_at(index)
 		else: equipment_queue[index]=job

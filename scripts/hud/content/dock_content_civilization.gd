@@ -97,6 +97,8 @@ func _government_blocks(governance:Dictionary)->Array:
 		{"type":"rows","heading":"PEOPLE IN GOVERNMENT","note":"%d known public figures · %s" % [int(government.get("living_people",0)),String(government.get("scope","founding council"))],"items":office_items},
 		{"type":"bars","heading":"GOVERNANCE","items":governance_items},
 	]
+	if int(government.stage)==0:
+		blocks.insert(1,{"type":"text","heading":"NEXT OFFICE · QUARTERMASTER","text":"A separate supply office opens at 220 residents or a second settlement, reviewed with the monthly government report. Until then, your steward manages the shared workshops."})
 	if policy_items.is_empty():
 		blocks.append({"type":"text","heading":"STANDING POLICY","text":"No standing policy is in force. Talk with your local leader in CIVICS. Advice, proposals and accepted work have distinct outcomes."})
 	else:

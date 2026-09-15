@@ -130,6 +130,7 @@ static func configure(host: Node, id: int, target: int, paused: bool) -> Diction
 		if int(job.id)==id and bool(job.get("persistent",false)):
 			job.target_stock=target;job.paused=paused
 			job.erase("planner_managed")
+			job.erase("staff_idle")
 			return {"ok":true,"message":"Production line updated."}
 	return {"error":"Select a persistent production line."}
 
@@ -167,6 +168,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
 		job.required_days=job.work_per_item
 		job.erase("planner_managed")
+		job.erase("staff_idle")
 		return {"ok":true,"message":"Line retooled. Existing setup tools remain assigned; missing tools are added. Some efficiency is retained; unfinished work is discarded without refunding consumed materials."}
 	return {"error":"Select a persistent production line."}
 
