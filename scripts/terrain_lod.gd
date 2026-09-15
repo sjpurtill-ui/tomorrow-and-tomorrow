@@ -15,7 +15,11 @@ static func bucket(span:float)->float:
 	return clampf(pow(1.5,ceil(log(maxf(0.9,span))/log(1.5))),0.9,MAX_SPAN_KM)
 
 static func center_for(point:Vector2,span:float)->Vector2:
-	var step:=maxf(0.04,span/12.0)
+	# Shift by whole final-grid cells. A literal span/12 shifts the 257/513
+	# grids by fractional cells, making every sample new on an otherwise tiny pan.
+	var cells:=resolution_for(span)-1
+	var shift_cells:=maxi(1,roundi(float(cells)/12.0))
+	var step:=maxf(0.04,span/float(cells)*float(shift_cells))
 	return (point/step).round()*step
 
 static func resolution_for(span:float)->int:
