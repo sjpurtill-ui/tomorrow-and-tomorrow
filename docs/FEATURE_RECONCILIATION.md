@@ -1,3 +1,36 @@
+## September 15 — city metrics, envoy drafting, and repeat reconnaissance
+
+Source `59c34a7`, base `b528391`, integrated by the canonical Mac integrator.
+Scope: shared indicator parameterization, city evidence/receipt metadata and
+presentation, foreign dialogue drafting/recovery, scouting staff standing orders,
+targeted report/notice presentation, and focused tests. The CivilizationSystem
+hotspot adds watch lifecycle callbacks, report identity, and optional validation;
+no terrain, civic labor, military ownership, or save-system replacement.
+
+Science/health now match the dashboard definitions. New observation fields avoid
+silently reinterpreting old percentage evidence. Per-field receipt dates stop a
+new low-quality report from rejuvenating inherited evidence. The bounded meter
+uses delivered-report recency with a 90-day fresh interval; evidence dates and
+unverified projections are still explicit. Report cards preserve unknowns.
+
+Editable next envoy briefs are saved, and setting aside an unanswered returned
+reply cancels only that pending request, retaining its brief in the transcript.
+Continuous reconnaissance orders reuse physical scout missions, accounting,
+routes, risk and return delivery. Each watched city has at most one managed
+party; 2–8 people, default 4, and six orders maximum. Resource/route constraints
+defer departure, stop orders leave travelers intact, and lost parties pause.
+The next visit starts no earlier than the day after return. No remote live data
+or free couriers are introduced. City return reports prioritize dated target
+findings rather than generic exploration rewards.
+
+Validation: 88/88 headless cases in test_dialogue_continuity,
+test_city_intelligence, test_city_label_layout, test_scouting_staff,
+test_scout_archive, test_civilization_indicators, test_foreign_city_map_labels,
+and test_diplomatic_journey, on the explicit canonical path. Zero errors,
+failures, skips, or orphans. No live-service or graphical audit. Save additions
+are optional; old reports require a new visit for newly defined metrics.
+No shared-file conflicts. Running player PID 43797 stays on `b528391a5f9f`.
+
 ## September 15 — narrower discovery announcements
 
 Integrated worker `9c582b2` at canonical `a567633`. Discovery announcements use

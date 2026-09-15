@@ -1,3 +1,29 @@
+## September 15 — comparable city metrics and continuous reconnaissance: INTEGRATED
+
+Canonical Mac integrator source `59c34a7` is integrated on main from `b528391`.
+Foreign reports now use the dashboard's science capacity/education and life
+expectancy/infant mortality calculations, not the previous generic indices.
+Percentage-only evidence remains stored but is not reinterpreted as new units.
+Report freshness has a 90-day delivery grace; true observation dates remain intact.
+
+Envoy drafts remain editable while a mission/reply is pending and persist across
+screens/saves. A returned unanswered reply can be explicitly set aside to send
+the next brief. Older orphaned discussion flags recover as returned, not away.
+Continuous city scouting uses one 2–8-person party per city (default 4), within
+the existing global party/adult limits. Each departure pays provisions, retains
+seven days of home food, rechecks the route, and waits if blocked. Stop prevents
+new departures; loss pauses the watch. At most six watch orders are retained.
+City returns lead with target evidence, observation duration, and standing order;
+incidental journey finds remain secondary.
+
+88/88 cases pass in dialogue continuity, city intelligence, city label layout,
+scouting staff, scout archive, civilization indicators, foreign city map labels,
+and diplomatic journeys. No errors, failures, skips, or orphans. Optional saved
+fields are backward-compatible; legacy cities lacking modeled indicators show
+Unknown until supported evidence exists. Tests were headless; no live API or
+graphical audit was performed. Player PID 43797 remains on `b528391a5f9f` and was
+not interrupted. This delivery is source-integrated, not loaded by that session.
+
 ## September 15 — narrower discovery announcements: INTEGRATED
 
 Worker `9c582b2` is integrated at `a567633`. New-discovery announcements now use
