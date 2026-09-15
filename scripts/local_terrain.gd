@@ -2092,7 +2092,10 @@ void fragment() {
 	forest_surface = mix(vec3(0.058, 0.108, 0.069), forest_surface, 0.77);
 	// Preserve the light crown tops and shaded gaps that distinguish canopy
 	// from grass. The biome blend otherwise fills those gaps with flat green.
-	float crown_light = clamp(0.38+dot(forest_crowns,vec3(0.28,0.57,0.15))*38.0,0.45,2.0);
+	// Linear-space aerial forest values are dark by design. The former x38 lift
+	// drove almost every resolved texel into its 2.0 ceiling, turning woodland
+	// into luminous green carpet and erasing the photographic canopy hierarchy.
+	float crown_light = clamp(0.62+dot(forest_crowns,vec3(0.28,0.57,0.15))*13.0,0.58,1.38);
 	forest_surface *= mix(1.0,crown_light,crown_detail);
 	// Alpha carries woodland density from the same biome samples used by
 	// resource access and inspection. Green grass no longer implies forest.
@@ -2112,7 +2115,10 @@ void fragment() {
 	forest_mask*=mix(1.0,mix(0.58,1.22,stand_pattern),country_detail);
 	float retained_woodland=woodland_retained(world_position.xz);
 	forest_mask*=retained_woodland;
-	float crown_shade=precise_surface_noise(surface_position,surface_origin,90,1,vec2(0.0));
+	float crown_shade=0.5;
+	if (local_detail>0.0) {
+		crown_shade=precise_surface_noise(surface_position,surface_origin,90,1,vec2(0.0));
+	}
 	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
@@ -3993,9 +3999,15 @@ void fragment() {
 			vec2 cell=vec2(float(atlas_variant%4),float(atlas_variant/4));
 			vec2 atlas_uv=(cell+vec2(0.018)+UV*0.964)/4.0;
 			vec4 canopy=texture(canopy_atlas,atlas_uv);
-			float canopy_luma=max(dot(canopy.rgb,vec3(0.299,0.587,0.114)),0.12);
+			// Preserve shaded crown interiors without letting the darkest source
+			// variants become black map dots against the continuous forest albedo.
+			float canopy_luma=max(dot(canopy.rgb,vec3(0.299,0.587,0.114)),0.16);
 			float tint_luma=max(dot(COLOR.rgb,vec3(0.299,0.587,0.114)),0.12);
-			vec3 restrained_canopy=mix(vec3(canopy_luma),canopy.rgb,0.42)*vec3(0.72,0.77,0.66);
+			// The source atlas has valid alpha but some saturated RGB at crown
+			// margins. Suppress that chroma as coverage falls so mipmaps cannot
+			// create green/yellow halos around otherwise natural foliage.
+			float edge_colour=smoothstep(0.08,0.60,canopy.a);
+			vec3 restrained_canopy=mix(vec3(canopy_luma),canopy.rgb,mix(0.08,0.44,edge_colour))*vec3(0.72,0.77,0.66);
 			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.16);
 			base*=0.82+crown*0.16;
 			// Keep texture coverage separate from the distance fade. Scissoring

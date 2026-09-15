@@ -1,4 +1,12 @@
 extends GdUnitTestSuite
+
+func test_canopy_shader_preserves_dark_aerial_range_and_neutralizes_alpha_edges()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	assert_str(source).contains("*13.0,0.58,1.38")
+	assert_str(source).contains(")),0.16)")
+	assert_str(source).contains("mix(0.08,0.44,edge_colour)")
+	assert_str(source).contains("if (local_detail>0.0)")
+
 class Terrain extends "res://scripts/local_terrain.gd":
 	func _ready()->void:pass
 	func _process(_delta:float)->void:pass
