@@ -3,6 +3,8 @@ extends GdUnitTestSuite
 func test_refinement_slices_preserve_camera_frame_budget()->void:
 	assert_int(Terrain.TERRAIN_PATCH_MOVING_BUDGET_USEC).is_less_equal(1500)
 	assert_int(Terrain.TERRAIN_PATCH_IDLE_BUDGET_USEC).is_less_equal(3000)
+	var builder_source:=FileAccess.get_file_as_string("res://scripts/terrain_patch_builder.gd")
+	assert_str(builder_source).contains("if cursor%2==0 and Time.get_ticks_usec()-started>=budget_usec")
 
 func test_cartographic_relief_begins_after_close_ground_is_unresolved()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
