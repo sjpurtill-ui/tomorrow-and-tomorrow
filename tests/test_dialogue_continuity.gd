@@ -27,6 +27,23 @@ func _return_envoys()->void:
 	GameState.elapsed_days=int(CivilizationSystem.diplomatic_mission.return_day)
 	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
 
+func test_next_envoy_brief_is_editable_saved_and_unlocked_by_setting_aside_reply()->void:
+	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
+	ForeignDialogue.ask(id,"Let us discuss shared waystations.");_return_envoys()
+	var screen=auto_free(preload("res://scripts/foreign_leader_screen.gd").new())
+	screen.civ_id=id;add_child(screen)
+	assert_bool(screen.entry.editable).is_true()
+	assert_bool(screen.ask_button.disabled).is_true()
+	screen.entry.text="A different proposal."
+	screen.entry.text_changed.emit(screen.entry.text)
+	assert_str(ForeignDialogue.export_state()[id].next_brief).is_equal("A different proposal.")
+	assert_bool(ForeignDialogue.set_aside_reply(id)).is_true()
+	screen.refresh()
+	assert_bool(screen.ask_button.disabled).is_false()
+	assert_str(screen.entry.text).is_equal("A different proposal.")
+	assert_bool(ForeignDialogue.ask(id,screen.entry.text)).is_true()
+	assert_str(ForeignDialogue.thread(id).next_brief).is_empty()
+
 func test_failed_reply_does_not_extend_journey_and_can_resolve_after_return()->void:
 	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
 	ForeignDialogue.ask(id,"Let us discuss shared waystations.")

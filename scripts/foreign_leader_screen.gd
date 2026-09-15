@@ -6,6 +6,7 @@ var speech:RichTextLabel
 var access_note:Label
 var audience_button:Button
 var retry_button:Button
+var set_aside_button:Button
 var memory:Label
 var assessment:Label
 var costs:Label
@@ -65,8 +66,11 @@ func _ready()->void:
 	speech.custom_minimum_size.y=120;speech.size_flags_vertical=Control.SIZE_EXPAND_FILL;speech.add_theme_font_size_override("normal_font_size",16);audience.add_child(speech)
 	var talk:=HBoxContainer.new();audience.add_child(talk)
 	entry=LineEdit.new();entry.placeholder_text="Brief your envoy: objective, limits, and latitude…";entry.max_length=1500;entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;talk.add_child(entry)
+	entry.text=String(WorldSimulation.dialogue.thread(civ_id).get("next_brief",""))
+	entry.text_changed.connect(func(value:String):WorldSimulation.dialogue.thread(civ_id)["next_brief"]=value)
 	ask_button=button(talk,"SEND ENVOY",ask);entry.text_submitted.connect(func(_text:String):ask())
 	retry_button=button(talk,"RETRY",func():WorldSimulation.dialogue.retry(civ_id);refresh())
+	set_aside_button=button(talk,"SET ASIDE REPLY",func():WorldSimulation.dialogue.set_aside_reply(civ_id);refresh())
 	draft_button=button(audience,"REVIEW PROPOSED TERMS",func():
 		var draft:Dictionary=WorldSimulation.dialogue.thread(civ_id).draft
 		if draft.is_empty():return
@@ -159,7 +163,11 @@ func refresh()->void:
 	draft_button.visible=not (thread.draft as Dictionary).is_empty()
 	var exchange_away:=bool(thread.get("in_transit",false)) or not WorldSimulation.world.diplomatic_mission.is_empty()
 	ask_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok) or exchange_away
-	entry.editable=not WorldSimulation.dialogue.pending.has(civ_id) and bool(gate.ok) and not exchange_away
+	# Writing the next brief is independent of dispatch or the previous reply.
+	entry.editable=true
+	entry.tooltip_text="Draft your next brief at any time; it is saved when you close this conversation."
+	ask_button.tooltip_text="Envoys must return before another party departs. If a returned reply is unavailable, retry it or set it aside." if exchange_away else String(gate.reason)
+	set_aside_button.visible=bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false))
 	retry_button.visible=bool(thread.retryable)
 	retry_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok)
 	var f:Dictionary=WorldSimulation.diplomacy.forecast(civ_id,selected_accord(),selected_tone(),generous.button_pressed)

@@ -9,6 +9,10 @@ var selector:OptionButton
 var duration:OptionButton
 var costs:Label
 var send:Button
+var continuous:CheckBox
+var party_size:SpinBox
+var watch_status:Label
+var stop_watch:Button
 var title:Label
 var flag:TextureRect
 var panel:PanelContainer
@@ -61,7 +65,7 @@ func _metric(parent:Node,key:String,hero:bool=false)->void:
 	var value:=_label(card,"Unknown",30 if hero else 20,T.INK)
 	var note:=_label(card,"Not observed",11,T.MUTED)
 	cards[key]={"value":value,"note":note,"card":card}
-	if key in ["fortification","production","logistics","damage","science","health"]:
+	if key in ["fortification","production","logistics","damage","education"]:
 		var band:=V.Band.new();band.ink=V.COLORS[key];card.add_child(band);cards[key]["band"]=band
 	if hero:
 		projection=_label(card,"",12,T.TEXT_SOFT)
@@ -106,7 +110,7 @@ func _ready()->void:
 	for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities("player",civ_id):
 		selector.add_item(String(city.name));selector.set_item_metadata(selector.item_count-1,String(city.city_id))
 		if city.city_id==city_id:selector.select(selector.item_count-1)
-	selector.item_selected.connect(func(_i:int):refresh())
+	selector.item_selected.connect(func(_i:int):_load_watch_controls();refresh())
 	var ribbon:=HBoxContainer.new();root.add_child(ribbon)
 	summary=_label(ribbon,"",12,T.AMBER);summary.size_flags_horizontal=SIZE_EXPAND_FILL
 	provenance=_label(ribbon,"",11,T.MUTED);provenance.autowrap_mode=TextServer.AUTOWRAP_OFF;provenance.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
@@ -122,7 +126,7 @@ func _ready()->void:
 	var left:=_page(tabs,"Overview")
 	_metric(left,"population",true)
 	grid=GridContainer.new();grid.columns=2;grid.size_flags_horizontal=SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8);left.add_child(grid)
-	for key:String in ["science","gdp","health","garrison","fortification","supply","production","logistics","damage"]:_metric(grid,key)
+	for key:String in ["science_capacity","education","gdp","life_expectancy","infant_mortality","garrison","fortification","supply","production","logistics","damage"]:_metric(grid,key)
 	provenance_button=_button(left,"Report details  ›",func():detail_text.visible=not detail_text.visible)
 	detail_text=_label(left,"",12,T.TEXT_SOFT);detail_text.hide()
 	var actions:=HBoxContainer.new();left.add_child(actions)
@@ -131,6 +135,13 @@ func _ready()->void:
 	var recon:=_page(tabs,"Scouting")
 	_label(recon,"Request a fresh report",18,T.INK)
 	_label(recon,"Scouts must travel, observe, and return before this report changes.",14,T.TEXT_SOFT)
+	continuous=CheckBox.new();continuous.text="Continuous city scouting";recon.add_child(continuous)
+	_label(recon,"One limited party revisits this city after each return. No live vision; reports still travel home. Stop at any time to prevent further departures.",12,T.TEXT_SOFT)
+	var people_row:=HBoxContainer.new();recon.add_child(people_row)
+	_label(people_row,"Party size · scouts",13,T.TEXT_SOFT)
+	party_size=SpinBox.new();party_size.min_value=2;party_size.max_value=8;party_size.step=1;party_size.value=4;people_row.add_child(party_size)
+	party_size.value_changed.connect(func(_value:float):refresh())
+	continuous.toggled.connect(func(_value:bool):refresh())
 	duration=OptionButton.new();duration.custom_minimum_size.y=36;recon.add_child(duration)
 	for days:int in CivilizationSystem.SCOUT_DURATIONS:duration.add_item("%d-day reconnaissance" % days);duration.set_item_metadata(duration.item_count-1,days)
 	duration.item_selected.connect(func(_i:int):refresh())
@@ -141,6 +152,10 @@ func _ready()->void:
 	scouting_hint=_label(recon,"Longer stays sharpen the population count. Travel days do not. Arrival and return can vary.",12,T.TEXT_SOFT)
 	costs=_label(recon,"",14,T.BODY)
 	send=_button(recon,"SEND SCOUTS",_send_scouts,true)
+	watch_status=_label(recon,"",12,T.TEAL)
+	stop_watch=_button(recon,"STOP CONTINUOUS SCOUTING",func():
+		var result:Dictionary=WorldSimulation.world.scouting_staff.set_city_watch(city_id,false)
+		continuous.button_pressed=false;feedback.show();feedback.text=String(result.message);refresh())
 	var military:=_page(tabs,"Military")
 	_label(military,"Approach this settlement",20,T.INK)
 	army_choice=OptionButton.new();army_choice.fit_to_longest_item=false;army_choice.custom_minimum_size.y=34;military.add_child(army_choice)
@@ -175,14 +190,23 @@ func _ready()->void:
 	if world!=null and not known.is_empty() and WorldSimulation.military.active_engagement.is_empty():
 		world.camera.size=maxf(.22,preload("res://scripts/foreign_settlement_visual.gd").framing_size(known))
 		world._set_camera_target(Vector3(known.position.x,0,known.position.z));world._refresh_contact_encounter_markers()
-	refresh()
+	_load_watch_controls();refresh()
+
+func _load_watch_controls()->void:
+	if selector.item_count==0:return
+	var watch:Dictionary=WorldSimulation.world.scouting_staff.city_watch(String(selector.get_selected_metadata()))
+	continuous.set_pressed_no_signal(bool(watch.get("enabled",false)))
+	party_size.set_value_no_signal(int(watch.get("personnel",4)))
+	for i in duration.item_count:
+		if int(duration.get_item_metadata(i))==int(watch.get("duration_days",30)):duration.select(i);break
+
 func _close()->void:get_parent().queue_free()
 func _show_map()->void:
 	var scene:=get_tree().current_scene
 	if scene and scene.has_method("_focus_known_city"):scene._focus_known_city(city_id)
 func _send_scouts()->void:
-	var result:=WorldSimulation.world.dispatch_scouts(int(duration.get_selected_metadata()),"city:"+city_id)
-	feedback.show();feedback.text=String(result.get("error","Scouts departed. Evidence will update after their return."));refresh()
+	var result:Dictionary=WorldSimulation.world.scouting_staff.set_city_watch(city_id,true,int(duration.get_selected_metadata()),int(party_size.value)) if continuous.button_pressed else WorldSimulation.world.dispatch_scouts(int(duration.get_selected_metadata()),"city:"+city_id,"",int(party_size.value))
+	feedback.show();feedback.text=String(result.get("error",result.get("message","Scouts departed. Evidence will update after their return.")));refresh()
 func _march()->void:
 	if army_choice.item_count==0:return
 	var result:=WorldSimulation.military.move_field_army(int(army_choice.get_selected_metadata()),city_id)
@@ -217,14 +241,14 @@ func refresh()->void:
 	title.text=String(city.name).trim_prefix("Reported home of ").capitalize()
 	selector.tooltip_text=String(city.name)
 	var fields:Dictionary=city.fields
-	var age:=int(city.get("age_days",-1))
-	summary.text=V.age_text(int(city.observed_day),int(WorldSimulation.state.elapsed_days))
-	summary.add_theme_color_override("font_color",T.AMBER if age>180 else T.TEAL)
-	provenance.text="STALE" if age>180 else "RECENT" if age<=30 and age>=0 else "AGING" if age>30 else "UNDATED"
+	var freshness:=V.freshness(city,int(WorldSimulation.state.elapsed_days))
+	summary.text="Report · "+String(freshness.status)
+	summary.add_theme_color_override("font_color",T.AMBER if int(freshness.level)<4 else T.TEAL)
+	provenance.text=String(freshness.status).to_upper()
 	var source:=String(city.source)
 	var observed_days:=int(city.get("observation_days",0))
 	provenance_button.text="Report details  ·  %s  ›" % ("%d days observing" % observed_days if observed_days>0 else "earlier report")
-	detail_text.text="%s\nObserved day %d · received day %d\n%s\nOriginal estimates are shown above. Projections allow for unobserved change; they do not track today's hidden population. Buildings on the map are representative, not a surveyed layout." % [source.capitalize(),int(city.observed_day),int(city.reported_day),"%d actual days observing this city. Travel days do not improve the count." % observed_days if observed_days>0 else "This earlier report did not record time observing the city."]
+	detail_text.text="%s\nObserved day %d · received day %d\n%s\nThe meter tracks delivered-report freshness, with 90 days before aging. Observation dates remain unchanged; this is not live vision. Science and health use the same measures as your dashboard. GDP is labor-equivalent daily output. Original estimates are shown above; projections allow for unobserved change." % [source.capitalize(),int(city.observed_day),int(city.reported_day),"%d actual days observing this city. Travel days do not improve the count." % observed_days if observed_days>0 else "This earlier report did not record time observing the city."]
 	detail_text.tooltip_text="Report reference: "+String(city.reference)
 	var identity_id:=String(city.controller) if not String(city.controller).is_empty() else String(city.civ_id)
 	flag.texture=IDENTITY.foreign(identity_id).texture
@@ -241,13 +265,16 @@ func refresh()->void:
 	var pop:Dictionary=fields.get("population",{})
 	projection.text="Unverified now: "+V.estimate("population",pop,false) if not pop.is_empty() and int(pop.get("age_days",0))>0 else ""
 	if int(pop.get("age_days",0))>1095:projection.text="Current population unknown · new observation needed"
-	projection.visible=not projection.text.is_empty()
-	var quote:=WorldSimulation.world.scout_mission_quote(int(duration.get_selected_metadata()),"city:"+city_id)
-	send.disabled=not bool(quote.get("can_dispatch",false))
-	journey.visible=not send.disabled;scouting_hint.visible=not send.disabled
-	if not send.disabled:
+	projection.visible=not projection.text.is_empty() and int(freshness.received_age)>90
+	var quote:=WorldSimulation.world.scout_mission_quote(int(duration.get_selected_metadata()),"city:"+city_id,"",int(party_size.value))
+	send.disabled=not bool(quote.get("can_dispatch",false)) and not continuous.button_pressed
+	send.text="ORDER CONTINUOUS SCOUTING" if continuous.button_pressed else "SEND SCOUTS"
+	var watch:Dictionary=WorldSimulation.world.scouting_staff.city_watch(city_id)
+	watch_status.text=String(watch.get("status",""));watch_status.visible=not watch.is_empty();stop_watch.visible=not watch.is_empty()
+	journey.visible=bool(quote.get("can_dispatch",false));scouting_hint.visible=journey.visible
+	if bool(quote.get("can_dispatch",false)):
 		journey_values[0].text="%dd" % int(quote.travel_leg_days);journey_values[1].text="%dd" % int(quote.observation_days);journey_values[2].text=journey_values[0].text
-	costs.text=String(quote.get("error",quote.get("blocker",""))) if send.disabled else "%d scouts  ·  %.0f food  ·  %d days planned" % [int(quote.personnel),float(quote.provisions),int(quote.duration_days)]
+	costs.text=String(quote.get("error",quote.get("blocker",""))) if not bool(quote.get("can_dispatch",false)) else "%d scouts  ·  %.0f food per trip  ·  %d days planned" % [int(quote.personnel),float(quote.provisions),int(quote.duration_days)]
 	var owner:=String(city.controller);if owner=="":owner=String(city.civ_id)
 	var owner_index:=WorldSimulation.world._civilization_index(owner)
 	if owner_index>=0:

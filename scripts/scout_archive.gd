@@ -4,6 +4,25 @@ extends RefCounted
 const PAGE_SIZE:=5
 const FILTERS:=["All reports","Findings","Routine surveys","Losses","Unread"]
 
+static func city_record(report:Dictionary)->Dictionary:
+	var id:=String(report.get("target_city_id",String(report.get("target_id","")).trim_prefix("city:")))
+	for city:Dictionary in report.get("city_observations",[]):
+		if String(city.get("city_id",""))==id:return city
+	return {}
+
+static func city_account(report:Dictionary)->String:
+	var city:=city_record(report)
+	var target:=String(city.get("name",String(report.get("target_label","the target city")).trim_prefix("OBSERVE ")))
+	var text:="Reconnaissance of %s: %d scouts returned after %d days away. " % [target,int(report.get("returned_personnel",report.get("personnel",0))),int(report.get("actual_days",report.get("duration_days",0)))]
+	if city.is_empty():text+="No usable observation of the target city was brought home. Its estimates were not refreshed."
+	else:
+		text+="%d days observing; evidence dated day %d. " % [int(city.get("observation_days",1)),int(city.get("observed_day",0))]
+		var visuals=preload("res://scripts/hud/city_report_visuals.gd")
+		for key:String in ["population","science_capacity","gdp","life_expectancy"]:
+			text+=String(visuals.LABELS[key])+": "+visuals.estimate(key,city.get("fields",{}).get(key,{}))+". "
+	if bool(report.get("continuous_watch",false)):text+="Standing order: repeat this city visit after return, subject to people, food and route availability."
+	return text.strip_edges()
+
 static func identity(report:Dictionary)->String:
 	return "%s:%s:%s:%s" % [report.get("mission_id",0),report.get("day",0),report.get("target_id",""),hash(JSON.stringify(report.get("route",[])))]
 
@@ -41,6 +60,9 @@ static func summary(report:Dictionary)->Dictionary:
 	if not recruitment.is_empty(): title="Recruitment party returned"; detail=String(recruitment.get("summary","No recruitment outcome recorded."))
 	if recruits>0: title="%d newcomers arrived" % recruits; priority=3
 	if not contacts.is_empty(): title="Contact with "+", ".join(PackedStringArray(contacts)); detail="Encounter reported; this alone does not locate a homeland."; priority=4
+	if String(report.get("mission_kind",""))=="observe_city":
+		title="City reconnaissance · "+String(city_record(report).get("name",String(report.get("target_label","Reported city")).trim_prefix("OBSERVE ")))
+		detail=city_account(report);priority=maxi(priority,2)
 	if losses>0: title="%d scouts did not return" % losses; detail="%d returned · %d stayed elsewhere. %s" % [int(report.get("returned_personnel",0)),int(report.get("stayed_personnel",0)),detail]; priority=5
 	var party:="Party %s" % report.mission_id if int(report.get("mission_id",0))>0 else "Earlier expedition"
 	var place:=String(report.get("target_label","Open exploration")).capitalize()

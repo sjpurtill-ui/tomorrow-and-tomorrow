@@ -3,7 +3,7 @@ extends RefCounted
 const MAX_OBSERVERS:=64
 const MAX_CITIES:=512
 const SIGHT_RADIUS:=12.0
-const FIELDS={"population":{"label":"Population","threshold":.25,"unit":"people"},"fortification":{"label":"Visible defenses","threshold":.35,"unit":"capacity"},"garrison":{"label":"Garrison","threshold":.55,"unit":"troops"},"production":{"label":"Workshops and production","threshold":.60,"unit":"capacity"},"logistics":{"label":"Roads and carrying capacity","threshold":.60,"unit":"capacity"},"supply":{"label":"Food reserve outlook","threshold":.75,"unit":"days"},"damage":{"label":"Visible damage","threshold":.35,"unit":"capacity"},"science":{"label":"Science index","threshold":.45,"unit":"capacity"},"gdp":{"label":"GDP (labor-equivalent output)","threshold":.45,"unit":"worker-days/day"},"health":{"label":"Health index","threshold":.45,"unit":"capacity"}}
+const FIELDS={"population":{"label":"Population","threshold":.25,"unit":"people"},"fortification":{"label":"Visible defenses","threshold":.35,"unit":"capacity"},"garrison":{"label":"Garrison","threshold":.55,"unit":"troops"},"production":{"label":"Workshops and production","threshold":.60,"unit":"capacity"},"logistics":{"label":"Roads and carrying capacity","threshold":.60,"unit":"capacity"},"supply":{"label":"Food reserve outlook","threshold":.75,"unit":"days"},"damage":{"label":"Visible damage","threshold":.35,"unit":"capacity"},"science":{"label":"Legacy science index","threshold":.45,"unit":"capacity"},"gdp":{"label":"GDP (labor-equivalent output)","threshold":.45,"unit":"worker-days/day"},"health":{"label":"Legacy health index","threshold":.45,"unit":"capacity"},"science_capacity":{"label":"Science capacity","threshold":.45,"unit":"researcher-equivalents"},"education":{"label":"Average education","threshold":.45,"unit":"capacity"},"life_expectancy":{"label":"Life expectancy","threshold":.45,"unit":"years"},"infant_mortality":{"label":"Infant mortality","threshold":.45,"unit":"deaths/1,000 births"}}
 var records:Dictionary={}
 var system:Node
 
@@ -93,7 +93,9 @@ func _civic_observation(city_id:String)->Dictionary:
 	return WorldSimulation.settlements.with_city_resources(city_id,func()->Dictionary:
 		return WorldSimulation.settlements.with_local_population(func()->Dictionary:
 			var state:=WorldSimulation.state
-			return {"gdp":CivilizationIndicators.economy(state).gdp,"science":clampf(float(state.simulation_metrics.get("knowledge",state.combined_intelligence)),0,1),"health":clampf(state.population_health,0,1)}))
+			var science:=CivilizationIndicators.science(state)
+			var health:=CivilizationIndicators.health(state,WorldSimulation.discovery)
+			return {"gdp":CivilizationIndicators.economy(state).gdp,"science_capacity":science.capacity,"education":science.education,"life_expectancy":health.life_expectancy,"infant_mortality":health.infant_mortality_per_1000}))
 
 func capture(observer:String,city_id:String,quality:float,day:int,source:String,reference:String,observation_days:int=1)->Dictionary:
 	var actual:=truth(city_id)
@@ -108,7 +110,7 @@ func capture(observer:String,city_id:String,quality:float,day:int,source:String,
 		# days spent travelling. Stores remain harder to assess than inhabitants.
 		var days:=clampi(observation_days,1,366)
 		var error:=maxf(.035,lerpf(.65,.16,quality)/sqrt(float(days))) if key=="population" else maxf(.10,lerpf(.65,.16,quality)/pow(float(days),.25))
-		var quantum:=.025 if FIELDS[key].unit=="capacity" else maxf(1,pow(10,floor(log(maxf(1,value))/log(10))-2))
+		var quantum:=.025 if FIELDS[key].unit=="capacity" else .1 if key=="science_capacity" else maxf(1,pow(10,floor(log(maxf(1,value))/log(10))-2))
 		var width:=maxf(quantum,value*error)
 		var center:=value+rng.randf_range(-.3,.3)*width
 		var low:=maxf(0,floor((center-width)/quantum)*quantum)
@@ -130,11 +132,14 @@ func publish(observer:String,observation:Dictionary,day:int)->void:
 	if not book.has(id) and book.size()>=MAX_CITIES: return
 	var previous:Dictionary=book.get(id,{})
 	var next:=observation.duplicate(true); next.reported_day=day
+	for field:Dictionary in next.fields.values():field["reported_day"]=day
 	if not previous.is_empty():
 		if int(previous.observed_day)>int(next.observed_day): return
 		if next.civ_id=="": next.civ_id=previous.civ_id; next.name=previous.name; next.controller=previous.controller
 		for field:String in previous.fields:
-			if not next.fields.has(field): next.fields[field]=previous.fields[field].duplicate(true)
+			if not next.fields.has(field):
+				next.fields[field]=previous.fields[field].duplicate(true)
+				if not next.fields[field].has("reported_day"):next.fields[field]["reported_day"]=int(previous.reported_day)
 	book[id]=next
 	if observer=="player":
 		system._add_revealed_area(vector(next.position),SIGHT_RADIUS,"observed city")
@@ -160,7 +165,7 @@ func known(observer:String,city_id:String,day:int=-1)->Dictionary:
 		# Original evidence stays intact. This planning band is an unverified
 		# projection, with separate rates for residents, troops, stores and fabric.
 		field["observed_low"]=float(field.low);field["observed_high"]=float(field.high)
-		var rate:float={"population":.20,"garrison":2.0,"supply":4.0,"fortification":.15,"production":.40,"logistics":.20,"damage":.50,"science":.20,"health":.40,"gdp":.40}[key]
+		var rate:float={"population":.20,"garrison":2.0,"supply":4.0,"fortification":.15,"production":.40,"logistics":.20,"damage":.50,"science":.20,"health":.40,"gdp":.40,"science_capacity":.20,"education":.20,"life_expectancy":.10,"infant_mortality":.40}[key]
 		var center:float=(float(field.low)+float(field.high))*.5
 		var scale:=1.0 if FIELDS[key].unit=="capacity" else maxf(1,center)
 		var drift:=scale*rate*minf(3.0,float(age)/365.0)
@@ -357,6 +362,7 @@ func valid_observation(value:Variant)->bool:
 		if field.has("observation_days") and (not number(field.observation_days) or field.observation_days<1 or field.observation_days>366):return false
 		for metric:String in ["low","high","observed_day","quality"]:
 			if not number(field[metric]): return false
+		if field.has("reported_day") and (not number(field.reported_day) or field.reported_day<field.observed_day):return false
 		if field.low<0 or field.high<field.low or field.high>1e15 or field.observed_day<0 or field.quality<0 or field.quality>1 or not field.source is String or field.source.length()>200 or not field.reference is String or field.reference.length()>200: return false
 	return true
 func validate(value:Variant)->bool:

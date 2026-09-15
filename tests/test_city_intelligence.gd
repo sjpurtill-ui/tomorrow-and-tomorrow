@@ -59,7 +59,10 @@ func test_civic_estimates_are_dated_evidence_not_live_truth()->void:
 	assert_bool(intel().validate(intel().records)).is_true()
 	var primary:=String(GameState.player_settlements[0].id)
 	var observation:Dictionary=intel().capture(String(civ().id),primary,.8,10,"test","test")
-	assert_bool(observation.fields.has_all(["gdp","science","health"])).is_true()
+	assert_bool(observation.fields.has_all(["gdp","science_capacity","life_expectancy","education","infant_mortality"])).is_true()
+	var actual:Dictionary=intel()._civic_observation(primary)
+	assert_float(float(actual.science_capacity)).is_equal_approx(float(CivilizationIndicators.science().capacity),.001)
+	assert_float(float(actual.life_expectancy)).is_equal_approx(float(CivilizationIndicators.health().life_expectancy),.001)
 	assert_bool(intel().valid_observation(observation)).is_true()
 
 func test_scout_carries_observations_until_return_and_does_not_resample_on_delivery()->void:
@@ -71,7 +74,7 @@ func test_scout_carries_observations_until_return_and_does_not_resample_on_deliv
 	civ().strategic_regions[0].population*=10
 	intel().deliver(mission,"player",40)
 	var city:Dictionary=intel().known("player",region(),10)
-	assert_dict(city.fields.population).is_equal(saved.fields.population.merged({"age_days":0,"stale":false,"observed_low":float(saved.fields.population.low),"observed_high":float(saved.fields.population.high)}))
+	assert_dict(city.fields.population).is_equal(saved.fields.population.merged({"reported_day":40,"age_days":0,"stale":false,"observed_low":float(saved.fields.population.low),"observed_high":float(saved.fields.population.high)}))
 	assert_int(city.observed_day).is_equal(10)
 	assert_int(city.reported_day).is_equal(40)
 
@@ -162,6 +165,7 @@ func test_army_runner_delivers_frozen_city_observation_only_after_travel()->void
 	civ().strategic_regions[0].population*=100
 	GameState.elapsed_days=int(MilitaryCampaign.runner_messages[0].arrival_day)
 	MilitaryCampaign._process_army_runners_day()
+	expected["reported_day"]=int(GameState.elapsed_days)
 	assert_dict(intel().records.player[region()].fields.population).is_equal(expected)
 
 func test_lost_scout_report_never_publishes_city_knowledge()->void:

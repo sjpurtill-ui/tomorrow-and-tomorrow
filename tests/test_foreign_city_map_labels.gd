@@ -55,7 +55,7 @@ func test_map_summary_reads_reported_estimates_and_leaves_full_report_optional()
 	var provider:=preload("res://scripts/hud/content/dock_detail_foreign_city.gd").new(null,null,String(city.city_id))
 	var before:Dictionary=provider.tab(0)
 	assert_str(String(provider.meta().title)).is_equal(String(city.name))
-	assert_int(before.blocks[0].items.size()).is_equal(7)
+	assert_int(before.blocks[0].items.size()).is_equal(12)
 	CivilizationSystem.civilizations[0].strategic_regions[-1].population*=100
 	assert_array(provider.tab(0).blocks[0].items).is_equal(before.blocks[0].items)
 	assert_bool(is_instance_valid(CivilizationSystem.city_intelligence.screen_layer)).is_false()

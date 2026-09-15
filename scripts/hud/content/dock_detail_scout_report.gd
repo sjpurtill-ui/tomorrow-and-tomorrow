@@ -17,9 +17,9 @@ func _init(terrain_node:Node,hud_node:Control,report_record:Dictionary={},archiv
 func meta()->Dictionary:
 	var title:=String(Archive.summary(report).title)
 	return {
-		"eyebrow":"THE EXPEDITION CHRONICLES · DAY %d" % int(report.get("day",0)),
+		"eyebrow":("CITY RECONNAISSANCE" if String(report.get("mission_kind",""))=="observe_city" else "THE EXPEDITION CHRONICLES")+" · DAY %d" % int(report.get("day",0)),
 		"title":title,
-		"subtabs":["DISCOVERIES","JOURNEY & ACCOUNTS"],
+		"subtabs":["CITY FINDINGS" if String(report.get("mission_kind",""))=="observe_city" else "DISCOVERIES","JOURNEY & ACCOUNTS"],
 	}
 
 func tab(_sub:int)->Dictionary:
@@ -53,6 +53,19 @@ func tab(_sub:int)->Dictionary:
 	else:
 		brief={"tone":"info","title":String(Archive.summary(report).title),"why":String(Archive.summary(report).detail)}
 	var blocks:Array=[]
+	if String(report.get("mission_kind",""))=="observe_city":
+		var city:=Archive.city_record(report)
+		kpis[3]={"label":"OBSERVING","value":"%d d" % int(city.get("observation_days",0)),"delta":"at target city","accent":Tokens.TEAL}
+		brief={"tone":"warn" if lost>0 or city.is_empty() else "info","title":String(Archive.summary(report).title),"why":Archive.city_account(report)}
+		if _sub==0:
+			var visuals=preload("res://scripts/hud/city_report_visuals.gd")
+			var rows:Array=[]
+			for key:String in ["population","science_capacity","education","gdp","life_expectancy","infant_mortality","garrison","fortification","supply"]:
+				rows.append({"name":String(visuals.LABELS[key]),"value":visuals.estimate(key,city.get("fields",{}).get(key,{})),"sub":"Returned observation" if city.get("fields",{}).has(key) else "Not observed","accent":Tokens.TEAL})
+			blocks.append({"type":"rows","heading":"TARGET CITY · DATED FINDINGS","items":rows})
+			blocks.append({"type":"text","text":"This is the report carried home, not live intelligence. Journey & Accounts retains the travel route and incidental finds."})
+			if return_provider!=null:blocks.append({"type":"actions","items":[{"label":"BACK TO ARCHIVE","on_press":func()->void:hud.open_detail(return_provider)}]})
+			return {"kpis":kpis,"brief":brief,"blocks":blocks}
 	if return_provider!=null:
 		blocks.append({"type":"actions","items":[{"label":"BACK TO ARCHIVE","sub":"keep search, filter and page","on_press":func()->void: hud.open_detail(return_provider)}]})
 	if is_recruitment:

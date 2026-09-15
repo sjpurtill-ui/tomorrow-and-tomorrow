@@ -21,6 +21,11 @@ func thread(id:String)->Dictionary:
 	if not existing.has("in_transit"):existing["in_transit"]=false
 	if not existing.has("private_brief"):existing["private_brief"]=""
 	if not existing.has("staged_result"):existing["staged_result"]={}
+	if not existing.has("next_brief"):existing["next_brief"]=""
+	# Older saves can retain a discussion flag after the physical mission ended.
+	# It must not lock the player out of retrying or setting that reply aside.
+	if bool(existing.in_transit) and String(WorldSimulation.world.diplomatic_mission.get("civ_id",""))!=id:
+		existing["returned_home"]=true
 	for record:Dictionary in existing.messages:
 		if not record.has("day"):
 			record["day"]=-1
@@ -60,12 +65,25 @@ func ask(id:String,message:String)->bool:
 	WorldSimulation.world.diplomatic_mission["dialogue_brief"]=clean
 	WorldSimulation.world.diplomatic_mission["dialogue_exchange"]=true
 	t.private_brief=clean;t.in_transit=true;t.staged_result={};t.retryable=false;t["returned_home"]=false
+	t.next_brief=""
 	_request(id,_envoy_brief_prompt(clean),false,true)
 	return true
 
 func retry(id:String)->void:
 	var t:=thread(id)
 	if not pending.has(id) and bool(t.retryable) and bool(t.in_transit) and not String(t.private_brief).is_empty():_request(id,_envoy_brief_prompt(String(t.private_brief)),false,true)
+
+func set_aside_reply(id:String)->bool:
+	var t:=thread(id)
+	if not bool(t.get("returned_home",false)) or not bool(t.in_transit):return false
+	if pending.has(id):
+		var http:HTTPRequest=pending[id]
+		pending.erase(id);http.cancel_request();http.queue_free()
+	_append(id,"user","Unanswered envoy brief set aside: "+String(t.private_brief))
+	t.in_transit=false;t.returned_home=false;t.retryable=false;t.private_brief="";t.staged_result={}
+	t.status="The unanswered exchange was set aside. No agreement was made. You can send your next brief."
+	changed.emit(id)
+	return true
 
 func _envoy_brief_prompt(brief:String)->String:
 	return "RULER'S PRIVATE BRIEF TO THE ENVOY (never quote as the ruler's speech): "+JSON.stringify(brief)+"\nRender what the envoy actually chose to say, then the foreign leader's answer."
@@ -158,7 +176,8 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 					if String(choices[0].get("finish_reason",""))=="length":problem="The service cut off the reply at its output limit."
 					elif not String(msg.get("refusal","")).is_empty():problem="The service declined to generate this reply."
 					var content:String=PronouncementInterpreter._content_text(msg.get("content",""))
-					value=JSON.parse_string(content.trim_prefix("```json").trim_suffix("```").strip_edges())
+					var parser:=JSON.new()
+					if parser.parse(content.trim_prefix("```json").trim_suffix("```").strip_edges())==OK:value=parser.data
 					var response_valid:=_valid_response(value,traveling,String(thread(id).private_brief))
 					if not response_valid and not repairing:
 						_request(id,CHARACTER_REPAIR_PROMPT+"\nREJECTED DRAFT: "+JSON.stringify(value),true,traveling)
@@ -239,6 +258,7 @@ func validate_state(data:Variant)->bool:
 		if t.has("in_transit") and not t.in_transit is bool:return false
 		if t.has("returned_home") and not t.returned_home is bool:return false
 		if t.has("private_brief") and (not t.private_brief is String or t.private_brief.length()>1500):return false
+		if t.has("next_brief") and (not t.next_brief is String or t.next_brief.length()>1500):return false
 		if t.has("staged_result"):
 			if not t.staged_result is Dictionary:return false
 			if not t.staged_result.is_empty() and not _valid_response(t.staged_result,true,String(t.get("private_brief",""))):return false

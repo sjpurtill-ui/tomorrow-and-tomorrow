@@ -11,6 +11,49 @@ func before_test()->void:
 	system.set_scout_geography_authority(func(_point:Vector2)->bool:return true)
 func after_test()->void:
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
+
+func _watch_city()->void:
+	system.initialize()
+	system.city_intelligence.records.player={"watch_city":{"city_id":"watch_city","name":"Watched Town","civ_id":"","controller":"","position":{"x":30.0,"z":0.0},"observed_day":0,"reported_day":0,"quality":.5,"source":"physical visit","reference":"test","fields":{}}}
+
+func test_city_watch_is_bounded_reprovisions_after_return_and_stops_new_departures()->void:
+	_watch_city()
+	var staff=system.scouting_staff
+	assert_bool(staff.set_city_watch("watch_city",true,30,4).get("ok",false)).is_true()
+	assert_array(system.scout_missions).is_empty()
+	staff.advance_city_watches(1)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_int(int(system.scout_missions[0].personnel)).is_equal(4)
+	var food:=FoodSystem.total_stored()
+	staff.advance_city_watches(8)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_float(FoodSystem.total_stored()).is_equal(food)
+	var returned:Dictionary=system.scout_missions[0]
+	system._erase_scout_mission(returned);staff.city_watch_returned(returned,30,true)
+	GameState.elapsed_days=31
+	staff.advance_city_watches(31)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_float(FoodSystem.total_stored()).is_less(food)
+	assert_bool(staff.valid(JSON.parse_string(JSON.stringify(staff.data)))).is_true()
+	var saved:Dictionary=JSON.parse_string(JSON.stringify(staff.data))
+	staff.restore(saved)
+	assert_int(int(staff.city_watch("watch_city").personnel)).is_equal(4)
+	staff.set_city_watch("watch_city",false)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	system._erase_scout_mission(system.scout_missions[0])
+	staff.advance_city_watches(60)
+	assert_array(system.scout_missions).is_empty()
+
+func test_city_watch_waits_for_food_and_pauses_if_party_is_lost()->void:
+	_watch_city()
+	var staff=system.scouting_staff
+	staff.set_city_watch("watch_city",true,30,4)
+	GameState.food_stocks={"Preserved food":1.0};GameState.resource_stockpiles.Food=1.0
+	staff.advance_city_watches(1)
+	assert_array(system.scout_missions).is_empty()
+	staff.city_watch_returned({"city_watch":"watch_city"},10,false)
+	assert_bool(staff.city_watch("watch_city").enabled).is_false()
+	assert_bool(staff.set_city_watch("watch_city",true,30,9).has("error")).is_true()
 func test_policy_setting_and_repeated_views_never_move_spend_or_reveal()->void:
 	var fog:Dictionary=system.fog_snapshot().duplicate(true);var food:=FoodSystem.total_stored()
 	assert_bool(system.scouting_staff.set_policy(.05,"exploration").has("ok")).is_true()

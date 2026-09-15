@@ -1,4 +1,15 @@
 extends GdUnitTestSuite
+
+func test_city_reconnaissance_prioritizes_target_evidence_over_exploration()->void:
+	var report:={"mission_id":20,"mission_kind":"observe_city","target_id":"city:town","target_label":"OBSERVE TOWN","day":40,"duration_days":30,"actual_days":32,"personnel":4,"returned_personnel":4,"continuous_watch":true,"contacts":["Neighbor"],"city_observations":[{"city_id":"town","name":"Town","observed_day":30,"observation_days":12,"fields":{"population":{"low":100,"high":120}}}]}
+	var summary:=ScoutArchive.summary(report)
+	assert_str(summary.title).contains("City reconnaissance")
+	assert_str(summary.detail).contains("12 days observing")
+	assert_str(summary.detail).contains("100–120")
+	assert_str(summary.detail).contains("Standing order")
+	var detail=auto_free(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(null,null,report))
+	assert_str(detail.meta().subtabs[0]).is_equal("CITY FINDINGS")
+	assert_str(detail.tab(0).blocks[0].heading).contains("TARGET CITY")
 const Archive:=preload("res://scripts/scout_archive.gd")
 const Widget:=preload("res://scripts/hud/scout_archive_widget.gd")
 const Detail:=preload("res://scripts/hud/content/dock_detail_scout_report.gd")

@@ -5,22 +5,22 @@ extends RefCounted
 
 const ECONOMIC_ROLES:Array[String]=["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
 
-static func infant_mortality_per_1000()->float:
-	var metrics:Dictionary=GameState.simulation_metrics
+static func infant_mortality_per_1000(state:Node=GameState,discovery:Node=DiscoverySystem)->float:
+	var metrics:Dictionary=state.simulation_metrics
 	var context:Dictionary={
-		"health":GameState.population_health,
-		"food_security":GameState.food_security,
+		"health":state.population_health,
+		"food_security":state.food_security,
 		"housing_ratio":float(metrics.get("housing_ratio",0.5)),
 		"cohesion":float(metrics.get("cohesion",0.58)),
 		"traveling":bool(metrics.get("traveling",false)),
-		"neonatal_survival":DiscoverySystem.effect("neonatal_survival"),
+		"neonatal_survival":discovery.effect("neonatal_survival"),
 	}
-	var risk:=GameState._pregnancy_risk_multiplier(context)
+	var risk:float=state._pregnancy_risk_multiplier(context)
 	var rate:=clampf((0.018+(risk-1.0)*0.025)*(1.0-clampf(float(context.neonatal_survival),0.0,0.60)),0.004,0.18)
 	return rate*1000.0
 
-static func health()->Dictionary:
-	return {"life_expectancy":GameState.projected_life_expectancy(),"infant_mortality_per_1000":infant_mortality_per_1000()}
+static func health(state:Node=GameState,discovery:Node=DiscoverySystem)->Dictionary:
+	return {"life_expectancy":state.projected_life_expectancy(),"infant_mortality_per_1000":infant_mortality_per_1000(state,discovery)}
 
 static func economy(state:Node=GameState)->Dictionary:
 	var effective:=0.0
@@ -32,14 +32,14 @@ static func economy(state:Node=GameState)->Dictionary:
 	var output:=effective*productivity
 	return {"gdp":output,"gdp_per_capita":output/maxf(1.0,float(state.population_total)),"productivity":productivity,"assigned_workers":assigned,"effective_workers":effective}
 
-static func education_index()->float:
-	var knowledge:Dictionary=GameState.society_subcategories.get("knowledge",{})
-	if knowledge.is_empty():return clampf(GameState.combined_intelligence,0.01,1.0)
-	var preservation:=float(knowledge.get("Preserved knowledge",GameState.combined_intelligence))
-	var communication:=float(knowledge.get("Communication",GameState.combined_intelligence))
+static func education_index(state:Node=GameState)->float:
+	var knowledge:Dictionary=state.society_subcategories.get("knowledge",{})
+	if knowledge.is_empty():return clampf(state.combined_intelligence,0.01,1.0)
+	var preservation:=float(knowledge.get("Preserved knowledge",state.combined_intelligence))
+	var communication:=float(knowledge.get("Communication",state.combined_intelligence))
 	return clampf(preservation*0.58+communication*0.42,0.01,1.0)
 
-static func science()->Dictionary:
-	var minds:=maxf(0.0,GameState.effective_workers("Knowledge"))
-	var education:=education_index()
+static func science(state:Node=GameState)->Dictionary:
+	var minds:=maxf(0.0,state.effective_workers("Knowledge"))
+	var education:=education_index(state)
 	return {"capacity":minds*education,"minds":minds,"education":education}

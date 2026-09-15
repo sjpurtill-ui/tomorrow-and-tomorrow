@@ -2446,6 +2446,7 @@ func _fail_player_scout_mission(mission:Dictionary,interception:Dictionary,day:i
 	else:
 		WorldSimulation.state.register_population_deaths(personnel,"Insecurity")
 	last_scout_outcome={"mission_id":int(mission.get("mission_id",0)),"day":day,"status":"missing","personnel":personnel,"message":"The scout party fails to return. No map, contact, sighting, or foreign identity reaches the civilization; the entire carried report is lost."}
+	scouting_staff.city_watch_returned(mission,day,false)
 	var message:=String(last_scout_outcome.message)
 	_record_world_event("Scout party overdue",message,"diplomacy",day)
 	WorldSimulation.state.simulation_events.push_front({"day":day,"title":"SCOUT PARTY OVERDUE","description":message,"domain":"security","severity":"major"})
@@ -2564,6 +2565,9 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var report:Dictionary={"mission_id":int(mission.get("mission_id",0)),"day":day,"duration_days":int(mission.duration_days),"personnel":int(mission.personnel),"distance_km":roundi(_scout_route_distance(route)*(1.0 if bool(mission.get("circuit",false)) else 2.0)),"mission_kind":String(mission.get("target_kind","explore")),"origin_city_id":String(mission.get("origin_city_id","")),"origin_label":String(mission.get("origin_label","Home settlement")),"origin_position":mission.get("origin_position",{}).duplicate(true),"target_id":String(mission.get("target_id","open_world")),"target_label":String(mission.get("target_label","OPEN EXPLORATION")),"target_finding":targeted_finding,"recruitment_account":recruitment_account,"contacts":contacts,"contact_records":contact_records,"route":route.duplicate(true),"return_route":return_route,"travel_mode":String(mission.get("travel_mode","land")),"route_status":String(mission.get("route_status","returned")),"turnback_reason":String(mission.get("turnback_reason","")),"new_contact_count":contacts.size(),"recruits":recruits,"returned_personnel":int(fate.returned),"lost_personnel":int(fate.lost),"stayed_personnel":int(fate.stayed),"journal":_compose_scout_journal(mission,route),"windfalls":windfalls.duplicate()}
 	report["discoveries"]=(mission.get("discoveries",[]) as Array).duplicate(true)
 	report["city_observations"]=city_reports
+	if String(mission.get("target_kind",""))=="observe_city":
+		report["target_city_id"]=String(mission.get("target_city_id",""))
+		report["continuous_watch"]=not String(mission.get("city_watch","")).is_empty()
 	report["actual_days"]=maxi(1,day-int(mission.get("start_day",day-int(mission.duration_days))))
 	report["start_day"]=int(mission.get("start_day",day-int(mission.duration_days)))
 	report["archive_reviewed"]=false
@@ -2579,10 +2583,12 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var is_recruitment:=not recruitment_account.is_empty()
 	var party_name:="recruitment party" if is_recruitment else "scout party"
 	var message:="The %s returns after %d days and charts roughly %d km of land travel. %s The map now reveals only the physical route contained in its returned report." % [party_name,int(report.actual_days),int(report.distance_km),finding]
+	if String(mission.get("target_kind",""))=="observe_city":message=ScoutArchive.city_account(report)
+	scouting_staff.city_watch_returned(mission,day,true)
 	last_scout_outcome={"mission_id":int(mission.get("mission_id",0)),"day":day,"status":"returned","personnel":int(report.personnel),"message":message}
-	_record_world_event("Recruitment party returns" if is_recruitment else "Scout party returns",message,"diplomacy",day)
+	_record_world_event("City reconnaissance returns" if String(mission.get("target_kind",""))=="observe_city" else "Recruitment party returns" if is_recruitment else "Scout party returns",message,"diplomacy",day)
 	scout_report_returned.emit(report.duplicate(true))
-	WorldSimulation.state.simulation_events.push_front({"day":day,"title":"RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major"})
+	WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major"})
 	_erase_scout_mission(mission)
 
 
@@ -5521,6 +5527,7 @@ func validate_state()->Array[String]:
 		if int(mission.get("return_day",-1))<=int(mission.get("start_day",-1)): errors.append("Scout mission return day must follow departure.")
 		if mission.has("travel_leg_days") and (not city_intelligence.number(mission.travel_leg_days) or float(mission.travel_leg_days)<1 or float(mission.travel_leg_days)>float(mission.get("duration_days",0))):errors.append("Scout travel allowance must be finite and within the expedition duration.")
 		if mission.has("circuit") and not mission.circuit is bool:errors.append("Scout circuit flag must be boolean.")
+		if mission.has("city_watch") and (not mission.city_watch is String or String(mission.city_watch).length()>200):errors.append("Invalid city watch reference.")
 		var route:Variant=mission.get("route",[])
 		if not route is Array or route.size()<2 or route.size()>SCOUT_ROUTE_POINT_LIMIT: errors.append("Scout mission route must remain bounded.")
 		elif route is Array:

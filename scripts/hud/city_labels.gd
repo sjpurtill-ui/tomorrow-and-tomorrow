@@ -8,16 +8,14 @@ const REPORT=preload("res://scripts/hud/city_report_visuals.gd")
 static func report_summary(record:Dictionary,today:int)->Dictionary:
 	var fields:Dictionary=record.get("fields",{})
 	var stats:Array[Dictionary]=[]
-	var oldest:=today
-	var dated:=false
-	for key:String in ["population","science","gdp","health"]:
+	for key:String in ["population","science_capacity","gdp","life_expectancy"]:
 		var field:Dictionary=fields.get(key,{})
-		if not field.is_empty():oldest=mini(oldest,int(field.get("observed_day",-1)));dated=true
-		stats.append({"key":key,"label":{"population":"POP · PEOPLE","science":"SCIENCE · INDEX","gdp":"GDP · WORK-DAYS/D","health":"HEALTH · INDEX"}[key],"value":REPORT.estimate(key,field)})
-	if not dated:oldest=int(record.get("observed_day",-1))
-	var age:=maxi(0,today-oldest)
-	var level:=0 if oldest<0 else (5 if age<=30 else 4 if age<=90 else 3 if age<=180 else 2 if age<=365 else 1)
-	return {"stats":stats,"level":level,"status":"Undated" if level==0 else "Fresh" if level==5 else "Aging" if level>=3 else "Stale"}
+		var detail:=""
+		if key=="science_capacity":detail="Edu "+REPORT.estimate("education",fields.get("education",{}))
+		if key=="life_expectancy":detail="IMR "+REPORT.estimate("infant_mortality",fields.get("infant_mortality",{}))
+		stats.append({"key":key,"label":{"population":"POP · PEOPLE","science_capacity":"SCIENCE · MIND-EQ.","gdp":"GDP · WORK-DAYS/D","life_expectancy":"HEALTH · LIFE EXP."}[key],"value":REPORT.estimate(key,field),"detail":detail})
+	var fresh:=REPORT.freshness(record,today)
+	return {"stats":stats,"level":fresh.level,"status":fresh.status}
 var terrain:Node
 var sources:Dictionary={}
 var cards:Array[Dictionary]=[]
@@ -132,7 +130,7 @@ func refresh()->void:
 		if not summary.is_empty():
 			var entry:Dictionary=entries.back()
 			entry["summary"]=summary
-			entry.extent=Vector2(maxf(242,width),float(lines.size())*20+108)
+			entry.extent=Vector2(maxf(260,width),float(lines.size())*20+130)
 			signature+=str(summary)
 		signature+=String(id)+str(anchor)+affiliation+status+label.text+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	if signature==layout_signature:return
@@ -219,12 +217,13 @@ func _draw()->void:
 			draw_line(Vector2(box.position.x+10,y+3),Vector2(box.end.x-10,y+3),Color(color,.18))
 			var stats:Array=card.summary.stats
 			for i in stats.size():
-				var cell:=Vector2(box.position.x+10+float(i%2)*(box.size.x-20)*.5,y+16+float(i/2)*31)
+				var cell:=Vector2(box.position.x+10+float(i%2)*(box.size.x-20)*.5,y+16+float(i/2)*42)
 				draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,9,Color("8babae"))
 				draw_string(font,cell+Vector2(0,15),String(stats[i].value),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("d1dad7") if stats[i].value!="Unknown" else Color("71868a"))
+				draw_string(font,cell+Vector2(0,27),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,-1,9,Color("8babae"))
 			var level:=int(card.summary.level)
 			var freshness_color:=Color("78bba4") if level>=4 else Color("d4ae68") if level>=2 else Color("b88270")
-			draw_string(font,Vector2(box.position.x+10,box.end.y-7),"INTEL · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,10,freshness_color)
+			draw_string(font,Vector2(box.position.x+10,box.end.y-7),"REPORT · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,10,freshness_color)
 			for i in 5:draw_rect(Rect2(Vector2(box.end.x-67+i*11,box.end.y-14),Vector2(8,5)),freshness_color if i<level else Color("293c40"))
 			continue
 		var status_height:=20.0 if not String(card.get("status","")).is_empty() else 0.0

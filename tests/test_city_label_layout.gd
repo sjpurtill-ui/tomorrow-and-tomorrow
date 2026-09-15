@@ -2,13 +2,15 @@ extends GdUnitTestSuite
 const Labels=preload("res://scripts/hud/city_labels.gd")
 
 func test_city_summary_has_units_unknowns_and_bounded_staleness()->void:
-	var report:={"observed_day":10,"fields":{"population":{"low":67,"high":158,"observed_day":10},"health":{"low":.6,"high":.8,"observed_day":10}}}
+	var report:={"observed_day":10,"fields":{"population":{"low":67,"high":158,"observed_day":10},"life_expectancy":{"low":38,"high":52,"observed_day":10}}}
 	var fresh:=Labels.report_summary(report,20)
 	assert_int(fresh.stats.size()).is_equal(4)
+	for stat:Dictionary in fresh.stats:
+		assert_float(ThemeDB.fallback_font.get_string_size(String(stat.label),HORIZONTAL_ALIGNMENT_LEFT,-1,9).x).is_less_equal(120.0)
 	assert_str(fresh.stats[0].label).contains("PEOPLE")
 	assert_str(fresh.stats[1].value).is_equal("Unknown")
 	assert_str(fresh.stats[2].label).contains("WORK-DAYS/D")
-	assert_str(fresh.stats[3].value).is_equal("60–80%")
+	assert_str(fresh.stats[3].value).is_equal("38–52 yr")
 	assert_int(fresh.level).is_equal(5)
 	assert_dict(Labels.report_summary(report,1000)).is_equal(Labels.report_summary(report,10000))
 	assert_int(Labels.report_summary({"observed_day":-1},100).level).is_equal(0)
@@ -16,9 +18,17 @@ func test_city_summary_has_units_unknowns_and_bounded_staleness()->void:
 func test_new_city_metrics_build_in_detail_panel()->void:
 	var screen=auto_free(preload("res://scripts/city_intelligence_screen.gd").new())
 	var rows=auto_free(VBoxContainer.new())
-	for key:String in ["science","gdp","health"]:
+	for key:String in ["science_capacity","gdp","life_expectancy","infant_mortality","education"]:
 		screen._metric(rows,key)
 		assert_bool(screen.cards.has(key)).is_true()
+
+func test_new_report_has_receipt_grace_without_falsifying_observation_date()->void:
+	var report:={"observed_day":10,"reported_day":200,"fields":{"population":{"low":67,"high":158,"observed_day":10,"reported_day":200}}}
+	assert_int(Labels.report_summary(report,290).level).is_equal(5)
+	assert_int(Labels.report_summary(report,291).level).is_equal(4)
+	assert_int(report.fields.population.observed_day).is_equal(10)
+	report.fields["science"]={"low":.5,"high":.9,"observed_day":10}
+	assert_str(Labels.report_summary(report,200).stats[1].value).is_equal("Unknown")
 
 class Map extends "res://scripts/local_terrain.gd":
 	var army_picked:=false

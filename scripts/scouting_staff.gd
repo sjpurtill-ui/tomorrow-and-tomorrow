@@ -5,10 +5,20 @@ const FOCI:={"exploration":"Exploration & discovery","recruitment":"Seek nomadic
 var host:Node
 var data:Dictionary={}
 func _init(world:Node)->void:host=world;reset()
-func reset()->void:data={"share":0.0,"focus":"exploration","origin_city_id":"","last_day":-1,"next_review":0,"status":"Choose a scouting allocation to begin.","food_spent":0.0,"last_visits":{},"target_cursor":0}
+func reset()->void:data={"share":0.0,"focus":"exploration","origin_city_id":"","last_day":-1,"next_review":0,"status":"Choose a scouting allocation to begin.","food_spent":0.0,"last_visits":{},"target_cursor":0,"city_watches":{}}
 func valid(value:Variant)->bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return true
+	var watches:Variant=value.get("city_watches",{})
+	if not watches is Dictionary or watches.size()>6:return false
+	for id in watches:
+		var watch:Variant=watches[id]
+		if not id is String or id.length()>200 or not watch is Dictionary:return false
+		if not watch.get("enabled") is bool or not watch.get("status") is String or String(watch.status).length()>1000:return false
+		if not host.city_intelligence.number(watch.get("personnel")) or int(watch.personnel)<2 or int(watch.personnel)>8:return false
+		if not host.city_intelligence.number(watch.get("duration_days")) or int(watch.duration_days) not in host.SCOUT_DURATIONS or float(watch.duration_days)!=float(int(watch.duration_days)):return false
+		if not watch.get("origin_city_id","") is String:return false
+		if not host.city_intelligence.number(watch.get("next_review",0)):return false
 	if not host.city_intelligence.number(value.get("target_cursor",0)) or float(value.get("target_cursor",0))<0:return false
 	var visits:Variant=value.get("last_visits",{})
 	if not visits is Dictionary or visits.size()>64:return false
@@ -41,6 +51,7 @@ func snapshot()->Dictionary:
 func advance(day:int)->void:
 	if day<=int(data.last_day):return
 	data.last_day=day
+	advance_city_watches(day)
 	if float(data.share)<=0:return
 	if not WorldSimulation.state.settlement_site_committed:data.status="Scouting begins after the settlement is founded.";return
 	if day<int(data.next_review):return
@@ -94,6 +105,53 @@ func advance(day:int)->void:
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
 			return
 	data.status=last_reason
+
+func city_watch(city_id:String)->Dictionary:
+	return (data.get("city_watches",{}) as Dictionary).get(city_id,{}).duplicate(true)
+
+func set_city_watch(city_id:String,enabled:bool,days:int=30,personnel:int=4)->Dictionary:
+	if not enabled:
+		data.city_watches.erase(city_id)
+		return {"ok":true,"message":"Continuous scouting stopped. The party already away will finish and return."}
+	if days not in host.SCOUT_DURATIONS or personnel<2 or personnel>8:return {"error":"Choose a 2–8-person party and a supported reconnaissance duration."}
+	if host.city_intelligence.known("player",city_id).is_empty():return {"error":"Only a reported city can be watched."}
+	if not data.city_watches.has(city_id) and data.city_watches.size()>=6:return {"error":"At most six city watches can be organized."}
+	var origin:Dictionary=host._scout_origin(String(data.get("origin_city_id","")))
+	data.city_watches[city_id]={"enabled":true,"duration_days":days,"personnel":personnel,"origin_city_id":String(origin.get("id","")),"next_review":int(WorldSimulation.state.elapsed_days),"status":"Continuous scouting ordered. Staff will organize one party on the next day."}
+	return {"ok":true,"message":data.city_watches[city_id].status}
+
+func advance_city_watches(day:int)->void:
+	if not WorldSimulation.state.settlement_site_committed:return
+	for city_id:String in data.city_watches:
+		var watch:Dictionary=data.city_watches[city_id]
+		if not bool(watch.enabled) or day<int(watch.next_review):continue
+		watch.next_review=day+7
+		var away:=false
+		for mission:Dictionary in host.scout_missions:
+			if String(mission.get("target_id",""))=="city:"+city_id:
+				away=true;watch.status="One party is visiting this city. The next departure follows its return.";break
+		if away:continue
+		if host.city_intelligence.known("player",city_id).is_empty():watch.enabled=false;watch.status="Stopped: the city's reported location is unavailable.";continue
+		var quote:Dictionary=host.scout_mission_quote(int(watch.duration_days),"city:"+city_id,"",int(watch.personnel),true,String(watch.origin_city_id))
+		if not bool(quote.get("can_dispatch",false)):
+			watch.status=String(quote.get("error",quote.get("blocker","Waiting for a route.")));continue
+		var reserve:=maxf(1,WorldSimulation.state.population_exact)*.9*7
+		if WorldSimulation.food.total_stored()-float(quote.provisions)<reserve:
+			watch.status="Waiting for provisions; seven days of food are reserved at home.";continue
+		var result:Dictionary=host.dispatch_scouts(int(watch.duration_days),"city:"+city_id,"",int(watch.personnel),true,String(watch.origin_city_id))
+		if result.has("error"):watch.status=String(result.error);continue
+		var mission:Dictionary=host.scout_missions[-1]
+		mission["city_watch"]=city_id
+		watch.status="%d scouts away; reports arrive on return. Staff will organize the next visit." % int(mission.personnel)
+		data.food_spent=float(data.food_spent)+float(mission.provisions)
+
+func city_watch_returned(mission:Dictionary,day:int,returned:bool)->void:
+	var id:=String(mission.get("city_watch",""))
+	if id.is_empty() or not data.city_watches.has(id):return
+	var watch:Dictionary=data.city_watches[id]
+	watch.next_review=day+1
+	watch.status="Report delivered. The next visit will be organized tomorrow." if returned else "Watch paused: the party failed to return. Review before sending another."
+	if not returned:watch.enabled=false
 
 func returned_influence(mission:Dictionary,reports:Array[Dictionary],day:int)->Array[String]:
 	var outcomes:Array[String]=[]

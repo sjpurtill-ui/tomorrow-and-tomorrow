@@ -82,7 +82,7 @@ func refresh()->void:
 	if reports.is_empty():notice.hide();return
 	var report:=reports[-1]
 	var summary:Dictionary=Archive.summary(report)
-	eyebrow.text="EXPEDITION RETURNED"+("  ·  %d UNREAD" % reports.size() if reports.size()>1 else "")
+	eyebrow.text=("CITY RECONNAISSANCE" if String(report.get("mission_kind",""))=="observe_city" else "EXPEDITION RETURNED")+("  ·  %d UNREAD" % reports.size() if reports.size()>1 else "")
 	title.text=String(summary.title)
 	detail.text=String(summary.detail)
 	var day:=int(summary.day)
