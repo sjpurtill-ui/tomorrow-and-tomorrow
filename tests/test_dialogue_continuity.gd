@@ -27,6 +27,55 @@ func _return_envoys()->void:
 	GameState.elapsed_days=int(CivilizationSystem.diplomatic_mission.return_day)
 	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
 
+func test_failed_reply_does_not_extend_journey_and_can_resolve_after_return()->void:
+	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
+	ForeignDialogue.ask(id,"Let us discuss shared waystations.")
+	var due:=int(CivilizationSystem.diplomatic_mission.return_day)
+	_return_envoys()
+	assert_dict(CivilizationSystem.diplomatic_mission).is_empty()
+	assert_int(int(GameState.elapsed_days)).is_equal(due)
+	assert_bool(ForeignDialogue.thread(id).returned_home).is_true()
+	assert_bool(ForeignDialogue.thread(id).retryable).is_true()
+	var saved:=ForeignDiplomacy.export_state()
+	assert_bool(ForeignDiplomacy.import_state(JSON.parse_string(JSON.stringify(saved))).get("ok",false)).is_true()
+	assert_bool(ForeignDialogue.thread(id).returned_home).is_true()
+	ForeignDialogue.thread(id).staged_result={"envoy_words":"My ruler proposes that our travelers maintain safe stopping places together.","reply":"Shared waystations may suit us.","accord":"routes","tone":"equals","generous":false,"reaction":"counteroffer"}
+	assert_bool(ForeignDialogue.resolve_returned(id).get("ok",false)).is_true()
+	assert_bool(ForeignDialogue.thread(id).in_transit).is_false()
+	assert_int(ForeignDialogue.thread(id).messages.size()).is_equal(2)
+
+func test_legacy_awaiting_account_returns_without_another_day_delay()->void:
+	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
+	ForeignDialogue.ask(id,"Let us discuss shared waystations.")
+	CivilizationSystem.diplomatic_mission.stage="awaiting_account"
+	CivilizationSystem.diplomatic_mission.arrival_resolved=true
+	CivilizationSystem.diplomatic_mission.return_day=int(GameState.elapsed_days)+1
+	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
+	assert_dict(CivilizationSystem.diplomatic_mission).is_empty()
+
+func test_pending_network_reply_arrives_after_envoys_are_home()->void:
+	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
+	ForeignDialogue.ask(id,"Let us discuss shared waystations.")
+	var http:=HTTPRequest.new();ForeignDialogue.add_child(http);ForeignDialogue.pending[id]=http
+	ForeignDialogue.thread(id).retryable=false
+	_return_envoys()
+	assert_dict(CivilizationSystem.diplomatic_mission).is_empty()
+	var response:={"envoy_words":"My ruler proposes that our travelers maintain safe stopping places together.","reply":"Shared waystations may suit us.","accord":"routes","tone":"equals","generous":false,"reaction":"counteroffer"}
+	var body:=JSON.stringify({"choices":[{"message":{"content":JSON.stringify(response)},"finish_reason":"stop"}]}).to_utf8_buffer()
+	ForeignDialogue._response(HTTPRequest.RESULT_SUCCESS,200,PackedStringArray(),body,id,http,false,true)
+	assert_bool(ForeignDialogue.thread(id).in_transit).is_false()
+	assert_bool(ForeignDialogue.thread(id).returned_home).is_false()
+	assert_int(ForeignDialogue.thread(id).messages.size()).is_equal(2)
+
+func test_truncated_reply_exposes_output_limit_instead_of_generic_error()->void:
+	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
+	ForeignDialogue.ask(id,"Let us discuss shared waystations.")
+	var http:=HTTPRequest.new();ForeignDialogue.add_child(http);ForeignDialogue.pending[id]=http
+	var body:=JSON.stringify({"choices":[{"message":{"content":"{"},"finish_reason":"length"}]}).to_utf8_buffer()
+	ForeignDialogue._response(HTTPRequest.RESULT_SUCCESS,200,PackedStringArray(),body,id,http,true,true)
+	assert_str(ForeignDialogue.thread(id).status).contains("output limit")
+	assert_bool(ForeignDialogue.thread(id).retryable).is_true()
+
 func test_audience_requires_real_envoys_and_does_not_purchase_an_accord()->void:
 	var id:=_foreign()
 	assert_bool(ForeignDialogue.access(id).ok).is_false()

@@ -3,6 +3,21 @@ extends Control
 const NAME_SIZE:=16
 const POP_SIZE:=13
 const GAP:=7.0
+const REPORT=preload("res://scripts/hud/city_report_visuals.gd")
+
+static func report_summary(record:Dictionary,today:int)->Dictionary:
+	var fields:Dictionary=record.get("fields",{})
+	var stats:Array[Dictionary]=[]
+	var oldest:=today
+	var dated:=false
+	for key:String in ["population","science","gdp","health"]:
+		var field:Dictionary=fields.get(key,{})
+		if not field.is_empty():oldest=mini(oldest,int(field.get("observed_day",-1)));dated=true
+		stats.append({"key":key,"label":{"population":"POP · PEOPLE","science":"SCIENCE · INDEX","gdp":"GDP · WORK-DAYS/D","health":"HEALTH · INDEX"}[key],"value":REPORT.estimate(key,field)})
+	if not dated:oldest=int(record.get("observed_day",-1))
+	var age:=maxi(0,today-oldest)
+	var level:=0 if oldest<0 else (5 if age<=30 else 4 if age<=90 else 3 if age<=180 else 2 if age<=365 else 1)
+	return {"stats":stats,"level":level,"status":"Undated" if level==0 else "Fresh" if level==5 else "Aging" if level>=3 else "Stale"}
 var terrain:Node
 var sources:Dictionary={}
 var cards:Array[Dictionary]=[]
@@ -102,10 +117,11 @@ func refresh()->void:
 		var title:=String(parts[0]);var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
 		if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
 		var status:=String(label.get_meta("map_status",""))
+		var summary:Dictionary={}
 		if bool(source.foreign):
 			var record:Dictionary=CivilizationSystem.city_intelligence.records.get("player",{}).get(String(id),{})
-			var population_field:Dictionary=record.get("fields",{}).get("population",{})
-			status=preload("res://scripts/hud/city_report_visuals.gd").age_text(int(population_field.get("observed_day",record.get("observed_day",-1))),int(GameState.elapsed_days))
+			summary=report_summary(record,int(GameState.elapsed_days))
+			status=summary.status
 		var affiliation:=CivilizationSystem.city_intelligence.controller_label(String(label.get_meta("city_civilization_id",""))) if bool(source.foreign) else ""
 		var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
 		var width:=maxf(font.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,font.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20
@@ -113,6 +129,11 @@ func refresh()->void:
 		width=maxf(width,font.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 		var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
 		entries.append({"id":String(id),"kind":kind,"status":status,"foreign":source.foreign,"anchor":anchor,"title":title,"lines":lines,"population":count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"extent":Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0))})
+		if not summary.is_empty():
+			var entry:Dictionary=entries.back()
+			entry["summary"]=summary
+			entry.extent=Vector2(maxf(242,width),float(lines.size())*20+108)
+			signature+=str(summary)
 		signature+=String(id)+str(anchor)+affiliation+status+label.text+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	if signature==layout_signature:return
 	layout_signature=signature
@@ -150,13 +171,17 @@ func _update_overflow(viewport_size:Vector2)->void:
 	list_panel.position=Vector2(viewport_size.x-340,120);list_panel.size=Vector2(320,maxf(100,viewport_size.y-190))
 	if overflow.is_empty():list_panel.hide()
 	var signature:=""
-	for entry:Dictionary in overflow:signature+=String(entry.id)+String(entry.title)+String(entry.population)+String(entry.get("status",""))+String(entry.get("affiliation",""))+str(entry.color)+str(entry.flag.get_instance_id() if entry.flag else 0)
+	for entry:Dictionary in overflow:signature+=String(entry.id)+String(entry.title)+String(entry.population)+str(entry.get("summary",{}))+String(entry.get("status",""))+String(entry.get("affiliation",""))+str(entry.color)+str(entry.flag.get_instance_id() if entry.flag else 0)
 	if signature==list_signature:return
 	list_signature=signature
 	for child in list_rows.get_children():list_rows.remove_child(child);child.queue_free()
 	var close:=Button.new();close.text="Close city list";close.pressed.connect(func():list_panel.hide());list_rows.add_child(close)
 	for entry:Dictionary in overflow:
 		var button:=Button.new();button.text=String(entry.title)+( "\n"+String(entry.affiliation) if not String(entry.get("affiliation","")).is_empty() else "")+"\n"+String(entry.population)+( "\n"+String(entry.get("status","")) if not String(entry.get("status","")).is_empty() else "")
+		if entry.has("summary"):
+			button.text=String(entry.title)+" · "+String(entry.affiliation)
+			for stat:Dictionary in entry.summary.stats:button.text+="\n"+String(stat.label)+"  "+String(stat.value)
+			button.text+="\nIntel · "+String(entry.status)
 		button.icon=entry.flag;button.expand_icon=true;button.add_theme_constant_override("icon_max_width",28)
 		button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_color_override("font_color",entry.color);button.custom_minimum_size.y=54
@@ -189,6 +214,19 @@ func _draw()->void:
 		var y:=box.position.y+19
 		for line:String in card.lines:
 			draw_string(font,Vector2(box.position.x+46,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,color);y+=20
+		if card.has("summary"):
+			draw_string(font,Vector2(box.position.x+10,y-3),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-20,11,Color(color,.8))
+			draw_line(Vector2(box.position.x+10,y+3),Vector2(box.end.x-10,y+3),Color(color,.18))
+			var stats:Array=card.summary.stats
+			for i in stats.size():
+				var cell:=Vector2(box.position.x+10+float(i%2)*(box.size.x-20)*.5,y+16+float(i/2)*31)
+				draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,9,Color("8babae"))
+				draw_string(font,cell+Vector2(0,15),String(stats[i].value),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("d1dad7") if stats[i].value!="Unknown" else Color("71868a"))
+			var level:=int(card.summary.level)
+			var freshness_color:=Color("78bba4") if level>=4 else Color("d4ae68") if level>=2 else Color("b88270")
+			draw_string(font,Vector2(box.position.x+10,box.end.y-7),"INTEL · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,10,freshness_color)
+			for i in 5:draw_rect(Rect2(Vector2(box.end.x-67+i*11,box.end.y-14),Vector2(8,5)),freshness_color if i<level else Color("293c40"))
+			continue
 		var status_height:=20.0 if not String(card.get("status","")).is_empty() else 0.0
 		if status_height>0:draw_string(font,Vector2(box.position.x+10,box.end.y-9),String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("e9bf70"))
 		if not String(card.get("affiliation","")).is_empty():draw_string(font,Vector2(box.position.x+10,box.end.y-27-status_height),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color(color,.85))

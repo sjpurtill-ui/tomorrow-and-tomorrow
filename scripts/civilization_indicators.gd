@@ -22,15 +22,15 @@ static func infant_mortality_per_1000()->float:
 static func health()->Dictionary:
 	return {"life_expectancy":GameState.projected_life_expectancy(),"infant_mortality_per_1000":infant_mortality_per_1000()}
 
-static func economy()->Dictionary:
+static func economy(state:Node=GameState)->Dictionary:
 	var effective:=0.0
 	var assigned:=0.0
 	for role:String in ECONOMIC_ROLES:
-		assigned+=maxf(0.0,float(GameState.population_allocations.get(role,0.0)))
-		effective+=maxf(0.0,GameState.effective_workers(role))
-	var productivity:=clampf(float(GameState.simulation_metrics.get("labor_efficiency",0.72)),0.0,1.5)
+		assigned+=maxf(0.0,float(state.population_allocations.get(role,0.0)))
+		effective+=maxf(0.0,state.effective_workers(role))
+	var productivity:=clampf(float(state.simulation_metrics.get("labor_efficiency",0.72)),0.0,1.5)
 	var output:=effective*productivity
-	return {"gdp":output,"gdp_per_capita":output/maxf(1.0,float(GameState.population_total)),"productivity":productivity,"assigned_workers":assigned,"effective_workers":effective}
+	return {"gdp":output,"gdp_per_capita":output/maxf(1.0,float(state.population_total)),"productivity":productivity,"assigned_workers":assigned,"effective_workers":effective}
 
 static func education_index()->float:
 	var knowledge:Dictionary=GameState.society_subcategories.get("knowledge",{})

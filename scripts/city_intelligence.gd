@@ -3,7 +3,7 @@ extends RefCounted
 const MAX_OBSERVERS:=64
 const MAX_CITIES:=512
 const SIGHT_RADIUS:=12.0
-const FIELDS={"population":{"label":"Population","threshold":.25,"unit":"people"},"fortification":{"label":"Visible defenses","threshold":.35,"unit":"capacity"},"garrison":{"label":"Garrison","threshold":.55,"unit":"troops"},"production":{"label":"Workshops and production","threshold":.60,"unit":"capacity"},"logistics":{"label":"Roads and carrying capacity","threshold":.60,"unit":"capacity"},"supply":{"label":"Food reserve outlook","threshold":.75,"unit":"days"},"damage":{"label":"Visible damage","threshold":.35,"unit":"capacity"}}
+const FIELDS={"population":{"label":"Population","threshold":.25,"unit":"people"},"fortification":{"label":"Visible defenses","threshold":.35,"unit":"capacity"},"garrison":{"label":"Garrison","threshold":.55,"unit":"troops"},"production":{"label":"Workshops and production","threshold":.60,"unit":"capacity"},"logistics":{"label":"Roads and carrying capacity","threshold":.60,"unit":"capacity"},"supply":{"label":"Food reserve outlook","threshold":.75,"unit":"days"},"damage":{"label":"Visible damage","threshold":.35,"unit":"capacity"},"science":{"label":"Science index","threshold":.45,"unit":"capacity"},"gdp":{"label":"GDP (labor-equivalent output)","threshold":.45,"unit":"worker-days/day"},"health":{"label":"Health index","threshold":.45,"unit":"capacity"}}
 var records:Dictionary={}
 var system:Node
 
@@ -58,6 +58,7 @@ func truth(city_id:String)->Dictionary:
 		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id)
 		var metrics:Dictionary=local.get("metrics",{})
 		values={"population":float(local.get("population",0)),"production":float(metrics.get("material_capacity",0)),"logistics":float(metrics.get("logistics",0)),"supply":float(metrics.get("food_days",-1))}
+		values.merge(_civic_observation(city_id))
 		if bool(city.get("primary",false)):
 			values["garrison"]=float(WorldSimulation.military.home_army.get("troops",0))
 			values["fortification"]=clampf(float(WorldSimulation.military.settlement_defense.get("stage",0))/5.0,0,1)
@@ -78,9 +79,21 @@ func truth(city_id:String)->Dictionary:
 			values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":int(region.get("garrison",0)),"production":float(local.get("material_capacity",0)),"logistics":float(local.get("logistics",0)),"supply":float(local.get("food_days",0))}
 		if String(region.controller)=="player":
 			for key in ["garrison","production","logistics","supply"]: values.erase(key)
+		elif bool(civ.get("shared_rules",false)) and WorldSimulation.actors.has(String(civ.id)) and region.has("local_city_id"):
+			values.merge(WorldSimulation.scoped(String(civ.id),func()->Dictionary:return _civic_observation(String(region.local_city_id))))
+		else:
+			# Legacy societies have indices, but no city-level GDP ledger.
+			values["science"]=float(civ.get("knowledge",0))
+			values["health"]=float(civ.get("health",0))
 		place["controller"]=String(region.controller)
 	place["values"]=values
 	return place
+
+func _civic_observation(city_id:String)->Dictionary:
+	return WorldSimulation.settlements.with_city_resources(city_id,func()->Dictionary:
+		return WorldSimulation.settlements.with_local_population(func()->Dictionary:
+			var state:=WorldSimulation.state
+			return {"gdp":CivilizationIndicators.economy(state).gdp,"science":clampf(float(state.simulation_metrics.get("knowledge",state.combined_intelligence)),0,1),"health":clampf(state.population_health,0,1)}))
 
 func capture(observer:String,city_id:String,quality:float,day:int,source:String,reference:String,observation_days:int=1)->Dictionary:
 	var actual:=truth(city_id)
@@ -147,7 +160,7 @@ func known(observer:String,city_id:String,day:int=-1)->Dictionary:
 		# Original evidence stays intact. This planning band is an unverified
 		# projection, with separate rates for residents, troops, stores and fabric.
 		field["observed_low"]=float(field.low);field["observed_high"]=float(field.high)
-		var rate:float={"population":.20,"garrison":2.0,"supply":4.0,"fortification":.15,"production":.40,"logistics":.20,"damage":.50}[key]
+		var rate:float={"population":.20,"garrison":2.0,"supply":4.0,"fortification":.15,"production":.40,"logistics":.20,"damage":.50,"science":.20,"health":.40,"gdp":.40}[key]
 		var center:float=(float(field.low)+float(field.high))*.5
 		var scale:=1.0 if FIELDS[key].unit=="capacity" else maxf(1,center)
 		var drift:=scale*rate*minf(3.0,float(age)/365.0)

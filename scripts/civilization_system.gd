@@ -1547,6 +1547,9 @@ func diplomatic_mission_status()->Dictionary:
 
 func _process_diplomatic_mission(day:int)->void:
 	if diplomatic_mission.is_empty(): return
+	# Recover saves whose completed journey was extended while a reply was pending.
+	if String(diplomatic_mission.get("stage",""))=="awaiting_account":
+		diplomatic_mission["return_day"]=mini(day,int(diplomatic_mission.get("return_day",day)))
 	var civ_id:=String(diplomatic_mission.get("civ_id",""))
 	var index:=_civilization_index(civ_id)
 	if index<0:
@@ -1595,12 +1598,9 @@ func _process_diplomatic_mission(day:int)->void:
 		if purpose in CARRIED_DIPLOMATIC_ACTIONS and purpose!="send_aid" and not bool(diplomatic_mission.get("proposal_resolved",false)): proposal_result=conduct_player_action(civ_id,purpose,true)
 		elif purpose=="send_aid": proposal_result={"ok":gift_resource=="Food" and gift_amount>0.0,"message":"The food aid reached %s and improved its reserves." % String(civ.name) if gift_resource=="Food" and gift_amount>0.0 else "The aid proposal arrived without food and was refused."}
 		if bool(proposal_result.get("pending_reply",false)):
-			diplomatic_mission["stage"]="awaiting_account"
-			diplomatic_mission["return_day"]=day+1
-			diplomatic_mission["reception"]=String(proposal_result.get("message","The returned envoys are assembling their account."))
-			civ["player_relation"]=relation
-			civilizations[index]=civ
-			return
+			# Physical return and observations must not wait for a network response.
+			WorldSimulation.dialogue.thread(civ_id)["returned_home"]=true
+			proposal_result={"ok":false,"message":"The envoys are home. Their conversation report is pending; open the leader conversation to check or retry the reply."}
 		var accepted:=bool(proposal_result.get("ok",false))
 		if purpose=="send_aid" and accepted: WorldSimulation.diplomacy.commitments.note_food_aid(civ_id,gift_amount,day)
 		var outcome:=String(proposal_result.get("message",proposal_result.get("error","The proposal was refused.")))

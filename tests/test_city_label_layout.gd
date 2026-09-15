@@ -1,5 +1,25 @@
 extends GdUnitTestSuite
 const Labels=preload("res://scripts/hud/city_labels.gd")
+
+func test_city_summary_has_units_unknowns_and_bounded_staleness()->void:
+	var report:={"observed_day":10,"fields":{"population":{"low":67,"high":158,"observed_day":10},"health":{"low":.6,"high":.8,"observed_day":10}}}
+	var fresh:=Labels.report_summary(report,20)
+	assert_int(fresh.stats.size()).is_equal(4)
+	assert_str(fresh.stats[0].label).contains("PEOPLE")
+	assert_str(fresh.stats[1].value).is_equal("Unknown")
+	assert_str(fresh.stats[2].label).contains("WORK-DAYS/D")
+	assert_str(fresh.stats[3].value).is_equal("60–80%")
+	assert_int(fresh.level).is_equal(5)
+	assert_dict(Labels.report_summary(report,1000)).is_equal(Labels.report_summary(report,10000))
+	assert_int(Labels.report_summary({"observed_day":-1},100).level).is_equal(0)
+
+func test_new_city_metrics_build_in_detail_panel()->void:
+	var screen=auto_free(preload("res://scripts/city_intelligence_screen.gd").new())
+	var rows=auto_free(VBoxContainer.new())
+	for key:String in ["science","gdp","health"]:
+		screen._metric(rows,key)
+		assert_bool(screen.cards.has(key)).is_true()
+
 class Map extends "res://scripts/local_terrain.gd":
 	var army_picked:=false
 	var site_review_opened:=false

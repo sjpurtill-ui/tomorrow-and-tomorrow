@@ -61,7 +61,7 @@ func _metric(parent:Node,key:String,hero:bool=false)->void:
 	var value:=_label(card,"Unknown",30 if hero else 20,T.INK)
 	var note:=_label(card,"Not observed",11,T.MUTED)
 	cards[key]={"value":value,"note":note,"card":card}
-	if key in ["fortification","production","logistics","damage"]:
+	if key in ["fortification","production","logistics","damage","science","health"]:
 		var band:=V.Band.new();band.ink=V.COLORS[key];card.add_child(band);cards[key]["band"]=band
 	if hero:
 		projection=_label(card,"",12,T.TEXT_SOFT)
@@ -122,7 +122,7 @@ func _ready()->void:
 	var left:=_page(tabs,"Overview")
 	_metric(left,"population",true)
 	grid=GridContainer.new();grid.columns=2;grid.size_flags_horizontal=SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8);left.add_child(grid)
-	for key:String in ["garrison","fortification","supply","production","logistics","damage"]:_metric(grid,key)
+	for key:String in ["science","gdp","health","garrison","fortification","supply","production","logistics","damage"]:_metric(grid,key)
 	provenance_button=_button(left,"Report details  ›",func():detail_text.visible=not detail_text.visible)
 	detail_text=_label(left,"",12,T.TEXT_SOFT);detail_text.hide()
 	var actions:=HBoxContainer.new();left.add_child(actions)

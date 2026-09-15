@@ -42,6 +42,7 @@ func access(id:String)->Dictionary:
 
 func ask(id:String,message:String)->bool:
 	if pending.has(id): return false
+	if bool(thread(id).get("returned_home",false)) and bool(thread(id).in_transit):return false
 	var gate:=access(id)
 	if WorldSimulation.diplomacy.leader(id).is_empty(): return false
 	var t:=thread(id)
@@ -58,7 +59,7 @@ func ask(id:String,message:String)->bool:
 	if journey.has("error"):t.status=String(journey.error);changed.emit(id);return false
 	WorldSimulation.world.diplomatic_mission["dialogue_brief"]=clean
 	WorldSimulation.world.diplomatic_mission["dialogue_exchange"]=true
-	t.private_brief=clean;t.in_transit=true;t.staged_result={};t.retryable=false
+	t.private_brief=clean;t.in_transit=true;t.staged_result={};t.retryable=false;t["returned_home"]=false
 	_request(id,_envoy_brief_prompt(clean),false,true)
 	return true
 
@@ -144,13 +145,18 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 	pending.erase(id); http.queue_free()
 	var valid:=false
 	var value:Variant=null
+	var problem:=PronouncementInterpreter.connection_response_problem(code,result)
 	if result==HTTPRequest.RESULT_SUCCESS and code>=200 and code<300:
+		problem="The service returned an unreadable response envelope."
 		var envelope:Variant=JSON.parse_string(body.get_string_from_utf8())
 		if envelope is Dictionary:
 			var choices:Variant=envelope.get("choices",[])
 			if choices is Array and not choices.is_empty() and choices[0] is Dictionary:
 				var msg:Variant=choices[0].get("message",{})
 				if msg is Dictionary:
+					problem="The leader's reply failed the game's dialogue validation after a repair attempt."
+					if String(choices[0].get("finish_reason",""))=="length":problem="The service cut off the reply at its output limit."
+					elif not String(msg.get("refusal","")).is_empty():problem="The service declined to generate this reply."
 					var content:String=PronouncementInterpreter._content_text(msg.get("content",""))
 					value=JSON.parse_string(content.trim_prefix("```json").trim_suffix("```").strip_edges())
 					var response_valid:=_valid_response(value,traveling,String(thread(id).private_brief))
@@ -161,7 +167,8 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 						if response_valid:
 							thread(id).staged_result=value.duplicate(true);thread(id).status="The answer remains with the returning envoys.";valid=true
 					elif response_valid:valid=accept(id,value)
-	if not valid: _failure(id,PronouncementInterpreter.connection_response_problem(code,result)+" Your discussion and draft are intact.")
+	if not valid: _failure(id,problem+" Your discussion and draft are intact.")
+	elif traveling and bool(thread(id).get("returned_home",false)):resolve_returned(id)
 	changed.emit(id)
 
 func resolve_returned(id:String)->Dictionary:
@@ -169,11 +176,11 @@ func resolve_returned(id:String)->Dictionary:
 	if not bool(t.in_transit):return {"error":"No traveling discussion is awaiting return."}
 	if pending.has(id):return {"pending_reply":true,"message":"The envoys have arrived home, but their account is still being prepared."}
 	if (t.staged_result as Dictionary).is_empty():
-		if bool(t.retryable):retry(id)
+		if not bool(t.retryable):_failure(id,"The conversation report is unavailable. Retry to request it again.")
 		return {"pending_reply":true,"message":"The envoys have arrived home, but no usable account is ready yet."}
 	var value:Dictionary=t.staged_result.duplicate(true)
 	if not accept(id,value):return {"error":"The returned account could not be verified."}
-	t.in_transit=false;t.private_brief="";t.staged_result={}
+	t.in_transit=false;t.private_brief="";t.staged_result={};t["returned_home"]=false
 	return {"ok":true,"message":"Your envoy reports: “%s”\n\n%s answered: “%s”" % [String(value.get("envoy_words","")),String(WorldSimulation.diplomacy.leader(id).name),String(value.reply)]}
 
 func _reply_stays_in_character(reply:String)->bool:
@@ -230,6 +237,7 @@ func validate_state(data:Variant)->bool:
 		if not t.messages is Array or t.messages.size()>MAX_MESSAGES or not valid_draft(t.draft) or not t.retryable is bool: return false
 		if not t.reply is String or t.reply.length()>1800 or not t.status is String or t.status.length()>1000: return false
 		if t.has("in_transit") and not t.in_transit is bool:return false
+		if t.has("returned_home") and not t.returned_home is bool:return false
 		if t.has("private_brief") and (not t.private_brief is String or t.private_brief.length()>1500):return false
 		if t.has("staged_result"):
 			if not t.staged_result is Dictionary:return false

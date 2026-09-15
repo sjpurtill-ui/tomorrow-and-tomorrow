@@ -49,6 +49,19 @@ func test_low_quality_has_unknown_fields_not_fabricated_zeroes()->void:
 	assert_str(intel().describe(city)).contains("Unknown")
 	assert_str(city.name).is_equal("Unidentified settlement")
 
+func test_civic_estimates_are_dated_evidence_not_live_truth()->void:
+	observe(region(),.8,10)
+	var before:Dictionary=intel().known("player",region(),10)
+	assert_bool(before.fields.has("science")).is_true()
+	assert_bool(before.fields.has("health")).is_true()
+	civ().knowledge=.99;civ().health=.01
+	assert_dict(intel().known("player",region(),10)).is_equal(before)
+	assert_bool(intel().validate(intel().records)).is_true()
+	var primary:=String(GameState.player_settlements[0].id)
+	var observation:Dictionary=intel().capture(String(civ().id),primary,.8,10,"test","test")
+	assert_bool(observation.fields.has_all(["gdp","science","health"])).is_true()
+	assert_bool(intel().valid_observation(observation)).is_true()
+
 func test_scout_carries_observations_until_return_and_does_not_resample_on_delivery()->void:
 	var mission:Dictionary={}
 	var place:Dictionary=intel().site(region())

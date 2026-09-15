@@ -933,6 +933,12 @@ func _refresh_toolbar()->void:
 	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
 		if bool((encounter_variant as Dictionary).get("home_location_known",false)): known_destinations+=1
 	var diplomat_presentation:Dictionary=terrain._diplomat_action_presentation(diplomatic_status,known_destinations)
+	var returned_reply:=""
+	if not bool(diplomatic_status.get("active",false)):
+		for thread:Dictionary in WorldSimulation.dialogue.threads.values():
+			if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
+				returned_reply="ENVOYS HOME · RETRY REPLY" if bool(thread.get("retryable",false)) else "ENVOYS HOME · REPLY PENDING"
+				break
 	var settle_text:String
 	var settle_tooltip:String
 	var settle_disabled:=false
@@ -958,7 +964,7 @@ func _refresh_toolbar()->void:
 	var settle_visible:=not settle_disabled
 	var scouts_visible:=GameState.settlement_site_committed or int(scouting.away)>0
 	var diplomat_visible:=not bool(diplomat_presentation.disabled) or bool(diplomatic_status.get("active",false))
-	var signature:="%s|%s|%s|%s|%s|%s|%s" % [settle_text,String(scout_presentation.label),String(diplomat_presentation.label),convoy_active,settle_visible,scouts_visible,diplomat_visible]
+	var signature:="%s|%s|%s|%s|%s|%s|%s" % [settle_text,String(scout_presentation.label),String(diplomat_presentation.label)+returned_reply,convoy_active,settle_visible,scouts_visible,diplomat_visible]
 	if signature==_toolbar_signature: return
 	_toolbar_signature=signature
 	settle.text=settle_text
@@ -973,6 +979,9 @@ func _refresh_toolbar()->void:
 	diplomat.text="SEND DIPLOMAT" if not bool(diplomatic_status.get("active",false)) else "ENVOYS AWAY · %dD" % int(diplomatic_status.get("days_remaining",0))
 	diplomat.disabled=bool(diplomat_presentation.disabled)
 	diplomat.tooltip_text=String(diplomat_presentation.tooltip)
+	if returned_reply!="":
+		diplomat.text=returned_reply
+		diplomat.tooltip_text="The envoys have returned. Open the foreign leader conversation to read its status or retry the reply."
 	diplomat.visible=diplomat_visible
 	convoy.visible=convoy_active
 	convoy.tooltip_text="Center the camera on the traveling settlement convoy."

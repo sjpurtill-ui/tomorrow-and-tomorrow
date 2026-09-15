@@ -166,7 +166,9 @@ func refresh()->void:
 	assessment.text=f.label+" · "+f.reasons+"\nThe answer is settled when envoys return; circumstances can change."
 	var quote:Dictionary=WorldSimulation.world.diplomatic_mission_quote(civ_id,"","leader_parley")
 	audience_cost.visible=true
-	if bool(thread.get("in_transit",false)):
+	if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
+		audience_cost.text="ENVOYS HOME · Reply unavailable — Retry to recover the conversation." if bool(thread.retryable) else "ENVOYS HOME · Waiting for the conversation report."
+	elif bool(thread.get("in_transit",false)):
 		var mission_status:=WorldSimulation.world.diplomatic_mission_status()
 		audience_cost.text="ENVOY EXCHANGE · %s · scheduled home day %d (%d days). Your private brief is not the envoy's spoken script." % [String(mission_status.get("phase","Traveling")).to_upper(),int(mission_status.get("return_day",0)),int(mission_status.get("days_remaining",0))]
 	else:
