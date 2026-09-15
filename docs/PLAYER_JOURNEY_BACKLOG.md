@@ -1,3 +1,17 @@
+# Open player-reported issues
+
+## Rail gauge standards appearing around year 58
+
+- Reported September 15, 2026: the player saw rail gauge standards coming up
+  around campaign year 58, implausibly early in progression.
+- Status: logged for later investigation; explicitly no fix requested now.
+- Follow-up: reproduce the announcement/availability, distinguish an upcoming
+  suggestion from an actual unlock, and audit its prerequisite and pacing gates.
+  Check for other advanced technologies surfacing before their foundations.
+- Acceptance: rail standardization appears only when supported by appropriate
+  railway development and prerequisites; do not assume a calendar-only gate.
+- Cause unconfirmed. No gameplay changes or reproduction performed for this entry.
+
 # Release .14: bounded general campaign
 
 The authored Alderford War now supplies an explicit playable two-rival campaign through Military → Play General Campaign. It does not certify natural first contact, a continuous 2,500-year journey, or all eras. See GENERAL_CAMPAIGN_DESIGN.md and RELEASE_2026_09_05_14.md. Earlier continuous-world findings remain below.
