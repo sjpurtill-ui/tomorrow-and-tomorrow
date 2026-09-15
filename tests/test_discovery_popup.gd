@@ -52,6 +52,12 @@ func test_small_window_keeps_dismissal_buttons_onscreen_and_body_scrollable()->v
 	assert_bool(Rect2(0,0,800,600).encloses(popup.dismiss_button.get_global_rect())).is_true()
 	assert_float(popup.body.get_combined_minimum_size().x).is_less_equal(popup.scroll.size.x)
 	popup.close()
+func test_wide_window_uses_a_narrow_art_led_announcement_panel()->void:
+	var f:=fixture(1440,900);var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
+	for i in 5:await get_tree().process_frame
+	assert_float(popup.panel.size.x).is_equal(600.0)
+	assert_float(popup.panel.size.y).is_greater(popup.panel.size.x)
+	popup.close()
 func test_nested_modal_pause_is_not_released_by_discovery_dismissal()->void:
 	var f:=fixture();var existing=Pause.new();existing.acquire(f.host)
 	var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}]);popup.close()
