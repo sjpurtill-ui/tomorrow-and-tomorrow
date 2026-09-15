@@ -2061,15 +2061,20 @@ void fragment() {
 	if (max(close_detail,crown_detail)>0.0) {
 		vec3 close_a;
 		vec3 close_b;
+		// This source covers a scrubland neighbourhood, not a grass surface.
+		// A 500 m footprint preserves shrubs and washes which the 15 m tile lost.
+		vec2 scrub_warp=(vec2(soil_patch,regional)-vec2(0.5))*0.27;
+		vec2 scrub_uv=periodic_surface_uv(surface_position,surface_origin,2,1,false,vec2(0.0))+scrub_warp;
+		vec2 scrub_uv_rotated=periodic_surface_uv(surface_position,surface_origin,166,100,true,vec2(0.19,-0.27))+vec2(-scrub_warp.y,scrub_warp.x)*0.71;
 		if (semiarid_weight>0.98) {
-			close_a=texture(semiarid_ground_albedo,close_uv).rgb;
-			close_b=texture(semiarid_ground_albedo,close_uv_rotated).rgb;
+			close_a=texture(semiarid_ground_albedo,scrub_uv).rgb;
+			close_b=texture(semiarid_ground_albedo,scrub_uv_rotated).rgb;
 		} else if (semiarid_weight<0.02) {
 			close_a=texture(ground_albedo,close_uv).rgb;
 			close_b=texture(ground_albedo,close_uv_rotated).rgb;
 		} else {
-			close_a=mix(texture(ground_albedo,close_uv).rgb,texture(semiarid_ground_albedo,close_uv).rgb,semiarid_weight);
-			close_b=mix(texture(ground_albedo,close_uv_rotated).rgb,texture(semiarid_ground_albedo,close_uv_rotated).rgb,semiarid_weight);
+			close_a=mix(texture(ground_albedo,close_uv).rgb,texture(semiarid_ground_albedo,scrub_uv).rgb,semiarid_weight);
+			close_b=mix(texture(ground_albedo,close_uv_rotated).rgb,texture(semiarid_ground_albedo,scrub_uv_rotated).rgb,semiarid_weight);
 		}
 		ground_close=mix(close_a,close_b,0.32);
 		// Bend both photograph coordinates with broad, already-computed world
@@ -2082,7 +2087,10 @@ void fragment() {
 		vec3 crown_photo_b=texture(forest_albedo,crown_uv_b).rgb;
 		forest_crowns=mix(crown_photo_a,crown_photo_b,0.20);
 	}
-	vec3 ground_sample = mix(ground_map, ground_close, close_detail * 0.66);
+	// Scrub crowns resolve at the same aerial footprint as woodland crowns.
+	// Waiting for the metre-scale grass threshold hid this layer at 10,000 ft.
+	float ground_neighbourhood_weight=mix(close_detail*0.66,crown_detail*0.80,semiarid_weight);
+	vec3 ground_sample = mix(ground_map, ground_close, ground_neighbourhood_weight);
 	vec3 forest_sample = mix(forest_map, forest_crowns, crown_detail * 0.90);
 	float photo_resolved=max(local_detail,close_detail);
 	float raw_ground_luma = dot(ground_sample, vec3(0.28, 0.57, 0.15));

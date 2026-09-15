@@ -45,8 +45,12 @@ vec3 apply_climate_surface(vec3 earth,vec2 point,vec2 origin,float pixel_world,f
 	vec3 soil = mix(vec3(0.365,0.29,0.18),vec3(0.51,0.445,0.32),fields.z);
 	soil = mix(soil,vec3(0.31,0.32,0.30),cold*0.72);
 	soil *= 0.96+(soil_mass-0.5)*0.22*soil_detail+grain;
-	// Do not turn wet grassland or existing woodland into a decorative desert.
-	earth = mix(earth,soil,dry*(1.0-forest_mask)*0.62);
+	// The resolved semiarid photograph already carries dry scrub and bare soil.
+	// A constant 62% soil wash erased those boundaries even at close altitude.
+	// Keep geology's broad palette at map scale; let the climate-selected ground
+	// image supply most of the surface once its tens-of-metres features resolve.
+	float soil_palette_weight=mix(0.62,0.16,soil_detail);
+	earth = mix(earth,soil,dry*(1.0-forest_mask)*soil_palette_weight);
 	float damp = smoothstep(0.62,0.88,rain)*(1.0-forest_mask);
 	earth *= 1.0-damp*0.10;
 	return earth;
