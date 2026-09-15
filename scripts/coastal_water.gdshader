@@ -64,26 +64,43 @@ void fragment() {
 	surveyed_surface *= 1.0-smoothstep(0.15,0.65,pixel_world);
 	float wind_detail = 1.0-smoothstep(0.008,0.035,pixel_world);
 	float ripple_detail = 1.0-smoothstep(0.0007,0.004,pixel_world);
-	float time = TIME*wave_speed;
-	float wind_a = dot(point,vec2(76.0,42.0))+wave_phase.x+sin(dot(point,vec2(9.7,-11.1))+wave_phase.z)*2.1-time*0.23;
-	float wind_b = dot(point,vec2(-53.0,86.0))+wave_phase.y+sin(dot(point,vec2(-7.3,5.1))+wave_phase.w)*1.7+time*0.16;
-	float ripple = dot(point,vec2(780.0,390.0))+ripple_phase.x-time*0.55;
-	float ripple_b = dot(point,vec2(631.8,315.9))+ripple_phase.y-time*0.4455;
-	vec2 normal_wave = vec2(cos(wind_a),sin(wind_b))*0.025*wind_detail;
-	normal_wave += vec2(cos(ripple),sin(ripple_b))*0.012*ripple_detail;
-	vec3 deep = vec3(0.027,0.085,0.13);
-	vec3 shelf = vec3(0.065,0.195,0.23);
-	vec3 shallows = vec3(0.18,0.285,0.26);
+	// Three oblique wave trains avoid the conspicuous diagonal crosshatch that
+	// read as a procedural overlay at 10,000 feet. Their amplitude is deliberately
+	// restrained: satellite-scale water should read primarily through color.
+	vec2 normal_wave = vec2(0.0);
+	if (wind_detail>0.0) {
+		float time = TIME*wave_speed;
+		float wind_a = dot(point,vec2(71.0,37.0))+wave_phase.x+sin(dot(point,vec2(8.3,-10.7))+wave_phase.z)*2.1-time*0.23;
+		float wind_b = dot(point,vec2(-43.0,79.0))+wave_phase.y+sin(dot(point,vec2(-6.1,4.7))+wave_phase.w)*1.7+time*0.16;
+		float wind_c = dot(point,vec2(29.0,-61.0))+wave_phase.z+sin(dot(point,vec2(3.9,7.1))+wave_phase.x)*1.3-time*0.11;
+		normal_wave = vec2(cos(wind_a)+0.55*sin(wind_c),sin(wind_b)-0.45*cos(wind_c))*0.013*wind_detail;
+		if (ripple_detail>0.0) {
+			float ripple = dot(point,vec2(780.0,390.0))+ripple_phase.x-time*0.55;
+			float ripple_b = dot(point,vec2(631.8,315.9))+ripple_phase.y-time*0.4455;
+			normal_wave += vec2(cos(ripple),sin(ripple_b))*0.006*ripple_detail;
+		}
+	}
+	vec3 deep = vec3(0.022,0.075,0.115);
+	vec3 shelf = vec3(0.052,0.165,0.19);
+	vec3 shallows = vec3(0.155,0.255,0.235);
 	vec3 water = mix(deep,shelf,exp(-depth/0.15)*surveyed_surface);
 	water = mix(water,shallows,exp(-depth/0.012)*surveyed_surface);
-	water *= 1.0+(sin(wind_a)*sin(wind_b))*0.012*wind_detail;
+	// Broad, static suspended-sediment variation gives shallow coasts the
+	// irregular mineral tint visible in aerial imagery without animating the bed.
+	float sediment = 0.0;
+	if (surveyed_surface>0.0 && depth<0.15) {
+		float sediment_field = 0.5+0.28*sin(dot(point,vec2(1.7,0.8))+wave_phase.z)
+			+0.22*sin(dot(point,vec2(-0.55,1.25))+wave_phase.w);
+		sediment = exp(-depth/0.022)*surveyed_surface*clamp(sediment_field,0.0,1.0);
+	}
+	water = mix(water,vec3(0.285,0.315,0.255),sediment*0.34);
 	// Only an actual shallow bed can produce a narrow wash. Filter it out before
 	// it becomes a flickering white coastline at distant map scales.
-	float wash = (1.0-smoothstep(0.0003,0.0015,depth))*surveyed_surface*ripple_detail;
-	water = mix(water,vec3(0.39,0.43,0.38),wash*0.24);
+	float wash = (1.0-smoothstep(0.00025,0.0012,depth))*surveyed_surface*ripple_detail;
+	water = mix(water,vec3(0.43,0.44,0.37),wash*0.18);
 	ALBEDO = water*visible;
 	EMISSION = vec3(0.006,0.012,0.014)*(1.0-visible);
 	NORMAL_MAP = vec3(normal_wave*visible,1.0)*0.5+0.5;
-	ROUGHNESS = 0.44;
-	SPECULAR = 0.18*visible;
+	ROUGHNESS = mix(0.48,0.38,wind_detail);
+	SPECULAR = 0.14*visible;
 }

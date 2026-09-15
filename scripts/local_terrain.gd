@@ -2508,7 +2508,12 @@ func _add_river_segment(surface: SurfaceTool, a: Vector3, b: Vector3, width: flo
 
 func _river_width_factor(point:Vector3)->float:
 	# World coordinates keep width stable when tessellation changes.
-	return clampf(0.90+sin(point.z*0.17+float(GameState.world_seed%211))*0.10+sin(point.z*1.7+point.x*0.3)*0.035,0.72,1.08)
+	return clampf(
+		0.91
+		+sin(point.z*0.17+float(GameState.world_seed%211))*0.10
+		+sin(point.z*0.71+point.x*0.11)*0.075
+		+sin(point.z*2.30+point.x*0.37)*0.065,
+		0.68,1.18)
 
 func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: float, color: Color, headwater:bool=false) -> void:
 	var taper:=preload("res://scripts/river_geometry.gd").headwater_factors(points) if headwater else PackedFloat32Array()
@@ -2659,6 +2664,7 @@ void fragment(){
 	float edge=min(UV.x,1.0-UV.x)*2.0;
 	float footprint=max(length(dFdx(world_position.xz)),length(dFdy(world_position.xz)));
 	float bank_detail=1.0-smoothstep(0.015,0.090,footprint);
+	float water_detail=1.0-smoothstep(0.006,0.045,footprint);
 	float bank_mass=river_noise(world_position.xz*5.5);
 	float bank_grain=river_noise(world_position.xz*110.0);
 	float shore_variation=((bank_mass-0.5)*0.38+(bank_grain-0.5)*0.055)*bank_detail;
@@ -2667,16 +2673,19 @@ void fragment(){
 	float inside_bend=max(0.0,(UV.x*2.0-1.0)*UV2.x);
 	float shoal_width=0.45+inside_bend*0.55;
 	float shallows=1.0-smoothstep(0.03,shoal_width,edge+shore_variation);
-	float ripple=(river_noise(world_position.xz*24.0)-0.5)*0.008;
-	vec3 water=mix(vec3(0.075,0.155,0.17),vec3(0.24,0.255,0.19),shallows*0.72)+vec3(ripple);
+	float broad_turbidity=river_noise(world_position.xz*0.72);
+	float ripple=(river_noise(world_position.xz*19.0)-0.5)*0.006*water_detail;
+	vec3 deep_water=mix(vec3(0.025,0.082,0.088),vec3(0.045,0.105,0.098),broad_turbidity);
+	vec3 silty_water=mix(vec3(0.19,0.175,0.105),vec3(0.125,0.155,0.105),broad_turbidity);
+	vec3 water=mix(deep_water,silty_water,shallows*0.58)+vec3(ripple);
 	float exposed_bar=inside_bend*(1.0-smoothstep(0.04,0.28,edge))*bank_detail;
 	water=mix(water,vec3(0.38,0.345,0.245)*(0.94+bank_grain*0.12),exposed_bar*0.85);
 	float bank_margin=smoothstep(0.30,0.50,edge)*(1.0-smoothstep(0.68,0.96,edge));
-	vec3 bank=mix(COLOR.rgb,vec3(0.30,0.285,0.205),bank_margin*(0.35+inside_bend*0.50)*bank_detail);
+	vec3 bank=mix(COLOR.rgb,vec3(0.285,0.255,0.17),bank_margin*(0.30+inside_bend*0.46)*bank_detail);
 	ALBEDO=mix(river_water?water:bank,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
 	// UV2.y feathers the spring/source cap; normal reaches remain opaque.
-	ALPHA=COLOR.a*discovered*coverage*UV2.y;
-	ROUGHNESS=0.72;
+	float riparian_patch=mix(1.0,0.38+river_noise(world_position.xz*0.42)*0.62,bank_detail);
+	ALPHA=COLOR.a*discovered*coverage*UV2.y*(river_water?1.0:riparian_patch);
 }
 """
 		var material:=ShaderMaterial.new()
