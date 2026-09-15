@@ -5,6 +5,10 @@ const PATCH_RADIUS_KM:=.235
 const PATCH_INNER_KM:=.13
 const CROWN_FULL_FOOTPRINT_KM:=.26
 const CROWN_HIDDEN_FOOTPRINT_KM:=.78
+# Keep eight material batches, but choose the atlas cells that read as healthy
+# aerial crowns. The omitted cells are pale or nearly leafless specimens whose
+# exposed branches became dark rock-like marks over a continuous woodland.
+const CROWN_ATLAS_CELLS:=[0,1,2,4,6,7,11,14]
 
 static func detail_strength(vertical_span:float,aspect:float)->float:
 	# Hand physical crowns back to continuous woodland albedo before the finite

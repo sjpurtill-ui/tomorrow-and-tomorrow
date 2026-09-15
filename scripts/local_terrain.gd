@@ -3922,7 +3922,7 @@ func _create_close_vegetation_multimesh(node_name: String, transforms: Array[Tra
 				if LandscapeCover.crown_variant(transforms[index].origin)!=variant: continue
 				variant_transforms.append(transforms[index])
 				variant_colors.append(colors[index])
-			_spawn_vegetation_multimesh("%s_%d" % [node_name,variant],mesh,variant_transforms,variant_colors,0,variant)
+			_spawn_vegetation_multimesh("%s_%d" % [node_name,variant],mesh,variant_transforms,variant_colors,0,LandscapeCover.CROWN_ATLAS_CELLS[variant])
 		return
 	_spawn_vegetation_multimesh(node_name,mesh,transforms,colors,1,-1)
 
@@ -4007,13 +4007,18 @@ void fragment() {
 			vec4 canopy=texture(canopy_atlas,atlas_uv);
 			// Preserve shaded crown interiors without letting the darkest source
 			// variants become black map dots against the continuous forest albedo.
-			float canopy_luma=max(dot(canopy.rgb,vec3(0.299,0.587,0.114)),0.16);
+			float source_luma=dot(canopy.rgb,vec3(0.299,0.587,0.114));
+			// Lift the atlas' crushed photographic blacks into the surrounding
+			// woodland range. Preserve source hue separately, so this is exposure
+			// recovery rather than a flat green tint painted over every crown.
+			float canopy_luma=0.18+source_luma*0.70;
 			float tint_luma=max(dot(COLOR.rgb,vec3(0.299,0.587,0.114)),0.12);
 			// The source atlas has valid alpha but some saturated RGB at crown
 			// margins. Suppress that chroma as coverage falls so mipmaps cannot
 			// create green/yellow halos around otherwise natural foliage.
 			float edge_colour=smoothstep(0.08,0.60,canopy.a);
-			vec3 restrained_canopy=mix(vec3(canopy_luma),canopy.rgb,mix(0.08,0.44,edge_colour))*vec3(0.72,0.77,0.66);
+			vec3 source_chroma=clamp(canopy.rgb/max(source_luma,0.035),vec3(0.45),vec3(1.75));
+			vec3 restrained_canopy=canopy_luma*mix(vec3(1.0),source_chroma,mix(0.08,0.38,edge_colour))*vec3(0.78,0.84,0.72);
 			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.16);
 			base*=0.82+crown*0.16;
 			// Keep texture coverage separate from the distance fade. Scissoring
