@@ -2218,7 +2218,7 @@ void fragment() {
 	float hill_light = dot(normalize(world_normal), normalize(vec3(-0.46, 0.78, -0.42)));
 	vec3 horizontal_sun = normalize(vec3(-0.46, 0.0, -0.42));
 	float directional_slope = dot(normalize(world_normal), horizontal_sun);
-	float hillshade = clamp(1.0 + directional_slope * 2.2 - slope * 0.12, 0.78, 1.16);
+	float hillshade = clamp(1.0 + directional_slope * 3.20 - slope * 0.16, 0.66, 1.24);
 	// The scene sun already shades resolvable terrain. Applying this cartographic
 	// hillshade at the same time doubled broad shadows into soft dark blobs at the
 	// 50,000-foot tier. Fade the map-only cue in once pixels cover country-scale
@@ -2228,7 +2228,15 @@ void fragment() {
 	// remains exactly absent at settlement scale and reaches the existing full
 	// strength only once individual landforms are genuinely unresolved.
 	float map_relief = smoothstep(0.035,0.28,pixel_world);
-	earth *= mix(1.0, hillshade, map_relief * 0.82);
+	earth *= mix(1.0, hillshade, map_relief * 0.90);
+	// Actual elevation remains meaningful after fine texture has filtered away.
+	// A broad, non-banded upland exposure separates low basins, plateaus and the
+	// alpine shoulder in regional/continental imagery. It is exactly absent from
+	// close inspection and never changes the terrain height or simulated biome.
+	float mapped_upland=smoothstep(0.65,5.60,world_position.y)*map_relief;
+	float mapped_alpine=smoothstep(3.20,8.20,world_position.y)*map_relief;
+	vec3 upland_surface=mix(earth*vec3(1.10,1.03,0.84),vec3(0.42,0.41,0.38),mapped_alpine);
+	earth=mix(earth,upland_surface,mapped_upland*0.36);
 	float ridge_glint = smoothstep(0.12, 0.62, slope) * smoothstep(0.25, 0.82, hill_light) * map_relief;
 	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.20);
 	// Close aerial imagery needs a different exposure than the shaded regional
