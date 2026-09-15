@@ -27,6 +27,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"production_board":
+				var board:=preload("res://scripts/hud/production_board.gd").new()
+				section.add_child(board);board.setup(block)
 			"recruitment_brief":
 				var brief:=preload("res://scripts/hud/recruitment_brief.gd").new()
 				section.add_child(brief);brief.setup(block)
@@ -321,11 +324,19 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 			Live.attach(value_label,"text",item.get("live_value"))
 		var action:Variant=item.get("on_click")
 		if action is Callable:
+			# The complete row is one hit target. Nested containers must not swallow
+			# clicks on the office name or APPOINT value before they reach the row.
+			for child:Node in row.find_children("*","Control",true,false):
+				(child as Control).mouse_filter=Control.MOUSE_FILTER_IGNORE
 			row.mouse_filter=Control.MOUSE_FILTER_STOP
+			row.focus_mode=Control.FOCUS_ALL
+			row.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 			row.gui_input.connect(func(event:InputEvent)->void:
 				var mouse:=event as InputEventMouseButton
 				if mouse and mouse.pressed and mouse.button_index==MOUSE_BUTTON_LEFT:
-					(action as Callable).call())
+					row.accept_event();(action as Callable).call()
+				elif event.is_action_pressed("ui_accept"):
+					row.accept_event();(action as Callable).call())
 
 
 static func _render_caps(parent:VBoxContainer,block:Dictionary)->void:

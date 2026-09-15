@@ -11,24 +11,32 @@ var feedback: Label
 var pause_button: Button
 var remaining:=0.0
 var signature:=""
+var board:VBoxContainer
+var manual:VBoxContainer
+var board_state:Dictionary={"mode":0}
 
 func _ready() -> void:
 	add_theme_constant_override("separation",6)
 	summary=Label.new();summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(summary)
-	labor=HSlider.new();labor.min_value=0;labor.max_value=100;labor.step=5;labor.tooltip_text="Share of the existing Crafting workforce assigned to military production. Idle lines return their capacity to civilian work."
-	add_child(labor);labor.value_changed.connect(func(value:float):WorldSimulation.military.set_production_labor_share(value/100);refresh())
-	line_choice=OptionButton.new();line_choice.fit_to_longest_item=false;add_child(line_choice);line_choice.item_selected.connect(func(_index:int):refresh(true))
-	var controls:=HBoxContainer.new();add_child(controls)
+	board=preload("res://scripts/hud/production_board.gd").new();add_child(board)
+	var management:=HBoxContainer.new();add_child(management)
+	button(management,"Delegate lines",func():report(WorldSimulation.military.workshop.delegate_lines()))
+	button(management,"Manual controls",func():manual.visible=not manual.visible)
+	manual=VBoxContainer.new();manual.visible=false;add_child(manual)
+	labor=HSlider.new();labor.min_value=0;labor.max_value=100;labor.step=5;labor.tooltip_text="Shared civilian and military workshops use existing craftspeople. Idle lines release capacity."
+	manual.add_child(labor);labor.value_changed.connect(func(value:float):WorldSimulation.military.set_production_labor_share(value/100);refresh())
+	line_choice=OptionButton.new();line_choice.fit_to_longest_item=false;manual.add_child(line_choice);line_choice.item_selected.connect(func(_index:int):refresh(true))
+	var controls:=HBoxContainer.new();manual.add_child(controls)
 	var caption:=Label.new();caption.text="Stock target (0 = no limit)";controls.add_child(caption)
 	target=SpinBox.new();target.min_value=0;target.max_value=1000000000;target.step=1;target.value=5;target.custom_minimum_size.x=110;target.tooltip_text="0 runs continuously. A positive target pauses work when that many usable items are in stock, and resumes after they are issued.";controls.add_child(target)
 	caption=Label.new();caption.text="Priority";controls.add_child(caption)
 	priority=SpinBox.new();priority.min_value=.05;priority.max_value=4;priority.step=.05;priority.value=1;priority.custom_minimum_size.x=80;controls.add_child(priority)
 	button(controls,"Apply",apply_settings)
-	var actions:=HBoxContainer.new();add_child(actions)
+	var actions:=HBoxContainer.new();manual.add_child(actions)
 	pause_button=button(actions,"Pause",toggle_pause)
 	button(actions,"Retool to selected item",retool)
 	button(actions,"Close line",close_line)
-	details=Label.new();details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(details)
+	details=Label.new();details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;manual.add_child(details)
 	feedback=Label.new();feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(feedback)
 	refresh(true)
 
@@ -73,10 +81,12 @@ func _process(delta:float)->void:
 func refresh(editors:bool=false)->void:
 	if line_choice==null:return
 	var data:=WorldSimulation.military.production_lines_snapshot()
-	var workforce:Dictionary=data.workforce
-	var actual_share:=WorldSimulation.military.workshop_utilization()
-	var survival:=preload("res://scripts/civilization_indicators.gd").health()
-	summary.text="Crafting: %.1f effective workers · %.0f%% assigned to military work (limit %.0f%%)\nLife expectancy %.1f years · infant mortality %.0f‰ · labor %.0f%% · workplaces %.0f%% · logistics %.0f%%" % [float(workforce.workers),actual_share*100,float(data.labor_share)*100,float(survival.life_expectancy),float(survival.infant_mortality_per_1000),float(workforce.labor_efficiency)*100,float(workforce.workplace_condition)*100,float(workforce.logistics)*100]
+	summary.text="SHARED WORKSHOPS · %d / %d lines\n%s\n%s" % [data.lines.size(),int(data.capacity),WorldSimulation.military.workshop.owner(),String(WorldSimulation.military.workshop.data.status)]
+	if not board.get_global_rect().has_point(board.get_global_mouse_position()) or editors:
+		board.setup({"lines":data.lines,"receipts":WorldSimulation.military.workshop.data.receipts,"day":int(WorldSimulation.state.elapsed_days),"view_state":board_state,"on_open":func(id:int):
+			for index:int in line_choice.item_count:
+				if int(line_choice.get_item_metadata(index))==id:line_choice.select(index)
+			manual.show();refresh(true)})
 	labor.set_value_no_signal(float(data.labor_share)*100)
 	var ids:Array=[]
 	for line in data.lines:ids.append([line.id,line.item])

@@ -59,12 +59,26 @@ func appoint(advisor_name: String, office: String) -> bool:
 		return false
 	var person_id:=int(advisor.get("person_id",0))
 	if person_id>0:
-		var appointed:Dictionary=WorldSimulation.government.mark_central_appointment(person_id,office)
-		if appointed.is_empty(): return false
-		advisor=appointed
+		return bool(appoint_person(person_id,office).get("ok",false))
 	WorldSimulation.state.leadership_positions[office] = advisor
 	_record_memory(advisor_name, "The Sovereign appointed this person to the %s office." % office, 0.85, "duty")
 	return true
+
+func appoint_person(person_id:int,office:String)->Dictionary:
+	# The roster is a conversation projection, not the authority for eligibility.
+	# Resolve the living person's stable id again when the player presses Appoint.
+	var government:=WorldSimulation.government
+	government.initialize()
+	var definition:Dictionary=government.office_definition(office)
+	if int(definition.get("unlock_stage",99))>government.government_stage:
+		return {"ok":false,"error":"This office is not available in the current government. The founding steward carries its duties until the government develops."}
+	var person:Dictionary=government.person_snapshot(person_id)
+	if person.is_empty() or String(person.get("status",""))!="active":
+		return {"ok":false,"error":"This person is no longer available. Review the current candidates."}
+	var appointed:Dictionary=government.mark_central_appointment(person_id,office)
+	if appointed.is_empty():return {"ok":false,"error":"The appointment could not be made. Review the current office and candidates."}
+	_record_memory(String(appointed.name),"The Sovereign appointed this person to the %s office." % office,.85,"duty")
+	return {"ok":true,"person":appointed,"message":"%s appointed as %s." % [String(appointed.name),String(definition.title)]}
 
 func advisor_by_name(advisor_name: String) -> Dictionary:
 	for advisor in WorldSimulation.state.advisor_roster:
