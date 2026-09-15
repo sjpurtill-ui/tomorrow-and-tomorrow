@@ -1,3 +1,21 @@
+## September 15 — shared workshops and appointments: INTEGRATED
+
+Worker `2a4de92` is integrated at `148bd02` without conflicts. Real government
+officeholders schedule routine civilian supplies and requested army equipment;
+manual lines are protected until explicitly delegated. Compact product rows show
+work, present stock, finished-output receipts and blockers. Workshops are reachable
+from Economy → Materials and Military Supply; optional manual controls are tucked
+away. Appointment controls resolve living person IDs, report failures immediately,
+and explain unavailable offices rather than silently claiming success.
+
+131/131 cases pass again on canonical main, with no errors, failures or orphans.
+The guarded native production/appointment probe passes at 540/400 logical pixels,
+including long text and actual mouse clicks. See `PRODUCTION_APPOINTMENTS_HANDOFF.md`
+for exact coverage, receipt bounds and scheduling limits. Optional save fields are
+backward-compatible; opening stock is not invented as historical production.
+The player PID 31435 remains on `2edae731d433`; it was not restarted. Build-only
+packaging follows this record. Terrain remains stopped and unchanged.
+
 ## September 15 — physical mountain detail: INTEGRATED; terrain work stopped
 
 Worker `4946779` is integrated at `e9026dc`, without conflicts. A bounded seeded

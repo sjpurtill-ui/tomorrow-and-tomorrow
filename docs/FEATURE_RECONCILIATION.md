@@ -1,3 +1,20 @@
+## September 15 — delegated shared production and working appointments
+
+Source `2a4de92` integrated as `148bd02`. Workshops now expose compact visual rows,
+work progress, present stock, separate completed-output receipts and attention
+filtering. Steward/quartermaster scheduling uses existing production authorities
+for civilian needs and explicitly requested army equipment, with bounded targets,
+manual ownership protection and no discarded work. The legacy supply view shares
+the board, and Economy → Materials links to it. Appointment input, stable person
+resolution, immediate feedback and locked-office explanations are corrected.
+
+131/131 cases pass on canonical main; guarded native checks pass at normal/narrow
+widths and exercise actual appointment and production clicks. Receipts persist in
+the existing campaign save and begin honestly without backfilled output. Details
+and limits are in `PRODUCTION_APPOINTMENTS_HANDOFF.md`. No terrain changed. The
+live player remains `2edae731d433` (PID 31435), pending the user's normal relaunch;
+the new source is prepared as a separate build-only release, not hot-loaded.
+
 ## September 15 — mountain ridges at playable distances
 
 Integrated worker `4946779` at runtime `e9026dc`. New deterministic physical
