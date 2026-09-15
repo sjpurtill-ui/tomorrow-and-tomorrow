@@ -16,6 +16,11 @@ func test_ocean_does_not_inundate_positive_elevation_coastal_ground()->void:
 	assert_float(terrain.ocean_surface.position.y).is_equal(terrain.SEA_LEVEL)
 	assert_float(terrain.ocean_surface.position.y).is_less(.005)
 	assert_float(terrain.coastal_water_material.get_shader_parameter("sea_level")).is_equal(terrain.ocean_surface.position.y)
+func test_distant_ocean_shader_has_static_geographic_basin_structure()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/coastal_water.gdshader")
+	assert_str(source).contains("float basin_field=clamp")
+	assert_str(source).contains("world_position.xz")
+	assert_str(source).contains("polar_water*0.16")
 func test_completed_and_cached_meshes_rebind_the_same_visible_bed()->void:
 	var terrain:=fixture();var first:=patch(Vector2.ZERO,5);var second:=patch(Vector2(2,1),7)
 	for completed:Dictionary in [first,second,first]:
