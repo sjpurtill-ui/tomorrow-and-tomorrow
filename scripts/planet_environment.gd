@@ -11,6 +11,7 @@ const SEA_LEVEL:=0.0
 var _configured_seed:=2147483647
 var _continent:=FastNoiseLite.new()
 var _mountains:=FastNoiseLite.new()
+var _mountain_relief:=preload("res://scripts/terrain_mountain_relief.gd").new()
 var _terrain:=FastNoiseLite.new()
 var _detail:=FastNoiseLite.new()
 var _moisture:=FastNoiseLite.new()
@@ -34,6 +35,7 @@ func _ensure_configured()->void:
 	var seed_value:=WorldSimulation.state.world_seed
 	if seed_value==_configured_seed: return
 	_configured_seed=seed_value
+	_mountain_relief.configure(seed_value)
 	_viable_land_cache.clear()
 	_profile_cache.clear()
 	_configure_noise(_continent,seed_value,0.000105,5,FastNoiseLite.FRACTAL_FBM)
@@ -74,7 +76,8 @@ func world_height_at(position:Vector2)->float:
 	var ridge:=1.0-absf(_mountains.get_noise_2d(x,z))
 	ridge=pow(clampf((ridge-0.34)/0.66,0.0,1.0),2.35)
 	var belt:=clampf((_mountains.get_noise_2d(x*0.41+9200.0,z*0.41-3800.0)+0.18)*1.55,0.0,1.0)
-	return 0.06+land_signal*1.48+rolling*1.42+local_detail*0.56+pow(hill_signal,2.0)*2.05+ridge*belt*8.4
+	var height:=0.06+land_signal*1.48+rolling*1.42+local_detail*0.56+pow(hill_signal,2.0)*2.05+ridge*belt*8.4
+	return height+_mountain_relief.height_at(x,z,ridge*belt*8.4)*smoothstep(.2,.8,height)
 
 
 func is_land(position:Vector2)->bool:

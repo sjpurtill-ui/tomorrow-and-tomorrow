@@ -87,6 +87,7 @@ var terrain_noise := FastNoiseLite.new()
 var detail_noise := FastNoiseLite.new()
 var continent_noise := FastNoiseLite.new()
 var mountain_noise := FastNoiseLite.new()
+var mountain_relief := preload("res://scripts/terrain_mountain_relief.gd").new()
 var moisture_noise := FastNoiseLite.new()
 var camera: Camera3D
 var camera_target := Vector3.ZERO
@@ -1391,6 +1392,7 @@ func _configure_shape() -> void:
 
 func _configure_noise() -> void:
 	var local_seed: int = GameState.world_seed ^ ((GameState.active_province + 1) * 104729)
+	mountain_relief.configure(GameState.world_seed)
 	if SEAMLESS_WORLD:
 		continent_noise.seed = GameState.world_seed
 		continent_noise.frequency = 0.000105
@@ -1510,6 +1512,7 @@ func _world_height_at(x: float,z: float) -> float:
 	var range_band:=exp(-pow((cradle_x-55.0)/25.0,2.0))*exp(-pow(cradle_z/510.0,4.0))
 	var range_teeth:=pow(clampf((1.0-absf(detail_noise.get_noise_2d(x*0.72+330.0,z*0.72-710.0))-0.20)/0.80,0.0,1.0),1.55)
 	height+=range_band*(0.65+range_teeth*6.8)
+	height+=mountain_relief.height_at(x,z,ridge*belt*8.4+range_band*(0.65+range_teeth*6.8))*smoothstep(.2,.8,height)
 	var local_drainage_distance:=_local_drainage_distance_at(x,z)
 	if local_drainage_distance<0.11:
 		var swale:=pow(1.0-local_drainage_distance/0.11,1.72)
