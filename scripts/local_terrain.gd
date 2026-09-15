@@ -2127,6 +2127,13 @@ void fragment() {
 	// Zero density remains zero, while dense forest retains connected mass.
 	float stand_pattern=smoothstep(0.31,0.69,regional*0.62+soil_patch*0.38);
 	forest_mask*=mix(1.0,mix(0.58,1.22,stand_pattern),country_detail);
+	// Satellite-scale cover has recognizable stand boundaries rather than a
+	// kilometre-wide translucent green wash. Reconstruct a firmer visual edge
+	// from the same authoritative continuous density, fading the treatment back
+	// out where close photography and physical crowns resolve individual cover.
+	float forest_stand_edge=smoothstep(0.18,0.72,forest_mask);
+	float forest_edge_weight=country_detail*(1.0-close_detail*0.68)*0.56;
+	forest_mask=mix(forest_mask,forest_stand_edge,forest_edge_weight);
 	float retained_woodland=woodland_retained(world_position.xz);
 	forest_mask*=retained_woodland;
 	float crown_shade=0.5;

@@ -1,5 +1,11 @@
 extends GdUnitTestSuite
 
+func test_satellite_woodland_has_firm_visual_edges_without_changing_density_authority()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	assert_str(source).contains("float forest_stand_edge=smoothstep(0.18,0.72,forest_mask)")
+	assert_str(source).contains("country_detail*(1.0-close_detail*0.68)*0.56")
+	assert_bool(source.find("forest_mask=mix(forest_mask,forest_stand_edge,forest_edge_weight)")<source.find("float retained_woodland=woodland_retained")).is_true()
+
 func test_regional_orthophoto_retains_resolved_tone_and_restrained_chroma()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
 	assert_str(source).contains("regional_photo_detail*0.96")
