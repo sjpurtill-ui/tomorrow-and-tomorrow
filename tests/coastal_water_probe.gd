@@ -22,6 +22,12 @@ func sample(view:SubViewport,camera:Camera3D,point:Vector3)->Color:
 	var pixel:=Vector2i(camera.unproject_position(point));var image:=view.get_texture().get_image()
 	return image.get_pixel(clampi(pixel.x,0,image.get_width()-1),clampi(pixel.y,0,image.get_height()-1))
 func difference(a:Color,b:Color)->float:return Vector3(a.r-b.r,a.g-b.g,a.b-b.b).length()
+func luminance_range(image:Image)->float:
+	var low:=1.0;var high:=0.0
+	for y in range(40,image.get_height()-40,40):
+		for x in range(40,image.get_width()-40,40):
+			var value:=image.get_pixel(x,y).get_luminance();low=minf(low,value);high=maxf(high,value)
+	return high-low
 func run()->void:
 	for node:Node in [GameState,MilitaryCampaign,CivilizationSystem]:node.set_process(false)
 	GameState.reset_for_new_world(424242)
@@ -96,6 +102,7 @@ func run()->void:
 		check(corner.b>corner.g,"water fills view at "+scale.name)
 		if scale.width_km>=150:check(first.get_data()==second.get_data(),"no unresolved animated detail at "+scale.name)
 		if scale.width_km>=3000:
+			check(luminance_range(second)>.008,"continental ocean retains broad static basin structure")
 			var real_bed:=sample(view,camera,Vector3.ZERO);material.set_shader_parameter("terrain_heights",texture(-.002,33));await settle()
 			check(difference(real_bed,sample(view,camera,Vector3.ZERO))<.005,"continental color cannot reveal the moving regional depth patch")
 	material.set_shader_parameter("discovery_mask",fog(Color.BLACK));material.set_shader_parameter("fog_current_origin",Vector2(100000,100000));material.set_shader_parameter("terrain_heights",texture(-.8,33));camera.size=2.84

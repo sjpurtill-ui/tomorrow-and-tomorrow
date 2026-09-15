@@ -83,7 +83,16 @@ void fragment() {
 	// Earth-observation water is primarily a depth image: open ocean remains
 	// blue-black, the continental shelf shifts blue-green, and only optically
 	// shallow water takes on the mineral colour of its bed.
-	vec3 deep = vec3(0.024,0.083,0.132);
+	// The unstreamed ocean still needs geographic scale. Two very broad, static
+	// basin terms keep continent views from becoming a single flat paint fill;
+	// they are stable in world space, resolve to an almost constant local tint at
+	// coastal zoom, and add no texture bandwidth or animation cost.
+	float basin_field=clamp(0.50
+		+0.28*sin(dot(world_position.xz,vec2(0.0011,0.0003))+0.7)
+		+0.22*sin(dot(world_position.xz,vec2(-0.0004,0.0017))-1.1),0.0,1.0);
+	float polar_water=clamp(abs(world_position.z)/(fog_world_size.y*0.5),0.0,1.0);
+	vec3 deep = mix(vec3(0.018,0.061,0.112),vec3(0.035,0.105,0.158),basin_field);
+	deep=mix(deep,vec3(0.030,0.083,0.125),polar_water*0.16);
 	vec3 shelf = vec3(0.045,0.162,0.215);
 	vec3 shallows = vec3(0.135,0.285,0.265);
 	vec3 water = mix(deep,shelf,exp(-depth/0.19)*surveyed_surface);
