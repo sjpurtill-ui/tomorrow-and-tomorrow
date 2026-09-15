@@ -1,3 +1,32 @@
+## September 15 — renewable resource fronts and truthful material access: INTEGRATED
+
+Canonical Mac integrator source `71b47e3` is integrated on main from `85cd0bc`.
+Timber, loose stone, and plant-fiber gathering now advance to a bounded nearby
+working front after the current physical patch is exhausted. New fronts are
+selected from the actual terrain provider within 3–9 km according to available
+logistics; an exhausted patch is retained as history and is never refilled or
+silently relabelled. At most 24 fronts per surface resource can be recorded.
+
+Medicinal plants now enter the same finite extraction, hauling, stock, and dry-
+storage flow as other gathered material. Surveyed resources with incomplete
+processing practice name that practice as their access blocker. Depleted sources
+no longer count as accessible, and the materials views distinguish workable,
+exhausted, unstaffed, blocked, at-source, in-transit, and delivered stock. Storage
+details show used/capacity by physical store type and identify which material is
+being lost, rather than exposing only an unexplained aggregate loss.
+
+Surface-stone markers were corrected from 35–110 metre radius smooth spheres to
+seeded 1.5–4.5 metre radius flattened rocks. The geometry size is regression-
+tested; no native screenshot audit is claimed.
+
+All 119 selected resource, atlas, settlement, research-material, supply-planner,
+and specimen cases pass with zero errors, failures, skips, or orphans. A read-only
+load of the existing quicksave successfully advanced its exhausted timber, stone,
+and fiber ledgers from 59 to 62 deposits in a deterministic terrain-provider
+smoke test; medicinal extraction and named Clay/Fiber storage losses also ran.
+The quicksave was not overwritten. Fields and metrics are additive, so older saves
+remain compatible. No player process was running when integration completed.
+
 ## September 15 — comparable city metrics and continuous reconnaissance: INTEGRATED
 
 Canonical Mac integrator source `59c34a7` is integrated on main from `b528391`.

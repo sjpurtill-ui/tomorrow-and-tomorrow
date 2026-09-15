@@ -1,3 +1,20 @@
+## September 15 — resource-access correction
+
+Integrated `71b47e3` from canonical base `85cd0bc`. Exhausted timber, loose-stone,
+and plant-fiber catchments can now move to bounded working fronts chosen from real
+nearby terrain instead of remaining forever on one depleted source. Medicinal
+plants participate in finite extraction and hauling. Processing-practice blockers,
+depletion, source staffing, transport, typed storage occupancy, and named daily
+losses are presented directly in the material UI. Depleted sites are not counted
+as accessible. The smooth 70–220 metre stone blobs are replaced by meter-scale,
+flattened surface rocks.
+
+Validation is 119/119 selected cases plus a read-only existing-save smoke test.
+The smoke migrated three exhausted landscape ledgers without replacing their
+history or writing the save. No save-schema requirement was added and no running
+player/editor was interrupted. Native visual inspection remains outstanding; the
+rock-size regression and all UI data/status logic are covered headlessly.
+
 ## September 15 — city metrics, envoy drafting, and repeat reconnaissance
 
 Source `59c34a7`, base `b528391`, integrated by the canonical Mac integrator.
