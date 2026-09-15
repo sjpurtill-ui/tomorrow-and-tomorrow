@@ -1736,3 +1736,25 @@ Integrated worker `71ce163` from `/Users/seanpurtill/Documents/Codex/tt-google-e
 Streaming reuses the colour pass's exact climate sample for physical surface fields. Patches beyond 64 km use a 385-square final grid except for literal whole-planet coverage, while the 50,000-foot tier retains 513-square landform density. In the isolated real renderer, regional and continental ready time changed from 12.654/9.931 seconds to 6.847/5.802 seconds in the final run. A preceding run measured 6.234/5.326 seconds; timings remain host/load sensitive. Final p95 frames were 20.407/20.436 ms versus 21.285/20.560 ms baseline. The 385 regional mesh still reduced sampled landform RMSE from 0.07786 km at the old 161 grid to 0.02079 km and reduced 251 sampled coastal sign errors from 84 to 47.
 
 All 32 focused terrain, surface-field, landscape-cover, season, close-mesh and four-distance tests pass with zero errors, failures, skips or orphans. `terrain_lod_probe` passes coverage, cancellation, hidden-geography equality and finite-world-edge checks; its final captures at all four distances were inspected. Save schema, world geography, biome/resource authority and player sessions are unchanged. Existing live player processes and the editor were preserved. This is one grounded material/performance step, not a claim that the landscape has reached Google Earth fidelity; river geometry, atmosphere and civilization-scale surface evidence remain next visual priorities.
+## September 15 — clearer command workflow and compact material units: INTEGRATED
+
+Canonical commit `50d697c` replaces the Army/Fleet/Air hierarchy's large empty
+order surface with a compact three-step objective workflow: choose a command,
+set an objective, and mark its area. Current orders and draft objectives are
+visually distinct, the command tree uses explicit objective states, and the
+primary issue action remains reachable at 1024×640. Commanders still choose
+routes, deployment and tactics; no direct-cohort control or simulation behavior
+changed.
+
+The material atlas uses denser cards and up to six columns on wide canvases.
+Every visible stock now names its actual gameplay unit: freshwater uses daily
+drinking portions (one person-day), while other recipe-ledger inventories use
+bulk units. Delivery is expressed in the matching unit per day, without claiming
+that abstract balanced inventory values are tonnes or another physical SI mass.
+
+All 73 focused hierarchy, service-map, dismissal and atlas-data cases pass with
+zero errors, failures, skips or orphans. Isolated renders cover the command panel
+and material atlas at 1280×900 and 800×600. This is presentation/data-label work
+with no save-schema change. No player or editor session was restarted; an
+already-running build does not contain the change until its next normal rebuild
+and launch.
