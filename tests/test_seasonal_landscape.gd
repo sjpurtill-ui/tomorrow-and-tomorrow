@@ -96,3 +96,13 @@ func test_base_mesh_and_live_streaming_paths_include_seasonal_channel()->void:
 		assert_float(terrain._vegetation_climate(Vector3(point.x,0,point.y)).b).is_equal(0.0)
 		found_water=true;break
 	assert_bool(found_water).is_true()
+
+func test_visual_cryosphere_is_climate_gated_and_uses_existing_structure()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/seasonal_surface.gdshaderinc")
+	assert_str(source).contains("float cold=1.0-smoothstep(-1.5,3.5,temperature)")
+	assert_str(source).contains("float snow_supply=smoothstep(0.045,0.38,rain)")
+	assert_str(source).contains("float hard_frost=(1.0-smoothstep(-16.0,-8.0,temperature))")
+	assert_str(source).contains("float drift=smoothstep(0.34,0.72,terrain_pattern)")
+	var terrain_source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	assert_str(terrain_source).contains("regional*0.62+soil_patch*0.38")
+	assert_str(terrain_source).contains("seasonal_terrain(earth,UV.y,UV.x-1.0")
