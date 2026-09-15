@@ -69,6 +69,7 @@ func run()->void:
 	for depth:float in [.003,.05,.8]:
 		material.set_shader_parameter("terrain_heights",texture(-depth));await settle();colors.append(sample(view,camera,Vector3.ZERO))
 	check(colors[0].get_luminance()>colors[1].get_luminance()+.02 and colors[1].get_luminance()>colors[2].get_luminance()+.02,"real depth distinguishes shallows, shelf and deep water")
+	check(colors[0].g>colors[0].b and colors[2].b>colors[2].g,"bed-tinted shallows transition to blue open water")
 	# Shader interpolation must agree with rays against both triangle diagonals.
 	var varied:=BUILDER.new(3,2.0,Vector2.ZERO,func(x:float,z:float)->float:return -.04-(x*x+z*z+x*z)*.04,func(_x:float,_z:float,_h:float)->Color:return Color.WHITE)
 	while not varied.advance(100000):pass

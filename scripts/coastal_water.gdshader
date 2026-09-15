@@ -80,24 +80,27 @@ void fragment() {
 			normal_wave += vec2(cos(ripple),sin(ripple_b))*0.006*ripple_detail;
 		}
 	}
-	vec3 deep = vec3(0.022,0.075,0.115);
-	vec3 shelf = vec3(0.052,0.165,0.19);
-	vec3 shallows = vec3(0.155,0.255,0.235);
-	vec3 water = mix(deep,shelf,exp(-depth/0.15)*surveyed_surface);
-	water = mix(water,shallows,exp(-depth/0.012)*surveyed_surface);
+	// Earth-observation water is primarily a depth image: open ocean remains
+	// blue-black, the continental shelf shifts blue-green, and only optically
+	// shallow water takes on the mineral colour of its bed.
+	vec3 deep = vec3(0.024,0.083,0.132);
+	vec3 shelf = vec3(0.045,0.162,0.215);
+	vec3 shallows = vec3(0.135,0.285,0.265);
+	vec3 water = mix(deep,shelf,exp(-depth/0.19)*surveyed_surface);
+	water = mix(water,shallows,exp(-depth/0.018)*surveyed_surface);
 	// Broad, static suspended-sediment variation gives shallow coasts the
 	// irregular mineral tint visible in aerial imagery without animating the bed.
 	float sediment = 0.0;
 	if (surveyed_surface>0.0 && depth<0.15) {
 		float sediment_field = 0.5+0.28*sin(dot(point,vec2(1.7,0.8))+wave_phase.z)
 			+0.22*sin(dot(point,vec2(-0.55,1.25))+wave_phase.w);
-		sediment = exp(-depth/0.022)*surveyed_surface*clamp(sediment_field,0.0,1.0);
+		sediment = exp(-depth/0.034)*surveyed_surface*clamp(sediment_field,0.0,1.0);
 	}
-	water = mix(water,vec3(0.285,0.315,0.255),sediment*0.34);
+	water = mix(water,vec3(0.315,0.335,0.245),sediment*0.42);
 	// Only an actual shallow bed can produce a narrow wash. Filter it out before
 	// it becomes a flickering white coastline at distant map scales.
 	float wash = (1.0-smoothstep(0.00025,0.0012,depth))*surveyed_surface*ripple_detail;
-	water = mix(water,vec3(0.43,0.44,0.37),wash*0.18);
+	water = mix(water,vec3(0.49,0.50,0.41),wash*0.20);
 	float altitude_haze = smoothstep(0.65,5.0,pixel_world);
 	float view_slant = length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze = smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
