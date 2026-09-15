@@ -51,7 +51,9 @@ func _ready()->void:
 	surface.resized.connect(layout);layout()
 func layout()->void:
 	var extent:=get_viewport().get_visible_rect().size
-	panel.size=Vector2(minf(740,extent.x-48),minf(730,extent.y-48));panel.position=(extent-panel.size)*.5
+	# The discovery art is square and reads better in a narrower announcement
+	# column. Keep the available height for the explanation and effect cards.
+	panel.size=Vector2(minf(600,extent.x-48),minf(730,extent.y-48));panel.position=(extent-panel.size)*.5
 	if is_instance_valid(hero):hero.custom_minimum_size.y=210 if extent.y>=750 else 142
 func enqueue(events:Array[Dictionary])->void:
 	for event:Dictionary in events:
