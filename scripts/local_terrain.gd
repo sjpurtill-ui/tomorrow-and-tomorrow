@@ -2011,9 +2011,18 @@ void fragment() {
 	if (regional_photo_detail>0.0) {
 		vec3 regional_photo=mix(texture(regional_ground_albedo,regional_ground_uv).rgb,
 			texture(regional_ground_albedo,regional_ground_uv_rotated).rgb,0.18);
-		float regional_tone=clamp(dot(regional_photo,vec3(0.28,0.57,0.15))/0.49,0.68,1.30);
-		ground_map*=mix(1.0,regional_tone,regional_photo_detail*0.72);
-		forest_map*=mix(1.0,regional_tone,regional_photo_detail*0.52);
+		float regional_luma=dot(regional_photo,vec3(0.28,0.57,0.15));
+		// Preserve the orthophoto's resolved escarpments, drainage fans and cover
+		// boundaries instead of reducing them to a faint grey wash. This is an
+		// albedo cue only; the actual normal and height still come from this world.
+		float regional_tone=clamp(1.0+(regional_luma/0.49-1.0)*1.68,0.50,1.50);
+		ground_map*=mix(1.0,regional_tone,regional_photo_detail*0.96);
+		forest_map*=mix(1.0,regional_tone,regional_photo_detail*0.72);
+		// Retain a little source chroma so mineral ground, dry cover and darker
+		// vegetation separate as they do in satellite imagery. Tight clamps and a
+		// low weight keep the simulated climate in control of the biome colour.
+		vec3 regional_chroma=clamp(regional_photo/max(regional_luma,0.08),vec3(0.82),vec3(1.18));
+		ground_map*=mix(vec3(1.0),regional_chroma,regional_photo_detail*0.20);
 	}
 	// Sampling an unresolved local layer only burns texture bandwidth and lets
 	// mip-averaged tiles muddy the regional and continental image.

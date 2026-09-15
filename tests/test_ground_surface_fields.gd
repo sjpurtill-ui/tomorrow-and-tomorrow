@@ -1,5 +1,11 @@
 extends GdUnitTestSuite
 
+func test_regional_orthophoto_retains_resolved_tone_and_restrained_chroma()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	assert_str(source).contains("regional_photo_detail*0.96")
+	assert_str(source).contains("regional_photo_detail*0.20")
+	assert_str(source).contains("vec3(0.82),vec3(1.18)")
+
 func test_unresolved_surface_noise_is_guarded_by_its_existing_lod_weight()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/ground_surface.gdshaderinc")
 	assert_str(source).contains("if (regional_grain>0.0)")
