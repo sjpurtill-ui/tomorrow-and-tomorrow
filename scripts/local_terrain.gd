@@ -1936,7 +1936,6 @@ void fragment() {
 	} else {
 	vec2 surface_origin=floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 	float broad = organic_noise(world_position.xz * 0.052);
-	float regional = organic_noise(world_position.xz * 0.17 + vec2(17.0, -9.0));
 	float slope = 1.0 - clamp(dot(normalize(world_normal), vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
 	// Interpolate the small camera-relative value. Differencing absolute
 	// 20,000 km positions quantized a sub-metre footprint into alternating bands.
@@ -1949,6 +1948,13 @@ void fragment() {
 	float regional_detail = 1.0 - smoothstep(0.050, 0.55, pixel_world);
 	float local_detail = 1.0 - smoothstep(0.008, 0.075, pixel_world);
 	float close_detail = 1.0 - smoothstep(0.0009, 0.008, pixel_world);
+	// The ~6 km field aliases into evenly spaced dark coins once a pixel spans
+	// several kilometres. At continental scale its correct filtered value is its
+	// mean; skipping fifteen value-noise evaluations also lowers fragment cost.
+	float regional = 0.5;
+	if (country_detail>0.08) {
+		regional = organic_noise(world_position.xz * 0.17 + vec2(17.0, -9.0));
+	}
 	// Neutral ground/forest tiles bridge regional and close views without baked
 	// mountains or a photographic coastline that contradicts the terrain mesh.
 	vec2 local_ground_uv = periodic_surface_uv(surface_position,surface_origin,52,100,false,vec2(0.0));
@@ -1960,9 +1966,27 @@ void fragment() {
 	// scale, while the biome FBM above remains responsible for large land-cover mass.
 	vec2 close_uv = periodic_surface_uv(surface_position,surface_origin,68,1,false,vec2(0.0));
 	vec2 close_uv_rotated = periodic_surface_uv(surface_position,surface_origin,5644,100,true,vec2(0.19,-0.27));
+	float precipitation=UV.x>=0.999?clamp(UV.x-1.0,0.0,1.0):clamp((COLOR.g-COLOR.r)*4.0+0.48,0.0,1.0);
+	float climate_woodland_mean=clamp(COLOR.a,0.0,1.0);
+	vec3 filtered_vertex_color=COLOR.rgb;
+	if (woodland_channel && UV.x>=0.999) {
+		climate_woodland_mean=clamp((precipitation-0.40)*2.6,0.0,1.0)
+			*clamp((UV.y-0.16)*3.4,0.0,1.0);
+		if (world_position.y>3.2) {
+			climate_woodland_mean*=1.0-clamp((world_position.y-3.2)/5.2,0.0,0.74);
+		}
+		climate_woodland_mean*=0.61;
+		// Rebuild the same climate tint without the unresolved sub-kilometre
+		// woodland draw embedded in a coarse vertex sample.
+		vec3 climate_vertex=mix(vec3(0.478,0.424,0.298),vec3(0.373,0.416,0.271),clamp((precipitation-0.18)*3.2,0.0,1.0));
+		float climate_dryness=1.0-smoothstep(0.30,0.49,precipitation);
+		climate_vertex=mix(climate_vertex,vec3(0.643,0.541,0.349),climate_dryness*0.92);
+		climate_vertex=mix(climate_vertex,vec3(0.173,0.290,0.204),climate_woodland_mean*0.90);
+		filtered_vertex_color=mix(climate_vertex,filtered_vertex_color,country_detail);
+	}
 	float biome_patch = organic_noise(world_position.xz * 0.011 + vec2(-5.0, 11.0));
 	float soil_patch = organic_noise(world_position.xz * 0.062 + vec2(23.0, -17.0));
-	vec3 vertex_tint = mix(vec3(dot(COLOR.rgb, vec3(0.28,0.57,0.15))), COLOR.rgb, 0.78);
+	vec3 vertex_tint = mix(vec3(dot(filtered_vertex_color, vec3(0.28,0.57,0.15))), filtered_vertex_color, 0.78);
 	vec3 climate_ground = mix(vec3(0.31,0.275,0.165), vec3(0.245,0.345,0.205), clamp(biome_patch*0.58+broad*0.42,0.0,1.0));
 	climate_ground = mix(climate_ground, vertex_tint, 0.72);
 	climate_ground *= 0.91 + (organic_noise(world_position.xz*0.0024)-0.5)*0.15;
@@ -1975,7 +1999,6 @@ void fragment() {
 	vec3 ground_map = procedural_ground;
 	vec3 procedural_forest = mix(vec3(0.055,0.105,0.070), vec3(0.155,0.205,0.125), biome_patch * 0.62 + regional * 0.38);
 	vec3 forest_map = procedural_forest;
-	float precipitation=UV.x>=0.999?clamp(UV.x-1.0,0.0,1.0):clamp((COLOR.g-COLOR.r)*4.0+0.48,0.0,1.0);
 	float semiarid_weight=1.0-smoothstep(0.24,0.52,precipitation);
 	// Sampling an unresolved aerial layer only burns texture bandwidth and lets
 	// mip-averaged tiles muddy the continental image. Each tier now has a hard
@@ -2042,13 +2065,20 @@ void fragment() {
 	forest_surface *= mix(1.0,crown_light,crown_detail);
 	// Alpha carries woodland density from the same biome samples used by
 	// resource access and inspection. Green grass no longer implies forest.
-	float forest_mask=woodland_channel?clamp(COLOR.a,0.0,1.0):smoothstep(0.025,0.105,COLOR.g-max(COLOR.r,COLOR.b*0.82));
+	float filtered_woodland=clamp(COLOR.a,0.0,1.0);
+	if (woodland_channel && UV.x>=0.999) {
+		// COLOR.a contains exact sub-kilometre woodland density. A continental
+		// mesh samples it every ~20 km, where those values alias into a vertex
+		// lattice. Reconstruct the climate-owned mean until that field resolves.
+		filtered_woodland=mix(climate_woodland_mean,filtered_woodland,country_detail);
+	}
+	float forest_mask=woodland_channel?filtered_woodland:smoothstep(0.025,0.105,COLOR.g-max(COLOR.r,COLOR.b*0.82));
 	forest_mask*=1.0-smoothstep(0.30,0.72,slope);
 	// COLOR.a is the authoritative woodland density. Resolve that density into
 	// irregular stands instead of rendering it as one airbrushed green wash.
 	// Zero density remains zero, while dense forest retains connected mass.
 	float stand_pattern=smoothstep(0.31,0.69,regional*0.62+soil_patch*0.38);
-	forest_mask*=mix(0.58,1.22,stand_pattern);
+	forest_mask*=mix(1.0,mix(0.58,1.22,stand_pattern),country_detail);
 	float retained_woodland=woodland_retained(world_position.xz);
 	forest_mask*=retained_woodland;
 	float crown_shade=precise_surface_noise(surface_position,surface_origin,90,1,vec2(0.0));
@@ -2097,13 +2127,13 @@ void fragment() {
 	earth = mix(earth,vec3(0.19,0.285,0.145),close_lush_mass*0.27*climate_green);
 	earth = mix(earth,vec3(0.31,0.295,0.205),close_clearings*0.16);
 	}
-	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06;
+	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06*country_detail;
 	earth *= modulation;
 	// Reused regional fields provide a cheap aerial-photo contrast hierarchy:
 	// broad climate still owns the colour, while soil/cover boundaries remain
 	// legible instead of dissolving into uniformly soft brown or green blobs.
 	float cover_structure=smoothstep(0.30,0.72,regional*0.58+soil_patch*0.42);
-	float structure_contrast=(cover_structure-0.5)*mix(0.10,0.24,max(regional_detail,local_detail));
+	float structure_contrast=(cover_structure-0.5)*0.24*max(country_detail,max(regional_detail,local_detail));
 	earth*=1.0+structure_contrast;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
 	if (UV.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,UV2); }
