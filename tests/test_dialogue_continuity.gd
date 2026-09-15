@@ -39,7 +39,9 @@ func test_next_envoy_brief_is_editable_saved_and_unlocked_by_setting_aside_reply
 	assert_str(ForeignDialogue.export_state()[id].next_brief).is_equal("A different proposal.")
 	assert_bool(ForeignDialogue.set_aside_reply(id)).is_true()
 	screen.refresh()
-	assert_bool(screen.ask_button.disabled).is_false()
+	assert_bool(screen.ask_button.disabled).is_true() # AI remains off; drafting is independent.
+	assert_bool(screen.retry_button.disabled).is_true()
+	assert_str(screen.access_note.text).contains("AI CONNECTION REQUIRED")
 	assert_str(screen.entry.text).is_equal("A different proposal.")
 	assert_bool(ForeignDialogue.ask(id,screen.entry.text)).is_true()
 	assert_str(ForeignDialogue.thread(id).next_brief).is_empty()

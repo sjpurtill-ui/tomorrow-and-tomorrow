@@ -12894,6 +12894,7 @@ func _refresh_nomad_sighting_markers()->void:
 		nomad_sighting_markers.erase(sighting_id)
 
 func _on_scout_report_returned(report:Dictionary)->void:
+	if not ScoutArchive.should_notify(report):return
 	# The simulation owns report delivery and storage. Arrival is a notification,
 	# not a request to change the player's speed or replace the open detail panel.
 	if travel_status_label:

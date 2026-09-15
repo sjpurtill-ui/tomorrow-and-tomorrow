@@ -7,6 +7,8 @@ var access_note:Label
 var audience_button:Button
 var retry_button:Button
 var set_aside_button:Button
+var connection_button:Button
+var panel:PanelContainer
 var memory:Label
 var assessment:Label
 var costs:Label
@@ -21,6 +23,7 @@ var draft_button:Button
 var page:=0
 var timer:=0.0
 var sections:Array[Control]=[]
+var section_pages:Array[Control]=[]
 var section_buttons:Array[Button]=[]
 var audience_cost:Label
 var returned_note:Label
@@ -32,12 +35,8 @@ func _ready()->void:
 	var bg:=ColorRect.new();bg.color=Color("071015d9");bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(bg)
 	bg.gui_input.connect(func(event:InputEvent):
 		if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed:queue_free())
-	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,32)
-	margin.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	add_child(margin)
-	var card:=PanelContainer.new();margin.add_child(card)
-	var style:=StyleBoxFlat.new();style.bg_color=Color("122128");style.set_corner_radius_all(10)
+	var card:=PanelContainer.new();panel=card;add_child(card)
+	var style:=StyleBoxFlat.new();style.bg_color=Color("122128");style.set_corner_radius_all(10);style.border_color=Color("49616b");style.set_border_width_all(1)
 	for side in [SIDE_LEFT,SIDE_RIGHT,SIDE_TOP,SIDE_BOTTOM]:style.set_content_margin(side,20)
 	card.add_theme_stylebox_override("panel",style)
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);card.add_child(root)
@@ -52,25 +51,32 @@ func _ready()->void:
 	button(navigation,"TREATIES",func():open_commitments())
 	var body:=VBoxContainer.new();body.size_flags_vertical=Control.SIZE_EXPAND_FILL;root.add_child(body)
 	for index in 3:
-		var section:=VBoxContainer.new();section.size_flags_vertical=Control.SIZE_EXPAND_FILL;section.add_theme_constant_override("separation",10);body.add_child(section);sections.append(section)
+		var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;body.add_child(scroll);section_pages.append(scroll)
+		var section:=VBoxContainer.new();section.size_flags_vertical=Control.SIZE_EXPAND_FILL;section.size_flags_horizontal=Control.SIZE_EXPAND_FILL;section.add_theme_constant_override("separation",10);scroll.add_child(section);sections.append(section)
 	var audience:=sections[0]
-	returned_note=label(audience,16);returned_note.add_theme_color_override("font_color",Color("d7b67a"))
+	returned_note=label(audience,12);returned_note.add_theme_color_override("font_color",Color("8ba6a9"))
 	access_note=label(audience,14)
-	button(audience,"AI Connection…",func():PronouncementInterpreter.open_connection_settings())
+	var connection_row:=HBoxContainer.new();audience.add_child(connection_row)
+	connection_button=button(connection_row,"AI Connection…",func():PronouncementInterpreter.open_connection_settings())
 	audience_cost=label(audience,14)
 	audience_button=button(audience,"SEND DELEGATES FOR AN AUDIENCE",func():
 		var result:=WorldSimulation.diplomacy.send_audience(civ_id)
 		if result.has("error"):message.text=String(result.error);refresh()
 		else:queue_free())
 	speech=RichTextLabel.new();speech.bbcode_enabled=false;speech.scroll_following=true
-	speech.custom_minimum_size.y=120;speech.size_flags_vertical=Control.SIZE_EXPAND_FILL;speech.add_theme_font_size_override("normal_font_size",16);audience.add_child(speech)
+	speech.custom_minimum_size.y=150;speech.size_flags_vertical=Control.SIZE_EXPAND_FILL;speech.add_theme_font_size_override("normal_font_size",16);audience.add_child(speech)
+	var speech_style:=StyleBoxFlat.new();speech_style.bg_color=Color("0b191f");speech_style.set_corner_radius_all(6)
+	for side in [SIDE_LEFT,SIDE_RIGHT,SIDE_TOP,SIDE_BOTTOM]:speech_style.set_content_margin(side,14)
+	speech.add_theme_stylebox_override("normal",speech_style)
+	var compose:=label(audience,11);compose.text="NEXT ENVOY BRIEF";compose.add_theme_color_override("font_color",Color("8bb9b4"))
 	var talk:=HBoxContainer.new();audience.add_child(talk)
 	entry=LineEdit.new();entry.placeholder_text="Brief your envoy: objective, limits, and latitude…";entry.max_length=1500;entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;talk.add_child(entry)
 	entry.text=String(WorldSimulation.dialogue.thread(civ_id).get("next_brief",""))
 	entry.text_changed.connect(func(value:String):WorldSimulation.dialogue.thread(civ_id)["next_brief"]=value)
 	ask_button=button(talk,"SEND ENVOY",ask);entry.text_submitted.connect(func(_text:String):ask())
-	retry_button=button(talk,"RETRY",func():WorldSimulation.dialogue.retry(civ_id);refresh())
-	set_aside_button=button(talk,"SET ASIDE REPLY",func():WorldSimulation.dialogue.set_aside_reply(civ_id);refresh())
+	var recovery:=HBoxContainer.new();audience.add_child(recovery)
+	retry_button=button(recovery,"Retry reply",func():WorldSimulation.dialogue.retry(civ_id);refresh())
+	set_aside_button=button(recovery,"Set aside unanswered reply",func():WorldSimulation.dialogue.set_aside_reply(civ_id);refresh())
 	draft_button=button(audience,"REVIEW PROPOSED TERMS",func():
 		var draft:Dictionary=WorldSimulation.dialogue.thread(civ_id).draft
 		if draft.is_empty():return
@@ -101,9 +107,15 @@ func _ready()->void:
 	message=label(root,15)
 	WorldSimulation.dialogue.changed.connect(func(id:String):
 		if id==civ_id:refresh())
-	show_section(0);refresh()
+	resized.connect(_fit);show_section(0);refresh();_fit.call_deferred()
+
+func _fit()->void:
+	if not is_instance_valid(panel):return
+	var extent:=get_viewport().get_visible_rect().size
+	panel.size=Vector2(minf(1000,extent.x-32),minf(690,extent.y-32))
+	panel.position=(extent-panel.size)*.5
 func show_section(index:int)->void:
-	for i in sections.size():sections[i].visible=i==index;section_buttons[i].disabled=i==index
+	for i in sections.size():section_pages[i].visible=i==index;section_buttons[i].disabled=i==index
 
 func _unhandled_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
@@ -119,6 +131,7 @@ func button(parent:Node,text:String,action:Callable)->Button:
 func selected_accord()->String: return ForeignDiplomacy.ACCORDS.keys()[accord.selected]
 func selected_tone()->String: return ForeignDiplomacy.TONES.keys()[tone.selected]
 func ask()->void:
+	if ask_button.disabled:return
 	if WorldSimulation.dialogue.ask(civ_id,entry.text):entry.clear();queue_free();return
 	refresh()
 
@@ -146,11 +159,14 @@ func refresh()->void:
 	returned_note.text="";returned_note.hide()
 	for report:Dictionary in WorldSimulation.world.diplomatic_history:
 		if String(report.get("civ_id",""))!=civ_id:continue
-		returned_note.text="Envoys returned · day %d\n%s" % [int(report.get("returned_day",0)),String(report.get("outcome","Your delegation has returned."))]
+		returned_note.text="Last delegation returned · day %d" % int(report.get("returned_day",0))
+		returned_note.tooltip_text=String(report.get("outcome","Your delegation has returned."))
 		returned_note.show();break
-	access_note.text=String(gate.reason)+("\n"+String(thread.status) if String(thread.status)!="" else "")
 	var connection_issue:=PronouncementInterpreter.connection_problem()
-	if not connection_issue.is_empty():access_note.text+="\n"+connection_issue
+	access_note.text="AI CONNECTION REQUIRED\n"+connection_issue if not connection_issue.is_empty() else String(thread.status) if bool(thread.retryable) else String(gate.reason) if not bool(gate.ok) else ""
+	access_note.visible=not access_note.text.is_empty()
+	access_note.add_theme_color_override("font_color",Color("e1bb78") if not connection_issue.is_empty() or bool(thread.retryable) else Color("a7bec1"))
+	connection_button.text="Connect AI…" if not connection_issue.is_empty() else "Connection settings…"
 	audience_button.visible=not bool(gate.ok)
 	audience_button.disabled=not WorldSimulation.world.diplomatic_mission.is_empty()
 	var transcript:Array[String]=[]
@@ -158,24 +174,25 @@ func refresh()->void:
 		var speaker:="You" if turn.role=="user" else ("Your envoy" if turn.role=="envoy" else String(p.name))
 		transcript.append("%s · %s\n%s" % [speaker,"earlier exchange" if int(turn.day)<0 else "day %d" % int(turn.day),String(turn.content)])
 	var displayed:="\n\n".join(transcript)
-	if displayed.is_empty(): displayed=String(context.title)+"\n“"+String(context.line)+"”" if bool(gate.ok) else "An audience has not yet been established. Your delegates must make the journey before this leader can answer."
+	if displayed.is_empty(): displayed="No reply received yet.\n\nYour brief is saved. Connect AI, then retry the unanswered exchange." if not connection_issue.is_empty() and bool(thread.in_transit) else "No conversation yet. Write your envoy's brief below." if bool(gate.ok) else "Send delegates to establish an audience. You can prepare your brief now."
 	if speech.text!=displayed: speech.text=displayed
 	draft_button.visible=not (thread.draft as Dictionary).is_empty()
 	var exchange_away:=bool(thread.get("in_transit",false)) or not WorldSimulation.world.diplomatic_mission.is_empty()
-	ask_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok) or exchange_away
+	ask_button.disabled=not connection_issue.is_empty() or WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok) or exchange_away
 	# Writing the next brief is independent of dispatch or the previous reply.
 	entry.editable=true
 	entry.tooltip_text="Draft your next brief at any time; it is saved when you close this conversation."
 	ask_button.tooltip_text="Envoys must return before another party departs. If a returned reply is unavailable, retry it or set it aside." if exchange_away else String(gate.reason)
 	set_aside_button.visible=bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false))
 	retry_button.visible=bool(thread.retryable)
-	retry_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok)
+	retry_button.disabled=not connection_issue.is_empty() or WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok)
+	retry_button.tooltip_text="Configure the AI connection first. Retrying cannot fix a missing key." if not connection_issue.is_empty() else "Request the saved exchange again. No new journey or provisions."
 	var f:Dictionary=WorldSimulation.diplomacy.forecast(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
 	assessment.text=f.label+" · "+f.reasons+"\nThe answer is settled when envoys return; circumstances can change."
 	var quote:Dictionary=WorldSimulation.world.diplomatic_mission_quote(civ_id,"","leader_parley")
 	audience_cost.visible=true
 	if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
-		audience_cost.text="ENVOYS HOME · Reply unavailable — Retry to recover the conversation." if bool(thread.retryable) else "ENVOYS HOME · Waiting for the conversation report."
+		audience_cost.text="Envoys home · reply pending" if not bool(thread.retryable) else "Envoys home · awaiting AI connection" if not connection_issue.is_empty() else "Envoys home · reply unavailable"
 	elif bool(thread.get("in_transit",false)):
 		var mission_status:=WorldSimulation.world.diplomatic_mission_status()
 		audience_cost.text="ENVOY EXCHANGE · %s · scheduled home day %d (%d days). Your private brief is not the envoy's spoken script." % [String(mission_status.get("phase","Traveling")).to_upper(),int(mission_status.get("return_day",0)),int(mission_status.get("days_remaining",0))]
@@ -190,3 +207,4 @@ func refresh()->void:
 	var travel:="Journey unavailable." if quote.has("error") else "DEPARTURE: %d envoys; %.1f food rations spent. Return in %d days." % [int(quote.personnel),float(quote.provisions),int(quote.total_days)]
 	costs.text="%s\nRESERVED: %d Timber, refunded if declined.\nIF ACCEPTED: +%d%% %s research for 730 days; their %s improves %d points.\n%s\n%s\nCONDITIONS: War ends cooperation. Combined research bonuses cap at +24%% per domain." % [ForeignDiplomacy.ACCORDS[selected_accord()].purpose,int(f.cost),roundi(float(f.bonus)*100),f.domain,"logistics" if selected_accord()=="routes" else ("knowledge" if selected_accord()=="exchange" else "cohesion"),4 if generous.button_pressed else 2,travel,"LARGER OFFER: better reception, but a smaller research bonus for you." if generous.button_pressed else "STANDARD OFFER: lower cost, with a larger research bonus for you."]
 	if blocker!="": costs.text+="\n"+blocker
+	message.visible=not message.text.is_empty()

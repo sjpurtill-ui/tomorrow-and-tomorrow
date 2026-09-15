@@ -5,6 +5,7 @@ import datetime
 from pathlib import Path
 import subprocess
 import sys
+import shutil
 
 CANONICAL = Path('/Users/seanpurtill/Documents/Codex/tomorrow-and-tomorrow')
 GODOT = Path('/Applications/Godot.app/Contents/MacOS/Godot')
@@ -44,8 +45,18 @@ def main():
     complete = destination / 'build.ok'
     if not executable.exists() or not complete.exists() or args.build_only:
         complete.unlink(missing_ok=True)
+        helper = game_root / 'artifacts' / 'native' / 'KeychainBridge'
+        source = game_root / 'tools' / 'native' / 'KeychainBridge.swift'
+        helper.parent.mkdir(parents=True, exist_ok=True)
+        if not helper.exists() or source.stat().st_mtime > helper.stat().st_mtime:
+            subprocess.run(['/usr/bin/swiftc', '-O', str(source), '-o', str(helper)], check=True)
+        subprocess.run(['/usr/bin/codesign', '--force', '--sign', '-', '--identifier', 'com.tomorrowandtomorrow.keychain', str(helper)], check=True)
         with build_log.open('w') as output:
             subprocess.run([str(GODOT), '--headless', '--path', str(game_root), '--export-release', 'macOS Release', str(app)], cwd=game_root, stdout=output, stderr=subprocess.STDOUT, check=True)
+        helpers = app / 'Contents' / 'Helpers'
+        helpers.mkdir(exist_ok=True)
+        shutil.copy2(helper, helpers / helper.name)
+        subprocess.run(['/usr/bin/codesign', '--force', '--deep', '--sign', '-', str(app)], check=True)
         subprocess.run(['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)], check=True)
         if executable.is_file():
             complete.write_text(git('rev-parse', 'HEAD') + '\n')

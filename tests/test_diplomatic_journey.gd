@@ -40,7 +40,7 @@ func test_opening_conversation_pauses_and_closing_restores_game()->void:
 	ForeignDiplomacy.open(String(civ.id))
 	assert_float(host.game_speed).is_equal(0.0)
 	assert_bool(is_instance_valid(ForeignDiplomacy.panel)).is_true()
-	assert_str(ForeignDiplomacy.panel.returned_note.text).contains("They accepted the trade agreement.")
+	assert_str(ForeignDiplomacy.panel.returned_note.tooltip_text).contains("They accepted the trade agreement.")
 	ForeignDiplomacy.panel.free()
 	assert_float(host.game_speed).is_equal(3.0)
 	get_tree().current_scene=previous

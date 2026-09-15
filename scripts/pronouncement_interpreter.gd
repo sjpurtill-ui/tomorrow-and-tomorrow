@@ -175,6 +175,7 @@ func _send_http(request_id:String)->void:
 		_handle_attempt_failure.call_deferred(request_id,0,"request could not start",true)
 
 func _api_config()->Dictionary:
+	preload("res://scripts/ai_connection_store.gd").ensure_loaded()
 	if not bool(GameState.civic_api_enabled): return {}
 	var endpoint:=OS.get_environment("LEVIATHAN_AI_ENDPOINT").strip_edges()
 	var api_key:=OS.get_environment("LEVIATHAN_AI_API_KEY").strip_edges()
@@ -188,6 +189,7 @@ func _api_config()->Dictionary:
 	return {"endpoint":endpoint,"api_key":api_key,"model":model,"structured_output":structured_output}
 
 func configuration_status()->Dictionary:
+	preload("res://scripts/ai_connection_store.gd").ensure_loaded()
 	if not bool(GameState.civic_api_enabled):
 		return {"enabled":false,"configured":false,"mode":"player disabled","model":"","endpoint_host":"","transport_security":"disabled","structured_output":false,"missing":[],"issues":[]}
 	var endpoint:=OS.get_environment("LEVIATHAN_AI_ENDPOINT").strip_edges()
@@ -202,34 +204,40 @@ func configuration_status()->Dictionary:
 	if api_key.is_empty(): missing.append("LEVIATHAN_AI_API_KEY or OPENAI_API_KEY")
 	var security:=_endpoint_security(endpoint)
 	var issues:Array[String]=[]
+	if api_key.is_empty() and not preload("res://scripts/ai_connection_store.gd").issue.is_empty():issues.append(preload("res://scripts/ai_connection_store.gd").issue)
 	if not endpoint.is_empty() and not bool(security.get("allowed",false)): issues.append(String(security.get("issue","Endpoint transport is not allowed.")))
 	var configured:=missing.is_empty() and issues.is_empty()
 	var structured:=configured and _structured_output_enabled(endpoint)
 	return {"enabled":true,"configured":configured,"mode":"strict structured API" if structured else "compatible JSON API" if configured else "deterministic offline","model":_safe_diagnostic_text(model,80),"endpoint_host":_endpoint_host(endpoint),"transport_security":String(security.get("label","not configured")),"structured_output":structured,"missing":missing,"issues":issues}
 
-func configure_connection(key:String,model:String,endpoint:String)->Dictionary:
+func configure_connection(key:String,model:String,endpoint:String,remember:bool=false)->Dictionary:
+	preload("res://scripts/ai_connection_store.gd").ensure_loaded()
 	var clean:=key.strip_edges();var selected_model:=model.strip_edges();var selected_endpoint:=endpoint.strip_edges()
 	if selected_endpoint.is_empty():selected_endpoint="https://api.openai.com/v1/chat/completions"
 	if selected_model.is_empty():selected_model=DEFAULT_API_MODEL
 	if clean.is_empty():clean=OS.get_environment("LEVIATHAN_AI_API_KEY").strip_edges()
 	if clean.is_empty():clean=OS.get_environment("OPENAI_API_KEY").strip_edges()
-	if clean.is_empty():return {"error":"Enter your API key on this device. The Windows setup does not configure the Mac."}
+	if clean.is_empty():return {"error":"Enter your existing API key once. You do not need a new key for each game."}
 	if "\n" in clean or "\r" in clean or clean.length()>8192:return {"error":"The key contains invalid characters."}
 	if selected_model.length()>120 or "\n" in selected_model:return {"error":"Enter a valid model name."}
 	var security:=_endpoint_security(selected_endpoint)
 	if not bool(security.get("allowed",false)):return {"error":String(security.get("issue","Choose a secure API endpoint."))}
-	# Session-only credentials: never place keys in campaign saves or the project.
+	if remember:
+		var saved:=preload("res://scripts/ai_connection_store.gd").call_store("save",{"key":clean,"model":selected_model,"endpoint":selected_endpoint})
+		if saved.has("error"):return saved
+	preload("res://scripts/ai_connection_store.gd").issue=""
+	# In-memory environment only; persistent credentials live exclusively in Keychain.
 	OS.set_environment("LEVIATHAN_AI_API_KEY",clean)
 	OS.set_environment("LEVIATHAN_AI_ENDPOINT",selected_endpoint)
 	OS.set_environment("LEVIATHAN_AI_MODEL",selected_model)
 	set_api_enabled(true)
-	return {"ok":true,"message":"Ready to retry your conversation. The key is kept only for this game session."}
+	return {"ok":true,"message":"Saved securely in macOS Keychain. This connection will load on future launches. You can retry your conversation." if remember else "Connection configured for this session. You can retry your conversation."}
 
 func connection_problem()->String:
 	var config:=configuration_status()
 	if not bool(config.enabled):return "AI is switched off. Open Menu → AI Connection to enable live conversations."
 	if not config.issues.is_empty():return "AI connection settings need attention: "+" ".join(PackedStringArray(config.issues))
-	if not bool(config.configured):return "No API key is configured on this device. Open Menu → AI Connection and enter your key. A Windows setup does not carry over to the Mac."
+	if not bool(config.configured):return "No API key configured. Connect your existing key once and remember it on this Mac."
 	return ""
 
 func connection_response_problem(http_code:int,transport_result:int)->String:

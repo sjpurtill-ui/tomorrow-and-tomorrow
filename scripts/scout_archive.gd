@@ -4,6 +4,16 @@ extends RefCounted
 const PAGE_SIZE:=5
 const FILTERS:=["All reports","Findings","Routine surveys","Losses","Unread"]
 
+static func should_notify(report:Dictionary)->bool:
+	# Standing watches still deliver/archive every report, without repeatedly
+	# interrupting the map for ordinary estimates of an already-known city.
+	if not bool(report.get("continuous_watch",false)):return true
+	if int(report.get("lost_personnel",0))>0 or int(report.get("stayed_personnel",0))>0:return true
+	if not String(report.get("turnback_reason","")).is_empty():return true
+	if int(report.get("new_contact_count",0))>0 or not (report.get("contacts",[]) as Array).is_empty():return true
+	if city_record(report).is_empty():return true
+	return not significant_findings(report).is_empty()
+
 static func city_record(report:Dictionary)->Dictionary:
 	var id:=String(report.get("target_city_id",String(report.get("target_id","")).trim_prefix("city:")))
 	for city:Dictionary in report.get("city_observations",[]):

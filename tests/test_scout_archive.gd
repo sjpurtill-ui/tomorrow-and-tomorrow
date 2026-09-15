@@ -1,5 +1,16 @@
 extends GdUnitTestSuite
 
+func test_standing_city_watch_returns_are_quiet_except_actionable_findings()->void:
+	var report:={"continuous_watch":true,"target_id":"city:town","city_observations":[{"city_id":"town"}],"discoveries":[]}
+	assert_bool(ScoutArchive.should_notify(report)).is_false()
+	for change:Dictionary in [{"lost_personnel":1},{"turnback_reason":"Route blocked"},{"new_contact_count":1},{"city_observations":[]},{"discoveries":[{"kind":"intelligence","title":"Armed strangers"}]}]:
+		var important:=report.duplicate(true)
+		important.merge(change,true)
+		assert_bool(ScoutArchive.should_notify(important)).is_true()
+	var once:=report.duplicate(true)
+	once.continuous_watch=false
+	assert_bool(ScoutArchive.should_notify(once)).is_true()
+
 func test_city_reconnaissance_prioritizes_target_evidence_over_exploration()->void:
 	var report:={"mission_id":20,"mission_kind":"observe_city","target_id":"city:town","target_label":"OBSERVE TOWN","day":40,"duration_days":30,"actual_days":32,"personnel":4,"returned_personnel":4,"continuous_watch":true,"contacts":["Neighbor"],"city_observations":[{"city_id":"town","name":"Town","observed_day":30,"observation_days":12,"fields":{"population":{"low":100,"high":120}}}]}
 	var summary:=ScoutArchive.summary(report)

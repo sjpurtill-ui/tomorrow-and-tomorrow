@@ -71,6 +71,8 @@ func ask(id:String,message:String)->bool:
 
 func retry(id:String)->void:
 	var t:=thread(id)
+	if PronouncementInterpreter._api_config().is_empty():
+		t.status=PronouncementInterpreter.connection_problem();changed.emit(id);return
 	if not pending.has(id) and bool(t.retryable) and bool(t.in_transit) and not String(t.private_brief).is_empty():_request(id,_envoy_brief_prompt(String(t.private_brief)),false,true)
 
 func set_aside_reply(id:String)->bool:

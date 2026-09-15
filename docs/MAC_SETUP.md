@@ -66,7 +66,7 @@ The terrain textures, exported unit assets, opening artwork, Tomorrow.mp3 and Wa
 
 The included Godot AI and gdUnit editor plugins are development tools. The game does not need an MCP server to play. The Windows probe/launcher scripts are not portable Mac launchers.
 
-Live AI dialogue requires your own local `OPENAI_API_KEY` or `LEVIATHAN_AI_API_KEY` environment configuration and the game's AI setting enabled. Launch Godot from the configured environment if Finder does not inherit it. No credential is committed. AI-off play and supported explicit commands remain available.
+Live AI dialogue requires an existing API key and the game's AI setting enabled. In the Mac release, Menu → AI Connection → Remember on this Mac stores the connection in macOS Keychain and loads it on future launches. Keys never go into campaign saves or Git. The launcher builds a small native helper with Apple's Swift compiler; Command Line Tools are required to build, not to play. Environment configuration (`OPENAI_API_KEY` or `LEVIATHAN_AI_API_KEY`) still takes precedence. AI-off play and supported explicit commands remain available.
 
 ## Bring a save separately
 

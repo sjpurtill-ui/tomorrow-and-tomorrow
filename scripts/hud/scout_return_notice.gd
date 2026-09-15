@@ -25,6 +25,7 @@ var date_label:Label
 var open_button:Button
 
 static func announce(terrain_node:Node,hud_node:Control,report:Dictionary)->CanvasLayer:
+	if not Archive.should_notify(report):return null
 	if not is_instance_valid(hud_node):return null
 	var digest:Variant=hud_node.get_meta("scout_return_digest") if hud_node.has_meta("scout_return_digest") else null
 	if not is_instance_valid(digest):
@@ -74,6 +75,7 @@ func layout()->void:
 	notice.position=Vector2(maxf(EDGE,extent.x-width-EDGE),maxf(EDGE,extent.y-height-LOWER_UI_CLEARANCE))
 
 func receive(report:Dictionary)->void:
+	if not Archive.should_notify(report):return
 	reports.append(report.duplicate(true))
 	if reports.size()>8:reports.pop_front()
 	refresh()
