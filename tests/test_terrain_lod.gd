@@ -1,4 +1,8 @@
 extends GdUnitTestSuite
+
+func test_cartographic_relief_begins_after_close_ground_is_unresolved()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	assert_str(source).contains("float map_relief = smoothstep(0.035,0.28,pixel_world)")
 const LOD:=preload("res://scripts/terrain_lod.gd")
 const SURFACE:=preload("res://scripts/rendered_surface_height.gd")
 class Terrain extends "res://scripts/local_terrain.gd":
