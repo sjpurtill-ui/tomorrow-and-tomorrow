@@ -1481,3 +1481,15 @@ and test_civilization_indicators using headless Godot on the explicit canonical
 path. Optional fields preserve old-save loading. No live API or graphical audit;
 the specific player's earlier reply failure remains unproven. Existing release
 PID 41480 and editor were not stopped or replaced.
+## September 15 — Mac AI persistence and bounded dialogue
+
+Source `ff33810` integrated by the canonical Mac integrator from `5963192`.
+Keychain connection storage uses a bundled native helper over private pipes, not
+command arguments or campaign serialization. Opt-in remembering, explicit removal,
+environment precedence and endpoint mismatch protection are covered. The dialogue
+panel consolidates repeated failures and prevents unconfigured retries, preserving
+drafts. Routine standing-watch reports remain archived but no longer announce
+every return. Existing explicit expedition and exceptional return notices remain.
+60/60 focused cases and isolated native storage self-test pass; no live service or
+graphical audit. No conflicts; narrow edits to terrain return-notification hook and
+civilization event publication. No terrain geometry or resource-supply changes.

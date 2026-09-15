@@ -1802,3 +1802,18 @@ failure could not be reconstructed: the available quicksave has no active envoy
 conversation, and the release log has no response diagnostic. New failures now
 distinguish output truncation, refusal, envelope parsing, and dialogue validation.
 Player PID 41480 remains on `2a21403c0d61`; it has not loaded this delivery.
+## September 15 — persistent Mac connection and quiet watch returns: INTEGRATED
+
+Canonical Mac integrator source `ff33810`, base `5963192`. Secure Keychain helper
+persists an opt-in connection across launches; environment credentials still win.
+Credentials remain outside reflected state and campaign saves. Diplomacy uses a
+bounded panel, one actionable connection status, editable drafts, and disabled
+retry/send when no connection exists. Routine standing-watch returns update the
+archive/intel without map cards or major-event notices; losses, blocked returns,
+missing observations and significant discoveries retain notifications.
+
+Validation: 60/60 cases across AI settings, dialogue continuity, diplomatic
+journey, scout archive and scouting staff. Native isolated Keychain CRUD self-test
+passes. No live API request or graphical verification. Save-compatible optional
+settings; existing session-only credentials cannot be recovered from an old process.
+Player PID 44896 remains on `5963192415e5`; it has not received these changes.

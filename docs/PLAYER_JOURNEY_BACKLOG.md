@@ -1,5 +1,18 @@
 # Open player-reported issues
 
+## Timber depletion despite surrounding forest; oversized stone orbs
+
+- September 15: read-only saved day 21212 has seven timber workers, an exhausted
+  9 km² woodland catchment, and 0.0314 actual timber/day versus 2.47 potential.
+  Surface supply refuses another deposit with the same landscape source; remaining
+  output matches daily regeneration. Diagnose catchment expansion/access and map
+  depletion feedback, not merely more worker allocation. Live state may differ.
+- Giant grey orbs: likely `_create_stone_patch` in local_terrain.gd. Its smooth
+  spheres have radius 0.035–0.11 in kilometre world units (70–220 m diameters,
+  before x-scale 1.3) and spawn for owned stone deposits. Need runtime visual
+  confirmation and correctly scaled ground-conforming rock geometry.
+- Diagnosed, not fixed in `ff33810`; do not claim either resolved by that build.
+
 ## Rail gauge standards appearing around year 58
 
 - Reported September 15, 2026: the player saw rail gauge standards coming up
