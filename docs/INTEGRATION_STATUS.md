@@ -1,3 +1,12 @@
+## September 15 — narrower discovery announcements: INTEGRATED
+
+Worker `9c582b2` is integrated at `a567633`. New-discovery announcements now use
+a 600-pixel maximum width so the square research art and its accompanying text
+read as a slimmer vertical panel. The layout still contracts for small windows
+and keeps its existing 730-pixel height allowance. The focused discovery-popup
+suite passes 9/9, including wide- and small-window layout coverage. This is a
+presentation-only change with no save impact.
+
 ## September 15 — shared workshops and appointments: INTEGRATED
 
 Worker `2a4de92` is integrated at `148bd02` without conflicts. Real government

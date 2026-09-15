@@ -1,3 +1,10 @@
+## September 15 — narrower discovery announcements
+
+Integrated worker `9c582b2` at canonical `a567633`. Discovery announcements use
+a 600-pixel maximum width while retaining their responsive small-window bounds
+and full vertical room for explanations and effects. The discovery-popup suite
+passes 9/9. No simulation, research progression, art binding, or save data changed.
+
 ## September 15 — delegated shared production and working appointments
 
 Source `2a4de92` integrated as `148bd02`. Workshops now expose compact visual rows,
