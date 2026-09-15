@@ -67,7 +67,10 @@ func advance(budget_usec:int=2500)->bool:
 				for corner in 6: indices[offset+corner]=corners[corner]
 		cursor+=1
 		if cursor>=total: phase+=1; cursor=0
-		if cursor%32==0 and Time.get_ticks_usec()-started>=budget_usec: break
+		# Height/climate sampling is substantially more expensive than moving one
+		# packed vertex. Check often enough that a nominal 1.4 ms navigation slice
+		# cannot run for several additional milliseconds before yielding.
+		if cursor%2==0 and Time.get_ticks_usec()-started>=budget_usec: break
 	max_slice_usec=maxi(max_slice_usec,Time.get_ticks_usec()-started)
 	return phase==2
 
