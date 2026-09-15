@@ -9,6 +9,7 @@ const ACCORDS={
 	"routes":{"name":"Shared waystations","domain":"logistics","purpose":"Coordinate safe stopping places and pass on route knowledge."},
 	"restraint":{"name":"Border understanding","domain":"culture","purpose":"Recognize each other's independence, quiet the frontier and pause invitations to each other's households."}
 }
+const ESCALATING_REACTIONS:=["warn","harden_border","mobilize","call_bluff"]
 var seed_value:=-999999
 var leaders:Dictionary={}
 var layer:CanvasLayer
@@ -107,7 +108,7 @@ func send(id:String,accord:String,tone:String,generous:bool=false)->Dictionary:
 
 func send_audience(id:String)->Dictionary:
 	if leader(id).is_empty(): return {"error":"Establish direct contact first."}
-	if bool(WorldSimulation.dialogue.access(id).ok): return {"error":"Your envoy channel is already established; continue the conversation."}
+	if bool(WorldSimulation.dialogue.access(id).ok): return {"error":"Your envoys already know the way. Give a new delegation its brief."}
 	var result:=WorldSimulation.world.dispatch_diplomat(id,"","leader_parley")
 	if result.has("error"): return result
 	WorldSimulation.world.diplomatic_mission["leader_audience"]=true
@@ -119,11 +120,14 @@ func resolve(id:String)->Dictionary:
 	if mission.has("commitment_terms"): return commitments.resolve(id,mission)
 	var terms:Dictionary=mission.get("leader_terms",{})
 	var p:=leader(id)
+	if not p.is_empty() and String(mission.get("civ_id",""))==id and bool(mission.get("dialogue_exchange",false)):
+		if int(WorldSimulation.state.elapsed_days)<int(mission.get("return_day",2147483647)):return {"error":"The envoy's account is still traveling."}
+		return WorldSimulation.dialogue.resolve_returned(id)
 	if not p.is_empty() and String(mission.get("civ_id",""))==id and bool(mission.get("leader_audience",false)):
 		if int(WorldSimulation.state.elapsed_days)<int(mission.get("return_day",2147483647)): return {"error":"The audience report is still traveling."}
 		p["audience_day"]=int(WorldSimulation.state.elapsed_days)
 		mission["leader_audience"]=false
-		var greeting:="The delegates established an audience with %s. The envoy channel is open for continued discussion; no agreement has been made." % String(p.name)
+		var greeting:="The delegates established an audience with %s and learned the route home. Any further exchange must still be carried there and back; no agreement has been made." % String(p.name)
 		remember(id,greeting)
 		return {"ok":true,"message":greeting}
 	if p.is_empty() or String(mission.get("civ_id",""))!=id or int(WorldSimulation.state.elapsed_days)<int(mission.get("return_day",2147483647)) or not valid_terms(terms): return {"error":"No returned leader proposal is available."}
@@ -163,6 +167,72 @@ func remember(id:String,message:String)->void:
 	if p.is_empty(): return
 	p.memories.push_front({"day":int(WorldSimulation.state.elapsed_days),"text":message})
 	if p.memories.size()>12: p.memories.resize(12)
+
+func apply_conversation_reaction(id:String,requested:String,player_words:String,leader_words:String)->Dictionary:
+	## Dialogue proposes a posture; material state and personality decide what the
+	## foreign polity actually risks. This lets a leader bluff in speech without
+	## granting language-model output direct authority to start a war.
+	var civ:=civilization(id);var p:=leader(id)
+	if civ.is_empty() or p.is_empty():return {"actual":"unchanged"}
+	var reaction:=requested if requested in WorldSimulation.dialogue.REACTIONS else "unchanged"
+	var relation:Dictionary=civ.player_relation
+	var words:=player_words.to_lower()
+	var threat_score:=0.0
+	for phrase:String in ["declare war","we will attack","i will attack","we'll attack","invade","conquer","destroy you","wipe you out","take your people","take your land","muster","our armies","my armies","violence"]:
+		if phrase in words:threat_score+=0.24
+	for phrase:String in ["avoid war","do not want war","don't want war","not a threat","no threat","peace between","seek peace"]:
+		if phrase in words:threat_score-=0.34
+	threat_score=clampf(threat_score,0.0,1.0)
+	var personality:Dictionary=p.personality
+	var assertiveness:=float(personality.get("assertiveness",0.5))
+	var risk:=float(personality.get("risk_tolerance",0.5))
+	var discipline:=float(personality.get("discipline",0.5))
+	var empathy:=float(personality.get("empathy",0.5))
+	var intelligence:=clampf(float(relation.get("rival_player_intelligence",0.0)),0.0,1.0)
+	var food_days:=float(civ.get("food_days",civ.get("simulation_metrics",{}).get("food_days",30.0)))
+	var prepared:=clampf(float(civ.get("military_readiness",0.4))*0.42+float(civ.get("command_readiness",0.4))*0.18+float(civ.get("logistics",0.0))*0.16+minf(1.0,food_days/60.0)*0.24,0.0,1.0)
+	var rng:=RandomNumberGenerator.new()
+	p["dialogue_reactions"]=int(p.get("dialogue_reactions",0))+1
+	rng.seed=hash("%d:%s:%d:%s:%d" % [WorldSimulation.state.world_seed,id,int(WorldSimulation.state.elapsed_days),player_words,int(p.dialogue_reactions)])
+	var actual:="unchanged"
+	if bool(relation.get("at_war",false)):
+		actual="warn" if reaction in ESCALATING_REACTIONS else reaction
+	elif threat_score>0.0:
+		p.trust=clampf(float(p.trust)-0.025-0.055*threat_score,-1.0,1.0)
+		relation.opinion=clampf(float(relation.get("opinion",0.0))-0.025-0.085*threat_score,-1.0,1.0)
+		relation.border_tension=clampf(float(relation.get("border_tension",0.0))+0.05+0.18*threat_score,0.0,1.0)
+		var resolve:=clampf(assertiveness*0.28+risk*0.20+discipline*0.16+float(civ.get("aggression",0.0))*0.18+prepared*0.12+intelligence*0.10-empathy*0.10,0.05,0.90)
+		if reaction=="call_bluff":
+			actual="call_bluff" if rng.randf()<resolve else ("mobilize" if discipline+prepared>0.9 else "warn")
+		elif reaction in ESCALATING_REACTIONS:
+			actual=reaction if rng.randf()<clampf(0.30+resolve*0.65,0.0,0.92) else "warn"
+		else:
+			actual="warn" if assertiveness+risk>1.05 else "unchanged"
+	elif reaction=="conciliate" and not bool(relation.get("at_war",false)):
+		actual="conciliate"
+		relation.opinion=clampf(float(relation.get("opinion",0.0))+0.012*empathy,-1.0,1.0)
+		relation.border_tension=maxf(0.0,float(relation.get("border_tension",0.0))-0.018*(empathy+float(personality.get("openness",0.5))))
+	elif reaction in ["counteroffer","warn"]:actual=reaction
+	if actual in ["harden_border","mobilize","call_bluff"]:
+		relation.stance="contain"
+		relation.border_tension=maxf(float(relation.get("border_tension",0.0)),0.54 if actual=="harden_border" else 0.68)
+		civ.strategy="fortification" if actual!="call_bluff" or not bool(preload("res://scripts/civilization_controller.gd").current_plan(id).get("offensive",false)) else "expansion"
+		civ.allocations=WorldSimulation.world._allocation_for(String(civ.strategy))
+	if actual=="call_bluff":
+		# This makes escalation possible, not automatic. The ordinary foreign
+		# controller still requires contact, intelligence, provisions, disposition,
+		# and its own later decision before it can dispatch a declaration or force.
+		relation.opinion=minf(float(relation.get("opinion",0.0)),-0.35)
+		relation.border_tension=maxf(float(relation.get("border_tension",0.0)),0.74)
+	p.memories.push_front({"day":int(WorldSimulation.state.elapsed_days),"text":"The ruler's envoy brought words that tested our relationship. I answered: %s" % leader_words.substr(0,500)})
+	if p.memories.size()>12:p.memories.resize(12)
+	leaders[id]=p
+	for index in WorldSimulation.world.civilizations.size():
+		if String(WorldSimulation.world.civilizations[index].get("id",""))==id:
+			civ["player_relation"]=relation
+			WorldSimulation.world.civilizations[index]=civ
+			break
+	return {"requested":reaction,"actual":actual,"threat":threat_score,"preparedness":prepared,"intelligence":intelligence}
 
 func advance(day:int)->void:
 	ensure()
@@ -205,6 +275,7 @@ func import_state(data:Dictionary)->Dictionary:
 			if not (p[field] is int or p[field] is float) or not is_finite(float(p[field])): return {"error":"Invalid foreign leader value."}
 		if absf(float(p.trust))>1 or p.next_day<0 or p.resolved<0 or p.serial<p.resolved: return {"error":"Invalid foreign leader history."}
 		if p.has("audience_day") and (not (p.audience_day is int or p.audience_day is float) or not is_finite(float(p.audience_day)) or p.audience_day<0): return {"error":"Invalid audience date."}
+		if p.has("dialogue_reactions") and (not (p.dialogue_reactions is int or p.dialogue_reactions is float) or not is_finite(float(p.dialogue_reactions)) or p.dialogue_reactions<0):return {"error":"Invalid diplomatic reaction history."}
 		if not p.memories is Array or p.memories.size()>12 or not p.accord is Dictionary or not p.counter is Dictionary: return {"error":"Invalid foreign commitments."}
 		for m in p.memories:
 			if not m is Dictionary or not m.get("text") is String or m.text.length()>2000 or not (m.get("day") is int or m.get("day") is float): return {"error":"Invalid foreign memory."}

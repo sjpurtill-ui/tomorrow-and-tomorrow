@@ -1590,6 +1590,13 @@ func _process_diplomatic_mission(day:int)->void:
 		var proposal_result:Dictionary={"ok":bool(diplomatic_mission.get("accepted",true)),"message":String(diplomatic_mission.get("outcome","The goodwill delegation was received."))}
 		if purpose in CARRIED_DIPLOMATIC_ACTIONS and purpose!="send_aid" and not bool(diplomatic_mission.get("proposal_resolved",false)): proposal_result=conduct_player_action(civ_id,purpose,true)
 		elif purpose=="send_aid": proposal_result={"ok":gift_resource=="Food" and gift_amount>0.0,"message":"The food aid reached %s and improved its reserves." % String(civ.name) if gift_resource=="Food" and gift_amount>0.0 else "The aid proposal arrived without food and was refused."}
+		if bool(proposal_result.get("pending_reply",false)):
+			diplomatic_mission["stage"]="awaiting_account"
+			diplomatic_mission["return_day"]=day+1
+			diplomatic_mission["reception"]=String(proposal_result.get("message","The returned envoys are assembling their account."))
+			civ["player_relation"]=relation
+			civilizations[index]=civ
+			return
 		var accepted:=bool(proposal_result.get("ok",false))
 		if purpose=="send_aid" and accepted: WorldSimulation.diplomacy.commitments.note_food_aid(civ_id,gift_amount,day)
 		var outcome:=String(proposal_result.get("message",proposal_result.get("error","The proposal was refused.")))
@@ -5375,6 +5382,9 @@ func validate_state()->Array[String]:
 		if diplomatic_mission.has("commitment_terms"):
 			var commitment:Variant=diplomatic_mission.commitment_terms
 			if not WorldSimulation.diplomacy.commitments.valid_terms(commitment) or not WorldSimulation.diplomacy.commitments.number(commitment.get("serial")) or float(commitment.get("serial",0))<1: errors.append("Diplomatic commitment terms are invalid.")
+		if diplomatic_mission.has("dialogue_exchange"):
+			if not diplomatic_mission.dialogue_exchange is bool or not bool(diplomatic_mission.dialogue_exchange) or String(diplomatic_mission.get("purpose",""))!="leader_parley":errors.append("Diplomatic discussion journey is invalid.")
+			if not diplomatic_mission.get("dialogue_brief") is String or String(diplomatic_mission.get("dialogue_brief","")).is_empty() or String(diplomatic_mission.get("dialogue_brief","")).length()>1500:errors.append("Diplomatic discussion brief is invalid.")
 		if int(diplomatic_mission.get("arrival_day",-1))<=int(diplomatic_mission.get("depart_day",-1)): errors.append("Diplomatic mission arrival must follow departure.")
 		if int(diplomatic_mission.get("return_day",-1))<=int(diplomatic_mission.get("arrival_day",-1)): errors.append("Diplomatic mission return must follow arrival.")
 		var diplomatic_purpose:=String(diplomatic_mission.get("purpose","goodwill"))

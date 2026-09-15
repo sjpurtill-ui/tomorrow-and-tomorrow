@@ -59,12 +59,13 @@ func _ready()->void:
 	audience_cost=label(audience,14)
 	audience_button=button(audience,"SEND DELEGATES FOR AN AUDIENCE",func():
 		var result:=WorldSimulation.diplomacy.send_audience(civ_id)
-		message.text=String(result.get("error","Delegates departed. Their report must return before conversation opens."));refresh())
+		if result.has("error"):message.text=String(result.error);refresh()
+		else:queue_free())
 	speech=RichTextLabel.new();speech.bbcode_enabled=false;speech.scroll_following=true
 	speech.custom_minimum_size.y=120;speech.size_flags_vertical=Control.SIZE_EXPAND_FILL;speech.add_theme_font_size_override("normal_font_size",16);audience.add_child(speech)
 	var talk:=HBoxContainer.new();audience.add_child(talk)
-	entry=LineEdit.new();entry.placeholder_text="Ask, challenge, or suggest terms…";entry.max_length=1500;entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;talk.add_child(entry)
-	ask_button=button(talk,"DISCUSS",ask);entry.text_submitted.connect(func(_text:String):ask())
+	entry=LineEdit.new();entry.placeholder_text="Brief your envoy: objective, limits, and latitude…";entry.max_length=1500;entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;talk.add_child(entry)
+	ask_button=button(talk,"SEND ENVOY",ask);entry.text_submitted.connect(func(_text:String):ask())
 	retry_button=button(talk,"RETRY",func():WorldSimulation.dialogue.retry(civ_id);refresh())
 	draft_button=button(audience,"REVIEW PROPOSED TERMS",func():
 		var draft:Dictionary=WorldSimulation.dialogue.thread(civ_id).draft
@@ -114,7 +115,7 @@ func button(parent:Node,text:String,action:Callable)->Button:
 func selected_accord()->String: return ForeignDiplomacy.ACCORDS.keys()[accord.selected]
 func selected_tone()->String: return ForeignDiplomacy.TONES.keys()[tone.selected]
 func ask()->void:
-	if WorldSimulation.dialogue.ask(civ_id,entry.text): entry.clear()
+	if WorldSimulation.dialogue.ask(civ_id,entry.text):entry.clear();queue_free();return
 	refresh()
 
 func open_commitments(draft:Dictionary={})->void:
@@ -150,20 +151,26 @@ func refresh()->void:
 	audience_button.disabled=not WorldSimulation.world.diplomatic_mission.is_empty()
 	var transcript:Array[String]=[]
 	for turn:Dictionary in thread.messages:
-		transcript.append("%s · %s\n%s" % ["You" if turn.role=="user" else String(p.name),"earlier exchange" if int(turn.day)<0 else "day %d" % int(turn.day),String(turn.content)])
+		var speaker:="You" if turn.role=="user" else ("Your envoy" if turn.role=="envoy" else String(p.name))
+		transcript.append("%s · %s\n%s" % [speaker,"earlier exchange" if int(turn.day)<0 else "day %d" % int(turn.day),String(turn.content)])
 	var displayed:="\n\n".join(transcript)
 	if displayed.is_empty(): displayed=String(context.title)+"\n“"+String(context.line)+"”" if bool(gate.ok) else "An audience has not yet been established. Your delegates must make the journey before this leader can answer."
 	if speech.text!=displayed: speech.text=displayed
 	draft_button.visible=not (thread.draft as Dictionary).is_empty()
-	ask_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok)
-	entry.editable=not WorldSimulation.dialogue.pending.has(civ_id) and bool(gate.ok)
+	var exchange_away:=bool(thread.get("in_transit",false)) or not WorldSimulation.world.diplomatic_mission.is_empty()
+	ask_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok) or exchange_away
+	entry.editable=not WorldSimulation.dialogue.pending.has(civ_id) and bool(gate.ok) and not exchange_away
 	retry_button.visible=bool(thread.retryable)
 	retry_button.disabled=WorldSimulation.dialogue.pending.has(civ_id) or not bool(gate.ok)
 	var f:Dictionary=WorldSimulation.diplomacy.forecast(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
 	assessment.text=f.label+" · "+f.reasons+"\nThe answer is settled when envoys return; circumstances can change."
 	var quote:Dictionary=WorldSimulation.world.diplomatic_mission_quote(civ_id,"","leader_parley")
-	audience_cost.visible=not bool(gate.ok)
-	audience_cost.text=String(quote.error) if quote.has("error") else "Audience journey: %d delegates, %.1f food rations spent at departure, %d days round trip. No Timber offer or agreement is included."%[int(quote.personnel),float(quote.provisions),int(quote.total_days)]
+	audience_cost.visible=true
+	if bool(thread.get("in_transit",false)):
+		var mission_status:=WorldSimulation.world.diplomatic_mission_status()
+		audience_cost.text="ENVOY EXCHANGE · %s · scheduled home day %d (%d days). Your private brief is not the envoy's spoken script." % [String(mission_status.get("phase","Traveling")).to_upper(),int(mission_status.get("return_day",0)),int(mission_status.get("days_remaining",0))]
+	else:
+		audience_cost.text=String(quote.error) if quote.has("error") else "%s: %d delegates, %.1f food rations spent at departure, %d days round trip. You set the brief; the envoy chooses the words."%["Audience journey" if not bool(gate.ok) else "Next exchange",int(quote.personnel),float(quote.provisions),int(quote.total_days)]
 	audience_button.disabled=quote.has("error")
 	var blocker:String=f.blocker
 	if blocker=="" and quote.has("error"): blocker=quote.error
