@@ -274,6 +274,8 @@ func _resource_potentials(position:Vector2,biome:String,temperature:float,precip
 		"Graphite":clampf(metamorphic*mineral*0.86,0.0,1.0),
 		"Uranium Ore":clampf(igneous*mineral*0.65+sediment*mineral*0.15,0.0,1.0),
 		"Silver Ore":clampf(mineral*(igneous*0.45+metamorphic*0.30+sediment*0.15),0.0,1.0),
+		"Gold Ore":clampf(mineral*(igneous*0.56+metamorphic*0.38)*local_variation,0.0,1.0),
+		"Crude Oil":clampf(basin*sediment*(0.55+local_variation*.45),0.0,1.0),
 		"Nickel Ore":clampf(igneous*mineral*weathering*.9,0.0,1.0),
 		"Bauxite":clampf(weathering*(igneous*.6+sediment*.4)*(0.4+temperature*.6)*(0.4+precipitation*.6),0.0,1.0),
 		"Rutile Ore":clampf(mineral*(igneous*.55+metamorphic*.45),0.0,1.0),

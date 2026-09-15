@@ -132,14 +132,14 @@ func _ready() -> void:
 		preset_button.tooltip_text = "%.0f%% of the population" % float(preset[1])
 	var focuses := _stack(columns, 6)
 	label(focuses, "WHAT SHOULD THEY SEEK?", 11, Art.GOLD)
-	for key: String in ["exploration","recruitment"]:
-		var caption := "Explore & discover" if key == "exploration" else "Recruit & influence"
+	for key: String in ["exploration","recruitment","prospecting"]:
+		var caption := "Explore & discover" if key == "exploration" else "Seek nomadic tribes" if key=="recruitment" else "Prospect rare resources"
 		var choice := button(focuses, caption, func():
 			CivilizationSystem.scouting_staff.set_policy(slider.value/100,key); refresh())
 		choice.icon = Art.icon(key); choice.expand_icon = true; choice.add_theme_constant_override("icon_max_width",28)
 		choice.alignment = HORIZONTAL_ALIGNMENT_LEFT; choice.toggle_mode = true; choice.custom_minimum_size.y = 40
 		focus_buttons[key] = choice
-		choice.tooltip_text = "New ground, resources, specimens and knowledge." if key=="exploration" else "Goodwill, knowledge and willing households. Visits continue when there is no room for newcomers."
+		choice.tooltip_text = "New ground, resources, specimens and knowledge." if key=="exploration" else "Search for scarce independent wandering bands; foreign-city recruitment is a separate hostile order." if key=="recruitment" else "Survey actual terrain for recognized rare mineral and fuel occurrences. No resource reaches stores until a deposit is developed."
 	label(focuses, "WHERE SHOULD THEY LEAVE FROM?", 11, Art.GOLD)
 	origin_selector = OptionButton.new(); origin_selector.name="ScoutOrigin"; origin_selector.custom_minimum_size.y=36
 	origin_selector.size_flags_horizontal=SIZE_EXPAND_FILL; focuses.add_child(origin_selector)
@@ -218,7 +218,10 @@ func refresh() -> void:
 	allocation.text = ("%d%%" % roundi(slider.value)) if is_equal_approx(slider.value,roundf(slider.value)) else "%.1f%%" % slider.value
 	staffing.text = "of our population\nUp to %d scouts · %d away" % [int(view.target),int(view.away)]
 	for key: String in focus_buttons: focus_buttons[key].set_pressed_no_signal(key==view.focus)
-	focus_hint.text = ("New ground, samples & new knowledge." if view.focus=="exploration" else "Build ties. Invite households when home has room.")+" New parties depart from %s." % String(view.get("origin_label","home"))
+	var hint:="New ground, samples & new knowledge."
+	if view.focus=="recruitment":hint="Search for scarce, independent wandering bands. Foreign-city recruitment is a separate hostile order."
+	elif view.focus=="prospecting":hint=String(view.get("prospecting",{}).get("message","Survey real terrain for rare resources."))
+	focus_hint.text = hint+" New parties depart from %s." % String(view.get("origin_label","home"))
 	party_heading.text = "%d %s in the field" % [int(view.parties),"party" if int(view.parties)==1 else "parties"] if int(view.parties)>0 else "No parties away"
 	status.text = String(view.status)
 	review.text = "Staff review in %d days" % int(view.review_in) if float(view.share)>0 and int(view.review_in)>0 else "Staff review on the next game day" if float(view.share)>0 else "No new departures. Existing parties will return."
@@ -227,17 +230,16 @@ func refresh() -> void:
 	if reception_card.visible:
 		var capacity := int(view.reception.capacity)
 		var recruitment:Dictionary=view.get("recruitment",{})
-		var known:=int(recruitment.get("known_targets",0))
-		var outlook:Dictionary=recruitment.get("outlook",{})
+		var nomads:Dictionary=recruitment.get("nomads",{})
 		if capacity<2:
-			reception_heading.text = "Visits continue · invitations on hold"
-			reception.text = "INVITATIONS ON HOLD · Visits can still build goodwill\n"+String(view.reception.message)
-		elif known==0:
-			reception_heading.text = "No known community to invite"
-			reception.text = "SEARCHING · Recruiters are scouting for real communities. They cannot return with people unless they physically meet one. Exploration is the faster choice if charting land and finding artifacts is your priority."
+			reception_heading.text = "Nomad search paused · no reception room"
+			reception.text = "INVITATIONS ON HOLD\n"+String(view.reception.message)
+		elif not bool(nomads.get("available",true)):
+			reception_heading.text = "The nomadic recruitment era is over"
+			reception.text = String(nomads.get("message","Independent wandering bands are no longer available."))
 		else:
-			reception_heading.text = "Invitations viable at %s" % String(recruitment.get("target_label","a known community")) if bool(outlook.get("ready",false)) else "Building trust at %s" % String(recruitment.get("target_label","a known community"))
-			reception.text = "%d known destination%s · room for %d\n%s" % [known,"" if known==1 else "s",capacity,String(outlook.get("reason",view.reception.message))]
+			reception_heading.text = "Rare, finite, and moving"
+			reception.text = "Room for %d newcomers · %d wandering bands previously encountered\n%s" % [capacity,int(nomads.get("known_bands",0)),String(nomads.get("message","Encounters are uncertain."))]
 	var keys: Array = [int(GameState.elapsed_days)]
 	for mission: Dictionary in CivilizationSystem.scout_missions:
 		keys.append([mission.get("mission_id",0),mission.get("personnel",0),mission.get("return_day",0),mission.get("route_status","")])
@@ -255,7 +257,7 @@ func _update_parties() -> void:
 		if not mission_rows.has(id): _make_party(id)
 		var entry: Dictionary = mission_rows[id]
 		var remaining := int(mission.return_day)-int(GameState.elapsed_days)
-		var focus := "Recruit & influence" if mission.get("target_kind","") in ["recruit_people","recruit_people_visit"] else "Observe city" if mission.get("target_kind","")=="observe_city" else "Explore & discover"
+		var focus := "Seek nomadic tribes" if mission.get("target_kind","") in ["recruit_people","recruit_nomads"] else "Prospect rare resources" if mission.get("target_kind","")=="prospect_resources" else "Hostile foreign recruitment" if mission.get("target_kind","")=="recruit_people_visit" else "Observe city" if mission.get("target_kind","")=="observe_city" else "Explore & discover"
 		entry.title.text = "Party %d · %s" % [id,focus]
 		entry.subtitle.text = "%d people · %s" % [int(mission.personnel), "due in ~%dd" % remaining if remaining>=0 else "%dd overdue" % -remaining]
 		var duration := maxi(1,int(mission.return_day)-int(mission.get("start_day",0)))

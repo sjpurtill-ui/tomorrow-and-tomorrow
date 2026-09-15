@@ -343,6 +343,9 @@ func _relation_with_strategy_defaults(relation:Dictionary,civ:Dictionary={}) -> 
 	normalized["rival_player_trace_radius_km"]=maxf(0.0,float(normalized.get("rival_player_trace_radius_km",0.0)))
 	normalized["rival_player_trace_day"]=int(normalized.get("rival_player_trace_day",-1))
 	normalized["rival_player_trace_source"]=String(normalized.get("rival_player_trace_source",""))
+	normalized["recruitment_pressure"]=clampf(float(normalized.get("recruitment_pressure",0.0)),0.0,1.0)
+	normalized["recruitment_visits"]=maxi(0,int(normalized.get("recruitment_visits",0)))
+	normalized["last_recruitment_day"]=int(normalized.get("last_recruitment_day",-1))
 	if bool(normalized.get("at_war",false)) or String(normalized.get("treaty","none")) not in ["none",""]:
 		normalized["contact_level"]=2
 		normalized["contact_intelligence"]=maxf(0.20,float(normalized.contact_intelligence))
@@ -1190,9 +1193,10 @@ func scout_target_options()->Array[Dictionary]:
 		"id":"open_world","kind":"explore","civ_id":"","label":"OPEN EXPLORATION",
 		"description":"Chart an unexamined direction. Any encounters remain unknown until the party returns.","position":{}
 	},{
-		"id":"recruit_people","kind":"recruit_people","civ_id":"","label":"SEEK COMMUNITIES",
-		"description":"Find communities through physical travel and exchange knowledge. Invite existing households only when home can receive them; no newcomers are created.","position":{}
+		"id":"recruit_people","kind":"recruit_nomads","civ_id":"","label":"SEEK NOMADIC TRIBES",
+		"description":"Search for scarce, unaffiliated wandering bands. Their numbers are finite, encounters are uncertain, and they disappear as the world becomes urban.","position":{}
 	}]
+	if bool(prospecting_status().available):options.append({"id":"rare_resources","kind":"prospect_resources","civ_id":"","label":"PROSPECT FOR RARE RESOURCES","description":"Send a geological survey along uncharted ground to locate real, scarce mineral or fuel occurrences such as gold, coal, and petroleum.","position":{}})
 	for encounter_variant in contact_encounters_snapshot():
 		var encounter:Dictionary=encounter_variant
 		var position:Dictionary=encounter.get("position",{})
@@ -1207,7 +1211,7 @@ func scout_target_options()->Array[Dictionary]:
 		options.append({"id":"lead:"+String(lead.id),"kind":"investigate_lead","lead_id":String(lead.id),"civ_id":String(lead.subject),"label":"INVESTIGATE LEAD · "+String(lead.name),"description":rumor_network.describe(lead),"position":lead.center.duplicate(true)})
 	for city:Dictionary in city_intelligence.known_cities():
 		if String(city.get("controller","")) not in ["","player"]:
-			options.append({"id":"recruit:"+String(city.city_id),"kind":"recruit_people_visit","city_id":city.city_id,"civ_id":city.controller,"label":"VISIT "+String(city.name).to_upper(),"description":"Invite existing households and exchange practices through a physical visit.","position":city.position.duplicate(true)})
+			options.append({"id":"recruit:"+String(city.city_id),"kind":"recruit_people_visit","city_id":city.city_id,"civ_id":city.controller,"label":"RECRUIT FROM "+String(city.name).to_upper()+" · HOSTILE","description":"Deliberately invite this foreign civilization's households away. This is political interference and can drive containment or war.","position":city.position.duplicate(true)})
 		options.append({"id":"city:"+String(city.city_id),"kind":"observe_city","city_id":city.city_id,"civ_id":city.civ_id,"label":"OBSERVE "+String(city.name).to_upper(),"description":"Revisit this independently reported city. Only a returning party updates its dated estimates.","position":city.position.duplicate(true)})
 	return options
 
@@ -1281,7 +1285,7 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 		target_distance=origin.distance_to(Vector2(float(target_position.x),float(target_position.z)))
 	var route_plan:Dictionary={}
 	var target_kind:=String(target.get("kind","explore"))
-	var directional_search:=target_kind in ["explore","recruit_people"]
+	var directional_search:=target_kind in ["explore","recruit_people","recruit_nomads","prospect_resources"]
 	var ordered_heading:=heading.to_lower().strip_edges() if SCOUT_HEADINGS.has(heading.to_lower().strip_edges()) else ""
 	if target_kind=="investigate_lead":
 		route_plan=rumor_network.plan("player",String(target.lead_id),next_scout_mission_id,one_way_range,int(WorldSimulation.state.elapsed_days),origin)
@@ -1375,7 +1379,7 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	var origin_position:Dictionary=quote.origin_position
 	var origin:=Vector2(float(origin_position.x),float(origin_position.z))
 	var planned_heading:=String(route_plan.get("planned_heading",_compass_phrase(origin,Vector2(float(route[-1].get("x",origin.x)),float(route[-1].get("z",origin.y))))))
-	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"ordered_heading":normalized_heading if String(target_option.kind) in ["explore","recruit_people"] else "","planned_heading":planned_heading,"origin_city_id":String(quote.origin_city_id),"origin_label":String(quote.origin_label),"origin_position":origin_position.duplicate(true),"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_city_id":String(target_option.get("city_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
+	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"ordered_heading":normalized_heading if String(target_option.kind) in ["explore","recruit_people","recruit_nomads","prospect_resources"] else "","planned_heading":planned_heading,"origin_city_id":String(quote.origin_city_id),"origin_label":String(quote.origin_label),"origin_position":origin_position.duplicate(true),"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_city_id":String(target_option.get("city_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
 	if bool(route_plan.get("circuit",false)):mission["circuit"]=true
 	if String(target_option.kind) in ["observe_city","recruit_people_visit"]:mission["travel_leg_days"]=int(quote.travel_leg_days)
 	# Journeys are not clockwork. The settlement counts down to the planned
@@ -2533,6 +2537,8 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	var recruitment_account:=_recruitment_return_account(mission,day,recruits)
 	var fate:=_resolve_party_fate(mission,day)
 	var windfalls:=_resolve_scout_windfalls(mission,route,day)
+	var prospecting_note:=_resolve_prospecting(mission,route,day)
+	if prospecting_note!="":windfalls.append(prospecting_note)
 	windfalls.append_array(influence_notes)
 	if String(mission.get("rumor_return_note",""))!="": windfalls.append(String(mission.rumor_return_note))
 	if String(fate.line)!="": windfalls.append(String(fate.line))
@@ -2678,14 +2684,22 @@ func _resolve_targeted_scout_report(mission:Dictionary,day:int)->String:
 
 
 func _resolve_scout_recruitment(mission:Dictionary,day:int)->int:
+	if String(mission.get("target_kind","")) in ["recruit_people","recruit_nomads"]:return _resolve_nomad_recruitment(mission,day)
 	return Exchange.arrive(mission,day)
 
 func _recruitment_return_account(mission:Dictionary,_day:int,recruits:int)->Dictionary:
-	if String(mission.get("target_kind","")) not in ["recruit_people","recruit_people_visit"]:return {}
+	var kind:=String(mission.get("target_kind",""))
+	if kind not in ["recruit_people","recruit_nomads","recruit_people_visit"]:return {}
+	if kind in ["recruit_people","recruit_nomads"]:
+		var nomad:Dictionary=mission.get("nomad_recruitment_account",{})
+		return {"disposition":"some_joined" if recruits>0 else "none_joined","encountered":int(nomad.get("joined",0))+int(nomad.get("remaining",0)) if bool(nomad.get("met",false)) else 0,"met_community":bool(nomad.get("met",false)),"group":String(nomad.get("group","Wandering people")),"joined":recruits,"declined":maxi(0,int(nomad.get("remaining",0))),"summary":String(nomad.get("summary","No wandering band was found.")),"reasons":[String(nomad.get("reason","Nomadic encounters are uncertain."))],"diplomatic_response":"","diplomatic_severity":""}
 	var reservation:Dictionary=mission.get("migrant_reservation",{})
 	var encounter:Dictionary=mission.get("recruitment_encounter",{})
 	var summary:="%d people arrived from %s. They are the households met on this journey; reception is now under way." % [recruits,String(reservation.get("source_name","the visited community"))] if recruits>0 else String(mission.get("recruitment_reason","No community was physically visited on this journey. No recruitment offer could be made."))
-	return {"disposition":"some_joined" if recruits>0 else "none_joined","encountered":int(reservation.get("count",0)),"met_community":not encounter.is_empty(),"group":String(encounter.get("source_name","People on the road")),"joined":recruits,"declined":0,"summary":summary,"reasons":[summary]}
+	var outlook:Dictionary=mission.get("recruitment_outlook",{})
+	var reasons:Array[String]=[String(outlook.get("reason",summary))]
+	var response:Dictionary=mission.get("recruitment_diplomatic_response",{})
+	return {"disposition":"some_joined" if recruits>0 else "none_joined","encountered":int(reservation.get("count",0)),"met_community":not encounter.is_empty(),"group":String(encounter.get("source_name","People on the road")),"joined":recruits,"declined":0,"summary":summary,"reasons":reasons,"diplomatic_response":String(response.get("message","")),"diplomatic_severity":String(response.get("severity",""))}
 
 func _resolve_party_fate(mission:Dictionary,day:int)->Dictionary:
 	## The gamble of the road. Usually everyone comes home; sometimes the party
@@ -2708,17 +2722,62 @@ func _resolve_party_fate(mission:Dictionary,day:int)->Dictionary:
 	return {"lost":lost,"stayed":stayed,"returned":personnel-lost-stayed,"line":line}
 
 
-const NOMAD_SIGHTING_LIMIT:=12
+const NOMAD_SIGHTING_LIMIT:=8
 const NOMAD_SIGHTING_FADE_DAYS:=360
 
 
+func nomadic_recruitment_status()->Dictionary:
+	var urban_polities:=0
+	var polity_count:=civilizations.size()+1
+	if mini(WorldSimulation.progression.domain_tier("institutions"),mini(WorldSimulation.progression.domain_tier("infrastructure"),WorldSimulation.progression.domain_tier("logistics")))>=2:urban_polities+=1
+	for civ_variant in civilizations:
+		var tiers:Dictionary=(civ_variant as Dictionary).get("progression_tiers",{})
+		if mini(int(tiers.get("institutions",0)),mini(int(tiers.get("infrastructure",0)),int(tiers.get("logistics",0))))>=2:urban_polities+=1
+	var urbanized:=polity_count>0 and urban_polities*4>=polity_count*3
+	var remaining:=0
+	for tribe_variant in nomad_sightings:remaining+=maxi(0,int((tribe_variant as Dictionary).get("population",0)))
+	var exhausted:=nomad_sightings.size()>=NOMAD_SIGHTING_LIMIT and remaining<=0
+	var message:="Nomadic societies still exist, but their wandering bands are scarce and encounters are uncertain."
+	if urbanized:message="The settled world has crossed into urban-scale institutions and routes. Independent wandering bands are no longer a meaningful source of recruits."
+	elif exhausted:message="The finite wandering bands known in this world have joined settlements, dispersed, or ceased to exist as independent groups."
+	return {"available":not urbanized and not exhausted,"urbanized":urbanized,"remaining_known":remaining,"known_bands":nomad_sightings.size(),"limit":NOMAD_SIGHTING_LIMIT,"message":message}
+
+
+func prospecting_status()->Dictionary:
+	var production_tier:=WorldSimulation.progression.domain_tier("production")
+	var knowledge_tier:=WorldSimulation.progression.domain_tier("knowledge")
+	var recognized:Array[String]=[]
+	for resource_name in ["Gold Ore","Crude Oil","Silver Ore","Coal","Iron Ore","Tin Ore","Lead Ore","Graphite","Phosphate Rock","Uranium Ore"]:
+		if WorldSimulation.resources.recognition_ready(resource_name):recognized.append(resource_name)
+	var available:=not recognized.is_empty()
+	var message:="Scouting can now organize geological surveys for recognized mineral and fuel signs. A return report fixes a real occurrence on the map; it delivers no stockpile."
+	if not available:message="Rare-resource prospecting develops when researchers establish methods for recognizing mineral or fuel occurrences. Until then, scouts collect broad field observations."
+	return {"available":available,"production_tier":production_tier,"knowledge_tier":knowledge_tier,"recognized":recognized,"message":message}
+
+
+func _nomad_position(tribe:Dictionary,day:int)->Vector2:
+	var anchor_data:Dictionary=tribe.get("anchor",tribe.get("position",{}))
+	var anchor:=Vector2(float(anchor_data.get("x",0.0)),float(anchor_data.get("z",0.0)))
+	var radius:=float(tribe.get("wander_radius",0.0))
+	if radius<=0.0:return anchor
+	var angle:=float(tribe.get("phase",0.0))+TAU*float(day)/maxf(180.0,float(tribe.get("wander_period",720.0)))
+	var candidate:=anchor+Vector2(cos(angle),sin(angle))*radius
+	if scout_land_authority.is_valid() and not bool(scout_land_authority.call(candidate)):
+		candidate=anchor+Vector2(cos(angle),sin(angle))*radius*.35
+		if not bool(scout_land_authority.call(candidate)):candidate=anchor
+	return candidate
+
+
 func nomad_sightings_snapshot()->Array[Dictionary]:
-	## Only marks fresh enough to still mean anything: nomads move.
+	## Reports become stale, while the underlying finite bands keep wandering.
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var visible:Array[Dictionary]=[]
 	for sighting_variant in nomad_sightings:
 		var sighting:Dictionary=sighting_variant
-		if day-int(sighting.get("day",0))<=NOMAD_SIGHTING_FADE_DAYS: visible.append(sighting.duplicate(true))
+		if int(sighting.get("population",0))<=0:continue
+		if day-int(sighting.get("day",0))<=NOMAD_SIGHTING_FADE_DAYS:
+			var current:=sighting.duplicate(true);var position:=_nomad_position(sighting,day)
+			current["position"]={"x":position.x,"z":position.y};visible.append(current)
 	return visible
 
 
@@ -2750,9 +2809,91 @@ func _resolve_scout_rumors(_day:int,_recruits:int)->String:
 	return ""
 
 
-func _resolve_nomad_sighting(_mission:Dictionary,_route:Array,_day:int,_recruits:int)->String:
-	# Historical sightings remain readable. New encounters require real people.
-	return ""
+func _nomad_encounter(mission:Dictionary,route:Array,day:int,recruiting:bool)->Dictionary:
+	if route.size()<4 or not bool(nomadic_recruitment_status().available):return {}
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=last_world_seed^day*67867967^int(mission.get("mission_id",0))*122949829
+	var duration:=maxi(1,int(mission.get("duration_days",30)))
+	var chance:=clampf((0.13 if recruiting else 0.07)+float(duration)/365.0*(0.26 if recruiting else 0.13),0.0,0.42 if recruiting else 0.20)
+	if rng.randf()>=chance:return {}
+	var nearby:Array[int]=[]
+	for index in nomad_sightings.size():
+		var known:Dictionary=nomad_sightings[index]
+		if int(known.get("population",0))>0 and _route_distance_to_point(route,_nomad_position(known,day))<=60.0:nearby.append(index)
+	var selected:=-1
+	if not nearby.is_empty():selected=nearby[rng.randi_range(0,nearby.size()-1)]
+	elif nomad_sightings.size()<NOMAD_SIGHTING_LIMIT:
+		var waypoint:Dictionary=route[rng.randi_range(route.size()/2,route.size()-1)]
+		var anchor:=Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0)))
+		var population:=rng.randi_range(10,42)
+		var created:Dictionary={"id":"nomads_%d" % next_nomad_sighting_id,"day":day,"position":{"x":anchor.x,"z":anchor.y},"anchor":{"x":anchor.x,"z":anchor.y},"band_hint":"a family band" if population<18 else ("a traveling band" if population<30 else "a large wandering band"),"population":population,"attraction":rng.randf_range(.38,.72),"wander_radius":rng.randf_range(8.0,32.0),"wander_period":rng.randf_range(300.0,900.0),"phase":rng.randf_range(0.0,TAU)}
+		nomad_sightings.append(created);next_nomad_sighting_id+=1;selected=nomad_sightings.size()-1
+	if selected<0:return {}
+	var tribe:Dictionary=nomad_sightings[selected]
+	var current:=_nomad_position(tribe,day)
+	tribe["day"]=day;tribe["position"]={"x":current.x,"z":current.y};nomad_sightings[selected]=tribe
+	return {"index":selected,"tribe":tribe}
+
+
+func _resolve_nomad_recruitment(mission:Dictionary,day:int)->int:
+	var status:=nomadic_recruitment_status()
+	if not bool(status.available):
+		mission["nomad_recruitment_account"]={"met":false,"joined":0,"summary":String(status.message),"reason":String(status.message)};return 0
+	var encounter:=_nomad_encounter(mission,mission.get("route",[]),day,true)
+	if encounter.is_empty():
+		mission["nomad_recruitment_account"]={"met":false,"joined":0,"summary":"The party found no wandering band on this route. Nomadic groups are scarce, mobile, and never guaranteed.","reason":"No band crossed the searched route during this journey."};return 0
+	var index:=int(encounter.index);var tribe:Dictionary=nomad_sightings[index]
+	var gap:=Exchange.attraction()-float(tribe.get("attraction",.55))
+	var room:=Exchange.reception_capacity();var count:=0
+	var reason:="The band judged settled life here clearly better than remaining on its present route."
+	if room<2:reason=String(Exchange.reception_snapshot().message)
+	elif gap<Exchange.MINIMUM_ATTRACTION_ADVANTAGE:reason="The band did not judge life in our settlements clearly better than its independent life on the road."
+	else:count=mini(room,mini(int(tribe.population),clampi(floori((gap-Exchange.MINIMUM_ATTRACTION_ADVANTAGE+.04)*int(mission.get("personnel",2))*2.0),2,int(mission.get("personnel",2)))))
+	if count>0:
+		tribe["population"]=int(tribe.population)-count;nomad_sightings[index]=tribe
+		WorldSimulation.state.register_population_arrivals(count,"Households from a wandering band")
+	mission["nomad_recruitment_account"]={"met":true,"joined":count,"remaining":int(tribe.population),"group":String(tribe.band_hint),"summary":"%d people from %s chose to settle here; %d remain with the wandering band." % [count,String(tribe.band_hint),int(tribe.population)] if count>0 else "%s was encountered, but nobody joined." % String(tribe.band_hint).capitalize(),"reason":reason}
+	return count
+
+
+func _resolve_nomad_sighting(mission:Dictionary,route:Array,day:int,recruits:int)->String:
+	if recruits>0:return ""
+	var encounter:=_nomad_encounter(mission,route,day,false)
+	if encounter.is_empty():return ""
+	var tribe:Dictionary=encounter.tribe
+	_record_world_event("Nomads sighted","The party passed %s near the marked point. The band kept moving and did not join." % String(tribe.band_hint),"diplomacy",day)
+	return "They passed %s who kept moving; the dated sighting is marked, but the band will not remain there." % String(tribe.band_hint)
+
+
+func _resolve_prospecting(mission:Dictionary,route:Array,day:int)->String:
+	if String(mission.get("target_kind",""))!="prospect_resources":return ""
+	var status:=prospecting_status()
+	if not bool(status.available):return String(status.message)
+	if not ground_survey_authority.is_valid() or route.size()<3:return "The survey party returned without a ground record precise enough to fix an occurrence."
+	var candidates:Array[String]=["Gold Ore","Crude Oil","Silver Ore","Coal","Iron Ore","Tin Ore","Lead Ore","Graphite","Phosphate Rock","Uranium Ore"]
+	var best_resource:="";var best_position:=Vector2.ZERO;var best_profile:Dictionary={};var best_potential:=.38
+	for route_index in range(maxi(1,route.size()/3),route.size()-1):
+		var waypoint:Dictionary=route[route_index]
+		var position:=Vector2(float(waypoint.get("x",0.0)),float(waypoint.get("z",0.0)))
+		var ground:Dictionary=ground_survey_authority.call(position)
+		if String(ground.get("biome",""))=="water":continue
+		var profile:Dictionary=ground
+		if not profile.has("resource_potentials"):profile=(preload("res://scripts/civilization_day.gd").context(position).get("environment_profile",{}) as Dictionary)
+		var potentials:Dictionary=profile.get("resource_potentials",{})
+		for resource_name in candidates:
+			if not WorldSimulation.resources.recognition_ready(resource_name):continue
+			var potential:=float(potentials.get(resource_name,0.0))
+			if potential>best_potential:
+				best_potential=potential;best_resource=resource_name;best_position=position;best_profile=profile
+	if best_resource.is_empty():return "The prospectors recorded the route's geology, but found no recognized rare-resource occurrence strong enough to survey."
+	var deposit:Dictionary=WorldSimulation.resources.register_expedition_occurrence(best_resource,best_position,best_profile)
+	if deposit.is_empty():return "The strongest mineral signs on this route matched an occurrence already recorded, so the party added detail rather than a duplicate deposit."
+	var origin_data:Dictionary=mission.get("origin_position",{})
+	var origin:=Vector2(float(origin_data.get("x",player_world_origin.x)),float(origin_data.get("z",player_world_origin.y)))
+	var card:=preload("res://scripts/expedition_findings.gd").deposit_card(deposit,roundi(origin.distance_to(best_position)))
+	(mission.get("discoveries",[]) as Array).push_front(card)
+	_record_world_event("Prospectors locate %s" % best_resource,String(card.description),"resources",day,{"kind":"resource_survey","resource":best_resource,"deposit_id":String(deposit.id),"position":card.position})
+	return "%s — %s" % [String(card.title),String(card.consequence)]
 
 func _resolve_taught_knowledge(_day:int,_recruits:int,_contacts:Array)->String:
 	# Specific carried evidence is studied through the ordinary workforce.
@@ -5140,6 +5281,20 @@ func _apply_state(payload:Dictionary)->void:
 		scout_missions.append(legacy_mission)
 	next_scout_mission_id=maxi(1,int(payload.get("next_scout_mission_id",scout_missions.size()+1)))
 	nomad_sightings.assign((payload.get("nomad_sightings",[]) as Array).duplicate(true))
+	# Same-version compatibility for the older sighting-only records. Preserve
+	# their reported locations, while promoting at most the finite world limit
+	# into persistent bands whose numbers and movement can now be simulated.
+	for sighting_index in nomad_sightings.size():
+		var sighting:Dictionary=nomad_sightings[sighting_index]
+		if sighting.has("population"):continue
+		var location:Dictionary=sighting.get("position",{})
+		var anchor:={"x":float(location.get("x",0.0)),"z":float(location.get("z",location.get("y",0.0)))}
+		var nomad_rng:=RandomNumberGenerator.new();nomad_rng.seed=hash("%s:%s:nomad-migration" % [last_world_seed,String(sighting.get("id",sighting_index))])
+		sighting["anchor"]=anchor;sighting["position"]=anchor.duplicate(true)
+		sighting["population"]=nomad_rng.randi_range(10,42) if sighting_index<NOMAD_SIGHTING_LIMIT else 0
+		sighting["attraction"]=nomad_rng.randf_range(.38,.72);sighting["wander_radius"]=nomad_rng.randf_range(8.0,32.0)
+		sighting["wander_period"]=nomad_rng.randf_range(300.0,900.0);sighting["phase"]=nomad_rng.randf_range(0.0,TAU)
+		nomad_sightings[sighting_index]=sighting
 	next_nomad_sighting_id=maxi(1,int(payload.get("next_nomad_sighting_id",nomad_sightings.size()+1)))
 	scout_reports.assign((payload.get("scout_reports",[]) as Array).duplicate(true))
 	last_scout_outcome=(payload.get("last_scout_outcome",{}) as Dictionary).duplicate(true)
@@ -5464,6 +5619,9 @@ func _validate_relation(relation:Dictionary,errors:Array[String],label:String)->
 		if not is_finite(intelligence) or intelligence<0.0 or intelligence>1.0: errors.append("Player relation intelligence must be normalized.")
 		if rival_contact_level<0 or rival_contact_level>2: errors.append("Rival knowledge of the player must use a bounded contact level.")
 		if not is_finite(rival_intelligence) or rival_intelligence<0.0 or rival_intelligence>1.0: errors.append("Rival intelligence about the player must be normalized.")
+		var recruitment_pressure:=float(relation.get("recruitment_pressure",0.0))
+		if not is_finite(recruitment_pressure) or recruitment_pressure<0.0 or recruitment_pressure>1.0: errors.append("Player relation recruitment pressure must be normalized.")
+		if int(relation.get("recruitment_visits",0))<0 or int(relation.get("last_recruitment_day",-1))<-1: errors.append("Player relation recruitment incident history is invalid.")
 		var trace_confidence:=float(relation.get("rival_player_trace_confidence",0.0))
 		var trace_radius:=float(relation.get("rival_player_trace_radius_km",0.0))
 		if not is_finite(trace_confidence) or trace_confidence<0.0 or trace_confidence>1.0: errors.append("Rival evidence confidence about the player must be normalized.")

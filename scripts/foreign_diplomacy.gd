@@ -234,6 +234,49 @@ func apply_conversation_reaction(id:String,requested:String,player_words:String,
 			break
 	return {"requested":reaction,"actual":actual,"threat":threat_score,"preparedness":prepared,"intelligence":intelligence}
 
+func apply_recruitment_incident(id:String,recruits:int,day:int)->Dictionary:
+	## Inviting another polity's households away is a real foreign-policy act even
+	## when nobody accepts. It worsens the ordinary relation state; the strategic
+	## AI, not this helper, still decides whether tension ultimately becomes war.
+	var index:int=WorldSimulation.world._civilization_index(id)
+	if index<0:return {}
+	var civ:Dictionary=WorldSimulation.world.civilizations[index]
+	var relation:Dictionary=WorldSimulation.world._relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
+	var personality:Dictionary=PERSONALITY.foreign(WorldSimulation.state.world_seed,id)
+	var previous_day:=int(relation.get("last_recruitment_day",-1))
+	var pressure:=clampf(float(relation.get("recruitment_pressure",0.0)),0.0,1.0)
+	if previous_day>=0 and day>previous_day:
+		pressure*=pow(0.5,float(day-previous_day)/1095.0)
+	var source_population:=maxf(1.0,float(civ.get("population",200.0)))
+	var removed_share:=clampf(float(recruits)/source_population,0.0,0.20)
+	var resistance:=float(personality.get("assertiveness",0.5))*.40+float(personality.get("discipline",0.5))*.30+float(personality.get("aggression",civ.get("aggression",0.3)))*.30
+	var increase:=(0.055+(0.10 if recruits>0 else 0.0)+minf(0.24,removed_share*2.4))*(0.78+resistance*.44)
+	pressure=clampf(pressure+increase,0.0,1.0)
+	var visits:=maxi(0,int(relation.get("recruitment_visits",0)))+1
+	relation["recruitment_pressure"]=pressure
+	relation["recruitment_visits"]=visits
+	relation["last_recruitment_day"]=day
+	relation["last_incident_day"]=day
+	relation["opinion"]=clampf(float(relation.get("opinion",0.0))-0.025-increase*.48-(0.035 if recruits>0 else 0.0),-1.0,1.0)
+	relation["border_tension"]=clampf(float(relation.get("border_tension",0.0))+0.03+increase*.58,0.0,1.0)
+	if pressure>=0.38:
+		relation["stance"]="contain"
+		if civ.has("strategy"):civ["strategy"]="fortification"
+		if civ.has("allocations"):civ["allocations"]=WorldSimulation.world._allocation_for("fortification")
+	if pressure>=0.72:
+		relation["opinion"]=minf(float(relation.opinion),-0.62)
+		relation["border_tension"]=maxf(float(relation.border_tension),0.80)
+	var severity:="hostile" if pressure>=0.58 else ("warning" if pressure>=0.28 or recruits>0 else "objection")
+	var name:=String(civ.get("name","The visited community"))
+	var message:="%s's leaders lodge a formal objection: inviting their households away is interference in their community." % name
+	if severity=="warning":message="%s's leaders warn that drawing away their households is a hostile pressure. Further recruiting parties will be watched and resisted." % name
+	elif severity=="hostile":message="%s's leaders now treat continued recruitment as hostile interference and warn that further losses may bring an armed response." % name
+	civ["player_relation"]=relation
+	WorldSimulation.world.civilizations[index]=civ
+	if int(relation.get("contact_level",0))>=2:
+		remember(id,"Their recruiters invited our households away; %d left. The act has become a matter of state." % recruits if recruits>0 else "Their recruiters invited our households away. We objected even though none left.")
+	return {"severity":severity,"message":message,"pressure":pressure,"opinion":float(relation.opinion),"border_tension":float(relation.border_tension),"visits":visits,"recruits":recruits}
+
 func advance(day:int)->void:
 	ensure()
 	commitments.advance(day)

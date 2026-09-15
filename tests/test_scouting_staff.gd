@@ -2,8 +2,9 @@ extends GdUnitTestSuite
 const System=preload("res://scripts/civilization_system.gd")
 var system:Node
 func before_test()->void:
+	WorldSimulation.clear()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
-	GameState.reset_for_new_world(112358);MilitaryCampaign.reset_for_new_world();FoodSystem.reset_for_new_world()
+	GameState.reset_for_new_world(112358);ProgressionSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();FoodSystem.reset_for_new_world()
 	GameState.ensure_population_total(200);GameState.settlement_site_committed=true
 	GameState.resource_stockpiles.Food=10000.0;GameState.food_stocks={"Preserved food":10000.0}
 	system=auto_free(System.new());system.reset_for_new_world();system.register_player_origin(Vector2.ZERO)
@@ -18,6 +19,41 @@ func test_policy_setting_and_repeated_views_never_move_spend_or_reveal()->void:
 	assert_dict(system.fog_snapshot()).is_equal(fog)
 	assert_bool(system.scouting_staff.set_policy(.5,"exploration").has("error")).is_true()
 	assert_bool(system.scouting_staff.set_policy(.05,"unknown").has("error")).is_true()
+
+func test_nomadic_search_is_distinct_from_explicit_hostile_foreign_recruitment()->void:
+	var open_option:Dictionary=system._scout_target_option("recruit_people")
+	assert_str(String(open_option.kind)).is_equal("recruit_nomads")
+	assert_str(String(open_option.label)).contains("NOMADIC")
+	system.civilizations.append({"id":"neighbor","name":"Neighbor","player_relation":{"at_war":false},"strategic_regions":[]})
+	system.city_intelligence.records.player={"town":{"city_id":"town","name":"Foreign Town","civ_id":"neighbor","controller":"neighbor","position":{"x":30.0,"z":0.0},"observed_day":0,"reported_day":0,"source":"physical visit","reference":"test","fields":{}}}
+	var hostile:Dictionary=system._scout_target_option("recruit:town")
+	assert_str(String(hostile.kind)).is_equal("recruit_people_visit")
+	assert_str(String(hostile.label)).contains("HOSTILE")
+
+func test_nomadic_bands_move_are_finite_and_end_at_world_urbanization()->void:
+	system.nomad_sightings.append({"id":"nomads_1","day":0,"position":{"x":20.0,"z":0.0},"anchor":{"x":20.0,"z":0.0},"band_hint":"a family band","population":12,"attraction":.5,"wander_radius":10.0,"wander_period":360.0,"phase":0.0})
+	assert_vector(system._nomad_position(system.nomad_sightings[0],0)).is_not_equal(system._nomad_position(system.nomad_sightings[0],90))
+	assert_int(int(system.nomadic_recruitment_status().remaining_known)).is_equal(12)
+	for civ in system.civilizations:
+		civ["progression_tiers"]={"institutions":2,"infrastructure":2,"logistics":2}
+	var status:Dictionary=system.nomadic_recruitment_status()
+	assert_bool(status.available).is_false()
+	assert_bool(status.urbanized).is_true()
+	assert_str(String(status.message)).contains("no longer")
+
+func test_organized_scouting_evolves_into_real_deposit_prospecting()->void:
+	GameState.known_discoveries.append("ore_assaying")
+	var option:Dictionary=system._scout_target_option("rare_resources")
+	assert_str(String(option.kind)).is_equal("prospect_resources")
+	var deposits_before:=GameState.resource_deposits.size()
+	system.set_ground_survey_authority(func(_point:Vector2)->Dictionary:
+		return {"biome":"hills","resource_potentials":{"Gold Ore":.92},"signature":"test-gold"})
+	var mission:Dictionary={"target_kind":"prospect_resources","mission_id":91,"origin_position":{"x":0.0,"z":0.0},"discoveries":[]}
+	var note:String=system._resolve_prospecting(mission,[{"x":0.0,"z":0.0},{"x":30.0,"z":0.0},{"x":60.0,"z":0.0},{"x":0.0,"z":0.0}],300)
+	assert_int(GameState.resource_deposits.size()).is_equal(deposits_before+1)
+	assert_str(String(GameState.resource_deposits[-1].resource)).is_equal("Gold Ore")
+	assert_str(note).contains("gold")
+	assert_int((mission.discoveries as Array).size()).is_equal(1)
 
 func test_expansion_city_can_be_selected_as_the_physical_scout_origin()->void:
 	GameState.player_settlements.append({"id":"rivermeet","name":"Rivermeet","position":Vector2(500,0),"primary":false,"population_share":.2,"occupied_by":"player"})
@@ -109,7 +145,7 @@ func test_known_or_reserved_routes_lose_preference_without_peeking_at_foreign_st
 func test_goodwill_requires_actual_returned_city_observation_and_has_revisit_cooldown()->void:
 	system.initialize();var civ:Dictionary=system.civilizations[0];var id:=String(civ.id)
 	var before:=float(civ.player_relation.opinion)
-	var mission:Dictionary={"target_kind":"recruit_people","start_day":10}
+	var mission:Dictionary={"target_kind":"recruit_people_visit","start_day":10}
 	var empty:Array[Dictionary]=[]
 	assert_array(system.scouting_staff.returned_influence(mission,empty,30)).is_empty()
 	assert_float(float(civ.player_relation.opinion)).is_equal(before)
@@ -149,45 +185,44 @@ func report_community(id:String,position:Vector2)->void:
 	if not system.city_intelligence.records.has("player"):system.city_intelligence.records.player={}
 	system.city_intelligence.records.player[id+"_city"]={"city_id":id+"_city","name":id.capitalize()+" Town","civ_id":id,"controller":id,"position":{"x":position.x,"z":position.y},"observed_day":0,"reported_day":0,"source":"physical visit","reference":"test","fields":{}}
 
-func test_recruitment_departs_without_spare_beds_and_can_build_goodwill()->void:
+func test_standing_recruitment_never_auto_targets_a_known_foreign_city()->void:
 	GameState.housing_capacity=100;GameState.population_allocations.Administration=0
 	report_community("nearby",Vector2(30,0))
 	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
 	assert_int(system.scout_missions.size()).is_equal(1)
 	var party:Dictionary=system.scout_missions[0]
-	assert_str(party.target_kind).is_equal("recruit_people_visit")
-	assert_str(party.target_city_id).is_equal("nearby_city")
+	assert_str(party.target_kind).is_equal("recruit_nomads")
+	assert_str(String(party.target_city_id)).is_empty()
+	assert_str(String(party.target_civ_id)).is_empty()
 	assert_int(system.scouting_staff.snapshot().reception.capacity).is_equal(0)
 	assert_str(system.scouting_staff.snapshot().reception.message).contains("Housing:")
-	var reports:Array[Dictionary]=[{"controller":"nearby","observed_day":10,"observation_days":4}]
-	assert_int(system.scouting_staff.returned_influence(party,reports,30).size()).is_equal(1)
 
 func test_recruitment_without_known_communities_searches_without_creating_people()->void:
 	system.initialize();system.city_intelligence.records.clear()
 	var population:=GameState.population_exact;var fog:Dictionary=system.fog_snapshot().duplicate(true)
 	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
 	assert_int(system.scout_missions.size()).is_equal(1)
-	assert_str(system.scout_missions[0].target_kind).is_equal("recruit_people")
-	assert_str(system.scouting_staff.data.status).contains("find communities")
-	assert_int(int(system.scouting_staff.snapshot().recruitment.known_targets)).is_equal(0)
+	assert_str(system.scout_missions[0].target_kind).is_equal("recruit_nomads")
+	assert_str(system.scouting_staff.data.status).contains("wandering bands")
 	assert_float(GameState.population_exact).is_equal(population)
 	assert_dict(system.fog_snapshot()).is_equal(fog)
 	assert_bool(system._scout_route_is_land(system.scout_missions[0].route)).is_true()
 
-func test_staff_can_visit_a_known_community_beyond_ninety_days_reach()->void:
+func test_staff_do_not_visit_a_known_community_beyond_ninety_days_reach()->void:
 	var distance:float=system.scout_one_way_range(90)*1.1
 	report_community("faraway",Vector2(distance,0))
 	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
 	assert_int(system.scout_missions.size()).is_equal(1)
-	assert_str(system.scout_missions[0].target_city_id).is_equal("faraway_city")
-	assert_int(system.scout_missions[0].duration_days).is_greater(90)
+	assert_str(system.scout_missions[0].target_kind).is_equal("recruit_nomads")
+	assert_str(String(system.scout_missions[0].target_city_id)).is_empty()
 
-func test_unreachable_nearest_community_does_not_block_a_reachable_visit()->void:
+func test_foreign_community_routes_do_not_affect_staff_nomad_search()->void:
 	report_community("island",Vector2(20,0));report_community("connected",Vector2(0,60))
 	system.set_scout_geography_authority(func(point:Vector2)->bool:return point.x<10)
 	system.scouting_staff.set_policy(.05,"recruitment");system.scouting_staff.advance(0)
 	assert_int(system.scout_missions.size()).is_equal(1)
-	assert_str(system.scout_missions[0].target_city_id).is_equal("connected_city")
+	assert_str(system.scout_missions[0].target_kind).is_equal("recruit_nomads")
+	assert_str(String(system.scout_missions[0].target_city_id)).is_empty()
 
 func test_staff_fit_a_smaller_party_to_provisions_without_spending_home_reserve()->void:
 	var reserve:=GameState.population_exact*.9*7

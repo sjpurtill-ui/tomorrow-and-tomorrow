@@ -1,7 +1,7 @@
 extends RefCounted
 ## Standing allocation controls physical parties, never fog or population directly.
 const EXCHANGE=preload("res://scripts/society_exchange.gd")
-const FOCI:={"exploration":"Exploration & discovery","recruitment":"Recruitment & influence"}
+const FOCI:={"exploration":"Exploration & discovery","recruitment":"Seek nomadic tribes","prospecting":"Rare-resource prospecting"}
 var host:Node
 var data:Dictionary={}
 func _init(world:Node)->void:host=world;reset()
@@ -35,15 +35,9 @@ func snapshot()->Dictionary:
 	for mission:Dictionary in host.scout_missions:assigned+=int(mission.get("personnel",0))
 	var recruitment:Dictionary={}
 	if data.focus=="recruitment":
-		var targets:=EXCHANGE.recruitment_targets(host)
-		recruitment={"known_targets":targets.size(),"reception":EXCHANGE.reception_snapshot()}
-		if not targets.is_empty():
-			var option:Dictionary=host._scout_target_option(String(targets[0]))
-			if not option.is_empty():
-				recruitment["target_label"]=String(option.get("label","known community")).trim_prefix("VISIT ").capitalize()
-				recruitment["outlook"]=EXCHANGE.invitation_outlook(String(option.get("civ_id","")))
+		recruitment={"reception":EXCHANGE.reception_snapshot(),"nomads":host.nomadic_recruitment_status()}
 	var origin:Dictionary=host._scout_origin(String(data.get("origin_city_id","")))
-	return {"share":float(data.share),"focus":String(data.focus),"origin_city_id":String(origin.get("id","")),"origin_label":String(origin.get("label","Home settlement")),"origins":host.scout_origin_options(),"target":floori(population*float(data.share)),"away":assigned,"parties":host.scout_missions.size(),"status":String(data.status),"food_spent":float(data.food_spent),"daily_food":float(assigned)*.55,"review_in":maxi(0,int(data.next_review)-int(WorldSimulation.state.elapsed_days)),"reception":EXCHANGE.reception_snapshot() if data.focus=="recruitment" else {},"recruitment":recruitment}
+	return {"share":float(data.share),"focus":String(data.focus),"origin_city_id":String(origin.get("id","")),"origin_label":String(origin.get("label","Home settlement")),"origins":host.scout_origin_options(),"target":floori(population*float(data.share)),"away":assigned,"parties":host.scout_missions.size(),"status":String(data.status),"food_spent":float(data.food_spent),"daily_food":float(assigned)*.55,"review_in":maxi(0,int(data.next_review)-int(WorldSimulation.state.elapsed_days)),"reception":EXCHANGE.reception_snapshot() if data.focus=="recruitment" else {},"recruitment":recruitment,"prospecting":host.prospecting_status()}
 func advance(day:int)->void:
 	if day<=int(data.last_day):return
 	data.last_day=day
@@ -67,16 +61,17 @@ func advance(day:int)->void:
 		return
 	var targets:Array[String]=[]
 	if data.focus=="recruitment":
-		var known:=EXCHANGE.recruitment_targets(host)
-		# Check a bounded group, rotating past unreachable reports on later
-		# reviews. One inaccessible city must not block the entire service.
-		for offset in mini(3,known.size()):targets.append(known[(int(data.target_cursor)+offset)%known.size()])
-		data.target_cursor=(int(data.target_cursor)+mini(3,known.size()))%maxi(1,known.size())
+		# Standing staff never choose the hostile act of recruiting inside a
+		# foreign city. That requires the player's explicit named-city order.
 		targets.append("recruit_people")
+	elif data.focus=="prospecting":
+		var prospecting:Dictionary=host.prospecting_status()
+		if not bool(prospecting.available):data.status=String(prospecting.message);return
+		targets.append("rare_resources")
 	else:targets.append("open_world")
 	var last_reason:="No connected route found within our current travel and food budget."
 	for target:String in targets:
-		var search:=target in ["open_world","recruit_people"]
+		var search:=target in ["open_world","recruit_people","rare_resources"]
 		# Familiar ground may need to be crossed to reach new country. Longer
 		# budgets are tried only when shorter, affordable trips are not useful.
 		for days:int in host.SCOUT_DURATIONS:
@@ -94,14 +89,15 @@ func advance(day:int)->void:
 			var party:Dictionary=host.scout_missions[-1];party["staff_managed"]=true;party["staff_focus"]=String(data.focus)
 			data.food_spent=float(data.food_spent)+float(party.provisions)
 			var purpose:="chart unvisited ground"
-			if data.focus=="recruitment":purpose="find communities and make contact" if search else "visit "+String(quote.target.label).trim_prefix("VISIT ")+" and build goodwill"
+			if data.focus=="recruitment":purpose="search for scarce wandering bands"
+			elif data.focus=="prospecting":purpose="prospect for rare mineral and fuel occurrences"
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
 			return
 	data.status=last_reason
 
 func returned_influence(mission:Dictionary,reports:Array[Dictionary],day:int)->Array[String]:
 	var outcomes:Array[String]=[]
-	if mission.get("target_kind","") not in ["recruit_people","recruit_people_visit"]:return outcomes
+	if mission.get("target_kind","")!="recruit_people_visit":return outcomes
 	var visited:Dictionary={}
 	for report:Dictionary in reports:
 		var id:=String(report.get("controller",""))

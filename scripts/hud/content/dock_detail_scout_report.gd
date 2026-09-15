@@ -29,7 +29,7 @@ func tab(_sub:int)->Dictionary:
 	var stayed:=int(report.get("stayed_personnel",0))
 	var recruits:=int(report.get("recruits",0))
 	var recruitment:Dictionary=report.get("recruitment_account",{})
-	var is_recruitment:=not recruitment.is_empty() or String(report.get("mission_kind",""))=="recruit_people"
+	var is_recruitment:=not recruitment.is_empty() or String(report.get("mission_kind","")) in ["recruit_people","recruit_nomads","recruit_people_visit"]
 	var contacts:Array=report.get("contacts",[])
 	var kpis:Array=[
 		{"label":"RETURNED","value":"%d of %d" % [returned,personnel],"delta":"%d lost · %d stayed" % [lost,stayed] if lost+stayed>0 else "all came home","delta_color":Tokens.RED if lost>0 else (Tokens.AMBER if stayed>0 else Tokens.GREEN),"accent":Tokens.RED if lost>0 else Tokens.GREEN,"tip":"The party that left against the party that came home"},
@@ -59,14 +59,17 @@ func tab(_sub:int)->Dictionary:
 		blocks.append({"type":"text","heading":"RECRUITMENT OUTCOME","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
 		var encountered:=int(recruitment.get("encountered",0))
 		if encountered>0 or bool(recruitment.get("met_community",false)):
+			var declined:=int(recruitment.get("declined",0))
 			blocks.append({"type":"rows","heading":"WHO THEY MET","items":[{
 				"name":String(recruitment.get("group","People on the road")).capitalize(),
-				"sub":"%d traveling · %d joined" % [encountered,recruits] if encountered>0 else "community visited · no household transfer",
+				"sub":"%d joined · %d declined" % [recruits,declined] if declined>0 else ("%d traveling · %d joined" % [encountered,recruits] if encountered>0 else "community visited · no household transfer"),
 				"value":"%d JOINED" % recruits if recruits>0 else "NONE","value_color":Tokens.GREEN if recruits>0 else Tokens.AMBER,"accent":Tokens.GREEN if recruits>0 else Tokens.AMBER,
 			}]})
 		var reason_lines:Array[String]=[]
 		for reason_variant in recruitment.get("reasons",[]): reason_lines.append("• "+String(reason_variant))
 		if not reason_lines.is_empty(): blocks.append({"type":"text","heading":"WHY THEY DECIDED","text":"\n".join(reason_lines)})
+		var diplomatic_response:=String(recruitment.get("diplomatic_response",""))
+		if not diplomatic_response.is_empty():blocks.append({"type":"text","heading":"POLITICAL CONSEQUENCE","text":diplomatic_response})
 	if _sub==0:
 		var discoveries:Array=report.get("discoveries",[])
 

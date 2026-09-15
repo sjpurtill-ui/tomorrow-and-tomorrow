@@ -11,6 +11,8 @@ const RECOGNITION_RULES={
 	"Bauxite":{"requires_all":["ore_assaying"]},
 	"Nickel Ore":{"requires_all":["ore_assaying"]},
 	"Silver Ore":{"requires_all":["ore_assaying"]},
+	"Gold Ore":{"requires_all":["ore_assaying"]},
+	"Crude Oil":{"requires_all":["mineral_specific_gravity"],"requires_any":[["chemical_distillation","coal_grading"]]},
 	"Deep Aquifer":{"requires_all":["well_siting"]},
 	"Refractory Clay":{"requires_all":["pit_firing"]},
 	"Phosphate Rock":{"requires_any":[["soil_assays","chemical_distillation"]]},
@@ -71,6 +73,8 @@ var catalog := {
 	"Uranium Ore":{"family":"Metal Ore","renewable":false,"recognition_year":250,"access":["mine","specialists","logistics"],"processing":["atomic_physics","reactor_engineering"],"signals":["materials","knowledge"],"base":0.0006},
 	"Graphite":{"family":"Mineral","renewable":false,"recognition_year":145,"access":["mine","specialists"],"processing":["standard_measures"],"signals":["materials","information"],"base":0.0008},
 	"Silver Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","lead_smelting"],"signals":["materials","trade"],"base":0.0012},
+	"Gold Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying"],"signals":["materials","trade"],"base":0.0007},
+	"Crude Oil":{"family":"Fuel","renewable":false,"recognition_year":0,"access":["mine","containers","logistics"],"processing":["chemical_distillation"],"signals":["materials","infrastructure"],"base":0.0007},
 	"Nickel Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","nickel_metal_recovery"],"signals":["materials","crafting"],"base":0.0010},
 	"Bauxite":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","alumina_refining"],"signals":["materials","crafting"],"base":0.0012},
 	"Rutile Ore":{"family":"Metal Ore","renewable":false,"recognition_year":0,"access":["mine","specialists","logistics"],"processing":["ore_assaying","industrial_catalyst_design"],"signals":["materials","crafting"],"base":0.0010},
@@ -178,6 +182,20 @@ func _deposit(resource_name: String, position: Vector3, quality: float, amount: 
 	# Exposed surface water is directly observable; a deep aquifer remains hidden.
 	var initial_stage:="surveyed" if resource_name=="Freshwater" else "unknown"
 	return {"id":"%s_%d" % [resource_name.to_snake_case(), index], "resource":resource_name, "position":position, "quality":quality, "remaining":amount, "initial_amount":amount, "stage":initial_stage, "clues":1.0 if initial_stage=="surveyed" else 0.0, "survey":1.0 if initial_stage=="surveyed" else 0.0, "access":0.0, "blockers":[], "development":0.0, "route":0.0, "workers":0,"daily_yield":0.0,"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Access not organized","last_reported_bottleneck":"","origin_scope":origin_scope,"environment_potential":environment_potential,"environment_signature":environment_signature,"source_settlement_id":""}
+
+func register_expedition_occurrence(resource_name:String,position:Vector2,profile:Dictionary)->Dictionary:
+	if not catalog.has(resource_name) or not recognition_ready(resource_name):return {}
+	for existing_variant in WorldSimulation.state.resource_deposits:
+		var existing:Dictionary=existing_variant
+		var location:Vector3=existing.get("position",Vector3.ZERO)
+		if String(existing.get("resource",""))==resource_name and Vector2(location.x,location.z).distance_to(position)<24.0:return {}
+	var potential:=clampf(float(profile.get("resource_potentials",{}).get(resource_name,0.0)),0.0,1.0)
+	if potential<.38:return {}
+	var local_rng:=RandomNumberGenerator.new();local_rng.seed=hash("%s:%s:%s:prospect" % [WorldSimulation.state.world_seed,resource_name,position.round()])
+	var deposit:=_deposit(resource_name,Vector3(position.x,0.0,position.y),clampf(.42+potential*.78+local_rng.randf_range(-.08,.08),.25,1.4),local_rng.randf_range(900.0,9000.0)*(.45+potential),WorldSimulation.state.resource_deposits.size(),"expedition",potential,String(profile.get("signature","")))
+	deposit["stage"]="surveyed";deposit["clues"]=1.0;deposit["survey"]=1.0
+	WorldSimulation.state.resource_deposits.append(deposit)
+	return deposit
 
 
 func _seed_founding_surface_recognition(deposit:Dictionary)->void:
@@ -562,6 +580,7 @@ func _material_profile(resource_name:String)->Dictionary:
 		"Peat":{"family":"fuel","bulk":0.90,"store":"dry","loss":0.0022,"base_yield":0.26},
 		"Coal":{"family":"fuel","bulk":1.10,"store":"yard","loss":0.0003,"base_yield":0.18},
 		"Bitumen":{"family":"chemical","bulk":0.85,"store":"sealed","loss":0.0020,"base_yield":0.16},
+		"Crude Oil":{"family":"fuel","bulk":0.78,"store":"sealed","loss":0.0015,"base_yield":0.10},
 		"Salt":{"family":"mineral","bulk":0.80,"store":"dry","loss":0.0018,"base_yield":0.24},
 		"Sulfur":{"family":"chemical","bulk":0.75,"store":"sealed","loss":0.0012,"base_yield":0.12},
 		"Nitrates":{"family":"chemical","bulk":0.70,"store":"dry","loss":0.0025,"base_yield":0.10},

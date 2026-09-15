@@ -7,6 +7,7 @@ const CONTACT_LIMIT:=1024
 const EarlyArt=preload("res://scripts/early_civ_artifacts.gd")
 const Artifacts=preload("res://scripts/artifact_collection.gd")
 const CONTACT_RADIUS:=2.0
+const MINIMUM_ATTRACTION_ADVANTAGE:=0.10
 const OBJECTS:={"clay_shaping":["Clay trial vessel","Clay"],"pit_firing":["Fired clay trial piece","Clay"],"cordage":["Braided cord sample","Fiber Plants"],"basketry":["Woven container sample","Fiber Plants"],"stone_sorting":["Selected cutting stone","Stone"],"joinery":["Fitted timber joint","Timber"],"tallies":["Marked counting stick","Timber"]}
 const CULTURE:=["oral_epics","festival_calendar","public_theatre","civic_games","comparative_chronicles","public_libraries","customary_law"]
 
@@ -160,6 +161,19 @@ static func valid_mission(mission:Dictionary)->bool:
 		for field:String in ["count","provisions","departed_day"]:
 			if not number(reservation.get(field)) or reservation[field]<0:return false
 		if reservation.count>1000000000000:return false
+	var outlook:Variant=mission.get("recruitment_outlook",{})
+	if not outlook is Dictionary:return false
+	if not outlook.is_empty():
+		if not outlook.get("ready") is bool or not short_text(outlook.get("reason"),600):return false
+		for field:String in ["quality_gap","credibility","score","threshold","room"]:
+			if not number(outlook.get(field)):return false
+	var response:Variant=mission.get("recruitment_diplomatic_response",{})
+	if not response is Dictionary:return false
+	if not response.is_empty():
+		if response.get("severity") not in ["objection","warning","hostile"] or not short_text(response.get("message"),800):return false
+		for field:String in ["pressure","opinion","border_tension","visits","recruits"]:
+			if not number(response.get(field)):return false
+		if response.pressure<0 or response.pressure>1 or response.opinion<-1 or response.opinion>1 or response.border_tension<0 or response.border_tension>1 or response.visits<1 or response.recruits<0:return false
 	return true
 
 static func policy(migration:String,sharing:String)->Dictionary:
@@ -210,7 +224,11 @@ static func reception_capacity()->int:
 
 static func attraction()->float:
 	var s:=WorldSimulation.state;var m:=s.simulation_metrics
-	return clampf(s.food_security*.3+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.2+s.population_health*.2+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15,0,1)
+	var health:=preload("res://scripts/civilization_indicators.gd").health()
+	var longevity:=clampf((float(health.life_expectancy)-15.0)/55.0,0.0,1.0)
+	var infant_survival:=1.0-clampf((float(health.infant_mortality_per_1000)-4.0)/176.0,0.0,1.0)
+	var health_quality:=longevity*.58+infant_survival*.42
+	return clampf(s.food_security*.28+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18+health_quality*.24+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15,0,1)
 
 static func connection(id:String)->Dictionary:
 	id=owner_id(id)
@@ -248,7 +266,7 @@ static func sample_missions(system:Node,day:int)->void:
 				if String(actual.get("controller",id))!=id:continue
 			mission.encountered_societies.append(id)
 			encounter(mission,id,String(system.civilizations[index].name),site.position,day)
-		if mission.get("target_kind","") in ["explore","recruit_people"] and day%7==int(mission.get("mission_id",0))%7:sample_ground(system,mission,position,day)
+		if mission.get("target_kind","") in ["explore","recruit_people","recruit_nomads","prospect_resources"] and day%7==int(mission.get("mission_id",0))%7:sample_ground(system,mission,position,day)
 
 static func encounter(mission:Dictionary,source:String,source_name:String,position:Dictionary,day:int)->void:
 	if not mission.has("carried_collections"):mission.carried_collections=[]
@@ -300,7 +318,8 @@ static func encounter(mission:Dictionary,source:String,source_name:String,positi
 		data().exposure=minf(1,float(data().exposure)+visitor_exposure*.2)
 		connection(recipient).last_visit=day)
 	share_practice(mission,source,position,day)
-	if mission.get("target_kind","") in ["recruit_people","recruit_people_visit"]:invite_households(mission,source,source_name,day)
+	# Only an explicit named-city order recruits inside a sovereign community.
+	if mission.get("target_kind","")=="recruit_people_visit":invite_households(mission,source,source_name,day)
 
 static func share_practice(mission:Dictionary,recipient:String,position:Dictionary,day:int)->void:
 	if data().sharing_policy=="guarded":return
@@ -366,20 +385,21 @@ static func recruitment_target(system:Node)->String:
 
 static func invitation_outlook(source:String)->Dictionary:
 	var room:=reception_capacity()
-	if owner_state(source)==null:return {"ready":false,"score":-1.0,"threshold":-0.02,"reason":"The community is no longer available to visit."}
+	if owner_state(source)==null:return {"ready":false,"quality_gap":-1.0,"credibility":0.0,"score":-1.0,"threshold":MINIMUM_ATTRACTION_ADVANTAGE,"room":room,"reason":"The community is no longer available to visit."}
 	var index:=WorldSimulation.world._civilization_index(source)
 	var opinion:=float(WorldSimulation.world.civilizations[index].player_relation.get("opinion",0)) if index>=0 else 0.0
 	var ties:=connection(source)
 	var our_attraction:=attraction()
 	var their_attraction:float=WorldSimulation.scoped(owner_id(source),func()->float:return attraction())
-	# Households compare material conditions, but returned visits and goodwill make
-	# a marginal offer credible. This gives repeated influence journeys a real
-	# path toward recruitment without creating unaffiliated people from nothing.
-	var score:=our_attraction-their_attraction+float(ties.familiarity)*.12+maxf(0.0,opinion)*.08+float(ties.respect)*.04
-	var threshold:=-0.02
-	var reason:="Households can hear an invitation on the next visit." if score>=threshold else "Our living conditions and trusted ties are not yet persuasive enough. Improve life at home or keep building familiarity."
+	# Goodwill can make an offer believable, but it cannot make households abandon
+	# a society whose actual living conditions are as good as (or better than) ours.
+	var quality_gap:=our_attraction-their_attraction
+	var credibility:=float(ties.familiarity)*.10+maxf(0.0,opinion)*.05+float(ties.respect)*.05
+	var score:=quality_gap+credibility
+	var threshold:=MINIMUM_ATTRACTION_ADVANTAGE
+	var reason:="Households judge food, housing, life expectancy, infant survival, safety, and cohesion clearly better here; trusted ties make the offer credible." if quality_gap>=threshold else "Their households do not judge our living conditions clearly better than their own. Familiarity cannot substitute for a real advantage in food, housing, health, safety, and cohesion."
 	if room<2:reason=String(reception_snapshot().message)
-	return {"ready":room>=2 and score>=threshold,"score":score,"threshold":threshold,"room":room,"opinion":opinion,"familiarity":float(ties.familiarity),"reason":reason}
+	return {"ready":room>=2 and quality_gap>=threshold,"quality_gap":quality_gap,"credibility":credibility,"score":score,"threshold":threshold,"room":room,"opinion":opinion,"familiarity":float(ties.familiarity),"reason":reason}
 
 static func invite_households(mission:Dictionary,source:String,source_name:String,day:int)->void:
 	if mission.has("migrant_reservation"):return
@@ -390,10 +410,11 @@ static func invite_households(mission:Dictionary,source:String,source_name:Strin
 	if room<2:mission["recruitment_reason"]="No invitation: "+String(reception_snapshot().message);return
 	var recipient:=WorldSimulation.actor_id
 	var outlook:=invitation_outlook(source)
+	mission["recruitment_outlook"]=outlook.duplicate(true)
 	var remaining_days:=maxi(1,int(mission.get("actual_return_day",mission.return_day))-day)
 	var key:="%s:%s" % [recipient,str(mission.get("mission_id",0))]
 	var result:Dictionary=WorldSimulation.scoped(owner_id(source),func()->Dictionary:
-		var advantage:=float(outlook.score)-float(outlook.threshold)+.02
+		var advantage:=float(outlook.quality_gap)-float(outlook.threshold)+float(outlook.credibility)+.02
 		if not bool(outlook.ready):return {"reason":String(outlook.reason)}
 		var free:=maxi(0,WorldSimulation.state.able_population()-WorldSimulation.military._mobilized_count()-WorldSimulation.world.mission_absent_personnel()-12)
 		var delegates:=clampi(int(mission.get("personnel",2)),2,80)
@@ -403,9 +424,13 @@ static func invite_households(mission:Dictionary,source:String,source_name:Strin
 		WorldSimulation.food.issue_for_obligation(provisions,"migration","Households joining a returning party",remaining_days,people)
 		data().outbound[key]={"count":people,"until":int(mission.get("actual_return_day",mission.return_day))+1,"destination":recipient}
 		return {"source":source,"source_name":source_name,"key":key,"count":people,"provisions":provisions,"departed_day":day})
+	var recruits:=int(result.get("count",0))
+	if recipient in ["player","human"]:
+		var diplomatic:Dictionary=WorldSimulation.diplomacy.apply_recruitment_incident(owner_id(source),recruits,day)
+		if not diplomatic.is_empty():mission["recruitment_diplomatic_response"]=diplomatic
 	if result.has("reason"):mission["recruitment_reason"]=result.reason;return
 	mission["migrant_reservation"]=result
-	mission["recruitment_reason"]="%d people accepted the invitation and are traveling with the party." % int(result.count)
+	mission["recruitment_reason"]="%d people accepted the invitation and are traveling with the party." % recruits
 
 # These investigations can use a returned physical sample. This never claims
 # surveyed local reserves or supplies accessible/developed material gates.

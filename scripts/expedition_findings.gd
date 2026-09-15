@@ -16,6 +16,8 @@ const STORIES:Dictionary={
 	"Tin Ore":["The tin country","The party returned with the location of a tin-bearing deposit.","A new source for your developing metal economy. Finding the ore does not confer the knowledge or labor to work it."],
 	"Iron Ore":["Iron beneath the uplands","An iron-bearing occurrence has been entered on the expedition's chart.","A long-term destination for mining and metalworking. Its remoteness still has to be overcome."],
 	"Coal":["The black-stone country","The scouts located a coal occurrence on the route.","A potential fuel supply once mining, ventilation and transport can be supported."],
+	"Gold Ore":["A trace of gold in the rock","Prospectors followed mineral signs to a gold-bearing occurrence and fixed it on the survey chart.","A rare trade and metal source. Finding it supplies no gold until access, extraction, and secure transport are organized."],
+	"Crude Oil":["Oil beneath the basin","Prospectors traced seepage and sedimentary structure to a probable petroleum occurrence.","A future fuel and chemical feedstock. Wells, containers, refining knowledge, and long-distance logistics are still required."],
 	"Phosphate Rock":["New ground for the growers","The party charted a phosphate-rock occurrence in the open country.","A prospective agricultural material source. Specialists, mining and logistics are still required."],
 }
 

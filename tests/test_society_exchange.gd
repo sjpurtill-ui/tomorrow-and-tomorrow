@@ -74,9 +74,7 @@ func test_households_transfer_once_and_preserve_world_population_and_mortality()
 	assert_float(float(E.pressure().unsettled)).is_equal(float(count))
 	assert_int(int(E.known_relation("neighbor").arrivals)).is_equal(count)
 
-func test_a_comparable_known_community_can_send_real_households_on_the_first_viable_visit()->void:
-	# Equal material conditions are a credible offer; this used to fail the hard
-	# six-point advantage gate forever despite spare homes and peaceful contact.
+func test_a_comparable_known_community_does_not_abandon_itself_for_familiarity()->void:
 	WorldSimulation.scoped("neighbor",func()->void:
 		WorldSimulation.state.housing_capacity=280
 		WorldSimulation.state.food_security=1;WorldSimulation.state.population_health=.95
@@ -85,10 +83,29 @@ func test_a_comparable_known_community_can_send_real_households_on_the_first_via
 		WorldSimulation.state.population_allocations.Administration=12)
 	CivilizationSystem.civilizations[0].player_relation.opinion=0.0
 	var outlook:=E.invitation_outlook("neighbor")
-	assert_bool(outlook.ready).override_failure_message(str(outlook)).is_true()
+	assert_bool(outlook.ready).override_failure_message(str(outlook)).is_false()
 	var trip:=mission("recruit_people_visit");E.invite_households(trip,"neighbor","Neighbor",10)
-	assert_bool(trip.has("migrant_reservation")).is_true()
-	assert_int(int(trip.migrant_reservation.count)).is_greater_equal(2)
+	assert_bool(trip.has("migrant_reservation")).is_false()
+	assert_str(String(trip.recruitment_reason)).contains("clearly better")
+
+func test_foreign_recruitment_always_creates_a_real_diplomatic_incident()->void:
+	var before_opinion:=float(CivilizationSystem.civilizations[0].player_relation.opinion)
+	var trip:=mission("recruit_people_visit");E.invite_households(trip,"neighbor","Neighbor",10)
+	assert_bool(trip.has("recruitment_diplomatic_response")).is_true()
+	assert_float(float(CivilizationSystem.civilizations[0].player_relation.opinion)).is_less(before_opinion)
+	assert_float(float(CivilizationSystem.civilizations[0].player_relation.border_tension)).is_greater(0.0)
+	assert_int(int(CivilizationSystem.civilizations[0].player_relation.recruitment_visits)).is_equal(1)
+	var account:=CivilizationSystem._recruitment_return_account(trip,40,int(trip.get("migrant_reservation",{}).get("count",0)))
+	assert_str(String(account.diplomatic_response)).contains("leaders")
+
+func test_repeated_household_poaching_drives_containment_without_scripted_war()->void:
+	for visit in 6:
+		var response:=WorldSimulation.diplomacy.apply_recruitment_incident("neighbor",3,10+visit*30)
+		assert_dict(response).is_not_empty()
+	var relation:Dictionary=CivilizationSystem.civilizations[0].player_relation
+	assert_float(float(relation.recruitment_pressure)).is_greater_equal(.58)
+	assert_str(String(relation.stance)).is_equal("contain")
+	assert_bool(bool(relation.at_war)).is_false()
 
 func test_failed_invitation_records_the_real_community_and_a_useful_reason()->void:
 	WorldSimulation.scoped("neighbor",func()->void:
@@ -336,7 +353,7 @@ func test_reception_readiness_names_individual_shortages_and_reserved_places()->
 	CivilizationSystem.scout_missions.clear()
 	assert_int(E.reception_capacity()).is_equal(5)
 
-func test_dispatched_influence_party_physically_brings_knowledge_home_without_inviting_when_full()->void:
+func test_standing_recruiters_never_auto_target_a_known_foreign_city()->void:
 	GameState.housing_capacity=190
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
 	civ.strategic_regions.append({"id":"neighbor_city","name":"Neighbor Town","role":"capital","map_x":.5,"map_y":.5,"position":Vector2(30,0),"controller":"neighbor"})
@@ -345,17 +362,10 @@ func test_dispatched_influence_party_physically_brings_knowledge_home_without_in
 	CivilizationSystem.scouting_staff.advance(0)
 	assert_int(CivilizationSystem.scout_missions.size()).is_equal(1)
 	var trip:Dictionary=CivilizationSystem.scout_missions[0]
-	assert_str(trip.target_kind).is_equal("recruit_people_visit")
+	assert_str(trip.target_kind).is_equal("recruit_nomads")
+	assert_str(String(trip.get("target_civ_id",""))).is_empty()
 	assert_dict(E.data().collections).is_empty()
-	var end:=int(trip.actual_return_day)
-	for day in range(1,end):
-		GameState.elapsed_days=day;E.sample_missions(CivilizationSystem,day)
-	assert_bool("neighbor" in trip.encountered_societies).is_true()
 	assert_bool(trip.has("migrant_reservation")).is_false()
-	assert_str(trip.recruitment_reason).contains("Housing:")
-	assert_dict(E.data().collections).is_empty()
-	assert_int(E.returned(trip,end).size()).is_greater(0)
-	assert_int(E.arrive(trip,end)).is_equal(0)
 	assert_float(GameState.population_exact).is_equal(200.0)
 
 func _archive_item(index:int)->Dictionary:
