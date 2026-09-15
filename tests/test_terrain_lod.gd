@@ -1,5 +1,9 @@
 extends GdUnitTestSuite
 
+func test_refinement_slices_preserve_camera_frame_budget()->void:
+	assert_int(Terrain.TERRAIN_PATCH_MOVING_BUDGET_USEC).is_less_equal(1500)
+	assert_int(Terrain.TERRAIN_PATCH_IDLE_BUDGET_USEC).is_less_equal(3000)
+
 func test_cartographic_relief_begins_after_close_ground_is_unresolved()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
 	assert_str(source).contains("float map_relief = smoothstep(0.035,0.28,pixel_world)")

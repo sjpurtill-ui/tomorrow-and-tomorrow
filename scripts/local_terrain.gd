@@ -114,6 +114,8 @@ var terrain_visual_sample_climate:Dictionary={}
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
 const SURFACE_PRECISION:=preload("res://scripts/surface_precision.gd")
 const TERRAIN_LOD:=preload("res://scripts/terrain_lod.gd")
+const TERRAIN_PATCH_MOVING_BUDGET_USEC:=1400
+const TERRAIN_PATCH_IDLE_BUDGET_USEC:=3000
 var dragging := false
 var rotating_camera := false
 var grid_x := 80
@@ -1733,7 +1735,11 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 
 func _advance_terrain_patch()->void:
 	if terrain_patch_job==null: return
-	if not terrain_patch_job.advance(2500 if _camera_in_motion() else 5000): return
+	# A useful low-density patch is already visible while refinement runs. Keep
+	# sampling below one tenth of a 60 Hz frame during navigation and below one
+	# fifth while idle; the former 2.5/5 ms slices compounded with rendering into
+	# obvious hitches even though the final terrain arrived sooner.
+	if not terrain_patch_job.advance(TERRAIN_PATCH_MOVING_BUDGET_USEC if _camera_in_motion() else TERRAIN_PATCH_IDLE_BUDGET_USEC): return
 	var started:=Time.get_ticks_usec()
 	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights}
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
