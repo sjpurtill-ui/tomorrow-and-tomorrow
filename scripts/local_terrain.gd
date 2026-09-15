@@ -1859,6 +1859,7 @@ render_mode diffuse_burley, specular_disabled;
 uniform sampler2D ground_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D semiarid_ground_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D forest_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
+uniform sampler2D regional_ground_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size = vec2(40075.0, 20004.0);
 uniform vec2 fog_current_origin = vec2(0.0);
@@ -1961,6 +1962,8 @@ void fragment() {
 	vec2 local_ground_uv_rotated = periodic_surface_uv(surface_position,surface_origin,4524,10000,true,vec2(0.29,-0.41));
 	vec2 local_forest_uv = periodic_surface_uv(surface_position,surface_origin,23,100,false,vec2(0.0));
 	vec2 local_forest_uv_rotated = periodic_surface_uv(surface_position,surface_origin,1817,10000,true,vec2(-0.17,0.36));
+	vec2 regional_ground_uv = periodic_surface_uv(surface_position,surface_origin,1,40,false,vec2(0.0));
+	vec2 regional_ground_uv_rotated = periodic_surface_uv(surface_position,surface_origin,23,1000,true,vec2(0.37,-0.23));
 	// The source albedo contains its own broad photographic mottling. At x18 it
 	// repeated as 55 m rugs; x68 places that content at a believable 10–20 m aerial
 	// scale, while the biome FBM above remains responsible for large land-cover mass.
@@ -2000,10 +2003,21 @@ void fragment() {
 	vec3 procedural_forest = mix(vec3(0.055,0.105,0.070), vec3(0.155,0.205,0.125), biome_patch * 0.62 + regional * 0.38);
 	vec3 forest_map = procedural_forest;
 	float semiarid_weight=1.0-smoothstep(0.24,0.52,precipitation);
-	// Sampling an unresolved aerial layer only burns texture bandwidth and lets
-	// mip-averaged tiles muddy the continental image. Each tier now has a hard
-	// zero-cost exit once its projected footprint is smaller than a pixel.
-	if (max(local_detail,regional_detail)>0.0) {
+	// A dedicated 40 km orthophoto supplies the drainage and mineral structure
+	// that a metre-scale ground tile correctly loses to mipmapping at altitude.
+	// Its two rotated samples replace four inappropriate local samples in the
+	// regional-only view and disappear before close inspection.
+	float regional_photo_detail=regional_detail*(1.0-smoothstep(0.35,0.85,local_detail));
+	if (regional_photo_detail>0.0) {
+		vec3 regional_photo=mix(texture(regional_ground_albedo,regional_ground_uv).rgb,
+			texture(regional_ground_albedo,regional_ground_uv_rotated).rgb,0.18);
+		float regional_tone=clamp(dot(regional_photo,vec3(0.28,0.57,0.15))/0.49,0.68,1.30);
+		ground_map*=mix(1.0,regional_tone,regional_photo_detail*0.72);
+		forest_map*=mix(1.0,regional_tone,regional_photo_detail*0.52);
+	}
+	// Sampling an unresolved local layer only burns texture bandwidth and lets
+	// mip-averaged tiles muddy the regional and continental image.
+	if (local_detail>0.0) {
 		vec3 local_ground_a;
 		vec3 local_ground_b;
 		if (semiarid_weight>0.98) {
@@ -2016,10 +2030,10 @@ void fragment() {
 			local_ground_a=mix(texture(ground_albedo,local_ground_uv).rgb,texture(semiarid_ground_albedo,local_ground_uv).rgb,semiarid_weight);
 			local_ground_b=mix(texture(ground_albedo,local_ground_uv_rotated).rgb,texture(semiarid_ground_albedo,local_ground_uv_rotated).rgb,semiarid_weight);
 		}
-		ground_map = mix(ground_map, mix(local_ground_a, local_ground_b, 0.22), max(local_detail*0.72,regional_detail*0.34));
+		ground_map = mix(ground_map, mix(local_ground_a, local_ground_b, 0.22), local_detail*0.72);
 		vec3 local_forest_a = texture(forest_albedo, local_forest_uv).rgb;
 		vec3 local_forest_b = texture(forest_albedo, local_forest_uv_rotated).rgb;
-		forest_map = mix(forest_map, mix(local_forest_a, local_forest_b, 0.18), max(local_detail*0.76,regional_detail*0.34));
+		forest_map = mix(forest_map, mix(local_forest_a, local_forest_b, 0.18), local_detail*0.76);
 	}
 	vec3 ground_close = ground_map;
 	// The existing tile contains dozens of crowns across its width. A 500 m
@@ -2157,12 +2171,13 @@ void fragment() {
 	vec3 horizontal_sun = normalize(vec3(-0.46, 0.0, -0.42));
 	float directional_slope = dot(normalize(world_normal), horizontal_sun);
 	float hillshade = clamp(1.0 + directional_slope * 2.2 - slope * 0.12, 0.78, 1.16);
-	// Close aerial views still need landform. Suppressing most hillshade at the
-	// exact settlement scale turned real 10–50 m relief into flat colour patches.
-	// Texture supplies surface detail; directional normal shading supplies shape.
-	float regional_relief = 1.0 - close_detail * 0.38;
-	earth *= mix(1.0, hillshade, regional_relief * 0.82);
-	float ridge_glint = smoothstep(0.12, 0.62, slope) * smoothstep(0.25, 0.82, hill_light) * regional_relief;
+	// The scene sun already shades resolvable terrain. Applying this cartographic
+	// hillshade at the same time doubled broad shadows into soft dark blobs at the
+	// 50,000-foot tier. Fade the map-only cue in once pixels cover country-scale
+	// ground, where geometric lighting alone no longer communicates the relief.
+	float map_relief = smoothstep(0.35,2.5,pixel_world);
+	earth *= mix(1.0, hillshade, map_relief * 0.82);
+	float ridge_glint = smoothstep(0.12, 0.62, slope) * smoothstep(0.25, 0.82, hill_light) * map_relief;
 	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.20);
 	// Close aerial imagery needs a different exposure than the shaded regional
 	// relief map. Without this lift the settlement-scale ground fell nearly black.
@@ -2183,9 +2198,11 @@ void fragment() {
 	var ground_texture: Texture2D = load("res://assets/terrain/temperate_ground_albedo_v1.png")
 	var forest_texture: Texture2D = load("res://assets/terrain/temperate_forest_albedo_v1.png")
 	var semiarid_texture: Texture2D = load("res://assets/terrain/semiarid_ground_albedo_v1.png")
+	var regional_ground_texture: Texture2D = load("res://assets/terrain/regional_ground_albedo_v1.png")
 	material.set_shader_parameter("ground_albedo",ground_texture)
 	material.set_shader_parameter("forest_albedo",forest_texture)
 	material.set_shader_parameter("semiarid_ground_albedo",semiarid_texture)
+	material.set_shader_parameter("regional_ground_albedo",regional_ground_texture)
 	material.set_shader_parameter("land_resources",1.0 if resource_view_enabled else 0.0)
 	material.set_shader_parameter("woodland_channel",SEAMLESS_WORLD)
 	material.set_shader_parameter("drainage_phase",float(posmod(GameState.world_seed,10007))/10007.0)
