@@ -19,6 +19,15 @@ def source(path):
 
 terrain = source('scripts/local_terrain.gd').split('func _create_terrain_material()', 1)[1]
 shader = terrain.split('shader.code = """', 1)[1].split('"""', 1)[0]
+# Freeze revision-owned include bodies too. Leaving res:// include directives in
+# the baseline caused both baseline and candidate Shader objects to load the
+# candidate checkout's helpers, invalidating paired measurements of include work.
+for include_path in ('scripts/surface_precision.gdshaderinc',
+                     'scripts/ground_surface.gdshaderinc',
+                     'scripts/seasonal_surface.gdshaderinc'):
+    directive = '#include "res://' + include_path + '"'
+    assert directive in shader
+    shader = shader.replace(directive, source(include_path))
 cutting = source('scripts/landscape_resource_visuals.gd').split('const CUTTING_SHADER:="""', 1)[1].split('"""', 1)[0]
 assert shader.count('varying vec3 world_position;') == 1
 shader = shader.replace('varying vec3 world_position;', cutting + '\nvarying vec3 world_position;')

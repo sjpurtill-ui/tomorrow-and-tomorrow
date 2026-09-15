@@ -20,6 +20,7 @@ func same_appearance(a:Image,b:Image,label:String,exact:bool=false)->bool:
 	return maximum<=1 and float(changed.size())/float(a.get_width()*a.get_height())<.00005
 
 func _ready()->void:
+	print("TERRAIN_SHADER_GUARD ",JSON.stringify({"userdata":OS.get_user_data_dir(),"owner":OS.get_environment("TT_CAPTURE_OWNER"),"executable":OS.get_executable_path()}))
 	if not OS.get_user_data_dir().ends_with("TomorrowCanopyTransitionTests") or OS.get_environment("TT_CAPTURE_OWNER")!="canopy-transition" or OS.get_executable_path().get_file()!="GodotCanopyProbe":
 		push_error("Use the verified private landscape capture runner.");get_tree().quit(2);return
 	output="res://artifacts/terrain-shader-cost/";call_deferred("run")
