@@ -26,3 +26,12 @@ func test_owned_stock_is_visible_without_inventing_a_deposit()->void:
 	assert_str(cards[0].id).is_equal("Stone")
 	assert_float(float(cards[0].stock)).is_equal(27.0)
 	assert_int(int(cards[0].sites)).is_equal(0)
+	assert_str(cards[0].unit).is_equal("bulk units")
+	assert_str(cards[0].description).contains("27.0 bulk units stored")
+func test_material_units_distinguish_water_portions_from_bulk_inventory()->void:
+	GameState.resource_deposits=[];GameState.resource_stockpiles={"Freshwater":752.2,"Timber":238.1}
+	var cards:=Data.materials();var units:Dictionary={}
+	for card:Dictionary in cards:
+		if card.known:units[card.id]=card.unit
+	assert_str(units.Freshwater).is_equal("daily portions")
+	assert_str(units.Timber).is_equal("bulk units")

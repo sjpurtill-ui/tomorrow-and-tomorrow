@@ -77,7 +77,7 @@ func refresh(refit:bool)->void:
 	if mode=="inquiry": records=Data.inquiry(domain,query)
 	else:
 		records.assign(SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array: return Data.materials()).filter(func(item:Dictionary)->bool: return (domain=="" or item.domain==domain) and (query=="" or String(item.name).to_lower().contains(query.to_lower()))))
-	legend.text=("DISCOVERED = colored · AVAILABLE / RESEARCHING = outlined · LOCKED = gray. Lines are prerequisites. " if mode=="inquiry" else "Colored = recognized · gray = still unknown. Quantities are bulk units in the selected city. ")+"Drag to pan, wheel to zoom. %d entries." % records.size()
+	legend.text=("DISCOVERED = colored · AVAILABLE / RESEARCHING = outlined · LOCKED = gray. Lines are prerequisites. " if mode=="inquiry" else "Stock: bulk units; water: daily drinking portions (one person-day). Delivery uses the same unit per day. ")+"Drag to pan, wheel to zoom. %d entries." % records.size()
 	plot.arrange()
 	if refit: plot.call_deferred("fit")
 	var found:=false
@@ -121,12 +121,15 @@ class AtlasPlot extends Control:
 	var dragging:=false
 	var press:=Vector2.ZERO
 	var moved:=false
-	const CARD:=Vector2(238,104)
+	const INQUIRY_CARD:=Vector2(238,104)
+	const MATERIAL_CARD:=Vector2(214,86)
+	func card_size()->Vector2:return INQUIRY_CARD if owner_view.mode=="inquiry" else MATERIAL_CARD
 	func _ready()->void:
 		clip_contents=true;mouse_default_cursor_shape=Control.CURSOR_DRAG;focus_mode=Control.FOCUS_ALL
 		resized.connect(func()->void: arrange();fit())
 	func arrange()->void:
 		boxes.clear()
+		var card:=card_size()
 		var rows:Dictionary={};var levels:Dictionary={}
 		for item:Dictionary in owner_view.records:levels[item.id]=0
 		if owner_view.mode=="inquiry":
@@ -140,10 +143,10 @@ class AtlasPlot extends Control:
 				if not changed:break
 		for index in owner_view.records.size():
 			var item:Dictionary=owner_view.records[index]
-			var columns:=clampi(floori(size.x/270),2,4)
+			var columns:=clampi(floori(size.x/(270 if owner_view.mode=="inquiry" else 234)),2,4 if owner_view.mode=="inquiry" else 6)
 			var col:int=int(levels[item.id]) if owner_view.mode=="inquiry" else index%columns
 			var row:int=int(rows.get(col,0)) if owner_view.mode=="inquiry" else index/columns
-			rows[col]=row+1;boxes[item.id]=Rect2(Vector2(col*300,row*140),CARD)
+			rows[col]=row+1;boxes[item.id]=Rect2(Vector2(col*(300 if owner_view.mode=="inquiry" else 234),row*(140 if owner_view.mode=="inquiry" else 102)),card)
 		queue_redraw()
 	func fit()->void:
 		if boxes.is_empty():queue_redraw();return
@@ -177,22 +180,40 @@ class AtlasPlot extends Control:
 			for item:Dictionary in owner_view.records:
 				for req in item.requires:
 					if boxes.has(req):
-						var a:=at(boxes[req].position+Vector2(CARD.x,CARD.y*.5));var b:=at(boxes[item.id].position+Vector2(0,CARD.y*.5))
+						var a:=at(boxes[req].position+Vector2(INQUIRY_CARD.x,INQUIRY_CARD.y*.5));var b:=at(boxes[item.id].position+Vector2(0,INQUIRY_CARD.y*.5))
 						draw_line(a,b,Color("587681"),maxf(1,2*zoom_level),true)
 		for item:Dictionary in owner_view.records:
-			var rect:=Rect2(at(boxes[item.id].position),CARD*zoom_level)
+			var card:=card_size();var rect:=Rect2(at(boxes[item.id].position),card*zoom_level)
 			if not rect.intersects(Rect2(Vector2.ZERO,size)):continue
 			var selected:bool=item.id==owner_view.selected_id
 			var color:=Color("83b7a5") if item.known else Color("7d898c")
-			draw_style_box(style(Color("253e40") if item.known else Color("202a30"),GOLD if selected else color,2 if selected else 1),rect)
-			var icon:Texture2D=Icons.texture_for(item.id) if owner_view.mode!="inquiry" and item.known else Icons.domain_texture(String(item.domain),color) if owner_view.mode=="inquiry" else null
-			if icon:draw_texture_rect(icon,Rect2(rect.position+Vector2(10,24)*zoom_level,Vector2(48,48)*zoom_level),false)
-			var left:=66.0 if icon else 14.0
-			var font:=ThemeDB.fallback_font
-			draw_string(font,rect.position+Vector2(left,31)*zoom_level,String(item.name),HORIZONTAL_ALIGNMENT_LEFT,(CARD.x-left-10)*zoom_level,maxi(8,roundi(14*zoom_level)),INK)
-			draw_string(font,rect.position+Vector2(left,54)*zoom_level,String(item.status),HORIZONTAL_ALIGNMENT_LEFT,(CARD.x-left-10)*zoom_level,maxi(7,roundi(10*zoom_level)),color)
-			var note:="%d%% progress" % roundi(float(item.get("progress",0))*100) if owner_view.mode=="inquiry" and item.status=="RESEARCHING" else String(item.domain).capitalize() if owner_view.mode=="inquiry" else "%.1f stored · +%.1f/day" % [item.get("stock",0),item.get("flow",0)] if item.known else "Survey to learn more"
-			draw_string(font,rect.position+Vector2(14,86)*zoom_level,note,HORIZONTAL_ALIGNMENT_LEFT,(CARD.x-28)*zoom_level,maxi(7,roundi(11*zoom_level)),MUTED)
+			var fill:=Color("253e40") if item.known and float(item.get("stock",0))>0 else Color("1c3034") if item.known else Color("202a30")
+			draw_style_box(style(fill,GOLD if selected else color,2 if selected else 1),rect)
+			if owner_view.mode=="inquiry":_draw_inquiry_card(item,rect,color)
+			else:_draw_material_card(item,rect,color,selected)
+	func _draw_inquiry_card(item:Dictionary,rect:Rect2,color:Color)->void:
+		var font:=ThemeDB.fallback_font
+		var icon:Texture2D=Icons.domain_texture(String(item.domain),color)
+		if icon:draw_texture_rect(icon,Rect2(rect.position+Vector2(10,24)*zoom_level,Vector2(48,48)*zoom_level),false)
+		var left:=66.0 if icon else 14.0
+		draw_string(font,rect.position+Vector2(left,31)*zoom_level,String(item.name),HORIZONTAL_ALIGNMENT_LEFT,(INQUIRY_CARD.x-left-10)*zoom_level,maxi(8,roundi(14*zoom_level)),INK)
+		draw_string(font,rect.position+Vector2(left,54)*zoom_level,String(item.status),HORIZONTAL_ALIGNMENT_LEFT,(INQUIRY_CARD.x-left-10)*zoom_level,maxi(7,roundi(10*zoom_level)),color)
+		var note:="%d%% progress" % roundi(float(item.get("progress",0))*100) if item.status=="RESEARCHING" else String(item.domain).capitalize()
+		draw_string(font,rect.position+Vector2(14,86)*zoom_level,note,HORIZONTAL_ALIGNMENT_LEFT,(INQUIRY_CARD.x-28)*zoom_level,maxi(7,roundi(11*zoom_level)),MUTED)
+	func _draw_material_card(item:Dictionary,rect:Rect2,color:Color,selected:bool)->void:
+		var font:=ThemeDB.fallback_font
+		draw_rect(Rect2(rect.position,Vector2(rect.size.x,maxf(2,3*zoom_level))),GOLD if selected else color)
+		var icon:Texture2D=Icons.texture_for(item.id) if item.known else null
+		if icon:draw_texture_rect(icon,Rect2(rect.position+Vector2(10,14)*zoom_level,Vector2(38,38)*zoom_level),false)
+		var left:=56.0 if icon else 12.0
+		draw_string(font,rect.position+Vector2(left,23)*zoom_level,String(item.name),HORIZONTAL_ALIGNMENT_LEFT,(MATERIAL_CARD.x-left-9)*zoom_level,maxi(8,roundi(13*zoom_level)),INK)
+		draw_string(font,rect.position+Vector2(left,41)*zoom_level,String(item.status),HORIZONTAL_ALIGNMENT_LEFT,(MATERIAL_CARD.x-left-9)*zoom_level,maxi(7,roundi(8*zoom_level)),color)
+		if not item.known:
+			draw_string(font,rect.position+Vector2(12,69)*zoom_level,"Survey to reveal material",HORIZONTAL_ALIGNMENT_LEFT,(MATERIAL_CARD.x-24)*zoom_level,maxi(7,roundi(10*zoom_level)),MUTED);return
+		var amount:="%.1f" % float(item.get("stock",0));var unit:=String(item.get("unit","bulk units")).to_upper()
+		draw_string(font,rect.position+Vector2(12,70)*zoom_level,amount,HORIZONTAL_ALIGNMENT_LEFT,58*zoom_level,maxi(9,roundi(15*zoom_level)),INK)
+		draw_string(font,rect.position+Vector2(67,68)*zoom_level,unit,HORIZONTAL_ALIGNMENT_LEFT,80*zoom_level,maxi(7,roundi(8*zoom_level)),MUTED)
+		var flow:="%+.1f / DAY" % float(item.get("flow",0))
+		draw_string(font,rect.position+Vector2(145,68)*zoom_level,flow,HORIZONTAL_ALIGNMENT_RIGHT,57*zoom_level,maxi(7,roundi(8*zoom_level)),color)
 	func style(fill:Color,border:Color,width:int)->StyleBoxFlat:
 		var value:=StyleBoxFlat.new();value.bg_color=fill;value.border_color=border;value.set_border_width_all(width);value.set_corner_radius_all(7);return value
-

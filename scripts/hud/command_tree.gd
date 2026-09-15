@@ -1,5 +1,6 @@
 extends Tree
 ## Lazy, expandable echelons. Browsing never splits or recruits a force.
+const T=preload("res://scripts/hud/hud_tokens.gd")
 signal command_selected(selection:Dictionary)
 var service:="army"
 var command:RefCounted
@@ -16,7 +17,12 @@ func _ready()->void:
 	set_column_expand(1,false);set_column_custom_minimum_width(1,maxi(84,ceili(title_width)));set_column_custom_minimum_width(2,95)
 	set_column_clip_content(0,true);set_column_clip_content(2,true)
 	add_theme_font_size_override("font_size",14);add_theme_constant_override("v_separation",9)
-	custom_minimum_size.y=220;size_flags_vertical=Control.SIZE_EXPAND_FILL
+	add_theme_color_override("font_color",T.BODY_2);add_theme_color_override("font_selected_color",T.GOLD_BRIGHT)
+	add_theme_color_override("title_button_color",T.MUTED);add_theme_color_override("guide_color",T.BORDER_SOFT)
+	add_theme_stylebox_override("panel",T.flat(Color("091216"),T.BORDER_2,1,5,4))
+	add_theme_stylebox_override("selected",T.flat(T.GOLD_WASH,T.GOLD,1,3))
+	add_theme_stylebox_override("selected_focus",T.flat(T.GOLD_WASH,T.GOLD_BRIGHT,1,3))
+	custom_minimum_size.y=180;size_flags_vertical=Control.SIZE_EXPAND_FILL
 	# Native Tree locks its items while dispatching a mouse selection. Populate
 	# the expanded branch after that event, including when it came from a click.
 	item_collapsed.connect(func(item:TreeItem):_expand_deferred.call_deferred(item.get_instance_id()))
@@ -52,7 +58,8 @@ func _row(parent:TreeItem,entry:Dictionary)->TreeItem:
 	var item:=create_item(parent);item.set_metadata(0,entry)
 	item.set_text(0,String(entry.name));item.set_text(1,str(entry.count))
 	var mission:=String(entry.order.get("mission",""))
-	item.set_text(2,"Unassigned" if mission=="" else "Holding" if mission=="cancelled" else mission.replace("_"," ").capitalize())
+	item.set_text(2,"NO OBJECTIVE" if mission=="" else "HOLDING" if mission=="cancelled" else mission.replace("_"," ").to_upper())
+	item.set_custom_color(2,T.MUTED if mission=="" else T.GOLD)
 	item.set_tooltip_text(0,"%s · %s\nSelect a command to give its whole subtree an objective. Expand to inspect smaller formations." % [entry.name,entry.leader])
 	if not entry.parts.is_empty():
 		var placeholder:=create_item(item);placeholder.set_metadata(0,{"placeholder":true});placeholder.set_selectable(0,false);item.collapsed=true
@@ -106,7 +113,8 @@ func _update_counts(item:TreeItem)->void:
 			item.set_metadata(0,current)
 			item.set_text(1,str(current.count))
 			var mission:=String(current.order.get("mission",""))
-			item.set_text(2,"Unassigned" if mission=="" else "Holding" if mission=="cancelled" else mission.replace("_"," ").capitalize())
+			item.set_text(2,"NO OBJECTIVE" if mission=="" else "HOLDING" if mission=="cancelled" else mission.replace("_"," ").to_upper())
+			item.set_custom_color(2,T.MUTED if mission=="" else T.GOLD)
 			if int(command.node(String(current.id)).get("force_id",-1))>=0:_refresh_parts(item,current)
 	for child:TreeItem in item.get_children():_update_counts(child)
 func _refresh_parts(item:TreeItem,current:Dictionary)->void:

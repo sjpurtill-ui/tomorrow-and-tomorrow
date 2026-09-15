@@ -4,6 +4,7 @@ const Overlay=preload("res://scripts/hud/service_world_overlay.gd")
 const CommandTree=preload("res://scripts/hud/command_tree.gd")
 const OrderBrief=preload("res://scripts/hud/command_order_brief.gd")
 const Preparation=preload("res://scripts/hud/command_preparation.gd")
+const T=preload("res://scripts/hud/hud_tokens.gd")
 var domain:="army"
 var terrain:Node
 var command:RefCounted
@@ -45,47 +46,56 @@ func _ready()->void:
 	map.order_region.connect(func(region:Dictionary):_region(region);_assign())
 	map.force_selected.connect(_select_force)
 	panel=PanelContainer.new();add_child(panel);panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	panel.offset_top=76;panel.offset_right=-12;panel.offset_left=-472
-	var skin:=StyleBoxFlat.new();skin.bg_color=Color("101e29");skin.border_color=Color("637b86");skin.set_border_width_all(1);skin.set_content_margin_all(12);panel.add_theme_stylebox_override("panel",skin);panel.add_theme_font_size_override("font_size",14)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",9);panel.add_child(column)
-	var heading:=_row(column);var title:=_label(heading,"ARMY COMMAND" if domain=="army" else "FLEET COMMAND" if domain=="navy" else "AIR FORCE COMMAND",21)
+	panel.offset_top=16;panel.offset_right=-16;panel.offset_left=-536
+	var skin:=T.flat(Color("0b171f"),Color("526b75"),1,8,14);panel.add_theme_stylebox_override("panel",skin);panel.add_theme_font_size_override("font_size",14)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
+	var heading:=_row(column)
+	var heading_copy:=VBoxContainer.new();heading_copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading_copy.add_theme_constant_override("separation",1);heading.add_child(heading_copy)
+	var eyebrow:=_label(heading_copy,"FIELD OPERATIONS  •  COMMANDERS EXECUTE THE DETAILS",11);eyebrow.modulate=T.GOLD;eyebrow.autowrap_mode=TextServer.AUTOWRAP_OFF
+	var title:=_label(heading_copy,"Army command" if domain=="army" else "Fleet command" if domain=="navy" else "Air force command",24)
 	title.autowrap_mode=TextServer.AUTOWRAP_OFF;title.clip_text=true;title.tooltip_text=title.text
-	_button(heading,"Close ×",queue_free)
+	var close:=_button(heading,"×",queue_free);close.custom_minimum_size=Vector2(42,42);close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.tooltip_text="Close command view"
 	var tabs:=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(tabs)
-	var orders:=VBoxContainer.new();orders.name="Orders";orders.add_theme_constant_override("separation",8);tabs.add_child(orders)
-	tree=CommandTree.new();tree.service=domain;orders.add_child(tree);tree.custom_minimum_size.y=200;tree.size_flags_stretch_ratio=2;tree.command_selected.connect(_selected)
+	var orders:=VBoxContainer.new();orders.name="Objectives";orders.add_theme_constant_override("separation",9);tabs.add_child(orders)
+	_step_label(orders,"1", "CHOOSE A COMMAND", "Click a row to select everyone beneath it")
+	tree=CommandTree.new();tree.service=domain;orders.add_child(tree);tree.custom_minimum_size.y=180;tree.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;tree.command_selected.connect(_selected)
 	var scroll:=ScrollContainer.new();orders_scroll=scroll;scroll.custom_minimum_size.y=100;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;orders.add_child(scroll)
 	var controls:=VBoxContainer.new();controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_theme_constant_override("separation",8);scroll.add_child(controls)
-	selected_label=_label(controls,"Select a command in the hierarchy",16)
+	_step_label(controls,"2", "SET THE OBJECTIVE", "A draft is not issued until you confirm below")
+	var selection_card:=_card(controls,"info")
+	selected_label=_label(selection_card,"No command selected",17)
 	selected_label.autowrap_mode=TextServer.AUTOWRAP_OFF;selected_label.clip_text=true
-	var current_row:=_row(controls)
-	current_order_label=_label(current_row,"Now: no command selected",14)
+	var current_row:=_row(selection_card)
+	current_order_label=_label(current_row,"CURRENT  •  No command selected",13)
 	current_order_label.autowrap_mode=TextServer.AUTOWRAP_OFF;current_order_label.clip_text=true
-	edit_order_button=_button(current_row,"Edit",_edit_current_order);edit_order_button.custom_minimum_size.y=22;edit_order_button.size_flags_horizontal=Control.SIZE_SHRINK_END;edit_order_button.disabled=true
+	edit_order_button=_button(current_row,"Load",_edit_current_order);edit_order_button.custom_minimum_size=Vector2(62,28);edit_order_button.size_flags_horizontal=Control.SIZE_SHRINK_END;edit_order_button.disabled=true
 	mission=OptionButton.new();mission.clip_text=true;controls.add_child(mission)
-	mission.tooltip_text="Next objective. Selecting or editing this draft does not issue an order; use Give objective or right-click a zone on the map."
+	mission.tooltip_text="Draft objective. Changing it does not issue an order; use Issue objective or right-click a zone on the map."
+	mission.custom_minimum_size.y=42;mission.add_theme_stylebox_override("normal",T.gold_outline_style())
 	var catalog:Dictionary=command.LAND_MISSIONS if domain=="army" else MilitaryCampaign.joint_operations.MISSIONS[domain]
 	for id:String in catalog:
 		if id=="transport":continue
-		mission.add_item("Next: "+String(catalog[id]));mission.set_item_metadata(mission.item_count-1,id)
+		mission.add_item("OBJECTIVE  •  "+String(catalog[id]));mission.set_item_metadata(mission.item_count-1,id)
 	mission.item_selected.connect(func(_index:int):_refresh_targets())
 	mission_hint=_label(controls,"");mission_hint.max_lines_visible=2;mission_hint.modulate=Color("efa092");mission_hint.hide()
 	cities=OptionButton.new();cities.clip_text=true;controls.add_child(cities)
-	region_label=_label(controls,"Zone: select on map or draw below")
+	_step_label(controls,"3", "MARK THE AREA", "Choose an existing zone on the map or draw one")
+	var zone_card:=_card(controls,"warn")
+	region_label=_label(zone_card,"No zone selected",15)
 	region_label.max_lines_visible=1
 	_build_preparation(controls)
 	var drawing:=_row(controls);_button(drawing,"Draw zone · D",_draw_zone)
 	finish_button=_button(drawing,"Finish",func():map.finish_boundary(area_name.text))
 	cancel_boundary_button=_button(drawing,"Cancel drawing",func():map.cancel_boundary())
 	finish_button.hide();cancel_boundary_button.hide()
-	details_toggle=_button(controls,"Names & brief ▸",func():details.visible=not details.visible;details_toggle.text="Names & brief ▾" if details.visible else "Names & brief ▸")
+	details_toggle=_button(controls,"Add commander's intent ▸",func():details.visible=not details.visible;details_toggle.text="Commander's intent ▾" if details.visible else "Add commander's intent ▸")
 	details=VBoxContainer.new();details.add_theme_constant_override("separation",6);controls.add_child(details);details.hide()
 	area_name=LineEdit.new();area_name.placeholder_text="New battle zone name (optional)" if domain=="army" else "New operating area name (optional)";details.add_child(area_name)
 	vision=LineEdit.new();vision.placeholder_text="Commander's brief (optional)";vision.tooltip_text="A note attached to the supported objective selected above. It does not create additional mechanics.";details.add_child(vision)
 	status=_label(controls,"");status.max_lines_visible=2;status.hide()
 	# The primary action stays outside the scrolling details, at every scroll
 	# position and regardless of optional text or the selected city objective.
-	var action:=_row(orders);apply_button=_button(action,"Give objective",_assign)
+	var action:=_row(orders);apply_button=_button(action,"ISSUE OBJECTIVE",_assign);apply_button.add_theme_stylebox_override("normal",T.gold_outline_style());apply_button.add_theme_color_override("font_color",T.GOLD_BRIGHT)
 	var cancel_orders:=_button(action,"Cancel orders",_cancel_orders)
 	cancel_orders.tooltip_text="Cancel only the selected command. A subdivision must be able to assemble before it can detach; other commands keep their objectives."
 	feedback=_label(column,"");feedback.max_lines_visible=2;feedback.hide()
@@ -99,12 +109,25 @@ func _ready()->void:
 	_button(organization,"Group selected commands",_group)
 	_label(organization,"Expand any force down to teams, ships or air elements. A smaller formation is physically detached when you give it an order. No extra troops or equipment are created.")
 	_button(organization,"Delete selected zone",func():_report(command.remove_region(String(map.selected.get("id",""))) if domain=="army" else MilitaryCampaign.joint_operations.remove_region(String(map.selected.get("id","")))))
-	var links:=_row(column)
+	var links:=_row(organization)
 	_button(links,"Forces & training",func():queue_free();MilitaryCampaign.open_roster(domain))
 	_button(links,"Army builds" if domain=="army" else "Ports & ships" if domain=="navy" else "Airbases & aircraft",_management)
 	_refresh_targets()
 func _row(parent:Node)->HBoxContainer:
 	var result:=HBoxContainer.new();result.add_theme_constant_override("separation",6);parent.add_child(result);return result
+
+func _step_label(parent:Node,number:String,title:String,explanation:String)->HBoxContainer:
+	var row:=_row(parent)
+	var badge:=Label.new();badge.text=number;badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;badge.custom_minimum_size=Vector2(27,27);badge.add_theme_font_size_override("font_size",13);badge.add_theme_color_override("font_color",T.DARK_INK);badge.add_theme_stylebox_override("normal",T.flat(T.GOLD,T.GOLD_BRIGHT,1,14));row.add_child(badge)
+	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",0);row.add_child(copy)
+	var heading:=_label(copy,title,12);heading.modulate=T.INK;heading.autowrap_mode=TextServer.AUTOWRAP_OFF
+	var note:=_label(copy,explanation,11);note.modulate=T.MUTED;note.autowrap_mode=TextServer.AUTOWRAP_OFF;note.clip_text=true;note.tooltip_text=explanation
+	return row
+
+func _card(parent:Node,tone:String="info")->VBoxContainer:
+	var frame:=PanelContainer.new();var style:=T.brief_style(tone);style.content_margin_top=6;style.content_margin_bottom=6;frame.add_theme_stylebox_override("panel",style);frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(frame)
+	var content:=VBoxContainer.new();content.add_theme_constant_override("separation",5);frame.add_child(content)
+	return content
 
 func _build_preparation(parent:Node)->void:
 	preparation_box=VBoxContainer.new();preparation_box.add_theme_constant_override("separation",4);parent.add_child(preparation_box);preparation_box.hide()
@@ -141,15 +164,16 @@ func _update_preparation()->void:
 func _label(parent:Node,text:String,size:int=14)->Label:
 	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",size);parent.add_child(result);return result
 func _button(parent:Node,text:String,callback:Callable)->Button:
-	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(result);return result
+	var result:=Button.new();result.text=text;result.custom_minimum_size.y=36;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	result.add_theme_stylebox_override("normal",T.action_button_style(false));result.add_theme_stylebox_override("hover",T.action_button_style(false,true));result.add_theme_stylebox_override("pressed",T.action_button_style(true));parent.add_child(result);return result
 func _selected(entry:Dictionary)->void:
 	selected=entry
 	_update_current_order()
 	_refresh_mission_availability()
 	if entry.is_empty():
-		selected_label.text="Select a command in the hierarchy";selected_label.tooltip_text=""
+		selected_label.text="No command selected";selected_label.tooltip_text="Choose a row above. Selecting Army gives the same objective to every subordinate."
 		map.selected_force=0;status.text="";status.hide();return
-	selected_label.text="%s · %d %s" % [entry.name,int(entry.count),"personnel" if domain=="army" else "ships" if domain=="navy" else "aircraft"]
+	selected_label.text="%s  •  %d %s" % [entry.name,int(entry.count),"people" if domain=="army" else "ships" if domain=="navy" else "aircraft"]
 	selected_label.tooltip_text=_selection_tooltip(entry)
 	map.selected_force=int(command.node(String(entry.id)).get("force_id",0))
 	_update_status()
@@ -165,16 +189,16 @@ func _select_force(id:int)->void:
 	for entry:Dictionary in command.data.nodes.values():
 		if entry.service==domain and int(entry.force_id)==id:tree.rebuild(String(entry.id));return
 func _region(region:Dictionary)->void:
-	map.selected=region;region_label.text="Zone: "+String(region.get("name","select on map or draw below"));region_label.tooltip_text=region_label.text;_refresh_targets()
+	map.selected=region;region_label.text="AREA  •  "+String(region.get("name","No zone selected")) if not region.is_empty() else "No zone selected";region_label.tooltip_text=region_label.text;_refresh_targets()
 
 func _update_current_order()->void:
 	# Existing live panels may not contain this strip until they are reopened.
 	if not is_instance_valid(current_order_label):return
 	var brief:Dictionary=OrderBrief.snapshot(command,selected)
-	current_order_label.text="Now: "+String(brief.summary);current_order_label.tooltip_text=String(brief.tooltip)
+	current_order_label.text="CURRENT  •  "+String(brief.summary);current_order_label.tooltip_text=String(brief.tooltip)
 	current_order_label.modulate=Color("e9c277") if brief.mixed or int(brief.overrides)>0 else Color("acd8c5") if not brief.order.is_empty() else Color("afbbc3")
 	edit_order_button.disabled=not bool(brief.editable)
-	edit_order_button.tooltip_text="Copy this issued order into the next-objective draft and highlight its zone on the main map. Give objective commits changes." if brief.editable else String(brief.tooltip)
+	edit_order_button.tooltip_text="Load this issued order as a draft and highlight its zone on the main map. Issue objective commits changes." if brief.editable else String(brief.tooltip)
 
 func _edit_current_order()->void:
 	command.sync()
@@ -188,7 +212,7 @@ func _edit_current_order()->void:
 		if cities.get_item_metadata(index)==issued.get("target",""):cities.select(index);break
 	vision.text=String(issued.get("vision",""))
 	_update_current_order()
-	_report({"message":"Current order loaded for editing. Give objective applies changes."})
+	_report({"message":"Current order loaded as a draft. Issue objective applies changes."})
 func _draw_zone()->void:
 	map.begin_boundary();_report({"message":"Click boundary points on the main map. Enter finishes; right-click undoes; Escape cancels."})
 func _mission()->String:return String(mission.get_item_metadata(mission.selected))
@@ -289,7 +313,7 @@ func _update_status()->void:
 func _process(delta:float)->void:
 	if panel==null:return
 	var view:=get_viewport().get_visible_rect().size
-	panel.offset_left=-minf(460,view.x*.48)-12;panel.offset_bottom=view.y-16
+	panel.offset_left=-minf(520,view.x*.54)-16;panel.offset_bottom=view.y-16
 	# An editor hot reload can leave an older, already-open panel without these
 	# new controls. It remains usable until the player closes and reopens it.
 	if is_instance_valid(finish_button):finish_button.visible=map.drawing

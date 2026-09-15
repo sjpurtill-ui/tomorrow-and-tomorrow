@@ -43,7 +43,7 @@ static func snapshot(command:RefCounted,selection:Dictionary)->Dictionary:
 			if not source.is_empty() and source.id!=id:notes.append("Inherited from %s." % String(source.name))
 	result.order=issued.duplicate(true)
 	var mission:=String(issued.get("mission",""))
-	if mission=="":result.summary="Unassigned";result.tooltip="Choose the next objective below, then Give objective.";return result
+	if mission=="":result.summary="No issued objective";result.tooltip="Choose a draft objective below, mark its area, then Issue objective.";return result
 	var catalog:Dictionary=command.LAND_MISSIONS if service=="army" else MilitaryCampaign.joint_operations.MISSIONS[service]
 	var title:="Holding" if mission=="cancelled" else mission.replace("_"," ").capitalize()
 	var location:=""
