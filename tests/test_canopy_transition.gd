@@ -1,11 +1,13 @@
 extends GdUnitTestSuite
+const Cover=preload("res://scripts/landscape_cover.gd")
 
 func test_canopy_shader_preserves_dark_aerial_range_and_neutralizes_alpha_edges()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
 	assert_str(source).contains("*13.0,0.58,1.38")
-	assert_str(source).contains(")),0.16)")
-	assert_str(source).contains("mix(0.08,0.44,edge_colour)")
+	assert_str(source).contains("float canopy_luma=0.18+source_luma*0.70")
+	assert_str(source).contains("mix(0.08,0.38,edge_colour)")
 	assert_str(source).contains("if (local_detail>0.0)")
+	assert_array(Cover.CROWN_ATLAS_CELLS).is_equal([0,1,2,4,6,7,11,14])
 
 class Terrain extends "res://scripts/local_terrain.gd":
 	func _ready()->void:pass
