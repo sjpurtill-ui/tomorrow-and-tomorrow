@@ -35,3 +35,11 @@ func test_material_units_distinguish_water_portions_from_bulk_inventory()->void:
 		if card.known:units[card.id]=card.unit
 	assert_str(units.Freshwater).is_equal("daily portions")
 	assert_str(units.Timber).is_equal("bulk units")
+
+func test_exhausted_sources_are_not_presented_as_accessible()->void:
+	GameState.resource_deposits=[{"resource":"Stone","stage":"developed","id":"stone","remaining":0.0,"stock_at_source":0.0,"shipments":[],"delivered_today":0.0}]
+	GameState.resource_stockpiles={"Stone":0.0}
+	var cards:=Data.materials()
+	assert_str(String(cards[0].status)).is_equal("EXHAUSTED")
+	assert_int(int(cards[0].workable)).is_equal(0)
+	assert_int(int(cards[0].exhausted)).is_equal(1)

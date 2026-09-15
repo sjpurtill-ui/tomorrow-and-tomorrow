@@ -2,6 +2,9 @@ extends Node
 
 var rng := RandomNumberGenerator.new()
 var initialized := false
+const SURFACE_FRONT_SPACING_KM:=3.0
+const MAX_SURFACE_FRONT_RING:=3
+const MAX_SURFACE_FRONTS_PER_RESOURCE:=24
 
 # Identification follows observations and existing methods, never campaign age.
 # These gates apply to unknown occurrences only; saved recognition is retained.
@@ -36,6 +39,7 @@ func plain_language_description(resource_name:String)->String:
 	if resource_name=="Timber": return "Trees grow across woodland. Local cutting areas share extraction labor; tools, carrying distance and regrowth limit delivered timber."
 	if resource_name=="Fiber Plants":
 		return "Workable reeds, grasses, bark fibers, and flax- or hemp-like plants used for cordage, baskets, mats, and thatch."
+	if resource_name=="Medicinal Plants": return "Recognized medicinal plants are gathered as finite bulk for remedies and care. Access does not imply free inventory."
 	return ""
 
 func reset_for_new_world()->void:
@@ -255,6 +259,8 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 		elif deposit.stage == "surveyed":
 			deposit.access = _calculate_access(deposit, definition, context)
 			deposit.blockers = _access_blockers(deposit,definition,context)
+			if deposit.access<1.0 and deposit.blockers.is_empty():
+				deposit.blockers.append(_access_practice_blocker(definition))
 			if deposit.access >= 1.0 and deposit.blockers.is_empty():
 				deposit.stage = "accessible"
 				events.append(_event("Resource Accessible", "%s can now support organized extraction." % resource_name, deposit.id))
@@ -423,6 +429,18 @@ func _access_blockers(deposit: Dictionary, definition: Dictionary, context: Dict
 			blockers.append("deep lifting machinery is unavailable")
 	return blockers
 
+func _access_practice_blocker(definition:Dictionary)->String:
+	var missing:Array[String]=[]
+	var developing:Array[String]=[]
+	for requirement_variant in definition.get("processing",[]):
+		var requirement:=String(requirement_variant)
+		var label:=requirement.replace("_"," ").capitalize()
+		if requirement not in WorldSimulation.state.known_discoveries:missing.append(label)
+		elif WorldSimulation.discovery.adoption(requirement)<0.95:developing.append(label)
+	if not missing.is_empty():return "Access practice needed: %s" % " or ".join(missing)
+	if not developing.is_empty():return "Access practice is still spreading: %s" % " or ".join(developing)
+	return "Access work is incomplete"
+
 func _ensure_woodland_supply(context:Dictionary)->void:
 	_ensure_surface_supply("Timber",context.get("woodland_catchment",{}),context,"woodland_catchment",600.0)
 
@@ -437,18 +455,34 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 	if field.is_empty() or not bool(context.get("settled",false)): return
 	var density:=clampf(float(field.get("density",0.0)),0.0,1.0)
 	var minimum_density:=0.03 if resource=="Stone" else 0.08
-	if density<minimum_density: return
+	var existing_fronts:Array[Dictionary]=[]
 	for deposit in WorldSimulation.state.resource_deposits:
-		if String(deposit.get("landscape_source",""))==source: return
+		if String(deposit.get("landscape_source",""))!=source:continue
+		existing_fronts.append(deposit)
+		if float(deposit.get("remaining",0.0))>0.001:return
+	if existing_fronts.size()>=MAX_SURFACE_FRONTS_PER_RESOURCE:return
+	if not existing_fronts.is_empty() or density<minimum_density:
+		field=_next_surface_front(resource,source,context,minimum_density)
+		if field.is_empty():return
+		density=clampf(float(field.get("density",0.0)),0.0,1.0)
 	var position:Vector3=field.get("position",context.get("origin",WorldSimulation.state.settlement_founded_at))
 	var supply:Dictionary={}
+	# Adopt an older nearby point record once before opening a new working front.
+	# This preserves its inventory, shipments and save identity.
+	if existing_fronts.is_empty():
+		for deposit in WorldSimulation.state.resource_deposits:
+			if String(deposit.get("resource",""))==resource and String(deposit.get("landscape_source",""))=="" and (deposit.position as Vector3).distance_to(position)<=2.5:
+				supply=deposit
+				break
 	if WorldSimulation.enabled:
-		supply=preload("res://scripts/civilization_resources.gd").surface(resource,source,field,stock_per_km2)
-		WorldSimulation.state.resource_deposits.append(supply)
-	for deposit in WorldSimulation.state.resource_deposits:
-		if supply.is_empty() and String(deposit.get("resource",""))==resource and (deposit.position as Vector3).distance_to(position)<=2.5:
-			supply=deposit
-			break
+		if supply.is_empty():
+			supply=preload("res://scripts/civilization_resources.gd").surface(resource,source,field,stock_per_km2)
+			WorldSimulation.state.resource_deposits.append(supply)
+	if supply.is_empty():
+		for deposit in WorldSimulation.state.resource_deposits:
+			if String(deposit.get("resource",""))==resource and (deposit.position as Vector3).distance_to(position)<=2.5:
+				supply=deposit
+				break
 	if supply.is_empty():
 		supply=_deposit(resource,position,0.45+density*0.65,maxf(1.0,float(field.get("area_km2",9.0)))*density*stock_per_km2,WorldSimulation.state.resource_deposits.size(),"local_surface",density)
 		WorldSimulation.state.resource_deposits.append(supply)
@@ -460,6 +494,37 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 	supply["clues"]=1.0
 	supply["access"]=1.0
 	supply["blockers"]=[]
+
+func _next_surface_front(resource:String,source:String,context:Dictionary,minimum_density:float)->Dictionary:
+	if not WorldSimulation.context_provider.is_valid():return {}
+	var used:Dictionary={}
+	for deposit_variant in WorldSimulation.state.resource_deposits:
+		var deposit:Dictionary=deposit_variant
+		if String(deposit.get("landscape_source",""))!=source:continue
+		used[_surface_front_key(resource,deposit)]=true
+	var origin_value:Variant=context.get("origin",WorldSimulation.state.settlement_founded_at)
+	var origin:=Vector2(origin_value.x,origin_value.z) if origin_value is Vector3 else Vector2(origin_value.x,origin_value.y)
+	var max_ring:=clampi(1+int(WorldSimulation.state.effective_workers("Logistics")/6.0),1,MAX_SURFACE_FRONT_RING)
+	for ring in range(1,max_ring+1):
+		var best:Dictionary={}
+		var best_density:=-1.0
+		for z in range(-ring,ring+1):
+			for x in range(-ring,ring+1):
+				if absi(x)!=ring and absi(z)!=ring:continue
+				var point:=origin+Vector2(x,z)*SURFACE_FRONT_SPACING_KM
+				var nearby:Dictionary=WorldSimulation.context_provider.call(point)
+				var candidate:Dictionary=nearby.get("woodland_catchment",{}) if resource=="Timber" else (nearby.get("surface_material_catchments",{}) as Dictionary).get(resource,{})
+				var candidate_density:=clampf(float(candidate.get("density",0.0)),0.0,1.0)
+				if candidate_density<minimum_density or used.has(_surface_front_key(resource,candidate)):continue
+				if candidate_density>best_density:best=candidate;best_density=candidate_density
+		if not best.is_empty():return best
+	return {}
+
+func _surface_front_key(resource:String,field:Dictionary)->String:
+	if field.has("world_key"):return String(field.world_key)
+	var point:Vector3=field.get("position",Vector3.ZERO)
+	var tile:=Vector2i(floori(point.x/SURFACE_FRONT_SPACING_KM),floori(point.z/SURFACE_FRONT_SPACING_KM))
+	return "surface:%d:%d:%s" % [tile.x,tile.y,resource]
 
 func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	_ensure_woodland_supply(context)
@@ -480,10 +545,10 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var labor_eff:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var total_weight:=0.0
 	for deposit in material_deposits:
-		total_weight+=_deposit_priority(deposit) if float(deposit.remaining)>0.0 else 0.0
+		total_weight+=_extraction_priority(deposit) if float(deposit.remaining)>0.0 else 0.0
 	var extracted_total:=0.0
 	for deposit in material_deposits:
-		var share:=_deposit_priority(deposit)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
+		var share:=_extraction_priority(deposit)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
 		var assigned:=extractors*share
 		deposit.workers=roundi(assigned)
 		var profile:=_material_profile(String(deposit.resource))
@@ -546,7 +611,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			deposit.travel_days=maxi(1,ceili(float(deposit.distance_km)/speed_km_day))
 			deposit.shipments.append({"quantity":dispatched,"departure_day":int(WorldSimulation.state.elapsed_days),"arrival_day":int(WorldSimulation.state.elapsed_days)+int(deposit.travel_days)})
 		_update_deposit_bottleneck(deposit,carriers,events)
-	var lost_total:=_apply_material_storage_losses(events)
+	var loss_report:=_apply_material_storage_losses(events)
+	var lost_total:=float(loss_report.total)
 	var at_source:=0.0
 	var in_transit:=0.0
 	for deposit in material_deposits:
@@ -557,8 +623,11 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var capacity_total:=0.0
 	for amount in capacities.values(): capacity_total+=float(amount)
 	var active_shipments:=0
-	for deposit in material_deposits: active_shipments+=(deposit.get("shipments",[]) as Array).size()
-	WorldSimulation.state.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":WorldSimulation.state.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":material_deposits.size(),"active_shipments":active_shipments,"bounded":true}
+	var workable_occurrences:=0
+	for deposit in material_deposits:
+		active_shipments+=(deposit.get("shipments",[]) as Array).size()
+		if not deposit_exhausted(deposit):workable_occurrences+=1
+	WorldSimulation.state.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"losses_by_resource":loss_report.by_resource,"storage_used_by_type":loss_report.used_by_type,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":WorldSimulation.state.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":workable_occurrences,"active_shipments":active_shipments,"bounded":true}
 	WorldSimulation.state.material_history.append({"day":int(WorldSimulation.state.elapsed_days),"extracted":extracted_total,"delivered":delivered_total,"lost":lost_total,"at_source":at_source,"in_transit":in_transit,"stored":stored_bulk})
 	if WorldSimulation.state.material_history.size()>370: WorldSimulation.state.material_history.pop_front()
 	return events
@@ -569,7 +638,7 @@ func _ensure_deposit_fields(deposit:Dictionary)->void:
 		if not deposit.has(key): deposit[key]=defaults[key].duplicate() if defaults[key] is Array else defaults[key]
 
 func _is_material_resource(resource_name:String)->bool:
-	return resource_name not in ["Freshwater","Fertile Soil","Game","Medicinal Plants"]
+	return resource_name not in ["Freshwater","Fertile Soil","Game"]
 
 func _material_profile(resource_name:String)->Dictionary:
 	var profiles={
@@ -584,6 +653,7 @@ func _material_profile(resource_name:String)->Dictionary:
 		"Salt":{"family":"mineral","bulk":0.80,"store":"dry","loss":0.0018,"base_yield":0.24},
 		"Sulfur":{"family":"chemical","bulk":0.75,"store":"sealed","loss":0.0012,"base_yield":0.12},
 		"Nitrates":{"family":"chemical","bulk":0.70,"store":"dry","loss":0.0025,"base_yield":0.10},
+		"Medicinal Plants":{"family":"organic","bulk":0.20,"store":"dry","loss":0.006,"base_yield":0.16},
 		"Coin":{"family":"metal","bulk":0.05,"store":"secure","loss":0.00005,"base_yield":0.0}
 	}
 	if profiles.has(resource_name): return profiles[resource_name]
@@ -619,6 +689,11 @@ func in_transit_for(deposit:Dictionary)->float:
 	for shipment_variant in deposit.get("shipments",[]): total+=float((shipment_variant as Dictionary).get("quantity",0.0))
 	return total
 
+func deposit_exhausted(deposit:Dictionary)->bool:
+	if String(deposit.get("stage","")) not in ["accessible","developed"]:return false
+	if not deposit.has("remaining"):return false
+	return float(deposit.get("remaining",0.0))<=0.001 and float(deposit.get("stock_at_source",0.0))<=0.001 and in_transit_for(deposit)<=0.001
+
 func _deposit_priority(deposit:Dictionary)->float:
 	var resource_name:=String(deposit.resource)
 	var named:=float(WorldSimulation.state.resource_priorities.get(resource_name,1.0))
@@ -629,6 +704,11 @@ func _deposit_priority(deposit:Dictionary)->float:
 	var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))
 	var scarcity:=1.0+1.0/(1.0+stored/20.0)
 	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.distance_km)/45.0))
+
+func _extraction_priority(deposit:Dictionary)->float:
+	var reserve:=float(deposit.get("remaining",0.0))
+	var working_reserve:=maxf(1.0,float(deposit.get("initial_amount",1.0))*0.05)
+	return _deposit_priority(deposit)*clampf(reserve/working_reserve,0.0,1.0)
 
 func _storage_capacities()->Dictionary:
 	var pop:=WorldSimulation.state.population_exact
@@ -667,10 +747,11 @@ func _stored_bulk()->float:
 		total+=float(WorldSimulation.state.resource_stockpiles[resource_name])*float(_material_profile(String(resource_name)).bulk)
 	return total
 
-func _apply_material_storage_losses(events:Array[Dictionary])->float:
+func _apply_material_storage_losses(events:Array[Dictionary])->Dictionary:
 	var capacities:=_storage_capacities()
 	var used={"yard":0.0,"dry":0.0,"covered":0.0,"sealed":0.0,"secure":0.0}
 	var lost_total:=0.0
+	var losses_by_resource:Dictionary={}
 	for resource_name_variant in WorldSimulation.state.resource_stockpiles.keys():
 		var resource_name:=String(resource_name_variant)
 		if resource_name=="Food" or not _is_material_resource(resource_name): continue
@@ -687,13 +768,15 @@ func _apply_material_storage_losses(events:Array[Dictionary])->float:
 		WorldSimulation.state.resource_stockpiles[resource_name]=amount-loss
 		used[store]=float(used[store])+maxf(0.0,amount-loss)*bulk
 		lost_total+=loss
+		if loss>0.0001:losses_by_resource[resource_name]=loss
 	if lost_total>0.5:
 		events.append(_event("Material Losses","%.1f units were lost today to exposure, leakage, damage, or overcrowded stores." % lost_total,"storage"))
-	return lost_total
+	return {"total":lost_total,"by_resource":losses_by_resource,"used_by_type":used}
 
 func _update_deposit_bottleneck(deposit:Dictionary,carriers:float,events:Array[Dictionary])->void:
 	var bottleneck:="Flowing"
-	if int(deposit.workers)<=0: bottleneck="No extractors assigned"
+	if deposit_exhausted(deposit):bottleneck="Source exhausted"
+	elif int(deposit.workers)<=0: bottleneck="No extractors assigned"
 	elif float(deposit.stock_at_source)>maxf(2.0,float(deposit.extracted_today)*4.0): bottleneck="Material accumulating at source"
 	elif carriers<=0.0: bottleneck="No carriers assigned"
 	elif float(deposit.route)<0.45: bottleneck="Access route is slow"
@@ -737,10 +820,14 @@ func lens_entries(origin: Vector3, radius_world_units: float, km_per_unit := 1.0
 		if distance > radius_world_units:
 			continue
 		var surveyed: bool = deposit.stage != "recognized"
-		var retrievable: bool = deposit.stage == "accessible" or deposit.stage == "developed"
+		var stage_retrievable:bool=deposit.stage=="accessible" or deposit.stage=="developed"
+		var exhausted:=deposit_exhausted(deposit)
+		var retrievable:bool=stage_retrievable and not exhausted
 		var visible_blockers: Array = deposit.blockers.duplicate()
 		if not surveyed:
 			visible_blockers = ["deposit has not been surveyed"]
+		elif exhausted:
+			visible_blockers=["known source is exhausted"]
 		elif not retrievable and visible_blockers.is_empty():
 			visible_blockers = ["access work is incomplete"]
 		entries.append({
@@ -751,7 +838,7 @@ func lens_entries(origin: Vector3, radius_world_units: float, km_per_unit := 1.0
 			"quality":_quality_label(deposit.quality) if surveyed else "unknown",
 			"abundance":_abundance_label(deposit) if surveyed else "unknown",
 			"retrievable":retrievable,
-			"access":"Retrievable now" if retrievable else "Not currently retrievable",
+			"access":"Retrievable now" if retrievable else "Source exhausted" if exhausted else "Not currently retrievable",
 			"blockers":visible_blockers
 		})
 	return entries

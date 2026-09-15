@@ -129,7 +129,8 @@ func _materials_brief()->Dictionary:
 	var capacity:=float(material_metrics.get("storage_capacity",0.0))
 	var accessible:=0
 	for deposit_variant in ResourceSystem.visible_deposits():
-		if float((deposit_variant as Dictionary).get("access",0.0))>0.5: accessible+=1
+		var deposit:Dictionary=deposit_variant
+		if String(deposit.get("stage","")) in ["accessible","developed"] and not ResourceSystem.deposit_exhausted(deposit):accessible+=1
 	var raw:Dictionary=terrain._material_constraint_brief(material_metrics,accessible,capacity,stored)
 	var status:=String(raw.get("status",""))
 	var tone:="info" if "BALANCED" in status else "warn"
@@ -141,22 +142,26 @@ func _materials_blocks()->Array:
 	for deposit_variant in ResourceSystem.visible_deposits():
 		var deposit:Dictionary=deposit_variant
 		var resource:=String(deposit.get("resource","Material"))
-		var entry:Dictionary=grouped.get(resource,{"sites":0,"accessible":0,"delivered":0.0,"bottleneck":""})
+		var entry:Dictionary=grouped.get(resource,{"sites":0,"workable":0,"exhausted":0,"delivered":0.0,"bottleneck":""})
 		entry.sites=int(entry.sites)+1
-		if float(deposit.get("access",0.0))>0.5: entry.accessible=int(entry.accessible)+1
+		if String(deposit.get("stage","")) in ["accessible","developed"]:
+			if ResourceSystem.deposit_exhausted(deposit):entry.exhausted=int(entry.exhausted)+1
+			else:entry.workable=int(entry.workable)+1
 		entry.delivered=float(entry.delivered)+float(deposit.get("delivered_today",0.0))
-		if String(entry.bottleneck)=="": entry.bottleneck=String(deposit.get("bottleneck",""))
+		if String(entry.bottleneck)=="":
+			entry.bottleneck=String((deposit.get("blockers",[]) as Array)[0]) if not (deposit.get("blockers",[]) as Array).is_empty() else String(deposit.get("bottleneck",""))
 		grouped[resource]=entry
 	var material_items:Array=[]
 	for resource in grouped:
 		var entry:Dictionary=grouped[resource]
-		var accessible:=int(entry.accessible)
+		var workable:=int(entry.workable)
+		var condition:="%d workable" % workable if workable>0 else "%d exhausted" % int(entry.exhausted) if int(entry.exhausted)>0 else String(entry.bottleneck).to_lower()
 		material_items.append({
 			"name":ResourceSystem.display_name(String(resource)),
-			"sub":"%d site%s · %s" % [int(entry.sites),"" if int(entry.sites)==1 else "s","reachable" if accessible>0 else String(entry.bottleneck).to_lower()],
+			"sub":"%d site%s · %s" % [int(entry.sites),"" if int(entry.sites)==1 else "s",condition],
 			"value":"%+.1f/day" % float(entry.delivered) if float(entry.delivered)>0.01 else "0",
 			"value_color":Tokens.GREEN if float(entry.delivered)>0.01 else Tokens.MUTED,
-			"accent":Tokens.GOLD if accessible>0 else Color(0,0,0,0),
+			"accent":Tokens.GOLD if workable>0 else Color(0,0,0,0),
 			"tip":ResourceSystem.plain_language_description(String(resource)) if ResourceSystem.plain_language_description(String(resource))!="" else "Recognized occurrences and today's delivered bulk",
 		})
 	if material_items.is_empty():
@@ -170,6 +175,9 @@ func _materials_blocks()->Array:
 		{"name":"Storage","value":"%d%%" % roundi(clampf(stored/capacity,0.0,1.0)*100.0),"ratio":clampf(stored/capacity,0.0,1.0),"color":Tokens.capacity_color(clampf(100.0-stored/capacity*100.0,0.0,100.0)),"tip":"Occupied share of aggregate bulk capacity"},
 		{"name":"Tool quality","value":"%d%%" % roundi(tool_quality*100.0),"ratio":tool_quality,"color":Tokens.capacity_color(tool_quality*100.0),"tip":"Effect of makers and discovered practice on tools"},
 	]
+	var losses:Dictionary=material_metrics.get("losses_by_resource",{})
+	for resource_variant in losses:
+		constraint_items.append({"name":ResourceSystem.display_name(String(resource_variant))+" lost","value":"%.2f/day" % float(losses[resource_variant]),"ratio":clampf(float(losses[resource_variant])/maxf(1.0,float(GameState.resource_stockpiles.get(resource_variant,0.0))),0.0,1.0),"color":Tokens.RED,"tip":"Loss from decay, exposure, or the storage type required by this material being full."})
 	var stock_names:Array=GameState.resource_stockpiles.keys()
 	stock_names.sort_custom(func(a,b)->bool: return float(GameState.resource_stockpiles[b])<float(GameState.resource_stockpiles[a]))
 	var storage_items:Array=[]

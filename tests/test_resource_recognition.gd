@@ -72,6 +72,8 @@ func test_flint_access_uses_adopted_flaking_and_actual_extraction_labor()->void:
 	GameState.population_allocations.Extraction=8;GameState.population_allocations.Logistics=8
 	var context:={"tools":1.0,"origin":Vector3.ZERO,"settled":false}
 	assert_float(ResourceSystem._calculate_access(flint,ResourceSystem.catalog.Flint,context)).is_less(1.0)
+	ResourceSystem.process_day(context)
+	assert_array(flint.blockers).contains(["Access practice needed: Controlled Flaking"])
 	GameState.known_discoveries.append("controlled_flaking");GameState.discovery_adoption.controlled_flaking=0.0
 	assert_float(ResourceSystem._calculate_access(flint,ResourceSystem.catalog.Flint,context)).is_less(1.0)
 	GameState.discovery_adoption.controlled_flaking=1.0

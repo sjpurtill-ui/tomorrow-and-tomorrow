@@ -30,18 +30,21 @@ static func materials()->Array[Dictionary]:
 	for deposit:Dictionary in ResourceSystem.visible_deposits():
 		var resource:=String(deposit.resource)
 		if resource=="Food": continue
-		if not entries.has(resource): entries[resource]={"id":resource,"name":ResourceSystem.display_name(resource),"sites":0,"accessible":0,"flow":0.0,"stock":0.0,"known":true,"requires":[],"domain":group(resource),"unit":material_unit(resource)}
+		if not entries.has(resource): entries[resource]={"id":resource,"name":ResourceSystem.display_name(resource),"sites":0,"accessible":0,"workable":0,"exhausted":0,"flow":0.0,"stock":0.0,"known":true,"requires":[],"domain":group(resource),"unit":material_unit(resource)}
 		var item:Dictionary=entries[resource]
 		item.sites+=1; item.flow+=float(deposit.get("delivered_today",0))
-		if String(deposit.stage) in ["accessible","developed"]: item.accessible+=1
+		if String(deposit.stage) in ["accessible","developed"]:
+			item.accessible+=1
+			if ResourceSystem.deposit_exhausted(deposit):item.exhausted+=1
+			else:item.workable+=1
 	for resource:String in GameState.resource_stockpiles:
 		if resource=="Food" or float(GameState.resource_stockpiles[resource])<=0: continue
-		if not entries.has(resource): entries[resource]={"id":resource,"name":ResourceSystem.display_name(resource),"sites":0,"accessible":0,"flow":0.0,"stock":0.0,"known":true,"requires":[],"domain":group(resource),"unit":material_unit(resource)}
+		if not entries.has(resource): entries[resource]={"id":resource,"name":ResourceSystem.display_name(resource),"sites":0,"accessible":0,"workable":0,"exhausted":0,"flow":0.0,"stock":0.0,"known":true,"requires":[],"domain":group(resource),"unit":material_unit(resource)}
 		entries[resource].stock=float(GameState.resource_stockpiles[resource])
 	var result:Array[Dictionary]=[]
 	for item:Dictionary in entries.values():
-		item["status"]="IN STORAGE" if item.stock>0 else "ACCESSIBLE" if item.accessible>0 else "RECOGNIZED"
-		item["description"]="%.1f %s stored · %.1f %s delivered today. %d recognized sites; %d accessible. %s" % [item.stock,item.unit,item.flow,item.unit,item.sites,item.accessible,ResourceSystem.plain_language_description(item.id)]
+		item["status"]="STORED · DEPLETED" if item.stock>0 and item.workable<=0 and item.exhausted>0 else "IN STORAGE" if item.stock>0 else "FLOWING" if item.flow>0.001 else "ACCESSIBLE" if item.workable>0 else "EXHAUSTED" if item.exhausted>0 else "RECOGNIZED"
+		item["description"]="%.1f %s stored · %.1f %s delivered today. %d recognized sites; %d workable; %d exhausted. %s" % [item.stock,item.unit,item.flow,item.unit,item.sites,item.workable,item.exhausted,ResourceSystem.plain_language_description(item.id)]
 		result.append(item)
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return String(a.domain)+String(a.name)<String(b.domain)+String(b.name))
 	result.append({"id":"unknown","name":"Not yet recognized","domain":"Unknown","status":"UNDISCOVERED","description":"Surveying and returning expeditions may identify more materials. Their names, locations and quantities remain unknown.","known":false,"requires":[]})

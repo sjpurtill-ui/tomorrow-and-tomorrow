@@ -42,6 +42,7 @@ const GLOBAL_GRID_X := 481
 const GLOBAL_GRID_Z := 241
 const SEA_LEVEL := 0.0
 const KM_PER_WORLD_UNIT := 1.0
+const SURFACE_STONE_RADIUS_KM:=Vector2(0.0015,0.0045)
 const CONVOY_KM_PER_DAY := 16.0
 const MAIN_RIVER_WATER_HALF_WIDTH_KM := 0.125
 const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
@@ -3168,11 +3169,11 @@ func _create_stone_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
 	for i in 9:
 		var rock := MeshInstance3D.new()
 		var mesh := SphereMesh.new()
-		mesh.radius = rng.randf_range(0.035, 0.11)
-		mesh.height = mesh.radius * 1.5
+		mesh.radius = rng.randf_range(SURFACE_STONE_RADIUS_KM.x,SURFACE_STONE_RADIUS_KM.y)
+		mesh.height = mesh.radius * rng.randf_range(0.8,1.25)
 		rock.mesh = mesh
-		rock.scale = Vector3(1.3, 0.75, 1.0)
-		rock.position = center + Vector3(rng.randf_range(-1.6, 1.6), mesh.radius * 0.45, rng.randf_range(-1.6, 1.6))
+		rock.scale = Vector3(rng.randf_range(0.8,1.35),rng.randf_range(0.45,0.8),rng.randf_range(0.75,1.25))
+		rock.position = center + Vector3(rng.randf_range(-1.6, 1.6), mesh.radius * 0.35, rng.randf_range(-1.6, 1.6))
 		var material := StandardMaterial3D.new()
 		material.albedo_color = Color("#686762")
 		rock.material_override = material
@@ -14375,7 +14376,7 @@ func _open_materials_panel() -> void:
 	for deposit_variant in material_sources:
 		var deposit:Dictionary=deposit_variant
 		max_distance=maxf(max_distance,float(deposit.get("distance_km",0.0)))
-		if String(deposit.get("stage","")) in ["accessible","developed"]: accessible_count+=1
+		if String(deposit.get("stage","")) in ["accessible","developed"] and not ResourceSystem.deposit_exhausted(deposit):accessible_count+=1
 		if String(deposit.get("stage",""))=="developed": developed_count+=1
 	var scale_label:="SETTLEMENT" if max_distance<80.0 else ("REGIONAL" if max_distance<500.0 else ("CONTINENTAL" if max_distance<3500.0 else "INTERCONTINENTAL"))
 	var subtitle:=Label.new(); subtitle.text="%s REACH  •  %d known material sources%s  •  See what is moving and what to fix next" % [scale_label,material_sources.size()," + mapped water" if bool(water_access.get("recognized",false)) else ""]; subtitle.add_theme_font_size_override("font_size",11); subtitle.add_theme_color_override("font_color",Color("#9ca29d")); heading.add_child(subtitle)
@@ -14444,9 +14445,12 @@ func _material_flow_rows(material_sources:Array)->Array[Dictionary]:
 	for deposit_variant in material_sources:
 		var deposit:Dictionary=deposit_variant
 		var resource_name:=String(deposit.get("resource","Unknown"))
-		var group:Dictionary=groups.get(resource_name,{"material":resource_name,"occurrences":0,"reachable":0,"developed":0,"workers":0,"extracted":0.0,"at_source":0.0,"moving":0.0,"distance":0.0,"bottlenecks":{}})
+		var group:Dictionary=groups.get(resource_name,{"material":resource_name,"occurrences":0,"reachable":0,"workable":0,"exhausted":0,"developed":0,"workers":0,"extracted":0.0,"at_source":0.0,"moving":0.0,"distance":0.0,"bottlenecks":{}})
 		group.occurrences=int(group.occurrences)+1
-		if String(deposit.get("stage","")) in ["accessible","developed"]: group.reachable=int(group.reachable)+1
+		if String(deposit.get("stage","")) in ["accessible","developed"]:
+			group.reachable=int(group.reachable)+1
+			if ResourceSystem.deposit_exhausted(deposit):group.exhausted=int(group.exhausted)+1
+			else:group.workable=int(group.workable)+1
 		if String(deposit.get("stage",""))=="developed": group.developed=int(group.developed)+1
 		group.workers=int(group.workers)+int(deposit.get("workers",0))
 		group.extracted=float(group.extracted)+float(deposit.get("extracted_today",0.0))
@@ -14454,19 +14458,24 @@ func _material_flow_rows(material_sources:Array)->Array[Dictionary]:
 		group.moving=float(group.moving)+ResourceSystem.in_transit_for(deposit)
 		group.distance=maxf(float(group.distance),maxf(0.0,float(deposit.get("distance_km",0.0))))
 		var bottleneck:=String(deposit.get("bottleneck",""))
+		if String(deposit.get("stage",""))=="surveyed" and not (deposit.get("blockers",[]) as Array).is_empty():bottleneck=String((deposit.blockers as Array)[0])
 		if bottleneck!="" and bottleneck!="Flowing": (group.bottlenecks as Dictionary)[bottleneck]=int((group.bottlenecks as Dictionary).get(bottleneck,0))+1
 		groups[resource_name]=group
 	var rows:Array[Dictionary]=[]
 	for resource_name_variant in groups:
 		var row:Dictionary=groups[resource_name_variant]
 		var bottlenecks:Dictionary=row.bottlenecks
-		if not bottlenecks.is_empty():
+		if int(row.workable)<=0 and int(row.exhausted)>0:
+			row["status"]="EXHAUSTED"
+			row["status_detail"]="No material remains at %d known site%s" % [int(row.exhausted),"" if int(row.exhausted)==1 else "s"]
+			row["attention_rank"]=0
+		elif not bottlenecks.is_empty():
 			row["status"]="BLOCKED"
 			row["status_detail"]=String(bottlenecks.keys()[0])
 			row["attention_rank"]=0
 		elif int(row.reachable)<=0 or int(row.workers)<=0:
-			row["status"]="UNORGANIZED"
-			row["status_detail"]="No staffed reachable source"
+			row["status"]="UNSTAFFED" if int(row.workable)>0 else "UNORGANIZED"
+			row["status_detail"]="Reachable source has no assigned workers" if int(row.workable)>0 else "No workable source"
 			row["attention_rank"]=1
 		else:
 			row["status"]="FLOWING"
@@ -14507,7 +14516,7 @@ func _add_material_flow_row(parent:Container,row_data:Dictionary)->void:
 	var resource_name:=String(row_data.get("material",""))
 	if bool(row_data.get("is_surface_water",false)):
 		var show_river:=Button.new(); show_river.text="SHOW RIVER"; show_river.custom_minimum_size=Vector2(105,30); show_river.add_theme_font_size_override("font_size",9); show_river.tooltip_text="Return to the map with recognized river and drainage channels emphasized."; show_river.pressed.connect(_open_resource_map_from_materials); row.add_child(show_river)
-	elif ResourceSystem.material_profile(resource_name).size()>0 and resource_name not in ["Freshwater","Fertile Soil","Game","Medicinal Plants"]:
+	elif ResourceSystem.material_profile(resource_name).size()>0 and resource_name not in ["Freshwater","Fertile Soil","Game"]:
 		var priority:=Button.new(); var priority_value:=float(GameState.resource_priorities.get(resource_name,1.0)); priority.text="SET %s" % ("LOW" if priority_value>1.2 else ("NORMAL" if priority_value<0.8 else "HIGH")); priority.custom_minimum_size=Vector2(105,30); priority.add_theme_font_size_override("font_size",9); priority.tooltip_text="Cycle this material's aggregate extraction and carrier priority."; priority.pressed.connect(_cycle_material_priority.bind(resource_name)); row.add_child(priority)
 	else:
 		_add_material_flow_cell(row,"No priority",105,Color("#6f7772"))
@@ -14537,9 +14546,13 @@ func _open_materials_detail_overlay(rows:Array[Dictionary],water_access:Dictiona
 		if explanation!="": text=explanation+"\n"+text
 		_add_compact_provision_text(detail,ResourceSystem.display_name(material_name).to_upper()+"  •  "+String(row_data.status),text,Color("#b8bab0"))
 	detail.add_child(HSeparator.new())
-	_add_provision_section_title(detail,"STORAGE BY SYSTEM","Bulk capacity is aggregated across every player settlement.")
+	_add_provision_section_title(detail,"STORAGE BY SYSTEM","Each material needs its own physical storage type; spare yard space cannot hold covered or sealed stock.")
 	var capacities:=ResourceSystem.storage_capacities()
-	for store_name in capacities: _add_compact_provision_text(detail,String(store_name).replace("_"," ").to_upper(),"%.0f bulk capacity" % float(capacities[store_name]),Color("#a58b67"))
+	var used_by_type:Dictionary=GameState.material_metrics.get("storage_used_by_type",{})
+	for store_name in capacities: _add_compact_provision_text(detail,String(store_name).replace("_"," ").to_upper(),"%.0f / %.0f bulk used" % [float(used_by_type.get(store_name,0.0)),float(capacities[store_name])],Color("#a58b67"))
+	var losses:Dictionary=GameState.material_metrics.get("losses_by_resource",{})
+	for resource_variant in losses:
+		_add_compact_provision_text(detail,"LOST · "+ResourceSystem.display_name(String(resource_variant)).to_upper(),"%.2f bulk lost today to decay, exposure, or the required storage type being full." % float(losses[resource_variant]),Color("#b77761"))
 
 
 func _open_materials_panel_legacy() -> void:
@@ -14650,7 +14663,7 @@ func _open_materials_panel_legacy() -> void:
 		knowledge.add_theme_color_override("font_color",Color("#a8afa8"))
 		knowledge.text=_material_knowledge_text(deposit)
 		content.add_child(knowledge)
-		if String(deposit.stage) in ["accessible","developed"] and ResourceSystem.material_profile(String(deposit.resource)).size()>0 and String(deposit.resource) not in ["Freshwater","Fertile Soil","Game","Medicinal Plants"]:
+		if String(deposit.stage) in ["accessible","developed"] and ResourceSystem.material_profile(String(deposit.resource)).size()>0 and String(deposit.resource) not in ["Freshwater","Fertile Soil","Game"]:
 			var flow:=Label.new()
 			flow.text="%.1f km  •  %d workers  •  %.1f extracted  •  %.1f awaiting carriers  •  %.1f moving" % [float(deposit.get("distance_km",0.0)),int(deposit.get("workers",0)),float(deposit.get("extracted_today",0.0)),float(deposit.get("stock_at_source",0.0)),ResourceSystem.in_transit_for(deposit)]
 			flow.add_theme_font_size_override("font_size",10)
@@ -14868,7 +14881,7 @@ func _open_materials_panel_legacy() -> void:
 	var used_by_store:={"yard":0.0,"dry":0.0,"covered":0.0,"sealed":0.0,"secure":0.0}
 	for resource_name_variant in GameState.resource_stockpiles:
 		var resource_name:=String(resource_name_variant)
-		if resource_name=="Food" or resource_name in ["Freshwater","Fertile Soil","Game","Medicinal Plants"]: continue
+		if resource_name=="Food" or resource_name in ["Freshwater","Fertile Soil","Game"]: continue
 		var amount:=float(GameState.resource_stockpiles[resource_name])
 		if amount<=0.005: continue
 		var profile:=ResourceSystem.material_profile(resource_name)
@@ -15228,6 +15241,14 @@ func _material_constraint_brief(metrics:Dictionary,accessible_count:int,capacity
 	var extracted:=float(metrics.get("extracted_today",0.0))
 	var waiting:=float(metrics.get("at_source",0.0))
 	var delivered:=float(metrics.get("delivered_today",0.0))
+	var lost:=float(metrics.get("lost_today",0.0))
+	if lost>0.05:
+		var losses:Dictionary=metrics.get("losses_by_resource",{})
+		var top_resource:="materials"
+		var top_loss:=0.0
+		for resource_variant in losses:
+			if float(losses[resource_variant])>top_loss:top_resource=ResourceSystem.display_name(String(resource_variant));top_loss=float(losses[resource_variant])
+		return {"status":"STORAGE IS LOSING MATERIAL","why":"%.1f bulk was lost today; %s accounts for %.1f." % [lost,top_resource,top_loss],"next":"Open Source Details to compare used and available capacity by storage type."}
 	if waiting>maxf(5.0,delivered*1.5):
 		return {"status":"CARRYING IS THE BOTTLENECK","why":"%.1f bulk waits at sources while only %.1f arrived today." % [waiting,delivered],"next":"Increase Logistics labor, route capacity, or material carriers before adding extraction."}
 	if capacity>0.0 and stored_bulk/capacity>0.82:
