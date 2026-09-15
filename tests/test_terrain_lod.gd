@@ -45,7 +45,7 @@ func test_regional_preview_improves_before_final_detail_is_ready()->void:
 		terrain._rebuild_regional_terrain_patch(point,span)
 		finish_job(terrain);resolutions.append(terrain.regional_patch_resolution)
 		assert_int(terrain.terrain_patch_cache.size()).is_equal(1 if stage==2 else 0)
-	assert_array(resolutions).is_equal([33,129,513])
+	assert_array(resolutions).is_equal([33,129,385])
 func test_continental_request_refines_and_cached_return_does_not_rebuild()->void:
 	var terrain:=fixture();var camera:=Camera3D.new();terrain.add_child(camera);terrain.camera=camera;camera.size=2000
 	terrain._update_world_streaming()
@@ -57,18 +57,18 @@ func test_continental_request_refines_and_cached_return_does_not_rebuild()->void
 	assert_int(terrain.terrain_patch_cache.size()).is_equal(0)
 	var preview:=terrain.regional_terrain_patch
 	terrain._update_world_streaming()
-	assert_int(terrain.terrain_patch_job.resolution).is_equal(513)
+	assert_int(terrain.terrain_patch_job.resolution).is_equal(385)
 	terrain._advance_terrain_patch()
 	assert_object(terrain.regional_terrain_patch).is_same(preview)
 	finish_job(terrain)
 	var mesh:Mesh=terrain.regional_terrain_patch.mesh
-	assert_int(terrain.regional_patch_resolution).is_equal(513)
+	assert_int(terrain.regional_patch_resolution).is_equal(385)
 	terrain._rebuild_regional_terrain_patch(Vector2(9000,0),span)
 	finish_job(terrain)
 	terrain._rebuild_regional_terrain_patch(Vector2.ZERO,span)
 	assert_object(terrain.terrain_patch_job).is_null()
 	assert_object(terrain.regional_terrain_patch.mesh).is_same(mesh)
-	assert_int(terrain.rendered_regional_heights.size()).is_equal(513*513)
+	assert_int(terrain.rendered_regional_heights.size()).is_equal(385*385)
 func test_cancelled_camera_request_cannot_replace_visible_ground()->void:
 	var terrain:=fixture();terrain._rebuild_regional_terrain_patch(Vector2.ZERO,40)
 	finish_job(terrain);var old:=terrain.regional_terrain_patch
@@ -114,7 +114,7 @@ func test_continental_coast_matches_physical_land_more_closely()->void:
 				h.append(terrain._height_at(q.x,q.y))
 			var coarse:=h[0]+(h[1]-h[0])*f.x+(h[2]-h[1])*f.y if f.x>=f.y else h[0]+(h[2]-h[3])*f.x+(h[3]-h[0])*f.y
 			if (coarse>0)!=(height>0):old_wrong+=1
-			if (sampled_height(terrain,p,span,513)>0)!=(height>0):new_wrong+=1
+			if (sampled_height(terrain,p,span,LOD.resolution_for(span))>0)!=(height>0):new_wrong+=1
 	print("LOD_COAST samples=",shore_samples," wrong_old=",old_wrong," wrong_new=",new_wrong)
 	assert_int(shore_samples).is_greater(100)
 	assert_int(new_wrong).is_less(int(old_wrong*.70))

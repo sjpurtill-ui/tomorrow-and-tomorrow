@@ -19,7 +19,16 @@ static func center_for(point:Vector2,span:float)->Vector2:
 	return (point/step).round()*step
 
 static func resolution_for(span:float)->int:
-	return 385 if span<=14.0 else (257 if span<=32.0 else MAX_RESOLUTION)
+	# A 513 grid remains worthwhile for the 50,000-ft band, where a streamed
+	# cell still covers several screen pixels. Beyond a 64 km patch, 385 cells
+	# already exceed useful projected density; 513 spent 44% more samples on
+	# climate, geology, coast and normals without adding visible information.
+	if span<=14.0:return 385
+	if span<=32.0:return 257
+	if span<=64.0:return MAX_RESOLUTION
+	# A literal whole-planet patch needs the existing 80 km coast ceiling.
+	if span>30720.0:return MAX_RESOLUTION
+	return 385
 
 static func preview_resolution(span:float)->int:
 	# A continental preview must never be coarser than the ~83 km global mesh.
