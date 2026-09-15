@@ -2061,16 +2061,24 @@ void fragment() {
 	}
 	vec3 ground_sample = mix(ground_map, ground_close, close_detail * 0.66);
 	vec3 forest_sample = mix(forest_map, forest_crowns, crown_detail * 0.90);
-	float ground_luma = dot(ground_sample, vec3(0.28, 0.57, 0.15));
+	float photo_resolved=max(local_detail,close_detail);
+	float raw_ground_luma = dot(ground_sample, vec3(0.28, 0.57, 0.15));
+	float photo_pivot=mix(0.31,0.41,semiarid_weight);
+	float photo_contrast=mix(1.0,mix(1.28,1.50,semiarid_weight),photo_resolved);
+	float ground_luma=clamp(photo_pivot+(raw_ground_luma-photo_pivot)*photo_contrast,0.04,0.92);
+	ground_sample*=ground_luma/max(raw_ground_luma,0.04);
 	float forest_luma = dot(forest_sample, vec3(0.28, 0.57, 0.15));
 	// Texture supplies light/dark detail; the surveyed biome supplies the hue.
 	// Tint multiplication alone left green photographs green in dry climates.
-	// The semiarid tile is already a physically appropriate soil photograph, so
-	// retain more of its mineral/grass colour locally instead of crushing it into
-	// monochrome climate tint. Wet ground continues to use the biome-owned hue.
-	float native_ground_colour=mix(0.08,0.38,semiarid_weight*max(local_detail,close_detail));
+	// Both tiles are physically grounded aerial photographs. Preserve their
+	// within-biome colour variation when the camera can resolve it; the previous
+	// tint pass discarded most scrub, bare-soil and moisture contrast and turned
+	// an information-rich orthophoto into a nearly uniform beige/green sheet.
+	// Climate still chooses the source and owns the broad hue, so this cannot make
+	// wet grass into desert or dry scrub into woodland.
+	float native_ground_colour=mix(0.08,mix(0.24,0.70,semiarid_weight),photo_resolved);
 	vec3 ground_surface = mix(vec3(ground_luma) * biome_hue, ground_sample, native_ground_colour);
-	ground_surface = mix(vertex_tint * 0.70, ground_surface, 0.79);
+	ground_surface = mix(vertex_tint * 0.70, ground_surface, mix(0.79,0.91,photo_resolved));
 	vec3 forest_surface = mix(vec3(forest_luma), forest_sample, 0.76);
 	forest_surface = mix(vec3(0.058, 0.108, 0.069), forest_surface, 0.77);
 	// Preserve the light crown tops and shaded gaps that distinguish canopy
