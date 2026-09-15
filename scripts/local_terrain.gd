@@ -2189,7 +2189,11 @@ void fragment() {
 	// hillshade at the same time doubled broad shadows into soft dark blobs at the
 	// 50,000-foot tier. Fade the map-only cue in once pixels cover country-scale
 	// ground, where geometric lighting alone no longer communicates the relief.
-	float map_relief = smoothstep(0.35,2.5,pixel_world);
+	// Begin the cartographic cue at regional satellite scale, where smoothed mesh
+	// lighting alone makes mountains read like broad stains in oblique views. It
+	// remains exactly absent at settlement scale and reaches the existing full
+	// strength only once individual landforms are genuinely unresolved.
+	float map_relief = smoothstep(0.035,0.28,pixel_world);
 	earth *= mix(1.0, hillshade, map_relief * 0.82);
 	float ridge_glint = smoothstep(0.12, 0.62, slope) * smoothstep(0.25, 0.82, hill_light) * map_relief;
 	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.20);
