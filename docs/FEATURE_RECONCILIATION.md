@@ -1,3 +1,14 @@
+## September 14 — detailed terrain survives small pans
+
+Integrated source `a436341` at `277b90a`. Adjacent patches reuse completed
+height/color/climate/geology/season samples at identical map coordinates and
+recalculate normals. Covered small pans keep the fine mesh visible through the
+replacement. Native paired renders are pixel-identical to complete resampling;
+the full zoom/pan check and all 25 targeted tests pass on integrated main.
+See `TERRAIN_PAN_REUSE_HANDOFF.md` for timings and limitations. This is a rendering
+performance change with no save fields or new geography. The live game remains
+on its previously launched build, `5c676ce`.
+
 ## September 14 — dryland aerial detail
 
 Integrated worker `54ada8b` at canonical `c7a2de8`. Close dryland retains more

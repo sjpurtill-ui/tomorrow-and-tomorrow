@@ -1,3 +1,15 @@
+## September 14 — preserve terrain detail during pans: INTEGRATED
+
+Worker `a436341` is integrated at `277b90a` without conflicts. Terrain refinement
+reuses completed samples within the bounded mesh cache, including intermediate
+zoom grids. A small covered pan retains the finished mesh until another fine
+mesh is ready. Two native comparisons reuse 91.69% of samples and produce
+pixel-identical results to full rebuilding. The complete native zoom/pan/fog
+check passes, and 25/25 tests pass again on canonical main. See
+`TERRAIN_PAN_REUSE_HANDOFF.md` for measured preparation times, memory bounds,
+cold-build limitations and the adjusted native test deadline. The live player
+continues to run `5c676ce`; no session restart was performed.
+
 ## September 14 — dryland aerial detail: INTEGRATED
 
 Worker `54ada8b` is integrated at `c7a2de8`. Dry ground preserves photographic
