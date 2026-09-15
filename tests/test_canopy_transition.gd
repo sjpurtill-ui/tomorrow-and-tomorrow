@@ -7,6 +7,8 @@ func test_canopy_shader_preserves_dark_aerial_range_and_neutralizes_alpha_edges(
 	assert_str(source).contains("float canopy_luma=0.18+source_luma*0.70")
 	assert_str(source).contains("mix(0.08,0.38,edge_colour)")
 	assert_str(source).contains("if (local_detail>0.0)")
+	assert_str(source).contains("vec2 canopy_warp=(vec2(soil_patch,regional)-vec2(0.5))*0.34")
+	assert_str(source).contains("forest_crowns=mix(crown_photo_a,crown_photo_b,0.20)")
 	assert_array(Cover.CROWN_ATLAS_CELLS).is_equal([0,1,2,4,6,7,11,14])
 
 class Terrain extends "res://scripts/local_terrain.gd":

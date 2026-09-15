@@ -2072,7 +2072,15 @@ void fragment() {
 			close_b=mix(texture(ground_albedo,close_uv_rotated).rgb,texture(semiarid_ground_albedo,close_uv_rotated).rgb,semiarid_weight);
 		}
 		ground_close=mix(close_a,close_b,0.32);
-		forest_crowns = mix(texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,2,1,false,vec2(0.0))).rgb, texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,158,100,true,vec2(0.1216,-0.1728))).rgb, 0.14);
+		// Bend both photograph coordinates with broad, already-computed world
+		// fields. Repetition no longer lands at the same phase every 500 m, yet the
+		// warp remains continuous across tile edges and costs no extra texture read.
+		vec2 canopy_warp=(vec2(soil_patch,regional)-vec2(0.5))*0.34;
+		vec2 crown_uv_a=periodic_surface_uv(surface_position,surface_origin,2,1,false,vec2(0.0))+canopy_warp;
+		vec2 crown_uv_b=periodic_surface_uv(surface_position,surface_origin,158,100,true,vec2(0.1216,-0.1728))+vec2(-canopy_warp.y,canopy_warp.x)*0.71;
+		vec3 crown_photo_a=texture(forest_albedo,crown_uv_a).rgb;
+		vec3 crown_photo_b=texture(forest_albedo,crown_uv_b).rgb;
+		forest_crowns=mix(crown_photo_a,crown_photo_b,0.20);
 	}
 	vec3 ground_sample = mix(ground_map, ground_close, close_detail * 0.66);
 	vec3 forest_sample = mix(forest_map, forest_crowns, crown_detail * 0.90);
