@@ -2183,6 +2183,14 @@ void fragment() {
 	// relief map. Without this lift the settlement-scale ground fell nearly black.
 	earth *= mix(1.0, 1.32, close_detail);
 	earth = mix(earth, max(earth, vec3(0.105,0.112,0.072)), close_detail * 0.72);
+	// Thin aerial perspective replaces expensive volumetric fog. At country and
+	// continental footprints it gently compresses saturation like a real column
+	// of atmosphere; oblique rays accumulate a little more haze than nadir rays.
+	float altitude_haze=smoothstep(0.65,5.0,pixel_world);
+	float view_slant=length(relative_position.xz)/max(abs(relative_position.y),0.001);
+	float slant_haze=smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
+	float atmospheric_weight=clamp(altitude_haze*0.13+slant_haze*0.13,0.0,0.22);
+	earth=mix(earth,vec3(0.31,0.37,0.38),atmospheric_weight);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
 	ALBEDO = earth*reveal;
