@@ -1,3 +1,15 @@
+## September 15 — mountain ridges at playable distances
+
+Integrated worker `4946779` at runtime `e9026dc`. New deterministic physical
+relief resolves smaller crests and valleys inside the broad mountain envelope.
+Both geographic consumers use the same model; no inventory, labor or save-schema
+fields changed. All 34 targeted cases pass on integrated main, and private native
+visual/streaming checks pass. The complete headless mesh benchmark adds about
+2.3% computation, but native preparation latency remains an unresolved limitation.
+See `MOUNTAIN_RELIEF_HANDOFF.md` for the full evidence and remaining visual limits.
+Terrain work stops after packaging this pass, at the user's explicit request.
+The running player remains `5c676ce`, not the new package.
+
 ## September 14 — detailed terrain survives small pans
 
 Integrated source `a436341` at `277b90a`. Adjacent patches reuse completed

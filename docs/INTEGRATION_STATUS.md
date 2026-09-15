@@ -1,3 +1,20 @@
+## September 15 — physical mountain detail: INTEGRATED; terrain work stopped
+
+Worker `4946779` is integrated at `e9026dc`, without conflicts. A bounded seeded
+ridge model adds kilometre-scale geometry within existing mountain uplift;
+lowlands and ocean are excluded. The local terrain and planet environmental
+counterpart share the new detail model. 34/34 tests pass again on canonical main.
+Paired textured/plain captures and the native four-distance, pan, cancellation,
+fog and world-edge checks pass. See `MOUNTAIN_RELIEF_HANDOFF.md` for evidence,
+save/geography limitations and performance costs: full headless mesh preparation
+adds about 2.3%, while native refinement was much slower than prior receipts and
+has not been isolated to host versus rendering effects. This is not a claim that
+Google Earth-like quality or the performance objective has been achieved.
+
+The user requested stopping after this pass. No further landscape iteration is
+to start without a new request. The existing player remains on `5c676ce`; it was
+not restarted. A build-only package is prepared after this integration record.
+
 ## September 14 — preserve terrain detail during pans: INTEGRATED
 
 Worker `a436341` is integrated at `277b90a` without conflicts. Terrain refinement
