@@ -12,8 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(__file__).resolve().parent
 BUILD = ROOT / 'artifacts' / 'macos-background-capture'
 GODOT = Path('/Applications/Godot.app/Contents/MacOS/Godot')
-ALLOWED = {'canopy_transition_probe', 'coastal_water_probe', 'ground_surface_probe', 'river_landscape_probe', 'seasonal_landscape_probe', 'terrain_lod_probe', 'ancient_scouting_probe', 'woodland_scale_probe', 'terrain_shader_cost_probe'}
+ALLOWED = {'atmosphere_landscape_probe', 'canopy_transition_probe', 'coastal_water_probe', 'ground_surface_probe', 'river_landscape_probe', 'seasonal_landscape_probe', 'terrain_lod_probe', 'ancient_scouting_probe', 'woodland_scale_probe', 'terrain_shader_cost_probe'}
 MARKERS = {'canopy_transition_probe': 'CANOPY_TRANSITION_CAPTURE PASS',
+           'atmosphere_landscape_probe': 'MAP_AUDIT',
            'coastal_water_probe': 'COASTAL_WATER_CAPTURE PASS',
            'ground_surface_probe': 'GROUND_SURFACE_CAPTURE PASS',
            'river_landscape_probe': 'MAP_AUDIT',
@@ -67,6 +68,13 @@ def main():
         river_output.mkdir(parents=True, exist_ok=True)
         probe_args = ['--', '--river', '--river-z=0', '--span=5', '--aerial', '--revealed',
                       '--verify-river-surface', '--output=res://artifacts/river-landscape/river.png']
+    elif args.probe == 'atmosphere_landscape_probe':
+        scene = 'res://tools/map_graphics_audit.tscn'
+        resolution = '1600x1000'
+        atmosphere_output = ROOT / 'artifacts' / 'atmosphere-landscape'
+        atmosphere_output.mkdir(parents=True, exist_ok=True)
+        probe_args = ['--', '--span=150', '--revealed',
+                      '--output=res://artifacts/atmosphere-landscape/oblique-region.png']
     command = [str(private), '--path', str(ROOT), '--audio-driver', 'Dummy',
                '--rendering-method', 'gl_compatibility', '--windowed', '--resolution', resolution,
                scene] + probe_args
