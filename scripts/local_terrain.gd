@@ -2107,28 +2107,33 @@ void fragment() {
 	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
-	// Seeded intermittent swales bridge the visual scale between a continental
-	// river and local soil mottling. Their broad riparian shoulder remains green;
-	// the narrow floor exposes damp earth. Geometry uses the same centreline.
-	float drainage_spacing=2.40;
-	float drainage_offset=(drainage_phase-0.5)*drainage_spacing;
-	float drainage_index=floor((world_position.x-drainage_offset)/drainage_spacing+0.5);
-	float drainage_x=drainage_index*drainage_spacing+drainage_offset;
-	drainage_x+=sin(world_position.z*1.34+drainage_index*2.17+drainage_phase*6.2831853)*0.22;
-	drainage_x+=sin(world_position.z*3.71-drainage_index*0.83+drainage_phase*17.0)*0.055;
-	float drainage_raw=0.50+sin(world_position.z*1.11+drainage_index*1.73+drainage_phase*31.0)*0.31+sin(world_position.z*0.37-drainage_index*2.41+drainage_phase*67.0)*0.19;
-	float drainage_active=smoothstep(0.29,0.72,drainage_raw);
-	float drainage_distance=abs(world_position.x-drainage_x)+mix(0.075,0.0,drainage_active);
 	float climate_green=smoothstep(-0.018,0.065,COLOR.g-COLOR.r);
-	float riparian=(1.0-smoothstep(0.025,0.115,drainage_distance))*drainage_active;
-	float swale_floor=(1.0-smoothstep(0.006,0.026,drainage_distance))*drainage_active;
-	earth=mix(earth,vec3(0.17,0.275,0.155),riparian*(0.06+climate_green*(0.14+local_detail*0.12)));
-	earth=mix(earth,vec3(0.225,0.245,0.165),swale_floor*climate_green*(0.20+close_detail*0.16));
-	// In dry country the same drainage network reads as pale alluvium, darker
-	// incised floors, and sparse greener shoulders—not invisible green rivers.
-	float dry_climate=1.0-climate_green;
-	earth=mix(earth,vec3(0.39,0.335,0.225),riparian*dry_climate*(0.10+local_detail*0.08));
-	earth=mix(earth,vec3(0.30,0.265,0.19),swale_floor*dry_climate*close_detail*0.06);
+	// Seeded intermittent swales bridge the visual scale between a continental
+	// river and local soil mottling. Once one pixel covers their entire riparian
+	// shoulder, evaluating four trigonometric meanders only produces striped
+	// aliasing. Fade the physical-width feature before that point and skip its
+	// construction entirely at regional and continental satellite scales.
+	float drainage_resolved=1.0-smoothstep(0.025,0.11,pixel_world);
+	if (drainage_resolved>0.0) {
+		float drainage_spacing=2.40;
+		float drainage_offset=(drainage_phase-0.5)*drainage_spacing;
+		float drainage_index=floor((world_position.x-drainage_offset)/drainage_spacing+0.5);
+		float drainage_x=drainage_index*drainage_spacing+drainage_offset;
+		drainage_x+=sin(world_position.z*1.34+drainage_index*2.17+drainage_phase*6.2831853)*0.22;
+		drainage_x+=sin(world_position.z*3.71-drainage_index*0.83+drainage_phase*17.0)*0.055;
+		float drainage_raw=0.50+sin(world_position.z*1.11+drainage_index*1.73+drainage_phase*31.0)*0.31+sin(world_position.z*0.37-drainage_index*2.41+drainage_phase*67.0)*0.19;
+		float drainage_active=smoothstep(0.29,0.72,drainage_raw);
+		float drainage_distance=abs(world_position.x-drainage_x)+mix(0.075,0.0,drainage_active);
+		float riparian=(1.0-smoothstep(0.025,0.115,drainage_distance))*drainage_active*drainage_resolved;
+		float swale_floor=(1.0-smoothstep(0.006,0.026,drainage_distance))*drainage_active*drainage_resolved;
+		earth=mix(earth,vec3(0.17,0.275,0.155),riparian*(0.06+climate_green*(0.14+local_detail*0.12)));
+		earth=mix(earth,vec3(0.225,0.245,0.165),swale_floor*climate_green*(0.20+close_detail*0.16));
+		// In dry country the same drainage network reads as pale alluvium, darker
+		// incised floors, and sparse greener shoulders—not invisible green rivers.
+		float dry_climate=1.0-climate_green;
+		earth=mix(earth,vec3(0.39,0.335,0.225),riparian*dry_climate*(0.10+local_detail*0.08));
+		earth=mix(earth,vec3(0.30,0.265,0.19),swale_floor*dry_climate*close_detail*0.06);
+	}
 	float open_meadow = smoothstep(0.58,0.78,soil_patch) * (1.0-forest_mask) * (1.0-close_detail*0.45);
 	float dryland_mass = smoothstep(0.60,0.80,organic_noise(world_position.xz*0.022+vec2(61.0,-47.0))) * (1.0-forest_mask);
 	earth = mix(earth, vec3(0.34,0.37,0.205), open_meadow*0.30*climate_green);
