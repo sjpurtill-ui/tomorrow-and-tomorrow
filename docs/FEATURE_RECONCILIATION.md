@@ -1428,3 +1428,23 @@ living-civilization images. The remaining 3,143 prehistoric catalogue IDs are
 still unillustrated rather than falsely mapped. Focused canonical validation:
 81/81 artifact and exchange cases, two clean artwork audits, and zero missing
 imported texture targets.
+## September 15 — envoy return and compact city intelligence
+
+Integrated source `04ef544` on canonical Mac main, base `2a21403`. Owned scope:
+envoy return/recovery, foreign dialogue status, HUD city cards and dated civic
+estimates, shared GDP calculation parameterization, and focused tests. No terrain,
+government, save-system, or military ownership changes; no shared-file conflicts.
+
+Pending AI output no longer advances return_day indefinitely. Physical reports
+return once; a valid late answer completes the saved discussion independently.
+Cards expose people, science/health percentage indices, and GDP in equivalent
+worker-days per day (not currency). Five freshness segments saturate; the oldest
+displayed observation governs freshness. No live hidden values are used to fill
+old reports. Legacy cities without a GDP ledger display Unknown.
+
+Validation: 55/55 cases in test_dialogue_continuity, test_city_intelligence,
+test_city_label_layout, test_foreign_city_map_labels, test_diplomatic_journey,
+and test_civilization_indicators using headless Godot on the explicit canonical
+path. Optional fields preserve old-save loading. No live API or graphical audit;
+the specific player's earlier reply failure remains unproven. Existing release
+PID 41480 and editor were not stopped or replaced.

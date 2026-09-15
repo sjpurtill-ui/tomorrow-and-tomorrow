@@ -1758,3 +1758,21 @@ and material atlas at 1280×900 and 800×600. This is presentation/data-label wo
 with no save-schema change. No player or editor session was restarted; an
 already-running build does not contain the change until its next normal rebuild
 and launch.
+## September 15 — envoy return and city intelligence cards: INTEGRATED
+
+Canonical Mac integrator delivery `04ef544`, based on `2a21403`, is integrated
+on main. Envoys return on schedule independently of a pending/failed model reply;
+old awaiting-account missions finish on the next simulation tick. Replies can
+recover after return. Cards show dated population, science index, labor-equivalent
+GDP, and health index estimates, with a bounded freshness meter instead of an
+ever-growing age count. Unknown observations remain unknown.
+
+55/55 focused cases pass across dialogue continuity, city intelligence, city label
+layout, foreign map labels, diplomatic journeys, and civilization indicators.
+No failures, errors, skips, or orphans. Save additions are optional; older records
+need new observation for new fields. Legacy societies lack a city GDP ledger.
+No graphical audit or live API request was performed. The user's specific reply
+failure could not be reconstructed: the available quicksave has no active envoy
+conversation, and the release log has no response diagnostic. New failures now
+distinguish output truncation, refusal, envelope parsing, and dialogue validation.
+Player PID 41480 remains on `2a21403c0d61`; it has not loaded this delivery.
