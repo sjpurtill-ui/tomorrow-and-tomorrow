@@ -29,6 +29,15 @@ func average(image:Image)->Color:
 	for y in range(90,630,12):
 		for x in range(120,960,12):total+=image.get_pixel(x,y);count+=1
 	return total/float(count)
+func luminance_spread(image:Image)->float:
+	var values:Array[float]=[];var mean:=0.0
+	for y in range(90,630,12):
+		for x in range(120,960,12):
+			var value:=image.get_pixel(x,y).get_luminance();values.append(value);mean+=value
+	mean/=maxf(1.0,float(values.size()))
+	var variance:=0.0
+	for value:float in values:variance+=(value-mean)*(value-mean)
+	return sqrt(variance/maxf(1.0,float(values.size())))
 func run()->void:
 	for node:Node in [GameState,MilitaryCampaign,CivilizationSystem]:node.set_process(false)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output))
@@ -54,9 +63,11 @@ func run()->void:
 		while not build.advance(5000):pass
 		terrain._install_regional_patch({"mesh":build.commit(),"center":site.point,"span":8.0,"resolution":201,"heights":build.heights});terrain._build_water()
 		var camera:=Camera3D.new();camera.fov=35;camera.near=.05;camera.far=100000;camera.position=Vector3(site.point.x,site.height+3.048,site.point.y+1.8);canvas.add_child(camera);camera.look_at(Vector3(site.point.x,site.height,site.point.y),Vector3.UP)
-		await settle();canvas.get_texture().get_image().save_png(output+id+"-real-world.png")
+		await settle();var site_image:=canvas.get_texture().get_image();site_image.save_png(output+id+"-real-world.png")
 		var profile:=PlanetEnvironment.profile_at(site.point,terrain._survey_ground_at(site.point))
 		print("GROUND_SITE ",JSON.stringify({"biome":id,"seed":site.seed,"x":site.point.x,"z":site.point.y,"height_km":site.height,"rain":site.biome.precipitation,"warmth":site.biome.temperature,"geology":profile.geology,"max_slice_us":build.max_slice_usec}))
+		print("GROUND_PHOTO_SPREAD ",id," ",luminance_spread(site_image))
+		if id in ["steppe","grassland"]:check(luminance_spread(site_image)>.021,"resolved "+id+" retains photographic ground variation")
 		canvas.queue_free();await settle()
 	# Compare the same steep geometry with controlled geological families.
 	var canvas:=view();var terrain:=setup(42);canvas.add_child(terrain);terrain.discovery_mask_texture=white_fog();var material:=terrain._create_terrain_material()
