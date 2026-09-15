@@ -109,6 +109,8 @@ var regional_patch_resolution:=0
 var terrain_patch_cancellations:=0
 var terrain_patch_last_slice_usec:int=0
 var terrain_patch_last_commit_usec:int=0
+var terrain_visual_sample_position:=Vector3(INF,INF,INF)
+var terrain_visual_sample_climate:Dictionary={}
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
 const SURFACE_PRECISION:=preload("res://scripts/surface_precision.gd")
 const TERRAIN_LOD:=preload("res://scripts/terrain_lod.gd")
@@ -1855,6 +1857,7 @@ shader_type spatial;
 render_mode diffuse_burley, specular_disabled;
 
 uniform sampler2D ground_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
+uniform sampler2D semiarid_ground_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D forest_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size = vec2(40075.0, 20004.0);
@@ -1969,32 +1972,67 @@ void fragment() {
 	// mesh normals own landform. A satellite photo containing other mountains
 	// must not draw nonexistent ridges over this planet's actual geometry.
 	vec3 biome_hue = vertex_tint / max(dot(vertex_tint, vec3(0.28, 0.57, 0.15)), 0.05);
-	vec3 local_ground_a = texture(ground_albedo, local_ground_uv).rgb;
-	vec3 local_ground_b = texture(ground_albedo, local_ground_uv_rotated).rgb;
-	vec3 local_ground_map = mix(local_ground_a, local_ground_b, 0.22);
-	vec3 local_forest_a = texture(forest_albedo, local_forest_uv).rgb;
-	vec3 local_forest_b = texture(forest_albedo, local_forest_uv_rotated).rgb;
-	vec3 local_forest_map = mix(local_forest_a, local_forest_b, 0.18);
 	vec3 ground_map = procedural_ground;
-	ground_map = mix(ground_map, local_ground_map, max(local_detail*0.72,regional_detail*0.34));
 	vec3 procedural_forest = mix(vec3(0.055,0.105,0.070), vec3(0.155,0.205,0.125), biome_patch * 0.62 + regional * 0.38);
 	vec3 forest_map = procedural_forest;
-	forest_map = mix(forest_map, local_forest_map, max(local_detail*0.76,regional_detail*0.34));
-	vec3 ground_close = mix(texture(ground_albedo, close_uv).rgb, texture(ground_albedo, close_uv_rotated).rgb, 0.32);
+	float precipitation=UV.x>=0.999?clamp(UV.x-1.0,0.0,1.0):clamp((COLOR.g-COLOR.r)*4.0+0.48,0.0,1.0);
+	float semiarid_weight=1.0-smoothstep(0.24,0.52,precipitation);
+	// Sampling an unresolved aerial layer only burns texture bandwidth and lets
+	// mip-averaged tiles muddy the continental image. Each tier now has a hard
+	// zero-cost exit once its projected footprint is smaller than a pixel.
+	if (max(local_detail,regional_detail)>0.0) {
+		vec3 local_ground_a;
+		vec3 local_ground_b;
+		if (semiarid_weight>0.98) {
+			local_ground_a=texture(semiarid_ground_albedo,local_ground_uv).rgb;
+			local_ground_b=texture(semiarid_ground_albedo,local_ground_uv_rotated).rgb;
+		} else if (semiarid_weight<0.02) {
+			local_ground_a=texture(ground_albedo,local_ground_uv).rgb;
+			local_ground_b=texture(ground_albedo,local_ground_uv_rotated).rgb;
+		} else {
+			local_ground_a=mix(texture(ground_albedo,local_ground_uv).rgb,texture(semiarid_ground_albedo,local_ground_uv).rgb,semiarid_weight);
+			local_ground_b=mix(texture(ground_albedo,local_ground_uv_rotated).rgb,texture(semiarid_ground_albedo,local_ground_uv_rotated).rgb,semiarid_weight);
+		}
+		ground_map = mix(ground_map, mix(local_ground_a, local_ground_b, 0.22), max(local_detail*0.72,regional_detail*0.34));
+		vec3 local_forest_a = texture(forest_albedo, local_forest_uv).rgb;
+		vec3 local_forest_b = texture(forest_albedo, local_forest_uv_rotated).rgb;
+		forest_map = mix(forest_map, mix(local_forest_a, local_forest_b, 0.18), max(local_detail*0.76,regional_detail*0.34));
+	}
+	vec3 ground_close = ground_map;
 	// The existing tile contains dozens of crowns across its width. A 500 m
 	// repeat puts them at roughly 10–20 m, visible from 10,000 ft. The former
 	// 20 m repeat shrank entire forests into grain while the 4 km layer looked
 	// like giant color clouds. Keep one crown scale as the camera approaches;
 	// mipmaps and the physical pixel footprint resolve it into distant cover.
-	vec3 forest_crowns = mix(texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,2,1,false,vec2(0.0))).rgb, texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,158,100,true,vec2(0.1216,-0.1728))).rgb, 0.14);
 	float crown_detail = 1.0-smoothstep(0.003,0.014,pixel_world);
+	vec3 forest_crowns = forest_map;
+	if (max(close_detail,crown_detail)>0.0) {
+		vec3 close_a;
+		vec3 close_b;
+		if (semiarid_weight>0.98) {
+			close_a=texture(semiarid_ground_albedo,close_uv).rgb;
+			close_b=texture(semiarid_ground_albedo,close_uv_rotated).rgb;
+		} else if (semiarid_weight<0.02) {
+			close_a=texture(ground_albedo,close_uv).rgb;
+			close_b=texture(ground_albedo,close_uv_rotated).rgb;
+		} else {
+			close_a=mix(texture(ground_albedo,close_uv).rgb,texture(semiarid_ground_albedo,close_uv).rgb,semiarid_weight);
+			close_b=mix(texture(ground_albedo,close_uv_rotated).rgb,texture(semiarid_ground_albedo,close_uv_rotated).rgb,semiarid_weight);
+		}
+		ground_close=mix(close_a,close_b,0.32);
+		forest_crowns = mix(texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,2,1,false,vec2(0.0))).rgb, texture(forest_albedo, periodic_surface_uv(surface_position,surface_origin,158,100,true,vec2(0.1216,-0.1728))).rgb, 0.14);
+	}
 	vec3 ground_sample = mix(ground_map, ground_close, close_detail * 0.66);
 	vec3 forest_sample = mix(forest_map, forest_crowns, crown_detail * 0.90);
 	float ground_luma = dot(ground_sample, vec3(0.28, 0.57, 0.15));
 	float forest_luma = dot(forest_sample, vec3(0.28, 0.57, 0.15));
 	// Texture supplies light/dark detail; the surveyed biome supplies the hue.
 	// Tint multiplication alone left green photographs green in dry climates.
-	vec3 ground_surface = mix(vec3(ground_luma) * biome_hue, ground_sample, 0.08);
+	// The semiarid tile is already a physically appropriate soil photograph, so
+	// retain more of its mineral/grass colour locally instead of crushing it into
+	// monochrome climate tint. Wet ground continues to use the biome-owned hue.
+	float native_ground_colour=mix(0.08,0.38,semiarid_weight*max(local_detail,close_detail));
+	vec3 ground_surface = mix(vec3(ground_luma) * biome_hue, ground_sample, native_ground_colour);
 	ground_surface = mix(vertex_tint * 0.70, ground_surface, 0.79);
 	vec3 forest_surface = mix(vec3(forest_luma), forest_sample, 0.76);
 	forest_surface = mix(vec3(0.058, 0.108, 0.069), forest_surface, 0.77);
@@ -2006,6 +2044,11 @@ void fragment() {
 	// resource access and inspection. Green grass no longer implies forest.
 	float forest_mask=woodland_channel?clamp(COLOR.a,0.0,1.0):smoothstep(0.025,0.105,COLOR.g-max(COLOR.r,COLOR.b*0.82));
 	forest_mask*=1.0-smoothstep(0.30,0.72,slope);
+	// COLOR.a is the authoritative woodland density. Resolve that density into
+	// irregular stands instead of rendering it as one airbrushed green wash.
+	// Zero density remains zero, while dense forest retains connected mass.
+	float stand_pattern=smoothstep(0.31,0.69,regional*0.62+soil_patch*0.38);
+	forest_mask*=mix(0.58,1.22,stand_pattern);
 	float retained_woodland=woodland_retained(world_position.xz);
 	forest_mask*=retained_woodland;
 	float crown_shade=precise_surface_noise(surface_position,surface_origin,90,1,vec2(0.0));
@@ -2028,7 +2071,12 @@ void fragment() {
 	float riparian=(1.0-smoothstep(0.025,0.115,drainage_distance))*drainage_active;
 	float swale_floor=(1.0-smoothstep(0.006,0.026,drainage_distance))*drainage_active;
 	earth=mix(earth,vec3(0.17,0.275,0.155),riparian*(0.06+climate_green*(0.14+local_detail*0.12)));
-	earth=mix(earth,vec3(0.225,0.245,0.165),swale_floor*(0.26+close_detail*0.18));
+	earth=mix(earth,vec3(0.225,0.245,0.165),swale_floor*climate_green*(0.20+close_detail*0.16));
+	// In dry country the same drainage network reads as pale alluvium, darker
+	// incised floors, and sparse greener shoulders—not invisible green rivers.
+	float dry_climate=1.0-climate_green;
+	earth=mix(earth,vec3(0.39,0.335,0.225),riparian*dry_climate*(0.10+local_detail*0.08));
+	earth=mix(earth,vec3(0.30,0.265,0.19),swale_floor*dry_climate*close_detail*0.06);
 	float open_meadow = smoothstep(0.58,0.78,soil_patch) * (1.0-forest_mask) * (1.0-close_detail*0.45);
 	float dryland_mass = smoothstep(0.60,0.80,organic_noise(world_position.xz*0.022+vec2(61.0,-47.0))) * (1.0-forest_mask);
 	earth = mix(earth, vec3(0.34,0.37,0.205), open_meadow*0.30*climate_green);
@@ -2051,6 +2099,12 @@ void fragment() {
 	}
 	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06;
 	earth *= modulation;
+	// Reused regional fields provide a cheap aerial-photo contrast hierarchy:
+	// broad climate still owns the colour, while soil/cover boundaries remain
+	// legible instead of dissolving into uniformly soft brown or green blobs.
+	float cover_structure=smoothstep(0.30,0.72,regional*0.58+soil_patch*0.42);
+	float structure_contrast=(cover_structure-0.5)*mix(0.10,0.24,max(regional_detail,local_detail));
+	earth*=1.0+structure_contrast;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
 	if (UV.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,UV2); }
 	// Rock exposure follows steepness, including low coastal cliffs. The old
@@ -2098,8 +2152,10 @@ void fragment() {
 	_register_woodland_material(material)
 	var ground_texture: Texture2D = load("res://assets/terrain/temperate_ground_albedo_v1.png")
 	var forest_texture: Texture2D = load("res://assets/terrain/temperate_forest_albedo_v1.png")
+	var semiarid_texture: Texture2D = load("res://assets/terrain/semiarid_ground_albedo_v1.png")
 	material.set_shader_parameter("ground_albedo",ground_texture)
 	material.set_shader_parameter("forest_albedo",forest_texture)
+	material.set_shader_parameter("semiarid_ground_albedo",semiarid_texture)
 	material.set_shader_parameter("land_resources",1.0 if resource_view_enabled else 0.0)
 	material.set_shader_parameter("woodland_channel",SEAMLESS_WORLD)
 	material.set_shader_parameter("drainage_phase",float(posmod(GameState.world_seed,10007))/10007.0)
@@ -2147,7 +2203,17 @@ func _vegetation_climate(position:Vector3)->Color:
 
 func _terrain_surface_fields_at(x:float,z:float,height:float)->Vector4:
 	if not SEAMLESS_WORLD:return Vector4.ZERO
-	var climate:=_climate_at(x,z,height)
+	# Patch construction asks for colour immediately before these fields. Reuse
+	# that exact climate sample: a 513-square refinement previously evaluated the
+	# same multi-noise climate twice for every vertex.
+	var position:=Vector3(x,height,z)
+	var climate:Dictionary
+	if position==terrain_visual_sample_position:
+		climate=terrain_visual_sample_climate
+	else:
+		climate=_climate_at(x,z,height)
+		terrain_visual_sample_position=position
+		terrain_visual_sample_climate=climate
 	var geology:=PlanetEnvironment.surface_geology_at(Vector2(x,z),height)
 	var total:=maxf(.001,float(geology.sedimentary)+float(geology.igneous)+float(geology.metamorphic))
 	# UV.x >= 1 identifies physical samples; custom/legacy meshes with no fields
@@ -2193,7 +2259,9 @@ func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
 	if is_nan(height): height=_height_at(x,z)
 	if height<SEA_LEVEL:
 		return {"id":"water","label":"open water","woodland":0.0,"fertility":0.0,"forage":0.0,"game":0.0,"stone":0.0,"color":Color("#21363a")}
-	var climate:=_climate_at(x,z,height)
+	return _biome_from_climate(x,z,height,_climate_at(x,z,height))
+
+func _biome_from_climate(x:float,z:float,height:float,climate:Dictionary)->Dictionary:
 	var temperature:=float(climate.temperature)
 	var precipitation:=float(climate.precipitation)
 	var river_distance:=float(climate.river_distance)
@@ -2244,7 +2312,14 @@ func _biome_at(x:float,z:float,height:float=NAN)->Dictionary:
 
 func _terrain_color_at(x: float, z: float, height: float) -> Color:
 	if SEAMLESS_WORLD:
-		var biome:=_biome_at(x,z,height)
+		var biome:Dictionary
+		if height<SEA_LEVEL:
+			biome=_biome_at(x,z,height)
+		else:
+			var climate:=_climate_at(x,z,height)
+			terrain_visual_sample_position=Vector3(x,height,z)
+			terrain_visual_sample_climate=climate
+			biome=_biome_from_climate(x,z,height,climate)
 		var color:Color=biome.color
 		color.a=float(biome.woodland)
 		return color
