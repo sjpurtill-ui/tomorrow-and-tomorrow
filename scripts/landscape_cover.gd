@@ -3,13 +3,15 @@ extends RefCounted
 ## Stable world cells keep existing plants fixed when a convoy or patch moves.
 const PATCH_RADIUS_KM:=.235
 const PATCH_INNER_KM:=.13
+const CROWN_FULL_FOOTPRINT_KM:=.26
+const CROWN_HIDDEN_FOOTPRINT_KM:=.78
 
 static func detail_strength(vertical_span:float,aspect:float)->float:
 	# Hand physical crowns back to continuous woodland albedo before the finite
 	# detail patch becomes a dot on the map. Use its physical footprint, so the
 	# same aerial distance cannot gain a square of trees on a wider display.
 	var footprint:=maxf(0.0,vertical_span)*maxf(1.0,aspect)
-	return 1.0-smoothstep(.45,2.40,footprint)
+	return 1.0-smoothstep(CROWN_FULL_FOOTPRINT_KM,CROWN_HIDDEN_FOOTPRINT_KM,footprint)
 
 static func cell_seed(cell:Vector2i,world_seed:int,salt:int=0)->int:
 	return hash("%d:%d:%d:%d:vegetation" % [world_seed,cell.x,cell.y,salt])

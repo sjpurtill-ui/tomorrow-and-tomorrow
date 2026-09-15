@@ -60,8 +60,8 @@ func test_crowns_scrub_and_understory_fade_together_without_rebuilding()->void:
 	for material in materials(terrain):kinds[material.get_shader_parameter("vegetation_kind")]=true
 	assert_int(kinds.size()).is_equal(3)
 	var previous:=1.0
-	for step in 120:
-		terrain.camera.size=.2+float(step)*.01;terrain._update_scale_lod()
+	for step in 240:
+		terrain.camera.size=.14+float(step)*.003;terrain._update_scale_lod()
 		var values:=materials(terrain);var fade:=float(values[0].get_shader_parameter("lod_fade"))
 		assert_float(fade).is_between(0.0,previous)
 		assert_float(previous-fade).is_less(.03)
@@ -73,7 +73,7 @@ func test_crowns_scrub_and_understory_fade_together_without_rebuilding()->void:
 	assert_float(GameState.population_exact).is_equal(population)
 
 func test_rebuilt_patch_receives_current_blend_and_its_own_boundary()->void:
-	var terrain:=fixture();terrain.camera.size=.7;terrain._update_scale_lod()
+	var terrain:=fixture();terrain.camera.size=.3;terrain._update_scale_lod()
 	var fade:=float(materials(terrain)[0].get_shader_parameter("lod_fade"))
 	assert_float(fade).is_between(.01,.99)
 	var destination:=terrain.camera_target+Vector3(.04,0,.02)
@@ -99,6 +99,8 @@ func test_first_construction_waits_until_foliage_is_visible_then_zoom_keeps_it()
 	terrain.camera.size=.7;terrain.camera_input_msec=Time.get_ticks_msec();terrain._update_scale_lod()
 	assert_object(terrain.close_vegetation_root).is_null()
 	terrain.camera_input_msec=-1000;terrain._update_scale_lod()
+	assert_object(terrain.close_vegetation_root).is_null()
+	terrain.camera.size=.3;terrain._update_scale_lod()
 	assert_object(terrain.close_vegetation_root).is_not_null()
 	assert_bool(terrain.close_vegetation_root.visible).is_true()
 	var original:=geometry(terrain);var root_id:=terrain.close_vegetation_root.get_instance_id()
@@ -128,11 +130,10 @@ func test_hidden_physical_changes_wait_but_upkeep_retains_the_constructed_patch(
 	assert_int(terrain.close_vegetation_revision).is_equal(GameState.morphology_revision)
 	assert_bool(terrain.close_vegetation_root.visible).is_true()
 
-func test_portrait_visible_foliage_is_built_above_the_old_ground_cutoff()->void:
+func test_portrait_aerial_view_uses_continuous_canopy_instead_of_physical_crowns()->void:
 	var terrain:=fixture(false)
 	(terrain.get_viewport() as SubViewport).size=Vector2i(720,1280)
 	terrain.camera.size=2.0
-	assert_float(terrain._close_vegetation_lod_strength()).is_greater(.001)
+	assert_float(terrain._close_vegetation_lod_strength()).is_equal(0.0)
 	terrain._rebuild_close_vegetation(terrain.camera_target);terrain._update_scale_lod()
-	assert_object(terrain.close_vegetation_root).is_not_null()
-	assert_bool(terrain.close_vegetation_root.visible).is_true()
+	assert_object(terrain.close_vegetation_root).is_null()
