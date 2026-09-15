@@ -12,8 +12,10 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(__file__).resolve().parent
 BUILD = ROOT / 'artifacts' / 'macos-background-capture'
 GODOT = Path('/Applications/Godot.app/Contents/MacOS/Godot')
-ALLOWED = {'canopy_transition_probe', 'seasonal_landscape_probe', 'terrain_lod_probe', 'ancient_scouting_probe', 'woodland_scale_probe', 'terrain_shader_cost_probe'}
+ALLOWED = {'canopy_transition_probe', 'coastal_water_probe', 'river_landscape_probe', 'seasonal_landscape_probe', 'terrain_lod_probe', 'ancient_scouting_probe', 'woodland_scale_probe', 'terrain_shader_cost_probe'}
 MARKERS = {'canopy_transition_probe': 'CANOPY_TRANSITION_CAPTURE PASS',
+           'coastal_water_probe': 'COASTAL_WATER_CAPTURE PASS',
+           'river_landscape_probe': 'MAP_AUDIT',
            'terrain_shader_cost_probe': 'TERRAIN_SHADER_COST_CAPTURE PASS',
            'woodland_scale_probe': 'WOODLAND_SCALE_CAPTURE PASS',
            'seasonal_landscape_probe': 'SEASONAL_LANDSCAPE_CAPTURE PASS',
@@ -54,9 +56,19 @@ def main():
     print('Background guard verified; installed Godot and normal player apps are unchanged.', flush=True)
     if args.preflight_only:
         return
+    scene = 'res://tests/' + args.probe + '.tscn'
+    probe_args = []
+    resolution = '64x64'
+    if args.probe == 'river_landscape_probe':
+        scene = 'res://tools/map_graphics_audit.tscn'
+        resolution = '1600x1000'
+        river_output = ROOT / 'artifacts' / 'river-landscape'
+        river_output.mkdir(parents=True, exist_ok=True)
+        probe_args = ['--', '--river', '--river-z=0', '--span=5', '--aerial', '--revealed',
+                      '--verify-river-surface', '--output=res://artifacts/river-landscape/river.png']
     command = [str(private), '--path', str(ROOT), '--audio-driver', 'Dummy',
-               '--rendering-method', 'gl_compatibility', '--windowed', '--resolution', '64x64',
-               'res://tests/' + args.probe + '.tscn']
+               '--rendering-method', 'gl_compatibility', '--windowed', '--resolution', resolution,
+               scene] + probe_args
     log_path = BUILD / (args.probe + '.log')
     with log_path.open('w') as log:
         result = subprocess.run(command, cwd=ROOT, env=env, stdin=subprocess.DEVNULL,
