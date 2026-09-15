@@ -1,3 +1,12 @@
+## September 14 — dryland aerial detail: INTEGRATED
+
+Worker `54ada8b` is integrated at `c7a2de8`. Dry ground preserves photographic
+contrast and resolves scrub at a 500 m image footprint. Native ground and terrain
+streaming checks pass; 12/12 relevant tests pass again on canonical main.
+`docs/DRYLAND_SURFACE_HANDOFF.md` records evidence and limitations. Runtime
+`local_terrain.gd` changes were confined to the ground material and integrated
+without conflict. The live player remains on `5c676ce`; no automatic restart.
+
 ## September 14 — physical recruitment, finite nomads, and resource prospecting
 
 Integrated canonical gameplay commit `0c0b175`. Standing recruitment now searches only for scarce, persistent wandering bands; recruiting from a known foreign city is a separate explicitly hostile mission. Foreign recruitment requires a real material-quality advantage, transfers bounded households from the source population, and creates a diplomatic incident that can drive containment or war through the ordinary strategic AI. It does not influence civilization placement. Nomadic bands move, have finite populations, occur unpredictably, and cease to be a recruitment source once three quarters of simulated polities reach urban-scale institutions, infrastructure, and logistics.

@@ -1,3 +1,15 @@
+## September 14 — dryland aerial detail
+
+Integrated worker `54ada8b` at canonical `c7a2de8`. Close dryland retains more
+scrub and soil detail through its climate-color pass, and the existing semiarid
+image now uses a 500 m aerial footprint instead of a 15 m grass-texture footprint.
+Region and Continent comparison captures remain pixel-identical. Both native
+ground/streaming probes pass; all 12 ground-field and coordinate-precision tests
+pass in the worker and integrated main. See `DRYLAND_SURFACE_HANDOFF.md` for
+captures, limits and performance context. The change is visual-only and adds no
+save fields. The player's live process still runs `5c676ce`; it has not received
+this change. Google Earth-like terrain fidelity remains an active, unfinished goal.
+
 ## September 14 — paid settlement fabric methods
 
 Ten existing D08 identities are now registered with their authored AND/OR foundations, finite component production, plot-specific assembly and trial records, city-local delivery, repair demand, acquisition disadvantages and research-card artwork. Runtime commit `e86b1cd41070fb2f9af05eeaf9f3c9ebdaaa5722`; frozen worker source `842f51d06d3fcd721ff43cfcacb03e975c5ed5ea`. The ledger remains 3,470 unique authored identities while the operating split advances to 878 integrated and 2,592 drafts. See `INTEGRATION_STATUS.md` and `technology-review/SETTLEMENT_FABRIC_READY_HANDOFF.md` for tests and limits.
