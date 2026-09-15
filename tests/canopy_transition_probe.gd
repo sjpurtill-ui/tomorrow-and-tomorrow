@@ -37,7 +37,7 @@ func run()->void:
 		terrain._build_detail_terrain_patch(terrain.camera_target);terrain._refresh_seasonal_visuals();terrain._update_scale_lod()
 		check(terrain.close_vegetation_root==null,label+" first aerial view defers hidden vegetation")
 		var original:Array=[];var constructed:=false;var root_id:=0
-		for spec:Array in [["10000ft-wide",Vector2i(1280,720),-1.0],["10000ft-standard",Vector2i(960,720),-1.0],["diagnostic-edge",Vector2i(1280,720),.72],["diagnostic-crowns",Vector2i(1280,720),.30]]:
+		for spec:Array in [["10000ft-wide",Vector2i(1280,720),-1.0],["10000ft-standard",Vector2i(960,720),-1.0],["diagnostic-edge",Vector2i(1280,720),.42],["diagnostic-crowns",Vector2i(1280,720),.16]]:
 			canvas.size=spec[1];terrain.set_camera_distance_level(0)
 			camera.size=terrain.zoom_target_size if float(spec[2])<0 else float(spec[2]);terrain.zoom_target_size=-1
 			# These are completed, stationary camera placements, not active gestures.
@@ -64,7 +64,7 @@ func run()->void:
 			terrain._update_camera();terrain._update_scale_lod()
 			check(constructed and original==plants(terrain) and root_id==terrain.close_vegetation_root.get_instance_id(),label+" distance "+str(level)+" preserves constructed crown identities")
 			check(not terrain.close_vegetation_root.visible,label+" distance "+str(level)+" hides constructed foliage")
-		camera.size=.30;terrain._update_camera();terrain._update_scale_lod();await settle()
+		camera.size=.16;terrain._update_camera();terrain._update_scale_lod();await settle()
 		# Unknown vegetation must not reveal the finite patch, even in the diagnostic.
 		var fog:=Image.create(2,2,false,Image.FORMAT_RGBA8);fog.fill(Color.BLACK)
 		for reference:WeakRef in terrain.vegetation_fog_materials:

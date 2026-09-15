@@ -25,6 +25,10 @@ func fixture()->Terrain:
 	return terrain
 func crowns(terrain:Terrain)->Dictionary:
 	return terrain.captured.duplicate(true)
+func test_physical_crowns_wait_for_resolvable_neighborhood_scale()->void:
+	assert_float(Cover.detail_strength(.16,16.0/9.0)).is_greater(.9)
+	assert_float(Cover.detail_strength(.30,16.0/9.0)).is_between(.4,.6)
+	assert_float(Cover.detail_strength(.44,16.0/9.0)).is_equal(0.0)
 func test_dry_and_cold_surveys_cannot_generate_a_visual_timber_forest()->void:
 	var terrain:=fixture()
 	for biome:Dictionary in [{"id":"steppe","woodland":0.0,"precipitation":.18,"temperature":.85},{"id":"tundra","woodland":0.0,"precipitation":.7,"temperature":.1}]:
@@ -76,14 +80,14 @@ func test_hidden_close_vegetation_waits_for_a_visible_distance()->void:
 	terrain.camera=Camera3D.new();terrain.add_child(terrain.camera);terrain.camera.size=50
 	terrain._rebuild_close_vegetation(Vector3.ZERO)
 	assert_object(terrain.close_vegetation_root).is_null()
-	terrain.camera.size=1.0;terrain._rebuild_close_vegetation(Vector3.ZERO)
+	terrain.camera.size=.3;terrain._rebuild_close_vegetation(Vector3.ZERO)
 	assert_object(terrain.close_vegetation_root).is_not_null()
 	var original:=terrain.close_vegetation_root.get_instance_id()
 	terrain.camera.size=50;GameState.morphology_revision+=1
 	GameState.settlement_routes.append({"points":PackedVector2Array([Vector2(-.1,0),Vector2(.1,0)]),"width_m":4.0})
 	terrain._rebuild_close_vegetation(Vector3.ZERO)
 	assert_int(terrain.close_vegetation_root.get_instance_id()).is_equal(original)
-	terrain.camera.size=1.0;terrain._rebuild_close_vegetation(Vector3.ZERO)
+	terrain.camera.size=.3;terrain._rebuild_close_vegetation(Vector3.ZERO)
 	assert_int(terrain.close_vegetation_root.get_instance_id()).is_not_equal(original)
 
 func test_upkeep_does_not_replant_trees_but_physical_clearance_changes_do()->void:
