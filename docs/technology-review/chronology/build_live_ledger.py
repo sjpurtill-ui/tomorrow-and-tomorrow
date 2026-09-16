@@ -11,7 +11,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 CATALOG = ROOT / "docs/technology-review/master-catalog"
 OUTPUT = Path(__file__).with_name("live-catalog-ledger.tsv")
-OPENING_REVIEW = Path(__file__).with_name("opening-spine-review.json")
+REVIEW_FILES = [
+    Path(__file__).with_name("opening-spine-review.json"),
+    Path(__file__).with_name("t05-spine-review.json"),
+]
 
 
 def load(name: str) -> dict:
@@ -54,12 +57,17 @@ def main() -> None:
         row["id"]: row["horizon"]
         for row in load("historical-horizon-allocation.json")["mappings"]
     }
-    opening_reviews = {}
-    if OPENING_REVIEW.exists():
-        opening_reviews = {
-            row["id"]: row for row in load_from_path(OPENING_REVIEW)["anchor_slots"]
-            if row.get("id")
-        }
+    accepted_reviews = {}
+    for review_path in REVIEW_FILES:
+        if not review_path.exists():
+            continue
+        for review in load_from_path(review_path)["anchor_slots"]:
+            discovery_id = review.get("id")
+            if not discovery_id:
+                continue
+            if discovery_id in accepted_reviews:
+                raise ValueError(f"duplicate reviewed discovery: {discovery_id}")
+            accepted_reviews[discovery_id] = review
     columns = [
         "id",
         "name",
@@ -103,7 +111,7 @@ def main() -> None:
                 "chronology_risk": "",
                 "review_note": "pending",
             }
-        review = opening_reviews.get(item["id"], {})
+        review = accepted_reviews.get(item["id"], {})
         for column in [
             "reference_transformation",
             "role",
