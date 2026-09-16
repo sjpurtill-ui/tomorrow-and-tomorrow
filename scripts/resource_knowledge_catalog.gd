@@ -125,6 +125,9 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 	if id=="sealed_vessels":
 		result["requires_all"]=requires.duplicate()
 		result["production_contract"]="Crafting workers fit fiber seals and lids to physical tempered vessels. Each maintained sealed vessel adds finite protected food capacity."
+	if id=="framed_construction":
+		result["requires_all"]=requires.duplicate()
+		result["production_contract"]="Permits a Framed Hall after shelters and a work area exist. The project consumes joined timber components, frame timber, roofing and infill; its benefits require a maintained completed hall and active Construction workers."
 	if id=="phosphate_dressing":
 		result.effects={}
 		result["production_items"]=["ground_phosphate_fertilizer"]
