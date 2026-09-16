@@ -6,7 +6,7 @@ const ALTERNATIVES:={
 	"smoking":{"label":"Hearth experiments","requires":["charcoal"],"signals":["fire","food"]},
 	"basketry":{"label":"Container experiments","requires":["clay_shaping"],"signals":["fiber","storage"]},
 	"pit_firing":{"label":"Cooking-fire experiments","requires":["clay_shaping","food_drying"],"signals":["fire","clay"]},
-	"joinery":{"label":"Workshop fitting","requires":["stone_sorting"],"signals":["timber","construction"]},
+	"joinery":{"label":"Corded-frame fitting","requires":["cordage"],"signals":["timber","construction"]},
 	"well_siting":{"label":"Comparing water-bearing ground","requires":["seasonal_patterns","route_memory"],"signals":["freshwater","survey"]},
 	"clean_water":{"label":"Comparing household illness","requires":["tallies","well_siting"],"signals":["freshwater","illness"]},
 	"standard_measures":{"label":"Exchange between communities","requires":["route_memory"],"signals":["trade","construction"]},

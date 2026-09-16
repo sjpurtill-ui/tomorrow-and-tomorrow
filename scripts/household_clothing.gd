@@ -7,7 +7,7 @@ const Barriers=preload("res://scripts/textile_barriers.gd")
 const LIMIT:=48
 const FINISH_FABRICS:={"tannin":"tannin dyed","resist":"resist patterned","printed":"block printed","calendered":"calendered"}
 const QUILT_REPAIR_INPUTS:={"Plant-Fiber Quilt Batts":.08,"Woven Cloth":.08,"Spun Yarn":.03}
-const HUNTING_BYPRODUCTS:={"Pancreatic Tissue": "Selected gland tissue from actual newly hunted rations, bounded and rapidly decaying","Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay"}
+const HUNTING_BYPRODUCTS:={"Pancreatic Tissue": "Selected gland tissue from actual newly hunted rations, bounded and rapidly decaying","Recovered Animal Fat": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Raw Hides": "Actual newly hunted rations, once per local day; bounded stock and daily decay","Recovered Bone":"Ordinary local hunting byproduct, bounded and collected once per local day"}
 const BONE_RESOURCE:="Recovered Bone"
 const CREATION_MODES:=["knit","twill","pile","sew","fit","grade","leather","tied","quilt","rain_shell"]
 const INSULATION:={"knit":.32,"twill":.25,"pile":.48,"sew":.32,"fit":.42,"grade":.42,"leather":.32,"tied":.25,"quilt":.50,"rain_shell":.18}
@@ -20,6 +20,8 @@ static func spend(item:String,amount:float)->void:
 	else:WorldSimulation.state.resource_stockpiles[item]=maxf(0,available(item)-amount)
 static func materials(id:String,installation:bool=false)->Dictionary:
 	var result:Dictionary=K.METHODS[id].cost.duplicate() if installation else K.METHODS[id].inputs.duplicate()
+	if not installation and id=="bone_needle_sewing" and (available("Woven Cloth")<float(result.get("Woven Cloth",0)) or available("Spun Yarn")<float(result.get("Spun Yarn",0))):
+		result={"Raw Hides":.70,"Fiber Plants":.10}
 	# Existing sewing/cutting skills can use an imported figured fabric. Pattern
 	# origin is retained in the garment lot; it grants no insulation multiplier.
 	if String(K.METHODS[id].mode) in ["sew","fit","grade","tied","quilt"] and result.has("Woven Cloth") and available("Figured Cloth")>=float(result["Woven Cloth"]):
@@ -227,15 +229,16 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 	var raw:=maxf(0,available("Raw Hides"))*.75
 	var tanning:="hide_tanning" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("hide_tanning")>=.1
 	var parchment:="parchment_record_preparation" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("parchment_record_preparation")>=.1
+	var sewing:="bone_needle_sewing" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("bone_needle_sewing")>=.1
 	if is_finite(hunted_rations):
-		if tanning or parchment:raw+=maxf(0,hunted_rations)*.001
+		if tanning or parchment or sewing:raw+=maxf(0,hunted_rations)*.001
 		if tanning:fat+=maxf(0,hunted_rations)*.0005
 	WorldSimulation.state.resource_stockpiles["Recovered Animal Fat"]=minf(maxf(0,population)*.01,fat)
 	WorldSimulation.state.resource_stockpiles["Raw Hides"]=minf(maxf(0,population)*.02,raw)
 	# Non-edible byproduct of actual newly hunted food, never imported meat,
 	# opening food stores or a forecast. Collected once per local day.
 	var recovered:=0.0
-	if "bone_needle_sewing" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("bone_needle_sewing")>=.1 and is_finite(hunted_rations):recovered=maxf(0,hunted_rations)*.002
+	if is_finite(hunted_rations):recovered=maxf(0,hunted_rations)*.002
 	data().bone_stock=minf(maxf(0,population)*.05,available(BONE_RESOURCE)+recovered)
 	var report:={"workers":0.0,"inputs":{},"methods":{},"discarded":0.0}
 	var remaining_wear:=maxf(0,population)
