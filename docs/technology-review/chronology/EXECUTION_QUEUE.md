@@ -102,6 +102,11 @@ Repeat the same order for T05 onward:
 A later transformation may be planned while the prior implementation is stable,
 but it does not enter runtime early merely because its identities already exist.
 
+The complete allocation authority is `journey-allocation.json`. Each review packet
+must reconcile its accepted identities against the transformation and field budget
+in `transformation-field-allocation.tsv`; any reallocation must keep every field,
+horizon, transformation, role, presentation, and grand total valid.
+
 ## P5 — hidden-era milestone reviews
 
 At the end of H01, H02, H03, H04, H05, and H06:

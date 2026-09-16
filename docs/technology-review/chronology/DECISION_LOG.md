@@ -19,6 +19,10 @@ that it produces a contradiction or unplayable result.
 | C12 | The 5,000 target counts distinct mechanisms and capabilities. | Maturity labels, imports, translations, art variants, and alternate acquisition routes do not inflate the discovery count. |
 | C13 | Planning precedes mass art and implementation. | Final art and runtime promotion wait until identity, scope, chronology, prerequisites, and presentation tier are accepted. |
 | C14 | Tests follow implementation maturity. | Editorial planning uses document and ledger review; focused tests cover code changes; long simulations run only at pacing milestones. |
+| C15 | The 5,000 identities are allocated across all 24 transformations and 24 fields. | New authoring fills a defined historical and disciplinary need; it does not grow an undifferentiated backlog. |
+| C16 | The approved hidden-horizon allocation is H01 600, H02 700, H03 800, H04 700, H05 900, and H06 1,300. | The future receives broad integrated depth while the first 2,500 years retain 3,700 distinct discoveries. |
+| C17 | Scholar envoys, partnerships, licenses, purchased research, specimens, and reverse engineering are learning routes rather than free capabilities. | Outside knowledge can accelerate work with cost and dependence, but never bypasses local operating foundations. |
+| C18 | Military technology is a 280-identity primary field supported by discoveries in other fields. | Units require organization, people, equipment, logistics, care, command, and maintenance; research never creates a fielded force by itself. |
 
 ## Terms
 
