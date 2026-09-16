@@ -421,8 +421,7 @@ func _spoil(traveling: bool) -> Dictionary:
 
 func _apply_storage_capacity() -> Dictionary:
 	var losses:={}
-	var capacity:=float(WorldSimulation.state.founding_manifest.get("food_storage_rations",0.0))
-	if "Storage Pits" in WorldSimulation.state.settlement_completed: capacity+=WorldSimulation.state.population_exact*84.0
+	var capacity:=_food_storage_capacity()
 	var excess:=maxf(0.0,_stock_total()+Grain.in_process()+Batches.in_process()-capacity)
 	var batch_loss:=Batches.discard(excess)
 	if batch_loss>0:losses["Food batches"]=batch_loss;excess-=batch_loss
@@ -435,6 +434,13 @@ func _apply_storage_capacity() -> Dictionary:
 		losses[food_type]=discard
 		excess-=discard
 	return losses
+
+func _food_storage_capacity()->float:
+	var capacity:=float(WorldSimulation.state.founding_manifest.get("food_storage_rations",0.0))
+	if "Storage Pits" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*84.0
+	if "Public Stores" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*120.0*preload("res://scripts/opening_craft_practice.gd").factor("public_stores")
+	capacity+=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Sealed Clay Vessels",0.0)))*18.0
+	return capacity
 
 func _consume(required: float,grain_report:Dictionary={}) -> Dictionary:
 	var result:={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0}

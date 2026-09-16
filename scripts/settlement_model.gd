@@ -2243,7 +2243,7 @@ func _synchronize_early_works(day:int,events:Array[Dictionary])->void:
 			_record_plot_building_event(plot,"converted",day,{},false,"Portable shelter replaced using the completed work’s recorded materials.")
 			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Shelters Took Root","plot_id":int(plot.id)})
-	var work_forms:Dictionary={"Storage Pits":{"use":"storage","from":"guarded_cache","to":"lined_storage_pits"},"Open Work Area":{"use":"workshop","from":"open_work_yard","to":"sheltered_work_area"}}
+	var work_forms:Dictionary={"Storage Pits":{"use":"storage","from":"guarded_cache","to":"lined_storage_pits"},"Public Stores":{"use":"storage","from":"lined_storage_pits","to":"public_storehouse"},"Open Work Area":{"use":"workshop","from":"open_work_yard","to":"sheltered_work_area"}}
 	for work_name in work_forms:
 		if work_name not in WorldSimulation.state.settlement_completed: continue
 		var definition:Dictionary=work_forms[work_name]

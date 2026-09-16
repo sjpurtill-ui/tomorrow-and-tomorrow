@@ -72,8 +72,8 @@ static func entries() -> Array[Dictionary]:
 		_entry("woven_carriers","Woven Carriers","Materials",90,0.007,["cordage","fiber_grading"],[_r("Fiber Plants","accessible")],["fiber","storage","travel"],"Fitted baskets and slings let one carrier move more while keeping both hands free.",{"haul_capacity":0.10,"dry_storage":0.04,"travel_speed":0.02}),
 		_entry("rope_rigging","Rope Rigging","Infrastructure",420,0.004,["woven_carriers","standard_measures"],[_r("Fiber Plants","developed"),_r("Timber","developed")],["fiber","construction","travel"],"Standard ropes, blocks, and lifting teams make heavy loads controllable.",{"haul_capacity":0.16,"construction_rate":0.07,"mine_safety":0.04,"naval_capacity":0.04}),
 		_entry("clay_testing","Clay Testing","Materials",80,0.008,[],[_r("Clay","recognized")],["clay","crafting"],"Small samples reveal which clays crack, shrink, seal, or endure heat.",{"survey_speed":0.03,"clay_yield":0.04}),
-		_entry("clay_tempering","Tempered Clay","Materials",180,0.006,["clay_shaping","clay_testing"],[_r("Clay","accessible")],["clay","crafting"],"Sand, crushed shell, and old pottery control cracking as vessels dry.",{"container_capacity":0.08,"storage_loss":-0.03,"craft_output":0.04}),
-		_entry("sealed_vessels","Sealed Vessels","Sustenance",330,0.005,["clay_tempering"],[_r("Clay","developed")],["clay","storage","food"],"Fitted lids and treated surfaces protect water, grain, oils, and medicines from damp and pests.",{"food_storage":0.10,"food_spoilage":-0.08,"health_protection":0.03,"trade_capacity":0.03}),
+		_entry("clay_tempering","Tempered Clay","Materials",180,0.006,["clay_shaping","clay_testing","pit_firing"],[_r("Clay","accessible")],["clay","crafting"],"Sand, crushed shell, and old pottery control cracking as vessels dry.",{"container_capacity":0.08,"storage_loss":-0.03,"craft_output":0.04}),
+		_entry("sealed_vessels","Sealed Vessels","Sustenance",330,0.005,["clay_tempering","pit_firing"],[_r("Clay","developed")],["clay","storage","food"],"Fitted lids and treated surfaces protect water, grain, oils, and medicines from damp and pests.",{"food_storage":0.10,"food_spoilage":-0.08,"health_protection":0.03,"trade_capacity":0.03}),
 		_entry("kiln_control","Controlled Kilns","Materials",720,0.004,["pit_firing","clay_tempering"],[_r("Clay","developed"),_r("Timber","developed")],["clay","fire","crafting"],"Enclosed firing chambers make heat repeatable enough to reproduce strong ceramics.",{"craft_output":0.09,"fuel_efficiency":0.05,"container_capacity":0.08,"knowledge_rate":0.02}),
 		_entry("quarry_reading","Reading the Quarry Face","Nature",280,0.005,["stone_sorting"],[_r("Stone","surveyed")],["stone","survey"],"Natural seams reveal where stone can be separated with less breakage and danger.",{"stone_yield":0.08,"mine_safety":0.03,"survey_speed":0.03}),
 		_entry("wedges_and_levers","Wedges and Levers","Infrastructure",600,0.004,["hafted_tools","quarry_reading"],[_r("Stone","accessible"),_r("Timber","developed")],["stone","construction"],"Coordinated wedges and levers turn human effort into controlled movement of heavy stone.",{"stone_yield":0.10,"haul_capacity":0.06,"construction_rate":0.06}),
@@ -119,6 +119,12 @@ static func _entry(id: String,name: String,direction: String,day: int,chance: fl
 	for requirement:Dictionary in resource_requirements:
 		if imported_basis.has(requirement.resource):requirement.minimum_stock=imported_basis[requirement.resource]
 	var result:={"id":id,"name":name,"direction":direction,"chance":chance,"day":day,"requires":requires,"resource_requirements":resource_requirements,"signals":signals,"observation":observation,"effects":effects}
+	if id=="clay_tempering":
+		result["requires_all"]=requires.duplicate()
+		result["production_contract"]="Crafting workers mix real Clay, crushed Stone, and water, then use Timber and a maintained fire to make durable tempered vessels."
+	if id=="sealed_vessels":
+		result["requires_all"]=requires.duplicate()
+		result["production_contract"]="Crafting workers fit fiber seals and lids to physical tempered vessels. Each maintained sealed vessel adds finite protected food capacity."
 	if id=="phosphate_dressing":
 		result.effects={}
 		result["production_items"]=["ground_phosphate_fertilizer"]
