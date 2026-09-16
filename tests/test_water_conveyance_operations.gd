@@ -121,7 +121,11 @@ func test_clay_workshop_chain_consumes_unfired_sections_and_fuel()->void:
 		var industry=preload("res://scripts/civilian_industry.gd")
 		var production=preload("res://scripts/persistent_production.gd")
 		var state=WorldSimulation.state
-		state.resource_stockpiles={"Prepared Clay":10.0,"Freshwater":10.0,"Timber":20.0,"Stone":20.0,"Clay":20.0}
+		state.resource_stockpiles={"Prepared Clay":10.0,"Freshwater":10.0,"Timber":20.0,"Stone":20.0,"Clay":20.0,"Joined Timber Components":2.0}
+		state.settlement_site_committed=true;state.resource_settlement_id="";state.population_allocations.Crafting=20;state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
+		state.known_discoveries.append("kiln_control");state.discovery_adoption.kiln_control=1.0
+		var ops=preload("res://scripts/technology_operations.gd");assert_bool(ops.install("controlled_kiln").get("ok",false)).is_true()
+		for day:int in range(1,14):state.elapsed_days=day;ops.advance(day)
 		for item:String in ["unfired_clay_conduits","fired_clay_conduits"]:
 			var spec:Dictionary=industry.product(item)
 			state.known_discoveries.append(spec.gate);state.discovery_adoption[spec.gate]=1.0

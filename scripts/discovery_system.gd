@@ -1099,6 +1099,8 @@ func _discovery_effect_summary(entry:Dictionary)->String:
 		return "%s Current local operating coverage is %.0f%%; knowledge alone provides no health benefit when the water cannot be supplied." % [String(entry.get("production_contract","This practice requires additional freshwater.")),opening.factor(opening_id)*100.0]
 	if opening_id in ["latrine_siting","protected_wellheads","rainwater_cisterns","water_settling_basins"]:
 		return "%s Current maintained local works coverage is %.0f%%; knowledge alone provides no settlement-wide benefit." % [String(entry.get("production_contract","This practice requires a physical local work.")),opening.factor(opening_id)*100.0]
+	if opening_id in ["kiln_control","lime_burning","lime_mortar"]:
+		return "%s Current local operating coverage is %.0f%%; knowledge alone supplies neither firing capacity nor durable masonry." % [String(entry.get("production_contract","This practice requires operating capital and physical material.")),opening.factor(opening_id)*100.0]
 	if opening_id in ["seed_selection","animal_taming","pack_animals","domesticated_mounts","mounted_scouts"]:
 		return "%s Current local physical coverage is %.0f%%; knowledge alone supplies neither seed nor animals." % [String(entry.get("production_contract","This practice requires a maintained local biological stock.")),opening.factor(opening_id)*100.0]
 	if not String(entry.get("clinical_care_method","")).is_empty():return String(entry.production_contract)

@@ -5,6 +5,7 @@ const LIMIT:=1000
 const WaterDrive=preload("res://scripts/water_hammer_site.gd")
 const Storage=preload("res://scripts/electrical_storage.gd")
 const PLANTS={
+	"controlled_kiln":{"name":"Maintained controlled kiln","gate":"kiln_control","requires":[],"cost":{"Stone":12.0,"Clay":6.0,"Joined Timber Components":2.0},"work":24.0,"workers":1.0,"inputs":{"Timber":0.5},"power":0.0,"services":{"kiln_heat":4.0}},
 	"sec_analytical_bench":{"name": "Aqueous size-exclusion bench", "gate": "size_exclusion_chromatography", "requires": ["electrical_measurement"], "cost": {"SEC Bench Assemblies": 1, "Steel": 2}, "work": 16, "workers": 1, "inputs": {"Freshwater": 1}, "power": 2, "services": {"sec_column_time": 1}},
 	"nmr_analytical_bench":{"name": "NMR analytical bench awaiting reference qualification", "gate": "nuclear_magnetic_resonance_spectroscopy", "requires": ["electrical_measurement"], "cost": {"Unqualified NMR Benches": 1, "Steel": 2}, "work": 24, "workers": 1, "inputs": {"Freshwater": 1, "Insulated Cable": 0.001}, "power": 8, "services": {"nmr_unqualified_time": 1}},
 	"foam_insulated_cold_store":{"name": "Foam-insulated electric cold store", "gate": "polymer_foam_cell_control", "requires": ["mechanical_refrigeration", "electric_motors"], "cost": {"Foam Cold-Store Panels": 2, "Electric Motors": 1, "Pressure Vessels": 1, "Glass": 1}, "work": 16, "workers": 1, "inputs": {"Bitumen": 0.01, "Foam Cold-Store Panels": 0.002}, "power": 2.2, "services": {"cold_storage": 200}},

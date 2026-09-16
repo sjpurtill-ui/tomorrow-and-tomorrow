@@ -16,6 +16,10 @@ func test_construction_catalog_has_valid_causal_and_production_contracts()->void
 func test_mortar_requires_paid_inputs_and_work()->void:
 	WorldSimulation.scoped("builders",func()->void:
 		var state=WorldSimulation.state
+		state.settlement_site_committed=true;state.resource_settlement_id="";state.population_allocations.Crafting=20;state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
+		learn("kiln_control");state.resource_stockpiles.merge({"Stone":12.0,"Clay":6.0,"Joined Timber Components":2.0,"Timber":8.0},true)
+		assert_bool(preload("res://scripts/technology_operations.gd").install("controlled_kiln").get("ok",false)).is_true()
+		for day:int in range(1,14):state.elapsed_days=day;preload("res://scripts/technology_operations.gd").advance(day)
 		for item:String in ["quicklime","slaked_lime","building_mortar"]:
 			var spec:=I.product(item);learn(spec.gate)
 			for resource:String in spec.materials:
@@ -71,16 +75,17 @@ func test_rival_workshops_prepare_paid_mortar_chain_for_housing_demand()->void:
 		state.settlement_site_committed=true;state.convoy_traveling=false
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
 		state.population_allocations.Construction=10;state.population_allocations.Crafting=10
-		learn("lime_mortar");learn("lime_burning")
+		learn("lime_mortar");learn("lime_burning");learn("kiln_control")
 		for material:String in ["Limestone","Timber","Clay","Stone","Fine Sand","Freshwater"]:state.resource_stockpiles[material]=20.0
+		state.resource_stockpiles["Joined Timber Components"]=2.0
 		state.resource_stockpiles["Quicklime"]=0.0;state.resource_stockpiles["Slaked Lime"]=0.0;state.resource_stockpiles["Building Mortar"]=0.0
 		var planner=preload("res://scripts/building_material_investment.gd")
 		var order:Dictionary=planner.recommendation()
-		assert_str(order.get("item","")).is_equal("quicklime")
+		assert_str(order.get("kind","")).is_equal("plant_install")
+		assert_str(order.get("plant","")).is_equal("controlled_kiln")
 		var stone:float=state.resource_stockpiles.Stone
 		preload("res://scripts/civilization_controller.gd").civilian_orders("builders",{})
-		assert_int(WorldSimulation.military.equipment_queue.size()).is_equal(1)
-		assert_str(WorldSimulation.military.equipment_queue[0].item).is_equal("quicklime")
+		assert_int(int(preload("res://scripts/technology_operations.gd").data().plants.controlled_kiln.building)).is_equal(1)
 		assert_float(float(state.resource_stockpiles.Stone)).is_less(stone)
 	)
 func test_new_fabric_cannot_skip_curing_through_instant_household_infill()->void:
