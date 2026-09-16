@@ -479,6 +479,7 @@ func test_cultivation_requires_discovery_food_labor_and_surveyed_fertile_ground(
 	model.process_month()
 	assert_int(GameState.settlement_plots.size()).is_equal(original_count)
 	GameState.resource_deposits.append({"id":"fertile_test","resource":"Fertile Soil","stage":"surveyed","position":GameState.settlement_founded_at+Vector3(2.0,0.0,1.0)})
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,GameState.population_exact*.01)
 	GameState.elapsed_days=120.0
 	model.process_month()
 	assert_int(GameState.settlement_plots.size()).is_equal(original_count+1)
@@ -489,6 +490,7 @@ func test_cultivation_requires_discovery_food_labor_and_surveyed_fertile_ground(
 
 func test_cultivated_ground_scales_with_allocated_food_labor()->void:
 	GameState.known_discoveries.append("seed_selection")
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,GameState.population_exact*.01)
 	GameState.resource_deposits.append({"id":"fertile_scale_test","resource":"Fertile Soil","stage":"surveyed","position":GameState.settlement_founded_at+Vector3(1.0,0.0,0.5)})
 	GameState.population_allocations["Food"]=36
 	for day in [60.0,90.0,120.0]:
@@ -505,6 +507,7 @@ func test_cultivated_ground_scales_with_allocated_food_labor()->void:
 
 func test_field_seasons_change_visual_state_without_rewriting_geometry()->void:
 	GameState.known_discoveries.append("seed_selection")
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,GameState.population_exact*.01)
 	GameState.resource_deposits.append({"id":"fertile_season_test","resource":"Fertile Soil","stage":"surveyed","position":GameState.settlement_founded_at+Vector3(1.0,0.0,0.5)})
 	GameState.population_allocations["Food"]=12
 	GameState.elapsed_days=60.0
@@ -555,6 +558,7 @@ func test_storage_growth_requires_storage_practice_and_logistics_pressure()->voi
 
 func test_role_reallocation_visibly_idles_and_reopens_working_ground()->void:
 	GameState.known_discoveries.append("seed_selection")
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,GameState.population_exact*.01)
 	GameState.resource_deposits.append({"id":"fertile_test","resource":"Fertile Soil","stage":"surveyed","position":GameState.settlement_founded_at+Vector3(2.0,0.0,1.0)})
 	GameState.elapsed_days=60.0
 	model.process_month()

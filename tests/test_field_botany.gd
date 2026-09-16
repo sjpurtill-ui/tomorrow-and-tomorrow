@@ -80,6 +80,7 @@ func test_actual_food_consumer_uses_application_and_expiry_without_mutating_prev
 		state.settlement_site_committed=true
 		state.known_discoveries.append("seed_selection")
 		state.discovery_adoption.seed_selection=1.0
+		preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,state.population_exact*.01)
 		state.population_allocations.Food=30
 		var food=WorldSimulation.food
 		var day:=1
@@ -163,6 +164,7 @@ func test_full_save_and_city_swap_preserve_unfinished_trials_and_local_costs()->
 func test_forecast_expires_current_application_without_spending_or_creating_trials()->void:
 	human_field()
 	GameState.known_discoveries.append("seed_selection");GameState.discovery_adoption.seed_selection=1.0
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,GameState.population_exact*.01)
 	GameState.population_allocations.Food=30
 	var day:=1
 	while day<365 and FoodSystem._weather_yield_factor(FoodSystem._environment_mix(),day)>=.99:day+=1

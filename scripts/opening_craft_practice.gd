@@ -51,6 +51,8 @@ static func target(id:String)->float:
 	return maxf(.25,WorldSimulation.state.population_exact*float(TARGET_PER_PERSON[id]))
 
 static func factor(id:String)->float:
+	if id in ["seed_selection","animal_taming","pack_animals","domesticated_mounts","mounted_scouts"]:
+		return preload("res://scripts/opening_opportunities.gd").practice_factor(id)
 	# These practices are services rather than durable craft stocks. Their health
 	# effects operate only for the share of today's local population that received
 	# the additional water their use requires. ResourceSystem records this after

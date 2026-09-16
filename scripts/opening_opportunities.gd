@@ -12,10 +12,16 @@ const RULES:Dictionary={
 	"route_memory":{"goal":8.0,"waiting":"journey days or returned route observations"},
 	"labor_rotations":{"goal":12.0,"waiting":"several simultaneous work obligations in a settled community"},
 	"watch_rotation":{"goal":10.0,"waiting":"sustained guard duty, accelerated by real danger"},
+	"seed_selection":{"goal":2.0,"waiting":"two tended sowing cycles harvested from finite retained seed"},
+	"animal_taming":{"goal":60.0,"waiting":"a suitable encountered herd population fed and handled beside the settlement"},
 }
 
+const SEED_MATURITY_DAYS:=90
+const SEED_TENDING_DAYS:=70
+const HERD_BIRTH_INTERVAL:=45
+
 static func empty_state()->Dictionary:
-	return {"last_day":-1,"evidence":{}}
+	return {"last_day":-1,"evidence":{},"programs":{"seed":{"retained":0.0,"plots":[],"harvests":0},"herd":{"animals":0.0,"continuity_days":0,"last_birth_day":-1,"source_id":"","care_coverage":0.0,"unfed_days":0}}}
 
 static func data()->Dictionary:
 	var current:Variant=WorldSimulation.state.opening_opportunities
@@ -40,6 +46,8 @@ static func advance(context:Dictionary)->void:
 	var guard_duty:=_workers("Defense")
 	var danger:=maxf(0.0,float(context.get("danger",0.0)))
 	_add(state,"watch_rotation",minf(1.5,.5+danger) if guard_duty>=2.0 else 0.0)
+	_advance_seed_program(state,context,day)
+	_advance_herd_program(state,context,day)
 
 static func ready(id:String)->bool:
 	if not RULES.has(id):return true
@@ -69,7 +77,134 @@ static func valid(value:Variant)->bool:
 		if not id is String or not RULES.has(String(id)):return false
 		var amount:Variant=evidence[id]
 		if not (amount is int or amount is float) or not is_finite(float(amount)) or float(amount)<0.0 or float(amount)>float(RULES[String(id)].goal):return false
-	return true
+	var programs:Variant=value.get("programs",{})
+	if not programs is Dictionary:return false
+	var seed:Variant=programs.get("seed",{"retained":0.0,"plots":[],"harvests":0})
+	var herd:Variant=programs.get("herd",{"animals":0.0,"continuity_days":0,"last_birth_day":-1,"source_id":"","care_coverage":0.0,"unfed_days":0})
+	if not seed is Dictionary or not herd is Dictionary:return false
+	if not _finite_range(seed.get("retained",0.0),0.0,1e9) or not seed.get("plots",[]) is Array or (seed.plots as Array).size()>2:return false
+	if not _finite_range(seed.get("harvests",0),0.0,100000.0):return false
+	for plot:Variant in seed.plots:
+		if not plot is Dictionary or not _finite_range(plot.get("planted_day",-1),-1.0,1e12) or not _finite_range(plot.get("tended_days",0),0.0,SEED_MATURITY_DAYS) or not _finite_range(plot.get("seed",0.0),0.0,1e6):return false
+	if not _finite_range(herd.get("animals",0.0),0.0,1e9) or not _finite_range(herd.get("continuity_days",0),0.0,1e12) or not _finite_range(herd.get("last_birth_day",-1),-1.0,1e12):return false
+	if not _finite_range(herd.get("care_coverage",0.0),0.0,1.0) or not _finite_range(herd.get("unfed_days",0),0.0,1e12):return false
+	return herd.get("source_id","") is String
+
+static func practice_factor(id:String)->float:
+	var programs:Dictionary=data().get("programs",{})
+	if id=="seed_selection":
+		var seed:Dictionary=programs.get("seed",{})
+		return clampf(float(seed.get("retained",0.0))/_seed_target(),0.0,1.0)
+	if id in ["animal_taming","pack_animals","domesticated_mounts","mounted_scouts"]:
+		var herd:Dictionary=programs.get("herd",{})
+		return clampf(float(herd.get("animals",0.0))/_herd_target(),0.0,1.0)*clampf(float(herd.get("care_coverage",0.0)),0.0,1.0)
+	return 1.0
+
+static func program_report()->Dictionary:
+	return data().get("programs",{}).duplicate(true)
+
+static func _programs(state:Dictionary)->Dictionary:
+	if not state.has("programs") or not state.programs is Dictionary:state.programs={}
+	if not state.programs.has("seed"):state.programs.seed={"retained":0.0,"plots":[],"harvests":0}
+	if not state.programs.has("herd"):state.programs.herd={"animals":0.0,"continuity_days":0,"last_birth_day":-1,"source_id":"","care_coverage":0.0,"unfed_days":0}
+	return state.programs
+
+static func _advance_seed_program(state:Dictionary,context:Dictionary,day:int)->void:
+	if not _opening_program_active(context) or "seasonal_patterns" not in WorldSimulation.state.known_discoveries or not _recognized_resource("Fertile Soil"):return
+	var seed:Dictionary=_programs(state).seed
+	var target:=_seed_target()
+	var available:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Dry staples",0.0)))
+	var retained:=maxf(0.0,float(seed.get("retained",0.0)))
+	var moved:=minf(minf(target-retained,available),maxf(.02,WorldSimulation.state.population_exact*.001))
+	if moved>0.0:
+		WorldSimulation.state.food_stocks["Dry staples"]=available-moved
+		retained+=moved
+	seed.retained=retained
+	if "seed_selection" in WorldSimulation.state.known_discoveries:return
+	var plots:Array=seed.get("plots",[])
+	if plots.is_empty():
+		var sow:=maxf(.10,WorldSimulation.state.population_exact*.001)
+		if retained>=sow:
+			seed.retained=retained-sow
+			plots.append({"planted_day":day,"tended_days":0,"seed":sow})
+			seed.plots=plots
+		return
+	var plot:Dictionary=plots[0]
+	plot.tended_days=minf(SEED_MATURITY_DAYS,float(plot.get("tended_days",0))+1.0)
+	if day-int(plot.get("planted_day",day))<SEED_MATURITY_DAYS:return
+	plots.remove_at(0);seed.plots=plots
+	if float(plot.tended_days)<SEED_TENDING_DAYS:return
+	seed.retained=minf(target*1.5,float(seed.retained)+float(plot.seed)*1.35)
+	seed.harvests=int(seed.get("harvests",0))+1
+	_add(state,"seed_selection",1.0)
+
+static func _advance_herd_program(state:Dictionary,context:Dictionary,day:int)->void:
+	var herd:Dictionary=_programs(state).herd
+	herd.care_coverage=0.0
+	if not _opening_program_active(context) or "seasonal_patterns" not in WorldSimulation.state.known_discoveries:
+		_miss_herd_care(herd);return
+	var animals:=maxf(0.0,float(herd.get("animals",0.0)))
+	if animals<.5:
+		var source:=_suitable_game_population()
+		if source.is_empty():return
+		var captured:=_withdraw_animals(source,4.0)
+		if captured<2.0:return
+		animals=captured;herd.animals=animals;herd.source_id=String(source.get("id","game_population"))
+	var has_water:=float(context.get("freshwater",0.0))>=.5 or bool(WorldSimulation.state.water_metrics.get("source_accessible",false))
+	if not has_water:
+		_miss_herd_care(herd);return
+	var feed_needed:=animals*.01
+	var plants:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Fresh plants",0.0)))
+	var plant_feed:=minf(plants,feed_needed)
+	WorldSimulation.state.food_stocks["Fresh plants"]=plants-plant_feed
+	var staples_needed:=feed_needed-plant_feed
+	var staples:=maxf(0.0,float(WorldSimulation.state.food_stocks.get("Dry staples",0.0)))
+	if staples+plant_feed+.000001<feed_needed:
+		_miss_herd_care(herd);return
+	WorldSimulation.state.food_stocks["Dry staples"]=staples-staples_needed
+	herd.care_coverage=1.0;herd.unfed_days=0
+	herd.continuity_days=int(herd.get("continuity_days",0))+1
+	_add(state,"animal_taming",1.0)
+	if day-int(herd.get("last_birth_day",-1))>=HERD_BIRTH_INTERVAL:
+		herd.animals=minf(_herd_target()*1.5,animals+maxf(1.0,floorf(animals*.25)))
+		herd.last_birth_day=day
+
+static func _miss_herd_care(herd:Dictionary)->void:
+	if float(herd.get("animals",0.0))<=0.0:return
+	herd.unfed_days=int(herd.get("unfed_days",0))+1
+	if int(herd.unfed_days)>3:herd.animals=maxf(0.0,float(herd.animals)*.98)
+
+static func _opening_program_active(context:Dictionary)->bool:
+	return WorldSimulation.state.settlement_site_committed and not bool(context.get("traveling",WorldSimulation.state.convoy_traveling)) and _workers("Food")>=2.0
+
+static func _recognized_resource(resource:String)->bool:
+	for deposit:Variant in WorldSimulation.state.resource_deposits:
+		if deposit is Dictionary and String(deposit.get("resource",""))==resource and String(deposit.get("stage","unknown")) in ["recognized","surveyed","accessible","developed"]:return true
+	return false
+
+static func _suitable_game_population()->Dictionary:
+	for deposit:Variant in WorldSimulation.state.resource_deposits:
+		if not deposit is Dictionary or String(deposit.get("resource",""))!="Game" or String(deposit.get("stage","unknown")) not in ["recognized","surveyed","accessible","developed"]:continue
+		if maxf(float(deposit.get("potential",0.0)),float(deposit.get("quality",0.0)))>=.55 and float(deposit.get("remaining",0.0))>=2.0:return deposit
+	return {}
+
+static func _withdraw_animals(deposit:Dictionary,requested:float)->float:
+	var amount:=minf(requested,maxf(0.0,float(deposit.get("remaining",0.0))))
+	if amount<=0.0:return 0.0
+	if deposit.has("world_key"):
+		amount=preload("res://scripts/civilization_resources.gd").withdraw(deposit,amount)
+		preload("res://scripts/civilization_resources.gd").available(deposit)
+	else:deposit.remaining=float(deposit.get("remaining",0.0))-amount
+	return amount
+
+static func _seed_target()->float:
+	return maxf(.5,WorldSimulation.state.population_exact*.01)
+
+static func _herd_target()->float:
+	return maxf(4.0,WorldSimulation.state.population_exact*.02)
+
+static func _finite_range(value:Variant,minimum:float,maximum:float)->bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value)>=minimum and float(value)<=maximum
 
 static func _add(state:Dictionary,id:String,amount:float)->void:
 	if amount<=0.0:return

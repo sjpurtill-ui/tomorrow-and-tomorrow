@@ -1835,6 +1835,7 @@ func _update_plot_workforce(day:int,events:Array[Dictionary])->void:
 func _attempt_field_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
 	if "seed_selection" not in WorldSimulation.state.known_discoveries: return
+	if preload("res://scripts/opening_opportunities.gd").practice_factor("seed_selection")<=0.0:return
 	var food_workers:=int(WorldSimulation.state.population_allocations.get("Food",0))
 	if food_workers<10: return
 	var fertile_ground:=_recognized_fertile_ground()

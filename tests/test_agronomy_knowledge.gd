@@ -8,6 +8,7 @@ func setup()->void:
 	WorldSimulation.state.population_allocations.Food=30
 	WorldSimulation.state.known_discoveries.assign(["seed_selection"])
 	WorldSimulation.state.discovery_adoption.seed_selection=1.0
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,WorldSimulation.state.population_exact*.01)
 func learn(id:String,adoption:float=1.0)->void:
 	WorldSimulation.state.known_discoveries.append(id);WorldSimulation.state.discovery_adoption[id]=adoption
 func test_authored_catalog_contracts_are_valid()->void:
