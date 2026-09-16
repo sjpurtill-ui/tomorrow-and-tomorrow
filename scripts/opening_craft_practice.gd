@@ -2,21 +2,24 @@ extends RefCounted
 ## Physical opening craft stocks. Knowledge permits work; it does not provide
 ## tools, bindings, containers, or fitted timber by itself.
 
-const ORDER:= ["controlled_flaking","cordage","food_drying","smoking","hafted_tools","basketry","clay_shaping","pit_firing","joinery"]
+const ORDER:= ["controlled_flaking","cordage","food_drying","smoking","hafted_tools","basketry","clay_shaping","pit_firing","clay_tempering","sealed_vessels","joinery"]
 const PRODUCTS:={
 	"controlled_flaking":"Flaked Stone Tools","cordage":"Cordage Bundles","hafted_tools":"Hafted Tool Sets",
 	"food_drying":"Drying Mats","smoking":"Smoke Frames","basketry":"Woven Containers",
-	"clay_shaping":"Unfired Clay Vessels","pit_firing":"Fired Clay Vessels","joinery":"Joined Timber Components"
+	"clay_shaping":"Unfired Clay Vessels","pit_firing":"Fired Clay Vessels",
+	"clay_tempering":"Tempered Clay Vessels","sealed_vessels":"Sealed Clay Vessels",
+	"joinery":"Joined Timber Components"
 }
 const TARGET_PER_PERSON:={
 	"controlled_flaking":.030,"cordage":.040,"food_drying":.025,"smoking":.012,
 	"hafted_tools":.020,"basketry":.025,
-	"clay_shaping":.030,"pit_firing":.025,"joinery":.015
+	"clay_shaping":.030,"pit_firing":.025,"clay_tempering":.022,"sealed_vessels":.018,"joinery":.015
 }
 const DECAY:={
 	"Flaked Stone Tools":.004,"Cordage Bundles":.008,"Drying Mats":.010,"Smoke Frames":.006,
 	"Hafted Tool Sets":.004,"Woven Containers":.003,
-	"Unfired Clay Vessels":.020,"Fired Clay Vessels":.0005,"Joined Timber Components":.003
+	"Unfired Clay Vessels":.020,"Fired Clay Vessels":.0005,"Tempered Clay Vessels":.0004,
+	"Sealed Clay Vessels":.0006,"Joined Timber Components":.003
 }
 const RECIPES:={
 	"controlled_flaking":{"rate":6.0,"inputs":{"Flint":.04}},
@@ -30,6 +33,8 @@ const RECIPES:={
 	"basketry":{"rate":4.0,"inputs":{"Fiber Plants":.12,"Cordage Bundles":.04}},
 	"clay_shaping":{"rate":5.0,"inputs":{"Clay":.10,"Freshwater":.03}},
 	"pit_firing":{"rate":4.0,"inputs":{"Unfired Clay Vessels":1.0,"Timber":.06},"fire":true},
+	"clay_tempering":{"rate":3.5,"inputs":{"Clay":.10,"Stone":.03,"Freshwater":.03,"Timber":.06},"fire":true},
+	"sealed_vessels":{"rate":3.0,"inputs":{"Tempered Clay Vessels":1.0,"Fiber Plants":.03}},
 	"joinery":{"rate":2.0,"inputs":{"Timber":.20,"Hafted Tool Sets":.03}}
 }
 
@@ -46,6 +51,12 @@ static func target(id:String)->float:
 	return maxf(.25,WorldSimulation.state.population_exact*float(TARGET_PER_PERSON[id]))
 
 static func factor(id:String)->float:
+	if id=="public_stores":
+		if "Public Stores" not in WorldSimulation.state.settlement_completed:return 0.0
+		var population:=maxf(1.0,WorldSimulation.state.population_exact)
+		var logistics:=WorldSimulation.state.effective_workers("Logistics")/maxf(1.0,population*.04)
+		var administration:=WorldSimulation.state.effective_workers("Administration")/maxf(1.0,population*.02)
+		return clampf(minf(logistics,administration),0.0,1.0)
 	if not PRODUCTS.has(id):return 1.0
 	var product:=String(PRODUCTS[id])
 	if id=="clay_shaping":

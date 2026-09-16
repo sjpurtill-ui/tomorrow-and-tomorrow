@@ -7,6 +7,7 @@ static func _settlement_definitions() -> Array[Dictionary]:
 		{"name":"Hearth Circle", "days":6.0, "requires":[], "minimum":{"Construction":3},"materials":{"Timber":6.0,"Fiber Plants":6.0},"requires_water":true,"effect":"anchors the camp and makes communal work possible"},
 		{"name":"Lean-to Shelters", "days":9.0, "requires":["Hearth Circle"], "minimum":{"Construction":5},"materials":{"Timber":18.0,"Fiber Plants":12.0},"effect":"protects health and expands shelter"},
 		{"name":"Storage Pits", "days":7.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Logistics":4},"materials":{"Timber":4.0,"Fiber Plants":3.0},"effect":"slows spoilage and expands food storage"},
+		{"name":"Public Stores", "days":14.0, "requires":["Storage Pits"], "discovery":"public_stores", "minimum":{"Construction":5,"Logistics":6,"Administration":3},"materials":{"Timber":14.0,"Clay":8.0,"Fiber Plants":6.0},"effect":"creates counted, staffed communal reserves"},
 		{"name":"Open Work Area", "days":12.0, "requires":["Hearth Circle"], "minimum":{"Construction":6, "Crafting":4},"materials":{"Timber":12.0,"Fiber Plants":5.0},"effect":"improves tools and material work"},
 		{"name":"Gathering Yard", "days":10.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Extraction":4},"materials":{"Timber":10.0,"Fiber Plants":4.0}, "known_resource":true,"effect":"organizes extraction from known deposits"}
 	]
@@ -17,6 +18,8 @@ static func _settlement_project_available(project: Dictionary) -> bool:
 	for required in project.requires:
 		if String(required) not in WorldSimulation.state.settlement_completed:
 			return false
+	var discovery:=String(project.get("discovery",""))
+	if not discovery.is_empty() and (discovery not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(discovery)<0.10):return false
 	for role in project.minimum:
 		if int(WorldSimulation.state.population_allocations.get(role, 0)) < int(project.minimum[role]):
 			return false
@@ -41,6 +44,7 @@ static func _settlement_project_material_plan(project:Dictionary)->Dictionary:
 				{"cost":{"Clay":32.0,"Fiber Plants":12.0},"requires":"clay_shaping"}
 			])
 		"Storage Pits":options.append({"cost":{"Clay":8.0,"Fiber Plants":3.0}})
+		"Public Stores":options.append_array([{"cost":{"Stone":18.0,"Timber":10.0,"Fiber Plants":6.0}},{"cost":{"Clay":18.0,"Fiber Plants":9.0}}])
 		"Open Work Area":options.append({"cost":{"Clay":16.0,"Fiber Plants":8.0}})
 		"Gathering Yard":options.append_array([{"cost":{"Stone":16.0,"Fiber Plants":4.0}}, {"cost":{"Clay":18.0,"Fiber Plants":4.0}}])
 	var selected:=preload("res://scripts/construction_materials.gd").choose(options,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries)
@@ -62,6 +66,7 @@ static func _current_settlement_project() -> Dictionary:
 		match String(project.name):
 			"Lean-to Shelters": score+=(1.0-clampf(float(WorldSimulation.state.housing_capacity)/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0))*4.0+1.1
 			"Storage Pits": score+=(1.0-clampf(float(WorldSimulation.state.simulation_metrics.get("food_days",30.0))/45.0,0.0,1.0))*3.4+float(WorldSimulation.state.population_allocations.get("Logistics",0))/10.0
+			"Public Stores": score+=float(WorldSimulation.state.population_allocations.get("Logistics",0))/8.0+float(WorldSimulation.state.population_allocations.get("Administration",0))/6.0
 			"Open Work Area": score+=float(WorldSimulation.state.population_allocations.get("Crafting",0))/5.0+float(WorldSimulation.state.population_allocations.get("Construction",0))/12.0
 			"Gathering Yard": score+=float(WorldSimulation.state.population_allocations.get("Extraction",0))/4.0+float(WorldSimulation.resources.visible_deposits().size())*0.5
 		if score>best_score:
@@ -95,7 +100,7 @@ static func process_day()->Array[Dictionary]:
 		WorldSimulation.settlements.ensure_founded()
 		WorldSimulation.government.initialize()
 	elif title=="Lean-to Shelters":WorldSimulation.state.housing_capacity+=roundi(90*(1+WorldSimulation.discovery.effect("housing_output")+WorldSimulation.progression.effect("housing_output")))
-	var event:={"day":int(WorldSimulation.state.elapsed_days),"settlement_id":WorldSimulation.state.resource_settlement_id,"settlement_name":WorldSimulation.state.settlement_name,"event":"completed","kind":title,"form":"communal_work","land_use":"communal","material_family":preload("res://scripts/construction_materials.gd").family_for(materials),"materials":materials,"counts_materials":true,"condition":1.0,"status":"active","note":String(project.get("effect",""))}
+	var event:={"day":int(WorldSimulation.state.elapsed_days),"settlement_id":WorldSimulation.state.resource_settlement_id,"settlement_name":WorldSimulation.state.settlement_name,"event":"completed","kind":title,"form":"public_storehouse" if title=="Public Stores" else "communal_work","land_use":"storage" if title=="Public Stores" else "communal","material_family":preload("res://scripts/construction_materials.gd").family_for(materials),"materials":materials,"counts_materials":true,"condition":1.0,"status":"active","note":String(project.get("effect",""))}
 	WorldSimulation.state.record_building_event(event)
 	events.append(event)
 	return events

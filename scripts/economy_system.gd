@@ -485,7 +485,7 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
 	var levy_adoption:=WorldSimulation.discovery.adoption("public_levies")
 	var rotations:=WorldSimulation.discovery.adoption("labor_rotations")
-	var public_stores:=WorldSimulation.discovery.adoption("public_stores")
+	var public_stores:=WorldSimulation.discovery.adoption("public_stores")*preload("res://scripts/opening_craft_practice.gd").factor("public_stores")
 	var councils:=WorldSimulation.discovery.adoption("household_councils")
 	var customary_law:=WorldSimulation.discovery.adoption("customary_law")
 	var tallies:=WorldSimulation.discovery.adoption("tallies")
