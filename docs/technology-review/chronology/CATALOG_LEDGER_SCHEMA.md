@@ -27,7 +27,7 @@ The generated ledger is planning data only. Runtime code must not load it.
 | `review_status` | `unreviewed`, `keep`, `repair`, `merge_split_review`, `quarantine`, or `remove`. |
 | `presentation_tier` | `landmark`, `notice`, `program_report`, or `digest`. |
 | `stack_gaps` | Missing indispensable energy, materials, manufacture, measurement, information, people, institution, logistics, or maintenance stack. |
-| `chronology_risk` | `none`, `shallow_path`, `cross_field_gap`, `scope_mismatch`, `foreign_bypass`, `duplicate`, or a concise combination. |
+| `chronology_risk` | `none`, `root_density`, `shallow_path`, `cross_field_gap`, `scope_mismatch`, `foreign_bypass`, `duplicate`, or a concise combination. |
 | `review_note` | Short explanation only when the classification is not self-evident. |
 
 ## Review discipline
