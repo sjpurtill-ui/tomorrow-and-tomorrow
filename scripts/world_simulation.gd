@@ -383,6 +383,8 @@ func validate_payload(payload:Dictionary)->String:
 		if not preload("res://scripts/fire_practice.gd").valid(actor.state.GameState.get("fire_practice",preload("res://scripts/fire_practice.gd").empty_state())):return "Invalid civilization maintained fire records."
 		var opening=preload("res://scripts/opening_craft_practice.gd")
 		if not opening.valid(actor.state.GameState.get("opening_craft_practice",opening.empty_state())) or not opening.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization opening craft records."
+		var opportunities=preload("res://scripts/opening_opportunities.gd")
+		if not opportunities.valid(actor.state.GameState.get("opening_opportunities",opportunities.empty_state())):return "Invalid civilization opening opportunity records."
 		if not clothing.valid(actor.state.GameState.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization clothing records."
 		if not preload("res://scripts/civilian_care_state.gd").valid_state(actor.state.GameState):return "Invalid civilian clinical care records."
 		var batches=preload("res://scripts/food_batches.gd")
