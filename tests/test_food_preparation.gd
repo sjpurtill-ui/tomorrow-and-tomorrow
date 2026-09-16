@@ -11,6 +11,8 @@ func before_test()->void:
 	GameState.resource_stockpiles={"Timber":10.0,"Stone":10.0,"Freshwater":10.0,"Clay":10.0,"Fiber Plants":10.0}
 	GameState.known_discoveries.assign(["hearth_roasting_control"])
 	GameState.discovery_adoption.hearth_roasting_control=1.0
+	GameState.resource_stockpiles["Drying Mats"]=3.0
+	GameState.resource_stockpiles["Smoke Frames"]=1.5
 
 func after_test()->void:
 	WorldSimulation.clear()
@@ -109,6 +111,17 @@ func test_air_drying_remains_available_without_fuel_and_no_zero_adoption_bonus()
 	assert_float(float(result["Fresh meat"])+float(result.Fish)).is_equal(0.0)
 	GameState.discovery_adoption.food_drying=0
 	assert_float(float(FoodSystem._preserve(10,0,false)["Fresh plants"])).is_equal(0.0)
+
+func test_preservation_needs_physical_equipment_and_drying_tracks_climate()->void:
+	GameState.known_discoveries.assign(["food_drying","smoking"])
+	GameState.discovery_adoption.food_drying=1.0;GameState.discovery_adoption.smoking=1.0
+	GameState.resource_stockpiles["Drying Mats"]=0.0;GameState.resource_stockpiles["Smoke Frames"]=0.0
+	var before:=GameState.food_stocks.duplicate(true)
+	assert_dict(FoodSystem._preserve(100,100,false)).is_equal({"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0})
+	assert_dict(GameState.food_stocks).is_equal(before)
+	var dry_hot:=FoodSystem._drying_weather_factor({"precipitation":.05,"mean_temperature_c":30.0,"seasonality_c":0.0},0)
+	var wet_cold:=FoodSystem._drying_weather_factor({"precipitation":.95,"mean_temperature_c":0.0,"seasonality_c":0.0},0)
+	assert_float(dry_hot).is_greater(wet_cold)
 
 func test_meal_staff_reduces_preservation_capacity_without_reallocating_people()->void:
 	GameState.known_discoveries.append("food_drying");GameState.discovery_adoption.food_drying=1.0
