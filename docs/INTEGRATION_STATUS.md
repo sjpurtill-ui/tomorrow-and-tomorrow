@@ -1,3 +1,19 @@
+## September 16 — physical T05 water, waste, kiln, and binder works: INTEGRATED
+
+Canonical commits `644464d` and `cc59227` integrate the first two operating
+packets from the reviewed T05 chronology spine. Latrines, wellheads, cisterns,
+and settling basins are paid local projects with finite construction, condition,
+staff, maintenance, rainfall, source, and treatment constraints. Controlled kiln
+knowledge now exposes paid kiln capital; installed, staffed and fueled capacity
+supplies bounded firing service to clay conduit and quicklime production. Lime
+and mortar passive effects require physical stock or maintained masonry.
+
+Canonical focused validation passes 7/7 water/waste and 4/4 kiln/binder cases.
+The worker validation also passes 14/14 water-conveyance, 43/43 settlement,
+4/4 opening-water, 16/16 technology-operations and 11/11 building-material
+cases. Older saves default to empty water/waste works and retain the existing
+technology-operations ledger. No player game was launched or restarted.
+
 ## September 15 — renewable resource fronts and truthful material access: INTEGRATED
 
 Canonical Mac integrator source `71b47e3` is integrated on main from `85cd0bc`.

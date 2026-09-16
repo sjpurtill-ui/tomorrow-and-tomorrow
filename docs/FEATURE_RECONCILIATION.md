@@ -1,3 +1,20 @@
+## September 16 — T05 operating infrastructure checkpoint
+
+Integrated worker sources `f7c5051` and `5579203` at canonical commits
+`644464d` and `cc59227`. Four water and waste discoveries no longer act as free
+settlement infrastructure: their effects scale from built local works, actual
+sources or rainfall, daily volume, labor and condition. Controlled Kilns now
+requires commissioned capital, workers and daily fuel, and its finite heat is
+consumed by fired-conduit and lime batches. Rival planning commissions the kiln
+before dependent production. Lime Mortar's general settlement effect requires
+maintained lime masonry while direct construction and repair continue to consume
+real mortar stock.
+
+The T05 chronology review and both runtime handoffs are in
+`docs/technology-review/`. Graded-route and irrigation networks, followed by the
+hidden T05 transformation evaluation, remain outstanding. The canonical source
+contains these changes; no running player session was represented as updated.
+
 ## September 15 — resource-access correction
 
 Integrated `71b47e3` from canonical base `85cd0bc`. Exhausted timber, loose-stone,
