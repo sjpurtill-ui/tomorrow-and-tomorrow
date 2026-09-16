@@ -176,6 +176,8 @@ func test_alternative_foundations_are_functional_and_reconnect_on_one_discovery(
 	var definition:=DiscoverySystem.discovery_definition("pit_firing")
 	GameState.known_discoveries.assign(["clay_shaping","food_drying"])
 	DiscoverySystem.latest_context={"fire":1.0,"clay":1.0}
+	assert_bool(P.ready(definition,100)).is_false()
+	GameState.known_discoveries.append("hearth_heat_retention")
 	assert_bool(P.ready(definition,100)).is_true()
 	assert_str(P.chosen(definition).id).is_equal("experimental")
 	P.remember(definition,100)

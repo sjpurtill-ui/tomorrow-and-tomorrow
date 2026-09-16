@@ -18,8 +18,12 @@ const ENTRIES=[
 		"direction": "Sustenance",
 		"day": 0,
 		"chance": 0.005,
-		"requires": [],
-		"requires_all": [],
+		"requires": [
+			"hearth_heat_retention"
+		],
+		"requires_all": [
+			"hearth_heat_retention"
+		],
 		"requires_any": [],
 		"signals": [
 			"food",
@@ -150,4 +154,3 @@ static func prepare(plan:Dictionary, consumed:Dictionary)->Dictionary:
 	result.rations=amount
 	result.quality_bonus=QUALITY_BONUS*amount/maxf(total,0.001)
 	return result
-
