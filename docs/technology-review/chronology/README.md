@@ -42,6 +42,9 @@ skills, logistics, or organizations by implication.
   dramatic without frequent technology rewards.
 - `CATALOG_LEDGER_SCHEMA.md` defines the review record used for live and draft
   discoveries.
+- `OPENING_SPINE_REVIEW.md` fills the T01–T04 anchor slots, records the first
+  chronology exceptions, and proposes the first connected implementation wave.
+- `opening-spine-review.json` carries those decisions into the generated ledger.
 - `live-catalog-ledger.tsv` is a generated planning ledger for all 878 live
   discoveries; it is not runtime data.
 - `DECISION_LOG.md` preserves accepted rules and prevents repeated redesign.

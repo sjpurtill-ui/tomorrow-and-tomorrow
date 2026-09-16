@@ -11,10 +11,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 CATALOG = ROOT / "docs/technology-review/master-catalog"
 OUTPUT = Path(__file__).with_name("live-catalog-ledger.tsv")
+OPENING_REVIEW = Path(__file__).with_name("opening-spine-review.json")
 
 
 def load(name: str) -> dict:
     with (CATALOG / name).open(encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def load_from_path(path: Path) -> dict:
+    with path.open(encoding="utf-8") as handle:
         return json.load(handle)
 
 
@@ -48,6 +54,12 @@ def main() -> None:
         row["id"]: row["horizon"]
         for row in load("historical-horizon-allocation.json")["mappings"]
     }
+    opening_reviews = {}
+    if OPENING_REVIEW.exists():
+        opening_reviews = {
+            row["id"]: row for row in load_from_path(OPENING_REVIEW)["anchor_slots"]
+            if row.get("id")
+        }
     columns = [
         "id",
         "name",
@@ -71,8 +83,7 @@ def main() -> None:
     rows = []
     for item in baseline["items"]:
         runtime = item.get("runtime_definition", {})
-        rows.append(
-            {
+        row = {
                 "id": item["id"],
                 "name": item["name"],
                 "source_domain": item.get("domain", ""),
@@ -90,12 +101,26 @@ def main() -> None:
                 "presentation_tier": "",
                 "stack_gaps": "",
                 "chronology_risk": "",
-                "review_note": "",
+                "review_note": "pending",
             }
-        )
+        review = opening_reviews.get(item["id"], {})
+        for column in [
+            "reference_transformation",
+            "role",
+            "review_status",
+            "presentation_tier",
+            "stack_gaps",
+            "chronology_risk",
+            "review_note",
+        ]:
+            if column in review:
+                row[column] = review[column]
+        rows.append(row)
     rows.sort(key=lambda row: row["id"])
     with OUTPUT.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=columns, delimiter="\t")
+        writer = csv.DictWriter(
+            handle, fieldnames=columns, delimiter="\t", lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
     print(f"wrote {len(rows)} live discoveries to {OUTPUT}")
