@@ -2,22 +2,30 @@ extends RefCounted
 ## Physical opening craft stocks. Knowledge permits work; it does not provide
 ## tools, bindings, containers, or fitted timber by itself.
 
-const ORDER:= ["controlled_flaking","cordage","hafted_tools","basketry","clay_shaping","pit_firing","joinery"]
+const ORDER:= ["controlled_flaking","cordage","food_drying","smoking","hafted_tools","basketry","clay_shaping","pit_firing","joinery"]
 const PRODUCTS:={
 	"controlled_flaking":"Flaked Stone Tools","cordage":"Cordage Bundles","hafted_tools":"Hafted Tool Sets",
-	"basketry":"Woven Containers","clay_shaping":"Unfired Clay Vessels","pit_firing":"Fired Clay Vessels","joinery":"Joined Timber Components"
+	"food_drying":"Drying Mats","smoking":"Smoke Frames","basketry":"Woven Containers",
+	"clay_shaping":"Unfired Clay Vessels","pit_firing":"Fired Clay Vessels","joinery":"Joined Timber Components"
 }
 const TARGET_PER_PERSON:={
-	"controlled_flaking":.030,"cordage":.040,"hafted_tools":.020,"basketry":.025,
+	"controlled_flaking":.030,"cordage":.040,"food_drying":.025,"smoking":.012,
+	"hafted_tools":.020,"basketry":.025,
 	"clay_shaping":.030,"pit_firing":.025,"joinery":.015
 }
 const DECAY:={
-	"Flaked Stone Tools":.004,"Cordage Bundles":.008,"Hafted Tool Sets":.004,"Woven Containers":.003,
+	"Flaked Stone Tools":.004,"Cordage Bundles":.008,"Drying Mats":.010,"Smoke Frames":.006,
+	"Hafted Tool Sets":.004,"Woven Containers":.003,
 	"Unfired Clay Vessels":.020,"Fired Clay Vessels":.0005,"Joined Timber Components":.003
 }
 const RECIPES:={
 	"controlled_flaking":{"rate":6.0,"inputs":{"Flint":.04}},
 	"cordage":{"rate":8.0,"inputs":{"Fiber Plants":.05}},
+	# Drying begins with woven surfaces rather than requiring the later basketry
+	# discovery. Smoke frames are simple timber-and-stone supports; their use,
+	# unlike their construction, still requires a maintained fire.
+	"food_drying":{"rate":5.0,"inputs":{"Fiber Plants":.10}},
+	"smoking":{"rate":3.0,"inputs":{"Timber":.12,"Stone":.05}},
 	"hafted_tools":{"rate":3.0,"inputs":{"Flaked Stone Tools":.15,"Timber":.08,"Cordage Bundles":.08}},
 	"basketry":{"rate":4.0,"inputs":{"Fiber Plants":.12,"Cordage Bundles":.04}},
 	"clay_shaping":{"rate":5.0,"inputs":{"Clay":.10,"Freshwater":.03}},

@@ -48,9 +48,9 @@ func test_practical_effects_require_and_track_physical_stock()->void:
 	assert_float(DiscoverySystem.effect("haul_capacity")).is_equal_approx(.04,.000001)
 
 func test_real_inputs_build_the_connected_chain()->void:
-	know(["controlled_flaking","fiber_grading","cordage","hafted_tools","basketry","clay_testing","clay_shaping","pit_firing","timber_grading","joinery","ember_tending"])
+	know(["controlled_flaking","fiber_grading","cordage","food_drying","smoking","hafted_tools","basketry","clay_testing","clay_shaping","pit_firing","timber_grading","joinery","ember_tending"])
 	GameState.population_allocations.Crafting=100
-	GameState.resource_stockpiles={"Flint":20.0,"Fiber Plants":30.0,"Timber":30.0,"Clay":20.0,"Freshwater":20.0}
+	GameState.resource_stockpiles={"Flint":20.0,"Stone":20.0,"Fiber Plants":30.0,"Timber":30.0,"Clay":20.0,"Freshwater":20.0}
 	GameState.fire_practice={"initialized":true,"embers":.7,"last_day":-1,"source":"test","last_event":"test","fuel_today":0.0,"ignitions":0,"extinctions":0}
 	var before:=GameState.resource_stockpiles.duplicate(true)
 	var report:=Craft.advance()

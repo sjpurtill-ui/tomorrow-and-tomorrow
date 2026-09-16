@@ -373,15 +373,18 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 	if traveling: return result
 	var capacity:=(logistics*0.16+makers*0.18)*(1.0+WorldSimulation.discovery.effect("food_storage"))
 	if "food_drying" in WorldSimulation.state.known_discoveries:
-		var plant_amount:=minf(float(WorldSimulation.state.food_stocks.get("Fresh plants",0.0)),capacity*0.55*clampf(WorldSimulation.discovery.adoption("food_drying"),0.0,1.0))
+		var drying_coverage:=preload("res://scripts/opening_craft_practice.gd").factor("food_drying")
+		var drying_weather:=_drying_weather_factor(_environment_mix(),WorldSimulation.state.elapsed_days)
+		var plant_amount:=minf(float(WorldSimulation.state.food_stocks.get("Fresh plants",0.0)),capacity*0.55*clampf(WorldSimulation.discovery.adoption("food_drying"),0.0,1.0)*drying_coverage*drying_weather)
 		WorldSimulation.state.food_stocks["Fresh plants"]-=plant_amount
 		WorldSimulation.state.food_stocks["Dry staples"]+=plant_amount*0.88
 		result["Fresh plants"]=plant_amount
 		capacity=maxf(0.0,capacity-plant_amount)
 	preload("res://scripts/fire_practice.gd").ensure_initialized()
 	if "smoking" in WorldSimulation.state.known_discoveries and preload("res://scripts/fire_practice.gd").available() and capacity>0.0:
+		var smoking_coverage:=preload("res://scripts/opening_craft_practice.gd").factor("smoking")
 		for food_type in ["Fresh meat","Fish"]:
-			var amount:=minf(float(WorldSimulation.state.food_stocks.get(food_type,0.0)),capacity*0.5*clampf(WorldSimulation.discovery.adoption("smoking"),0.0,1.0))
+			var amount:=minf(float(WorldSimulation.state.food_stocks.get(food_type,0.0)),capacity*0.5*clampf(WorldSimulation.discovery.adoption("smoking"),0.0,1.0)*smoking_coverage)
 			# Smoking must maintain an actual wood fire; knowledge alone supplies no heat.
 			amount=minf(amount,maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)))/0.04)
 			var fuel:=amount*0.04
@@ -392,6 +395,14 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 			WorldSimulation.state.food_stocks["Preserved food"]+=amount*0.82
 			result[food_type]=amount
 	return result
+
+func _drying_weather_factor(profile:Dictionary,day:float)->float:
+	# Open-air drying remains possible in damp country, but cool humid seasons
+	# demand much more rack time. Hot, dry air helps without creating free output.
+	var precipitation:=clampf(float(profile.get("precipitation",0.5)),0.0,1.0)
+	var temperature:=PlanetEnvironment.ambient_temperature_c(profile,day)
+	var warmth:=clampf((temperature+5.0)/35.0,0.0,1.0)
+	return clampf(0.38+(1.0-precipitation)*0.52+warmth*0.25,0.25,1.15)
 
 func _spoil(traveling: bool) -> Dictionary:
 	var result:={}
