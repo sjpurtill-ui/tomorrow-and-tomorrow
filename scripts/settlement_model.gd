@@ -24,6 +24,7 @@ const CITY_RESOURCE_DEFAULTS:={
 	"civilian_care":{"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}},
 	"household_clothing":{"tools":{},"lots":[],"bone_stock":0.0,"last_day":-1,"report":{}},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
+	"water_waste_works":{"works":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
 	"grain_processing":{"stocks":{"grain":0.0,"clean":0.0,"tested":0.0,"dry":0.0,"flour":0.0,"fine":0.0,"bran":0.0,"malt":0.0},"tools":{},"batches":[],"last_day":-1,"report":{}},
 	"microscopy":{"enabled":true,"staff_share":.25,"work_bank":0.0,"last_day":-1,"next_id":1,"specimens":[],"records":[],"protocols":[],"tools":{},"report":{}},
@@ -1349,12 +1350,14 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	var water_sites:=0
 	for line:Dictionary in WorldSimulation.state.water_conveyance.lines:
 		if String(line.status)=="under_construction":water_sites+=1
+	var water_work_sites:=preload("res://scripts/water_waste_works.gd").construction_sites()
 	var rail_sites:=preload("res://scripts/rail_freight.gd").construction_sites()
 	var retrofit_sites:=0
 	for plot:Dictionary in WorldSimulation.state.settlement_plots:
 		if preload("res://scripts/settlement_fabric_operations.gd").needs_work(plot):retrofit_sites+=1
-	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites+rail_sites+retrofit_sites))
+	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites+water_work_sites+rail_sites+retrofit_sites))
 	preload("res://scripts/water_conveyance.gd").construction_work(builders_per_site*water_sites*labor_efficiency*0.10,month_day)
+	preload("res://scripts/water_waste_works.gd").construction_work(builders_per_site*water_work_sites*labor_efficiency*0.10,month_day)
 	preload("res://scripts/rail_freight.gd").construction_work(builders_per_site*rail_sites*labor_efficiency*.10,int(WorldSimulation.state.elapsed_days))
 	for plot in WorldSimulation.state.settlement_plots:
 		plot["last_update_day"]=month_day
@@ -2055,8 +2058,10 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		if String(plot.get("status","")) in ["ruin","reclaimed","under_construction"]: continue
 		maintained_plots+=1
 	var water_lines:=preload("res://scripts/water_conveyance.gd").active_lines()
-	var maintenance_per_plot:=builders*labor_efficiency/maxf(1.0,float(maintained_plots+water_lines))*0.0032
+	var water_works:int=preload("res://scripts/water_waste_works.gd").data().works.size()
+	var maintenance_per_plot:=builders*labor_efficiency/maxf(1.0,float(maintained_plots+water_lines+water_works))*0.0032
 	preload("res://scripts/water_conveyance.gd").scheduled_maintenance(maintenance_per_plot/.01,day)
+	preload("res://scripts/water_waste_works.gd").scheduled_maintenance(maintenance_per_plot/.01,day)
 	var hardship:=clampf(1.0-float(WorldSimulation.state.simulation_metrics.get("health",WorldSimulation.state.population_health)),0.0,1.0)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=WorldSimulation.state.world_seed^day^0x27d4eb2d

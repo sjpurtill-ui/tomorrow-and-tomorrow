@@ -376,6 +376,7 @@ func validate_payload(payload:Dictionary)->String:
 				if expected_type!=TYPE_NIL and saved_type!=expected_type and not (saved_type in [TYPE_INT,TYPE_FLOAT] and expected_type in [TYPE_INT,TYPE_FLOAT]):return "Invalid civilization field type: "+field
 		if not preload("res://scripts/civic_administration.gd").valid(actor.state.get("GovernmentPeopleSystem",{}).get("administration_records",preload("res://scripts/civic_administration.gd").empty_state())):return "Invalid civilization civic administration records."
 		if not preload("res://scripts/water_conveyance_state.gd").valid_state(actor.state.GameState):return "Invalid civilization water conveyance records."
+		if not preload("res://scripts/water_waste_works_state.gd").valid_state(actor.state.GameState):return "Invalid civilization water and waste works records."
 		if not preload("res://scripts/rail_freight_state.gd").valid_state(actor.state.GameState):return "Invalid civilization rail freight records."
 		if not preload("res://scripts/building_material_operations.gd").valid_state(actor.state.GameState):return "Invalid civilization building material or curing records."
 		var nutrition:=preload("res://scripts/crop_nutrition.gd")
