@@ -13,6 +13,7 @@ func farm()->void:
 	WorldSimulation.state.settlement_site_committed=true
 	WorldSimulation.state.population_allocations.Food=30
 	learn("seed_selection");learn(N.GATE)
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,WorldSimulation.state.population_exact*.01)
 func test_quote_conserves_inputs_and_requires_both_complementary_nutrients()->void:
 	var reserves:=N.empty_state();var stocks:={"Nitrate Fertilizer":7.0,"Soluble Phosphate":4.2}
 	var result:=N.plan(100,stocks,reserves,1)

@@ -287,7 +287,8 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var fishing_weight:=maxf(0.16*maxf(float(access.freshwater),environmental_water),coastal_fishing_weight)
 	var cultivation_weight:=0.0
 	if "seed_selection" in WorldSimulation.state.known_discoveries and WorldSimulation.state.settlement_site_committed:
-		cultivation_weight=(0.22+float(environment.get("fertility",0.0))*0.20+float(access.fertile)*0.08)*maxf(0.05,WorldSimulation.discovery.adoption("seed_selection"))
+		var seed_coverage:=preload("res://scripts/opening_opportunities.gd").practice_factor("seed_selection")
+		cultivation_weight=(0.22+float(environment.get("fertility",0.0))*0.20+float(access.fertile)*0.08)*WorldSimulation.discovery.adoption("seed_selection")*seed_coverage
 	var remaining:=maxf(0.0,1.0-fishing_weight-cultivation_weight)
 	var hunting_weight:=remaining*(0.31+float(access.game)*0.09)
 	var gathering_weight:=maxf(0.0,remaining-hunting_weight)
