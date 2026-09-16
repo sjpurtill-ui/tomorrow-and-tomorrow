@@ -459,14 +459,14 @@ const PRODUCTS={
 
 	"laundry_soap":{"name":"Plant-oil laundry soap", "output":"Laundry Soap", "gate":"soap_manufacture", "materials":{"Drying Oil":1.0,"Caustic Soda":0.2,"Freshwater":0.5,"Timber":0.3}, "days":3.0, "tooling":{"Laboratory Glassware":1.0,"Clay":3.0,"Stone":2.0}},
 	"unfired_clay_conduits":{"name": "Formed clay conduit batches", "output": "Unfired Clay Conduits", "gate": "clay_pipe_forming", "materials": {"Prepared Clay": 2, "Freshwater": 0.2}, "days": 3, "tooling": {"Timber": 2, "Stone": 2}},
-	"fired_clay_conduits":{"name": "Qualified fired conduit batches", "output": "Fired Clay Conduits", "gate": "ceramic_pipe_firing_qualification", "materials": {"Unfired Clay Conduits": 1.25, "Timber": 2}, "days": 4, "tooling": {"Stone": 4, "Clay": 3}},
+	"fired_clay_conduits":{"name": "Qualified fired conduit batches", "output": "Fired Clay Conduits", "gate": "ceramic_pipe_firing_qualification", "materials": {"Unfired Clay Conduits": 1.25}, "days": 4, "tooling": {"Stone": 4, "Clay": 3},"services":{"kiln_heat":1.0}},
 	"conduit_fit_gauges":{"name": "Conduit fit gauge sets", "output": "Conduit Fit Gauges", "gate": "ceramic_pipe_fit_gauges", "materials": {"Timber": 2}, "days": 2, "tooling": {"Stone": 2}},
 	"wooden_conduits":{"name": "Bored timber conduit batches", "output": "Wooden Conduits", "gate": "wooden_log_conduits", "materials": {"Timber": 4}, "days": 5, "tooling": {"Wrought Iron": 1, "Timber": 2}},
 	"conduit_bedding":{"name": "Prepared conduit bedding", "output": "Conduit Bedding", "gate": "rigid_pipe_bedding", "materials": {"Stone": 2, "Fine Sand": 1}, "days": 2, "tooling": {"Timber": 1}},
 	"conduit_rodding_sets":{"name": "Conduit clearing rod sets", "output": "Conduit Rodding Sets", "gate": "sewer_rodding_service", "materials": {"Timber": 2, "Rope Coils": 0.2}, "days": 3, "tooling": {"Stone": 1}},
 
 	"cement_gypsum":{"name":"Precipitated cement gypsum","output":"Gypsum","gate":"portland_cement_clinker","materials":{"Limestone":1.0,"Sulfuric Acid":0.5,"Freshwater":1.0},"days":3,"tooling":{"Glass":2,"Clay":2}},
-	"quicklime":{"name":"Burned quicklime","output":"Quicklime","gate":"lime_burning","materials":{"Limestone":2,"Timber":2},"days":3,"tooling":{"Stone":6,"Clay":2}},
+	"quicklime":{"name":"Burned quicklime","output":"Quicklime","gate":"lime_burning","materials":{"Limestone":2},"days":3,"tooling":{"Stone":6,"Clay":2},"services":{"kiln_heat":1.5}},
 	"slaked_lime":{"name":"Slaked lime","output":"Slaked Lime","gate":"lime_mortar","materials":{"Quicklime":1,"Freshwater":1},"days":2,"tooling":{"Clay":2,"Timber":1}},
 	"building_mortar":{"name":"Lime building mortar","output":"Building Mortar","gate":"lime_mortar","materials":{"Slaked Lime":1,"Fine Sand":2,"Freshwater":0.5},"days":2,"tooling":{"Timber":2,"Stone":1}},
 	"hydraulic_lime_binder":{"name":"Hydraulic lime binder","output":"Hydraulic Binder","gate":"hydraulic_lime_binders","materials":{"Limestone":2,"Clay":0.5,"Timber":3},"days":4,"tooling":{"Refractory Bricks":4,"Stone":4}},

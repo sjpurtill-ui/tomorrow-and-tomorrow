@@ -51,6 +51,16 @@ static func target(id:String)->float:
 	return maxf(.25,WorldSimulation.state.population_exact*float(TARGET_PER_PERSON[id]))
 
 static func factor(id:String)->float:
+	if id=="kiln_control":return clampf(preload("res://scripts/technology_operations.gd").service("kiln_heat")/4.0,0.0,1.0)
+	if id=="lime_burning":
+		var lime:=stock("Quicklime")+stock("Slaked Lime")+stock("Building Mortar")
+		return clampf(lime/maxf(.5,WorldSimulation.state.population_exact*.02),0.0,1.0)
+	if id=="lime_mortar":
+		var best:=0.0
+		for plot:Dictionary in WorldSimulation.state.settlement_plots:
+			if String(plot.get("form",""))!="lime_masonry_household" or String(plot.get("status","active")) in ["ruin","reclaimed","under_construction"]:continue
+			best=maxf(best,clampf(float(plot.get("condition",0.0)),0.0,1.0))
+		return best
 	if id in ["latrine_siting","protected_wellheads","rainwater_cisterns","water_settling_basins"]:
 		return preload("res://scripts/water_waste_works.gd").factor(id)
 	if id in ["seed_selection","animal_taming","pack_animals","domesticated_mounts","mounted_scouts"]:

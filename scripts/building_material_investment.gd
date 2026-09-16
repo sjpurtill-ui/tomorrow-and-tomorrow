@@ -6,6 +6,7 @@ static func recommendation()->Dictionary:
 	var state=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
 	if state.effective_workers("Construction")<4 or WorldSimulation.military.production_labor_share<=0:return {}
+	if _needs_controlled_kiln():return _kiln_recommendation()
 	# Existing supplied fabric creates a small finite maintenance stock target.
 	var maintenance:Dictionary={}
 	for plot:Dictionary in state.settlement_plots:
@@ -34,6 +35,23 @@ static func recommendation()->Dictionary:
 			if part.is_empty():feasible=false;break
 			if first.is_empty():first=part
 		if feasible:return first
+	return {}
+
+static func _needs_controlled_kiln()->bool:
+	var state=WorldSimulation.state
+	if "kiln_control" not in state.known_discoveries or WorldSimulation.discovery.adoption("kiln_control")<.25:return false
+	var record:Dictionary=preload("res://scripts/technology_operations.gd").data().plants.get("controlled_kiln",{})
+	if int(record.get("installed",0))+int(record.get("building",0))>0:return false
+	return "lime_burning" in state.known_discoveries or "ceramic_pipe_firing_qualification" in state.known_discoveries
+
+static func _kiln_recommendation()->Dictionary:
+	var ops=preload("res://scripts/technology_operations.gd");var spec:Dictionary=ops.PLANTS.controlled_kiln
+	for item:String in spec.cost:
+		if float(WorldSimulation.state.resource_stockpiles.get(item,0))>=float(spec.cost[item]):continue
+		var supply:Dictionary=Supply.supply(item,ceili(float(spec.cost[item])),{})
+		if not supply.is_empty():return supply
+		return {}
+	if not ops.quote("controlled_kiln").has("error"):return {"kind":"plant_install","plant":"controlled_kiln","count":1}
 	return {}
 
 static func fabric_targets()->Dictionary:
