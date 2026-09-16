@@ -208,7 +208,7 @@ const METHODS := {
     },
     "mode": "sew",
     "observation": "Join suitable flexible material using a prepared needle and thread. Needles, thread, material and practiced hands",
-    "production_contract": "Actual post-siege hunting harvest supplies bounded recovered bone for paid needles. Cloth and yarn are consumed to sew garments; cutting templates reduce cloth offcuts, and graded patterns support repeated fitted work. Repairs consume compatible cloth, yarn and shared Logistics time to restore the treated share of existing garment condition, never new garment quantity. Supply, equipment and daily quotas constrain operation."
+    "production_contract": "Ordinary local hunting supplies bounded bone for paid needles. Early sewing can join raw hides with prepared plant fiber; woven cloth and spun yarn become the preferred route when supplied. Cutting templates reduce later cloth offcuts, and graded patterns support repeated fitted work. Repairs consume compatible material and shared Logistics time to restore the treated share of existing garment condition, never new garment quantity. Supply, equipment and daily quotas constrain operation."
   },
   "garment_pattern_cutting": {
     "name": "Garment-Pattern Cutting",

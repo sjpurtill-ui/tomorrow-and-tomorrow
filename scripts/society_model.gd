@@ -194,11 +194,15 @@ func _societal_value_context(context:Dictionary)->Dictionary:
 	}
 
 func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
+	if definitions_by_id.size()!=_catalog.size():
+		definitions_by_id.clear()
+		for definition:Dictionary in _catalog:definitions_by_id[String(definition.get("id",""))]=definition
 	effect_totals.clear()
 	for id in WorldSimulation.state.known_discoveries:
 		var discovery:Dictionary=definitions_by_id.get(id,{})
 		if discovery.is_empty(): continue
 		var adoption_level:=clampf(float(WorldSimulation.state.discovery_adoption.get(id,0.025)),0.0,1.0)
+		adoption_level*=preload("res://scripts/opening_craft_practice.gd").factor(String(id))
 		for effect_name in (discovery.get("effects",{}) as Dictionary):
 			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+float(discovery.effects[effect_name])*adoption_level
 	for effect_name in effect_totals:

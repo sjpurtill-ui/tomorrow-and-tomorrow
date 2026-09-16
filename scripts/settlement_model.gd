@@ -30,6 +30,7 @@ const CITY_RESOURCE_DEFAULTS:={
 	"field_botany":{"last_day":-1,"next_id":1,"lines":[],"trials":[],"vouchers":[],"applications":[],"report":{},"balance":false,"reference_seed":0.0,"reference_site":"","reference_day":-1,"reference_line":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
+	"opening_craft_practice":{"initialized":true,"last_day":-1,"report":{}},
 	"resource_events":[],"resource_practice":{},"resource_priorities":{},
 	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],
 	"food_stocks":{"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0},
@@ -256,6 +257,7 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		stamp=_record_secondary_timing(timings,"resources",stamp)
 		with_local_population(func()->void:WorldSimulation.consequences.process_day(context),true)
 		stamp=_record_secondary_timing(timings,"consequences",stamp)
+		with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
 		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
 		stamp=_record_secondary_timing(timings,"economy",stamp)
 		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)

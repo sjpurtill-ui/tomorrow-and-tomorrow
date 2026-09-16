@@ -46,14 +46,14 @@ func reset_for_new_world()->void:
 var catalog: Array[Dictionary] = [
 	{"id":"seasonal_patterns","name":"Seasonal Patterns","direction":"Nature","chance":0.010,"day":0,"requires":[],"signals":["foraging","exploration"],"observation":"Gatherers report that plants and animals return in recurring cycles."},
 	{"id":"seed_selection","name":"Selective Planting","direction":"Sustenance","chance":0.006,"day":20,"requires":["seasonal_patterns"],"signals":["foraging","food"],"observation":"Some gathered seeds consistently produce stronger plants."},
-	{"id":"food_drying","name":"Food Drying","direction":"Sustenance","chance":0.009,"day":0,"requires":[],"signals":["food","storage"],"observation":"Food left in dry moving air spoils more slowly."},
+	{"id":"food_drying","name":"Food Drying","direction":"Sustenance","chance":0.009,"day":0,"requires":["edible_resource_recognition"],"requires_all":["edible_resource_recognition"],"signals":["food","storage"],"observation":"Repeated handling of known edible foods shows that dry moving air slows spoilage."},
 	{"id":"smoking","name":"Smoke Preservation","direction":"Sustenance","chance":0.005,"day":18,"requires":["hearth_heat_retention"],"requires_all":["hearth_heat_retention"],"signals":["food","fire"],"observation":"Food kept above smoky fires changes texture and lasts longer.","learning_routes":[{"id":"local","label":"Drying practice extended over smoke","requires_all":["food_drying"]},{"id":"charcoal","label":"Hearth experiments with restricted combustion","requires_all":["charcoal"]}]},
-	{"id":"cordage","name":"Twisted Cordage","direction":"Materials","chance":0.010,"day":3,"requires":[],"signals":["fiber","construction"],"observation":"Twisted plant fibers hold much more weight than loose strands."},
-	{"id":"basketry","name":"Basketry","direction":"Materials","chance":0.006,"day":12,"requires":["cordage"],"signals":["fiber","storage"],"observation":"Interlaced fibers form containers that remain light and strong."},
+	{"id":"cordage","name":"Twisted Cordage","direction":"Materials","chance":0.010,"day":3,"requires":["fiber_grading"],"requires_all":["fiber_grading"],"signals":["fiber","construction"],"observation":"Graded plant fibers twisted together hold more weight than loose strands."},
+	{"id":"basketry","name":"Basketry","direction":"Materials","chance":0.006,"day":12,"requires":["cordage","fiber_grading"],"requires_all":["cordage","fiber_grading"],"signals":["fiber","storage"],"observation":"Interlaced graded fibers form containers that remain light and repairable."},
 	{"id":"charcoal","name":"Charcoal Production","direction":"Materials","chance":0.004,"day":35,"requires":["hearth_heat_retention"],"requires_all":["hearth_heat_retention"],"signals":["fire","timber"],"observation":"Wood heated beneath restricted air leaves an unusually hot-burning residue.","effects":{},"production_items":["wood_charcoal"],"production_contract":"A finite workshop converts timber into physical charcoal with paid earth-and-stone tooling. No fuel stock is granted by discovery."},
-	{"id":"clay_shaping","name":"Clay Vessels","direction":"Materials","chance":0.006,"day":15,"requires":[],"signals":["clay","storage"],"observation":"Local wet earth can be shaped into containers before it dries."},
+	{"id":"clay_shaping","name":"Clay Vessels","direction":"Materials","chance":0.006,"day":15,"requires":["clay_testing"],"requires_all":["clay_testing"],"signals":["clay","storage"],"observation":"Tested local clay can be shaped into containers before it dries."},
 	{"id":"pit_firing","name":"Pit Firing","direction":"Materials","chance":0.003,"day":50,"requires":["clay_shaping","hearth_heat_retention"],"requires_all":["clay_shaping","hearth_heat_retention"],"signals":["fire","clay"],"observation":"Clay exposed to sustained heat becomes permanently hard.","learning_routes":[{"id":"local","label":"Charcoal-supported firing trials","requires_all":["charcoal"]},{"id":"experimental","label":"Cooking-fire experiments","requires_all":["food_drying"],"signals":["fire","clay"]}]},
-	{"id":"joinery","name":"Wood Joinery","direction":"Infrastructure","chance":0.005,"day":22,"requires":["cordage"],"signals":["timber","construction"],"observation":"Carefully cut wooden members can lock together without cord."},
+	{"id":"joinery","name":"Wood Joinery","direction":"Infrastructure","chance":0.005,"day":22,"requires":["hafted_tools","timber_grading"],"requires_all":["hafted_tools","timber_grading"],"signals":["timber","construction"],"observation":"Hafted cutting tools shape selected wooden members so they lock together without cord."},
 	{"id":"drainage","name":"Ground Drainage","direction":"Infrastructure","chance":0.007,"day":10,"requires":[],"signals":["construction","rain"],"observation":"Shallow channels keep occupied ground drier after storms."},
 	{"id":"well_siting","name":"Well Siting","direction":"Infrastructure","chance":0.004,"day":40,"requires":["drainage"],"signals":["freshwater","construction"],"observation":"Certain terrain features reliably indicate water beneath the ground."},
 	{"id":"wound_cleaning","name":"Wound Cleaning","direction":"Health","chance":0.007,"day":0,"requires":[],"signals":["injury","freshwater"],"observation":"Washed wounds become dangerous less often than untreated wounds."},
@@ -783,6 +783,11 @@ func effect(effect_id:String)->float:
 	initialize()
 	return society_model.effect(effect_id)
 
+func refresh_operating_effects()->void:
+	initialize()
+	society_model._rebuild_effect_totals(catalog)
+	WorldSimulation.state.knowledge_effects=society_model.effect_totals.duplicate(true)
+
 func adoption(discovery_id:String)->float:
 	return society_model.adoption(discovery_id)
 
@@ -1080,6 +1085,11 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
+	var opening:=preload("res://scripts/opening_craft_practice.gd")
+	var opening_id:=String(entry.get("id",""))
+	if opening.PRODUCTS.has(opening_id):
+		var product:=String(opening.PRODUCTS[opening_id])
+		return "%s produces and maintains %s from real local inputs. Its listed benefits operate in proportion to physical stock coverage (currently %.0f%%); the knowledge remains when stocks wear out." % [String(entry.get("production_contract","This practice")),product,opening.factor(opening_id)*100.0]
 	if not String(entry.get("clinical_care_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("rail_service_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("naval_service_method","")).is_empty():return String(entry.production_contract)

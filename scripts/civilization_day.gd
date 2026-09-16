@@ -40,6 +40,7 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	WorldSimulation.state.synchronize_population_allocations()
 	var events:Array[Dictionary]=WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.consequences.process_day(daily_context),true)
 	stamp=record_timing(timings,"consequences",stamp)
+	WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
 	events.append_array(WorldSimulation.civics.process_day(day))
 	stamp=record_timing(timings,"civics",stamp)
 	events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context)))

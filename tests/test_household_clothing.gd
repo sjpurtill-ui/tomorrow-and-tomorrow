@@ -118,6 +118,7 @@ func test_full_save_file_restores_clothes_and_accepts_missing_legacy_field()->vo
 	assert_bool(restored.get("ok",false)).is_true();assert_dict(C.data()).is_equal(C.empty_state())
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
 func test_secondary_city_clothes_are_local_and_save_separately()->void:
+	var secondary_bone:={"amount":0.0}
 	WorldSimulation.scoped("clothes",func()->void:
 		prepare();C.add("sew",20);C.data().bone_stock=.5
 		WorldSimulation.state.player_settlements.append({"id":"second","name":"Second","position":Vector2(10,0),"population_share":.25,"founded_day":0})
@@ -125,13 +126,14 @@ func test_secondary_city_clothes_are_local_and_save_separately()->void:
 			assert_float(C.count()).is_equal(0.0);C.add("fit",3);C.data().bone_stock=.1
 			WorldSimulation.food.process_day({"traveling":false},1,1)
 			assert_float(float(C.coverage(100,0).issued)).is_equal(3.0)
+			secondary_bone.amount=C.available(C.BONE_RESOURCE)
 		)
 		assert_float(C.count()).is_equal(20.0);assert_float(C.available(C.BONE_RESOURCE)).is_equal(.5)
 	)
 	var saved:=WorldSimulation.export_state();assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
 	WorldSimulation.scoped("clothes",func()->void:
 		assert_float(C.count()).is_equal(20.0);assert_float(C.available(C.BONE_RESOURCE)).is_equal(.5)
-		WorldSimulation.settlements.with_city_resources("second",func()->void:assert_float(C.count()).is_equal(3.0);assert_float(C.available(C.BONE_RESOURCE)).is_equal(.1))
+		WorldSimulation.settlements.with_city_resources("second",func()->void:assert_float(C.count()).is_equal(3.0);assert_float(C.available(C.BONE_RESOURCE)).is_equal(float(secondary_bone.amount)))
 	)
 func test_actual_daily_health_consumes_only_supplied_cold_coverage()->void:
 	WorldSimulation.scoped("clothes",func()->void:
@@ -154,6 +156,19 @@ func learn(id:String)->void:
 	for gate:String in gates:
 		if gate not in WorldSimulation.state.known_discoveries:WorldSimulation.state.known_discoveries.append(gate)
 		WorldSimulation.state.discovery_adoption[gate]=1.0
+func test_ordinary_hunting_recovers_bone_before_sewing_and_early_sewing_uses_hides()->void:
+	WorldSimulation.scoped("clothes",func()->void:
+		prepare();WorldSimulation.state.resource_stockpiles={}
+		C.advance(0,100,false,50)
+		assert_float(C.available(C.BONE_RESOURCE)).is_equal_approx(.1,.000001)
+		WorldSimulation.state.elapsed_days=1;learn("bone_needle_sewing")
+		WorldSimulation.state.resource_stockpiles={"Raw Hides":10.0,"Fiber Plants":10.0,"Stone":1.0,"Timber":1.0}
+		assert_bool(C.install("bone_needle_sewing").get("ok",false)).is_true()
+		var result:=report();C.operate("bone_needle_sewing",10,100,1,result)
+		assert_float(C.count()).is_equal(2.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Raw Hides"])).is_equal_approx(8.6,.000001)
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Fiber Plants"])).is_equal_approx(9.8,.000001)
+	)
 func test_bone_recovery_is_bounded_once_per_day_and_pays_for_sewing_needles()->void:
 	WorldSimulation.scoped("clothes",func()->void:
 		prepare();learn("bone_needle_sewing")
