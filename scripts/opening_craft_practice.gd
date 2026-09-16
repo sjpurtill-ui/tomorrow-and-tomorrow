@@ -67,6 +67,16 @@ static func factor(id:String)->float:
 		var logistics:=WorldSimulation.state.effective_workers("Logistics")/maxf(1.0,population*.04)
 		var administration:=WorldSimulation.state.effective_workers("Administration")/maxf(1.0,population*.02)
 		return clampf(minf(logistics,administration),0.0,1.0)
+	if id=="framed_construction":
+		var best_condition:=0.0
+		for plot:Dictionary in WorldSimulation.state.settlement_plots:
+			if String(plot.get("form",""))!="timber_frame_hall":continue
+			if String(plot.get("status","active")) in ["vacant","ruin","reclaimed","under_construction"]:continue
+			best_condition=maxf(best_condition,clampf(float(plot.get("condition",0.0)),0.0,1.0))
+		if best_condition<=0.0:return 0.0
+		var population:=maxf(1.0,WorldSimulation.state.population_exact)
+		var staffing:=WorldSimulation.state.effective_workers("Construction")/maxf(1.0,population*.03)
+		return clampf(minf(best_condition,staffing),0.0,1.0)
 	if not PRODUCTS.has(id):return 1.0
 	var product:=String(PRODUCTS[id])
 	if id=="clay_shaping":

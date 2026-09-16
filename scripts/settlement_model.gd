@@ -2244,6 +2244,20 @@ func _synchronize_early_works(day:int,events:Array[Dictionary])->void:
 			_record_plot_building_event(plot,"converted",day,{},false,"Portable shelter replaced using the completed work’s recorded materials.")
 			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Shelters Took Root","plot_id":int(plot.id)})
+	if "Framed Hall" in WorldSimulation.state.settlement_completed:
+		var hall_materials:=_completed_work_materials("Framed Hall")
+		for plot in WorldSimulation.state.settlement_plots:
+			if String(plot.get("land_use",""))!="communal" or String(plot.get("form",""))!="open_hearth_yard":continue
+			plot["form"]="timber_frame_hall"
+			_apply_completed_work_materials(plot,hall_materials)
+			plot["roof_plan"]="thatched_ridge"
+			plot["converted_day"]=day
+			plot["roof_coverage"]=maxf(float(plot.get("roof_coverage",0.0)),0.58)
+			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"converted","new_state":"timber_frame_hall","cause":"Framed Hall"})
+			_record_plot_building_event(plot,"converted",day,{},false,"A paid timber frame enclosed the inherited communal hearth ground.")
+			WorldSimulation.state.morphology_revision+=1
+			events.append({"type":"morphology","title":"A Framed Hall Rose","plot_id":int(plot.id)})
+			break
 	var work_forms:Dictionary={"Storage Pits":{"use":"storage","from":"guarded_cache","to":"lined_storage_pits"},"Public Stores":{"use":"storage","from":"lined_storage_pits","to":"public_storehouse"},"Open Work Area":{"use":"workshop","from":"open_work_yard","to":"sheltered_work_area"}}
 	for work_name in work_forms:
 		if work_name not in WorldSimulation.state.settlement_completed: continue

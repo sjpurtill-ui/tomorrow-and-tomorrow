@@ -1094,6 +1094,7 @@ func _discovery_effect_summary(entry:Dictionary)->String:
 		var product:=String(opening.PRODUCTS[opening_id])
 		return "%s produces and maintains %s from real local inputs. Its listed benefits operate in proportion to physical stock coverage (currently %.0f%%); the knowledge remains when stocks wear out." % [String(entry.get("production_contract","This practice")),product,opening.factor(opening_id)*100.0]
 	if opening_id=="public_stores":return "This knowledge permits a material Public Stores construction project after Storage Pits. Its listed benefits and common-reserve accounting operate only after that staffed communal store is completed."
+	if opening_id=="framed_construction":return "%s Current maintained local operating coverage is %.0f%%." % [String(entry.get("production_contract","This knowledge requires a physical framed structure.")),opening.factor(opening_id)*100.0]
 	if opening_id in ["wound_cleaning","clean_water"]:
 		return "%s Current local operating coverage is %.0f%%; knowledge alone provides no health benefit when the water cannot be supplied." % [String(entry.get("production_contract","This practice requires additional freshwater.")),opening.factor(opening_id)*100.0]
 	if opening_id in ["seed_selection","animal_taming","pack_animals","domesticated_mounts","mounted_scouts"]:
