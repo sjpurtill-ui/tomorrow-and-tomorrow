@@ -234,6 +234,7 @@ var food_stocks: Dictionary = {}
 var fire_practice:Dictionary=preload("res://scripts/fire_practice.gd").empty_state()
 var household_clothing:Dictionary=preload("res://scripts/household_clothing.gd").empty_state()
 var water_conveyance:Dictionary={"lines":[],"next_id":1,"last_day":-1,"report":{}}
+var water_waste_works:Dictionary=preload("res://scripts/water_waste_works_state.gd").empty()
 var civilian_care:Dictionary=preload("res://scripts/civilian_care_fabric.gd").empty_state()
 var rail_freight:Dictionary=preload("res://scripts/rail_freight_fabric.gd").empty_state()
 var food_batches:Dictionary=preload("res://scripts/food_batches.gd").empty_state()
@@ -551,6 +552,7 @@ func reset_for_new_world(new_seed:int)->void:
 	fire_practice=preload("res://scripts/fire_practice.gd").empty_state()
 	household_clothing=preload("res://scripts/household_clothing.gd").empty_state()
 	water_conveyance={"lines":[],"next_id":1,"last_day":-1,"report":{}}
+	water_waste_works=preload("res://scripts/water_waste_works_state.gd").empty()
 	civilian_care=preload("res://scripts/civilian_care_fabric.gd").empty_state()
 	rail_freight=preload("res://scripts/rail_freight_fabric.gd").empty_state()
 	food_batches=preload("res://scripts/food_batches.gd").empty_state()

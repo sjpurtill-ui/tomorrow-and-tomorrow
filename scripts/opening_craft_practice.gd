@@ -51,6 +51,8 @@ static func target(id:String)->float:
 	return maxf(.25,WorldSimulation.state.population_exact*float(TARGET_PER_PERSON[id]))
 
 static func factor(id:String)->float:
+	if id in ["latrine_siting","protected_wellheads","rainwater_cisterns","water_settling_basins"]:
+		return preload("res://scripts/water_waste_works.gd").factor(id)
 	if id in ["seed_selection","animal_taming","pack_animals","domesticated_mounts","mounted_scouts"]:
 		return preload("res://scripts/opening_opportunities.gd").practice_factor(id)
 	# These practices are services rather than durable craft stocks. Their health

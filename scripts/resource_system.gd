@@ -331,12 +331,14 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var flow_factor:=clampf(0.75+accessible_quality*0.25,0.0,1.08)
 	var collected:=minf(total_required*1.35,collection_capacity)*flow_factor if accessible_quality>0.0 else 0.0
 	var conveyed:=preload("res://scripts/water_conveyance.gd").delivery(context,int(WorldSimulation.state.elapsed_days),maxf(0.0,total_required*1.35-household_collection*flow_factor))
-	collected=minf(total_required*1.35,collected+conveyed)
+	var works:Dictionary=preload("res://scripts/water_waste_works.gd").advance(context,int(WorldSimulation.state.elapsed_days),total_required)
+	var rain_collected:=maxf(0.0,float(works.get("rain_collected",0.0)))
+	collected=minf(total_required*1.35+float(works.get("cistern_capacity",0.0)),collected+conveyed+rain_collected)
 	var portable_days:=float(WorldSimulation.state.founding_manifest.get("water_vessel_days",3.0))
 	portable_days+=maxf(0.0,WorldSimulation.consequences.policy_effect("water_storage"))
 	if "Storage Pits" in WorldSimulation.state.settlement_completed: portable_days+=2.0
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: portable_days+=1.0+WorldSimulation.discovery.effect("container_capacity")*2.0
-	var capacity:=population*portable_days
+	var capacity:=population*portable_days+maxf(0.0,float(works.get("cistern_capacity",0.0)))
 	var stored_before:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Freshwater",0.0)))
 	var available:=minf(capacity,stored_before+collected)
 	var drinking_consumed:=minf(drinking_required,available)
@@ -350,7 +352,7 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var intake:=clampf(drinking_consumed/maxf(0.01,drinking_required),0.0,1.0)
 	var wound_cleaning_coverage:=clampf(wound_cleaning_used/maxf(.000001,wound_cleaning_required),0.0,1.0) if wound_cleaning_required>.000001 else 0.0
 	var clean_water_coverage:=clampf(clean_water_used/maxf(.000001,clean_water_required),0.0,1.0) if clean_water_required>.000001 else 0.0
-	WorldSimulation.state.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"conveyed_today":conveyed,"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":drinking_required,"practice_required_today":practice_required,"total_required_today":total_required,"consumed_today":consumed,"drinking_consumed_today":drinking_consumed,"wound_cleaning_water_used":wound_cleaning_used,"clean_water_water_used":clean_water_used,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"days":stored/maxf(0.01,drinking_required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
+	WorldSimulation.state.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"conveyed_today":conveyed,"rain_collected_today":rain_collected,"cistern_capacity":float(works.get("cistern_capacity",0.0)),"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":drinking_required,"practice_required_today":practice_required,"total_required_today":total_required,"consumed_today":consumed,"drinking_consumed_today":drinking_consumed,"wound_cleaning_water_used":wound_cleaning_used,"clean_water_water_used":clean_water_used,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"days":stored/maxf(0.01,drinking_required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
 	WorldSimulation.state.water_history.append({"day":int(WorldSimulation.state.elapsed_days),"stored":stored,"collected":collected,"household_collected":minf(collected,household_collection*flow_factor),"required":drinking_required,"practice_required":practice_required,"consumed":consumed,"drinking_consumed":drinking_consumed,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_id":source_id,"source_origin":source_origin})
 	if WorldSimulation.state.water_history.size()>370: WorldSimulation.state.water_history.pop_front()
 	# ConsequenceEngine runs after resource flow, so rebuild the society totals now
