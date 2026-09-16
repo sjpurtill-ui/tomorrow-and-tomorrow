@@ -18,6 +18,7 @@ func test_blocked_favorite_field_yields_to_a_live_foundation_without_extra_budge
 	var player_before:=GameState.research_allocations.duplicate(true)
 	WorldSimulation.scoped("research_ruler",func()->void:
 		configure("drainage",3)
+		preload("res://scripts/opening_opportunities.gd").record("drainage",1000.0)
 		C.research_orders("research_ruler",plan())
 		assert_int(int(WorldSimulation.state.research_allocations.infrastructure)).is_equal(3)
 		assert_int(int(WorldSimulation.state.research_allocations.security)).is_equal(0)

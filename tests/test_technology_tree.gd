@@ -55,6 +55,7 @@ func test_rival_paths_differ_but_only_choose_viable_technologies()->void:
 	assert_int(choices.size()).is_greater(1)
 func test_explicit_target_preserves_unfinished_progress()->void:
 	GameState.elapsed_days=1000.0
+	preload("res://scripts/opening_opportunities.gd").record("tallies",1000.0)
 	GameState.discovery_progress["tallies"]=0.43
 	assert_bool(bool(DiscoverySystem.select_research_target("tallies").ok)).is_true()
 	DiscoverySystem.refresh_investigations()

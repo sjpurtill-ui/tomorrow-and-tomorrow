@@ -2,6 +2,7 @@ extends Node
 
 const Pathways=preload("res://scripts/knowledge_pathways.gd")
 const Exchange=preload("res://scripts/society_exchange.gd")
+const OpeningOpportunities=preload("res://scripts/opening_opportunities.gd")
 const ResourceKnowledgeCatalog = preload("res://scripts/resource_knowledge_catalog.gd")
 const SocietyKnowledgeCatalog = preload("res://scripts/society_knowledge_catalog.gd")
 const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catalog.gd")
@@ -203,6 +204,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		for signal_name in military_context:
 			effective_context[signal_name]=float(effective_context.get(signal_name,0.0))+float(military_context[signal_name])
 	latest_context=effective_context.duplicate(true)
+	OpeningOpportunities.advance(effective_context)
 	society_model.process_day(catalog,effective_context)
 	var results: Array[Dictionary] = []
 	var current_day := int(floor(WorldSimulation.state.elapsed_days))
@@ -487,7 +489,7 @@ func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=n
 	if known==null:known=WorldSimulation.state.known_discoveries
 	var id:=String(discovery.get("id",""))
 	if id in known or not _path_is_viable(discovery):return false
-	return Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
+	return OpeningOpportunities.ready(id) and Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 func _channel_has_candidate(channel:String,current_day:int)->bool:
 	var known:=Pathways.Requirements.index_known(WorldSimulation.state.known_discoveries)
@@ -965,7 +967,8 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 				if float(requirement.get("minimum_stock",0.0))>0:alternative+=" or %.1f in stores" % float(requirement.minimum_stock)
 				for resource:String in requirement.get("alternative_stocks",{}):alternative+=" or %.1f %s in stores" % [float(requirement.alternative_stocks[resource]),resource]
 				missing.append("%s: %s access%s" % [String(requirement.get("resource","material")),String(requirement.get("stage","recognized")),alternative])
-		if Pathways.ready(entry,int(WorldSimulation.state.elapsed_days),known_index) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
+		if not OpeningOpportunities.ready(id):missing.append(OpeningOpportunities.remaining(id))
+		if OpeningOpportunities.ready(id) and Pathways.ready(entry,int(WorldSimulation.state.elapsed_days),known_index) and _resource_requirements_met(entry.get("resource_requirements",[])):missing.clear()
 		elif missing.is_empty():missing.append("A supported approach and its evidence are needed")
 		var known:=known_index.has(id)
 		row["ready"]=not known and missing.is_empty()

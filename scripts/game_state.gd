@@ -178,6 +178,7 @@ var last_morphology_day:=-1
 var resource_deposits: Array[Dictionary] = []
 var resource_stockpiles: Dictionary = {}
 var opening_craft_practice:Dictionary=preload("res://scripts/opening_craft_practice.gd").empty_state()
+var opening_opportunities:Dictionary=preload("res://scripts/opening_opportunities.gd").empty_state()
 var resource_events: Array[Dictionary] = []
 var resource_practice: Dictionary = {}
 var resource_priorities: Dictionary = {}
@@ -419,6 +420,7 @@ func reset_for_new_world(new_seed:int)->void:
 	var foreign:=WorldSimulation.system("ForeignDiplomacy")
 	if foreign: foreign.reset_for_new_world()
 	resource_settlement_id=""
+	opening_opportunities=preload("res://scripts/opening_opportunities.gd").empty_state()
 	city_trade_shipments=[]
 	city_trade_history=[]
 	last_city_trade_day=-1
