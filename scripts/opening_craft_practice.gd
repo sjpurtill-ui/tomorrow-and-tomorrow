@@ -51,6 +51,14 @@ static func target(id:String)->float:
 	return maxf(.25,WorldSimulation.state.population_exact*float(TARGET_PER_PERSON[id]))
 
 static func factor(id:String)->float:
+	# These practices are services rather than durable craft stocks. Their health
+	# effects operate only for the share of today's local population that received
+	# the additional water their use requires. ResourceSystem records this after
+	# drinking water has been allocated first.
+	if id=="wound_cleaning":
+		return clampf(float(WorldSimulation.state.water_metrics.get("wound_cleaning_coverage",0.0)),0.0,1.0)
+	if id=="clean_water":
+		return clampf(float(WorldSimulation.state.water_metrics.get("clean_water_coverage",0.0)),0.0,1.0)
 	if id=="public_stores":
 		if "Public Stores" not in WorldSimulation.state.settlement_completed:return 0.0
 		var population:=maxf(1.0,WorldSimulation.state.population_exact)
