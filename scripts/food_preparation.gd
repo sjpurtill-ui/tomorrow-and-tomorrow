@@ -116,7 +116,8 @@ const ENTRIES=[
 static func plan(logistics:float, demand:float, traveling:bool)->Dictionary:
 	var state=WorldSimulation.state
 	var best:Dictionary={"method":"","capacity":0.0,"workers":0.0,"inputs":{},"rate":0.0}
-	if traveling or not state.settlement_site_committed or logistics<=0 or demand<=0:return best
+	preload("res://scripts/fire_practice.gd").ensure_initialized()
+	if traveling or not state.settlement_site_committed or logistics<=0 or demand<=0 or not preload("res://scripts/fire_practice.gd").available():return best
 	var food:=0.0
 	for category:String in FRESH:food+=maxf(0.0,float(state.food_stocks.get(category,0.0)))
 	for id:String in METHODS:

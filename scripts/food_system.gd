@@ -65,6 +65,8 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
 	var demand_breakdown:=_calculate_demand(traveling)
+	var wants_fire:=("hearth_roasting_control" in WorldSimulation.state.known_discoveries and float(demand_breakdown.total)>0.0) or ("smoking" in WorldSimulation.state.known_discoveries and (float(WorldSimulation.state.food_stocks.get("Fresh meat",0.0))+float(WorldSimulation.state.food_stocks.get("Fish",0.0))>0.0))
+	var fire_report:=preload("res://scripts/fire_practice.gd").advance(int(WorldSimulation.state.elapsed_days),wants_fire,traveling)
 	var nutrient_report:Dictionary={}
 	var selected_access:float=military_campaign.siege_home_food_access() if military_campaign!=null else 1.0
 	var selected:=preload("res://scripts/selected_food_processing.gd").harvest(context,workers,labor_efficiency,ecology,float(demand_breakdown.total),selected_access)
@@ -154,6 +156,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_forecast_90":forecast_90,
 		"food_diet_quality":diet_quality,
 		"food_preparation":prepared,
+		"fire_practice":fire_report,
 		"food_batches":batches,
 		"food_batch_stock":Batches.available_total(),
 		"food_batch_work":Batches.in_process(),
@@ -375,7 +378,8 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 		WorldSimulation.state.food_stocks["Dry staples"]+=plant_amount*0.88
 		result["Fresh plants"]=plant_amount
 		capacity=maxf(0.0,capacity-plant_amount)
-	if "smoking" in WorldSimulation.state.known_discoveries and capacity>0.0:
+	preload("res://scripts/fire_practice.gd").ensure_initialized()
+	if "smoking" in WorldSimulation.state.known_discoveries and preload("res://scripts/fire_practice.gd").available() and capacity>0.0:
 		for food_type in ["Fresh meat","Fish"]:
 			var amount:=minf(float(WorldSimulation.state.food_stocks.get(food_type,0.0)),capacity*0.5*clampf(WorldSimulation.discovery.adoption("smoking"),0.0,1.0))
 			# Smoking must maintain an actual wood fire; knowledge alone supplies no heat.
