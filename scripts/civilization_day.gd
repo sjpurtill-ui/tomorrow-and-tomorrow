@@ -3,7 +3,7 @@ extends RefCounted
 const BUILD=preload("res://scripts/settlement_construction.gd")
 
 static func context(origin:Vector2,traveling:bool=false)->Dictionary:
-	var result:={"origin":Vector3(origin.x,0,origin.y),"settlement_origin":Vector3(origin.x,0,origin.y),"traveling":traveling,"settled":WorldSimulation.state.settlement_site_committed,"foraging":.78 if traveling else 1.0,"food":1.0,"exploration":.8 if traveling else .5,"travel":1.0 if traveling else .1,"fiber":.5,"fire":.6,"administration":.5,"defense":.3,"tools":WorldSimulation.consequences.tools_factor(),"insight":WorldSimulation.consequences.discovery_multiplier()}
+	var result:={"origin":Vector3(origin.x,0,origin.y),"settlement_origin":Vector3(origin.x,0,origin.y),"traveling":traveling,"settled":WorldSimulation.state.settlement_site_committed,"foraging":.78 if traveling else 1.0,"food":1.0,"exploration":.8 if traveling else .5,"travel":1.0 if traveling else .1,"fiber":.5,"fire":.6 if preload("res://scripts/fire_practice.gd").available() else .08,"administration":.5,"defense":.3,"tools":WorldSimulation.consequences.tools_factor(),"insight":WorldSimulation.consequences.discovery_multiplier()}
 	var journey:=WorldSimulation.state.founding_journey
 	result.travel_days_remaining=maxf(0,float(journey.get("duration_days",0))-float(journey.get("elapsed",0))) if traveling else 0.0
 	result.travel_distance_remaining_km=origin.distance_to(journey.get("destination",origin)) if traveling else 0.0

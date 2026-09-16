@@ -189,6 +189,7 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	var nutrition:=preload("res://scripts/crop_nutrition.gd")
 	var state:Dictionary=payload.get("reflected_GameState",{})
 	var clothing=preload("res://scripts/household_clothing.gd")
+	if not preload("res://scripts/fire_practice.gd").valid(state.get("fire_practice",preload("res://scripts/fire_practice.gd").empty_state())):return {"error":"Invalid maintained fire records."}
 	if not clothing.valid(state.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid household clothing records."}
 	if not preload("res://scripts/water_conveyance_state.gd").valid_state(state):return {"error":"Invalid water conveyance records."}
 	if not preload("res://scripts/rail_freight_state.gd").valid_state(state):return {"error":"Invalid rail freight records."}

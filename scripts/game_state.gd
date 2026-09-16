@@ -229,6 +229,7 @@ var material_history: Array[Dictionary] = []
 var water_metrics: Dictionary = {"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 var water_history: Array[Dictionary] = []
 var food_stocks: Dictionary = {}
+var fire_practice:Dictionary=preload("res://scripts/fire_practice.gd").empty_state()
 var household_clothing:Dictionary=preload("res://scripts/household_clothing.gd").empty_state()
 var water_conveyance:Dictionary={"lines":[],"next_id":1,"last_day":-1,"report":{}}
 var civilian_care:Dictionary=preload("res://scripts/civilian_care_fabric.gd").empty_state()
@@ -543,6 +544,7 @@ func reset_for_new_world(new_seed:int)->void:
 	water_metrics={"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 	water_history=[]
 	food_stocks={}
+	fire_practice=preload("res://scripts/fire_practice.gd").empty_state()
 	household_clothing=preload("res://scripts/household_clothing.gd").empty_state()
 	water_conveyance={"lines":[],"next_id":1,"last_day":-1,"report":{}}
 	civilian_care=preload("res://scripts/civilian_care_fabric.gd").empty_state()

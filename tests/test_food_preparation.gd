@@ -143,10 +143,15 @@ func test_rival_uses_own_adoption_inputs_and_round_trip_state()->void:
 
 func test_food_report_displays_actual_meals_and_preservation_fuel()->void:
 	var view=preload("res://scripts/hud/content/dock_content_economy.gd").new(null,null)
-	var report:={"food_preparation":{"method":"hearth_roasting_control","rations":3.0,"inputs":{"Timber":.09},"workers_reserved":.375},"food_preservation_inputs":{"Timber":.04}}
+	var report:={"fire_practice":{"available":true,"embers":.75,"source":"friction","status":"Embers were sheltered and fed","maintenance_timber":.015},"food_preparation":{"method":"hearth_roasting_control","rations":3.0,"inputs":{"Timber":.09},"workers_reserved":.375},"food_preservation_inputs":{"Timber":.04}}
 	var found_meals:=false
 	var found_fuel:=false
+	var found_fire:=false
 	for block:Dictionary in view._food_blocks(report):
+		if block.get("heading","")=="HEARTH FIRE":
+			found_fire=true
+			assert_str(block.items[0].value).is_equal("75%")
+			assert_str(block.items[0].tip).contains("Friction")
 		if block.get("heading","")=="MEAL PREPARATION":
 			found_meals=true
 			assert_str(block.items[0].name).is_equal("Hearth Roasting Control")
@@ -155,6 +160,7 @@ func test_food_report_displays_actual_meals_and_preservation_fuel()->void:
 		if block.get("heading","")=="SMOKING FUEL":found_fuel=true
 	assert_bool(found_meals).is_true()
 	assert_bool(found_fuel).is_true()
+	assert_bool(found_fire).is_true()
 
 func test_foreign_study_keeps_common_and_alternative_foundations()->void:
 	var entry:=DiscoverySystem.discovery_definition("food_steaming_vessels")
@@ -180,4 +186,3 @@ func test_inspector_receives_operating_conditions_and_grouped_alternatives()->vo
 		assert_str(item.operating_summary).contains("Logistics")
 		assert_array(item.requires_any).is_equal([["clay_shaping","basketry"]])
 	assert_bool(found).is_true()
-

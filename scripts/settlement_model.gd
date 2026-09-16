@@ -33,6 +33,7 @@ const CITY_RESOURCE_DEFAULTS:={
 	"resource_events":[],"resource_practice":{},"resource_priorities":{},
 	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],
 	"food_stocks":{"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":0.0,"Preserved food":0.0},
+	"fire_practice":{"initialized":false,"embers":0.0,"last_day":-1,"source":"none","last_event":"No maintained fire","fuel_today":0.0,"ignitions":0,"extinctions":0},
 	"food_source_health":{"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94},
 	"food_history":[],"food_issue_history":[],"nutrition_reserve":0.90,"malnutrition_burden":0.0,
 	"founding_manifest":{},"settlement_completed":["Hearth Circle"],"settlement_projects":{},

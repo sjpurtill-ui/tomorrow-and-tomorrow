@@ -101,6 +101,11 @@ func _food_blocks(metrics:Dictionary)->Array:
 		})
 	var blocks:Array=[Charts.reserves(GameState.selected_player_settlement_id),Charts.food_flow(GameState.selected_player_settlement_id),{"type":"bars","heading":"TODAY'S FLOW","note":"rations · weather %d%%" % weather,"items":flow_items}]
 	var preparation:Dictionary=metrics.get("food_preparation",{})
+	var fire:Dictionary=metrics.get("fire_practice",{})
+	if not fire.is_empty():
+		var fire_name:="Maintained embers" if bool(fire.get("available",false)) else "Fire unavailable"
+		var source:=String(fire.get("source","none")).replace("_"," ").capitalize()
+		blocks.append({"type":"rows","heading":"HEARTH FIRE","items":[{"name":fire_name,"sub":String(fire.get("status","No maintained fire")),"value":"%d%%" % roundi(clampf(float(fire.get("embers",0.0)),0.0,1.0)*100.0),"value_color":Tokens.GREEN if bool(fire.get("available",false)) else Tokens.RED,"accent":Tokens.AMBER if bool(fire.get("available",false)) else Color(0,0,0,0),"tip":"Source: %s · %.3f Timber used today to preserve or restore the fire" % [source,float(fire.get("maintenance_timber",0.0))]}]})
 	if float(preparation.get("rations",0.0))>0.0:
 		var inputs:Array[String]=[]
 		for resource:String in preparation.get("inputs",{}):inputs.append("%.2f %s" % [float(preparation.inputs[resource]),resource])
@@ -226,7 +231,7 @@ func signature()->Array:
 
 func _local_signature()->Array:
 	var metrics:Dictionary=GameState.simulation_metrics
-	return [snappedf(float(metrics.get("food_days",0.0)),0.1),snappedf(float(metrics.get("food_net",0.0)),0.1),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.water_metrics.get("days",0.0)),0.1)]
+	return [snappedf(float(metrics.get("food_days",0.0)),0.1),snappedf(float(metrics.get("food_net",0.0)),0.1),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.water_metrics.get("days",0.0)),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05)]
 
 func _trade_block()->Dictionary:
 	var city:=SettlementModel.selected_settlement()
