@@ -1,3 +1,19 @@
+## September 19 — compact site review and distinct map clicks: INTEGRATED
+
+Worker `15b44f0` is integrated at canonical commit `4a6cebf`. The founding-site
+review now leads with icon cards for water and neighbors, a compact household
+water meter, and up to four nearby resource types that returned scouting or
+travel reports have actually exposed. Unknown deposits and reported resources
+beyond 18 km remain absent. Longer explanations are retained as tooltips.
+
+The opening map-help panel stays closed unless the player opens **Map Help**.
+During the founding journey, left-click inspects land and right-click moves the
+convoy. A selected field army continues to own right-click orders. Later-city
+placement remains an explicit targeting flow.
+
+Canonical focused validation passes 34/34 cases with zero errors, failures,
+skips, or orphans. Save data and simulation authority are unchanged.
+
 ## September 19 — discovery cards no longer pause time: INTEGRATED
 
 Worker `a6247f6` is integrated at canonical commit `6bcdcdb`. Opening a discovery
