@@ -25,12 +25,12 @@ func test_routine_findings_do_not_pause_and_are_deduplicated()->void:
 	assert_bool(digest.notice.visible).is_false()
 	assert_float(f.host.game_speed).is_equal(3.0)
 
-func test_milestones_pause_while_routine_results_remain_in_digest()->void:
+func test_milestones_open_a_card_while_simulation_continues()->void:
 	GameState.known_discoveries.append("powered_flight")
 	var f:=fixture()
 	var digest:=Notices.announce(f.host,f.hud,[{"id":"powered_flight","day":100},{"id":"drainage","day":100}])
 	assert_int(digest.unread).is_equal(1)
-	assert_float(f.host.game_speed).is_equal(0.0)
+	assert_float(f.host.game_speed).is_equal(3.0)
 	var popup:Variant=f.hud.get_meta("discovery_popup")
 	assert_str(popup.current.id).is_equal("powered_flight")
 	popup.close()
@@ -49,7 +49,7 @@ func test_all_mode_preserves_individual_announcements()->void:
 	var f:=fixture()
 	var digest:=Notices.announce(f.host,f.hud,[{"id":"drainage","day":1}])
 	assert_int(digest.unread).is_equal(0)
-	assert_float(f.host.game_speed).is_equal(0.0)
+	assert_float(f.host.game_speed).is_equal(3.0)
 	f.hud.get_meta("discovery_popup").close()
 
 func test_digest_fits_small_viewport_without_a_fullscreen_input_surface()->void:

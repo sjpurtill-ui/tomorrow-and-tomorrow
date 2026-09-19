@@ -3,14 +3,12 @@ extends CanvasLayer
 ## Existing knowledge stays in the research archive and is not replayed on load.
 const Art=preload("res://scripts/hud/research_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
-const Pause=preload("res://scripts/hud/simulation_pause.gd")
 const COSTS=["food_spoilage","labor_demand","fuel_demand","pollution","timber_pressure","ecological_pressure","disease_exposure","injury_risk","disaster_risk","health_risk","institutional_rigidity","fatigue"]
 var terrain:Node
 var hud:Node
 var pending:Array[Dictionary]=[]
 var received:Dictionary={}
 var current:Dictionary={}
-var pause=Pause.new()
 var surface:Control
 var panel:PanelContainer
 var body:VBoxContainer
@@ -60,7 +58,7 @@ func enqueue(events:Array[Dictionary])->void:
 		var id:=String(event.get("id",""))
 		if id=="" or id not in GameState.known_discoveries or received.has(id):continue
 		received[id]=true;pending.append(DiscoverySystem.player_facing_discovery_event(event))
-	if current.is_empty() and not pending.is_empty():pause.acquire(terrain);advance()
+	if current.is_empty() and not pending.is_empty():advance()
 	elif not current.is_empty():_queue_labels()
 	elif pending.is_empty():close()
 func _queue_labels()->void:
@@ -107,8 +105,7 @@ static func percent(value:float)->String:
 	return ("+" if value>0 else "−" if value<0 else "")+text+"%"
 func close()->void:
 	if closing:return
-	closing=true;pause.release();queue_free()
-func _exit_tree()->void:pause.release()
+	closing=true;queue_free()
 func _input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
 		close();get_viewport().set_input_as_handled()
