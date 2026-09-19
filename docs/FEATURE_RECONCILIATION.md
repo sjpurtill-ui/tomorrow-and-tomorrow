@@ -1537,3 +1537,16 @@ Ground Survey, and Settlement Site review use the selected palette; the terrain
 and simulation remain unchanged. Canonical integration preserves existing saves.
 Focused worker validation passed 27/27 cases covering preference persistence,
 Command Rail stability, survey cards, and founding guidance.
+
+## September 19 — automatic government officials
+
+Integrated worker `b009974` as canonical `e706760`. Government is now a
+first-class command-rail destination with a recognizable civic-building icon;
+all rail destinations use distinct theme-aware drawn pictograms. Every unlocked
+central or local office fills automatically from durable named people with
+stable randomized traits and skills. Normal player screens no longer ask the
+player to select candidates. Dismiss and Execute immediately trigger succession;
+execution removes one person from the aggregate population and carries the
+larger legitimacy and cohesion cost. Expanded name banks improve variety while
+preserving all names already stored in saves. Focused validation passed 34/34
+government simulation cases and 2/2 Government HUD cases. No save migration.
