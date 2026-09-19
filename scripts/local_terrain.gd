@@ -11616,7 +11616,7 @@ func _build_interface() -> void:
 	travel_council_notice.add_theme_font_size_override("font_size",12)
 	travel_council_notice.add_theme_color_override("font_color",Color("#eadfc8"))
 	travel_council_notice.tooltip_text="Open the full council record."
-	travel_council_notice.pressed.connect(func()->void: _on_hud_section_requested("civ",2))
+	travel_council_notice.pressed.connect(func()->void: _on_hud_section_requested("civ",1))
 	travel_council_notice.visible=false
 	layer.add_child(travel_council_notice)
 	foreign_alert_panel=PanelContainer.new()
@@ -11875,6 +11875,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.register_provider("settlement",preload("res://scripts/hud/content/dock_content_settlement.gd").new(self,hud))
 	hud.register_provider("health",preload("res://scripts/hud/content/dock_detail_health.gd").new(self,hud))
 	hud.register_provider("economy",preload("res://scripts/hud/content/dock_content_economy.gd").new(self,hud))
+	hud.register_provider("government",preload("res://scripts/hud/content/dock_content_government.gd").new(self,hud))
 	hud.register_provider("civ",preload("res://scripts/hud/content/dock_content_civilization.gd").new(self,hud))
 	hud.register_provider("inquiry",preload("res://scripts/hud/content/dock_content_inquiry.gd").new(self,hud))
 	hud.register_provider("world",preload("res://scripts/hud/content/dock_content_world.gd").new(self,hud))

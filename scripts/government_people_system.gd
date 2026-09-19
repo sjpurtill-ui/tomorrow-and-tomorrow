@@ -11,12 +11,17 @@ const MAX_PERSON_MEMORIES:=20
 const MONTH_DAYS:=30
 
 const GIVEN_NAMES:=[
-	"Alda","Ansel","Arin","Bera","Cassian","Dara","Edda","Elian","Enna","Farid","Galen","Hana",
-	"Ilya","Iona","Joren","Kaia","Leif","Mara","Niko","Oren","Rhea","Sana","Tarin","Vera",
+	"Alda","Amara","Ansel","Arin","Aster","Bako","Bera","Cassian","Chika","Dara","Dimitra","Edda",
+	"Elian","Enna","Eshe","Farid","Galen","Hana","Hyeon","Idris","Ilya","Iona","Iskra","Joren",
+	"Kaia","Kamau","Kavi","Laleh","Leif","Liora","Mara","Meilin","Nadiya","Niko","Nkiru","Oren",
+	"Priya","Qamar","Rafiq","Rhea","Rufaro","Sana","Sefu","Soraya","Tala","Tarin","Temur","Vera",
+	"Xia","Yara","Yejun","Zahra","Zhen","Zuri",
 ]
 const FAMILY_NAMES:=[
-	"Alder","Ashfield","Briar","Cairn","Dawn","Ember","Farrow","Flint","Grove","Hearth","Ivers",
-	"Kestrel","Lark","Morrow","North","Oak","Reed","Stone","Thorne","Vale","Ward","Wells","Yarrow","Wren",
+	"Adebayo","Alder","Almasi","Anvari","Ashfield","Batsaikhan","Briar","Cairn","Chandra","Dawn","Dlamini",
+	"Ember","Farrow","Flint","Grove","Haddad","Hearth","Ivers","Jafari","Kestrel","Khan","Kim","Kovač",
+	"Lark","Mensah","Morrow","Ndlovu","North","Oak","Okafor","Petrescu","Qureshi","Reed","Sato","Silva",
+	"Stone","Tadesse","Thorne","Tran","Vale","Ward","Wells","Yarrow","Yi","Zoric","Wren",
 ]
 const TRAITS:=[
 	"Patient","Forceful","Curious","Methodical","Warm","Skeptical","Bold","Cautious","Frugal","Generous",
@@ -674,14 +679,16 @@ func mark_central_appointment(person_id:int,office_key:String)->Dictionary:
 	var index:=_find_person_index(person_id)
 	if index<0 or String(people[index].get("status",""))!="active": return {}
 	# A person cannot execute two central portfolios at once. Reassignment is
-	# allowed, but the former office becomes visibly vacant immediately.
+	# retained for save compatibility and development tools; normal play assigns
+	# successors automatically.
+	var former_office:=String(people[index].get("office_key",""))
+	if former_office!="" and former_office!=office_key:
+		WorldSimulation.state.leadership_positions.erase(former_office)
 	for other_index in people.size():
 		if String(people[other_index].get("office_key",""))==office_key:
 			people[other_index]["office_key"]=""
 			people[other_index]["office_title"]=""
-		if int(people[other_index].get("person_id",0))==person_id:
-			var former_office:=String(people[other_index].get("office_key",""))
-			if former_office!="" and former_office!=office_key: WorldSimulation.state.leadership_positions.erase(former_office)
+		if int(people[other_index].get("person_id",0))==person_id and other_index!=index:
 			people[other_index]["office_key"]=""
 			people[other_index]["office_title"]=""
 	people[index]["office_key"]=office_key
@@ -716,15 +723,76 @@ func _synchronize_office_holders(events:Array[Dictionary]=[],record_events:bool=
 			continue
 		person["office_title"]=String(office_definition(key).title)
 		WorldSimulation.state.leadership_positions[key]=person
-	# The first government is one recognizable person. Later specialist offices
-	# emerge vacant and remain a player choice.
-	if "Steward" not in WorldSimulation.state.leadership_positions:
-		var candidates:=candidates_for_office("Steward","",1)
-		if not candidates.is_empty():
-			var person:=mark_central_appointment(int(candidates[0].person_id),"Steward")
-			WorldSimulation.state.leadership_positions["Steward"]=person
-			if government_stage==0 and WorldSimulation.state.player_settlements.size()==1 and record_events:
-				events.append({"day":int(WorldSimulation.state.elapsed_days),"title":"Local Succession","description":"%s now carries the founding council and local leadership of %s." % [String(person.get("name","A successor")),String(WorldSimulation.state.player_settlements[0].get("name","the settlement"))],"domain":"institutions","severity":"notice"})
+	# Every available office remains staffed. The sovereign judges results and may
+	# remove an officeholder, but does not sort candidate slates. Selection uses a
+	# stable seed-dependent order, so a save reload never rerolls its government.
+	for key in active_keys:
+		if key in WorldSimulation.state.leadership_positions: continue
+		var successor:=_automatic_successor(key)
+		if successor.is_empty(): continue
+		var person:=mark_central_appointment(int(successor.person_id),key)
+		if person.is_empty(): continue
+		if record_events:
+			var event_title:="Local Succession" if key=="Steward" and government_stage==0 else "%s Appointed" % String(office_definition(key).title)
+			var description:="%s now carries the founding council and local leadership of %s." % [String(person.get("name","A successor")),String(WorldSimulation.state.player_settlements[0].get("name","the settlement"))] if key=="Steward" and government_stage==0 and WorldSimulation.state.player_settlements.size()==1 else "%s was selected to serve as %s." % [String(person.get("name","A successor")),String(office_definition(key).title)]
+			events.append({"day":int(WorldSimulation.state.elapsed_days),"title":event_title,"description":description,"domain":"institutions","severity":"notice"})
+
+
+func _automatic_successor(office_key:String,excluded_person_id:int=0)->Dictionary:
+	var candidates:=candidates_for_office(office_key,"",MAX_GOVERNMENT_PEOPLE,false)
+	# Prefer someone without another central portfolio. Local and central duty may
+	# overlap in a small polity, as the founding Steward already demonstrates.
+	for candidate in candidates:
+		if int(candidate.get("person_id",0))==excluded_person_id: continue
+		if String(candidate.get("office_key",""))=="": return candidate
+	for candidate in candidates:
+		if int(candidate.get("person_id",0))!=excluded_person_id: return candidate
+	return {}
+
+
+func remove_central_officeholder(office_key:String,action:String="dismiss")->Dictionary:
+	initialize()
+	var normalized:="execute" if action.to_lower() in ["kill","execute"] else "dismiss"
+	var previous:=officeholder(office_key)
+	if previous.is_empty(): return {"ok":false,"reason":"That office has no holder to remove."}
+	var previous_id:=int(previous.get("person_id",0))
+	var index:=_find_person_index(previous_id)
+	if index<0: return {"ok":false,"reason":"That officeholder is no longer available."}
+	people[index]["office_key"]=""
+	people[index]["office_title"]=""
+	people[index]["removed_day"]=int(WorldSimulation.state.elapsed_days)
+	people[index]["removal_reason"]="executed" if normalized=="execute" else "dismissed"
+	WorldSimulation.state.leadership_positions.erase(office_key)
+	# If this person also leads a settlement, that local office passes through the
+	# same automatic succession machinery.
+	var local_id:=String(people[index].get("local_leader_of",""))
+	if normalized=="execute":
+		people[index]["status"]="deceased"
+		people[index]["died_day"]=int(WorldSimulation.state.elapsed_days)
+		people[index]["local_leader_of"]=""
+		WorldSimulation.state.register_directive_population_deaths(1,"officeholder_execution","%s was executed by sovereign order." % String(previous.get("name","An officeholder")),{"exact_count":1,"label":"named officeholder"})
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))-0.08,0.01,0.99)
+		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.05,0.01,0.99)
+	elif local_id!="":
+		people[index]["local_leader_of"]=""
+	if local_id!="":
+		for settlement_index in WorldSimulation.state.player_settlements.size():
+			if String(WorldSimulation.state.player_settlements[settlement_index].get("id",""))==local_id:
+				WorldSimulation.state.player_settlements[settlement_index]["leader_person_id"]=0
+				break
+	_ensure_pool()
+	var successor:=_automatic_successor(office_key,previous_id)
+	var appointed:Dictionary={}
+	if not successor.is_empty(): appointed=mark_central_appointment(int(successor.person_id),office_key)
+	_ensure_local_leaders()
+	var verb:="executed" if normalized=="execute" else "dismissed"
+	var successor_text:=" %s took office automatically." % String(appointed.get("name","A successor")) if not appointed.is_empty() else " The office remains vacant."
+	var event:Dictionary={"day":int(WorldSimulation.state.elapsed_days),"title":"Officeholder Executed" if normalized=="execute" else "Officeholder Dismissed","description":"%s was %s as %s.%s" % [String(previous.get("name","The officeholder")),verb,String(previous.get("office_title",office_key)),successor_text],"domain":"institutions","severity":"major" if normalized=="execute" else "notice"}
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
+	revision+=1
+	_sync_advisor_roster()
+	return {"ok":true,"action":normalized,"former":previous,"successor":appointed,"event":event,"message":event.description}
 
 
 func officeholder(office_key:String)->Dictionary:
@@ -763,7 +831,7 @@ func assign_settlement_leader(settlement_id:String,person_id:int)->Dictionary:
 
 func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dictionary:
 	initialize()
-	action="arrest" if action.to_lower()=="arrest" else "dismiss"
+	action="execute" if action.to_lower() in ["kill","execute"] else ("arrest" if action.to_lower()=="arrest" else "dismiss")
 	var settlement_index:=-1
 	for index in WorldSimulation.state.player_settlements.size():
 		if String(WorldSimulation.state.player_settlements[index].get("id",""))==settlement_id: settlement_index=index; break
@@ -772,14 +840,19 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 	var previous:=person_snapshot(previous_id)
 	if previous.is_empty(): return {"ok":false,"reason":"That settlement has no leader to remove."}
 	var arrest:=action=="arrest"
+	var execute:=action=="execute"
 	var combined_founding_office:=government_stage==0 and WorldSimulation.state.player_settlements.size()==1
 	var previous_index:=_find_person_index(previous_id)
 	if previous_index>=0:
 		people[previous_index]["local_leader_of"]=""
 		people[previous_index]["removed_day"]=int(WorldSimulation.state.elapsed_days)
-		people[previous_index]["removal_reason"]="arrested" if arrest else "dismissed"
+		people[previous_index]["removal_reason"]="executed" if execute else ("arrested" if arrest else "dismissed")
 		if arrest: people[previous_index]["status"]="detained"
-	if combined_founding_office or arrest:
+		if execute:
+			people[previous_index]["status"]="deceased"
+			people[previous_index]["died_day"]=int(WorldSimulation.state.elapsed_days)
+			WorldSimulation.state.register_directive_population_deaths(1,"local_leader_execution","%s was executed by sovereign order." % String(previous.get("name","A local leader")),{"exact_count":1,"label":"named local leader"})
+	if combined_founding_office or arrest or execute:
 		for office_key_variant in WorldSimulation.state.leadership_positions.keys().duplicate():
 			var office_key:=String(office_key_variant)
 			if int((WorldSimulation.state.leadership_positions[office_key] as Dictionary).get("person_id",0))!=previous_id: continue
@@ -789,7 +862,10 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 			people[previous_index]["office_title"]=""
 	WorldSimulation.state.player_settlements[settlement_index]["leader_person_id"]=0
 	WorldSimulation.state.player_settlements[settlement_index]["leader_title"]=settlement_leader_title()
-	if arrest:
+	if execute:
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))-0.08,0.01,0.99)
+		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.05,0.01,0.99)
+	elif arrest:
 		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))-0.04,0.01,0.99)
 		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.025,0.01,0.99)
 	else:
@@ -814,22 +890,22 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 	var successor_record:Dictionary=appointment.get("leader",{})
 	var succession_text:=" %s now succeeds them." % String(successor_record.get("name","A successor")) if bool(appointment.get("ok",false)) else " The office is vacant."
 	var event:={
-		"day":int(WorldSimulation.state.elapsed_days),"title":"Leader Arrested" if arrest else "Leader Dismissed",
-		"description":"%s was %s as %s of %s.%s" % [String(previous.get("name","The former leader")),"arrested and detained" if arrest else "dismissed",settlement_leader_title(),String(WorldSimulation.state.player_settlements[settlement_index].get("name","the settlement")),succession_text],
-		"domain":"institutions","severity":"major" if arrest else "notice",
+		"day":int(WorldSimulation.state.elapsed_days),"title":"Leader Executed" if execute else ("Leader Arrested" if arrest else "Leader Dismissed"),
+		"description":"%s was %s as %s of %s.%s" % [String(previous.get("name","The former leader")),"executed" if execute else ("arrested and detained" if arrest else "dismissed"),settlement_leader_title(),String(WorldSimulation.state.player_settlements[settlement_index].get("name","the settlement")),succession_text],
+		"domain":"institutions","severity":"major" if arrest or execute else "notice",
 	}
 	WorldSimulation.state.simulation_events.push_front(event)
 	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 	WorldSimulation.state.settlement_network_revision+=1
 	revision+=1
 	_sync_advisor_roster()
-	var legitimacy_cost:=0.04 if arrest else 0.008
-	var cohesion_cost:=0.025 if arrest else 0.002
+	var legitimacy_cost:=0.08 if execute else (0.04 if arrest else 0.008)
+	var cohesion_cost:=0.05 if execute else (0.025 if arrest else 0.002)
 	var successor_name:=String(successor_record.get("name","No successor"))
 	var message:="%s was %s. %s%s" % [
-		String(previous.get("name","The former leader")),"arrested and detained" if arrest else "dismissed",
+		String(previous.get("name","The former leader")),"executed" if execute else ("arrested and detained" if arrest else "dismissed"),
 		"%s took office. " % successor_name if bool(appointment.get("ok",false)) else "The office remains vacant. ",
-		"This coercive removal seriously damaged legitimacy and cohesion." if arrest else "The abrupt replacement carried a small legitimacy and cohesion cost.",
+		"The execution seriously damaged legitimacy and cohesion." if execute else ("This coercive removal seriously damaged legitimacy and cohesion." if arrest else "The abrupt replacement carried a small legitimacy and cohesion cost."),
 	]
 	return {"ok":true,"action":action,"former":previous,"successor":successor_record,"event":event,"legitimacy_cost":legitimacy_cost,"cohesion_cost":cohesion_cost,"message":message}
 
