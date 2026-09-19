@@ -13805,9 +13805,9 @@ func _create_warfare_front_marker(front_id:String)->Node3D:
 func _build_lens(layer: CanvasLayer) -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
 	lens_panel = PanelContainer.new()
-	lens_panel.position = Vector2(viewport_size.x - 440.0, 104.0)
+	lens_panel.position = Vector2(viewport_size.x - 380.0, 104.0)
 	lens_panel.set_meta("responsive_scroll_layout",true)
-	lens_panel.size = Vector2(minf(420,viewport_size.x-40),minf(500,viewport_size.y-190))
+	lens_panel.size = Vector2(minf(360,viewport_size.x-40),minf(440,viewport_size.y-190))
 	lens_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	var panel_style := StyleBoxFlat.new()
 	panel_style.bg_color = Color("#101719ee")
@@ -13817,35 +13817,33 @@ func _build_lens(layer: CanvasLayer) -> void:
 	panel_style.corner_radius_top_right = 2
 	panel_style.corner_radius_bottom_left = 2
 	panel_style.corner_radius_bottom_right = 2
-	panel_style.set_content_margin_all(12)
+	panel_style.set_content_margin_all(8)
 	lens_panel.add_theme_stylebox_override("panel", panel_style)
 	layer.add_child(lens_panel)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 8)
+	column.add_theme_constant_override("separation", 4)
 	lens_panel.add_child(column)
 	var lens_header:=HBoxContainer.new()
 	column.add_child(lens_header)
 	var title := Label.new()
 	title.text = "GROUND SURVEY"
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", 17)
+	title.add_theme_font_size_override("font_size", 14)
 	title.add_theme_color_override("font_color", Color("#dfd0aa"))
 	lens_header.add_child(title)
 	var close_lens:=Button.new()
 	close_lens.text="×"
 	close_lens.tooltip_text="Close the map lens"
-	close_lens.custom_minimum_size=Vector2(32,28)
+	close_lens.custom_minimum_size=Vector2(26,24)
 	close_lens.flat=true
 	close_lens.pressed.connect(_close_lens)
 	lens_header.add_child(close_lens)
 	lens_location_label = Label.new()
-	lens_location_label.add_theme_font_size_override("font_size", 12)
+	lens_location_label.add_theme_font_size_override("font_size", 10)
 	lens_location_label.add_theme_color_override("font_color", Color("#938c7a"))
-	lens_location_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	lens_location_label.autowrap_mode=TextServer.AUTOWRAP_OFF
+	lens_location_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	column.add_child(lens_location_label)
-	var rule := HSeparator.new()
-	rule.add_theme_color_override("separator", Color("#75694f"))
-	column.add_child(rule)
 	var found_title := Label.new()
 	found_title.text = ""
 	found_title.visible=false
@@ -13857,7 +13855,7 @@ func _build_lens(layer: CanvasLayer) -> void:
 	lens_body.bbcode_enabled = true
 	lens_body.fit_content = false
 	lens_body.scroll_active = true
-	lens_body.custom_minimum_size = Vector2(0, 220)
+	lens_body.custom_minimum_size = Vector2(0, 160)
 	lens_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lens_body.add_theme_font_size_override("normal_font_size", 14)
 	lens_body.add_theme_color_override("default_color", Color("#c7c2b4"))
