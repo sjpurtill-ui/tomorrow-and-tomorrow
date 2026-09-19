@@ -13,15 +13,15 @@ func fixture(width:int=1200,height:int=900)->Dictionary:
 	var host:=Host.new();canvas.add_child(host)
 	var hud:=Control.new();host.add_child(hud)
 	return {"canvas":canvas,"host":host,"hud":hud}
-func test_new_discoveries_queue_once_and_pause_until_last_dismissal()->void:
+func test_new_discoveries_queue_once_without_pausing_simulation()->void:
 	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12},{"id":"drainage","day":12}])
-	assert_float(f.host.game_speed).is_equal(0.0)
+	assert_float(f.host.game_speed).is_equal(3.0)
 	assert_str(popup.current.id).is_equal("food_drying")
 	assert_int(popup.pending.size()).is_equal(1)
 	DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12},{"id":"cordage","day":12}])
 	assert_int(popup.pending.size()).is_equal(2)
 	popup.advance();assert_str(popup.current.id).is_equal("drainage")
-	assert_float(f.host.game_speed).is_equal(0.0)
+	assert_float(f.host.game_speed).is_equal(3.0)
 	popup.close();assert_float(f.host.game_speed).is_equal(3.0)
 	assert_bool(Pause.blocks(f.host)).is_false()
 func test_popup_uses_actual_signed_effects_and_labels_tradeoffs()->void:
@@ -58,9 +58,10 @@ func test_wide_window_uses_a_narrow_art_led_announcement_panel()->void:
 	assert_float(popup.panel.size.x).is_equal(600.0)
 	assert_float(popup.panel.size.y).is_greater(popup.panel.size.x)
 	popup.close()
-func test_nested_modal_pause_is_not_released_by_discovery_dismissal()->void:
+func test_existing_modal_pause_remains_while_discovery_is_read_and_after_dismissal()->void:
 	var f:=fixture();var existing=Pause.new();existing.acquire(f.host)
-	var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}]);popup.close()
+	var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
+	assert_float(f.host.game_speed).is_equal(0.0);popup.close()
 	assert_float(f.host.game_speed).is_equal(0.0);existing.release();assert_float(f.host.game_speed).is_equal(3.0)
 func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	var f:=fixture();GameState.known_discoveries.append("stone_sorting")
