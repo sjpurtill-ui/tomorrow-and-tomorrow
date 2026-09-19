@@ -2,6 +2,14 @@ extends GdUnitTestSuite
 
 const RENDERER:=preload("res://scripts/local_terrain.gd")
 
+class ClickMap extends "res://scripts/local_terrain.gd":
+	var inspected:=0
+	var convoy_moves:=0
+	var army_orders:=0
+	func _inspect_land_from_screen(_position:Vector2)->void:inspected+=1
+	func _move_settlers_to_screen(_position:Vector2)->void:convoy_moves+=1
+	func _order_selected_army_to_screen(_position:Vector2)->void:army_orders+=1
+
 var renderer:Node3D
 
 
@@ -38,9 +46,11 @@ func test_grab_drag_makes_ground_follow_the_pointer()->void:
 
 
 func test_first_use_help_names_one_contextual_next_action_without_a_control_glossary()->void:
+	assert_bool(renderer.map_help_dismissed).is_true()
 	var founding:Dictionary=renderer._map_help_presentation(false,false,false)
 	assert_str(String(founding.title)).is_equal("FIND A HOME")
-	assert_str(String(founding.body)).contains("Click land")
+	assert_str(String(founding.body)).contains("Left-click land to inspect")
+	assert_str(String(founding.body)).contains("Right-click land to move")
 	assert_str(String(founding.body)).contains("card")
 	assert_str(String(founding.body)).contains("review water")
 	assert_str(String(founding.body)).not_contains("WASD")
@@ -54,6 +64,21 @@ func test_first_use_help_names_one_contextual_next_action_without_a_control_glos
 	assert_str(String(settled.body)).contains("Click a city")
 	assert_str(String(settled.body)).contains("double-click")
 	assert_str(String(settled.body)).contains("Click the map to close")
+
+
+func test_left_click_inspects_and_right_click_moves_the_founding_convoy()->void:
+	var map:ClickMap=auto_free(ClickMap.new())
+	GameState.settlement_site_committed=false
+	assert_bool(map._handle_map_ground_button(MOUSE_BUTTON_LEFT,Vector2(30,40))).is_true()
+	assert_int(map.inspected).is_equal(1)
+	assert_int(map.convoy_moves).is_equal(0)
+	assert_bool(map._handle_map_ground_button(MOUSE_BUTTON_RIGHT,Vector2(30,40))).is_true()
+	assert_int(map.inspected).is_equal(1)
+	assert_int(map.convoy_moves).is_equal(1)
+	map.selected_army_id=7
+	map._handle_map_ground_button(MOUSE_BUTTON_RIGHT,Vector2(30,40))
+	assert_int(map.army_orders).is_equal(1)
+	assert_int(map.convoy_moves).is_equal(1)
 
 
 func test_action_presentations_put_blockers_and_next_steps_on_the_action()->void:
@@ -85,7 +110,7 @@ func test_blocked_scout_duration_is_visible_without_relying_on_a_tooltip()->void
 		"risk":{"label":"LOW"},"can_dispatch":false,
 		"blocker":"Requires 132.0 Food; only 30.0 is stored."
 	})
-	assert_str(text).contains("SEND FOR 30 DAYS")
+	assert_str(text).contains("30-DAY EXPEDITION")
 	assert_str(text).contains("BLOCKED")
 	assert_str(text).contains("Requires 132.0 Food")
 

@@ -37,11 +37,11 @@ func _ready()->void:
 	var opening_resource_clusters:Array[Dictionary]=terrain._bounded_resource_overlay_selection(visible_surface_resources,Vector2(terrain.camera_target.x,terrain.camera_target.z),terrain.camera.size,func(position:Vector3)->bool: return terrain._world_position_is_revealed(position))
 	_expect(not opening_resource_clusters.is_empty(),"resource mode showed no recognized resource on the opening regional map")
 	if terrain.map_help_panel:
-		_expect(terrain.map_help_panel.visible,"first-use map help was not visible on a normal new game")
+		_expect(not terrain.map_help_panel.visible,"map help opened automatically over a normal new game")
 		_expect(terrain.map_help_panel.position.x>=0.0 and terrain.map_help_panel.position.y>=46.0,"map help began outside the usable viewport")
 		_expect(terrain.map_help_panel.position.x+terrain.map_help_panel.size.x<=viewport_size.x,"map help overflowed the right viewport edge")
 		_expect(terrain.map_help_panel.position.y+terrain.map_help_panel.size.y<=viewport_size.y,"map help overflowed the bottom viewport edge")
-	_expect(terrain.map_help_body and "Click land" in terrain.map_help_body.text and "FOUND SETTLEMENT" in terrain.map_help_body.text,"first-use help did not explain the immediate founding action")
+	_expect(terrain.map_help_body and "Left-click" in terrain.map_help_body.text and "Right-click" in terrain.map_help_body.text,"on-demand map help did not explain inspect versus convoy movement")
 	_expect(terrain.map_help_body and "WASD" not in terrain.map_help_body.text and "Middle-drag" not in terrain.map_help_body.text,"first-use help dumped camera controls into the primary instruction")
 	var settle_button:=terrain.hud.find_child("ToolbarSettle",true,false) as Button
 	_expect(settle_button and "FOUND SETTLEMENT" in settle_button.text and not settle_button.disabled,"founding action was not explicit on the map toolbar")
@@ -58,10 +58,11 @@ func _ready()->void:
 	if terrain.map_selection_marker:
 		_expect(is_equal_approx(terrain.map_selection_marker.scale.x,terrain.map_selection_marker.scale.y) and is_equal_approx(terrain.map_selection_marker.scale.y,terrain.map_selection_marker.scale.z),"temporary ground locator was stretched into a vertical capsule")
 	_expect(terrain.travel_status_label and ("SELECTED" in terrain.travel_status_label.text or "GROUND" in terrain.travel_status_label.text),"land inspection produced no readable result or next step")
-	terrain._dismiss_map_help()
-	_expect(not terrain.map_help_panel.visible,"first-use helper could not be dismissed")
 	terrain._toggle_map_help()
 	_expect(terrain.map_help_panel.visible,"MAP HELP could not reopen the dismissed guide")
+	terrain._dismiss_map_help()
+	_expect(not terrain.map_help_panel.visible,"on-demand map help could not be dismissed")
+	terrain._toggle_map_help()
 	# Routine unit sightings stay on the map/World indicator and never interrupt.
 	# First contact remains historically important: if a report owns the interaction
 	# layer, it waits below it and appears only after the player returns to the map.
