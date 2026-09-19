@@ -16,6 +16,7 @@ const FoodSystemScript := preload("res://scripts/food_system.gd")
 const SettlementModelScript:=preload("res://scripts/settlement_model.gd")
 const FoundingSiteAdvice:=preload("res://scripts/founding_site_advice.gd")
 const FoundingSiteGuide:=preload("res://scripts/hud/founding_site_guide.gd")
+const HudT:=preload("res://scripts/hud/hud_tokens.gd")
 var founding_site_advisor:RefCounted
 var founding_site_guide:Control
 const SocietalValuesModel:=preload("res://scripts/societal_values_model.gd")
@@ -13809,16 +13810,8 @@ func _build_lens(layer: CanvasLayer) -> void:
 	lens_panel.set_meta("responsive_scroll_layout",true)
 	lens_panel.size = Vector2(minf(360,viewport_size.x-40),minf(440,viewport_size.y-190))
 	lens_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color("#101719ee")
-	panel_style.border_color = Color("#75694f")
-	panel_style.set_border_width_all(1)
-	panel_style.corner_radius_top_left = 2
-	panel_style.corner_radius_top_right = 2
-	panel_style.corner_radius_bottom_left = 2
-	panel_style.corner_radius_bottom_right = 2
-	panel_style.set_content_margin_all(8)
-	lens_panel.add_theme_stylebox_override("panel", panel_style)
+	lens_panel.theme=HudT.control_theme()
+	lens_panel.add_theme_stylebox_override("panel",HudT.flat(HudT.PANEL_BG_SOLID,HudT.BORDER,1,2,8))
 	layer.add_child(lens_panel)
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 4)
@@ -13829,7 +13822,7 @@ func _build_lens(layer: CanvasLayer) -> void:
 	title.text = "GROUND SURVEY"
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	title.add_theme_font_size_override("font_size", 14)
-	title.add_theme_color_override("font_color", Color("#dfd0aa"))
+	title.add_theme_color_override("font_color",HudT.GOLD)
 	lens_header.add_child(title)
 	var close_lens:=Button.new()
 	close_lens.text="×"
@@ -13840,7 +13833,7 @@ func _build_lens(layer: CanvasLayer) -> void:
 	lens_header.add_child(close_lens)
 	lens_location_label = Label.new()
 	lens_location_label.add_theme_font_size_override("font_size", 10)
-	lens_location_label.add_theme_color_override("font_color", Color("#938c7a"))
+	lens_location_label.add_theme_color_override("font_color",HudT.MUTED)
 	lens_location_label.autowrap_mode=TextServer.AUTOWRAP_OFF
 	lens_location_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	column.add_child(lens_location_label)
@@ -13848,7 +13841,7 @@ func _build_lens(layer: CanvasLayer) -> void:
 	found_title.text = ""
 	found_title.visible=false
 	found_title.add_theme_font_size_override("font_size", 13)
-	found_title.add_theme_color_override("font_color", Color("#c5b992"))
+	found_title.add_theme_color_override("font_color",HudT.GOLD)
 	column.add_child(found_title)
 	lens_body = RichTextLabel.new()
 	lens_body.scroll_active=false
@@ -13858,7 +13851,7 @@ func _build_lens(layer: CanvasLayer) -> void:
 	lens_body.custom_minimum_size = Vector2(0, 160)
 	lens_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	lens_body.add_theme_font_size_override("normal_font_size", 14)
-	lens_body.add_theme_color_override("default_color", Color("#c7c2b4"))
+	lens_body.add_theme_color_override("default_color",HudT.BODY)
 	column.add_child(lens_body)
 	lens_survey=preload("res://scripts/hud/resource_survey_card.gd").new()
 	lens_survey.host_panel=lens_panel
@@ -18814,7 +18807,7 @@ func _open_systems_hub()->void:
 	interface_layer.add_child(systems_hub_panel)
 	var dimmer:=ColorRect.new()
 	dimmer.size=systems_hub_panel.size
-	dimmer.color=Color(0.006,0.009,0.011,0.88)
+	dimmer.color=Color(0.84,0.81,0.74,0.72) if HudT.is_light() else Color(0.006,0.009,0.011,0.88)
 	systems_hub_panel.add_child(dimmer)
 	var modal:=PanelContainer.new()
 	modal.name="CivilizationDashboard"
@@ -19873,6 +19866,7 @@ func _open_world_menu()->void:
 	world_menu_panel.set_meta("responsive_scroll_layout",true)
 	world_menu_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	world_menu_panel.mouse_filter=Control.MOUSE_FILTER_STOP
+	world_menu_panel.theme=HudT.control_theme()
 	interface_layer.add_child(world_menu_panel)
 	var dimmer:=ColorRect.new()
 	dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -19881,7 +19875,7 @@ func _open_world_menu()->void:
 	var modal:=PanelContainer.new()
 	modal.name="PauseMenuBody"
 	modal.size=Vector2(680,minf(820,get_viewport().get_visible_rect().size.y-32))
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1215"),Color("#817353"),1,4,22))
+	modal.add_theme_stylebox_override("panel",HudT.flat(HudT.PANEL_BG_SOLID,HudT.BORDER,1,4,22))
 	world_menu_panel.add_child(modal)
 	var scroll:=ScrollContainer.new()
 	scroll.name="PauseMenuScroll"
@@ -19894,32 +19888,32 @@ func _open_world_menu()->void:
 	var eyebrow:=Label.new()
 	eyebrow.text="GAME MENU · "+String(ProjectSettings.get_setting("application/config/version","development"))
 	eyebrow.add_theme_font_size_override("font_size",14)
-	eyebrow.add_theme_color_override("font_color",Color("#b9a56c"))
+	eyebrow.add_theme_color_override("font_color",HudT.GOLD)
 	content.add_child(eyebrow)
 	var title:=Label.new()
 	title.text="PAUSED"
 	title.add_theme_font_size_override("font_size",26)
-	title.add_theme_color_override("font_color",Color("#f0e5cf"))
+	title.add_theme_color_override("font_color",HudT.INK)
 	content.add_child(title)
 	var explanation:=Label.new()
 	explanation.text="%s • Year %d, Day %d • Population %d" % [_settlement_display_name(),int(GameState.elapsed_days/365.0)+1,int(GameState.elapsed_days)%365+1,GameState.population_total]
 	explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	explanation.add_theme_font_size_override("font_size",15)
-	explanation.add_theme_color_override("font_color",Color("#a6ada8"))
+	explanation.add_theme_color_override("font_color",HudT.TEXT_SOFT)
 	content.add_child(explanation)
 	if display_preferences:display_preferences.add_navigation_controls(content)
 	content.add_child(HSeparator.new())
 	var save_title:=Label.new()
 	save_title.text="SAVE, LOAD & CIVICS AI"
 	save_title.add_theme_font_size_override("font_size",14)
-	save_title.add_theme_color_override("font_color",Color("#c8b77e"))
+	save_title.add_theme_color_override("font_color",HudT.GOLD)
 	content.add_child(save_title)
 	var save_status:=Label.new()
 	var existing_save:Dictionary=SaveSystem.save_metadata()
 	save_status.text="Saved world: %s · day %d · population %d" % [String(existing_save.get("settlement_name","the settlement")),int(existing_save.get("elapsed_days",0)),int(existing_save.get("population",0))] if not existing_save.is_empty() else "No saved world exists yet."
 	save_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	save_status.add_theme_font_size_override("font_size",14)
-	save_status.add_theme_color_override("font_color",Color("#8f9994"))
+	save_status.add_theme_color_override("font_color",HudT.MUTED)
 	content.add_child(save_status)
 	var save_row:=HBoxContainer.new()
 	save_row.add_theme_constant_override("separation",8)
@@ -19952,7 +19946,7 @@ func _open_world_menu()->void:
 	var seed_label:=Label.new()
 	seed_label.text="NEW GAME  •  WORLD SEED"
 	seed_label.add_theme_font_size_override("font_size",14)
-	seed_label.add_theme_color_override("font_color",Color("#c8b77e"))
+	seed_label.add_theme_color_override("font_color",HudT.GOLD)
 	content.add_child(seed_label)
 	world_seed_input=LineEdit.new()
 	world_seed_input.text=str(GameState.world_seed)
@@ -19972,7 +19966,7 @@ func _open_world_menu()->void:
 	world_seed_status.text="Seed %d defines terrain, resources, founders, and historical possibilities. Starting again permanently erases this civilization." % GameState.world_seed
 	world_seed_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	world_seed_status.add_theme_font_size_override("font_size",14)
-	world_seed_status.add_theme_color_override("font_color",Color("#8f9994"))
+	world_seed_status.add_theme_color_override("font_color",HudT.MUTED)
 	content.add_child(world_seed_status)
 	var same_seed:=Button.new()
 	same_seed.text="RESTART THIS WORLD"
@@ -19988,7 +19982,7 @@ func _open_world_menu()->void:
 	var random_seed:=Button.new()
 	random_seed.text="GENERATE A NEW WORLD"
 	random_seed.custom_minimum_size=Vector2(0,40)
-	random_seed.add_theme_color_override("font_color",Color("#f0d78f"))
+	random_seed.add_theme_color_override("font_color",HudT.GOLD_BRIGHT)
 	random_seed.pressed.connect(_restart_random_world)
 	content.add_child(random_seed)
 	content.add_child(HSeparator.new())
@@ -19997,13 +19991,13 @@ func _open_world_menu()->void:
 	var controls_title:=Label.new()
 	controls_title.text="CONTROLS"
 	controls_title.add_theme_font_size_override("font_size",14)
-	controls_title.add_theme_color_override("font_color",Color("#c8b77e"))
+	controls_title.add_theme_color_override("font_color",HudT.GOLD)
 	content.add_child(controls_title)
 	var controls:=Label.new()
-	controls.text="Left-click terrain  •  Inspect land / choose a convoy destination\nTwo-finger slide / middle-drag / WASD  •  Move the map    Shift+middle  •  Rotate\nUp  •  Zoom in    Down  •  Zoom out    0–5  •  Pause and hourly time speeds    Esc  •  Menu"
+	controls.text="Left-click terrain  •  Inspect land\nRight-click terrain  •  Move the founding convoy\nTwo-finger slide / middle-drag / WASD  •  Move the map    Shift+middle  •  Rotate\nUp  •  Zoom in    Down  •  Zoom out    0–5  •  Pause and hourly time speeds    Esc  •  Menu"
 	controls.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	controls.add_theme_font_size_override("font_size",14)
-	controls.add_theme_color_override("font_color",Color("#9fa7a2"))
+	controls.add_theme_color_override("font_color",HudT.TEXT_SOFT)
 	content.add_child(controls)
 	var cancel:=Button.new()
 	cancel.text="RESUME GAME"

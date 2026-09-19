@@ -1,5 +1,6 @@
 extends Node
 ## Machine-local display and input choices, separate from world saves.
+const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const SETTINGS_PATH:="user://display.cfg"
 const DEFAULT_MAP_SCROLL_SPEED:=4.0
 const MIN_MAP_SCROLL_SPEED:=0.5
@@ -10,6 +11,7 @@ var shadows:=false
 var frame_limit:=60
 var music_volume:=1.0
 var map_scroll_speed:=DEFAULT_MAP_SCROLL_SPEED
+var color_theme:="light"
 var config_path:=SETTINGS_PATH
 var applying:=false
 
@@ -21,11 +23,14 @@ func _ready()->void:
 		shadows=bool(config.get_value("display","shadows",false))
 		frame_limit=int(config.get_value("display","frame_limit",60))
 		music_volume=clampf(float(config.get_value("display","music_volume",1.0)),0.0,1.0)
+		color_theme=String(config.get_value("display","color_theme","light"))
+		if color_theme not in ["light","dark"]:color_theme="light"
 		var saved_speed:Variant=config.get_value("camera","map_scroll_speed",DEFAULT_MAP_SCROLL_SPEED)
 		if (saved_speed is float or saved_speed is int) and is_finite(float(saved_speed)):
 			map_scroll_speed=clampf(float(saved_speed),MIN_MAP_SCROLL_SPEED,MAX_MAP_SCROLL_SPEED)
 		if frame_limit not in [30,60,120]:frame_limit=60
 	get_window().size_changed.connect(apply)
+	Tokens.set_color_mode(color_theme)
 	apply()
 
 static func logical_size(pixels:Vector2i,density:float,scale:float)->Vector2i:
@@ -66,7 +71,7 @@ func apply_music()->void:
 
 func persist()->void:
 	var config:=ConfigFile.new()
-	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume"]:config.set_value("display",key,get(key))
+	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","color_theme"]:config.set_value("display",key,get(key))
 	config.set_value("camera","map_scroll_speed",map_scroll_speed)
 	if config.save(config_path)!=OK:push_warning("Settings apply this session but could not be saved.")
 
@@ -84,15 +89,24 @@ func add_navigation_controls(parent:Node)->void:
 	reset.pressed.connect(func():slider.value=DEFAULT_MAP_SCROLL_SPEED)
 	parent.add_child(slider)
 
-func _choice(parent:Node,label:String,labels:Array,current:int,callback:Callable)->void:
+func _choice(parent:Node,label:String,labels:Array,current:int,callback:Callable)->OptionButton:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);parent.add_child(row)
 	var text:=Label.new();text.text=label;text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)
 	var options:=OptionButton.new();options.custom_minimum_size=Vector2(170,38)
 	for value in labels:options.add_item(String(value))
 	options.select(current);options.item_selected.connect(callback);row.add_child(options)
+	return options
+
+func set_color_theme(mode:String,reload_scene:bool=true)->void:
+	color_theme="dark" if mode=="dark" else "light"
+	Tokens.set_color_mode(color_theme)
+	persist()
+	if reload_scene and is_inside_tree():get_tree().reload_current_scene.call_deferred()
 
 func add_controls(parent:Node)->void:
 	var heading:=Label.new();heading.text="DISPLAY & PERFORMANCE";heading.add_theme_font_size_override("font_size",16);parent.add_child(heading)
+	var appearance:=_choice(parent,"Interface colors",["Light","Dark"],1 if color_theme=="dark" else 0,func(index:int):set_color_theme("dark" if index==1 else "light"))
+	appearance.name="ColorTheme"
 	_choice(parent,"Text & interface size",["100%","125%","150%","175%"],clampi(roundi((ui_scale-1)*4),0,3),func(index:int):ui_scale=1.0+index*.25;apply();persist())
 	_choice(parent,"3D resolution",["50% · fastest","75% · balanced","100% · sharpest"],[0.5,0.75,1.0].find(render_scale),func(index:int):render_scale=[0.5,0.75,1.0][index];apply();persist())
 	_choice(parent,"Terrain shadows",["Off · faster","On"],1 if shadows else 0,func(index:int):shadows=index==1;apply();persist())
