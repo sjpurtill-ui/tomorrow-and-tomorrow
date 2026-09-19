@@ -35,12 +35,13 @@ var drawn_labels:Array[Rect2]=[]
 func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	terrain=world;later_city=is_later
 	name="FoundingSiteGuide";mouse_filter=Control.MOUSE_FILTER_IGNORE
+	theme=T.control_theme()
 	# The full-size root projects markers onto the map; it is not a modal report.
 	# Opt out of the shared report fitter before its deferred layer callback runs.
 	set_meta("responsive_scroll_layout",true)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel=PanelContainer.new();panel.name="SiteReview";panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	var style:=StyleBoxFlat.new();style.bg_color=Color("101e23f5");style.border_color=Color("618e87");style.set_border_width_all(1);style.set_corner_radius_all(6);style.set_content_margin_all(16)
+	var style:=T.flat(T.PANEL_BG_SOLID,T.BORDER,1,6,16)
 	panel.add_theme_stylebox_override("panel",style);add_child(panel)
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",9);panel.add_child(root)
 	var top:=HBoxContainer.new();root.add_child(top)
@@ -66,7 +67,7 @@ func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	neighbor_badge=_label(neighbor_row,10);neighbor_badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;neighbor_badge.custom_minimum_size.x=48
 	var resource_header:=HBoxContainer.new();body.add_child(resource_header)
 	var resource_title:=_label(resource_header,10);resource_title.text="SEEN NEARBY";resource_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var resource_radius:=_label(resource_header,10);resource_radius.text="≤ %d KM" % roundi(RESOURCE_RADIUS_KM);resource_radius.add_theme_color_override("font_color",Color("7f918c"))
+	var resource_radius:=_label(resource_header,10);resource_radius.text="≤ %d KM" % roundi(RESOURCE_RADIUS_KM);resource_radius.add_theme_color_override("font_color",T.MUTED)
 	resource_grid=GridContainer.new();resource_grid.columns=2;resource_grid.add_theme_constant_override("h_separation",7);resource_grid.add_theme_constant_override("v_separation",7);body.add_child(resource_grid)
 	resource_empty=_label(body,12);resource_empty.text="No resource reports nearby"
 	var site_header:=HBoxContainer.new();body.add_child(site_header)
@@ -84,7 +85,7 @@ func _label(parent:Node,font_size:int)->Label:
 	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.autowrap_mode=TextServer.AUTOWRAP_OFF
-	label.add_theme_font_size_override("font_size",font_size);label.add_theme_color_override("font_color",Color("d9e2df"));parent.add_child(label);return label
+	label.add_theme_font_size_override("font_size",font_size);label.add_theme_color_override("font_color",T.BODY);parent.add_child(label);return label
 
 func _card(parent:Node,accent:Color)->PanelContainer:
 	var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -159,7 +160,7 @@ func _refresh_resources()->void:
 		var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",0);row.add_child(copy)
 		var name_label:=_label(copy,11);name_label.text=ResourceSystem.display_name(String(entry.resource));name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.autowrap_mode=TextServer.AUTOWRAP_OFF
 		var stage:="surveyed" if String(entry.get("knowledge",""))=="surveyed" else "seen"
-		var detail:=_label(copy,9);detail.text="%.1f km · %s" % [float(entry.distance_km),stage];detail.add_theme_color_override("font_color",Color("91a39e"))
+		var detail:=_label(copy,9);detail.text="%.1f km · %s" % [float(entry.distance_km),stage];detail.add_theme_color_override("font_color",T.TEXT_SOFT)
 		var blockers:Array=entry.get("blockers",[]) as Array
 		var access_note:=String(blockers.front()) if not blockers.is_empty() else String(entry.get("access",""))
 		chip.tooltip_text="Known from returned scouting or travel reports. "+access_note

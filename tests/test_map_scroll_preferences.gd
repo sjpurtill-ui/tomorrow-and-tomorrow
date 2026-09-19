@@ -1,5 +1,6 @@
 extends GdUnitTestSuite
 const Preferences=preload("res://scripts/display_preferences.gd")
+const Tokens=preload("res://scripts/hud/hud_tokens.gd")
 const CONFIG_PATH:="user://map-scroll-preferences-test.cfg"
 class Map extends "res://scripts/local_terrain.gd":
 	func _ready()->void:pass
@@ -11,6 +12,7 @@ func before_test()->void:
 	if FileAccess.file_exists(CONFIG_PATH):DirAccess.remove_absolute(CONFIG_PATH)
 func after_test()->void:
 	if FileAccess.file_exists(CONFIG_PATH):DirAccess.remove_absolute(CONFIG_PATH)
+	Tokens.set_color_mode("light")
 
 func fixture()->Node3D:
 	var map:Node3D=auto_free(Map.new());add_child(map)
@@ -51,6 +53,24 @@ func test_legacy_settings_gain_faster_default_and_other_settings_survive_scroll_
 	assert_float(restored.music_volume).is_equal(.35)
 	assert_float(restored.render_scale).is_equal(.5)
 	assert_float(restored.ui_scale).is_equal(1.5)
+	assert_str(restored.color_theme).is_equal("light")
+	assert_bool(Tokens.is_light()).is_true()
+
+func test_light_is_default_and_dark_choice_persists()->void:
+	var map:=fixture()
+	assert_str(map.display_preferences.color_theme).is_equal("light")
+	assert_float(Tokens.PANEL_BG.get_luminance()).is_greater(Tokens.INK.get_luminance())
+	var controls:VBoxContainer=auto_free(VBoxContainer.new());add_child(controls)
+	map.display_preferences.add_controls(controls)
+	var chooser:=controls.find_child("ColorTheme",true,false) as OptionButton
+	assert_object(chooser).is_not_null()
+	assert_str(chooser.get_item_text(chooser.selected)).is_equal("Light")
+	map.display_preferences.set_color_theme("dark",false)
+	assert_bool(Tokens.is_light()).is_false()
+	assert_float(Tokens.PANEL_BG.get_luminance()).is_less(Tokens.INK.get_luminance())
+	var restored:=Preferences.new();restored.config_path=CONFIG_PATH;map.add_child(restored)
+	assert_str(restored.color_theme).is_equal("dark")
+	assert_bool(Tokens.is_light()).is_false()
 
 func test_saved_scroll_speed_is_bounded_and_invalid_values_use_the_default()->void:
 	for example in [[0.0,.5],[99.0,12.0],[NAN,4.0],[INF,4.0],["bad",4.0]]:

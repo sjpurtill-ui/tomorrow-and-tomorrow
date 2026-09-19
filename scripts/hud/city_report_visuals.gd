@@ -2,7 +2,7 @@ extends RefCounted
 ## Shared presentation of dated evidence. Never reads the hidden city ledger.
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const LABELS={"population":"Population","fortification":"Defenses","garrison":"Garrison","production":"Workshops","logistics":"Roads & transport","supply":"Food reserves","damage":"Damage","science":"Legacy science index","gdp":"GDP · worker-days/day","health":"Legacy health index","science_capacity":"Science · researcher-equivalents","education":"Average education","life_expectancy":"Health · life expectancy","infant_mortality":"Infant deaths / 1,000 births"}
-const COLORS={"population":T.INK,"fortification":T.BLUE,"garrison":T.RED,"production":T.GOLD,"logistics":T.TEAL,"supply":T.GREEN,"damage":T.AMBER,"science":T.BLUE,"gdp":T.GOLD,"health":T.GREEN,"science_capacity":T.BLUE,"education":T.BLUE,"life_expectancy":T.GREEN,"infant_mortality":T.GREEN}
+static var COLORS={"population":T.INK,"fortification":T.BLUE,"garrison":T.RED,"production":T.GOLD,"logistics":T.TEAL,"supply":T.GREEN,"damage":T.AMBER,"science":T.BLUE,"gdp":T.GOLD,"health":T.GREEN,"science_capacity":T.BLUE,"education":T.BLUE,"life_expectancy":T.GREEN,"infant_mortality":T.GREEN}
 const PATHS={
 	"science":'<path d="M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10"/>',
 	"gdp":'<path d="M4 21V13h4v8M10 21V9h4v12M16 21V3h4v18"/>',
