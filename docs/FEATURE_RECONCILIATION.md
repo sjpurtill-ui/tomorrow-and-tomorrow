@@ -1527,3 +1527,13 @@ every return. Existing explicit expedition and exceptional return notices remain
 60/60 focused cases and isolated native storage self-test pass; no live service or
 graphical audit. No conflicts; narrow edits to terrain return-notification hook and
 civilization event publication. No terrain geometry or resource-supply changes.
+
+## September 19 — light and dark interface themes
+
+Integrated worker `da9b80b` as canonical `7cfbe39`. Light is now the default
+interface palette, while Dark remains available under Display & Performance and
+persists as a machine-local preference. The shared HUD, Command Rail, game menu,
+Ground Survey, and Settlement Site review use the selected palette; the terrain
+and simulation remain unchanged. Canonical integration preserves existing saves.
+Focused worker validation passed 27/27 cases covering preference persistence,
+Command Rail stability, survey cards, and founding guidance.
