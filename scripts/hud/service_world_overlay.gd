@@ -6,6 +6,7 @@ signal base_selected(id:int)
 signal order_region(region:Dictionary)
 signal boundary_feedback(result:Dictionary)
 const R=preload("res://scripts/joint_regions.gd")
+const T=preload("res://scripts/hud/hud_tokens.gd")
 var terrain:Node
 var domain:="navy"
 var selected:Dictionary={}
@@ -104,10 +105,10 @@ func _caption(point:Vector2,title:String,color:Color)->void:
 	var font:=ThemeDB.fallback_font
 	var width:=minf(280,font.get_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x)
 	draw_style_box(_label_style(),Rect2(point+Vector2(10,-19),Vector2(width+12,23)))
-	draw_string(font,point+Vector2(16,-2),title,HORIZONTAL_ALIGNMENT_LEFT,width,14,color)
+	draw_string(font,point+Vector2(16,-2),title,HORIZONTAL_ALIGNMENT_LEFT,width,14,T.INK)
 
 func _label_style()->StyleBoxFlat:
-	var style:=StyleBoxFlat.new();style.bg_color=Color(0.025,0.055,0.075,.94);return style
+	return T.flat(T.MAP_LABEL_BG,T.BORDER_SOFT,1,3,2)
 
 func _draw()->void:
 	if op==null or not is_instance_valid(terrain) or terrain.camera==null:return
