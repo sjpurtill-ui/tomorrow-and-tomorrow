@@ -99,7 +99,7 @@ func _layout()->void:
 	if view==layout_size:return
 	layout_size=view
 	var width:=minf(350.0,view.x-120.0)
-	panel.size=Vector2(width,minf(510.0,view.y-198.0))
+	panel.size=Vector2(width,minf(460.0,view.y-198.0))
 	panel.position=Vector2(view.x-width-18.0,108.0)
 	panel.get_child(0).custom_minimum_size.x=width-32.0
 
