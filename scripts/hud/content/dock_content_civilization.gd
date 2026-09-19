@@ -1,6 +1,6 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## CIVILIZATION section: Society / Government / Council.
-## Replaces the systems hub and the society, government, and council panels.
+## CIVILIZATION section: society and civic dialogue. Government has its own
+## first-class rail destination.
 
 const DYNAMIC_ORDER:Array[String]=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
@@ -8,9 +8,9 @@ const ValuesModel:=preload("res://scripts/societal_values_model.gd")
 func meta()->Dictionary:
 	var government:=GovernmentPeopleSystem.structure_snapshot()
 	return {
-		"eyebrow":"CIVILIZATION · SOCIETY, GOVERNMENT & KNOWLEDGE",
+		"eyebrow":"CIVILIZATION · SOCIETY & CIVICS",
 		"title":String(government.get("name","Forming Order")).capitalize(),
-		"subtabs":["SOCIETY","GOVERNMENT","CIVICS"],
+		"subtabs":["SOCIETY","CIVICS"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -37,8 +37,7 @@ func tab(sub:int)->Dictionary:
 	var raw_brief:Dictionary=terrain._society_attention_brief(capacities)
 	var brief:=adapt_brief(raw_brief,"warn" if weakest_value<0.4 else "info","")
 	match sub:
-		1: return {"kpis":[kpis[2],kpis[3]],"brief":_government_brief(governance),"blocks":_government_overview()}
-		2: return {"kpis":[],"brief":{},"blocks":_council_blocks()}
+		1: return {"kpis":[],"brief":{},"blocks":_council_blocks()}
 	return {"kpis":[kpis[2],kpis[3]],"brief":brief,"blocks":_society_overview()}
 
 func _society_blocks(capacities:Dictionary)->Array:
@@ -57,7 +56,7 @@ func _society_blocks(capacities:Dictionary)->Array:
 func _government_brief(governance:Dictionary)->Dictionary:
 	var support:=clampf(float(governance.get("council_support",0.6)),0.0,1.0)
 	if ConsequenceEngine.active_policies().is_empty():
-		return {"tone":"info","title":"No standing policy is in force","why":"Talk with your local leader in CIVICS. Advice, proposals and accepted work have distinct outcomes.","action_label":"OPEN COUNCIL","on_action":jump("civ",2)}
+		return {"tone":"info","title":"No standing policy is in force","why":"Talk with your local leader in CIVICS. Advice, proposals and accepted work have distinct outcomes.","action_label":"OPEN COUNCIL","on_action":jump("civ",1)}
 	if support<0.45:
 		return {"tone":"warn","title":"Council support is low","why":"Institutions execute reluctantly at %d%% support. Fewer, better-aligned policies recover it." % roundi(support*100.0)}
 	return {"tone":"info","title":"Government is executing","why":"Standing policies are within administrative capacity."}
@@ -109,7 +108,7 @@ func _council_brief()->Dictionary:
 	var settlement:=_civic_settlement()
 	var leader:=GovernmentPeopleSystem.settlement_leader(String(settlement.get("id","")))
 	if leader.is_empty():
-		return {"tone":"warn","title":"This settlement has no leader","why":"Civic directives require one accountable person who can answer, object, and carry them out.","action_label":"APPOINT LEADER","on_action":_open_civic_leadership.bind(String(settlement.get("id","")))}
+		return {"tone":"warn","title":"Succession is pending","why":"Civic directives resume when government can automatically appoint an eligible living person."}
 	var latest_order:=_latest_civic_order(String(settlement.get("id","")),int(leader.get("person_id",0)))
 	var directive_state:=_directive_state(latest_order)
 	match directive_state:
@@ -158,13 +157,10 @@ func _council_all_blocks()->Array:
 				"name":"YOU" if is_player else String(turn.get("speaker_name",leader.get("name","LEADER"))),
 				"text":dialogue_text,"day":int(turn.get("day",0)),
 			})
-		var leadership_actions:Array=[]
-		if latest_state in ["NEEDS YOUR DECISION","REFUSED"]:
-			leadership_actions=[
-				{"label":"CHANGE LEADER…","on_press":_open_civic_leadership.bind(settlement_id),"tip":"Review named candidates. Nothing changes until you appoint someone."},
-				{"label":"DISMISS","on_press":_remove_civic_leader.bind(settlement_id,"dismiss"),"tip":"Remove this leader and appoint a successor. This carries a political cost."},
-				{"label":"ARREST","color":Tokens.RED,"on_press":_remove_civic_leader.bind(settlement_id,"arrest"),"tip":"Detain this leader and appoint a successor. This carries a severe political cost."},
-			]
+		var leadership_actions:Array=[
+			{"label":"DISMISS","on_press":_remove_civic_leader.bind(settlement_id,"dismiss"),"tip":"Fire this leader. A successor takes office automatically."},
+			{"label":"EXECUTE","color":Tokens.RED,"on_press":_remove_civic_leader.bind(settlement_id,"execute"),"tip":"Kill this leader by decree. A successor takes office automatically, with severe political cost."},
+		]
 		blocks.append({
 			"type":"conversation","leader_name":String(leader.get("name","the appointed leader")),
 			"leader_title":String(leader.get("title","local leader")),"disposition":String(disposition.get("label","pragmatic")).to_lower(),
@@ -175,8 +171,7 @@ func _council_all_blocks()->Array:
 			"placeholder":"Reply to %s…" % String(leader.get("name","the leader")),"disabled":latest_state=="INTERPRETING",
 		})
 	if leader.is_empty():
-		blocks.append({"type":"text","heading":"NO LOCAL LEADER","text":"Appoint one accountable person before beginning a civic conversation."})
-		blocks.append({"type":"actions","items":[{"label":"APPOINT A LEADER","sub":"one accountable person must hold local authority","primary":true,"on_press":_open_civic_leadership.bind(settlement_id),"tip":"Choose a named person to lead this settlement before issuing civic directives."}]})
+		blocks.append({"type":"text","heading":"SUCCESSION PENDING","text":"No eligible living person is available. Government will fill this office automatically when one becomes available."})
 	var combat_reports:Array=[]
 	for item in GameState.council_inbox:
 		var item_id:=String(item.get("id",""))
@@ -441,16 +436,15 @@ func _remove_civic_leader(settlement_id:String,action:String)->void:
 
 func _society_overview()->Array:
 	var details:=_society_blocks(GameState.society_capacities)
-	return [details[1],{"type":"actions","items":[{"label":"OUR DIRECTION","sub":"Long-term purpose and traditions","on_press":func():PeopleDirection.open_direction()}, {"label":"TALK TO OUR LEADER","sub":"Discuss a problem or give direction","on_press":jump("civ",2)},focused_action("CAPACITIES IN DETAIL","Twelve measures of what society can do",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}),{"label":"PEOPLE IN GOVERNMENT","sub":"Offices, responsibilities and policy","on_press":jump("civ",1)}]}]
+	return [details[1],{"type":"actions","items":[{"label":"OUR DIRECTION","sub":"Long-term purpose and traditions","on_press":func():PeopleDirection.open_direction()}, {"label":"TALK TO OUR LEADER","sub":"Discuss a problem or give direction","on_press":jump("civ",1)},focused_action("CAPACITIES IN DETAIL","Twelve measures of what society can do",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}),{"label":"PEOPLE IN GOVERNMENT","sub":"Offices, responsibilities and policy","on_press":jump("government",0)}]}]
 func _government_overview()->Array:
-	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[focused_action("OFFICEHOLDERS","Named people and their responsibilities",func()->Dictionary:return {"blocks":[_government_blocks(ConsequenceEngine.governance_metrics())[0]]}),focused_action("POLICY & EXECUTION","Standing commitments and capacity",func()->Dictionary:return {"blocks":_government_blocks(ConsequenceEngine.governance_metrics()).slice(1)}),{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work","on_press":jump("civ",2)}]}]
+	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"OPEN GOVERNMENT","sub":"Officeholders, removals and policy","on_press":jump("government",0)},{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work","on_press":jump("civ",1)}]}]
 func _council_blocks()->Array:
 	var all:=_council_all_blocks();var blocks:Array=[]
 	for item:Dictionary in all:
 		if item.get("type","")=="conversation":blocks.append(item)
 	if blocks.is_empty():
-		blocks.append({"type":"text","text":"Appoint a local leader to begin civic conversation."})
-		blocks.append({"type":"actions","items":[{"label":"APPOINT A LEADER","on_press":_open_civic_leadership.bind(String(_civic_settlement().get("id","")))}]})
+		blocks.append({"type":"text","text":"Succession is pending. Civic conversation resumes when an eligible leader takes office."})
 	blocks.append({"type":"actions","items":[focused_action("COUNCIL DECISIONS","Review pending choices and consequences",_civic_report.bind("decisions")),focused_action("WORK & REPORTS","Pending orders and returned reports",_civic_report.bind("reports")),focused_action("MILITARY REPORTS","Threats and battle outcomes",_civic_report.bind("military")),focused_action("CONVERSATION SETTINGS","AI routing and local interpretation",func()->Dictionary:return {"blocks":[_interpreter_status_block()]})]})
 	return blocks
 func _civic_report(kind:String)->Dictionary:

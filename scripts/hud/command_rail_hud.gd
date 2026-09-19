@@ -5,6 +5,7 @@ extends Control
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const DockPanelScript:=preload("res://scripts/hud/dock_panel.gd")
+const NavIcon:=preload("res://scripts/hud/nav_icon.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 
 signal section_requested(section:String,sub:int)
@@ -12,12 +13,13 @@ signal menu_requested
 signal escape_pressed
 
 const SECTIONS:Array[Dictionary]=[
-	{"id":"settlement","glyph":"⌂","tooltip":"Settlement · people, labor, works and defense · F1"},
-	{"id":"economy","glyph":"◈","tooltip":"Economy · food, water and materials · F2"},
-	{"id":"civ","glyph":"◎","tooltip":"Civilization · society, government and council · F3"},
-	{"id":"inquiry","glyph":"✦","tooltip":"Inquiry · research attention and findings · F4"},
-	{"id":"world","glyph":"◉","tooltip":"World · contacts, scouting and standing · F5"},
-	{"id":"military","glyph":"⚔","tooltip":"Military · formations, training and supply · F6"},
+	{"id":"settlement","tooltip":"Settlement · people, labor, works and defense · F1"},
+	{"id":"economy","tooltip":"Economy · food, water and materials · F2"},
+	{"id":"government","tooltip":"Government · officeholders, authority and policy · F3"},
+	{"id":"civ","tooltip":"Civilization · society and civic dialogue · F4"},
+	{"id":"inquiry","tooltip":"Inquiry · research attention and findings · F5"},
+	{"id":"world","tooltip":"World · contacts, scouting and standing · F6"},
+	{"id":"military","tooltip":"Military · formations, training and supply · F8"},
 ]
 const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 day/s","3 days/s"]
 const MAX_QUEUE_CARDS:=3
@@ -35,6 +37,7 @@ var rail_panel:PanelContainer
 var top_frame:PanelContainer
 var rail_buttons:Dictionary={}
 var rail_badges:Dictionary={}
+var rail_icons:Dictionary={}
 var time_pill:PanelContainer
 var time_text:RichTextLabel
 var pause_button:Button
@@ -219,11 +222,8 @@ func _make_rail_button(section:Dictionary)->Button:
 	content.add_theme_constant_override("separation",0)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
-	var glyph:=Label.new()
-	glyph.text=String(section.glyph)
-	glyph.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	glyph.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	Tokens.style_label(glyph,21,Tokens.TEXT_DIM)
+	var glyph:=NavIcon.new(id)
+	glyph.set_icon_color(Tokens.TEXT_DIM)
 	content.add_child(glyph)
 	var badge:=Label.new()
 	badge.visible=false
@@ -239,6 +239,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	button.add_child(badge)
 	rail_buttons[id]=button
 	rail_badges[id]=badge
+	rail_icons[id]=glyph
 	return button
 
 func toggle_section(id:String)->void:
@@ -254,9 +255,8 @@ func set_active_section(id:String)->void:
 		var active:bool=String(section_id)==id
 		button.add_theme_stylebox_override("normal",Tokens.rail_button_style(active))
 		button.add_theme_stylebox_override("hover",Tokens.rail_button_style(active,true))
-		for child in button.get_child(0).get_children():
-			if child is Label:
-				(child as Label).add_theme_color_override("font_color",Tokens.INK if active else Tokens.TEXT_DIM)
+		var icon:Control=rail_icons.get(section_id)
+		if icon and icon.has_method("set_icon_color"): icon.set_icon_color(Tokens.INK if active else Tokens.TEXT_DIM)
 	_position_toolbar()
 
 func _set_badge(id:String,text:String,color:Color)->void:
@@ -504,7 +504,7 @@ func _rebuild_queue(items:Array)->void:
 	council_link.add_theme_color_override("font_color",Tokens.GOLD)
 	council_link.add_theme_color_override("font_hover_color",Tokens.GOLD_BRIGHT)
 	council_link.tooltip_text="Open the council ledger."
-	council_link.pressed.connect(func()->void: section_requested.emit("civ",2))
+	council_link.pressed.connect(func()->void: section_requested.emit("civ",1))
 	footer_row.add_child(council_link)
 	queue_root.reset_size()
 	_layout()
@@ -549,7 +549,7 @@ func _make_queue_card(item:Dictionary)->PanelContainer:
 	decide.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
 	decide.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	decide.tooltip_text="Open the decision in the council."
-	decide.pressed.connect(func()->void: section_requested.emit("civ",2))
+	decide.pressed.connect(func()->void: section_requested.emit("civ",1))
 	actions.add_child(decide)
 	var dismiss:=Button.new()
 	dismiss.text="×"
@@ -777,7 +777,7 @@ func _unhandled_key_input(event:InputEvent)->void:
 	if key.keycode in [KEY_F5,KEY_F6] and key.shift_pressed:
 		MilitaryCampaign.joint_operations.open_service("navy" if key.keycode==KEY_F5 else "air")
 		get_viewport().set_input_as_handled();return
-	var keys:={KEY_F1:"settlement",KEY_F2:"economy",KEY_F3:"civ",KEY_F4:"inquiry",KEY_F5:"world",KEY_F6:"military"}
+	var keys:={KEY_F1:"settlement",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F8:"military"}
 	if keys.has(key.keycode):
 		toggle_section(String(keys[key.keycode]))
 		get_viewport().set_input_as_handled()

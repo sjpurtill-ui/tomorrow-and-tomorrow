@@ -204,17 +204,55 @@ func test_visible_knowledge_skill_changes_research_execution()->void:
 	assert_float(strong_execution).is_greater(weak_execution+0.10)
 
 
-func test_steward_covers_unformed_specialist_office_but_not_an_unfilled_existing_one()->void:
+func test_steward_covers_unformed_specialist_office_and_new_offices_fill_automatically()->void:
 	assert_str(GovernmentPeopleSystem.executing_office("Scholar")).is_equal("Steward")
 	GameState.ensure_population_total(12000)
 	GameState.society_capacities.institutions=0.74
 	GameState.elapsed_days=30.0
 	GovernmentPeopleSystem.process_day(30)
 	assert_str(GovernmentPeopleSystem.executing_office("Scholar")).is_equal("Scholar")
-	assert_bool(GovernmentPeopleSystem.officeholder("Scholar").is_empty()).is_true()
+	assert_bool(GovernmentPeopleSystem.officeholder("Scholar").is_empty()).is_false()
+	for office:Dictionary in GovernmentPeopleSystem.active_offices():
+		assert_bool(GovernmentPeopleSystem.officeholder(String(office.key)).is_empty()).is_false()
 
 
-func test_reassigning_a_person_vacates_their_previous_central_office()->void:
+func test_dismissal_and_execution_immediately_install_different_successors()->void:
+	GameState.ensure_population_total(12000)
+	GameState.society_capacities.institutions=0.74
+	GameState.elapsed_days=30.0
+	GovernmentPeopleSystem.process_day(30)
+	var first:=GovernmentPeopleSystem.officeholder("Quartermaster")
+	var dismissed:=GovernmentPeopleSystem.remove_central_officeholder("Quartermaster","dismiss")
+	assert_bool(bool(dismissed.get("ok",false))).is_true()
+	var second:=GovernmentPeopleSystem.officeholder("Quartermaster")
+	assert_int(int(second.person_id)).is_not_equal(int(first.person_id))
+	assert_str(String(GovernmentPeopleSystem.person_snapshot(int(first.person_id)).status)).is_equal("active")
+	var population_before:=GameState.population_total
+	var executed:=GovernmentPeopleSystem.remove_central_officeholder("Quartermaster","execute")
+	assert_bool(bool(executed.get("ok",false))).is_true()
+	assert_str(String(GovernmentPeopleSystem.person_snapshot(int(second.person_id)).status)).is_equal("deceased")
+	assert_int(GameState.population_total).is_equal(population_before-1)
+	assert_int(int(GovernmentPeopleSystem.officeholder("Quartermaster").person_id)).is_not_equal(int(second.person_id))
+
+
+func test_generated_public_figures_have_varied_stable_names()->void:
+	GameState.ensure_population_total(12000)
+	GameState.society_capacities.institutions=0.74
+	GameState.elapsed_days=30.0
+	GovernmentPeopleSystem.process_day(30)
+	var names:Array[String]=[]
+	var unique_names:Dictionary={}
+	var initials:Dictionary={}
+	for person:Dictionary in GovernmentPeopleSystem.living_people():
+		var person_name:=String(person.name)
+		names.append(person_name)
+		unique_names[person_name]=true
+		initials[person_name.left(1)]=true
+	assert_int(names.size()).is_equal(unique_names.size())
+	assert_int(initials.size()).is_greater_equal(8)
+
+
+func test_reassigning_a_person_triggers_automatic_succession_in_previous_office()->void:
 	GameState.ensure_population_total(12000)
 	GameState.society_capacities.institutions=0.74
 	GameState.elapsed_days=30.0
@@ -224,7 +262,8 @@ func test_reassigning_a_person_vacates_their_previous_central_office()->void:
 	GovernmentPeopleSystem.mark_central_appointment(person_id,"Quartermaster")
 	assert_int(int(GovernmentPeopleSystem.officeholder("Quartermaster").person_id)).is_equal(person_id)
 	GovernmentPeopleSystem.mark_central_appointment(person_id,"Scholar")
-	assert_bool(GovernmentPeopleSystem.officeholder("Quartermaster").is_empty()).is_true()
+	assert_bool(GovernmentPeopleSystem.officeholder("Quartermaster").is_empty()).is_false()
+	assert_int(int(GovernmentPeopleSystem.officeholder("Quartermaster").person_id)).is_not_equal(person_id)
 	assert_int(int(GovernmentPeopleSystem.officeholder("Scholar").person_id)).is_equal(person_id)
 
 

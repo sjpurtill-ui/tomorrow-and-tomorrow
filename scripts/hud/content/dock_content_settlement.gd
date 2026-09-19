@@ -103,7 +103,7 @@ func _people_blocks(productive:int,local_population:int,local_share:float,settle
 		{"type":"segments","heading":"AGE STRUCTURE","note":"dependency %.2f" % dependency,"items":segment_items,"legend":"Green = productive-age • warm/grey = dependent • life expectancy is not a maximum age"},
 		{"type":"alloc","heading":"DELEGATED LOCAL LABOR","note":"about %d of %d productive" % [assigned,productive],"items":alloc_items},
 		{"type":"actions","items":[
-			{"label":"LOCAL LEADERSHIP","sub":"appoint from named people","primary":true,"on_press":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_settlement_people.gd").new(terrain,hud,settlement_id)),"tip":"Review the real people available to lead this settlement."},
+			{"label":"LOCAL LEADER","sub":"view, dismiss, or execute","primary":true,"on_press":jump("civ",1),"tip":"Local leaders are appointed automatically. Open Civics to speak with or remove the current leader."},
 			{"label":"RENAME SETTLEMENT","sub":"change its map name","on_press":terrain._open_settlement_naming_panel.bind(settlement_id),"tip":"Give this place the name used on the map and in history."},
 		]},
 	]
@@ -216,7 +216,7 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	return [
 		{"type":"text","heading":"YOUR ROLE","text":"Choose this place’s direction. Its local leader assigns routine work; you do not need to distribute every worker. Buildings emerge from needs, labor and available materials."},
 		{"type":"actions","heading":"SHAPE THIS PLACE","items":[
-			{"label":"LOCAL LEADERSHIP","sub":"Choose who manages the settlement","primary":true,"on_press":func()->void:hud.open_detail(preload("res://scripts/hud/content/dock_detail_settlement_people.gd").new(terrain,hud,id))},
+			{"label":"LOCAL LEADER","sub":"automatic appointment · manage in Civics","primary":true,"on_press":jump("civ",1)},
 			focused_action("LOCAL PRIORITY","Let the leader decide, or give a direction",_people_report.bind("priority"))]},
 		{"type":"actions","heading":"UNDERSTAND YOUR SETTLEMENT","items":[
 			focused_action("POPULATION","Growth and age groups",_people_report.bind("population")),
