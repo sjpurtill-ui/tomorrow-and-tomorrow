@@ -39,6 +39,7 @@ var time_pill:PanelContainer
 var time_text:RichTextLabel
 var pause_button:Button
 var speed_selector:OptionButton
+var speed_buttons:Array[Button]=[]
 var last_running_speed:=1
 var kpi_strip:PanelContainer
 var kpi_chips:Dictionary={}
@@ -307,26 +308,37 @@ func _build_time_pill()->void:
 	time_text.add_theme_font_size_override("bold_font_size",15)
 	row.add_child(time_text)
 	var speed_row:=HBoxContainer.new()
-	speed_row.add_theme_constant_override("separation",4)
+	speed_row.add_theme_constant_override("separation",1)
 	row.add_child(speed_row)
 	pause_button=Button.new()
 	pause_button.name="PauseResume"
-	pause_button.custom_minimum_size=Vector2(28,28)
+	pause_button.custom_minimum_size=Vector2(28,26)
 	pause_button.add_theme_font_size_override("font_size",11)
 	pause_button.pressed.connect(func()->void:
 		_on_speed_pressed(last_running_speed if terrain and int(terrain.game_speed)==0 else 0))
 	speed_row.add_child(pause_button)
+	speed_buttons=[pause_button]
 	speed_selector=OptionButton.new()
 	speed_selector.name="TimeSpeed"
 	speed_selector.fit_to_longest_item=false
-	speed_selector.custom_minimum_size=Vector2(84,28)
+	speed_selector.visible=false
 	speed_selector.add_theme_font_size_override("font_size",12)
 	for speed in 6:
 		speed_selector.add_item("Paused" if speed==0 else SPEED_TOOLTIPS[speed],speed)
 		speed_selector.get_popup().set_item_tooltip(speed,"Keyboard: %d" % speed)
 	speed_selector.tooltip_text="Simulation speed · shortcuts 0–5"
 	speed_selector.item_selected.connect(_on_speed_pressed)
-	speed_row.add_child(speed_selector)
+	add_child(speed_selector)
+	for speed:int in range(1,6):
+		var button:=Button.new()
+		button.name="Speed%d"%speed
+		button.text=["","½h","2h","8h","1d","3d"][speed]
+		button.custom_minimum_size=Vector2(32,26)
+		button.add_theme_font_size_override("font_size",10)
+		button.tooltip_text=SPEED_TOOLTIPS[speed]+" · keyboard %d"%speed
+		button.pressed.connect(_on_speed_pressed.bind(speed))
+		speed_row.add_child(button)
+		speed_buttons.append(button)
 	_style_speed_controls(0)
 
 func _on_speed_pressed(speed:int)->void:
@@ -340,14 +352,17 @@ func _style_speed_controls(selected:int)->void:
 	var paused:=selected==0
 	pause_button.text="▶" if paused else "Ⅱ"
 	pause_button.tooltip_text="Resume at %s" % SPEED_TOOLTIPS[last_running_speed] if paused else "Pause · 0"
-	for button:Button in [pause_button,speed_selector]:
-		var active:=paused and button==pause_button
-		var style:=Tokens.flat(Tokens.GOLD if active else Tokens.SPEED_IDLE_BG,Tokens.BORDER_2 if not active else Color(0,0,0,0),0 if active else 1,15)
-		button.add_theme_stylebox_override("normal",style)
-		button.add_theme_stylebox_override("hover",style)
-		button.add_theme_stylebox_override("pressed",style)
-		button.add_theme_color_override("font_color",Tokens.DARK_INK if active else Tokens.TEXT_DIM)
-		button.add_theme_color_override("font_hover_color",Tokens.DARK_INK if active else Tokens.INK)
+	for index:int in speed_buttons.size():
+		var button:=speed_buttons[index]
+		var active:=index==selected
+		var normal:=Tokens.flat(Tokens.GOLD_WASH if active else Color.TRANSPARENT)
+		if active:normal.border_color=Tokens.GOLD;normal.border_width_bottom=2
+		var hover:=Tokens.flat(Tokens.HOVER_BG)
+		button.add_theme_stylebox_override("normal",normal)
+		button.add_theme_stylebox_override("hover",hover)
+		button.add_theme_stylebox_override("pressed",normal)
+		button.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT if active else Tokens.TEXT_DIM)
+		button.add_theme_color_override("font_hover_color",Tokens.INK)
 
 # --- KPI strip --------------------------------------------------------------
 

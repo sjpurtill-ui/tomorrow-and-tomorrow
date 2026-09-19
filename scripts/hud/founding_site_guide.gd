@@ -224,7 +224,7 @@ func _marker(position:Vector3,text:String,color:Color)->void:
 	if terrain.camera.is_position_behind(position):return
 	var point:Vector2=terrain.camera.unproject_position(position)
 	if not get_viewport_rect().has_point(point) or panel.get_rect().has_point(point):return
-	draw_circle(point,11,Color("0b191e"));draw_arc(point,11,0,TAU,32,color,2,true);draw_circle(point,4,color)
+	draw_circle(point,11,T.MAP_LABEL_BG);draw_arc(point,11,0,TAU,32,color,2,true);draw_circle(point,4,color)
 	var font:=ThemeDB.fallback_font
 	var label_size:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,13)
 	var label_position:=point+Vector2(16,-10)
@@ -243,4 +243,4 @@ func _marker(position:Vector3,text:String,color:Color)->void:
 		label_position.y=point.y+float((attempt/2)+1)*24.0*(1.0 if attempt%2==0 else -1.0)
 
 func _marker_style()->StyleBoxFlat:
-	var style:=StyleBoxFlat.new();style.bg_color=Color("0b191eee");return style
+	return T.flat(T.MAP_LABEL_BG,T.BORDER_SOFT,1,3,2)

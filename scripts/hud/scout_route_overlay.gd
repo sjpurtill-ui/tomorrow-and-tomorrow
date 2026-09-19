@@ -1,5 +1,6 @@
 extends Control
 ## Hover-only route account; existing grounded ribbons own the route drawing.
+const T=preload("res://scripts/hud/hud_tokens.gd")
 var camera:Camera3D
 var points:=PackedVector3Array()
 var caption:=""
@@ -31,8 +32,6 @@ func _draw()->void:
 	var origin:=mouse+Vector2(14,18)
 	origin.x=clampf(origin.x,8,maxf(8,size.x-box_size.x-8))
 	origin.y=clampf(origin.y,8,maxf(8,size.y-box_size.y-8))
-	var style:=StyleBoxFlat.new()
-	style.bg_color=Color(0.035,0.065,0.07,0.94)
-	style.set_corner_radius_all(4)
+	var style:=T.flat(T.MAP_LABEL_BG,T.BORDER_SOFT,1,4,0)
 	draw_style_box(style,Rect2(origin,box_size))
-	draw_string(font,origin+Vector2(10,7+font.get_ascent(13)),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#d9c99e"))
+	draw_string(font,origin+Vector2(10,7+font.get_ascent(13)),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK)

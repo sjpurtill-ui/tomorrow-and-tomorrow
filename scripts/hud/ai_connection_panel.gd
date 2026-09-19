@@ -33,7 +33,7 @@ func _ready()->void:
 	var close:=Button.new();close.text="Close";actions.add_child(close);close.pressed.connect(func():queue_free())
 	var forget:=Button.new();forget.text="Forget saved connection…";root.add_child(forget)
 	forget.pressed.connect(func():
-		var confirmation:=ConfirmationDialog.new();confirmation.dialog_text="Remove this game's saved AI connection from Keychain and clear it from this session?";add_child(confirmation)
+		var confirmation:=ConfirmationDialog.new();confirmation.theme=preload("res://scripts/hud/hud_tokens.gd").control_theme();confirmation.dialog_text="Remove this game's saved AI connection from Keychain and clear it from this session?";add_child(confirmation)
 		confirmation.confirmed.connect(func():status.text=String(preload("res://scripts/ai_connection_store.gd").forget().get("message","Could not remove the saved connection. Unlock Keychain and try again."));confirmation.queue_free())
 		confirmation.canceled.connect(confirmation.queue_free);confirmation.popup_centered())
 	get_viewport().size_changed.connect(_fit);card.minimum_size_changed.connect(_fit.call_deferred);_fit.call_deferred()

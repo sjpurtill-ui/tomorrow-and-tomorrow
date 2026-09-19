@@ -4,6 +4,7 @@ const NAME_SIZE:=16
 const POP_SIZE:=13
 const GAP:=7.0
 const REPORT=preload("res://scripts/hud/city_report_visuals.gd")
+const T=preload("res://scripts/hud/hud_tokens.gd")
 
 static func report_summary(record:Dictionary,today:int)->Dictionary:
 	var fields:Dictionary=record.get("fields",{})
@@ -29,11 +30,12 @@ var layout_signature:=""
 var styles:Dictionary={}
 
 func _ready()->void:
+	theme=T.control_theme()
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	more=Button.new();more.text="More cities";more.hide();add_child(more)
 	more.pressed.connect(func():list_panel.visible=not list_panel.visible)
-	list_panel=PanelContainer.new();list_panel.hide();add_child(list_panel)
+	list_panel=PanelContainer.new();list_panel.add_theme_stylebox_override("panel",T.flat(T.PANEL_BG_SOLID,T.BORDER_SOFT,1,5,8));list_panel.hide();add_child(list_panel)
 	var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;list_panel.add_child(scroll)
 	list_rows=VBoxContainer.new();list_rows.size_flags_horizontal=Control.SIZE_EXPAND_FILL;scroll.add_child(list_rows)
 
@@ -195,13 +197,13 @@ func _draw()->void:
 	for card:Dictionary in cards:
 		var box:Rect2=card.rect;var anchor:Vector2=card.anchor;var color:Color=card.color
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
-		draw_line(anchor,end,Color("071312"),3,true)
+		draw_line(anchor,end,T.MAP_LABEL_BG,3,true)
 		draw_line(anchor,end,Color(color,.65),1,true)
-		draw_circle(anchor,3,Color("071312"));draw_circle(anchor,2,color)
+		draw_circle(anchor,3,T.MAP_LABEL_BG);draw_circle(anchor,2,color)
 	for card:Dictionary in cards:
 		var box:Rect2=card.rect;var color:Color=card.color
 		if not styles.has(color):
-			var style:=StyleBoxFlat.new();style.bg_color=Color("0a171bea");style.border_color=Color(color,.4)
+			var style:=StyleBoxFlat.new();style.bg_color=T.MAP_LABEL_BG;style.border_color=Color(color,.65)
 			style.set_border_width_all(1);style.set_corner_radius_all(4);styles[color]=style
 		draw_style_box(styles[color],box)
 		draw_rect(Rect2(box.position+Vector2(0,5),Vector2(3,box.size.y-10)),color)
@@ -211,22 +213,22 @@ func _draw()->void:
 			draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,2)+(Vector2(30,20)-flag_size)*.5,flag_size),false)
 		var y:=box.position.y+19
 		for line:String in card.lines:
-			draw_string(font,Vector2(box.position.x+46,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,color);y+=20
+			draw_string(font,Vector2(box.position.x+46,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,T.INK);y+=20
 		if card.has("summary"):
 			draw_string(font,Vector2(box.position.x+10,y-3),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-20,11,Color(color,.8))
 			draw_line(Vector2(box.position.x+10,y+3),Vector2(box.end.x-10,y+3),Color(color,.18))
 			var stats:Array=card.summary.stats
 			for i in stats.size():
 				var cell:=Vector2(box.position.x+10+float(i%2)*(box.size.x-20)*.5,y+16+float(i/2)*42)
-				draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,9,Color("8babae"))
-				draw_string(font,cell+Vector2(0,15),String(stats[i].value),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("d1dad7") if stats[i].value!="Unknown" else Color("71868a"))
-				draw_string(font,cell+Vector2(0,27),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,-1,9,Color("8babae"))
+				draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,9,T.MUTED)
+				draw_string(font,cell+Vector2(0,15),String(stats[i].value),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.INK if stats[i].value!="Unknown" else T.DISABLED)
+				draw_string(font,cell+Vector2(0,27),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,-1,9,T.TEXT_SOFT)
 			var level:=int(card.summary.level)
 			var freshness_color:=Color("78bba4") if level>=4 else Color("d4ae68") if level>=2 else Color("b88270")
 			draw_string(font,Vector2(box.position.x+10,box.end.y-7),"REPORT · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,10,freshness_color)
-			for i in 5:draw_rect(Rect2(Vector2(box.end.x-67+i*11,box.end.y-14),Vector2(8,5)),freshness_color if i<level else Color("293c40"))
+			for i in 5:draw_rect(Rect2(Vector2(box.end.x-67+i*11,box.end.y-14),Vector2(8,5)),freshness_color if i<level else T.TRACK)
 			continue
 		var status_height:=20.0 if not String(card.get("status","")).is_empty() else 0.0
-		if status_height>0:draw_string(font,Vector2(box.position.x+10,box.end.y-9),String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("e9bf70"))
-		if not String(card.get("affiliation","")).is_empty():draw_string(font,Vector2(box.position.x+10,box.end.y-27-status_height),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color(color,.85))
-		draw_string(font,Vector2(box.position.x+10,box.end.y-9-status_height),card.population,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,Color("d1dad7"))
+		if status_height>0:draw_string(font,Vector2(box.position.x+10,box.end.y-9),String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.GOLD_BRIGHT)
+		if not String(card.get("affiliation","")).is_empty():draw_string(font,Vector2(box.position.x+10,box.end.y-27-status_height),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.TEXT_SOFT)
+		draw_string(font,Vector2(box.position.x+10,box.end.y-9-status_height),card.population,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.INK)

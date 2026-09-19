@@ -11691,12 +11691,7 @@ func _build_interface() -> void:
 	settlement_convoy_instruction_panel.position=Vector2(viewport_width*0.5-300,get_viewport().get_visible_rect().size.y-176)
 	settlement_convoy_instruction_panel.size=Vector2(600,56)
 	settlement_convoy_instruction_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var convoy_instruction_style:=StyleBoxFlat.new()
-	convoy_instruction_style.bg_color=Color(0.025,0.038,0.040,0.96)
-	convoy_instruction_style.border_color=Color("#b99b5d")
-	convoy_instruction_style.set_border_width_all(1)
-	convoy_instruction_style.set_corner_radius_all(4)
-	convoy_instruction_style.set_content_margin_all(8)
+	var convoy_instruction_style:=HudT.flat(HudT.PANEL_BG_SOLID,HudT.GOLD,1,4,8)
 	settlement_convoy_instruction_panel.add_theme_stylebox_override("panel",convoy_instruction_style)
 	settlement_convoy_instruction_label=Label.new()
 	settlement_convoy_instruction_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
@@ -11934,6 +11929,7 @@ func _pause_for_military_attention(event_id:String,title:String,body:String,trun
 func _show_military_attention(title:String,body:String)->void:
 	if military_attention_dialog and is_instance_valid(military_attention_dialog): military_attention_dialog.queue_free()
 	military_attention_dialog=ConfirmationDialog.new()
+	military_attention_dialog.theme=HudT.control_theme()
 	military_attention_dialog.title=title
 	military_attention_dialog.dialog_text=body
 	military_attention_dialog.min_size=Vector2i(650,260)
@@ -20035,6 +20031,7 @@ func _request_quit()->void:
 		quit_dialog.popup_centered()
 		return
 	quit_dialog=ConfirmationDialog.new()
+	quit_dialog.theme=HudT.control_theme()
 	quit_dialog.title="Quit Tomorrow and Tomorrow?"
 	quit_dialog.dialog_text="Save your current progress before quitting?"
 	quit_dialog.ok_button_text="Save & Quit"
