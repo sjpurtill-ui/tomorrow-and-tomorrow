@@ -1,3 +1,15 @@
+## September 19 — compact ground survey: INTEGRATED
+
+Worker `92b24a1` is integrated at canonical commit `6072018`. Ground Survey is
+now capped at 360 pixels wide with a tighter header, a single four-icon terrain
+strip, an inline water/neighbor disclosure, and one-row known-source summaries.
+Quality, abundance, distance and status remain visible; prose and access blockers
+remain available through the row chevron or tooltip.
+
+The focused resource-survey suite passes 4/4 canonically. An isolated native
+render passed and was visually inspected at the real compact width, including
+collapsed and expanded source rows. Save and simulation data are unchanged.
+
 ## September 19 — compact site review and distinct map clicks: INTEGRATED
 
 Worker `15b44f0` is integrated at canonical commit `4a6cebf`. The founding-site
