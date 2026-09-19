@@ -101,15 +101,15 @@ const COHORT_COLORS:Array[Color]=[Color("#9b7252"),Color("#779a67"),Color("#5e9d
 const ROLE_COLORS:Array[Color]=[Color("#8fa26a"),Color("#79a8a0"),Color("#a9946e"),Color("#b39a68"),Color("#c9a95a"),Color("#8798b5"),Color("#a897c9"),Color("#d0b46f"),Color("#c67462")]
 
 # Layout
-const RAIL_WIDTH:=76.0
-const RAIL_BUTTON_HEIGHT:=54.0
-const RAIL_HEADER_HEIGHT:=38.0
-const DOCK_X:=88.0
+const RAIL_WIDTH:=50.0
+const RAIL_BUTTON_HEIGHT:=46.0
+const RAIL_HEADER_HEIGHT:=42.0
+const DOCK_X:=60.0
 const DOCK_WIDTH:=540.0
 const DOCK_DETAIL_X:=652.0
-const DOCK_MARGIN_Y:=14.0
-const EDGE_MARGIN:=16.0
-const CHIP_HEIGHT:=44.0
+const DOCK_MARGIN_Y:=8.0
+const EDGE_MARGIN:=10.0
+const CHIP_HEIGHT:=40.0
 const QUEUE_WIDTH:=400.0
 
 static func delta_color(direction:int,attention:bool=false)->Color:

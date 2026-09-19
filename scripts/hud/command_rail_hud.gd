@@ -12,12 +12,12 @@ signal menu_requested
 signal escape_pressed
 
 const SECTIONS:Array[Dictionary]=[
-	{"id":"settlement","glyph":"ST","label":"SETTLEMENT","tooltip":"People, labor, works, defense · F1"},
-	{"id":"economy","glyph":"EC","label":"ECONOMY","tooltip":"Food, water, materials · F2"},
-	{"id":"civ","glyph":"CV","label":"CIVILIZATION","tooltip":"Society, government, council · F3"},
-	{"id":"inquiry","glyph":"IN","label":"INQUIRY","tooltip":"Research attention and findings · F4"},
-	{"id":"world","glyph":"WD","label":"WORLD","tooltip":"Contacts, scouting, standing · F5"},
-	{"id":"military","glyph":"ML","label":"MILITARY","tooltip":"Formations, training, supply · F6"},
+	{"id":"settlement","glyph":"⌂","tooltip":"Settlement · people, labor, works and defense · F1"},
+	{"id":"economy","glyph":"◈","tooltip":"Economy · food, water and materials · F2"},
+	{"id":"civ","glyph":"◎","tooltip":"Civilization · society, government and council · F3"},
+	{"id":"inquiry","glyph":"✦","tooltip":"Inquiry · research attention and findings · F4"},
+	{"id":"world","glyph":"◉","tooltip":"World · contacts, scouting and standing · F5"},
+	{"id":"military","glyph":"⚔","tooltip":"Military · formations, training and supply · F6"},
 ]
 const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 day/s","3 days/s"]
 const MAX_QUEUE_CARDS:=3
@@ -32,6 +32,7 @@ var active_section:String=""
 var dismissed_alert_ids:Array=[]
 
 var rail_panel:PanelContainer
+var top_frame:PanelContainer
 var rail_buttons:Dictionary={}
 var rail_badges:Dictionary={}
 var time_pill:PanelContainer
@@ -69,6 +70,7 @@ func _ready()->void:
 	theme=Tokens.control_theme()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
+	_build_frame()
 	_build_rail()
 	_build_time_pill()
 	_build_kpi_strip()
@@ -83,11 +85,14 @@ func _ready()->void:
 
 func _layout()->void:
 	var view:=get_viewport().get_visible_rect().size
+	if top_frame:
+		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
+		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,56)
 	if rail_panel:
 		rail_panel.position=Vector2.ZERO
 		rail_panel.size=Vector2(Tokens.RAIL_WIDTH,view.y)
 	if time_pill:
-		time_pill.position=Vector2(Tokens.DOCK_X,Tokens.DOCK_MARGIN_Y)
+		time_pill.position=Vector2(Tokens.DOCK_X,6)
 	if kpi_strip:
 		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 		# The status strip is a fixed-height top-bar component. At the minimum
@@ -100,19 +105,19 @@ func _layout()->void:
 			kpi_separators[0].visible=not compact_top
 			kpi_separators[1].visible=not compact_top
 		kpi_strip.reset_size()
-		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Tokens.DOCK_MARGIN_Y)
+		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),6)
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,view.y-Tokens.EDGE_MARGIN-queue_root.size.y)
 	if dock:
-		dock.position=Vector2(Tokens.DOCK_X,72)
+		dock.position=Vector2(Tokens.DOCK_X,64)
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-72-Tokens.DOCK_MARGIN_Y))
+		dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
 	if detail_dock:
-		detail_dock.position=Vector2(Tokens.DOCK_X,72)
-		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-72-Tokens.DOCK_MARGIN_Y))
+		detail_dock.position=Vector2(Tokens.DOCK_X,64)
+		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
 	_position_toolbar()
 	if action_feedback:
 		action_feedback.position=Vector2(maxf(Tokens.DOCK_X,view.x-action_feedback.size.x-16),maxf(124,view.y-action_feedback.size.y-112))
@@ -124,7 +129,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-72-Tokens.DOCK_MARGIN_Y)
+		panel.size=Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 
@@ -139,28 +144,38 @@ func _position_toolbar()->void:
 
 # --- Rail -------------------------------------------------------------------
 
+func _build_frame()->void:
+	top_frame=PanelContainer.new()
+	top_frame.name="TopFrame"
+	top_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID)
+	style.border_color=Tokens.BORDER_SOFT
+	style.border_width_bottom=1
+	top_frame.add_theme_stylebox_override("panel",style)
+	add_child(top_frame)
+
 func _build_rail()->void:
 	rail_panel=PanelContainer.new()
 	rail_panel.name="CommandRail"
 	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER,0,0)
 	style.border_color=Tokens.BORDER
 	style.border_width_right=1
-	style.content_margin_top=12.0
-	style.content_margin_bottom=12.0
-	style.content_margin_left=8.0
-	style.content_margin_right=8.0
+	style.content_margin_top=6.0
+	style.content_margin_bottom=6.0
+	style.content_margin_left=4.0
+	style.content_margin_right=4.0
 	rail_panel.add_theme_stylebox_override("panel",style)
 	add_child(rail_panel)
 	var column:=VBoxContainer.new()
-	column.add_theme_constant_override("separation",6)
+	column.add_theme_constant_override("separation",3)
 	rail_panel.add_child(column)
 	var header:=Label.new()
-	header.text="T&T"
+	header.text="T·T"
 	header.name="RailHeader"
 	header.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
 	header.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	header.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	Tokens.style_label(header,10,Tokens.GOLD,0.14)
+	Tokens.style_label(header,9,Tokens.GOLD,0.1)
 	column.add_child(header)
 	var header_rule:=ColorRect.new()
 	header_rule.color=Tokens.BORDER
@@ -175,9 +190,9 @@ func _build_rail()->void:
 	var menu_button:=Button.new()
 	menu_button.name="RailMenu"
 	menu_button.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
-	menu_button.text="MENU"
+	menu_button.text="•••"
 	menu_button.tooltip_text="Pause, view controls, restart, or begin a new world."
-	menu_button.add_theme_font_size_override("font_size",9)
+	menu_button.add_theme_font_size_override("font_size",15)
 	menu_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	menu_button.add_theme_stylebox_override("normal",Tokens.rail_button_style(false))
 	menu_button.add_theme_stylebox_override("hover",Tokens.rail_button_style(false,true))
@@ -200,21 +215,15 @@ func _make_rail_button(section:Dictionary)->Button:
 	var content:=VBoxContainer.new()
 	content.set_anchors_preset(Control.PRESET_FULL_RECT)
 	content.alignment=BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation",3)
+	content.add_theme_constant_override("separation",0)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
 	var glyph:=Label.new()
 	glyph.text=String(section.glyph)
 	glyph.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	glyph.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	Tokens.style_label(glyph,16,Tokens.TEXT_DIM,0.04)
+	Tokens.style_label(glyph,21,Tokens.TEXT_DIM)
 	content.add_child(glyph)
-	var label:=Label.new()
-	label.text=String(section.label)
-	label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	Tokens.style_label(label,8,Tokens.TEXT_DIM,0.1)
-	content.add_child(label)
 	var badge:=Label.new()
 	badge.visible=false
 	badge.custom_minimum_size=Vector2(16,16)
@@ -225,7 +234,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	badge.add_theme_color_override("font_color",Tokens.DARK_INK)
 	# Rail width is fixed, so a plain top-left offset lands the pill at the
 	# button's top-right corner (button content width = rail - 2*8 padding).
-	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-16.0-4.0,4.0)
+	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
 	button.add_child(badge)
 	rail_buttons[id]=button
 	rail_badges[id]=badge
@@ -280,17 +289,19 @@ func _build_time_pill()->void:
 	style.content_margin_right=8.0
 	style.content_margin_top=6.0
 	style.content_margin_bottom=6.0
+	style.bg_color=Color.TRANSPARENT
+	style.border_width_left=0;style.border_width_top=0;style.border_width_right=0;style.border_width_bottom=0
 	time_pill.add_theme_stylebox_override("panel",style)
 	add_child(time_pill)
 	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",12)
+	row.add_theme_constant_override("separation",7)
 	time_pill.add_child(row)
 	time_text=RichTextLabel.new()
 	time_text.bbcode_enabled=true
 	time_text.fit_content=true
 	time_text.autowrap_mode=TextServer.AUTOWRAP_OFF
 	time_text.scroll_active=false
-	time_text.custom_minimum_size=Vector2(210,32)
+	time_text.custom_minimum_size=Vector2(166,28)
 	time_text.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	time_text.add_theme_font_size_override("normal_font_size",15)
 	time_text.add_theme_font_size_override("bold_font_size",15)
@@ -300,7 +311,7 @@ func _build_time_pill()->void:
 	row.add_child(speed_row)
 	pause_button=Button.new()
 	pause_button.name="PauseResume"
-	pause_button.custom_minimum_size=Vector2(30,30)
+	pause_button.custom_minimum_size=Vector2(28,28)
 	pause_button.add_theme_font_size_override("font_size",11)
 	pause_button.pressed.connect(func()->void:
 		_on_speed_pressed(last_running_speed if terrain and int(terrain.game_speed)==0 else 0))
@@ -308,7 +319,7 @@ func _build_time_pill()->void:
 	speed_selector=OptionButton.new()
 	speed_selector.name="TimeSpeed"
 	speed_selector.fit_to_longest_item=false
-	speed_selector.custom_minimum_size=Vector2(100,30)
+	speed_selector.custom_minimum_size=Vector2(84,28)
 	speed_selector.add_theme_font_size_override("font_size",12)
 	for speed in 6:
 		speed_selector.add_item("Paused" if speed==0 else SPEED_TOOLTIPS[speed],speed)
@@ -352,7 +363,7 @@ const KPI_DEFS:Array[Dictionary]=[
 func _build_kpi_strip()->void:
 	kpi_strip=PanelContainer.new()
 	kpi_strip.name="KpiStrip"
-	kpi_strip.add_theme_stylebox_override("panel",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER_SOFT,1,8,2))
+	kpi_strip.add_theme_stylebox_override("panel",Tokens.flat(Color.TRANSPARENT))
 	add_child(kpi_strip)
 	var row:=HBoxContainer.new()
 	row.add_theme_constant_override("separation",0)
@@ -543,27 +554,25 @@ func _make_queue_card(item:Dictionary)->PanelContainer:
 func _build_toolbar()->void:
 	toolbar=PanelContainer.new()
 	toolbar.name="MapToolbar"
-	var style:=Tokens.flat(Tokens.TOOLBAR_BG,Tokens.BORDER,1,4,6.0)
+	var style:=Tokens.flat(Tokens.TOOLBAR_BG,Tokens.BORDER_SOFT,1,6,4.0)
 	toolbar.add_theme_stylebox_override("panel",style)
 	add_child(toolbar)
 	var row:=HBoxContainer.new()
 	row.add_theme_constant_override("separation",6)
-	var column:=VBoxContainer.new()
-	toolbar.add_child(column)
+	toolbar.add_child(row)
 	city_selector=OptionButton.new()
 	city_selector.name="CitySelector"
-	city_selector.custom_minimum_size=Vector2(240,32)
+	city_selector.custom_minimum_size=Vector2(150,28)
 	city_selector.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
-	column.add_child(city_selector)
-	column.add_child(row)
-	for action in [["settle","FOUND SETTLEMENT",true],["scouts","SEND SCOUTS",false],["diplomat","SEND DIPLOMAT",false],["convoy","FOCUS CONVOY",false]]:
+	row.add_child(city_selector)
+	for action in [["settle","＋ FOUND",true],["scouts","⌖ SCOUT",false],["diplomat","◇ ENVOY",false],["convoy","⌂ CONVOY",false]]:
 		var button:=Button.new()
 		button.name="Toolbar"+String(action[0]).capitalize()
 		button.text=String(action[1])
-		button.custom_minimum_size=Vector2(0,34)
-		button.add_theme_font_size_override("font_size",11)
+		button.custom_minimum_size=Vector2(0,28)
+		button.add_theme_font_size_override("font_size",10)
 		button.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT if bool(action[2]) else Tokens.BODY)
 		button.add_theme_color_override("font_disabled_color",Tokens.DISABLED)
 		button.add_theme_stylebox_override("normal",Tokens.action_button_style(bool(action[2])))
@@ -576,33 +585,31 @@ func _build_toolbar()->void:
 	var actions_divider:=_toolbar_divider()
 	actions_divider.name="ToolbarActionsDivider"
 	row.add_child(actions_divider)
-	var scale_box:=VBoxContainer.new()
+	var scale_box:=HBoxContainer.new()
 	scale_box.alignment=BoxContainer.ALIGNMENT_CENTER
-	scale_box.add_theme_constant_override("separation",3)
+	scale_box.add_theme_constant_override("separation",6)
 	row.add_child(scale_box)
 	scale_line=ColorRect.new()
 	scale_line.color=Tokens.LAYER_ON_FG
-	scale_line.custom_minimum_size=Vector2(90,2)
+	scale_line.custom_minimum_size=Vector2(56,2)
+	scale_line.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	scale_box.add_child(scale_line)
-	var scale_row:=HBoxContainer.new()
-	scale_row.add_theme_constant_override("separation",8)
-	scale_box.add_child(scale_row)
 	scale_label=Tokens.make_label("",10,Tokens.MUTED)
-	scale_row.add_child(scale_label)
+	scale_box.add_child(scale_label)
 	compass_label=Button.new()
-	compass_label.text="NORTH ↑"
-	compass_label.add_theme_font_size_override("font_size",12)
+	compass_label.text="N ↑"
+	compass_label.add_theme_font_size_override("font_size",10)
 	compass_label.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
 	compass_label.pressed.connect(func()->void: terrain._reset_camera_north())
 	compass_label.tooltip_text="Click to reset north-up (N). Rotate with Q/E or Shift + middle-drag; drag vertically to tilt."
-	scale_row.add_child(compass_label)
+	scale_box.add_child(compass_label)
 	distance_selector=OptionButton.new();distance_selector.name="MapDistanceLevel"
 	distance_selector.fit_to_longest_item=false
-	distance_selector.custom_minimum_size.x=130
+	distance_selector.custom_minimum_size=Vector2(104,28)
 	for level:Dictionary in terrain.CAMERA_DISTANCE_LEVELS:distance_selector.add_item(String(level.name))
 	distance_selector.tooltip_text="10,000 ft · 50,000 ft · Region · Continent. Scroll or pinch changes one level; Shift-scroll makes gentle fine adjustments."
 	distance_selector.item_selected.connect(func(index:int)->void:terrain.set_camera_distance_level(index))
-	scale_row.add_child(distance_selector)
+	scale_box.add_child(distance_selector)
 
 	toolbar.reset_size()
 	_position_toolbar()
@@ -632,9 +639,9 @@ func update_scale(pixel_width:float,distance_text:String,band:String,north:Strin
 	var signature:="%d|%s|%s|%s" % [roundi(pixel_width),distance_text,band,north]
 	if signature==_scale_signature: return
 	_scale_signature=signature
-	scale_line.custom_minimum_size=Vector2(clampf(pixel_width,72.0,174.0),2)
+	scale_line.custom_minimum_size=Vector2(clampf(pixel_width,48.0,110.0),2)
 	scale_label.text="%s · %s" % [band,distance_text]
-	compass_label.text="NORTH %s" % north
+	compass_label.text="N %s" % north
 	toolbar.reset_size()
 	_position_toolbar()
 
