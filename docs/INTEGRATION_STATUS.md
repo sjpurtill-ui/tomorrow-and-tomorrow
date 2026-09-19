@@ -1,3 +1,14 @@
+## September 19 — discovery cards no longer pause time: INTEGRATED
+
+Worker `a6247f6` is integrated at canonical commit `6bcdcdb`. Opening a discovery
+card, including milestone cards and the “announce all” preference, leaves the
+current simulation speed unchanged while the player reads. If the player or a
+different modal already paused time, the discovery card preserves that pause.
+
+The worker discovery-card and research-announcement suites pass 17/17. Canonical
+discovery-card validation passes 9/9 with zero errors, failures, skips or
+orphans. The patch ID matches the worker delivery exactly. Save data is unchanged.
+
 ## September 16 — physical T05 water, waste, kiln, and binder works: INTEGRATED
 
 Canonical commits `644464d` and `cc59227` integrate the first two operating
