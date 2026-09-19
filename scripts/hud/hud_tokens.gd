@@ -4,34 +4,34 @@ class_name HudTokens
 
 # Runtime palette. DisplayPreferences sets it before the HUD is constructed.
 static var color_mode:="light"
-static var PANEL_BG:=Color("f3efe6f0")
-static var PANEL_BG_SOLID:=Color("f6f2e9f8")
-static var DOCK_BG:=Color("f7f3eafa")
-static var TILE_BG:=Color("eae4d8")
-static var ROW_BG:=Color("f0ebe1")
-static var ACTIVE_BG:=Color("ded6c7")
-static var HOVER_BG:=Color("e6dfd2")
-static var CLOSE_HOVER_BG:=Color("ead8d1")
-static var BUTTON_BG:=Color("e9e2d5")
-static var FIELD_BG:=Color("fbf8f0")
-static var SPEED_IDLE_BG:=Color("ece6da")
-static var TRACK:=Color("d5cdbf")
-static var TOOLBAR_BG:=Color("f5f1e8ed")
-static var MAP_LABEL_BG:=Color("f7f3ead9")
-static var BORDER:=Color("aaa08e")
-static var BORDER_2:=Color("988e7d")
-static var BORDER_SOFT:=Color("c6bdad")
+static var PANEL_BG:=Color("e9dfcff2")
+static var PANEL_BG_SOLID:=Color("eee5d6fa")
+static var DOCK_BG:=Color("f2eadcfb")
+static var TILE_BG:=Color("dfd2be")
+static var ROW_BG:=Color("e8dece")
+static var ACTIVE_BG:=Color("d3c1a5")
+static var HOVER_BG:=Color("ddd0bd")
+static var CLOSE_HOVER_BG:=Color("dfc8bd")
+static var BUTTON_BG:=Color("e0d4c2")
+static var FIELD_BG:=Color("f7f1e7")
+static var SPEED_IDLE_BG:=Color("ded2c0")
+static var TRACK:=Color("c9baa4")
+static var TOOLBAR_BG:=Color("ebe1d2f2")
+static var MAP_LABEL_BG:=Color("eee5d7e8")
+static var BORDER:=Color("9b896e")
+static var BORDER_2:=Color("87745b")
+static var BORDER_SOFT:=Color("b9a991")
 static var LAYER_ON_BORDER:=Color("537d76")
-static var INK:=Color("252a28")
-static var BODY:=Color("353b38")
-static var BODY_2:=Color("464c48")
-static var TEXT_SOFT:=Color("59625d")
-static var TEXT_DIM:=Color("66706a")
-static var MUTED:=Color("737d77")
-static var DISABLED:=Color("929a95")
+static var INK:=Color("20231f")
+static var BODY:=Color("30352f")
+static var BODY_2:=Color("3e443d")
+static var TEXT_SOFT:=Color("4c554e")
+static var TEXT_DIM:=Color("566058")
+static var MUTED:=Color("687169")
+static var DISABLED:=Color("8c918a")
 static var LAYER_ON_FG:=Color("343b37")
-static var GOLD:=Color("8d6c20")
-static var GOLD_BRIGHT:=Color("6e5214")
+static var GOLD:=Color("8a6118")
+static var GOLD_BRIGHT:=Color("704b0d")
 static var GOLD_WASH:=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.12)
 static var GREEN:=Color("647a3e")
 static var RED:=Color("a64f40")
@@ -60,9 +60,9 @@ static func set_color_mode(mode:String)->void:
 		GOLD=Color("c9a95a");GOLD_BRIGHT=Color("ead078");GOLD_WASH=Color(201.0/255.0,169.0/255.0,90.0/255.0,0.12);GREEN=Color("8fa26a");RED=Color("c67462");AMBER=Color("d0b46f");TEAL=Color("79a8a0");BLUE=Color("8798b5");VIOLET=Color("a897c9");GLYPH_DARK=Color("0d1416")
 		WARN_BG=Color(201.0/255.0,169.0/255.0,90.0/255.0,0.08);WARN_BORDER=Color("7d6a3a");DANGER_BG=Color(198.0/255.0,116.0/255.0,98.0/255.0,0.12);DANGER_BORDER=Color("8a4f44");INFO_BG=Color(121.0/255.0,168.0/255.0,160.0/255.0,0.10);INFO_BORDER=Color("3e5f5a")
 	else:
-		PANEL_BG=Color("f3efe6f0");PANEL_BG_SOLID=Color("f6f2e9f8");DOCK_BG=Color("f7f3eafa");TILE_BG=Color("eae4d8");ROW_BG=Color("f0ebe1");ACTIVE_BG=Color("ded6c7");HOVER_BG=Color("e6dfd2");CLOSE_HOVER_BG=Color("ead8d1");BUTTON_BG=Color("e9e2d5");FIELD_BG=Color("fbf8f0");SPEED_IDLE_BG=Color("ece6da");TRACK=Color("d5cdbf");TOOLBAR_BG=Color("f5f1e8ed");MAP_LABEL_BG=Color("f7f3ead9")
-		BORDER=Color("aaa08e");BORDER_2=Color("988e7d");BORDER_SOFT=Color("c6bdad");LAYER_ON_BORDER=Color("537d76");INK=Color("252a28");BODY=Color("353b38");BODY_2=Color("464c48");TEXT_SOFT=Color("59625d");TEXT_DIM=Color("66706a");MUTED=Color("737d77");DISABLED=Color("929a95");LAYER_ON_FG=Color("343b37")
-		GOLD=Color("8d6c20");GOLD_BRIGHT=Color("6e5214");GOLD_WASH=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.12);GREEN=Color("647a3e");RED=Color("a64f40");AMBER=Color("8c6d28");TEAL=Color("427c73");BLUE=Color("596d91");VIOLET=Color("735f92");GLYPH_DARK=Color("f4efe5")
+		PANEL_BG=Color("e9dfcff2");PANEL_BG_SOLID=Color("eee5d6fa");DOCK_BG=Color("f2eadcfb");TILE_BG=Color("dfd2be");ROW_BG=Color("e8dece");ACTIVE_BG=Color("d3c1a5");HOVER_BG=Color("ddd0bd");CLOSE_HOVER_BG=Color("dfc8bd");BUTTON_BG=Color("e0d4c2");FIELD_BG=Color("f7f1e7");SPEED_IDLE_BG=Color("ded2c0");TRACK=Color("c9baa4");TOOLBAR_BG=Color("ebe1d2f2");MAP_LABEL_BG=Color("eee5d7e8")
+		BORDER=Color("9b896e");BORDER_2=Color("87745b");BORDER_SOFT=Color("b9a991");LAYER_ON_BORDER=Color("4b746c");INK=Color("20231f");BODY=Color("30352f");BODY_2=Color("3e443d");TEXT_SOFT=Color("4c554e");TEXT_DIM=Color("566058");MUTED=Color("687169");DISABLED=Color("8c918a");LAYER_ON_FG=Color("30362f")
+		GOLD=Color("8a6118");GOLD_BRIGHT=Color("704b0d");GOLD_WASH=Color(138.0/255.0,97.0/255.0,24.0/255.0,0.13);GREEN=Color("536d32");RED=Color("a34435");AMBER=Color("805d1d");TEAL=Color("356f66");BLUE=Color("4d6389");VIOLET=Color("695587");GLYPH_DARK=Color("f4efe5")
 		WARN_BG=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.10);WARN_BORDER=Color("8d6c20");DANGER_BG=Color(166.0/255.0,79.0/255.0,64.0/255.0,0.10);DANGER_BORDER=Color("a64f40");INFO_BG=Color(66.0/255.0,124.0/255.0,115.0/255.0,0.10);INFO_BORDER=Color("427c73")
 
 static func is_light()->bool:return color_mode=="light"
@@ -90,7 +90,7 @@ static func control_theme()->Theme:
 	_control_theme=result
 	return result
 
-static func surface(dark_color:Color,light_color:Color=Color("f0ebe1"))->Color:
+static func surface(dark_color:Color,light_color:Color=Color("e8dece"))->Color:
 	if not is_light():return dark_color
 	var result:=light_color;result.a=dark_color.a
 	return result
@@ -101,10 +101,10 @@ const COHORT_COLORS:Array[Color]=[Color("#9b7252"),Color("#779a67"),Color("#5e9d
 const ROLE_COLORS:Array[Color]=[Color("#8fa26a"),Color("#79a8a0"),Color("#a9946e"),Color("#b39a68"),Color("#c9a95a"),Color("#8798b5"),Color("#a897c9"),Color("#d0b46f"),Color("#c67462")]
 
 # Layout
-const RAIL_WIDTH:=84.0
-const RAIL_BUTTON_HEIGHT:=62.0
-const RAIL_HEADER_HEIGHT:=44.0
-const DOCK_X:=96.0
+const RAIL_WIDTH:=76.0
+const RAIL_BUTTON_HEIGHT:=54.0
+const RAIL_HEADER_HEIGHT:=38.0
+const DOCK_X:=88.0
 const DOCK_WIDTH:=540.0
 const DOCK_DETAIL_X:=652.0
 const DOCK_MARGIN_Y:=14.0
@@ -149,6 +149,13 @@ static func chip_style(hover:bool=false)->StyleBoxFlat:
 	return style
 
 static func rail_button_style(active:bool,hover:bool=false)->StyleBoxFlat:
+	if is_light():
+		var light_style:=flat(ACTIVE_BG if active else HOVER_BG if hover else Color.TRANSPARENT)
+		if active or hover:
+			light_style.border_color=GOLD if active else BORDER_2
+			light_style.border_width_left=3 if active else 2
+		light_style.set_corner_radius_all(2)
+		return light_style
 	var style:=flat(ACTIVE_BG if active else Color(0,0,0,0),GOLD if (active or hover) else BORDER_2,1,4)
 	return style
 
@@ -201,7 +208,7 @@ static func brief_style(tone:String)->StyleBoxFlat:
 	return style
 
 static func pill_style()->StyleBoxFlat:
-	var style:=flat(PANEL_BG,BORDER,1,22)
+	var style:=flat(PANEL_BG,BORDER_SOFT,1,8)
 	return style
 
 static var _spaced_fonts:Dictionary={}

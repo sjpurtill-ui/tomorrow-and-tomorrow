@@ -18736,7 +18736,7 @@ func _update_time_interface() -> void:
 	elif settlement_convoy_targeting:
 		travel_status_label.text="SELECT KNOWN LAND FOR THE NEW SETTLEMENT  •  click a viable destination or press the button again to cancel"
 	elif placement_building == "":
-		travel_status_label.text = ("FOUNDING CONVOY READY  •  LEFT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
+		travel_status_label.text = ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "RECOGNIZED RESOURCES %s  •  TWO-FINGER SLIDE TO PAN  •  UP / DOWN TO ZOOM" % ("SHOWN" if resource_view_enabled else "HIDDEN"))
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.

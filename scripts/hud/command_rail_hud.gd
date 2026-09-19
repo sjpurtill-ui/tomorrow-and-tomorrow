@@ -352,7 +352,7 @@ const KPI_DEFS:Array[Dictionary]=[
 func _build_kpi_strip()->void:
 	kpi_strip=PanelContainer.new()
 	kpi_strip.name="KpiStrip"
-	kpi_strip.add_theme_stylebox_override("panel",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER,1,22,2))
+	kpi_strip.add_theme_stylebox_override("panel",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER_SOFT,1,8,2))
 	add_child(kpi_strip)
 	var row:=HBoxContainer.new()
 	row.add_theme_constant_override("separation",0)
@@ -820,7 +820,7 @@ func _refresh_time()->void:
 	var signature:="%d|%d|%d|%s" % [year,day_of_year,speed,temperature_text]
 	if signature==_time_signature: return
 	_time_signature=signature
-	time_text.text="[b][color=#f0e6d1]Year %d · Day %d[/color][/b][color=#8a948f] · %s[/color]" % [year,day_of_year,temperature_text]
+	time_text.text="[b][color=#%s]Year %d · Day %d[/color][/b][color=#%s] · %s[/color]" % [Tokens.INK.to_html(false),year,day_of_year,Tokens.TEXT_SOFT.to_html(false),temperature_text]
 	time_pill.tooltip_text="Local air temperature at the settlement. The annual warm–cold cycle drives food yields and cold-season rations; the arrow is the day-to-day trend."
 	_style_speed_controls(speed)
 	time_pill.reset_size()
