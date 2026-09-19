@@ -302,7 +302,8 @@ var map_help_button:Button
 var map_help_panel:PanelContainer
 var map_help_title:Label
 var map_help_body:Label
-var map_help_dismissed:=false
+# Map help remains available on demand, but never opens over a new campaign.
+var map_help_dismissed:=true
 var travel_council_notice: Button
 var travel_council_notice_until_msec := 0
 var foreign_alert_panel:PanelContainer
@@ -12109,7 +12110,7 @@ func _build_map_help(layer:CanvasLayer)->void:
 	# not flash map controls underneath that mandatory, mouse-stopping modal.
 	var available_on_map:=not capture_render_active and GameState.founding_focus!=""
 	map_help_button.visible=available_on_map
-	map_help_panel.visible=available_on_map
+	map_help_panel.visible=available_on_map and not map_help_dismissed
 	layer.add_child(map_help_panel)
 	_refresh_map_help()
 
@@ -12123,7 +12124,7 @@ func _map_help_presentation(site_committed:bool,targeting:bool,settlement_convoy
 	if not site_committed:
 		return {
 			"title":"FIND A HOME",
-			"body":"Click land—including black-map land—to move the convoy.\nClick its card to review water; use HALT & FORAGE between longer legs."
+			"body":"Left-click land to inspect it. Right-click land to move the convoy.\nClick its card to review water; use HALT & FORAGE between longer legs."
 		}
 	if settlement_convoy_active:
 		return {
@@ -20440,10 +20441,29 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not settlement_convoy_targeting and _focus_settlement_from_screen(event.position, event.double_click):
 			get_viewport().set_input_as_handled()
 			return
-		_move_settlers_to_screen(event.position)
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed and selected_army_id!=-1:
-		_order_selected_army_to_screen(event.position)
-		get_viewport().set_input_as_handled()
+		if _handle_map_ground_button(MOUSE_BUTTON_LEFT,event.position):get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+		if _handle_map_ground_button(MOUSE_BUTTON_RIGHT,event.position):get_viewport().set_input_as_handled()
+
+
+func _handle_map_ground_button(button_index:int,screen_position:Vector2)->bool:
+	if button_index==MOUSE_BUTTON_LEFT:
+		_inspect_land_from_screen(screen_position)
+		return true
+	if button_index!=MOUSE_BUTTON_RIGHT:return false
+	if selected_army_id!=-1:
+		_order_selected_army_to_screen(screen_position)
+		return true
+	if not GameState.settlement_site_committed:
+		_move_settlers_to_screen(screen_position)
+		return true
+	return false
+
+
+func _inspect_land_from_screen(screen_position:Vector2)->void:
+	var hit:Dictionary=_terrain_hit(screen_position)
+	if hit.is_empty() or not hit.get("position") is Vector3:return
+	_inspect_location(hit.position)
 
 func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: bool, city_id:String="") -> bool:
 	if camera==null or not ("Hearth Circle" in GameState.settlement_completed):
