@@ -587,11 +587,18 @@ func _persistent_job_report(job:Dictionary)->Dictionary:
 	var line:Dictionary={}
 	for candidate:Dictionary in MilitaryCampaign.production_lines_snapshot().lines:
 		if int(candidate.id)==id:line=candidate;break
-	var targets:Array=[]
-	for target:int in [0,5,20,100,500]:targets.append({"label":"CONTINUOUS" if target==0 else "STOCK %d"%target,"primary":int(job.target_stock)==target,"on_press":func():_production_result(MilitaryCampaign.configure_production_line(id,target,bool(job.paused)))})
-	var priorities:Array=[]
-	for weight:float in [.5,1.0,2.0,4.0]:priorities.append({"label":"%.1f×"%weight,"primary":is_equal_approx(float(job.allocation),weight),"on_press":func():_production_result(MilitaryCampaign.set_production_line_allocation(id,weight))})
-	return {"blocks":[{"type":"text","heading":MilitaryCampaign.PersistentProduction.product_name(String(job.item)).to_upper(),"text":MilitaryCampaign.PersistentProduction.product_description(String(job.item))+"\n"+("CONTINUOUS — NO LIMIT\n" if int(job.target_stock)==0 else "MAINTAIN %d IN STORES\n" % int(job.target_stock))+"%s · %d in stores · %d finished by this line.\n%.0f%% efficiency · %.0f%% of next item complete. Forecast %.2f/day with current inputs; last day %d completed. See material stocks below."%[String(line.get("state","")),int(line.get("stock",0)),int(job.completed),float(job.efficiency)*100,float(job.progress_days)/float(job.work_per_item)*100,float(line.get("forecast_output_per_day",0)),int(job.get("last_output",0))]},_line_materials_block(line),{"type":"actions","heading":"TARGET","items":targets},{"type":"actions","heading":"RELATIVE PRIORITY","items":priorities},{"type":"actions","items":[{"label":"RETURN TO LEADER","disabled":bool(job.get("planner_managed",false)),"on_press":func():_production_result(MilitaryCampaign.workshop.delegate_line(id))},{"label":"RESUME" if bool(job.paused) else "PAUSE","on_press":func():_production_result(MilitaryCampaign.configure_production_line(id,int(job.target_stock),not bool(job.paused)))},focused_action("RETOOL LINE","Changes item; loses some practice and unfinished work",_retool_report.bind(id)),{"label":"CLOSE LINE","sub":"Finished items stay; consumed materials are not refunded","on_press":func():_production_result(MilitaryCampaign.cancel_equipment_job(id))},focused_action("CRAFTING ALLOCATION","Balance workshop lines and other crafting",_production_labor_report)]}]}
+	if line.is_empty():return {"blocks":[{"type":"text","text":"This production line is no longer active."}]}
+	return {"blocks":[{"type":"production_line","line":line,"title":MilitaryCampaign.PersistentProduction.product_name(String(job.item)),"description":MilitaryCampaign.PersistentProduction.product_description(String(job.item)),"owner":MilitaryCampaign.workshop.owner(),"staff_enabled":bool(MilitaryCampaign.workshop.data.enabled),
+		"on_target":func(target:int):_production_result(MilitaryCampaign.configure_production_line(id,target,bool(job.paused))),
+		"on_priority":func(weight:float):
+			var result:=MilitaryCampaign.configure_production_line(id,int(job.target_stock),bool(job.paused))
+			if not result.has("error"):result=MilitaryCampaign.set_production_line_allocation(id,weight)
+			_production_result(result),
+		"on_delegate":func():_production_result(MilitaryCampaign.workshop.delegate_line(id)),
+		"on_pause":func():_production_result(MilitaryCampaign.configure_production_line(id,int(job.target_stock),not bool(job.paused))),
+		"on_retool":focused_action("RETOOL LINE","",_retool_report.bind(id)).on_press,
+		"on_labor":focused_action("WORKFORCE","",_production_labor_report).on_press,
+		"on_close":func():_production_result(MilitaryCampaign.cancel_equipment_job(id))}]}
 
 func _line_materials_block(line:Dictionary)->Dictionary:
 	var rows:Array=[]
