@@ -27,6 +27,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"cabinet":
+				var cabinet:=preload("res://scripts/hud/government_cabinet_widget.gd").new()
+				section.add_child(cabinet);cabinet.setup(block)
 			"production_board":
 				var board:=preload("res://scripts/hud/production_board.gd").new()
 				section.add_child(board);board.setup(block)

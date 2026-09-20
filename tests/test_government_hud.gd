@@ -28,7 +28,7 @@ func test_rail_has_distinct_government_destination_and_drawn_icons()->void:
 	for section:Dictionary in CommandRail.SECTIONS:
 		var icon:Control=auto_free(NavIcon.new(String(section.id)))
 		assert_str(icon.icon_id).is_equal(String(section.id))
-		assert_vector(icon.custom_minimum_size).is_equal(Vector2(26,26))
+		assert_vector(icon.custom_minimum_size).is_equal(Vector2(30,30))
 
 func test_government_screen_has_no_candidate_picker_and_removal_auto_replaces()->void:
 	var terrain:Terrain=auto_free(Terrain.new())
@@ -37,16 +37,15 @@ func test_government_screen_has_no_candidate_picker_and_removal_auto_replaces()-
 	assert_array(provider.meta().subtabs).contains_exactly(["OFFICEHOLDERS","POLICY"])
 	var before:=GovernmentPeopleSystem.officeholder("Steward")
 	var page:Dictionary=provider.tab(0)
-	var labels:Array[String]=[]
-	for block:Dictionary in page.blocks:
-		if String(block.get("type",""))!="actions":continue
-		for item:Dictionary in block.items:labels.append(String(item.label))
-	assert_array(labels).contains(["DISMISS","EXECUTE"])
-	assert_bool(labels.any(func(label:String)->bool:return "APPOINT" in label or "CANDIDATE" in label)).is_false()
-	for block:Dictionary in page.blocks:
-		if String(block.get("type",""))=="actions":
-			(block.items[0].on_press as Callable).call()
-			break
+	assert_int(page.kpis.size()).is_equal(0)
+	assert_bool(page.brief.is_empty()).is_true()
+	assert_int(page.blocks.size()).is_equal(1)
+	assert_str(String(page.blocks[0].type)).is_equal("cabinet")
+	var item:Dictionary=page.blocks[0].items[0]
+	assert_bool(item.on_dismiss is Callable).is_true()
+	assert_bool(item.on_execute is Callable).is_true()
+	assert_bool(item.has("label")).is_false()
+	(item.on_dismiss as Callable).call()
 	assert_bool(bool(terrain.last_report.get("ok",false))).is_true()
 	assert_int(int(GovernmentPeopleSystem.officeholder("Steward").person_id)).is_not_equal(int(before.person_id))
 	assert_int(hud.refreshes).is_equal(1)
