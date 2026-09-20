@@ -379,7 +379,7 @@ const KPI_DEFS:Array[Dictionary]=[
 	{"id":"water","label":"WATER","width":112.0,"accent":Tokens.TEAL,"section":"economy","sub":0},
 	{"id":"health","label":"HEALTH","width":152.0,"accent":Tokens.TEAL,"section":"health","sub":0},
 	{"id":"science","label":"SCIENCE","width":140.0,"accent":Tokens.GOLD,"section":"inquiry","sub":0},
-	{"id":"gdp","label":"REAL GDP / DAY","width":136.0,"accent":Tokens.BLUE,"section":"economy","sub":3},
+	{"id":"gdp","label":"REAL GDP / DAY","width":136.0,"accent":Tokens.BLUE,"section":"economy","sub":2},
 ]
 
 func _build_kpi_strip()->void:

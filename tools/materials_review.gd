@@ -34,6 +34,8 @@ func render()->void:
 	assert(data.rows[0].key=="Timber" and data.rows[0].delivered==18.4)
 	assert(data.rows[4].points[0].value==null)
 	assert(not provider.open_expanded_tab(1))
+	assert(provider.meta().subtabs==["FOOD & WATER","MATERIALS","WEALTH"])
+	assert(provider._local_tab(2).kpis[0].label=="REAL GDP / DAY")
 	var stocks_before:Dictionary=state.resource_stockpiles.duplicate(true)
 	data.on_select.call("Stone")
 	assert(provider.selected_material=="Stone")
@@ -64,5 +66,5 @@ func render()->void:
 
 class ReviewProvider extends RefCounted:
 	var data:Dictionary
-	func meta()->Dictionary:return {"eyebrow":"GODOT UI REVIEW · SEEDED SIMULATION","title":"Materials","serif":true,"title_size":38,"spread_tabs":true,"subtabs":["FOOD & WATER","MATERIALS","DISTRIBUTION","WEALTH"]}
+	func meta()->Dictionary:return {"eyebrow":"GODOT UI REVIEW · SEEDED SIMULATION","title":"Materials","serif":true,"title_size":38,"spread_tabs":true,"subtabs":["FOOD & WATER","MATERIALS","WEALTH"]}
 	func tab(_sub:int)->Dictionary:return {"blocks":[data]}
