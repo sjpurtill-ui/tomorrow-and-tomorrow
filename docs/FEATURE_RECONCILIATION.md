@@ -1570,3 +1570,13 @@ Existing leaders continue scheduling work; manual takeover is optional. No new
 construction queue override has been implemented. Simulation and save formats
 are unchanged. The GdUnit runner crashed before assertions; live visual review
 is pending. This structural change requires a restart to appear in the player.
+
+## September 19 — optional work overrides
+
+Worker `28caf4b` integrated as `54772f4`. Construction supports an optional
+per-city project priority, subject to existing prerequisites; blank preference
+retains leader scheduling. Production can return one persistent line to staff,
+resuming it without resetting work or touching other manual lines. Optional
+city field is contained in existing settlement records. Focused runtime checks
+passed for setting/clearing priorities, invalid-city rejection, per-line isolation
+and work preservation. Sidebar providers compile successfully.
