@@ -1694,3 +1694,9 @@ Worker `6e387951` from `67d5d47c` is integrated as canonical `c0a5d2fe`. Observe
 
 The same 24-day, twelve-opponent, day-11238 replay reduced headless mean daily CPU from 281.60 to 253.99 ms (9.8%). Owning simulation state matches the baseline, including full food forecasts; only wall-clock save time and deliberately narrowed observer projections are exempted, with retained projection values checked. Canonical focused validation passes 17/17 with zero errors/failures/skips/orphans. No shared-file conflict occurred. Resource search caches are excluded from saves; existing saves retain their private city data. No player restart or release packaging occurred. This is not a rendered-FPS or year-3000 guarantee. Details: `docs/performance/CAMPAIGN_COST.md`.
 
+## September 20 — second campaign performance pass: INTEGRATED
+
+Worker `2d264dd2` on `codex/campaign-scaling`, based on `e341b8eb`, is integrated as canonical `4ab3a7bd`. Research readiness uses a short-circuit predicate instead of constructing descriptive routes; material profiles reuse constant definitions; food spoilage and forecasts batch preservation lookups. Branching, imported knowledge, adoption, staffing and all food mechanics retain their existing semantics. No persistent readiness cache or save-schema change was introduced.
+
+The same 24-day, twelve-opponent, day-11238 replay reduced mean headless daily CPU from 256.32 to 236.07 ms (7.9% additional reduction). Full saved simulation state matches, excluding only the save timestamp. Canonical focused validation passes 33/33 with zero errors, failures, skips or orphans. Synthetic large-knowledge preservation lookup is 13.6 times faster, a component result rather than a whole-game claim. No shared-file conflicts, player restart or release packaging occurred. The year-100 campaign was unavailable; this does not establish year-3000 performance. Details: `docs/performance/CAMPAIGN_SCALING.md`.
+
