@@ -64,6 +64,10 @@ static func _current_settlement_project() -> Dictionary:
 	if WorldSimulation.state.settlement_completed.is_empty():
 		for project in available:
 			if String(project.name)=="Hearth Circle": return project
+	var city:=WorldSimulation.settlements.settlement_record(WorldSimulation.state.resource_settlement_id)
+	var priority:=String(city.get("construction_priority",""))
+	for project in available:
+		if String(project.name)==priority:return project
 	var best: Dictionary = available[0]
 	var best_score := -INF
 	for project in available:
@@ -114,3 +118,18 @@ static func process_day()->Array[Dictionary]:
 	WorldSimulation.state.record_building_event(event)
 	events.append(event)
 	return events
+
+static func set_priority(city_id:String,title:String)->Dictionary:
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
+	if city.is_empty():return {"error":"Found a settlement before setting construction priorities."}
+	if not String(city.get("occupied_by","")).is_empty():return {"error":"Construction is unavailable while occupied."}
+	if not title.is_empty():
+		var valid:=false
+		for project in _settlement_definitions():
+			if String(project.name)!=title:continue
+			var discovery:=String(project.get("discovery",""))
+			valid=discovery.is_empty() or discovery in WorldSimulation.state.known_discoveries
+		if not valid:return {"error":"That project is not known."}
+	city["construction_priority"]=title
+	WorldSimulation.state.settlement_network_revision+=1
+	return {"ok":true,"message":"Leader manages construction." if title.is_empty() else title+" prioritized when requirements are met."}
