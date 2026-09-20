@@ -13,7 +13,9 @@ signal menu_requested
 signal escape_pressed
 
 const SECTIONS:Array[Dictionary]=[
-	{"id":"settlement","tooltip":"Settlement · people, labor, works and defense · F1"},
+	{"id":"settlement","tooltip":"Settlement · people, housing and history · F1"},
+	{"id":"construction","tooltip":"Construction · buildings, infrastructure and ongoing work · F7"},
+	{"id":"production","tooltip":"Production · civilian goods and military equipment · F9"},
 	{"id":"economy","tooltip":"Economy · food, water and materials · F2"},
 	{"id":"government","tooltip":"Government · officeholders, authority and policy · F3"},
 	{"id":"civ","tooltip":"Civilization · society and civic dialogue · F4"},
@@ -779,7 +781,7 @@ func _unhandled_key_input(event:InputEvent)->void:
 	if key.keycode in [KEY_F5,KEY_F6] and key.shift_pressed:
 		MilitaryCampaign.joint_operations.open_service("navy" if key.keycode==KEY_F5 else "air")
 		get_viewport().set_input_as_handled();return
-	var keys:={KEY_F1:"settlement",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F8:"military"}
+	var keys:={KEY_F1:"settlement",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F8:"military",KEY_F7:"construction",KEY_F9:"production"}
 	if keys.has(key.keycode):
 		toggle_section(String(keys[key.keycode]))
 		get_viewport().set_input_as_handled()

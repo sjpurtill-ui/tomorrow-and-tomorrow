@@ -23,7 +23,7 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"OWNED SETTLEMENT · %s" % String(settlement.get("classification","settlement")).to_upper(),
 		"title":String(settlement.get("name",terrain._settlement_display_name())).capitalize(),
-		"subtabs":["OVERVIEW","WORKS","HISTORY"],
+		"subtabs":["OVERVIEW","HISTORY"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -37,7 +37,7 @@ func _city_tab(sub:int)->Dictionary:
 		var traveling:=bool(GameState.founding_journey.get("active",false))
 		var travel_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
 		var items:Array=[{"label":"FOOD & MATERIALS","sub":"Water access and current stores","on_press":jump("economy",0)}]
-		if committed:items.append({"label":"FOUNDING WORK","sub":"Progress toward the Hearth Circle","on_press":jump("settlement",1)})
+		if committed:items.append({"label":"FOUNDING WORK","sub":"Progress toward the Hearth Circle","on_press":jump("construction",0)})
 		else:
 			items.push_front({"label":"FOUND SETTLEMENT","sub":"Commit the convoy’s present site","primary":not traveling,"on_press":terrain._on_settlement_action_pressed})
 			if traveling:items.push_front({"label":"HALT & FORAGE","sub":"Camp here and replenish before another leg","primary":true,"on_press":terrain._halt_founding_convoy_to_forage,"tip":"The convoy stops at its current physical position. Food workers forage locally while time advances; no food is invented."})
@@ -64,8 +64,7 @@ func _city_tab(sub:int)->Dictionary:
 	]
 	var brief:Dictionary={"tone":"info" if not leader.is_empty() else "warn","title":"%s is managing %s" % [leader_name,String(settlement.get("name","this settlement"))] if not leader.is_empty() else "This settlement has no local leader","why":"WHY · %s\nEFFECT · %s" % [focus_reason,focus_effect] if not leader.is_empty() else "Appoint a person from the local governing pool so routine needs are handled without micromanagement."}
 	match sub:
-		1: return {"kpis":kpis,"brief":brief,"blocks":SettlementModel.with_city_resources(settlement_id,func()->Array: return _works_blocks(GameState.simulation_metrics,profile,settlement,management))}
-		2: return {"kpis":kpis,"brief":brief,"blocks":_history_blocks(metrics,settlement)}
+		1: return {"kpis":kpis,"brief":brief,"blocks":_history_blocks(metrics,settlement)}
 	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_overview_blocks(settlement)}
 
 

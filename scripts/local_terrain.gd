@@ -11873,6 +11873,8 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.menu_requested.connect(_open_world_menu)
 	hud.escape_pressed.connect(_on_hud_escape)
 	hud.register_provider("settlement",preload("res://scripts/hud/content/dock_content_settlement.gd").new(self,hud))
+	hud.register_provider("construction",preload("res://scripts/hud/content/dock_content_construction.gd").new(self,hud))
+	hud.register_provider("production",preload("res://scripts/hud/content/dock_content_production.gd").new(self,hud))
 	hud.register_provider("health",preload("res://scripts/hud/content/dock_detail_health.gd").new(self,hud))
 	hud.register_provider("economy",preload("res://scripts/hud/content/dock_content_economy.gd").new(self,hud))
 	hud.register_provider("government",preload("res://scripts/hud/content/dock_content_government.gd").new(self,hud))

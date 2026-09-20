@@ -27,6 +27,13 @@ func _draw()->void:
 			draw_colored_polygon(PackedVector2Array([Vector2(5,14),Vector2(15,5),Vector2(25,14)]),c)
 			draw_rect(Rect2(8,13,14,11),c,true)
 			draw_rect(Rect2(13,18,4,6),_cut_color(),true)
+		"construction":
+			draw_line(Vector2(9,25),Vector2(21,5),c,4,true)
+			draw_colored_polygon(PackedVector2Array([Vector2(12,5),Vector2(16,2),Vector2(28,9),Vector2(24,15)]),c)
+		"production":
+			draw_colored_polygon(PackedVector2Array([Vector2(4,25),Vector2(4,13),Vector2(11,9),Vector2(11,14),Vector2(18,10),Vector2(18,16),Vector2(26,16),Vector2(26,25)]),c)
+			draw_rect(Rect2(22,4,4,13),c)
+			for x in [8.0,14.0,20.0]:draw_rect(Rect2(x,20,3,3),_cut_color())
 		"economy":
 			# Three stacked coins with curved rims, not a menu/list glyph.
 			for y in [21.0,15.0,9.0]:
