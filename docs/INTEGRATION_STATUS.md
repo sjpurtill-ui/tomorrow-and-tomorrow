@@ -1,3 +1,9 @@
+## September 20 — first campaign performance pass: INTEGRATED
+
+Worker `6e387951` from `67d5d47c` is integrated as canonical `c0a5d2fe`. Observer city projections omit unused detailed private metrics; surface-front searches use narrow catchment reads and a bounded, invalidated search cache; food forecasts avoid empty botany work. Food simulation depth, AI cadence and elapsed-day rules are unchanged.
+
+The same 24-day, twelve-opponent, day-11238 replay reduced headless mean daily CPU from 281.60 to 253.99 ms (9.8%). Owning simulation state matches the baseline, including full food forecasts; only wall-clock save time and deliberately narrowed observer projections are exempted, with retained projection values checked. Canonical focused validation passes 17/17 with zero errors/failures/skips/orphans. No shared-file conflict occurred. Resource search caches are excluded from saves; existing saves retain their private city data. No player restart or release packaging occurred. This is not a rendered-FPS or year-3000 guarantee. Details: `docs/performance/CAMPAIGN_COST.md`.
+
 ## September 19 — compact ground survey: INTEGRATED
 
 Worker `92b24a1` is integrated at canonical commit `6072018`. Ground Survey is
