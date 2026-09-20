@@ -1,67 +1,68 @@
 extends VBoxContainer
-## Visual cabinet: authority gauges, office seals, abstract portraits, ability
-## bars, and icon-only removal controls.
+## Compact government cards. Vacancies have no invented person or actions.
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Glyph:=preload("res://scripts/hud/government_glyph.gd")
 
 func setup(block:Dictionary)->void:
 	name="GovernmentCabinet"
-	add_theme_constant_override("separation",10)
+	add_theme_constant_override("separation",12)
 	_add_authority(float(block.get("legitimacy",0.0)),float(block.get("support",0.0)))
 	for item_variant in block.get("items",[]) as Array:
 		_add_office(item_variant as Dictionary)
 
 func _add_authority(legitimacy:float,support:float)->void:
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);add_child(row)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);add_child(row)
 	_add_gauge(row,"LEGITIMACY",legitimacy,Tokens.GOLD,"Public acceptance of the government")
-	_add_gauge(row,"COUNCIL",support,Tokens.TEAL,"Support for the current government")
-	var auto:=PanelContainer.new();auto.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	auto.add_theme_stylebox_override("panel",Tokens.tile_style(Tokens.GREEN));auto.tooltip_text="Vacancies are filled automatically from living public figures."
-	row.add_child(auto)
-	var auto_box:=VBoxContainer.new();auto_box.alignment=BoxContainer.ALIGNMENT_CENTER;auto.add_child(auto_box)
-	var mark:=Tokens.make_label("↻",25,Tokens.GREEN);mark.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;auto_box.add_child(mark)
-	var label:=Tokens.make_label("SUCCESSION",8,Tokens.MUTED,0.08);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;auto_box.add_child(label)
+	_add_gauge(row,"COUNCIL SUPPORT",support,Tokens.TEAL,"Support for the current government")
 
 func _add_gauge(parent:HBoxContainer,label_text:String,value:float,color:Color,tip:String)->void:
-	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.tooltip_text=tip
-	panel.add_theme_stylebox_override("panel",Tokens.tile_style(color));parent.add_child(panel)
-	var box:=VBoxContainer.new();box.alignment=BoxContainer.ALIGNMENT_CENTER;box.add_theme_constant_override("separation",1);panel.add_child(box)
-	var value_label:=Tokens.make_label("%d" % roundi(value*100.0),21,color);value_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;box.add_child(value_label)
-	var track:=ColorRect.new();track.color=Tokens.TRACK;track.custom_minimum_size=Vector2(0,4);box.add_child(track)
+	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.tooltip_text=tip;box.add_theme_constant_override("separation",6);parent.add_child(box)
+	var heading:=HBoxContainer.new();heading.alignment=BoxContainer.ALIGNMENT_CENTER;box.add_child(heading)
+	var label:=Tokens.make_label(label_text,9,Tokens.MUTED,0.06);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(label)
+	heading.add_child(Tokens.make_label("%d%%" % roundi(value*100.0),18,color))
+	var track:=ColorRect.new();track.color=Tokens.TRACK;track.custom_minimum_size=Vector2(0,3);box.add_child(track)
 	var fill:=ColorRect.new();fill.color=color;fill.anchor_right=clampf(value,0,1);fill.anchor_bottom=1.0;track.add_child(fill)
-	var label:=Tokens.make_label(label_text,8,Tokens.MUTED,0.08);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;box.add_child(label)
 
 func _add_office(item:Dictionary)->void:
+	var vacant:=bool(item.get("vacant",false))
 	var accent:Color=item.get("accent",Tokens.GOLD)
 	var card:=PanelContainer.new();card.name="OfficeCard";card.tooltip_text=String(item.get("tip",""))
-	var style:=Tokens.flat(Tokens.ROW_BG,accent,1,6);style.border_width_left=4;style.content_margin_left=12;style.content_margin_right=10;style.content_margin_top=10;style.content_margin_bottom=10
+	var style:=Tokens.flat(Tokens.ROW_BG,Tokens.BORDER_SOFT,1,6,12)
 	card.add_theme_stylebox_override("panel",style);add_child(card)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",11);card.add_child(row)
-	var seal:=Glyph.new();seal.setup(String(item.get("office_key","office")),accent);seal.custom_minimum_size=Vector2(44,64);seal.tooltip_text=String(item.get("office_title","Office"));row.add_child(seal)
-	var portrait:=Glyph.new();portrait.setup("portrait",accent,int(item.get("person_id",1)));portrait.custom_minimum_size=Vector2(58,64);row.add_child(portrait)
-	var identity:=VBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.add_theme_constant_override("separation",3);row.add_child(identity)
-	identity.add_child(Tokens.make_label(String(item.get("office_title","OFFICE")).to_upper(),9,accent,0.1))
-	var name_label:=Tokens.make_label(String(item.get("name","Vacant")),16,Tokens.INK);name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;identity.add_child(name_label)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
+	var medallion:=Control.new();medallion.custom_minimum_size=Vector2(64,64);medallion.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(medallion)
+	var portrait:=Glyph.new();portrait.name="EmptySeat" if vacant else "Portrait";portrait.setup("vacant" if vacant else "portrait",Tokens.MUTED if vacant else accent,int(item.get("person_id",1)));portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);medallion.add_child(portrait)
+	if not vacant:
+		var seal:=Glyph.new();seal.name="OfficeSeal";seal.setup(String(item.get("office_key","office")),accent);seal.custom_minimum_size=Vector2.ZERO;seal.position=Vector2(43,43);seal.size=Vector2(26,26)
+		var seal_back:=Panel.new();seal_back.position=seal.position;seal_back.size=seal.size;seal_back.add_theme_stylebox_override("panel",Tokens.flat(Tokens.ROW_BG,Color.TRANSPARENT,0,13));seal_back.mouse_filter=Control.MOUSE_FILTER_IGNORE;medallion.add_child(seal_back);medallion.add_child(seal)
+	var identity:=VBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.alignment=BoxContainer.ALIGNMENT_CENTER;identity.add_theme_constant_override("separation",5);row.add_child(identity)
+	identity.add_child(Tokens.make_label(String(item.get("office_title","OFFICE")).to_upper(),9,Tokens.MUTED if vacant else accent,0.08))
+	var name_label:=Tokens.make_label("Vacant" if vacant else String(item.get("name","Unknown")),17,Tokens.TEXT_DIM if vacant else Tokens.INK);name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;identity.add_child(name_label)
+	if vacant:
+		identity.add_child(Tokens.make_label("Awaiting a successor",10,Tokens.MUTED))
+		return
 	var traits:Array=item.get("traits",[])
 	if not traits.is_empty():
-		var trait_row:=HBoxContainer.new();trait_row.add_theme_constant_override("separation",5);identity.add_child(trait_row)
-		for index in mini(2,traits.size()):
-			var pill:=Label.new();pill.text=String(traits[index]).to_upper();Tokens.style_label(pill,8,Tokens.TEXT_SOFT,0.04);pill.add_theme_stylebox_override("normal",Tokens.flat(Tokens.ACTIVE_BG,Color.TRANSPARENT,0,8,5));trait_row.add_child(pill)
-	for skill_variant in item.get("skills",[]) as Array:
-		var skill:Dictionary=skill_variant
-		var skill_row:=HBoxContainer.new();skill_row.add_theme_constant_override("separation",5);skill_row.tooltip_text=String(skill.get("name",""));identity.add_child(skill_row)
-		var short:=Tokens.make_label(String(skill.get("short","")),8,Tokens.MUTED);short.custom_minimum_size=Vector2(25,0);skill_row.add_child(short)
-		var track:=ColorRect.new();track.color=Tokens.TRACK;track.custom_minimum_size=Vector2(0,4);track.size_flags_horizontal=Control.SIZE_EXPAND_FILL;track.size_flags_vertical=Control.SIZE_SHRINK_CENTER;skill_row.add_child(track)
-		var fill:=ColorRect.new();fill.color=skill.get("color",accent);fill.anchor_right=clampf(float(skill.get("value",0))/100.0,0,1);fill.anchor_bottom=1.0;track.add_child(fill)
-	var controls:=VBoxContainer.new();controls.alignment=BoxContainer.ALIGNMENT_CENTER;controls.add_theme_constant_override("separation",4);row.add_child(controls)
-	var fit:=Glyph.new();fit.setup("fit",Tokens.capacity_color(float(item.get("fit",0))*100.0),1,float(item.get("fit",0)));fit.custom_minimum_size=Vector2(44,44);fit.tooltip_text="%d%% fit for office" % roundi(float(item.get("fit",0))*100.0);controls.add_child(fit)
-	var actions:=HBoxContainer.new();actions.add_theme_constant_override("separation",4);controls.add_child(actions)
+		var trait_text:=PackedStringArray()
+		for index in mini(2,traits.size()): trait_text.append(String(traits[index]).capitalize())
+		var trait_label:=Tokens.make_label(" · ".join(trait_text),10,Tokens.TEXT_SOFT);trait_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;identity.add_child(trait_label)
+	var skills:Array=item.get("skills",[])
+	if not skills.is_empty():
+		var skill_row:=HBoxContainer.new();skill_row.add_theme_constant_override("separation",7);identity.add_child(skill_row)
+		for skill_variant in skills:
+			var skill:Dictionary=skill_variant
+			var track:=ColorRect.new();track.color=Tokens.TRACK;track.custom_minimum_size=Vector2(0,3);track.size_flags_horizontal=Control.SIZE_EXPAND_FILL;track.tooltip_text="%s · %d / 100" % [String(skill.get("name","")).capitalize(),int(skill.get("value",0))];track.mouse_filter=Control.MOUSE_FILTER_STOP;skill_row.add_child(track)
+			var fill:=ColorRect.new();fill.color=skill.get("color",accent);fill.anchor_right=clampf(float(skill.get("value",0))/100.0,0,1);fill.anchor_bottom=1.0;fill.mouse_filter=Control.MOUSE_FILTER_IGNORE;track.add_child(fill)
+	var controls:=VBoxContainer.new();controls.alignment=BoxContainer.ALIGNMENT_CENTER;controls.add_theme_constant_override("separation",5);row.add_child(controls)
+	var fit:=Glyph.new();fit.name="OfficeFit";fit.setup("fit",Tokens.capacity_color(float(item.get("fit",0))*100.0),1,float(item.get("fit",0)));fit.custom_minimum_size=Vector2(44,44);fit.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;fit.tooltip_text="%d%% fit for office" % roundi(float(item.get("fit",0))*100.0);fit.mouse_filter=Control.MOUSE_FILTER_STOP;controls.add_child(fit)
+	var actions:=HBoxContainer.new();actions.add_theme_constant_override("separation",5);controls.add_child(actions)
 	_add_action(actions,"dismiss",Tokens.TEXT_DIM,String(item.get("dismiss_tip","Dismiss")),item.get("on_dismiss",Callable()))
 	_add_action(actions,"execute",Tokens.RED,String(item.get("execute_tip","Execute")),item.get("on_execute",Callable()))
 
 func _add_action(parent:HBoxContainer,kind:String,color:Color,tip:String,callback:Variant)->void:
-	var button:=Button.new();button.name="Cabinet"+kind.capitalize();button.custom_minimum_size=Vector2(32,30);button.tooltip_text=tip
-	button.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT,Tokens.BORDER_SOFT,1,4));button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,color,1,4));button.add_theme_stylebox_override("focus",StyleBoxEmpty.new());parent.add_child(button)
-	var glyph:=Glyph.new();glyph.setup(kind,color);glyph.set_anchors_preset(Control.PRESET_FULL_RECT);glyph.custom_minimum_size=Vector2.ZERO;button.add_child(glyph)
-	if callback is Callable: button.pressed.connect(func()->void:(callback as Callable).call())
+	var button:=Button.new();button.name="Cabinet"+kind.capitalize();button.custom_minimum_size=Vector2(30,30);button.tooltip_text=tip
+	button.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT,Tokens.BORDER_SOFT,1,5));button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,color,1,5));button.add_theme_stylebox_override("focus",Tokens.flat(Color.TRANSPARENT,color,2,5));parent.add_child(button)
+	var glyph:=Glyph.new();glyph.setup(kind,color);glyph.custom_minimum_size=Vector2.ZERO;glyph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);button.add_child(glyph)
+	button.disabled=not callback is Callable or not (callback as Callable).is_valid()
+	if not button.disabled: button.pressed.connect(callback as Callable)

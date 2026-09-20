@@ -25,7 +25,7 @@ func _office_blocks(legitimacy:float,support:float)->Array:
 		var key:=String(office.key)
 		var holder:=GovernmentPeopleSystem.officeholder(key)
 		if holder.is_empty():
-			items.append({"office_key":key,"office_title":String(office.title),"name":"Vacant","accent":Tokens.MUTED,"traits":[],"skills":[],"fit":0.0})
+			items.append({"office_key":key,"office_title":String(office.title),"name":"Vacant","vacant":true,"tip":"This office has no holder. A successor is selected automatically when an eligible public figure is available.","accent":Tokens.MUTED,"traits":[],"skills":[],"fit":0.0})
 			continue
 		var traits:Array=holder.get("traits",[])
 		var top_skills:Array=_top_skills(holder)

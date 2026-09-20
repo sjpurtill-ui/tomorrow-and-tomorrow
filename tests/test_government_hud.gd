@@ -49,3 +49,21 @@ func test_government_screen_has_no_candidate_picker_and_removal_auto_replaces()-
 	assert_bool(bool(terrain.last_report.get("ok",false))).is_true()
 	assert_int(int(GovernmentPeopleSystem.officeholder("Steward").person_id)).is_not_equal(int(before.person_id))
 	assert_int(hud.refreshes).is_equal(1)
+
+func test_vacant_office_has_empty_seat_and_no_person_or_removal_controls()->void:
+	var cabinet:Control=auto_free(preload("res://scripts/hud/government_cabinet_widget.gd").new())
+	cabinet.setup({"items":[{"office_key":"Steward","office_title":"First Speaker","vacant":true,"name":"Vacant"}]})
+	assert_object(cabinet.find_child("EmptySeat",true,false)).is_not_null()
+	for node_name in ["Portrait","OfficeFit","CabinetDismiss","CabinetExecute"]:
+		assert_object(cabinet.find_child(node_name,true,false)).is_null()
+
+func test_occupied_office_keeps_distinct_removal_callbacks_and_zero_fit()->void:
+	var cabinet:Control=auto_free(preload("res://scripts/hud/government_cabinet_widget.gd").new())
+	var actions:Array[String]=[]
+	cabinet.setup({"items":[{"office_key":"Steward","office_title":"First Speaker","name":"Test Person","fit":0.0,"on_dismiss":func()->void:actions.append("dismiss"),"on_execute":func()->void:actions.append("execute")}]})
+	assert_object(cabinet.find_child("Portrait",true,false)).is_not_null()
+	assert_object(cabinet.find_child("OfficeSeal",true,false)).is_not_null()
+	assert_object(cabinet.find_child("OfficeFit",true,false)).is_not_null()
+	(cabinet.find_child("CabinetDismiss",true,false) as Button).pressed.emit()
+	(cabinet.find_child("CabinetExecute",true,false) as Button).pressed.emit()
+	assert_array(actions).contains_exactly(["dismiss","execute"])
