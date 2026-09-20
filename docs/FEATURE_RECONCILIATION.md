@@ -1626,3 +1626,20 @@ Shared files: dock_blocks.gd and command_rail_hud.gd; cherry-pick had no conflic
 Art covers the seven defined communal projects, with an ivory background; it
 represents building types rather than every possible material variant. Housing
 expansion remains automatic and the existing building record remains accessible.
+
+## September 20 — illustrated provisions and economy tabs
+
+Worker `5775e3d2` integrated as `3211dc24` from base `3495f81a`. Provisions now
+shows illustrated stores, actual spoilage and daily flow including mission issues,
+water coverage, and engine 30/90-day forecast checkpoints. Meat/fish aggregate
+only for display, with separate amounts in the expansion. Food/water direction
+and return to leader use existing government APIs. Existing detailed sources,
+history, deliveries and other economy tabs remain accessible. Economy uses the
+wide work dock, serif heading, and equal-width underlined tabs.
+
+Canonical isolated review passed aggregation, delegation, first-water-report
+handling, real dock compilation, compact width and full body fit at 920x1000.
+Screenshot is seeded data in the actual dock, not the live campaign. Player was
+not restarted. No simulation/save schema changes or merge conflicts. Art is
+ivory-backed category illustration; no fabricated portrait or daily forecast
+curve. Forecast presentation deliberately uses available engine checkpoints.
