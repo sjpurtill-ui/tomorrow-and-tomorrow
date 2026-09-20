@@ -2,14 +2,14 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 var workshop_content:RefCounted
-## ECONOMY section: Food & Water / Materials / Who Eats.
+## ECONOMY section: Food & Water / Materials / Wealth.
 ## Replaces the provisions panel, the materials panel, and their overlays.
 
 func meta()->Dictionary:
 	return {
 		"eyebrow":"ECONOMY · PROVISIONS & MATERIALS",
 		"title":"Provisions","serif":true,"title_size":38,"spread_tabs":true,
-		"subtabs":["FOOD & WATER","MATERIALS","DISTRIBUTION","WEALTH"],
+		"subtabs":["FOOD & WATER","MATERIALS","WEALTH"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -22,38 +22,10 @@ func _workshop_report()->Dictionary:
 	return workshop_content._production_overview()
 
 func _local_tab(sub:int)->Dictionary:
-	if sub==3: return _wealth_tab()
-	if sub==0:return {"blocks":[_provisions_data()]}
-	if sub==1:return {"blocks":[_materials_data()]}
-	var metrics:Dictionary=GameState.simulation_metrics
-	var water:Dictionary=GameState.water_metrics
-	var food_days:=float(metrics.get("food_days",0.0))
-	var net:=float(metrics.get("food_net",0.0))
-	var intake:=roundi(clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.2)*100.0)
-	var diet:=roundi(clampf(float(metrics.get("food_diet_quality",0.0)),0.0,1.0)*100.0)
-	var water_days:=float(water.get("days",0.0))
-	var water_intake:=roundi(clampf(float(water.get("intake_ratio",1.0)),0.0,1.2)*100.0)
-	var forecast:Dictionary=metrics.get("food_forecast_90",{})
-	var shortage_day:=int(forecast.get("first_shortage_day",-1))
-	var kpis:Array=[
-		{"label":"FOOD RESERVE","value":"%.1f days" % food_days,"delta":"%+.0f/day" % net,"delta_color":Tokens.GREEN if net>=0.0 else Tokens.RED,"accent":Tokens.AMBER,"tip":"Days of adult-equivalent rations in store"},
-		{"label":"INTAKE","value":"%d%%" % intake,"delta":"diet %d%%" % diet,"delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Share of today's ration need actually received"},
-		{"label":"WATER","value":"%.1f days" % water_days,"delta":"%d%%" % water_intake,"delta_color":Tokens.GREEN if water_intake>=100 else Tokens.RED,"accent":Tokens.TEAL,"tip":"Stored drinking water"},
-		{"label":"OUTLOOK","value":"%d d" % shortage_day if shortage_day>0 else "clear","delta":"to shortage" if shortage_day>0 else "90-day forecast","delta_color":Tokens.RED if shortage_day>0 else Tokens.GREEN,"accent":Tokens.RED if shortage_day>0 else Tokens.GREEN,"tip":"90-day seasonal forecast"},
-	]
-	var day:=int(GameState.elapsed_days)
-	var raw_brief:Dictionary=terrain._provisions_decision_brief(metrics,water,FoodSystem.issued_on_day(day))
-	if not water.has("required_today"):
-		raw_brief={"status":"First collection report pending","why":"The settlement has not completed its first day of water collection.","next":"Review nearby water access, then let time advance to see actual collection."}
-	elif water_intake<98:
-		raw_brief["next"]="Review water access and ask the local leader to prioritize water. The leader assigns the work; a direction cannot create a missing source."
-	var status:=String(raw_brief.get("status",""))
-	var tone:="info" if "STABLE" in status else ("danger" if ("SHORTAGE" in status or "SHORTFALL" in status) else "warn")
-	var brief:=adapt_brief(raw_brief,tone,"WATER ACCESS",func()->void:_open_water())
 	match sub:
-		1: return {"kpis":kpis,"brief":_materials_brief(),"blocks":[Charts.stocks(GameState.selected_player_settlement_id)]+_materials_blocks()}
-		2: return {"kpis":kpis,"brief":brief,"blocks":_who_eats_blocks(metrics)}
-	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_food_overview()}
+		1:return {"blocks":[_materials_data()]}
+		2:return _wealth_tab()
+	return {"blocks":[_provisions_data()]}
 
 func _food_blocks(metrics:Dictionary)->Array:
 	var produced:=float(metrics.get("food_production",0.0))
@@ -205,24 +177,6 @@ func _materials_blocks()->Array:
 			{"label":"SHOW RESOURCE LAYER","sub":"recognized deposits only","on_press":func()->void: hud.terrain._toggle_resource_view(),"tip":"Toggle the resource map layer"},
 			{"label":"LOCAL LOGISTICS","sub":"direct this city’s carriers","primary":true,"on_press":func()->void: GovernmentPeopleSystem.set_settlement_focus(GameState.selected_player_settlement_id,"logistics"),"tip":"Ask this city’s leader to focus on logistics"},
 		]},
-	]
-
-func _who_eats_blocks(metrics:Dictionary)->Array:
-	var demand:Dictionary=metrics.get("food_demand_breakdown",{})
-	var base:=float(demand.get("children",0.0))+float(demand.get("adults",0.0))+float(demand.get("elders",0.0))
-	var labor:=float(demand.get("labor",0.0))
-	var climate:=float(demand.get("climate",0.0))
-	var pregnancy:=float(demand.get("pregnancy",0.0))+float(demand.get("lactation",0.0))
-	var top:=maxf(1.0,base)
-	var items:Array=[
-		{"name":"Base metabolism","value":"%.0f" % base,"ratio":base/top,"color":Tokens.TEAL,"tip":"Children, adults, and elders at rest"},
-		{"name":"Physical work","value":"%.1f" % labor,"ratio":labor/top,"color":Tokens.TEAL,"tip":"Extra need from assigned labor"},
-		{"name":"Cold season","value":"%.1f" % climate,"ratio":climate/top,"color":Tokens.TEAL,"tip":"Extra need from climate"},
-		{"name":"Pregnancy & lactation","value":"%.1f" % pregnancy,"ratio":pregnancy/top,"color":Tokens.TEAL,"tip":"Extra need from pregnancy and infant care"},
-	]
-	return [
-		{"type":"bars","heading":"DAILY DEMAND","note":"rations","items":items},
-		{"type":"text","heading":"MISSIONS & CONVOYS","text":terrain._provisions_commitment_summary()},
 	]
 
 func signature()->Array:

@@ -47,5 +47,5 @@ func render()->void:
 
 class ReviewProvider extends RefCounted:
 	var data:Dictionary
-	func meta()->Dictionary:return {"eyebrow":"GODOT UI REVIEW · SEEDED SIMULATION","title":"Provisions","serif":true,"title_size":38,"spread_tabs":true,"subtabs":["FOOD & WATER","MATERIALS","DISTRIBUTION","WEALTH"]}
+	func meta()->Dictionary:return {"eyebrow":"GODOT UI REVIEW · SEEDED SIMULATION","title":"Provisions","serif":true,"title_size":38,"spread_tabs":true,"subtabs":["FOOD & WATER","MATERIALS","WEALTH"]}
 	func tab(_sub:int)->Dictionary:return {"blocks":[data]}
