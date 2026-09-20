@@ -1643,3 +1643,25 @@ Screenshot is seeded data in the actual dock, not the live campaign. Player was
 not restarted. No simulation/save schema changes or merge conflicts. Art is
 ivory-backed category illustration; no fabricated portrait or daily forecast
 curve. Forecast presentation deliberately uses available engine checkpoints.
+
+## September 20 — illustrated Materials ledger
+
+Workers `b411a5ef` and `360934de`, based on `a4df05ad`, integrated as `c3e35b73`
+and `84d2cdd2`. Materials opens in the economy dock rather than immediately
+redirecting to the atlas. Illustrated stock rows show actual known-site delivery
+rates, observed stock sparklines, expandable site constraints, and selected-city
+incoming deliveries. Storage/hauling gauges and optional logistics/delegation
+use existing engine values/APIs. The materials atlas remains available inline.
+No simulation rules or save schema changes; shared dock/provider edits integrated
+without conflicts. Current live player not restarted.
+
+Canonical real-dock seeded review passed hidden-deposit exclusion, row ordering,
+unknown-history gaps, incoming-city filtering, expansion toggles, logistics and
+return-to-leader with unchanged stocks, compact width and body fit at 920x1000.
+Final run had no asset-loading warning. Imported textures are preferred, with
+source-image fallback for unimported development assets. No standalone export
+was built in this task. Five basic material types have artwork; others retain
+accurate names/values without unrelated art. Portrait is a stable illustrative
+avatar from the existing five-face atlas. Historical copper points are unavailable
+in the existing history schema and correctly show No history. Incoming cart
+illustration is representative; no new transport simulation is implied.
