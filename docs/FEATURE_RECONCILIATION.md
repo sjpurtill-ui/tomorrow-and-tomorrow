@@ -1591,3 +1591,20 @@ API. Batch orders, product catalog and retool selection retain their existing
 layouts. Compile check and Godot sample-data render passed; no live campaign
 changed by the isolated preview. No save format change. Current player has not
 been restarted to receive this inspector.
+
+## September 20 — illustrated production queue
+
+Worker `9094cf3` integrated as `eb251ad`. Production now uses stacked illustrated
+rows, ten fractional work-share markers, efficiency bars, forecast rates, stock
+targets and material shortfalls. Targets, pause, relative priority and delegation
+expand inline; history and detailed retooling remain accessible. Production alone
+uses a wider responsive dock. Capacity markers are work shares, not invented
+factory or worker counts. No simulation or save-format changes.
+
+Canonical isolated Godot review passed action isolation, per-line delegation work
+preservation, civilian/military filters and compact minimum width; five seeded
+engine snapshots rendered successfully. The review exits without modifying the
+player campaign. Existing live game has not been restarted. Art coverage is an
+initial family with explicit generic workshop fallback; atlas is ivory-backed.
+Queue order displays current line order; relative priority changes work share,
+not drag ordering. Full earlier-era production-capacity rebalance is not included.
