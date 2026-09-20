@@ -1560,3 +1560,13 @@ icon-only dismissal and execution controls. The Command Rail uses heavier filled
 silhouettes and a clear active medallion. Simulation, appointments, terrain, and
 save data are unchanged. Godot completed a clean parse/import pass; the focused
 UI runner encountered its existing headless crash before assertions.
+
+## September 19 — separate Construction and Production navigation
+
+Integrated worker `7ef73b8` as canonical `beab66c`. Dedicated hammer and factory
+rail destinations expose delegated construction progress and shared production
+orders, with civilian/military filters. Settlement retains Overview and History.
+Existing leaders continue scheduling work; manual takeover is optional. No new
+construction queue override has been implemented. Simulation and save formats
+are unchanged. The GdUnit runner crashed before assertions; live visual review
+is pending. This structural change requires a restart to appear in the player.
