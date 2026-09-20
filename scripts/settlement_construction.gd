@@ -33,6 +33,10 @@ static func _settlement_project_available(project: Dictionary) -> bool:
 
 
 static func _settlement_project_material_plan(project:Dictionary)->Dictionary:
+	var selected:=preload("res://scripts/construction_materials.gd").choose(material_options(project),WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries)
+	return selected.get("cost",{})
+
+static func material_options(project:Dictionary)->Array[Dictionary]:
 	var required:Dictionary=(project.get("materials",{}) as Dictionary).duplicate(true)
 	var options:Array[Dictionary]=[{"cost":required}]
 	match String(project.get("name","")):
@@ -52,8 +56,7 @@ static func _settlement_project_material_plan(project:Dictionary)->Dictionary:
 			{"cost":{"Joined Timber Components":8.0,"Timber":16.0,"Stone":16.0,"Fiber Plants":8.0}}
 		])
 		"Gathering Yard":options.append_array([{"cost":{"Stone":16.0,"Fiber Plants":4.0}}, {"cost":{"Clay":18.0,"Fiber Plants":4.0}}])
-	var selected:=preload("res://scripts/construction_materials.gd").choose(options,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries)
-	return selected.get("cost",{})
+	return options
 
 
 static func _current_settlement_project() -> Dictionary:
