@@ -17,6 +17,7 @@ const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSy
 # Deterministic caches that rebuild from the seed; persisting them would bloat
 # saves and freeze stale copies of static content.
 const REFLECT_SKIP:Dictionary={
+	"ResourceSystem":["_surface_front_cache"],
 	"GameState":["resource_settlement_id"],
 	"SettlementModel":["_local_population_scope","_claim_shape_cache"],
 	"FoodSystem":["_forecast_climate_cache"],

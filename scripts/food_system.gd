@@ -544,6 +544,9 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	var has_nutrients:=not traveling and float(nutrient_report.get("adoption",0))>0 and float(nutrient_report.get("bonus",0))>0
 	var projected_nutrients:Dictionary=WorldSimulation.state.cultivation_nutrients.duplicate(true) if has_nutrients else {}
 	var projected_inputs:Dictionary={}
+	var botany_site:=Botany.site_key()
+	var has_botany_trials:bool=not traveling and not WorldSimulation.state.field_botany.trials.is_empty()
+	var has_botany_applications:bool=not traveling and not WorldSimulation.state.field_botany.applications.is_empty()
 	if has_nutrients:
 		for resource:String in preload("res://scripts/crop_nutrition.gd").INPUTS:projected_inputs[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
 	for offset in range(1,horizon+1):
@@ -563,8 +566,8 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 				var botany_scale:=future_season/current_season*future_weather_type/current_weather_type
 				future_yield-=float(nutrient_report.get("botany_delta",0))*botany_scale
 				var projected_botany_base:=float(nutrient_report.get("botany_base",0))*botany_scale
-				future_yield-=projected_botany_base*Botany.land_quote(WorldSimulation.state.field_botany,Botany.site_key(),int(future_day)) if not traveling else 0.0
-				future_yield+=Botany.application_quote(WorldSimulation.state.field_botany,Botany.site_key(),int(future_day),projected_botany_base,maxf(0,1.0-_weather_yield_factor(environment,future_day))*4.0) if not traveling else 0.0
+				future_yield-=projected_botany_base*Botany.land_quote(WorldSimulation.state.field_botany,botany_site,int(future_day)) if has_botany_trials else 0.0
+				future_yield+=Botany.application_quote(WorldSimulation.state.field_botany,botany_site,int(future_day),projected_botany_base,maxf(0,1.0-_weather_yield_factor(environment,future_day))*4.0) if has_botany_applications else 0.0
 			projected_stocks[food_type]=float(projected_stocks.get(food_type,0.0))+future_yield
 			total_produced+=future_yield
 		var season_wave:=sin(fmod(future_day,365.0)/365.0*TAU)

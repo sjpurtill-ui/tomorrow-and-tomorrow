@@ -467,6 +467,7 @@ func _ready() -> void:
 	CivilizationSystem.register_player_origin(Vector2(world_start_position.x,world_start_position.z))
 	WorldSimulation.water_provider=Callable(self,"_surface_water_site_near")
 	WorldSimulation.context_provider=Callable(self,"_civilization_geography")
+	WorldSimulation.surface_material_provider=Callable(self,"_civilization_surface_materials")
 	WorldSimulation.start_provider=Callable(self,"_civilization_start")
 	WorldSimulation.route_provider=Callable(self,"_analyze_convoy_route")
 	WorldSimulation.start_world()
@@ -1335,14 +1336,20 @@ func _commit_live_report_replacements()->void:
 		assert(stable_root.get_instance_id()==int(record.get("root_id",0)))
 
 
-func _civilization_geography(origin:Vector2)->Dictionary:
-	# The authored ground and catchment potential do not change each day.
-	# Extraction, regrowth and city stores remain in their live resource ledgers.
+func _cached_civilization_geography(origin:Vector2)->Dictionary:
+	# Authored potential only; extraction and regrowth stay in live ledgers.
 	var key:=[GameState.world_seed,origin]
 	if not civilization_geography_cache.has(key):
 		if civilization_geography_cache.size()>=512:civilization_geography_cache.erase(civilization_geography_cache.keys()[0])
 		civilization_geography_cache[key]=_sample_civilization_geography(origin)
-	return civilization_geography_cache[key].duplicate(true)
+	return civilization_geography_cache[key]
+
+func _civilization_geography(origin:Vector2)->Dictionary:
+	return _cached_civilization_geography(origin).duplicate(true)
+
+func _civilization_surface_materials(origin:Vector2)->Dictionary:
+	# A resource-front search needs catchments, not climate and water reports.
+	return (_cached_civilization_geography(origin).surface_material_catchments as Dictionary).duplicate(true)
 
 func _sample_civilization_geography(origin:Vector2)->Dictionary:
 	var ground:=_survey_ground_at(origin)
