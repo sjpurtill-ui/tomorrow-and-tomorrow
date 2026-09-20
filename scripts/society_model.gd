@@ -131,6 +131,8 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 	if day-last_adoption_day>=30:
 		var adoption_days:=clampi(day-last_adoption_day,1,30)
 		last_adoption_day=day
+		var teaching:=observers/population*0.055+stewards/population*0.018+makers/population*0.012
+		var adoption_factor:=1.0+clampf(effect("adoption_rate")+WorldSimulation.state.founding_effect("adoption_rate")+WorldSimulation.progression.effect("adoption_rate"),-0.35,0.80)
 		for id in WorldSimulation.state.known_discoveries:
 			var discovery:Dictionary=definitions_by_id.get(id,{})
 			if discovery.is_empty(): continue
@@ -139,10 +141,9 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 			var attention:=float(WorldSimulation.state.research_allocations.get(direction,0))
 			var relevant_activity:=0.0
 			for signal_name in discovery.get("signals",[]): relevant_activity+=float(context.get(signal_name,0.0))
-			var teaching:=observers/population*0.055+stewards/population*0.018+makers/population*0.012
 			var practice:=minf(0.012,relevant_activity*0.0014)
 			var directed:=minf(0.006,attention*0.0012)
-			var spread:=(0.00035+teaching+practice+directed)*(1.0+clampf(effect("adoption_rate")+WorldSimulation.state.founding_effect("adoption_rate")+WorldSimulation.progression.effect("adoption_rate"),-0.35,0.80))
+			var spread:=(0.00035+teaching+practice+directed)*adoption_factor
 			spread*=1.0-adoption_level
 			var retention_loss:=maxf(0.0,0.00018-preserved*0.00015) if relevant_activity<=0.05 else 0.0
 			adoption_level=clampf(adoption_level+(spread-retention_loss)*adoption_days,0.015,1.0)
@@ -270,6 +271,9 @@ func leadership_effect(dynamic_id:String)->float:
 	return clampf(total/sqrt(float(contributors)), -0.12,0.14)
 
 func leadership_subcategory_effect(dynamic_id:String,subcategory:String)->float:
+	return _leadership_subcategory_effect(dynamic_id,subcategory,{})
+
+func _leadership_subcategory_effect(dynamic_id:String,subcategory:String,doctrine_effects:Dictionary)->float:
 	var total:=0.0
 	var contributors:=0
 	for office in WorldSimulation.state.leadership_positions:
@@ -278,7 +282,7 @@ func leadership_subcategory_effect(dynamic_id:String,subcategory:String)->float:
 			# Doctrine institutions execute a whole portfolio; subcategories inherit
 			# the same structural strength slightly damped rather than a second
 			# random per-subcategory competence.
-			var contribution:=_doctrine_dynamic_effect(String(office),advisor,dynamic_id)*0.85
+			var contribution:float=doctrine_effects[office] if doctrine_effects.has(office) else _doctrine_dynamic_effect(String(office),advisor,dynamic_id)*0.85
 			if contribution==0.0: continue
 			total+=contribution
 			contributors+=1
@@ -418,8 +422,14 @@ func evaluate_subcategories(_context:Dictionary)->Dictionary:
 		"culture":{"Social cohesion":cohesion,"Shared legitimacy":legitimacy,"Inquiry breadth":clampf(float(active_directions)/12.0,0.0,1.0),"Collective memory":preservation}
 	}
 	for dynamic_id in result:
+		# Reuse only within this evaluation; appointments and state stay live.
+		var doctrine_effects:Dictionary={}
+		for office in WorldSimulation.state.leadership_positions:
+			var advisor:Dictionary=WorldSimulation.state.leadership_positions[office]
+			if String(advisor.get("doctrine",""))!="":
+				doctrine_effects[office]=_doctrine_dynamic_effect(String(office),advisor,String(dynamic_id))*0.85
 		for subcategory in (result[dynamic_id] as Dictionary):
-			var influence:=leadership_subcategory_effect(String(dynamic_id),String(subcategory))
+			var influence:=_leadership_subcategory_effect(String(dynamic_id),String(subcategory),doctrine_effects)
 			result[dynamic_id][subcategory]=clampf(float(result[dynamic_id][subcategory])+influence,0.0,1.0)
 	return result
 
