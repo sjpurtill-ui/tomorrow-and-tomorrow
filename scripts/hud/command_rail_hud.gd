@@ -120,7 +120,7 @@ func _layout()->void:
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(minf(_production_width(view.x) if active_section=="production" else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
+		dock.set_deferred("size",Vector2(minf(_work_queue_width(view.x) if active_section in ["production","construction"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
 	if detail_dock:
 		detail_dock.position=Vector2(Tokens.DOCK_X,64)
 		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
@@ -128,7 +128,7 @@ func _layout()->void:
 	if action_feedback:
 		action_feedback.position=Vector2(maxf(Tokens.DOCK_X,view.x-action_feedback.size.x-16),maxf(124,view.y-action_feedback.size.y-112))
 
-func _production_width(view_width:float)->float:
+func _work_queue_width(view_width:float)->float:
 	return clampf(view_width*.65,720.0,980.0)
 
 func force_dock_layout()->void:
@@ -138,7 +138,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(minf(_production_width(view.x) if panel==dock and active_section=="production" else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y)
+		panel.size=Vector2(minf(_work_queue_width(view.x) if panel==dock and active_section in ["production","construction"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 
