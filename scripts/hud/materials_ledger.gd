@@ -7,7 +7,9 @@ func setup(block:Dictionary)->void:
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",14);add_child(head)
 	var leader:Dictionary=data.leader
 	if not leader.is_empty():
-		if portraits==null:portraits=ImageTexture.create_from_image(Image.load_from_file("res://assets/portraits/founding_leaders.png"))
+		if portraits==null:
+			var path:="res://assets/portraits/founding_leaders.png"
+			portraits=load(path) as Texture2D if ResourceLoader.exists(path) else ImageTexture.create_from_image(Image.load_from_file(path))
 		var portrait:=TextureRect.new();var atlas:=AtlasTexture.new();atlas.atlas=portraits
 		var cell:=Vector2(atlas.atlas.get_width()/5.0,atlas.atlas.get_height());atlas.region=Rect2(Vector2(posmod(int(leader.get("id",0)),5)*cell.x,0),cell)
 		portrait.texture=atlas;portrait.custom_minimum_size=Vector2(90,100);portrait.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;portrait.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;portrait.tooltip_text="Leader portrait illustration";head.add_child(portrait)
