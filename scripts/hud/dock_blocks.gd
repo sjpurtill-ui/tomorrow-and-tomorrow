@@ -30,6 +30,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"cabinet":
 				var cabinet:=preload("res://scripts/hud/government_cabinet_widget.gd").new()
 				section.add_child(cabinet);cabinet.setup(block)
+			"production_queue":
+				var queue:=preload("res://scripts/hud/production_queue.gd").new()
+				section.add_child(queue);queue.setup(block)
 			"production_line":
 				var inspector:=preload("res://scripts/hud/production_line_detail.gd").new()
 				section.add_child(inspector);inspector.setup(block)

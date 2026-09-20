@@ -126,6 +126,9 @@ func rebuild()->void:
 	var meta:Dictionary=provider.meta()
 	eyebrow_label.text=String(meta.get("eyebrow",""))
 	title_label.text=String(meta.get("title",""))
+	if bool(meta.get("serif",false)):
+		var face:=SystemFont.new();face.font_names=PackedStringArray(["Georgia","serif"]);title_label.add_theme_font_override("font",face)
+	else:title_label.remove_theme_font_override("font")
 	var subtabs:Array=meta.get("subtabs",[])
 	tabs_row.visible=subtabs.size()>1
 	sub=clampi(sub,0,maxi(0,subtabs.size()-1))
