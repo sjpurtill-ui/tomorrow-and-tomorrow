@@ -16,7 +16,11 @@ var last_day:=-1
 var water_provider:Callable
 var start_provider:Callable
 var route_provider:Callable
-var context_provider:Callable
+var surface_material_provider:Callable
+var context_provider:Callable:
+	set(value):
+		context_provider=value
+		surface_material_provider=Callable()
 var _seed:=-2147483648
 
 var state := GameState:
@@ -243,7 +247,7 @@ func project(civ:Dictionary)->void:
 			added.role="frontier";added.approach_index=slot
 			regions.append(added)
 		var region:Dictionary=regions[slot]
-		var local:=settlements.city_resource_snapshot(String(city.id),false)
+		var local:=settlements.city_resource_snapshot(String(city.id),false,true)
 		region["settlement_founded"]=true
 		region["local_city_id"]=String(city.id)
 		region["position"]=city.position

@@ -42,7 +42,11 @@ func plain_language_description(resource_name:String)->String:
 	if resource_name=="Medicinal Plants": return "Recognized medicinal plants are gathered as finite bulk for remedies and care. Access does not imply free inventory."
 	return ""
 
+var _surface_front_cache:Dictionary={}
+const SURFACE_FRONT_CACHE_LIMIT:=256
+
 func reset_for_new_world()->void:
+	_surface_front_cache.clear()
 	initialized=false
 	rng=RandomNumberGenerator.new()
 
@@ -525,6 +529,19 @@ func _next_surface_front(resource:String,source:String,context:Dictionary,minimu
 	var origin_value:Variant=context.get("origin",WorldSimulation.state.settlement_founded_at)
 	var origin:=Vector2(origin_value.x,origin_value.z) if origin_value is Vector3 else Vector2(origin_value.x,origin_value.y)
 	var max_ring:=clampi(1+int(WorldSimulation.state.effective_workers("Logistics")/6.0),1,MAX_SURFACE_FRONT_RING)
+	# Only the authored-terrain provider promises stable catchment potential.
+	# Cache failed searches too; a desert should not be resurveyed every day.
+	# New fronts, more logistics, a new origin/seed or provider all change the key.
+	var cacheable:=WorldSimulation.surface_material_provider.is_valid()
+	var cache_key:=[WorldSimulation.state.world_seed,origin,resource,source,minimum_density,max_ring,used.keys(),WorldSimulation.surface_material_provider]
+	if cacheable and _surface_front_cache.has(cache_key):return (_surface_front_cache[cache_key] as Dictionary).duplicate(true)
+	var result:=_search_surface_front(resource,origin,max_ring,used,minimum_density)
+	if cacheable:
+		if _surface_front_cache.size()>=SURFACE_FRONT_CACHE_LIMIT:_surface_front_cache.erase(_surface_front_cache.keys()[0])
+		_surface_front_cache[cache_key]=result.duplicate(true)
+	return result
+
+func _search_surface_front(resource:String,origin:Vector2,max_ring:int,used:Dictionary,minimum_density:float)->Dictionary:
 	for ring in range(1,max_ring+1):
 		var best:Dictionary={}
 		var best_density:=-1.0
@@ -532,8 +549,12 @@ func _next_surface_front(resource:String,source:String,context:Dictionary,minimu
 			for x in range(-ring,ring+1):
 				if absi(x)!=ring and absi(z)!=ring:continue
 				var point:=origin+Vector2(x,z)*SURFACE_FRONT_SPACING_KM
-				var nearby:Dictionary=WorldSimulation.context_provider.call(point)
-				var candidate:Dictionary=nearby.get("woodland_catchment",{}) if resource=="Timber" else (nearby.get("surface_material_catchments",{}) as Dictionary).get(resource,{})
+				var candidate:Dictionary
+				if WorldSimulation.surface_material_provider.is_valid():
+					candidate=WorldSimulation.surface_material_provider.call(point).get(resource,{})
+				else:
+					var nearby:Dictionary=WorldSimulation.context_provider.call(point)
+					candidate=nearby.get("woodland_catchment",{}) if resource=="Timber" else (nearby.get("surface_material_catchments",{}) as Dictionary).get(resource,{})
 				var candidate_density:=clampf(float(candidate.get("density",0.0)),0.0,1.0)
 				if candidate_density<minimum_density or used.has(_surface_front_key(resource,candidate)):continue
 				if candidate_density>best_density:best=candidate;best_density=candidate_density

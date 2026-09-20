@@ -117,7 +117,7 @@ func _ensure_city_fabric(record:Dictionary)->void:
 	local.next_settlement_plot_id=plots.size()+1
 	local.settlement_nuclei=[{"id":1,"kind":"founding_hearth","position":Vector2.ZERO,"pull":1.0,"active":true,"created_day":int(record.get("founded_day",0)),"absorbed_day":-1}]
 
-func city_resource_snapshot(settlement_id:String,include_details:bool=true)->Dictionary:
+func city_resource_snapshot(settlement_id:String,include_details:bool=true,observer_summary:bool=false)->Dictionary:
 	var record:=settlement_record(settlement_id)
 	if record.is_empty(): return {}
 	_ensure_city_resources(record)
@@ -127,12 +127,17 @@ func city_resource_snapshot(settlement_id:String,include_details:bool=true)->Dic
 	else: local=record.local_resources
 	# Diplomacy/world projections only need the current totals. Detailed city
 	# reports can still request deposits, water and food history explicitly.
-	var result:={"id":settlement_id,"name":String(record.name),"population":_settlement_population(record),"stores":(local.resource_stockpiles as Dictionary).duplicate(true),"metrics":(local.simulation_metrics as Dictionary).duplicate(true)}
+	var result:={"id":settlement_id,"name":String(record.name),"population":_settlement_population(record),"stores":(local.resource_stockpiles as Dictionary).duplicate(true),"metrics":_observer_metrics(local.simulation_metrics) if observer_summary else (local.simulation_metrics as Dictionary).duplicate(true)}
 	if include_details:
 		result["deposits"]=(local.resource_deposits as Array).duplicate(true)
 		result["water"]=(local.water_metrics as Dictionary).duplicate(true)
 		result["food_history"]=(local.food_history as Array).duplicate(true)
 	return result
+
+# City intelligence reads only these three scalars. Detailed forecasts, demand
+# breakdowns and histories stay in the owning city's simulation and save.
+func _observer_metrics(metrics:Dictionary)->Dictionary:
+	return {"material_capacity":float(metrics.get("material_capacity",0)),"logistics":float(metrics.get("logistics",0)),"food_days":float(metrics.get("food_days",0))}
 
 ## Existing resource systems run with bounded local counts. No resident objects,
 ## selected-city dependence enters the tick. Committed vital changes update the total.
