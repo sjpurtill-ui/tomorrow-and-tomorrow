@@ -67,6 +67,13 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	preload("res://scripts/civilization_travel.gd").advance(1.0)
 	stamp=record_timing(timings,"military_and_travel",stamp)
 	var arrival:=advance_convoy()
+	if WorldSimulation.actor_id=="player" and WorldSimulation.state.settlement_site_committed:
+		var controller:=preload("res://scripts/civilization_controller.gd")
+		if controller.review_due("player",day):
+			WorldSimulation.direction.ensure();WorldSimulation.direction._ensure_cultural_memory();WorldSimulation.direction.apply_inclinations(day)
+			var drive:=preload("res://scripts/cultural_inheritance.gd").weight(WorldSimulation.direction.cultural_memory,"ambition","expansion",day)
+			# Every culture can grow organically; expansionist traditions review more often.
+			if WorldSimulation.direction.auto_settlement and (drive>=.35 or posmod(day/30,6)==0):controller.expansion_orders("player",controller.current_plan("player"))
 	stamp=record_timing(timings,"convoy",stamp)
 	return {"discoveries":discoveries,"resources":resource_events,"events":events,"progression":progression_events,"arrival":arrival}
 

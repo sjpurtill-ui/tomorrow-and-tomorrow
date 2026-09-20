@@ -16185,6 +16185,7 @@ func _research_allocation_total() -> int:
 	return total
 
 func _change_research_domain_allocation(dynamic_id:String,change:int)->void:
+	PeopleDirection.auto_research=false
 	var current:=maxi(0,int(GameState.research_allocations.get(dynamic_id,0)))
 	DiscoverySystem.set_domain_research_priority(dynamic_id,current+change)
 	_refresh_research_allocations()
@@ -16192,6 +16193,7 @@ func _change_research_domain_allocation(dynamic_id:String,change:int)->void:
 	if hud: hud.request_immediate_dock_refresh()
 
 func _change_research_allocation(dynamic_id:String,subcategory:String,change:int)->void:
+	PeopleDirection.auto_research=false
 	# Legacy save/test adapter. The playable UI exposes only macro domains; changing a
 	# domain immediately lets the automatic program redistribute its researchers.
 	var subcategories:Dictionary=GameState.research_subcategory_allocations.get(dynamic_id,{})
@@ -17988,6 +17990,7 @@ func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
 
 
 func _dispatch_scout_from_actions(duration_days:int,target_id:String="open_world")->void:
+	PeopleDirection.auto_scouting=false
 	var result:=CivilizationSystem.dispatch_scouts(duration_days,target_id,pending_scout_heading if target_id in ["open_world","recruit_people"] else "")
 	if result.has("error"):
 		if scout_dispatch_status:

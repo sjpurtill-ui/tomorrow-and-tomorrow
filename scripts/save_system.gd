@@ -187,6 +187,8 @@ static func _apply_reflected(target:Object,state:Dictionary,skip:Array=[])->void
 func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	if not preload("res://scripts/civic_administration.gd").valid(payload.get("reflected_GovernmentPeopleSystem",{}).get("administration_records",preload("res://scripts/civic_administration.gd").empty_state())):return {"error":"Invalid civic administration records."}
 	var nutrition:=preload("res://scripts/crop_nutrition.gd")
+	var culture:Variant=payload.get("reflected_PeopleDirection",{}).get("cultural_memory",preload("res://scripts/cultural_inheritance.gd").empty())
+	if not preload("res://scripts/cultural_inheritance.gd").valid(culture):return {"error":"Invalid cultural inheritance."}
 	var state:Dictionary=payload.get("reflected_GameState",{})
 	var clothing=preload("res://scripts/household_clothing.gd")
 	if not preload("res://scripts/fire_practice.gd").valid(state.get("fire_practice",preload("res://scripts/fire_practice.gd").empty_state())):return {"error":"Invalid maintained fire records."}

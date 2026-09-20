@@ -1,5 +1,11 @@
 extends Node
 
+const Culture:=preload("res://scripts/cultural_inheritance.gd")
+var cultural_memory:Dictionary=Culture.empty()
+var auto_scouting:=true
+var auto_settlement:=true
+var auto_research:=true
+var inclination_review_day:=-1
 const VALUES=preload("res://scripts/societal_values_model.gd")
 const CENTURY_DAYS:=36500
 const AMBITIONS:={
@@ -10,7 +16,13 @@ const AMBITIONS:={
 	"military":{"name":"Build military strength","vision":"Develop the organization and supply needed to defend our people or pursue military ambitions. This does not declare war.","domains":["security","logistics"],"axis":"collective_obligation","target":.8,"effect":"25% faster security and logistics research; 5% slower elsewhere. Your society’s stated values shift toward shared labor, resources and care for the community."},
 	"sustenance":{"name":"Secure lasting abundance","vision":"Improve food systems and stewardship so growth rests on a dependable foundation.","domains":["nutrition","ecology"],"axis":"ecological_restraint","target":.8,"effect":"25% faster nutrition and ecology research; 5% slower elsewhere. Ecological restraint grows gradually."},
 	"wellbeing":{"name":"Help generations thrive","vision":"Give care, health and the lives of future generations a central place.","domains":["health","demography"],"axis":"common_stewardship","target":.8,"effect":"25% faster health and demography research; 5% slower elsewhere. Common stewardship grows gradually."},
-	"commerce":{"name":"Grow through exchange","vision":"Build the skills and connections that make useful goods travel. Trade still needs real partners and routes.","domains":["production","logistics"],"axis":"openness","target":.8,"effect":"25% faster production and logistics research; 5% slower elsewhere. Openness grows gradually."}
+	"commerce":{"name":"Grow through exchange","vision":"Build the skills and connections that make useful goods travel. Trade still needs real partners and routes.","domains":["production","logistics"],"axis":"openness","target":.8,"effect":"25% faster production and logistics research; 5% slower elsewhere. Openness grows gradually."},
+	"expansion":{"name":"Found new horizons","vision":"Make new settlements a source of opportunity and prestige.","domains":["logistics","demography"],"axis":"openness","target":.7,"effect":"Builds an enduring expansionist tradition; favors logistics and population knowledge."},
+	"dominion":{"name":"Rule beyond our borders","vision":"Seek power through conquest, tribute and the labor of subject peoples.","domains":["security","institutions"],"axis":"hierarchy","target":.9,"effect":"Strengthens conquest, extraction, exploitation and personal authority."},
+	"purity":{"name":"Preserve a chosen people","vision":"Treat outsiders and dissenting ways as threats to the community's identity.","domains":["culture","security"],"axis":"pluralism","target":.1,"effect":"Strengthens exclusion, purification and sacred certainty."},
+	"dynasty":{"name":"Entrench a ruling order","vision":"Make inherited rank and enduring authority the foundation of society.","domains":["institutions","infrastructure"],"axis":"achieved_status","target":.1,"effect":"Strengthens hereditary privilege, tradition and personal authority."},
+	"retribution":{"name":"Make defiance costly","vision":"Build a reputation for vengeance and punishment that others fear.","domains":["security","institutions"],"axis":"restorative_justice","target":.1,"effect":"Strengthens vengeance, terror and the prestige of force."},
+	"orthodoxy":{"name":"Bind society to one truth","vision":"Reward loyalty to an official account of the world and suppress rival interpretations.","domains":["institutions","culture"],"axis":"pluralism","target":.15,"effect":"Strengthens conformity and the use of truth in service of power."}
 }
 const VISIONS:=[
 	{"title":"Whose knowledge travels?","role":"Explorer","other":"Scholar","question":"Some argue that useful knowledge should circulate freely. Others want to preserve a trusted teaching tradition before spreading it.","options":[{"label":"Share what we learn","axis":"openness","delta":.04,"meaning":"Make openness to outsiders a stronger public value."},{"label":"Strengthen our own teaching","axis":"collective_obligation","delta":.04,"meaning":"Strengthen the duty to pass knowledge on within the community."}]},
@@ -38,7 +50,7 @@ func ensure()->void:
 	next_vision_day=last_day+30
 
 func reset_for_new_world()->void:
-	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); initialized=false
+	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); cultural_memory=Culture.empty(); auto_scouting=true;auto_settlement=true;auto_research=true;inclination_review_day=-1; initialized=false
 	if is_instance_valid(panel): panel.queue_free()
 
 func choose(id:String)->Dictionary:
@@ -46,12 +58,15 @@ func choose(id:String)->Dictionary:
 	if not AMBITIONS.has(id): return {"error":"Unknown ambition."}
 	var day:=int(WorldSimulation.state.elapsed_days)
 	if not needs_century_choice(): return {"error":"This century's focus is already chosen. Reconsider at the start of the next century."}
+	_ensure_cultural_memory()
+	Culture.record(cultural_memory,"century:%d" % century_at(day),id,day,10.0)
 	ambition=id; chosen_day=day; chosen_century=century_at(day); last_day=day
 	if WorldSimulation.state.founding_focus=="":
 		# Complete the old time gate without applying an unrelated survival preset.
 		WorldSimulation.state.founding_focus="collective_ambition"
 		WorldSimulation.state.founding_focus_selected_day=day
 		WorldSimulation.state.founding_banner_index=AMBITIONS.keys().find(id)%4
+	apply_inclinations(day)
 	_log(day,"Century %d: chose to %s." % [chosen_century+1,String(AMBITIONS[id].name).to_lower()])
 	return {"ok":true}
 
@@ -66,18 +81,38 @@ func next_century_day()->int:
 	return (century_at(int(WorldSimulation.state.elapsed_days))+1)*CENTURY_DAYS
 
 func research_multiplier(domain:String)->float:
-	ensure()
-	if needs_century_choice(): return 1.0
-	return 1.25 if domain in AMBITIONS[ambition].domains else .95
+	ensure();_ensure_cultural_memory()
+	var total:=0.0;var relevant:=0.0
+	var weighted:=Culture.choice_weights(cultural_memory,int(WorldSimulation.state.elapsed_days))
+	for choice in weighted:
+		var amount:=float(weighted[choice]);total+=amount
+		if domain in AMBITIONS[choice].domains:relevant+=amount
+	return 1.0 if total<=0 else .95+.30*relevant/total
+
+func _ensure_cultural_memory()->void:
+	if not Culture.valid(cultural_memory):cultural_memory=Culture.empty()
+	# Older saves retain only their last selected focus. Do not invent earlier choices.
+	if cultural_memory.events.is_empty() and AMBITIONS.has(ambition):Culture.record(cultural_memory,"legacy:%d" % chosen_century,ambition,maxi(0,chosen_day),10.0)
+
+func cultural_tendencies()->Array[Dictionary]:
+	ensure();_ensure_cultural_memory()
+	var result:Array[Dictionary]=[];var day:=int(WorldSimulation.state.elapsed_days)
+	for domain in Culture.DOMAINS:
+		result.append({"domain":domain,"inheritance":Culture.distribution(cultural_memory,domain,day),"current":Culture.distribution(cultural_memory,domain,day,true)})
+	return result
 
 func advance(day:int)->void:
 	ensure()
 	if day<=last_day: return
-	if ambition!="" and chosen_century>=0:
-		var axis:String=AMBITIONS[ambition].axis
+	_ensure_cultural_memory()
+	if not cultural_memory.choices.is_empty():
 		var state:Dictionary=VALUES.normalize_state(WorldSimulation.state.societal_values)
-		var active_days:=maxi(0,mini(day,(chosen_century+1)*CENTURY_DAYS)-maxi(last_day,chosen_day))
-		state.official[axis]=move_toward(float(state.official[axis]),float(AMBITIONS[ambition].target),float(active_days)*.00008)
+		var totals:Dictionary={};var weights:Dictionary={}
+		var weighted:=Culture.choice_weights(cultural_memory,day)
+		for choice in weighted:
+			var axis:String=AMBITIONS[choice].axis;var amount:=float(weighted[choice])
+			totals[axis]=float(totals.get(axis,0))+float(AMBITIONS[choice].target)*amount;weights[axis]=float(weights.get(axis,0))+amount
+		for axis in totals:state.official[axis]=move_toward(float(state.official[axis]),float(totals[axis])/float(weights[axis]),float(day-last_day)*.00008)
 		WorldSimulation.state.societal_values=VALUES.normalize_state(state)
 	last_day=day
 
@@ -87,11 +122,15 @@ func decide(option:int)->Dictionary:
 	if ambition=="" or resolved>=VISIONS.size() or day<next_vision_day: return {"error":"There is no vision awaiting your support."}
 	if option<0 or option>=2: return {"error":"Unknown vision."}
 	var choice:Dictionary=VISIONS[resolved].options[option]
+	_ensure_cultural_memory()
+	var imprint:String=[["horizons","makers"],["makers","gathering"],["gathering","wellbeing"]][resolved][option]
+	Culture.record(cultural_memory,"vision:%d" % resolved,imprint,day,2.0)
 	var state:Dictionary=VALUES.normalize_state(WorldSimulation.state.societal_values)
 	state.official[choice.axis]=clampf(float(state.official[choice.axis])+float(choice.delta),0,1)
 	WorldSimulation.state.societal_values=VALUES.normalize_state(state)
 	_log(day,String(choice.label)+". "+String(choice.meaning))
 	resolved+=1; next_vision_day=day+180
+	inclination_review_day=-1;apply_inclinations(day)
 	return {"ok":true}
 
 func _log(day:int,message:String)->void:
@@ -151,10 +190,11 @@ func _recommendation(role:String,known:Array)->Dictionary:
 
 func export_state()->Dictionary:
 	ensure()
-	return {"version":2,"chosen_century":chosen_century,"network":WorldSimulation.communities.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true)}
+	return {"version":3,"auto_scouting":auto_scouting,"auto_settlement":auto_settlement,"auto_research":auto_research,"cultural_memory":cultural_memory.duplicate(true),"chosen_century":chosen_century,"network":WorldSimulation.communities.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true)}
 
 func import_state(state:Dictionary)->Dictionary:
-	if int(state.get("version",0)) not in [1,2] or state.get("seed",0)!=WorldSimulation.state.world_seed: return {"error":"Incompatible people-direction save."}
+	if int(state.get("version",0)) not in [1,2,3] or state.get("seed",0)!=WorldSimulation.state.world_seed: return {"error":"Incompatible people-direction save."}
+	if state.has("cultural_memory") and not Culture.valid(state.cultural_memory):return {"error":"Invalid accumulated culture."}
 	var imported_century:=int(state.get("chosen_century",-1))
 	if int(state.version)==1:
 		# Preserve the player's existing ambition for their current century, rather
@@ -177,6 +217,9 @@ func import_state(state:Dictionary)->Dictionary:
 		WorldSimulation.communities.reset_for_new_world(); WorldSimulation.communities.ensure()
 	ambition=state.get("ambition",""); chosen_day=int(state.get("chosen_day",-1)); last_day=int(state.get("last_day",0)); resolved=int(state.get("resolved",0)); next_vision_day=int(state.get("next_vision_day",30)); automatic_work=bool(state.get("automatic_work",true)); work_baseline=state.get("work_baseline",{}).duplicate(true); work_day=int(state.get("work_day",-30)); history.assign(state.get("history",[]).duplicate(true)); seed_value=WorldSimulation.state.world_seed; initialized=true
 	chosen_century=imported_century
+	cultural_memory=state.get("cultural_memory",Culture.empty()).duplicate(true)
+	auto_scouting=bool(state.get("auto_scouting",true));auto_settlement=bool(state.get("auto_settlement",true));auto_research=bool(state.get("auto_research",true));inclination_review_day=-1
+	_ensure_cultural_memory()
 	return {"ok":true}
 
 func _unhandled_key_input(event:InputEvent)->void:
@@ -190,3 +233,37 @@ func open_direction()->void:
 		return
 	if not is_instance_valid(layer): layer=CanvasLayer.new(); layer.layer=81; add_child(layer)
 	panel=preload("res://scripts/people_direction_screen.gd").new(); layer.add_child(panel)
+
+func record_cultural_action(key:String,choice:String,weight:float=1.0)->bool:
+	ensure();_ensure_cultural_memory()
+	var day:=int(WorldSimulation.state.elapsed_days);var used:=0.0
+	for event:Dictionary in cultural_memory.events:
+		if String(event.id).begins_with("action:") and event.choice==choice and century_at(event.day)==century_at(day):used+=float(event.weight)
+	# Repeated automated behavior cannot drown out a ten-point century commitment.
+	return Culture.record(cultural_memory,"action:"+key,choice,day,minf(weight,maxf(0,5.0-used)))
+
+func apply_inclinations(day:int)->void:
+	ensure();_ensure_cultural_memory()
+	if cultural_memory.choices.is_empty() or inclination_review_day==day:return
+	inclination_review_day=day
+	if auto_scouting:
+		var share:=Culture.scout_share(cultural_memory,day)
+		if float(WorldSimulation.state.simulation_metrics.get("food_intake_ratio",1))<.98:share=0.0
+		WorldSimulation.world.scouting_staff.set_policy(share,"exploration",true)
+	if auto_research:
+		var controller=load("res://scripts/civilization_controller.gd")
+		var plan:Dictionary=controller.current_plan(WorldSimulation.actor_id)
+		var weights:Dictionary={}
+		for domain in WorldSimulation.state.research_allocations:weights[domain]=.1
+		var choices:=Culture.choice_weights(cultural_memory,day)
+		for choice in choices:
+			for domain in AMBITIONS[choice].domains:weights[domain]=float(weights.get(domain,.1))+float(choices[choice])
+		plan.research_weights=weights
+		controller.research_orders(WorldSimulation.actor_id,plan)
+func set_delegated(area:String,enabled:bool)->void:
+	match area:
+		"scouting":auto_scouting=enabled
+		"settlement":auto_settlement=enabled
+		"research":auto_research=enabled
+	inclination_review_day=-1
+	if enabled:apply_inclinations(int(WorldSimulation.state.elapsed_days))

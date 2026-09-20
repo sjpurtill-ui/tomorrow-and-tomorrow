@@ -27,8 +27,9 @@ func valid(value:Variant)->bool:
 	return host.city_intelligence.number(value.get("share")) and float(value.share)>=0 and float(value.share)<=.10 and String(value.get("focus","")) in FOCI and value.get("origin_city_id","") is String and String(value.get("origin_city_id","")).length()<100 and host.city_intelligence.number(value.get("last_day",-1)) and host.city_intelligence.number(value.get("next_review",0)) and host.city_intelligence.number(value.get("food_spent",0)) and float(value.get("food_spent",0))>=0 and value.get("status","") is String
 func restore(value:Dictionary)->void:
 	reset();data.merge(value,true)
-func set_policy(share:float,focus:String)->Dictionary:
+func set_policy(share:float,focus:String,delegated:bool=false)->Dictionary:
 	if not is_finite(share) or share<0 or share>.10 or not FOCI.has(focus):return {"error":"Choose 0–10% of the population and a scouting focus."}
+	if not delegated and WorldSimulation.actor_id=="player":WorldSimulation.direction.auto_scouting=false
 	if is_equal_approx(float(data.share),share) and data.focus==focus:return {"ok":true}
 	data.share=share;data.focus=focus;data.next_review=int(WorldSimulation.state.elapsed_days);data.target_cursor=0
 	data.status="Staff will organize parties on the next day." if share>0 else "No new departures. Parties already away will finish and return."
@@ -36,13 +37,14 @@ func set_policy(share:float,focus:String)->Dictionary:
 func set_origin(origin_city_id:String)->Dictionary:
 	var origin:Dictionary=host._scout_origin(origin_city_id)
 	if origin_city_id!="" and String(origin.get("id",""))!=origin_city_id:return {"error":"Choose a player-controlled settlement as the scouting origin."}
+	if WorldSimulation.actor_id=="player":WorldSimulation.direction.auto_scouting=false
 	data.origin_city_id=String(origin.get("id",""));data.next_review=int(WorldSimulation.state.elapsed_days)
 	data.status="New scouting parties will organize from %s." % String(origin.get("label","the selected settlement"))
 	return {"ok":true,"message":data.status}
 func snapshot()->Dictionary:
-	var population:=maxi(0,floori(WorldSimulation.state.population_exact))
-	var assigned:=0
-	for mission:Dictionary in host.scout_missions:assigned+=int(mission.get("personnel",0))
+	var pool:Dictionary=host.scout_origin_staffing(String(data.get("origin_city_id","")))
+	var population:=maxi(0,floori(pool.population))
+	var assigned:=int(pool.away)
 	var recruitment:Dictionary={}
 	if data.focus=="recruitment":
 		recruitment={"reception":EXCHANGE.reception_snapshot(),"nomads":host.nomadic_recruitment_status()}
@@ -62,11 +64,12 @@ func advance(day:int)->void:
 		return
 	var slots:int=host.scout_party_capacity()-int(view.parties)
 	if slots<=0:data.status="All organized parties are away. Staff will replace them after return.";return
-	var adults:=maxi(0,WorldSimulation.state.able_population()-WorldSimulation.military._mobilized_count()-host.mission_absent_personnel()-12)
+	var pool:Dictionary=host.scout_origin_staffing(String(view.origin_city_id))
+	var adults:=int(pool.available)
 	if adults<2:data.status="Waiting for people: %d adults free after existing commitments and essential work; a party needs 2." % adults;return
 	var people:=mini(adults,clampi(ceili(float(free)/slots),2,mini(80,free)))
-	var civilian_reserve:=maxf(1,WorldSimulation.state.population_exact)*.9*7
-	var spendable:=maxf(0,WorldSimulation.food.total_stored()-civilian_reserve)
+	var civilian_reserve:=maxf(1,float(pool.population))*.9*7
+	var spendable:=maxf(0,float(pool.food)-civilian_reserve)
 	if spendable<2*30*.55:
 		data.status="Waiting for provisions: %.0f food available for travel; the smallest party needs 33. Seven days of food stay at home." % spendable
 		return
@@ -135,8 +138,9 @@ func advance_city_watches(day:int)->void:
 		var quote:Dictionary=host.scout_mission_quote(int(watch.duration_days),"city:"+city_id,"",int(watch.personnel),true,String(watch.origin_city_id))
 		if not bool(quote.get("can_dispatch",false)):
 			watch.status=String(quote.get("error",quote.get("blocker","Waiting for a route.")));continue
-		var reserve:=maxf(1,WorldSimulation.state.population_exact)*.9*7
-		if WorldSimulation.food.total_stored()-float(quote.provisions)<reserve:
+		var pool:Dictionary=host.scout_origin_staffing(String(watch.origin_city_id))
+		var reserve:=maxf(1,float(pool.population))*.9*7
+		if float(pool.food)-float(quote.provisions)<reserve:
 			watch.status="Waiting for provisions; seven days of food are reserved at home.";continue
 		var result:Dictionary=host.dispatch_scouts(int(watch.duration_days),"city:"+city_id,"",int(watch.personnel),true,String(watch.origin_city_id))
 		if result.has("error"):watch.status=String(result.error);continue

@@ -1081,10 +1081,12 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float)->Dictionar
 		"timber":float(founding_materials.get("Timber",0.0)),"fiber":float(founding_materials.get("Fiber Plants",0.0))
 	}
 
-func begin_settlement_convoy(destination:Vector2,duration_days:float,settlement_name:String="")->Dictionary:
+func begin_settlement_convoy(destination:Vector2,duration_days:float,settlement_name:String="",delegated:bool=false)->Dictionary:
 	var quote:=settlement_convoy_quote(destination,duration_days)
 	if not bool(quote.get("ok",false)): return quote
-	return with_city_resources(String(quote.origin_id),func()->Dictionary: return _depart_local_convoy(destination,quote,settlement_name))
+	var result:Dictionary=with_city_resources(String(quote.origin_id),func()->Dictionary: return _depart_local_convoy(destination,quote,settlement_name))
+	if bool(result.get("ok",false)) and not delegated and WorldSimulation.actor_id=="player":WorldSimulation.direction.auto_settlement=false
+	return result
 
 func _depart_local_convoy(destination:Vector2,quote:Dictionary,settlement_name:String)->Dictionary:
 	var food_system:=_autoload_node("FoodSystem")
@@ -1165,6 +1167,7 @@ func complete_settlement_convoy(destination:Vector2)->Dictionary:
 	WorldSimulation.state.settlement_convoy={}
 	WorldSimulation.state.settlement_network_revision+=1
 	WorldSimulation.world.settlement_siting.founded(String(record.id),String(record.name),planned_destination,int(WorldSimulation.state.elapsed_days))
+	WorldSimulation.direction.record_cultural_action("settlement:"+String(record.id),"expansion",2.0)
 	return {"ok":true,"settlement":record.duplicate(true),"population":roundi(_settlement_population(record))}
 
 func _create_founding_nucleus()->void:

@@ -1238,6 +1238,24 @@ func _scout_origin(origin_city_id:String="")->Dictionary:
 	return options[0]
 
 
+func scout_origin_staffing(origin_city_id:String="")->Dictionary:
+	var origin:=_scout_origin(origin_city_id)
+	var id:=String(origin.id)
+	var away:=0
+	for mission:Dictionary in scout_missions:
+		# Older parties without an origin belong to the primary settlement.
+		if String(mission.get("origin_city_id",""))==id or (String(mission.get("origin_city_id","")).is_empty() and bool(origin.primary)):
+			away+=maxi(0,int(mission.get("personnel",0)))
+	var national_available:=maxi(0,WorldSimulation.state.able_population()-WorldSimulation.military._mobilized_count()-mission_absent_personnel()-12)
+	var local:Dictionary=WorldSimulation.settlements.with_city_resources(id,func()->Dictionary:
+		return WorldSimulation.settlements.with_local_population(func()->Dictionary:
+			return {"population":WorldSimulation.state.population_exact,"adults":WorldSimulation.state.able_population(),"food":WorldSimulation.food.total_stored()}))
+	local["away"]=away
+	local["available"]=mini(national_available,maxi(0,int(local.adults)-away-12))
+	local["origin_city_id"]=id
+	return local
+
+
 func contact_investigation_proposal(civ_id:String)->Dictionary:
 	var target_id:="contact:"+civ_id
 	for mission:Dictionary in scout_missions:
@@ -1274,7 +1292,8 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 	if origin_city_id!="" and String(origin_option.get("id",""))!=origin_city_id:return {"error":"That settlement cannot currently organize a scouting party."}
 	var origin:Vector2=origin_option.position
 	var requested_duration:=duration_days
-	var population:=maxf(1.0,WorldSimulation.state.population_exact)
+	var staffing:=scout_origin_staffing(String(origin_option.id))
+	var population:=float(staffing.population)
 	var personnel:=clampi(party_size,2,80) if party_size>0 else clampi(roundi(population*0.012),6,80)
 	var provisions:=float(personnel)*float(duration_days)*0.55
 	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16)),0.0,1.0)
@@ -1329,14 +1348,11 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 		provisions=float(personnel)*float(duration_days)*.55
 	var planning_mission:={"duration_days":duration_days,"concealment":clampf(0.72+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93),"evasion":clampf(0.76+logistics*0.14+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.08,0.74,0.95)}
 	var risk:=_player_scout_risk_snapshot(planning_mission)
-	var committed_scouts:=0
-	for mission_variant in scout_missions: committed_scouts+=int((mission_variant as Dictionary).get("personnel",0))
-	var available_adults:=maxi(0,WorldSimulation.state.able_population()-WorldSimulation.military._mobilized_count()-mission_absent_personnel())
 	var blocker:=""
 	if scout_missions.size()>=scout_party_capacity(): blocker="All %d scout parties this population can organize are already away." % scout_party_capacity()
 	elif not scout_land_authority.is_valid(): blocker="No terrain survey is available. Unknown ground cannot be assumed to be land."
-	elif population<float(personnel+committed_scouts)+12.0 or available_adults<personnel+12: blocker="Not enough adults free for this party after existing commitments and essential work at home."
-	elif WorldSimulation.food.total_stored()+0.0001<provisions: blocker="Requires %.1f Food; only %.1f is stored." % [provisions,WorldSimulation.food.total_stored()]
+	elif int(staffing.available)<personnel: blocker="%s has only %d adults available after existing commitments and essential work." % [String(origin_option.label),int(staffing.available)]
+	elif float(staffing.food)+0.0001<provisions: blocker="Requires %.1f Food; only %.1f is stored at %s." % [provisions,float(staffing.food),String(origin_option.label)]
 	elif target_distance>one_way_range: blocker="This mission can reach about %.0f km, but the target is %.0f km away. Choose a longer expedition." % [one_way_range,target_distance]
 	elif not route_plan.is_empty() and not bool(route_plan.get("ok",false)): blocker=String(route_plan.get("reason","No continuous land-only route reaches this target."))
 	elif not route_plan.is_empty() and float(route_plan.get("distance_km",INF))>one_way_range+.001: blocker="The land route is %.0f km after following the coastline, beyond this party's %.0f km range. Choose a longer expedition." % [float(route_plan.get("distance_km",0.0)),one_way_range]
@@ -1370,7 +1386,7 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	if distance>one_way_range+0.001:
 		return {"error":"The coastline-aware route is %.0f km, beyond this party's %.0f km range." % [distance,one_way_range]}
 	var start_day:=int(WorldSimulation.state.elapsed_days)
-	var issued_provisions:=WorldSimulation.food.issue_for_obligation(provisions,"scouting","Scout party • %s" % String(target_option.label),float(duration_days),personnel)
+	var issued_provisions:float=WorldSimulation.settlements.with_city_resources(String(quote.origin_city_id),func()->float:return WorldSimulation.food.issue_for_obligation(provisions,"scouting","Scout party • %s" % String(target_option.label),float(duration_days),personnel))
 	if issued_provisions+0.0001<provisions: return {"error":"Food stores changed before the scout party could be provisioned."}
 	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16)),0.0,1.0)
 	var field_knowledge:=clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)

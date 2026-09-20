@@ -37,9 +37,9 @@ static func execute(order:Dictionary)->Dictionary:
 			var context:=preload("res://scripts/civilization_day.gd").context(destination)
 			if not WorldSimulation.world._scout_land_at(destination) or not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):return {"error":"The destination needs dry land and known reachable water."}
 			if not WorldSimulation.world._scout_segment_is_land(WorldSimulation.world.player_world_origin,destination):return {"error":"The founding route must cross traversable land."}
-			return WorldSimulation.settlements.begin_settlement_convoy(destination,0.0,String(order.get("name","")))
+			return WorldSimulation.settlements.begin_settlement_convoy(destination,0.0,String(order.get("name","")),true)
 		"society_policy":return preload("res://scripts/society_exchange.gd").policy(String(order.get("migration","balanced")),String(order.get("sharing","selective")))
-		"scouting_policy":return WorldSimulation.world.scouting_staff.set_policy(float(order.get("share",0)),String(order.get("focus","exploration")))
+		"scouting_policy":return WorldSimulation.world.scouting_staff.set_policy(float(order.get("share",0)),String(order.get("focus","exploration")),true)
 		"scout":return WorldSimulation.world.dispatch_scouts(int(order.get("days",30)),String(order.get("target","open_world")),String(order.get("heading","")),0,false,String(order.get("origin_city_id","")))
 		"diplomacy":return WorldSimulation.world.dispatch_diplomat(String(order.get("target","")),"",String(order.get("action","goodwill")))
 		"training_policy":return WorldSimulation.military.training_staff.set_policy(String(order.get("service","army")),String(order.get("policy","regular")))
