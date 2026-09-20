@@ -1550,3 +1550,13 @@ execution removes one person from the aggregate population and carries the
 larger legitimacy and cohesion cost. Expanded name banks improve variety while
 preserving all names already stored in saves. Focused validation passed 34/34
 government simulation cases and 2/2 Government HUD cases. No save migration.
+
+## September 19 — visual government cabinet
+
+Integrated worker `f81c395` as canonical `1edb41c`. The Government destination
+now presents authority as gauges and officeholders as compact visual cards with
+office seals, abstract portraits, trait chips, ability bars, a fit ring, and
+icon-only dismissal and execution controls. The Command Rail uses heavier filled
+silhouettes and a clear active medallion. Simulation, appointments, terrain, and
+save data are unchanged. Godot completed a clean parse/import pass; the focused
+UI runner encountered its existing headless crash before assertions.
