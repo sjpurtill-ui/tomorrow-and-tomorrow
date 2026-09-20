@@ -4,10 +4,18 @@ extends GdUnitTestSuite
 const SOCIETY_MODEL_SCRIPT:=preload("res://scripts/society_model.gd")
 
 var model:RefCounted
+var civilization_was_processing:=false
 
 func before_test()->void:
+	civilization_was_processing=CivilizationSystem.is_processing()
+	CivilizationSystem.set_process(false)
 	GameState.reset_for_new_world(918273)
 	model=auto_free(SOCIETY_MODEL_SCRIPT.new())
+
+# Unit fixtures contain minimal settlement records, not live world cities.
+func after_test()->void:
+	GameState.reset_for_new_world(918273)
+	CivilizationSystem.set_process(civilization_was_processing)
 
 func _advisor(value:float)->Dictionary:
 	var dynamics:Dictionary={}

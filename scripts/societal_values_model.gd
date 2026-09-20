@@ -301,6 +301,14 @@ static func simulation_effect(state:Dictionary,effect_id:String)->float:
 	# Effects only read the value axes. Normalizing a complete society here
 	# also copied its history and rebuilt identity/architecture for every query.
 	var source:=initial_state() if state.is_empty() else state
+	# Axis-only effects do not need political alignment or institution scans.
+	var raw_values:Dictionary=source.get("lived",{})
+	match effect_id:
+		"knowledge": return clampf((clampf(float(raw_values.get("experimentation",0.5)),0.0,1.0)-0.50)*0.08+(clampf(float(raw_values.get("pluralism",0.5)),0.0,1.0)-0.50)*0.035,-0.06,0.07)
+		"adoption": return clampf((clampf(float(raw_values.get("experimentation",0.5)),0.0,1.0)-0.50)*0.10+(clampf(float(raw_values.get("openness",0.5)),0.0,1.0)-0.50)*0.035,-0.07,0.08)
+		"ecology": return clampf((clampf(float(raw_values.get("ecological_restraint",0.5)),0.0,1.0)-0.50)*0.10,-0.05,0.05)
+		"security": return clampf((clampf(float(raw_values.get("collective_obligation",0.5)),0.0,1.0)-0.50)*0.035+(clampf(float(raw_values.get("hierarchy",0.5)),0.0,1.0)-0.50)*0.025,-0.035,0.035)
+		"trade": return clampf((clampf(float(raw_values.get("openness",0.5)),0.0,1.0)-0.50)*0.09+(clampf(float(raw_values.get("pluralism",0.5)),0.0,1.0)-0.50)*0.035,-0.06,0.07)
 	var lived:Dictionary={}
 	var official:Dictionary=source.get("official",{})
 	var raw_lived:Dictionary=source.get("lived",{})
@@ -319,11 +327,6 @@ static func simulation_effect(state:Dictionary,effect_id:String)->float:
 		"cohesion": return clampf((alignment-0.50)*0.12+(float(lived.collective_obligation)-0.50)*0.035,-0.08,0.09)
 		"legitimacy": return clampf((alignment-0.50)*0.14,-0.09,0.07)
 		"institutions": return clampf((alignment-0.50)*0.10+(float(lived.centralization)-0.50)*0.025,-0.07,0.07)
-		"knowledge": return clampf((float(lived.experimentation)-0.50)*0.08+(float(lived.pluralism)-0.50)*0.035,-0.06,0.07)
-		"adoption": return clampf((float(lived.experimentation)-0.50)*0.10+(float(lived.openness)-0.50)*0.035,-0.07,0.08)
-		"ecology": return clampf((float(lived.ecological_restraint)-0.50)*0.10,-0.05,0.05)
-		"security": return clampf((float(lived.collective_obligation)-0.50)*0.035+(float(lived.hierarchy)-0.50)*0.025,-0.035,0.035)
-		"trade": return clampf((float(lived.openness)-0.50)*0.09+(float(lived.pluralism)-0.50)*0.035,-0.06,0.07)
 	return 0.0
 
 
