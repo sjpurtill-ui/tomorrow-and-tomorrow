@@ -14,8 +14,7 @@ func meta()->Dictionary:
 
 func tab(sub:int)->Dictionary:
 	var data:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary: return SettlementModel.with_local_population(func()->Dictionary: return _local_tab(sub)))
-	if sub==1:data.blocks.push_front({"type":"actions","items":[focused_action("SHARED WORKSHOPS","Production, finished goods and delegated scheduling",_workshop_report)]})
-	if sub!=0: (data.blocks as Array).append({"type":"actions","items":[focused_action("CITY DELIVERIES","Routes, shipments and requirements",_economy_report.bind("trade"))]})
+	if sub not in [0,1]: (data.blocks as Array).append({"type":"actions","items":[focused_action("CITY DELIVERIES","Routes, shipments and requirements",_economy_report.bind("trade"))]})
 	return data
 
 func _workshop_report()->Dictionary:
@@ -25,6 +24,7 @@ func _workshop_report()->Dictionary:
 func _local_tab(sub:int)->Dictionary:
 	if sub==3: return _wealth_tab()
 	if sub==0:return {"blocks":[_provisions_data()]}
+	if sub==1:return {"blocks":[_materials_data()]}
 	var metrics:Dictionary=GameState.simulation_metrics
 	var water:Dictionary=GameState.water_metrics
 	var food_days:=float(metrics.get("food_days",0.0))
@@ -227,7 +227,7 @@ func _who_eats_blocks(metrics:Dictionary)->Array:
 
 func signature()->Array:
 	var result:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,_local_signature)
-	result.append_array([selected_food,show_priorities,GameState.settlement_network_revision,GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
+	result.append_array([selected_material,materials_priorities,selected_food,show_priorities,GameState.settlement_network_revision,GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
 	return result
 
 func _local_signature()->Array:
@@ -261,9 +261,7 @@ func _wealth_tab()->Dictionary:
 	return {"kpis":[{"label":"REAL GDP / DAY","value":"%.1f" % float(economy.gdp),"delta":"selected city","accent":Tokens.BLUE,"tip":"Effective assigned worker-days × current labor productivity"},{"label":"GDP / PERSON","value":"%.2f" % float(economy.gdp_per_capita),"delta":"real output","accent":Tokens.TEAL,"tip":"Daily real GDP divided by the selected city's population"},{"label":"PRODUCTIVITY","value":"%d%%" % roundi(float(economy.productivity)*100.0),"delta":"per effective worker","accent":Tokens.AMBER,"tip":"The same labor productivity multiplier used to calculate real GDP"}],"brief":{},"blocks":blocks}
 
 func open_expanded_tab(sub:int)->bool:
-	if sub!=1:return false
-	preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"materials")
-	return true
+	return false
 
 func _food_overview()->Array:
 	return [{"type":"text","heading":"READING THE RESERVES","text":"Days of food and water describe what is stored against current need. They are not a countdown while production continues. Local leaders handle routine provisioning."},
@@ -325,3 +323,42 @@ func _provisions_focus(focus:String)->void:
 		var result:=GovernmentPeopleSystem.set_settlement_focus(id,focus)
 		if not bool(result.get("ok",false)):terrain._report_military_action({"message":String(result.get("reason","Direction unavailable"))})
 	hud.request_immediate_dock_refresh()
+
+var selected_material:=""
+var materials_priorities:=false
+func _materials_data()->Dictionary:
+	var id:=GameState.selected_player_settlement_id
+	var city:=SettlementModel.settlement_record(id)
+	var metrics:Dictionary=GameState.material_metrics
+	var grouped:Dictionary={}
+	for deposit:Dictionary in ResourceSystem.visible_deposits():
+		var key:=String(deposit.get("resource",""))
+		if key.is_empty():continue
+		var item:Dictionary=grouped.get(key,{"sites":[],"delivered":0.0})
+		item.sites.append(deposit.duplicate(true));item.delivered+=float(deposit.get("delivered_today",0));grouped[key]=item
+	for key:String in GameState.resource_stockpiles:
+		if key!="Food" and float(GameState.resource_stockpiles[key])>.001 and not grouped.has(key):grouped[key]={"sites":[],"delivered":0.0}
+	var history:=preload("res://scripts/strategic_history.gd").points(GameState.strategic_history,id)
+	var rows:Array=[]
+	for key:String in grouped:
+		var item:Dictionary=grouped[key];var points:Array=[]
+		for observation:Dictionary in history:
+			points.append({"day":observation.day,"value":observation.get(key,null)})
+		var details:Array[String]=[]
+		var blocked:=false
+		for site:Dictionary in item.sites:
+			var blockers:Array=site.get("blockers",[])
+			blocked=blocked or not blockers.is_empty()
+			var condition:=", ".join(blockers) if not blockers.is_empty() else String(site.get("bottleneck",site.get("stage","Surveyed")))
+			if ResourceSystem.deposit_exhausted(site):condition="Exhausted"
+			details.append(String(site.get("name",ResourceSystem.display_name(key)))+" · "+condition)
+		rows.append({"key":key,"name":ResourceSystem.display_name(key),"stock":float(GameState.resource_stockpiles.get(key,0)),"delivered":item.delivered,"points":points,"details":details,"blocked":blocked,"loss":float(metrics.get("losses_by_resource",{}).get(key,0))})
+	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var order:=["Timber","Stone","Clay","Fiber Plants","Copper Ore"]
+		var ai:=order.find(a.key);var bi:=order.find(b.key)
+		if ai!=bi:return (ai if ai>=0 else 999)<(bi if bi>=0 else 999)
+		return String(a.name)<String(b.name))
+	var incoming:Array=[]
+	for shipment:Dictionary in GameState.city_trade_shipments:
+		if String(shipment.get("destination_id",""))==id and String(shipment.get("status",""))=="in_transit":incoming.append(shipment.duplicate(true))
+	return {"type":"materials_ledger","title":"Materials","city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(id),"managed":city.get("auto_manage",true),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"storage":ResourceSystem.stored_bulk(),"capacity":float(metrics.get("storage_capacity",0)),"hauling":metrics.get("flow_ratio",null),"rows":rows,"incoming":incoming,"day":GameState.elapsed_days,"selected":selected_material,"priorities":materials_priorities,"on_select":func(key:String):selected_material="" if selected_material==key else key;hud.request_immediate_dock_refresh(),"on_toggle":func():materials_priorities=not materials_priorities;hud.request_immediate_dock_refresh(),"on_map":terrain._toggle_resource_view,"on_focus":_provisions_focus,"on_trade":focused_action("City deliveries","",_economy_report.bind("trade")).on_press,"on_atlas":func():preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"materials")}
