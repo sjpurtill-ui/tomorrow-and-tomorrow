@@ -8,8 +8,8 @@ var workshop_content:RefCounted
 func meta()->Dictionary:
 	return {
 		"eyebrow":"ECONOMY · PROVISIONS & MATERIALS",
-		"title":"%s · Provisions" % String(SettlementModel.selected_settlement().get("name","Settlement")),
-		"subtabs":["FOOD & WATER","MATERIALS","WHO EATS","WEALTH"],
+		"title":"Provisions","serif":true,"title_size":38,"spread_tabs":true,
+		"subtabs":["FOOD & WATER","MATERIALS","DISTRIBUTION","WEALTH"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -24,6 +24,7 @@ func _workshop_report()->Dictionary:
 
 func _local_tab(sub:int)->Dictionary:
 	if sub==3: return _wealth_tab()
+	if sub==0:return {"blocks":[_provisions_data()]}
 	var metrics:Dictionary=GameState.simulation_metrics
 	var water:Dictionary=GameState.water_metrics
 	var food_days:=float(metrics.get("food_days",0.0))
@@ -226,7 +227,7 @@ func _who_eats_blocks(metrics:Dictionary)->Array:
 
 func signature()->Array:
 	var result:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,_local_signature)
-	result.append_array([GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
+	result.append_array([selected_food,show_priorities,GameState.settlement_network_revision,GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
 	return result
 
 func _local_signature()->Array:
@@ -302,3 +303,25 @@ func _water_report()->Dictionary:
 			var result:=GovernmentPeopleSystem.set_settlement_focus(id,"water")
 			if not bool(result.get("ok",false)):terrain._report_military_action({"message":String(result.get("reason","Direction unavailable."))})
 			hud.request_immediate_dock_refresh()},{"label":"LET LEADER DECIDE","sub":"Restore automatic local priorities","disabled":management.is_empty(),"on_press":func()->void:GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]}]})
+
+var selected_food:=""
+var show_priorities:=false
+func _provisions_data()->Dictionary:
+	var metrics:Dictionary=GameState.simulation_metrics
+	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	var rows:Array=[]
+	var stocks:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
+	for group in [["Fresh plants"],["Fresh meat","Fish"],["Dry staples"],["Preserved food"]]:
+		var stock:=0.0;var lost:=0.0;var parts:Array[String]=[]
+		for kind:String in group:
+			var amount:=float(stocks.get(kind,0));var waste:=float(metrics.get("food_spoilage_by_type",{}).get(kind,0))
+			stock+=amount;lost+=waste;parts.append("%s: %.1f rations · %.1f spoiled" % [kind,amount,waste])
+		rows.append({"name":"Meat & fish" if group.size()>1 else group[0],"stock":stock,"lost":lost,"detail":"\n".join(parts)})
+	return {"type":"provisions","city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"rows":rows,"food_days":metrics.get("food_days",0),"water":GameState.water_metrics.duplicate(true),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),"flow":{"Produced":metrics.get("food_production",0),"Eaten":metrics.get("food_eaten",0),"Spoiled":metrics.get("food_spoilage",0),"Missions":FoodSystem.issued_on_day(int(GameState.elapsed_days)),"Net":metrics.get("food_net",0)},"selected":selected_food,"priorities":show_priorities,"on_select":func(kind:String):selected_food="" if kind==selected_food else kind;hud.request_immediate_dock_refresh(),"on_toggle":func():show_priorities=not show_priorities;hud.request_immediate_dock_refresh(),"on_focus":_provisions_focus,"on_water":_open_water,"on_sources":focused_action("Sources","",_economy_report.bind("sources")).on_press,"on_history":focused_action("Reserve history","",_economy_report.bind("outlook")).on_press,"on_trade":focused_action("City deliveries","",_economy_report.bind("trade")).on_press}
+func _provisions_focus(focus:String)->void:
+	var id:=GameState.selected_player_settlement_id
+	if focus.is_empty():GovernmentPeopleSystem.restore_delegation(id)
+	else:
+		var result:=GovernmentPeopleSystem.set_settlement_focus(id,focus)
+		if not bool(result.get("ok",false)):terrain._report_military_action({"message":String(result.get("reason","Direction unavailable"))})
+	hud.request_immediate_dock_refresh()

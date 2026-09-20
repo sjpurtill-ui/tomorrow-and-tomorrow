@@ -126,6 +126,7 @@ func rebuild()->void:
 	var meta:Dictionary=provider.meta()
 	eyebrow_label.text=String(meta.get("eyebrow",""))
 	title_label.text=String(meta.get("title",""))
+	title_label.add_theme_font_size_override("font_size",int(meta.get("title_size",24)))
 	if bool(meta.get("serif",false)):
 		var face:=SystemFont.new();face.font_names=PackedStringArray(["Georgia","serif"]);title_label.add_theme_font_override("font",face)
 	else:title_label.remove_theme_font_override("font")
@@ -145,12 +146,19 @@ func rebuild()->void:
 		tab.visible=index<subtabs.size()
 		if index<subtabs.size(): tab.text=String(subtabs[index])
 		var active:=index==sub
+		tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL if bool(meta.get("spread_tabs",false)) else Control.SIZE_FILL
 		var style:=Tokens.flat(Tokens.ACTIVE_BG if active else Color(0,0,0,0),Tokens.BORDER,1,3)
 		style.border_width_bottom=0
 		style.corner_radius_bottom_left=0
 		style.corner_radius_bottom_right=0
 		style.content_margin_left=12.0
 		style.content_margin_right=12.0
+		if bool(meta.get("spread_tabs",false)):
+			style=Tokens.flat(Color.TRANSPARENT,Tokens.GOLD if active else Tokens.BORDER_SOFT,0,0,10)
+			style.border_width_bottom=3 if active else 1
+			style.border_color=Tokens.GOLD if active else Tokens.BORDER_SOFT
+			tab.add_theme_font_size_override("font_size",12)
+		else:tab.add_theme_font_size_override("font_size",10)
 		tab.add_theme_stylebox_override("normal",style)
 		tab.add_theme_stylebox_override("hover",style)
 		tab.add_theme_stylebox_override("pressed",style)
