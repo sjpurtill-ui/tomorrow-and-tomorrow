@@ -8,6 +8,17 @@ static func index_known(known:Array)->Dictionary:
 	for id:String in known:result[id]=true
 	return result
 
+# Boolean simulation queries do not need missing-parent presentation records.
+static func satisfied(spec:Dictionary,known:Variant)->bool:
+	for id:String in spec.get("requires_all",spec.get("requires",[])):
+		if id not in known:return false
+	for group:Array in spec.get("requires_any",[]):
+		var found:=false
+		for id:String in group:
+			if id in known:found=true;break
+		if not found:return false
+	return true
+
 static func evaluate(spec:Dictionary,known:Variant)->Dictionary:
 	var missing:Array[String]=[]
 	var alternatives:Array=[]

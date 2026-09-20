@@ -1,0 +1,111 @@
+{
+  "baseline": {
+    "days": 24,
+    "failures": [],
+    "max_ms": 648.844,
+    "mean_ms": 256.324583333333,
+    "median_ms": 237.234,
+    "mode": "baseline",
+    "opponents": 12,
+    "p95_ms": 334.959,
+    "samples_ms": [
+      648.844,
+      334.959,
+      203.476,
+      202.491,
+      203.86,
+      309.953,
+      231.598,
+      237.234,
+      212.119,
+      211.355,
+      253.665,
+      261.916,
+      256.368,
+      238.737,
+      249.338,
+      217.357,
+      247.034,
+      220.663,
+      251.802,
+      253.066,
+      218.991,
+      230.023,
+      223.454,
+      233.487
+    ],
+    "simulation_state_matches": false,
+    "start_day": 11238
+  },
+  "optimized": {
+    "days": 24,
+    "failures": [],
+    "max_ms": 624.333,
+    "mean_ms": 236.065083333333,
+    "median_ms": 214.866,
+    "mode": "optimized",
+    "opponents": 12,
+    "p95_ms": 306.432,
+    "samples_ms": [
+      624.333,
+      306.432,
+      194.91,
+      191.398,
+      191.017,
+      260.54,
+      202.206,
+      208.631,
+      198.794,
+      190.42,
+      221.367,
+      245.883,
+      227.449,
+      214.192,
+      220.234,
+      205.346,
+      229.696,
+      211.656,
+      214.866,
+      241.158,
+      212.123,
+      221.504,
+      214.175,
+      217.232
+    ],
+    "simulation_state_matches": true,
+    "start_day": 11238
+  },
+  "food_component_scaling": [
+    {
+      "bulk_us_per_call": 17.08,
+      "identical": true,
+      "known_entries": 32,
+      "scalar_us_per_call": 175.9
+    },
+    {
+      "bulk_us_per_call": 50.34,
+      "identical": true,
+      "known_entries": 128,
+      "scalar_us_per_call": 647.52
+    },
+    {
+      "bulk_us_per_call": 197.1,
+      "identical": true,
+      "known_entries": 512,
+      "scalar_us_per_call": 2553.8
+    },
+    {
+      "bulk_us_per_call": 806.38,
+      "identical": true,
+      "known_entries": 2048,
+      "scalar_us_per_call": 10823.9
+    },
+    {
+      "bulk_us_per_call": 2231.9,
+      "identical": true,
+      "known_entries": 5491,
+      "scalar_us_per_call": 30414.46
+    }
+  ],
+  "reduction_percent": 7.903845872502158
+}

@@ -80,8 +80,36 @@ static func chosen(entry:Dictionary,_day:int=-1,known:Variant=null)->Dictionary:
 		if score>best:result=route;best=score
 	return result
 
-static func ready(entry:Dictionary,day:int,known:Variant=null)->bool:
-	return not chosen(entry,day,known).is_empty()
+static func ready(entry:Dictionary,_day:int,known:Variant=null)->bool:
+	if known==null:known=WorldSimulation.state.known_discoveries
+	return ready_for(entry,known,WorldSimulation.discovery.latest_context,evidence(String(entry.id)))
+
+# Same eligibility as chosen(), without building copied routes, descriptions,
+# missing-parent lists or imported presentation records for every candidate.
+static func ready_for(entry:Dictionary,known:Variant,context:Dictionary,source:Dictionary={})->bool:
+	var common:={"requires_all":entry.get("requires_all",[]),"requires_any":entry.get("requires_any",[])}
+	if not Requirements.satisfied(common,known):return false
+	var definitions:Array=entry.get("learning_routes",[])
+	if definitions.is_empty():
+		if _route_ready({"id":"local","requires":entry.get("requires",[])},entry,known,context,source):return true
+		var alternate:Dictionary=ALTERNATIVES.get(String(entry.id),{})
+		return not alternate.is_empty() and _route_ready(alternate,entry,known,context,source,"experimental")
+	for definition:Dictionary in definitions:
+		if _route_ready(definition,entry,known,context,source):return true
+	return false
+
+static func _route_ready(definition:Dictionary,entry:Dictionary,known:Variant,context:Dictionary,source:Dictionary,id_override:String="")->bool:
+	if not Requirements.satisfied(definition,known):return false
+	var signals:Array=definition.get("signals",entry.get("signals",[]))
+	var support:=0.0
+	for signal_name:String in signals:support+=clampf(float(context.get(signal_name,0)),0,2)
+	support/=maxi(1,signals.size())
+	var id:=id_override if id_override!="" else String(definition.id)
+	var progress:=float(definition.get("progress_multiplier",1.0))
+	if (not id.begins_with("experimental") or support>=.25) and support+progress+(.05 if id=="local" else .1)>-1.0:return true
+	# Imported/fieldwork copies retain all foundations, but have their own route
+	# IDs and score. They do not inherit the local experimental-support gate.
+	return not source.is_empty() and support+progress*preload("res://scripts/society_exchange.gd").evidence_strength(source)+.1>-1.0
 
 static func multiplier(entry:Dictionary)->float:
 	var route:=chosen(entry,int(WorldSimulation.state.elapsed_days))
