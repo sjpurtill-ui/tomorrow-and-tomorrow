@@ -30,7 +30,7 @@ config/use_custom_user_dir=true
 config/custom_user_dir_name="TomorrowCampaignPerformanceTests"
 ```
 
-Copy the chosen campaign into that private userdata directory as `saves/performance_snapshot.save`. The probe refuses ordinary userdata and graphical rendering. Run `res://tools/campaign_performance_probe.tscn` headlessly at the baseline, then at the optimized revision with `-- --compare-baseline`. It writes only private `daily_cost_baseline.save` and `daily_cost_optimized.save`. Remove the override before packaging or launching. Results are in `campaign-cost-2026-09-20.json`; private campaign saves are not committed.
+Copy the chosen campaign into that private userdata directory as `saves/performance_snapshot.save`. The probe refuses ordinary userdata and graphical rendering. Run `res://tools/campaign_performance_probe.tscn` headlessly at the baseline, then at the optimized revision with `-- --compare-baseline --allow-observer-summary` (the extra flag permits this pass’s deliberate observer-projection change). It writes only private `daily_cost_baseline.save` and `daily_cost_optimized.save`. Remove the override before packaging or launching. Results are in `campaign-cost-2026-09-20.json`; private campaign saves are not committed.
 
 ## Remaining limit
 

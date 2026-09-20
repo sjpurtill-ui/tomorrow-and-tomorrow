@@ -1087,6 +1087,26 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 	return maxf(.3,result)
 
 
+func food_storage_multipliers(food_types:Array,traveling:bool)->Dictionary:
+	var result:Dictionary={}
+	for food_type:String in food_types:result[food_type]=1.0
+	if traveling or not WorldSimulation.state.settlement_site_committed:return result
+	if WorldSimulation.state.effective_workers("Logistics")+WorldSimulation.state.effective_workers("Crafting")<1:return result
+	# One pass over established knowledge serves all food categories. Results
+	# remain local to this call, so adoption, staffing and settlement changes
+	# take effect immediately without cache invalidation or stale forecasts.
+	for id:String in WorldSimulation.state.known_discoveries:
+		var profile:Dictionary=catalog_by_id.get(id,{}).get("preservation_profile",{})
+		if profile.is_empty():continue
+		var level:=adoption(id)
+		for food_type:String in profile:
+			if not result.has(food_type):continue
+			var reduction:=clampf(float(profile[food_type]),0,.5)
+			result[food_type]=float(result[food_type])*(1.0-reduction*level)
+	for food_type in result:result[food_type]=maxf(.3,float(result[food_type]))
+	return result
+
+
 func _discovery_effect_summary(entry:Dictionary)->String:
 	var opening:=preload("res://scripts/opening_craft_practice.gd")
 	var opening_id:=String(entry.get("id",""))

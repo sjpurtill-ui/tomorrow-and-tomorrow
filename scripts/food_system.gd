@@ -407,15 +407,16 @@ func _drying_weather_factor(profile:Dictionary,day:float)->float:
 
 func _spoil(traveling: bool) -> Dictionary:
 	var result:={}
+	var preservation:=WorldSimulation.discovery.food_storage_multipliers(FOOD_TYPES,traveling)
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
 	if traveling: storage_multiplier*=1.28
 	result["Food batches"]=Batches.spoil(traveling,storage_multiplier)
-	result["Grain processing"]=Grain.spoil(false,storage_multiplier*WorldSimulation.discovery.food_storage_multiplier("Dry staples",traveling))
+	result["Grain processing"]=Grain.spoil(false,storage_multiplier*float(preservation["Dry staples"]))
 	var cooling:=Operations.refrigeration_multiplier(Operations.service("cold_storage") if not traveling else 0.0,WorldSimulation.state.food_stocks)
 	for food_type in FOOD_TYPES:
 		var amount:=float(WorldSimulation.state.food_stocks.get(food_type,0.0))
-		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)*(cooling if food_type in ["Fresh plants","Fresh meat","Fish"] else 1.0)
+		var loss:=amount*float(SPOILAGE[food_type])*storage_multiplier*float(preservation[food_type])*(cooling if food_type in ["Fresh plants","Fresh meat","Fish"] else 1.0)
 		WorldSimulation.state.food_stocks[food_type]=maxf(0.0,amount-loss)
 		result[food_type]=loss
 	return result
@@ -536,8 +537,7 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		current_weather_types[food_type]=maxf(.05,float(current_climate[food_type][1]))
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	if traveling:storage_multiplier*=1.28
-	var preservation:Dictionary={}
-	for food_type:String in FOOD_TYPES:preservation[food_type]=WorldSimulation.discovery.food_storage_multiplier(food_type,traveling)
+	var preservation:=WorldSimulation.discovery.food_storage_multipliers(FOOD_TYPES,traveling)
 	# A projection mutates only projected food, never installed services. With
 	# no current cooling, none of its future days can promise refrigeration.
 	var has_cooling:=not traveling and Operations.service("cold_storage")>0.0

@@ -48,7 +48,7 @@ func _ready() -> void:
 	get_tree().quit(0 if failures.is_empty() else 1)
 
 func compare(before: Variant, after: Variant, path: String) -> void:
-	if path.ends_with(".local_metrics") and ".strategic_regions[" in path and before is Dictionary and after is Dictionary:
+	if "--allow-observer-summary" in OS.get_cmdline_user_args() and path.ends_with(".local_metrics") and ".strategic_regions[" in path and before is Dictionary and after is Dictionary:
 		if after.size()!=3:failures.append(path+" unexpected observer fields")
 		for key in ["material_capacity","logistics","food_days"]:
 			if after.get(key)!=float(before.get(key,0)):failures.append(path+"."+key+" changed")

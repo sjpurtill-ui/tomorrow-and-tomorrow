@@ -681,8 +681,7 @@ func _ensure_deposit_fields(deposit:Dictionary)->void:
 func _is_material_resource(resource_name:String)->bool:
 	return resource_name not in ["Freshwater","Fertile Soil","Game"]
 
-func _material_profile(resource_name:String)->Dictionary:
-	var profiles={
+const MATERIAL_PROFILES:={
 		"Timber":{"family":"organic","bulk":1.35,"store":"yard","loss":0.0012,"base_yield":0.34},
 		"Fiber Plants":{"family":"organic","bulk":0.45,"store":"dry","loss":0.0035,"base_yield":0.42},
 		"Clay":{"family":"earth","bulk":1.25,"store":"covered","loss":0.0010,"base_yield":0.30},
@@ -696,10 +695,14 @@ func _material_profile(resource_name:String)->Dictionary:
 		"Nitrates":{"family":"chemical","bulk":0.70,"store":"dry","loss":0.0025,"base_yield":0.10},
 		"Medicinal Plants":{"family":"organic","bulk":0.20,"store":"dry","loss":0.006,"base_yield":0.16},
 		"Coin":{"family":"metal","bulk":0.05,"store":"secure","loss":0.00005,"base_yield":0.0}
-	}
-	if profiles.has(resource_name): return profiles[resource_name]
-	if "Ore" in resource_name or resource_name in ["Graphite","Lead Ore"]: return {"family":"metal","bulk":1.55,"store":"secure","loss":0.0002,"base_yield":0.14}
-	return {"family":"mineral","bulk":1.65,"store":"yard","loss":0.00015,"base_yield":0.24}
+}
+const ORE_PROFILE:={"family":"metal","bulk":1.55,"store":"secure","loss":0.0002,"base_yield":0.14}
+const MINERAL_PROFILE:={"family":"mineral","bulk":1.65,"store":"yard","loss":0.00015,"base_yield":0.24}
+
+func _material_profile(resource_name:String)->Dictionary:
+	if MATERIAL_PROFILES.has(resource_name): return MATERIAL_PROFILES[resource_name]
+	if "Ore" in resource_name or resource_name in ["Graphite","Lead Ore"]: return ORE_PROFILE
+	return MINERAL_PROFILE
 
 func material_profile(resource_name:String)->Dictionary:
 	return _material_profile(resource_name).duplicate(true)
