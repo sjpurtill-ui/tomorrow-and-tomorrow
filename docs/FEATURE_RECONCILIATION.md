@@ -1675,3 +1675,14 @@ Wealth routing, and existing Materials behavior. No save changes, merge conflict
 or player restart. The exact user-approved Wealth/navigation reference is saved
 under docs/design; the illustrated rail and Wealth redesign remain design work,
 not implemented features.
+
+
+## September 20 — accumulated culture and local scouting: INTEGRATED
+
+Source `775c1e91`, base `9785c9f7`, integrated as `3cc5c09d` in the canonical Mac checkout. Century commitments accumulate permanent weighted inheritance and a decaying recent influence across nine multipolar value domains. Fourteen directions influence research and leader-managed labor; player scouting, research, and organic settlement have persistent manual overrides. Expansion reviews retain existing food, terrain, convoy, and construction requirements. Settlement founding and leader execution leave capped cultural imprints.
+
+The culture screen uses parchment, an illustrated portrait, four-pole value tracks with inherited markers, century thumbnails, and compact delegation controls. Existing ambition artwork is reused; the six additional directions do not yet have unique illustrations. Darker values influence the existing culture/labor/research systems; this does not implement new autonomous atrocities or war declarations.
+
+Scout targets and away counts now belong to the chosen departure settlement. Dispatch is bounded by local working-age population and national commitments; provisions come from that settlement's stores. Existing missions remain unchanged. Older culture saves migrate only the last recorded direction; unknown earlier choices are not fabricated.
+
+Canonical focused checks pass: `tools/cultural_inheritance_review.gd` (weighted choices, migration, manual overrides, capped actions, survival gate) and `tools/scout_origin_review.gd` (40-person settlement, 10% target, other-city absences, invalid dispatch rejection, valid dispatch charging local stores). Actual native culture render inspected at 1200×900. No player process restarted. Prior Wealth/navigation work remains isolated and unintegrated in its existing worktree.
