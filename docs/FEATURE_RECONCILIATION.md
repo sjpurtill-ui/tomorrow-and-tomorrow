@@ -1580,3 +1580,14 @@ resuming it without resetting work or touching other manual lines. Optional
 city field is contained in existing settlement records. Focused runtime checks
 passed for setting/clearing priorities, invalid-city rejection, per-line isolation
 and work preservation. Sidebar providers compile successfully.
+
+## September 19 — compact production line inspector
+
+Integrated worker `814fde7`. Persistent production details now use a product
+header, ownership status, four metrics, work progress, a compact input shortage
+table, stock target and priority strips, and a short action footer. Priority
+overrides release that line from staff control through the existing configure
+API. Batch orders, product catalog and retool selection retain their existing
+layouts. Compile check and Godot sample-data render passed; no live campaign
+changed by the isolated preview. No save format change. Current player has not
+been restarted to receive this inspector.
