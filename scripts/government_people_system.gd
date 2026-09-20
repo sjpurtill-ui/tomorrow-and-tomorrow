@@ -907,6 +907,7 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 		"%s took office. " % successor_name if bool(appointment.get("ok",false)) else "The office remains vacant. ",
 		"The execution seriously damaged legitimacy and cohesion." if execute else ("This coercive removal seriously damaged legitimacy and cohesion." if arrest else "The abrupt replacement carried a small legitimacy and cohesion cost."),
 	]
+	if execute:WorldSimulation.direction.record_cultural_action("execution:%s" % str(previous.get("person_id",previous.get("id",0))),"retribution",2.0)
 	return {"ok":true,"action":action,"former":previous,"successor":successor_record,"event":event,"legitimacy_cost":legitimacy_cost,"cohesion_cost":cohesion_cost,"message":message}
 
 
@@ -1074,7 +1075,7 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 	return guard
 
 
-func _allocations_for_focus(focus:String,leader:Dictionary)->Dictionary:
+func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)->Dictionary:
 	var weights:Dictionary=BASE_ALLOCATIONS.duplicate(true)
 	var changes:Dictionary=({
 		"logistics":{"Logistics":16.0,"Construction":4.0,"Administration":2.0},
@@ -1087,6 +1088,10 @@ func _allocations_for_focus(focus:String,leader:Dictionary)->Dictionary:
 		"research":{"Knowledge":16.0,"Survey":5.0,"Administration":3.0},
 	}).get(focus,{})
 	for role in changes: weights[role]=float(weights.get(role,0.0))+float(changes[role])
+	if cultural:
+		WorldSimulation.direction._ensure_cultural_memory()
+		var bias:=preload("res://scripts/cultural_inheritance.gd").labor_bias(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
+		for role in bias:weights[role]=float(weights.get(role,0))+float(bias[role])
 	_apply_survival_guard(weights)
 	if not leader.is_empty():
 		var skills:Dictionary=leader.get("skills",{})
@@ -1121,7 +1126,7 @@ func _delegate_settlements(_day:int)->void:
 				"label":String(FOCUS_LABELS.get(String(settlement.get("management_focus","balanced")),"BALANCED STEWARDSHIP")),
 				"reason":String(settlement.get("management_focus_reason",_manual_focus_reason(String(settlement.get("management_focus","balanced"))))),
 			}
-			return {"guard":guard,"decision":decision,"allocations":_allocations_for_focus(String(decision.id),leader)}
+			return {"guard":guard,"decision":decision,"allocations":_allocations_for_focus(String(decision.id),leader,auto_manage)}
 		)
 		var guard:Dictionary=local.guard
 		var decision:Dictionary=local.decision

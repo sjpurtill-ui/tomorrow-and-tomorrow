@@ -121,7 +121,7 @@ func _ready() -> void:
 	staffing = label(numbers, "", 14, Art.SOFT); staffing.size_flags_vertical = SIZE_SHRINK_CENTER
 	slider = HSlider.new(); slider.name = "PopulationAllocation"; slider.min_value = 0; slider.max_value = 10; slider.step = .5
 	slider.custom_minimum_size.y = 26; slider.value = float(CivilizationSystem.scouting_staff.data.share)*100
-	slider.tooltip_text = "Share of the whole population reserved for scouting. Parties already away finish their journeys if you reduce it."
+	slider.tooltip_text = "Share of the departure settlement’s population reserved for scouting. Parties already away finish their journeys if you reduce it."
 	Art.style_slider(slider); commitment.add_child(slider)
 	slider.value_changed.connect(func(value: float):
 		CivilizationSystem.scouting_staff.set_policy(value/100, String(CivilizationSystem.scouting_staff.data.focus)); refresh())
@@ -129,7 +129,7 @@ func _ready() -> void:
 	for preset: Array in [["Off",0.0],["Little",2.0],["Regular",5.0],["A lot",10.0]]:
 		var preset_button := button(presets, preset[0], func(): slider.value = preset[1])
 		preset_button.add_theme_font_size_override("font_size",12); preset_button.custom_minimum_size.y=28
-		preset_button.tooltip_text = "%.0f%% of the population" % float(preset[1])
+		preset_button.tooltip_text = "%.0f%% of this settlement’s population" % float(preset[1])
 	var focuses := _stack(columns, 6)
 	label(focuses, "WHAT SHOULD THEY SEEK?", 11, Art.GOLD)
 	for key: String in ["exploration","recruitment","prospecting"]:
@@ -216,7 +216,7 @@ func refresh() -> void:
 	# Changes made elsewhere update the controls without issuing another order.
 	slider.set_value_no_signal(float(view.share)*100)
 	allocation.text = ("%d%%" % roundi(slider.value)) if is_equal_approx(slider.value,roundf(slider.value)) else "%.1f%%" % slider.value
-	staffing.text = "of our population\nUp to %d scouts · %d away" % [int(view.target),int(view.away)]
+	staffing.text = "of this settlement\nUp to %d scouts · %d away" % [int(view.target),int(view.away)]
 	for key: String in focus_buttons: focus_buttons[key].set_pressed_no_signal(key==view.focus)
 	var hint:="New ground, samples & new knowledge."
 	if view.focus=="recruitment":hint="Search for scarce, independent wandering bands. Foreign-city recruitment is a separate hostile order."

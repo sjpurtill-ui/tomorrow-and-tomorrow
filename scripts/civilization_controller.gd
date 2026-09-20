@@ -16,7 +16,18 @@ static func current_plan(id:String)->Dictionary:
 	for ties:Dictionary in state.society_exchange.connections.values():exchange_value=maxf(exchange_value,float(ties.get("respect",0)))
 	situation["cultural_exchange"]=exchange_value
 	situation["reception_capacity"]=preload("res://scripts/society_exchange.gd").reception_capacity()
-	return STRATEGY.preferences(STRATEGY.PERSONALITY.foreign(state.world_seed,id),situation)
+	var plan:=STRATEGY.preferences(STRATEGY.PERSONALITY.foreign(state.world_seed,id),situation)
+	WorldSimulation.direction._ensure_cultural_memory()
+	var drive:=preload("res://scripts/cultural_inheritance.gd").weight(WorldSimulation.direction.cultural_memory,"ambition","expansion",int(state.elapsed_days))
+	plan.expansion_food=maxf(45,float(plan.expansion_food)*(1.0-drive*.35))
+	var choices:=preload("res://scripts/cultural_inheritance.gd").choice_weights(WorldSimulation.direction.cultural_memory,int(state.elapsed_days))
+	var total:=0.0
+	for weight in choices.values():total+=float(weight)
+	if total>0:
+		for choice in choices:
+			for domain in WorldSimulation.direction.AMBITIONS[choice].domains:plan.research_weights[domain]=float(plan.research_weights.get(domain,1))+float(choices[choice])/total*4.0
+		plan.scout_days=90 if drive>=.35 else plan.scout_days
+	return plan
 
 static func review_due(id:String,day:int)->bool:
 	# Same monthly decision frequency, distributed across the calendar so all
@@ -77,6 +88,9 @@ static func choose_orders(id:String)->void:
 	military_orders(id,plan)
 	civilian_orders(id,plan)
 	foreign_orders(id,plan)
+	expansion_orders(id,plan)
+
+static func expansion_orders(id:String,plan:Dictionary)->void:
 	if bool(plan.hungry) or bool(plan.at_war) or float(WorldSimulation.state.simulation_metrics.get("food_days",0))<float(plan.expansion_food):return
 	if bool(WorldSimulation.state.settlement_convoy.get("active",false)):return
 	if "Hearth Circle" not in WorldSimulation.state.settlement_completed:return
