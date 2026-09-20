@@ -256,7 +256,9 @@ func set_active_section(id:String)->void:
 		button.add_theme_stylebox_override("normal",Tokens.rail_button_style(active))
 		button.add_theme_stylebox_override("hover",Tokens.rail_button_style(active,true))
 		var icon:Control=rail_icons.get(section_id)
-		if icon and icon.has_method("set_icon_color"): icon.set_icon_color(Tokens.INK if active else Tokens.TEXT_DIM)
+		if icon:
+			if icon.has_method("set_active"): icon.set_active(active)
+			if icon.has_method("set_icon_color"): icon.set_icon_color(Tokens.GOLD if active else Tokens.TEXT_DIM)
 	_position_toolbar()
 
 func _set_badge(id:String,text:String,color:Color)->void:

@@ -14,47 +14,45 @@ func tab(sub:int)->Dictionary:
 	var governance:=ConsequenceEngine.governance_metrics()
 	var legitimacy:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.7)),0.0,1.0)
 	var support:=clampf(float(governance.get("council_support",0.6)),0.0,1.0)
-	var kpis:Array=[
-		{"label":"LEGITIMACY","value":"%d%%" % roundi(legitimacy*100.0),"accent":Tokens.capacity_color(legitimacy*100.0),"tip":"Shared acceptance of authority"},
-		{"label":"SUPPORT","value":"%d%%" % roundi(support*100.0),"accent":Tokens.capacity_color(support*100.0),"tip":"Institutional support for current policy"},
-	]
+	var kpis:Array=[]
 	if sub==1: return {"kpis":kpis,"brief":_policy_brief(governance),"blocks":_policy_blocks(governance)}
-	return {"kpis":kpis,"brief":{"tone":"info","title":"Appointments are automatic","why":"Each available office is filled from the living public figures. Traits and abilities differ by person; dismissing or executing a holder triggers immediate succession."},"blocks":_office_blocks()}
+	return {"kpis":kpis,"brief":{},"blocks":_office_blocks(legitimacy,support)}
 
-func _office_blocks()->Array:
-	var blocks:Array=[]
+func _office_blocks(legitimacy:float,support:float)->Array:
+	var items:Array=[]
 	for office_variant in GovernmentPeopleSystem.active_offices():
 		var office:Dictionary=office_variant
 		var key:=String(office.key)
 		var holder:=GovernmentPeopleSystem.officeholder(key)
 		if holder.is_empty():
-			blocks.append({"type":"text","heading":String(office.title).to_upper(),"text":"Vacant. Government will fill this office when an eligible living person is available."})
+			items.append({"office_key":key,"office_title":String(office.title),"name":"Vacant","accent":Tokens.MUTED,"traits":[],"skills":[],"fit":0.0})
 			continue
 		var traits:Array=holder.get("traits",[])
-		var top_skills:=_top_skills(holder)
+		var top_skills:Array=_top_skills(holder)
 		var disposition:=GovernmentPeopleSystem.leader_disposition(holder)
-		blocks.append({"type":"rows","heading":String(office.title).to_upper(),"items":[{
-			"name":"%s · age %d" % [String(holder.get("name","Unknown")),int(holder.get("age",0))],
-			"sub":"%s · %s" % [" / ".join(traits),String(disposition.get("label","pragmatic")).capitalize()],
-			"detail":"%s\n%s" % [String(holder.get("background","Public figure")),top_skills],
-			"value":"%d%% FIT" % roundi(GovernmentPeopleSystem.office_competency(holder,key)*100.0),
-			"value_color":Tokens.BODY_2,"accent":Tokens.GOLD,
-			"tip":"Traits and skills belong to this person and remain stable through service.",
-		}]})
-		blocks.append({"type":"actions","items":[
-			{"label":"DISMISS","sub":"remove from office; successor appointed","on_press":_remove.bind(key,"dismiss"),"tip":"Fire %s. They remain alive and may serve again later." % String(holder.get("name","this officeholder"))},
-			{"label":"EXECUTE","sub":"kill by decree; severe political cost","color":Tokens.RED,"on_press":_remove.bind(key,"execute"),"tip":"Execute %s and appoint a successor." % String(holder.get("name","this officeholder"))},
-		]})
-	return blocks
+		items.append({"office_key":key,"office_title":String(office.title),"name":String(holder.get("name","Unknown")),"person_id":int(holder.get("person_id",1)),"traits":traits,"skills":top_skills,"fit":GovernmentPeopleSystem.office_competency(holder,key),"accent":_office_color(key),"tip":"Age %d · %s · %s" % [int(holder.get("age",0)),String(holder.get("background","Public figure")),String(disposition.get("label","pragmatic")).capitalize()],"on_dismiss":_remove.bind(key,"dismiss"),"on_execute":_remove.bind(key,"execute"),"dismiss_tip":"Dismiss %s; a successor is appointed immediately." % String(holder.get("name","officeholder")),"execute_tip":"Execute %s; severe political cost." % String(holder.get("name","officeholder"))})
+	return [{"type":"cabinet","legitimacy":legitimacy,"support":support,"items":items}]
 
-func _top_skills(person:Dictionary)->String:
+func _top_skills(person:Dictionary)->Array:
 	var ranked:Array=[]
 	for skill in GovernmentPeopleSystem.SKILL_KEYS:
 		ranked.append({"name":String(skill),"value":roundi(GovernmentPeopleSystem.skill_value(person,String(skill)))})
 	ranked.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.value)>int(b.value))
-	var labels:Array[String]=[]
-	for index in mini(3,ranked.size()): labels.append("%s %d" % [String(ranked[index].name),int(ranked[index].value)])
-	return " · ".join(labels)
+	var result:Array=[]
+	var colors:Array[Color]=[Tokens.GOLD,Tokens.TEAL,Tokens.BLUE]
+	for index in mini(3,ranked.size()):
+		var skill_name:=String(ranked[index].name)
+		result.append({"name":skill_name,"short":skill_name.substr(0,3).to_upper(),"value":int(ranked[index].value),"color":colors[index]})
+	return result
+
+func _office_color(key:String)->Color:
+	match key.to_lower():
+		"steward":return Tokens.GOLD
+		"quartermaster":return Tokens.TEAL
+		"marshal":return Tokens.RED
+		"scholar":return Tokens.BLUE
+		"envoy":return Tokens.VIOLET
+	return Tokens.GOLD
 
 func _remove(office_key:String,action:String)->void:
 	var result:=GovernmentPeopleSystem.remove_central_officeholder(office_key,action)
