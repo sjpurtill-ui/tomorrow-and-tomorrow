@@ -1700,3 +1700,9 @@ Worker `2d264dd2` on `codex/campaign-scaling`, based on `e341b8eb`, is integrate
 
 The same 24-day, twelve-opponent, day-11238 replay reduced mean headless daily CPU from 256.32 to 236.07 ms (7.9% additional reduction). Full saved simulation state matches, excluding only the save timestamp. Canonical focused validation passes 33/33 with zero errors, failures, skips or orphans. Synthetic large-knowledge preservation lookup is 13.6 times faster, a component result rather than a whole-game claim. No shared-file conflicts, player restart or release packaging occurred. The year-100 campaign was unavailable; this does not establish year-3000 performance. Details: `docs/performance/CAMPAIGN_SCALING.md`.
 
+## September 20 — daily society calculations: INTEGRATED
+
+Worker `20a480d7` from base `1fc946b0`, branch `codex/campaign-daily-cost`, integrated as canonical `a3d03025`. Daily subcategories reuse per-office doctrine contributions within each evaluation; axis-only cultural effects skip unrelated political alignment work; monthly adoption hoists unchanged common factors. Existing formulas, live appointment/state changes, legacy profiles, food and research behavior are preserved.
+
+The 24-day, twelve-opponent year-31 replay measured 239.91 → 234.39 ms mean CPU per day (2.3%). Full saved state matches except the timestamp. Canonical focused validation passes 21/21 with no errors, failures, skips or orphans. A pre-existing leadership fixture now isolates its partial settlement records from background city processing. No save-schema change, shared-file conflict, player restart or release packaging. This modest gain does not establish year-100 or year-3000 performance. Details: `docs/performance/CAMPAIGN_SOCIETY_COST.md`.
+

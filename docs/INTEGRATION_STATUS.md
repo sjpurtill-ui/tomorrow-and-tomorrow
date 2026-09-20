@@ -1,3 +1,9 @@
+## September 20 — daily society calculations: INTEGRATED
+
+Worker `20a480d7` from base `1fc946b0`, branch `codex/campaign-daily-cost`, integrated as canonical `a3d03025`. Daily subcategories reuse per-office doctrine contributions within each evaluation; axis-only cultural effects skip unrelated political alignment work; monthly adoption hoists unchanged common factors. Existing formulas, live appointment/state changes, legacy profiles, food and research behavior are preserved.
+
+The 24-day, twelve-opponent year-31 replay measured 239.91 → 234.39 ms mean CPU per day (2.3%). Full saved state matches except the timestamp. Canonical focused validation passes 21/21 with no errors, failures, skips or orphans. A pre-existing leadership fixture now isolates its partial settlement records from background city processing. No save-schema change, shared-file conflict, player restart or release packaging. This modest gain does not establish year-100 or year-3000 performance. Details: `docs/performance/CAMPAIGN_SOCIETY_COST.md`.
+
 ## September 20 — second campaign performance pass: INTEGRATED
 
 Worker `2d264dd2` on `codex/campaign-scaling`, based on `e341b8eb`, is integrated as canonical `4ab3a7bd`. Research readiness uses a short-circuit predicate instead of constructing descriptive routes; material profiles reuse constant definitions; food spoilage and forecasts batch preservation lookups. Branching, imported knowledge, adoption, staffing and all food mechanics retain their existing semantics. No persistent readiness cache or save-schema change was introduced.
