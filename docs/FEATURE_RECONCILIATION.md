@@ -1665,3 +1665,13 @@ accurate names/values without unrelated art. Portrait is a stable illustrative
 avatar from the existing five-face atlas. Historical copper points are unavailable
 in the existing history schema and correctly show No history. Incoming cart
 illustration is representative; no new transport simulation is implied.
+
+## September 20 — Distribution removed; navigation reference approved
+
+Worker `43d22fc6` integrated as `7f278df5`. Distribution tab and dedicated content
+removed; Wealth is now tab 2 and the GDP HUD shortcut targets it. Dietary demand
+simulation is unchanged. Canonical real-dock review verified three-tab metadata,
+Wealth routing, and existing Materials behavior. No save changes, merge conflicts,
+or player restart. The exact user-approved Wealth/navigation reference is saved
+under docs/design; the illustrated rail and Wealth redesign remain design work,
+not implemented features.
