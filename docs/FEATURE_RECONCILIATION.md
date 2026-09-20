@@ -1608,3 +1608,21 @@ player campaign. Existing live game has not been restarted. Art coverage is an
 initial family with explicit generic workshop fallback; atlas is ivory-backed.
 Queue order displays current line order; relative priority changes work share,
 not drag ordering. Full earlier-era production-capacity rebalance is not included.
+
+## September 20 — illustrated construction queue
+
+Worker `21abad0`, based on `7d383a9`, integrated as `583e28c`. Construction now
+uses illustrated project rows, actual progress, compact material indicators,
+inline project requirements and optional priority with return to leader choice.
+Projects and completed works remain separate tabs. Construction shares the wider
+responsive production dock. Material alternatives are exposed from the existing
+engine recipes; selection and daily construction behavior are unchanged.
+
+Canonical Godot review passed HUD/block compilation, progress/completion filters,
+feasible material reporting, priority selection, blocked-priority fallback,
+delegation progress preservation, and compact minimum width. The seeded review
+rendered and exited; the live player was not restarted. Save schema unchanged.
+Shared files: dock_blocks.gd and command_rail_hud.gd; cherry-pick had no conflicts.
+Art covers the seven defined communal projects, with an ivory background; it
+represents building types rather than every possible material variant. Housing
+expansion remains automatic and the existing building record remains accessible.
