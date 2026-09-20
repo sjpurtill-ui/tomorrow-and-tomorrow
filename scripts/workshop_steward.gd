@@ -27,6 +27,16 @@ func delegate_lines()->Dictionary:
 			job.planner_managed=true
 			if int(job.get("target_stock",0))==0:job.target_stock=P.stock(host,job)+1
 	return {"ok":true,"message":"Staff now schedule unpaused lines. Work in progress is preserved; manual target or pause changes take a line back under your control."}
+func delegate_line(id:int)->Dictionary:
+	for job:Dictionary in host.equipment_queue:
+		if int(job.get("id",-1))!=id or not bool(job.get("persistent",false)):continue
+		data.enabled=true
+		job.planner_managed=true
+		job.paused=false
+		job.erase("staff_idle")
+		if int(job.get("target_stock",0))==0:job.target_stock=P.stock(host,job)+1
+		return {"ok":true,"message":"Line returned to leader management; unfinished work is preserved."}
+	return {"error":"Select an active production line."}
 func advance(day:int)->void:
 	if WorldSimulation.actor_id!="player" or int(data.last_day)==day:return
 	data.last_day=day
