@@ -1,5 +1,5 @@
 extends RefCounted
-## One standing order fills missing personnel in supplied, capacity-limited groups.
+## Compatibility standing order; shortages affect instruction, never drafting.
 ## Home soldiers keep their experience, equipment and availability.
 var host:Node
 func _init(campaign:Node)->void:host=campaign
@@ -18,7 +18,6 @@ func quote(template_id:int)->Dictionary:
 	var global_block:=""
 	if not host.active_engagement.is_empty() or not host.pending_aftermath.is_empty():global_block="Finish the battle or aftermath before enrolling recruits."
 	elif host.recovery.home_unavailable():global_block="Home is occupied; recruitment cannot operate here."
-	elif float(policy.intake)<=0:global_block="Army training is suspended. Choose a training policy to resume."
 	for entry:Dictionary in host.army_templates[index].get("entries",[]):
 		var unit:=String(entry.unit);var weapon:=String(entry.weapon);var count:=int(entry.count)
 		var home:int=mini(count,host._matching_home_count(unit,weapon))
@@ -32,23 +31,12 @@ func quote(template_id:int)->Dictionary:
 		shortfalls.append({"unit":unit,"weapon":weapon,"missing":need})
 		var gate:Dictionary=host._training_gate(unit,weapon)
 		if gate.has("error"):blockers.append(String(gate.error));continue
-		var candidate:=mini(need,mini(space_left,people_left))
-		if bool(gate.get("prototype",false)):
-			if need>host.PROTOTYPE_COHORT_LIMIT:blockers.append("Experimental units are limited to %d people until the practice is established." % host.PROTOTYPE_COHORT_LIMIT);continue
-			candidate=mini(candidate,host.PROTOTYPE_COHORT_LIMIT)
+		var candidate:=mini(need,people_left)
 		var days:float=host.UnitCatalog.training_days(unit)*(host.PROTOTYPE_TRAINING_MULTIPLIER if bool(gate.get("prototype",false)) else 1.0)
 		var per_person:=maxf(.18,days*.18)
-		candidate=mini(candidate,maxi(0,floori(food_left/per_person)))
-		# Binary search handles shared artillery/vehicle sets without assuming one
-		# weapon per person. Deduct the same stock budget across all entries.
-		var low:=0;var high:=candidate
-		while low<high:
-			var middle:=(low+high+1)/2
-			if host._equipment_required_for(unit,middle)<=int(stock.get(weapon,0)):low=middle
-			else:high=middle-1
-		candidate=low if global_block.is_empty() else 0
+		candidate=candidate if global_block.is_empty() else 0
 		if candidate>0:
-			var gear:int=host._equipment_required_for(unit,candidate)
+			var gear:int=mini(host._equipment_required_for(unit,candidate),maxi(0,int(stock.get(weapon,0))))
 			batches.append({"unit":unit,"weapon":weapon,"count":candidate,"equipment":gear})
 			start_now+=candidate;space_left-=candidate;people_left-=candidate
 			stock[weapon]=int(stock.get(weapon,0))-gear;food_left-=candidate*per_person;food+=candidate*per_person
@@ -66,10 +54,10 @@ func quote(template_id:int)->Dictionary:
 		equipment_rows.append({"weapon":weapon,"needed":int(equipment[weapon]),"stored":int(host.military_inventory.get(weapon,0)),"issued":held,"reserved":reserved})
 	if not global_block.is_empty():blockers.push_front(global_block)
 	elif missing>start_now:
-		if places<=start_now:blockers.append("Training space: %d free now. The next group follows when a place opens." % places)
+		if places<=start_now:blockers.append("Training capacity: %d places; crowding slows instruction." % places)
 		if people<=start_now:blockers.append("Recruitable people: %d now; %d still needed. Review military commitments to free more people." % [people,missing])
-		if food_left<.18:blockers.append("Food reserve protected. Recruitment resumes when extra training rations are available.")
-		elif start_now==0 and blockers.is_empty():blockers.append("Not enough extra training rations above the seven-day civilian reserve.")
+		if food_left<.18:blockers.append("Instruction will draw down civilian food; inadequate rations slow training.")
+		elif start_now==0 and blockers.is_empty():blockers.append("Rations are insufficient; recruits still enlist but instruction may stall.")
 	var summary:="%d can start now · %d follow automatically" % [start_now,maxi(0,missing-start_now)] if start_now>0 else ("%d already training · staff fill remaining places automatically" % active if active>0 else "Waiting for supplies or people")
 	if missing<=0:summary="All %d soldiers are at home" % home_total if active==0 else "%d at home · %d in training" % [home_total,active]
 	return {"can_start":start_now>0,"start_now":start_now,"missing":missing,"required":required,"home":home_total,"shortfalls":shortfalls,"blockers":blockers,"food":food,"people_room":people,"training_places":places,"equipment":equipment,"equipment_rows":equipment_rows,"active_training":active,"batches":batches,"summary":summary}
@@ -88,7 +76,7 @@ func enroll(template_id:int,retain_order:bool)->Dictionary:
 		if result.has("error"):continue
 		var order:Dictionary=host.training_queue[-1]
 		order.recruitment_template=template_id
-		var gear:int=host._equipment_required_for(batch.unit,int(result.accepted))
+		var gear:int=mini(host._equipment_required_for(batch.unit,int(result.accepted)),maxi(0,int(host.military_inventory.get(batch.weapon,0))))
 		order.reserved_equipment=gear
 		host.military_inventory[batch.weapon]=int(host.military_inventory.get(batch.weapon,0))-gear
 		queued+=int(result.accepted)

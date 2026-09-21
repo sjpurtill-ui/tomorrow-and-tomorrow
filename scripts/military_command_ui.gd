@@ -689,7 +689,7 @@ func _refresh_primary_action_guidance(army:Dictionary,line_state:Dictionary,mobi
 		raise_recruits_button.tooltip_text=(
 			"CURRENT  %s / %s mobilized.\nACTION  Move up to %s people from civilian functions into the untrained reserve.\nCOST  Their civilian labor is unavailable until demobilized."
 			% [_compact_count(mobilized),_compact_count(mobilization_capacity),_compact_count(mini(recruit_room,int(recruit_count.value)))]
-		) if recruit_room>0 else "BLOCKED  Mobilization capacity is full.\nNEXT  Demobilize personnel, expand the working-age population, or improve institutions and security capacity."
+		) if recruit_room>0 else "BLOCKED  No uncommitted adults are available.\nNEXT  Wait for people to return or demobilize personnel."
 	var recruits:=maxi(0,int(army.get("recruits",0)))
 	if begin_training_button!=null:
 		var training_selection_ready:=_choice_is_available(unit_choice) and _choice_is_available(weapon_choice)

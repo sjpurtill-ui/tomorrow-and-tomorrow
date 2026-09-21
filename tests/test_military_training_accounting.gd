@@ -39,16 +39,15 @@ func test_deploy_leaves_22_in_reserve_but_preserves_122_total()->void:
 	MilitaryCampaign.disband_field_army(int(result.army.army_id))
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(122)
 
-func test_oversized_prototype_build_waits_instead_of_accepting_partial_cohort()->void:
+func test_prototype_recruitment_has_costs_instead_of_headcount_cap()->void:
 	for id in ["seasonal_patterns","animal_taming","pack_animals","domesticated_mounts","bronze_weaponry"]:GameState.known_discoveries.append(id)
 	MilitaryCampaign.aggregate_recruits=40
 	MilitaryCampaign.army_templates=[{"template_id":1,"name":"Experimental riders","entries":[{"unit":"cavalry","weapon":"sword_shield","count":40}]}]
 	var result:=MilitaryCampaign.queue_template_training(1)
-	assert_int(int(result.get("queued",0))).is_equal(0)
-	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(40)
-	assert_array(MilitaryCampaign.training_queue).is_empty()
-	assert_bool(bool(result.get("waiting",false))).is_true()
-	assert_str(String(result.message)).contains("Experimental units are limited")
+	assert_int(int(result.get("queued",0))).is_equal(40)
+	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(0)
+	assert_bool(bool(MilitaryCampaign.training_queue[0].prototype)).is_true()
+	assert_float(float(MilitaryCampaign.training_queue[0].required_days)).is_greater(MilitaryCampaign.UnitCatalog.training_days("cavalry"))
 
 
 func test_training_counts_are_capped_to_missing_build_places()->void:

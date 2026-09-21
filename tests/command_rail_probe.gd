@@ -190,7 +190,7 @@ func _ready()->void:
 	var adjusted_total:=0
 	for entry_variant in ((MilitaryCampaign.army_template_snapshot().templates as Array)[0].entries as Array):
 		adjusted_total+=int((entry_variant as Dictionary).get("count",0))
-	_expect(adjusted_total==capacity,"build target %d was not clamped to mobilization capacity %d" % [adjusted_total,capacity])
+	_expect(adjusted_total==capacity+10,"design target %d was incorrectly clamped to current population %d" % [adjusted_total,capacity])
 	terrain._on_hud_section_requested("",0)
 	await get_tree().process_frame
 

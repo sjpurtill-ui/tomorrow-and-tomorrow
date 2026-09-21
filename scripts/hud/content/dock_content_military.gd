@@ -169,7 +169,7 @@ func _formation_blocks(army:Dictionary)->Array:
 # --- ARMY BUILDS ------------------------------------------------------------
 
 func _builds_blocks(capabilities:Dictionary,template_filter:int=-1,step:int=0)->Array:
-	if template_filter<0:return _build_roster()
+	if template_filter<0:return [{"type":"recruit_deploy","edit_template":func(id:int):_open_build(id)}]
 	var blocks:Array=[]
 	if step==2 and not MilitaryCampaign.field_armies.is_empty():
 		blocks.append({"type":"actions","items":[{"label":"FIND YOUR ARMIES","sub":"open the deployed force roster","on_press":jump("military",0)}]})
@@ -409,7 +409,7 @@ func _build_roster()->Array:
 	for template:Dictionary in templates.slice(template_page*4,template_page*4+4):
 		var id:=int(template.template_id)
 		items.append({"label":String(template.name),"sub":"%d target · %d assembled at home"%[int(template.required_total),int(template.ready_total)],"on_press":func()->void:_open_build(id)})
-	return [{"type":"text","heading":"PREPARE AN ARMY","text":"Open a design, choose its composition, recruit and train, then deploy. A design is a plan; soldiers are real people drawn from your settlement and shared home reserve."},{"type":"actions","heading":"CHOOSE A DESIGN","items":items},{"type":"actions","items":[{"label":"NEW DESIGN","sub":"Create an empty army plan","disabled":templates.size()>=8,"on_press":func()->void:
+	return [{"type":"text","heading":"PREPARE AN ARMY","text":"Open a design, choose its composition, recruit and train, then deploy. A design is a plan; soldiers are real people drawn from your settlement and shared home reserve."},{"type":"actions","heading":"CHOOSE A DESIGN","items":items},{"type":"actions","items":[{"label":"NEW DESIGN","sub":"Create an empty army plan","on_press":func()->void:
 		var result:=MilitaryCampaign.create_army_template()
 		if result.has("error"):terrain._report_military_action(result)
 		else:_open_build(int(result.template.template_id))},{"label":"OTHER DESIGNS","sub":"Page %d / %d"%[template_page+1,maxi(1,ceili(templates.size()/4.0))],"disabled":templates.size()<=4,"on_press":func():template_page=(template_page+1)%maxi(1,ceili(templates.size()/4.0));hud.request_immediate_dock_refresh()}]}]

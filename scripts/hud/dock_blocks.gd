@@ -48,6 +48,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"production_board":
 				var board:=preload("res://scripts/hud/production_board.gd").new()
 				section.add_child(board);board.setup(block)
+			"recruit_deploy":
+				var board:=preload("res://scripts/hud/recruit_deploy_board.gd").new()
+				section.add_child(board);board.setup(block)
 			"recruitment_brief":
 				var brief:=preload("res://scripts/hud/recruitment_brief.gd").new()
 				section.add_child(brief);brief.setup(block)

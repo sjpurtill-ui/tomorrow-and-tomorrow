@@ -25,13 +25,11 @@ func test_first_full_class_with_no_home_soldiers_starts_once()->void:
 	assert_int(int(MilitaryCampaign.queue_template_training(1).get("queued",0))).is_equal(0)
 	assert_int(MilitaryCampaign._queued_trainees()).is_equal(8)
 	assert_int(GameState.population_total).is_equal(population)
-func test_six_home_zero_training_two_unfilled_wait_without_partial_intake()->void:
-	var entry:Dictionary=MilitaryCampaign.army_template_snapshot().templates[0].entries[0]
-	assert_int(int(entry.ready)).is_equal(6);assert_int(int(entry.in_training)).is_equal(0);assert_int(int(entry.unfilled)).is_equal(2)
+func test_six_home_two_missing_enroll_even_without_spare_supplies()->void:
 	var result:=MilitaryCampaign.queue_template_training(1)
-	assert_int(int(result.get("queued",0))).is_equal(0)
-	assert_int(MilitaryCampaign._mobilized_count()).is_equal(6)
-	assert_array(MilitaryCampaign.training_queue).is_empty()
+	assert_int(int(result.get("queued",0))).is_equal(2)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(8)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
 	assert_bool(MilitaryCampaign.army_templates[0].recruitment_requested).is_true()
 func test_unfilled_order_survives_capacity_block_then_fills_without_second_click()->void:
 	GameState.ensure_population_total(210)
@@ -82,8 +80,9 @@ func test_top_up_completes_without_retraining_existing_soldiers_or_creating_peop
 	MilitaryCampaign.queue_template_training(1)
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
 	assert_int(MilitaryCampaign._queued_trainees()).is_equal(2)
-	var payload:Dictionary=JSON.parse_string(JSON.stringify(MilitaryCampaign.export_state()))
-	assert_bool(MilitaryCampaign.import_state(payload).has("ok")).is_true()
+	var payload:Dictionary=bytes_to_var(var_to_bytes(MilitaryCampaign.export_state()))
+	var restored:=MilitaryCampaign.import_state(payload)
+	assert_bool(restored.has("ok")).override_failure_message(str(restored)).is_true()
 	for day in 100:
 		if MilitaryCampaign.training_queue.is_empty():break
 		MilitaryCampaign._process_training_day()
@@ -105,7 +104,7 @@ func test_batch_holds_finished_members_and_cancels_all_members()->void:
 	assert_array(MilitaryCampaign.training_queue).is_empty()
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(8)
 
-func test_capacity_limits_new_groups_and_staff_refill_without_repeat_clicks()->void:
+func test_training_crowding_slows_instruction_without_limiting_intake()->void:
 	GameState.ensure_population_total(5000);GameState.initialize_population_model()
 	GameState.population_allocations.Defense=49
 	MilitaryCampaign.army_templates[0].entries[0].count=50
@@ -116,13 +115,13 @@ func test_capacity_limits_new_groups_and_staff_refill_without_repeat_clicks()->v
 	var before:=MilitaryCampaign.home_army.duplicate(true)
 	var population:=GameState.population_total
 	var quote:=MilitaryCampaign.template_training_quote(1)
-	assert_int(int(quote.start_now)).is_equal(mini(44,places))
-	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(mini(44,places))
+	assert_int(int(quote.start_now)).is_equal(44)
+	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(44)
 	assert_array(MilitaryCampaign.home_army.formations).is_equal(before.formations)
 	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(0)
 	# Each completion releases places for the next daily staff intake.
 	for cycle in 4:
-		assert_int(MilitaryCampaign._queued_trainees()).is_less_equal(places)
+		assert_int(MilitaryCampaign._queued_trainees()).is_less_equal(44)
 		for order:Dictionary in MilitaryCampaign.training_queue:MilitaryCampaign._complete_training(order)
 		MilitaryCampaign.training_queue.clear()
 		MilitaryCampaign._process_requested_templates()
@@ -130,28 +129,28 @@ func test_capacity_limits_new_groups_and_staff_refill_without_repeat_clicks()->v
 	assert_int(GameState.population_total).is_equal(population)
 	assert_float(float(MilitaryCampaign.home_army.formations[0].experience)).is_equal(.8)
 
-func test_equipment_limits_intake_without_reserving_missing_stock()->void:
+func test_equipment_shortage_does_not_limit_intake_or_create_stock()->void:
 	GameState.population_allocations.Defense=30
 	MilitaryCampaign.military_inventory.improvised=1
 	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
 	var first:=MilitaryCampaign.queue_template_training(1)
-	assert_int(int(first.queued)).is_equal(1)
+	assert_int(int(first.queued)).is_equal(2)
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(0)
-	assert_int(MilitaryCampaign._queued_trainees()).is_equal(1)
+	assert_int(MilitaryCampaign._queued_trainees()).is_equal(2)
 	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(0)
 	MilitaryCampaign.military_inventory.improvised=1
 	MilitaryCampaign._process_requested_templates()
 	assert_int(MilitaryCampaign._queued_trainees()).is_equal(2)
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
 
-func test_suspended_training_and_civilian_food_reserve_block_new_intake()->void:
+func test_suspended_instruction_and_low_food_do_not_forbid_drafting()->void:
 	GameState.population_allocations.Defense=30;MilitaryCampaign.military_inventory.improvised=100
 	FoodSystem.initialize();FoodSystem.receive_external_food(10000)
 	MilitaryCampaign.training_staff.set_policy("army","suspended")
-	assert_bool(MilitaryCampaign.template_training_quote(1).can_start).is_false()
+	assert_bool(MilitaryCampaign.template_training_quote(1).can_start).is_true()
 	MilitaryCampaign.training_staff.set_policy("army","regular")
 	GameState.resource_stockpiles.Food=1;GameState.food_stocks={"Preserved food":1}
-	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(0)
+	assert_int(int(MilitaryCampaign.queue_template_training(1).queued)).is_equal(2)
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(6)
 
 func test_shared_weapon_stock_is_presented_once_for_multiple_unit_types()->void:
