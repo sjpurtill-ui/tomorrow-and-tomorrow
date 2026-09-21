@@ -2043,3 +2043,9 @@ Validation: 57 workshop, turnover and power-investment checks passed. A real 25-
 ### First 300 years: ordinary food forecast cost
 
 Ordinary food forecasts use local numeric arrays while preserving each projected day's arithmetic, spoilage and consumption order. Nutrient, botany and refrigeration forecasts keep their existing paths. In a 30-day replay of the 20-settlement year-128 warm campaign, full world state was exactly equal before/after; runtime was 9.099 versus 8.778 seconds (3.5%), with secondary consequence time 2.545 versus 2.213 seconds. This single comparison is not a general frame-rate claim. All 69 crop nutrition, botany, food batch and technology-operation checks passed, and developed owned-save next-day replay passed. No save fields or balance values changed.
+
+### First 300 years: population read stability
+
+Population normalization now preserves already conserved age and sex totals within floating-point summation noise (relative 1e-12). Actual population changes still rescale cohorts. This prevents save loading or repeated population reads from gradually changing fractional demographics. No save-format change or grant of people is involved.
+
+Validation: two read-stability checks and 23 demographic, monthly scope and full-save checks passed. The save test now resets its military fixture rather than inheriting another suite's incomplete force dictionary. The actual year-30 world, resumed for three days, restores exactly and advances identically after loading. The preceding five-year continuation also recorded the player's first fitted beams (13) and timber splices (2) under the shared civilian planner. Compact evidence: pacing/first300-world30-recovery.json. The full-world diagnostic is continuing toward year 300; this is not an endpoint claim.

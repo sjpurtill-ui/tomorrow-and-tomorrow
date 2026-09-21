@@ -709,9 +709,12 @@ func _normalize_population_cohorts() -> void:
 		population_cohorts.clear()
 		initialize_population_model()
 		return
-	var scale:=target/current
-	for key in POPULATION_AGE_COHORTS:
-		population_cohorts[key]=maxf(0.0,float(population_cohorts.get(key,0.0))*scale)
+	# Reads and loads revisit this method. Do not rescale already conserved
+	# cohorts for floating-point summation noise; that made inspection mutate them.
+	if absf(current-target)>maxf(1.0,target)*1e-12:
+		var scale:=target/current
+		for key in POPULATION_AGE_COHORTS:
+			population_cohorts[key]=maxf(0.0,float(population_cohorts.get(key,0.0))*scale)
 	_refresh_population_summary()
 
 func _refresh_population_summary() -> void:
@@ -728,7 +731,7 @@ func _refresh_population_summary() -> void:
 	if sex_total<=0.000001:
 		female=population_exact*0.495
 		male=population_exact-female
-	else:
+	elif absf(sex_total-population_exact)>maxf(1.0,population_exact)*1e-12:
 		var sex_scale:=population_exact/sex_total
 		female*=sex_scale
 		male*=sex_scale

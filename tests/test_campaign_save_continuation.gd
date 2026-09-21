@@ -8,6 +8,7 @@ func after_test()->void:
 func test_whole_game_load_preserves_research_and_opponent_next_day()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(9241)
+	MilitaryCampaign.reset_for_new_world()
 	GameState.opponent_count=3
 	CivilizationSystem.reset_for_new_world()
 	DiscoverySystem.reset_for_new_world()
