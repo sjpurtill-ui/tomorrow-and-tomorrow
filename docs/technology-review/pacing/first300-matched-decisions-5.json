@@ -1,0 +1,304 @@
+{
+  "runtime_commit": "f8b4b8a",
+  "years": 5,
+  "scenarios": [
+    {
+      "choice": "makers",
+      "target_reached": true,
+      "save_check": {
+        "ok": true
+      },
+      "seed": 91420,
+      "starting_seat": 0,
+      "final": {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1.0,
+        "army_provisions_delivered": 15.68,
+        "army_provisions_required": 15.68,
+        "completed_buildings": 5,
+        "day": 1825,
+        "food_consumption": 121.488624465831,
+        "food_days": 27.9454268998721,
+        "food_demand_breakdown": {
+          "adults": 75.4703191496626,
+          "army_field": 15.68,
+          "base": 110.314276586159,
+          "children": 25.2501173234817,
+          "climate": 0.0,
+          "elders": 9.59384011301461,
+          "labor": 10.37,
+          "lactation": 0.324347879672513,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.48,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 121.488624465831,
+          "travel": 0.0
+        },
+        "food_eaten": 121.488624465831,
+        "food_intake_ratio": 1.0,
+        "food_security": 0.906190043184267,
+        "knowledge_workers": 5,
+        "known": 11,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 236.413876868814,
+          "Stone": 198.897449682348,
+          "Timber": 322.863807571925
+        },
+        "plot_history_records": 78,
+        "population": 129,
+        "production": {
+          "available_civilian_recipes": 1,
+          "civilian_lines": 0,
+          "delivery_shortage": false,
+          "food_shortage": false,
+          "household_stocks": {
+            "Cordage Bundles": 6.17762572353175,
+            "Drying Mats": 3.86164844939563,
+            "Flaked Stone Tools": 4.63208102270989,
+            "Hafted Tool Sets": 3.08931875951651
+          },
+          "installed_units": 0,
+          "manufactured_stock_kinds": 0,
+          "military_capabilities": {
+            "bow": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 0,
+              "recipe_known": false,
+              "stored": 0
+            },
+            "improvised": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 5,
+              "recipe_known": true,
+              "stored": 1
+            },
+            "lance": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 0,
+              "recipe_known": false,
+              "stored": 0
+            },
+            "siege_kit": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 0,
+              "recipe_known": false,
+              "stored": 0
+            },
+            "spear": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 9,
+              "recipe_known": true,
+              "stored": 13
+            }
+          },
+          "operations_ledger_current": true,
+          "production_food_blocked": false,
+          "recorded_output": {
+            "improvised": 8.0,
+            "spear": 23.0
+          },
+          "remaining_daily_services": {},
+          "units_under_construction": 0
+        },
+        "resource_deposits": 49,
+        "settled": true,
+        "settlement_count": 1,
+        "settlement_plots": 21,
+        "year": 5.0
+      },
+      "discoveries": [
+        {
+          "day": 1311,
+          "id": "drainage",
+          "year": 3.59178082191781
+        }
+      ],
+      "research_allocations": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 0,
+        "health": 0,
+        "infrastructure": 2,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 1,
+        "production": 1,
+        "security": 0
+      },
+      "allocations": {
+        "Administration": 3,
+        "Construction": 12,
+        "Crafting": 13,
+        "Defense": 2,
+        "Extraction": 9,
+        "Food": 23,
+        "Knowledge": 5,
+        "Logistics": 4,
+        "Survey": 4
+      }
+    },
+    {
+      "choice": "military",
+      "target_reached": true,
+      "save_check": {
+        "ok": true
+      },
+      "seed": 91420,
+      "starting_seat": 0,
+      "final": {
+        "active_inquiries": 3,
+        "army_provision_delivery_ratio": 1.0,
+        "army_provisions_delivered": 17.92,
+        "army_provisions_required": 17.92,
+        "completed_buildings": 5,
+        "day": 1825,
+        "food_consumption": 122.868067001587,
+        "food_days": 31.3195762907236,
+        "food_demand_breakdown": {
+          "adults": 75.8486008639962,
+          "army_field": 17.92,
+          "base": 111.450128215618,
+          "children": 25.5791384745644,
+          "climate": 0.0,
+          "elders": 10.0223888770578,
+          "labor": 10.61,
+          "lactation": 0.327938785968331,
+          "mission_absent": 0.0,
+          "occupation_relief": 0.0,
+          "pregnancy": 0.48,
+          "prisoner_custody": 0.0,
+          "rationing": 0.0,
+          "total": 122.868067001587,
+          "travel": 0.0
+        },
+        "food_eaten": 122.868067001587,
+        "food_intake_ratio": 1.0,
+        "food_security": 0.926109334354805,
+        "knowledge_workers": 5,
+        "known": 10,
+        "material_stocks": {
+          "Clay": 0.0,
+          "Fiber Plants": 247.076048800801,
+          "Stone": 204.580065827213,
+          "Timber": 309.480279090032
+        },
+        "plot_history_records": 74,
+        "population": 130,
+        "production": {
+          "available_civilian_recipes": 1,
+          "civilian_lines": 0,
+          "delivery_shortage": false,
+          "food_shortage": false,
+          "household_stocks": {
+            "Cordage Bundles": 6.24602059140168,
+            "Drying Mats": 3.90440227945945,
+            "Flaked Stone Tools": 4.68336450585115,
+            "Hafted Tool Sets": 3.12352182356756
+          },
+          "installed_units": 0,
+          "manufactured_stock_kinds": 0,
+          "military_capabilities": {
+            "bow": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 0,
+              "recipe_known": false,
+              "stored": 0
+            },
+            "improvised": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 11,
+              "recipe_known": true,
+              "stored": 1
+            },
+            "lance": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 0,
+              "recipe_known": false,
+              "stored": 0
+            },
+            "siege_kit": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 0,
+              "recipe_known": false,
+              "stored": 0
+            },
+            "spear": {
+              "ammunition_carried": 0,
+              "ammunition_required": 0,
+              "ammunition_stored": 0,
+              "equipped": 5,
+              "recipe_known": true,
+              "stored": 13
+            }
+          },
+          "operations_ledger_current": true,
+          "production_food_blocked": false,
+          "recorded_output": {
+            "improvised": 15.0,
+            "spear": 25.0
+          },
+          "remaining_daily_services": {},
+          "units_under_construction": 0
+        },
+        "resource_deposits": 49,
+        "settled": true,
+        "settlement_count": 1,
+        "settlement_plots": 20,
+        "year": 5.0
+      },
+      "discoveries": [],
+      "research_allocations": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 0,
+        "health": 0,
+        "infrastructure": 0,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 1,
+        "nutrition": 1,
+        "production": 0,
+        "security": 2
+      },
+      "allocations": {
+        "Administration": 3,
+        "Construction": 9,
+        "Crafting": 7,
+        "Defense": 9,
+        "Extraction": 9,
+        "Food": 23,
+        "Knowledge": 5,
+        "Logistics": 7,
+        "Survey": 4
+      }
+    }
+  ],
+  "limitations": [
+    "Isolated AI seats on the same actual terrain",
+    "Five years establishes early allocation/output differences, not all 300-year outcomes"
+  ]
+}

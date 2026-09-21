@@ -1977,3 +1977,7 @@ The structural supply audit now includes actual household recipes, with their re
 ### First 300 years: repeated intercity store lookups
 - Resolve each city's live store reference once per dispatch pass instead of repeatedly initializing its complete resource schema for every source/destination/good comparison. Earlier dispatches still debit the same dictionary seen by later destinations.
 - Validation: 44 city, rail and siege checks pass. A 30-day replay of the same real year-100 checkpoint produces an exactly equal complete exported world before/after, with both binary saves valid. Phase timing was 1.270 s versus 1.152 s, but concurrent workloads made total wall time noisier; no broad speedup claim is made.
+
+### First 300 years: matched decisions and current evidence ledger
+- Added current readiness status and a reproducible five-year matched comparison at the same seed/terrain site. Makers and Military change research emphasis and actual output without resource grants; both complete and validate saves.
+- New cool opening completes 25 years with 194 people, 25 known practices, 57 spears and 8 fitted post/beam sets produced. Twenty player-panel logic tests pass. Full 300-year endpoints remain pending; no completion or visual-review claim.

@@ -2,6 +2,19 @@
 
 Accepted direction: begin with a capable prehistoric community, not an 800 BC state and not people without inherited survival skills. Calendar years express campaign time, not literal archaeological chronology.
 
+## Current validation status (September 21)
+
+The 300-year endpoint is still being validated. The dated sections below retain earlier observations; their open problems should not be read as a list of unfixed current defects.
+
+- Generated founding sites: 48 real terrain sites across three seeds satisfy food, growing-season, temperature, drinking water, wood, stone and fiber requirements. Later chosen settlements may depend on trade.
+- Full world: player plus three opponents completed 25 years with zero state errors and valid player/owned binary save payloads. This is headless simulation evidence, not a rendered load or visual review. See `technology-review/pacing/first300-world25.json`.
+- New cool opening: 25 years, 194 people, 25 known practices, 345 timber in stock, 57 spears and 8 fitted post/beam sets produced; save valid. Earlier treeless starts are preserved as recovery scenarios, not recommended generated starts.
+- Material recovery: the warm year-100 campaign resumed building-component output after depleted-front and worker-allocation fixes. The older treeless cool campaign recovered equipped spear and bow forces through real supplies over years 100–105.
+- Matched decisions: same seed and final terrain site, five years each. Makers assigned research to infrastructure/production; Military to security/logistics and produced more weapons. Both maintained provisions; neither received grants. See `technology-review/pacing/first300-matched-decisions-5.json`.
+- Player panels: 20 headless checks pass for live progress, settlement histories, visible civilian production, culture effects/presentation and research navigation. Visual inspection remains with the user.
+
+Outstanding release evidence: finish the long campaigns, review their adopted and physically operating capabilities, and verify their final saves and continuation. Do not replace these checks with structural graph reachability or calendar unlocks.
+
 ## Player-facing targets
 
 | Years | Civilian capability | Military capability |
