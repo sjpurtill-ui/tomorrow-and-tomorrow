@@ -1,0 +1,9 @@
+{
+  "id": "regional_maps",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Regional Maps. Show a concrete, visually clear scene demonstrating this exact practice: Routes, settlements, waters, elevations, and borders are reconciled onto shared surfaces. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-217c304f-005d-4014-96b5-071e7ea7ac45.png",
+  "asset": "res://assets/ui/research/subjects/regional_maps-v1.png",
+  "sha256": "8bdc8530c3c1ad8cc82430417660e2e6ccb36639cdc98525e261a4b6fb13462f",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "smoking",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Smoke Preservation. Strips of fish hang well above a small smoldering smoky wood fire in a simple open shelter; visible cool smoke curls around drying food, no roasting spit or kiln.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f9a8628a-3de1-44e4-91d8-c70813c3615e.png",
+  "asset": "res://assets/ui/research/subjects/smoking-v1.png",
+  "sha256": "3793baf1258e906459d1123a2140bdef3b2ec202f4addb91da3b9735f4ebbc05",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

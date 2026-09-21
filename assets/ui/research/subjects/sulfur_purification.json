@@ -1,0 +1,9 @@
+{
+  "id": "sulfur_purification",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Sulfur Purification. A historical mineral workbench with yellow sulfur crystals, a covered heating vessel and collected purified yellow material, atmospheric scientific still life, no formula labels or instructions.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-548f1f29-095b-42fc-9714-9a6735154fb0.png",
+  "asset": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+  "sha256": "cf8deb4574fecf19bc98c8be1ce1abfa2b8f5eb0b7bc1172aa6ac535b1d3cb60",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
