@@ -81,11 +81,15 @@ func army_demands()->Array[Dictionary]:
 			var required:=maxi(0,int(formation.get("equipment_required",formation.get("count",0))))
 			var missing:=maxi(0,required-int(formation.get("equipment",0)))
 			if missing>0:totals[item]=int(totals.get(item,0))+missing
+			var ammunition:=String(host._ammunition_type_for(item))
+			if not ammunition.is_empty():
+				var rounds:=maxi(0,int(formation.get("ammunition_required",host._ammunition_required_for(item,required)))-int(formation.get("ammunition",0)))
+				if rounds>0:totals[ammunition]=int(totals.get(ammunition,0))+rounds
 	var result:Array[Dictionary]=[]
 	for item:String in totals:
-		if int(totals[item])<=int(host.military_inventory.get(item,0)):continue
 		var recipe:=P.recipe(host,item)
 		if recipe.has("error"):continue
+		if int(totals[item])<=P.stock(host,recipe):continue
 		var upstream:Dictionary={}
 		for material:String in recipe.materials:
 			if float(WorldSimulation.state.resource_stockpiles.get(material,0))<float(recipe.materials[material]):

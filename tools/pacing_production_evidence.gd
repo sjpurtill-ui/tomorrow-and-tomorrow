@@ -32,11 +32,15 @@ static func capture(detailed:bool=false)->Dictionary:
 		if available>0:services[service]=available
 	var military:Dictionary={}
 	for item:String in ["improvised","spear","bow","lance","siege_kit"]:
-		military[item]={"recipe_known":not P.recipe(campaign,item).has("error"),"stored":int(campaign.military_inventory.get(item,0)),"equipped":0}
+		var ammunition:=String(campaign._ammunition_type_for(item))
+		military[item]={"recipe_known":not P.recipe(campaign,item).has("error"),"stored":int(campaign.military_inventory.get(item,0)),"equipped":0,"ammunition_carried":0,"ammunition_required":0,"ammunition_stored":int(campaign.military_consumables.get(ammunition,0))}
 	for force:Dictionary in [campaign.home_army]+campaign.field_armies+campaign.occupation_forces:
 		for formation:Dictionary in force.get("formations",[]):
 			var weapon:=String(formation.get("weapon",""))
-			if military.has(weapon):military[weapon].equipped+=int(formation.get("equipment",0))
+			if military.has(weapon):
+				military[weapon].equipped+=int(formation.get("equipment",0))
+				military[weapon].ammunition_carried+=int(formation.get("ammunition",0))
+				military[weapon].ammunition_required+=int(formation.get("ammunition_required",0))
 	var household:Dictionary={}
 	for product:String in preload("res://scripts/opening_craft_practice.gd").PRODUCTS.values():
 		if float(state.resource_stockpiles.get(product,0))>0:household[product]=float(state.resource_stockpiles[product])

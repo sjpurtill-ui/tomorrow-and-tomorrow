@@ -22,12 +22,14 @@ static func supports_founders(profile:Dictionary)->bool:
 
 static func choose(origin:Vector2,ground:Callable)->Vector2:
 	var best:=origin;var score:=INF
-	for radius:float in [0,2,5,10,20,40,80,160]:
+	for radius:float in [0,2,5,10,20,40,80,160,320,640]:
+		if radius>160 and score<INF:break
 		for spoke in (1 if radius==0 else 32):
 			var point:=origin+Vector2.from_angle(TAU*float(spoke)/32.0)*radius
 			var sample:Dictionary=ground.call(point)
 			if float(sample.get("height",-1))<=.02 or float(sample.get("slope",1))>.48:continue
 			if not bool(sample.get("founding_valid",true)):continue
+			if sample.has("environment_profile") and not supports_founders(sample.environment_profile):continue
 			var water:=float(sample.get("river_distance_km",INF))
 			if water>6:continue
 			var value:=radius*.02+water*3.0+float(sample.get("slope",0))*12.0-float(sample.get("fertility",0))

@@ -247,6 +247,7 @@ func test_battle_losses_reach_both_actual_populations_and_formations()->void:
 		assert_int(int(actor.systems.MilitaryCampaign.home_army.troops)).is_equal(int(result[pair[1]].remaining_troops))
 
 func test_human_and_owned_civilization_use_identical_daily_economy_and_demography()->void:
+	WorldSimulation.clear()
 	GameState.reset_for_new_world(777)
 	for name in WorldSimulation.OWNED_SYSTEMS:
 		if name=="GameState":continue
@@ -256,11 +257,17 @@ func test_human_and_owned_civilization_use_identical_daily_economy_and_demograph
 	ResourceSystem.initialize();FoodSystem.initialize();ConsequenceEngine.initialize();EconomySystem.initialize();DiscoverySystem.initialize()
 	WorldSimulation.create_actor("alpha",777,Vector2.ZERO)
 	CivilizationSystem.player_world_origin=Vector2.ZERO
+	# The actor factory seeds founding map knowledge; give the human fixture
+	# the same evidence so seed trials and surface recognition receive equal inputs.
+	CivilizationSystem._add_revealed_area(Vector2.ZERO,72.0,"founding knowledge")
 	WorldSimulation.enabled=true
 	for id in ["player","alpha"]:
 		WorldSimulation.scoped(id,func()->void:
 			WorldSimulation.state.settlement_name="Parity"
 			WorldSimulation.world.scout_land_authority=func(_point:Vector2)->bool:return true
+			# Compare equal orders: the human steward otherwise schedules extra jobs,
+			# while this owned actor deliberately has no AI controller review.
+			WorldSimulation.military.workshop.set_enabled(false)
 		)
 		WorldSimulation.submit(id,{"kind":"ambition","id":"makers"})
 		WorldSimulation.submit(id,{"kind":"found"})

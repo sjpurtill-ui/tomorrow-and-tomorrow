@@ -17,6 +17,7 @@ static func entries()->Array[Dictionary]:
       "charcoal"
     ],
     "requires_any": [],
+    "resource_requirements": [{"resource":"Tin Ore","stage":"accessible","minimum_stock":2.0}],
     "learning_routes": [
       {
         "id": "local",

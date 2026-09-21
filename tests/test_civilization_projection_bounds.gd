@@ -51,3 +51,19 @@ func test_out_of_range_foreign_readiness_is_still_rejected()->void:
 		var payload:=CivilizationSystem.export_state()
 		payload.foreign_formations[0].readiness=value
 		assert_bool(CivilizationSystem.import_state(payload).has("error")).is_true()
+
+func test_prepared_army_projects_normalized_summary_without_losing_readiness()->void:
+	MilitaryCampaign.reset_for_new_world()
+	MilitaryCampaign.home_army.readiness=1.25
+	var summary:Dictionary=CivilizationSystem.civilizations[0].duplicate(true)
+	WorldSimulation.project(summary)
+	assert_float(float(summary.military_readiness)).is_equal(1.0)
+	assert_float(float(MilitaryCampaign.home_army.readiness)).is_equal(1.25)
+	MilitaryCampaign.reset_for_new_world()
+func test_existing_shared_readiness_overflow_loads()->void:
+	var payload:=CivilizationSystem.export_state()
+	payload.civilizations[0]["shared_rules"]=true
+	payload.civilizations[0].military_readiness=1.25
+	assert_bool(CivilizationSystem.import_state(payload).has("error")).is_false()
+	assert_float(float(CivilizationSystem.civilizations[0].military_readiness)).is_equal(1.0)
+	assert_float(float(payload.civilizations[0].military_readiness)).is_equal(1.25)

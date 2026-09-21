@@ -11528,6 +11528,7 @@ func _civilization_start(origin:Vector2)->Vector2:
 	return preload("res://scripts/civilization_start.gd").choose(origin,func(point:Vector2)->Dictionary:
 		var sample:=_survey_ground_at(point)
 		sample["founding_valid"]=bool(_settlement_surface_assessment(Vector3(point.x,0,point.y)).valid)
+		sample["environment_profile"]=PlanetEnvironment.profile_at(point,sample)
 		return sample)
 
 func _find_world_start_position()->Vector3:

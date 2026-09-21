@@ -171,3 +171,23 @@ func test_serving_unequipped_reserve_creates_paid_supply_without_new_recruitment
 	MilitaryCampaign.military_inventory.improvised=0
 	MilitaryCampaign.home_army.formations[0].equipment=3
 	assert_array(MilitaryCampaign.workshop.army_demands()).is_empty()
+
+func test_equipped_archers_request_paid_arrows_and_count_existing_ammunition()->void:
+	GameState.known_discoveries.append("bow_craft");GameState.discovery_adoption.bow_craft=1.0
+	MilitaryCampaign.army_templates=[]
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Archers",[{"id":1,"unit":"skirmisher","weapon":"bow","count":2,"equipment":2,"ammunition":3,"ammunition_required":12,"training":.4}],.8,.7)
+	MilitaryCampaign.field_armies=[];MilitaryCampaign.occupation_forces=[]
+	MilitaryCampaign.military_consumables.arrows=2
+	GameState.resource_stockpiles["Fiber Plants"]=10.0;GameState.resource_stockpiles.Stone=10.0
+	var demands:=MilitaryCampaign.workshop.army_demands()
+	assert_int(demands.size()).is_equal(1)
+	assert_str(String(demands[0].item)).is_equal("arrows")
+	assert_int(int(demands[0].target)).is_equal(9)
+	var timber:=float(GameState.resource_stockpiles.Timber)
+	MilitaryCampaign.workshop.schedule(demands[0])
+	for day in range(1,30):
+		GameState.elapsed_days=day
+		MilitaryCampaign._process_equipment_production_day()
+	assert_int(int(MilitaryCampaign.military_consumables.arrows)).is_equal(9)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber)
+	assert_array(MilitaryCampaign.workshop.army_demands()).is_empty()

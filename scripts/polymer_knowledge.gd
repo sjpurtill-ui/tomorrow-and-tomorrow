@@ -1451,12 +1451,19 @@ static func entries()->Array[Dictionary]:
     "chance": 0.002,
     "requires": [
       "ore_assaying",
-      "metallurgical_mass_balances"
+      "metallurgical_mass_balances",
+      "chemical_distillation",
+      "pressure_vessels",
+      "chloralkali_cells"
     ],
     "requires_all": [
       "ore_assaying",
-      "metallurgical_mass_balances"
+      "metallurgical_mass_balances",
+      "chemical_distillation",
+      "pressure_vessels",
+      "chloralkali_cells"
     ],
+    "resource_requirements": [{"resource":"Bauxite","stage":"surveyed","minimum_stock":2.5}],
     "requires_any": [],
     "learning_routes": [
       {

@@ -374,7 +374,9 @@ func test_open_exploration_never_invents_a_wandering_group_to_recruit()->void:
 
 
 func test_recruitment_returns_a_distinct_social_account_even_when_nobody_joins()->void:
-	var mission:Dictionary={"mission_id":771,"duration_days":90,"target_id":"recruit_people","target_kind":"recruit_people"}
+	# Migrant reservations belong to visits to settled communities. Wandering
+	# bands use their own route encounter account and must not invent residents.
+	var mission:Dictionary={"mission_id":771,"duration_days":90,"target_id":"recruit_people","target_kind":"recruit_people_visit"}
 	var empty_account:Dictionary=system._recruitment_return_account(mission,550,0)
 	assert_dict(empty_account).is_not_empty()
 	assert_str(String(empty_account.get("summary",""))).is_not_empty()

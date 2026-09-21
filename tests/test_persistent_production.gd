@@ -160,8 +160,9 @@ func test_main_supply_dock_defaults_to_persistent_controls()->void:
 	assert_bool(bool(job.persistent)).is_true()
 	assert_int(int(job.target_stock)).is_equal(5)
 	var controls:Dictionary=provider._workshop_job_report(int(job.id))
-	assert_str(str(controls)).contains("RETOOL LINE")
-	controls.blocks.back().items[0].on_press.call()
+	assert_str(String(controls.blocks[0].type)).is_equal("production_line")
+	assert_bool((controls.blocks[0].on_retool as Callable).is_valid()).is_true()
+	controls.blocks[0].on_pause.call()
 	assert_bool(bool(job.paused)).is_true()
 	MilitaryCampaign.configure_production_line(int(job.id),0,false)
 	provider=null;terrain.free();hud.free()
@@ -242,7 +243,8 @@ func test_material_limited_forecast_and_default_finite_target()->void:
 	assert_str(String(view.state)).contains("Missing")
 
 func test_existing_line_rechecks_research_before_consuming_materials()->void:
-	GameState.known_discoveries.append("hafted_weapons");GameState.discovery_adoption.hafted_weapons=1.0
+	if "hafted_weapons" not in GameState.known_discoveries:GameState.known_discoveries.append("hafted_weapons")
+	GameState.discovery_adoption.hafted_weapons=1.0
 	GameState.resource_stockpiles.Stone=100.0
 	assert_bool(MilitaryCampaign.start_production_line("spear",5).has("ok")).is_true()
 	var job:Dictionary=MilitaryCampaign.equipment_queue.back()

@@ -210,7 +210,7 @@ func project(civ:Dictionary)->void:
 	# commitment ledger (which can retain absent personnel after population loss).
 	civ.military_population=minf(float(military._mobilized_count()),maxf(0,state.population_exact))
 	civ.military_share=float(civ.military_population)/maxf(1,state.population_exact)
-	civ.military_readiness=float(military.home_army.get("readiness",0))
+	civ.military_readiness=clampf(float(military.home_army.get("readiness",0)),0.0,1.0)
 	civ.military_stockpile=0.0
 	for amount in military.military_inventory.values():civ.military_stockpile+=int(amount)
 	civ["local_allocations"]=state.population_allocation_percentages.duplicate(true)

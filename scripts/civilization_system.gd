@@ -5046,7 +5046,7 @@ func import_state(payload:Dictionary)->Dictionary:
 	# the authoritative actor resources and production remain untouched.
 	for civ:Dictionary in incoming.get("civilizations",[]):
 		if not bool(civ.get("shared_rules",false)): continue
-		for metric in ["cohesion","knowledge","production","logistics","ecology"]:
+		for metric in ["cohesion","knowledge","production","logistics","ecology","military_readiness"]:
 			var value:=float(civ.get(metric,-1.0))
 			if is_finite(value) and value>1.0: civ[metric]=1.0
 		var population:=float(civ.get("population",NAN))
