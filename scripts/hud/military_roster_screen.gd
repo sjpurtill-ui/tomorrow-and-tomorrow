@@ -159,7 +159,7 @@ func _hero(rows:Array[Dictionary])->void:
 	for edge:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,12)
 	hero.add_child(margin)
 	var summary:=HBoxContainer.new();summary.add_theme_constant_override("separation",22);margin.add_child(summary)
-	for definition:Array in [["formations",{"army":"FORMATIONS","navy":"TASK FORCES","air":"AIR WINGS"}[service]],["strength",{"army":"LISTED SOLDIERS","navy":"VESSELS","air":"AIRCRAFT"}[service]],["attention","NEED ATTENTION"]]:
+	for definition:Array in [["formations",{"army":"FORCE GROUPS","navy":"TASK FORCES","air":"AIR WINGS"}[service]],["strength",{"army":"LISTED SOLDIERS","navy":"VESSELS","air":"AIRCRAFT"}[service]],["attention","NEED ATTENTION"]]:
 		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);summary.add_child(box)
 		hero_values[definition[0]]=_label(box,"0",24)
 		_label(box,definition[1],10,Color("c3ced1"))
@@ -177,7 +177,7 @@ func _update_hero(rows:Array[Dictionary])->void:
 	policy_shortcut.text="Training · %s ›" % MilitaryCampaign.training_staff.policy(service).label
 
 func _attention(data:Dictionary)->bool:
-	return bool(data.get("unknown",false)) or float(data.get("equipment",0))<.8 or float(data.get("condition",0))<.75 or "waiting" in String(data.get("activity","")).to_lower() or "paused" in String(data.get("activity","")).to_lower()
+	return bool(data.get("needs_attention",false)) or bool(data.get("unknown",false)) or float(data.get("equipment",0))<.8 or float(data.get("condition",0))<.75 or "waiting" in String(data.get("activity","")).to_lower() or "paused" in String(data.get("activity","")).to_lower()
 func _filtered(rows:Array[Dictionary])->Array[Dictionary]:
 	if roster_filter=="attention":return rows.filter(_attention)
 	if roster_filter=="training":return rows.filter(func(data:Dictionary)->bool:return bool(data.get("in_training",false)))
@@ -244,6 +244,10 @@ func _update_row(binding:Dictionary,data:Dictionary)->void:
 	binding.activity_note.visible=false
 	for key:String in ["personnel","equipment","skill"]:binding[key+"_bar"].queue_redraw()
 func _rows()->Array[Dictionary]:
+	var raw:=_raw_rows()
+	return preload("res://scripts/hud/army_roster_groups.gd").group(raw) if service=="army" else raw
+
+func _raw_rows()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	var campaign=MilitaryCampaign
 	if service=="army":
@@ -257,16 +261,16 @@ func _rows()->Array[Dictionary]:
 					result.append({"id":"field:%s" % army.get("army_id",army.get("id",0)),"type_id":"","name":String(army.get("name","Field army")),"glyph":"⚑","location":"Awaiting formation report","count":int(report.get("troops",0)),"unknown":true});continue
 				forces.append({"force":report,"key":"field:%s" % army.get("army_id",army.get("id",0)),"location":"%s · report %dd old" % [army.get("name","Field army"),maxi(0,int(GameState.elapsed_days)-int(report.get("day",0)))]})
 			else:forces.append({"force":army,"key":"field:%s" % army.get("army_id",army.get("id",0)),"location":army.get("name","Field army")})
-		for occupation:Dictionary in campaign.occupation_forces:forces.append({"force":occupation,"key":"garrison:%s" % campaign.occupation_forces.find(occupation),"location":"Occupation garrison"})
+		for occupation:Dictionary in campaign.occupation_forces:forces.append({"force":occupation,"key":"garrison:%s:%s" % [occupation.get("civ_id",""),occupation.get("region_id",campaign.occupation_forces.find(occupation))],"location":String(occupation.get("region_name","Occupied settlement"))+" garrison"})
 		for group:Dictionary in forces:
 			for unit:Dictionary in group.force.get("formations",[]):
 				var count:=int(unit.get("count",0));var attending:=int(unit.get("training_attending",0)) if not "report" in String(group.location) else 0
 				var type_id:=String(unit.get("unit","levy"))
 				var glyph:="♞" if type_id in ["cavalry","horse_archer","mounted_archer"] else "➶" if String(unit.get("weapon",""))=="bow" else "⚔"
-				result.append({"id":"%s:%s" % [group.key,unit.get("id",group.force.get("formations",[]).find(unit))],"type_id":type_id,"purpose":campaign.UnitCatalog.archetype(type_id).get("purpose",""),"weapon":String(unit.get("weapon","")),"name":campaign.UnitCatalog.archetype(type_id).get("label",type_id),"glyph":glyph,"location":group.location,"count":count,"authorized":int(unit.get("authorized_count",count)),"condition":float(unit.get("personnel_condition",1)),"equipment":float(unit.get("equipment",0))/maxf(1,unit.get("equipment_required",count)),"equipment_note":("Ammo %d / %d" % [unit.get("ammunition",0),unit.get("ammunition_required",0)] if int(unit.get("ammunition_required",0))>0 else "No ammo needed"),"skill":float(unit.get("training",0)),"experience":float(unit.get("experience",0)),"in_training":attending>0,"activity":"Staff training" if attending>0 else "On duty / reserve","progress":float(campaign.training_program.get("progress_days",0))/maxf(1,campaign.training_program.get("duration_days",1)) if attending>0 else 0.0,"training_note":"%d soldiers rotating" % attending if attending>0 else "Policy: "+String(campaign.training_staff.policy(service).label)})
+				result.append({"id":"%s:%s" % [group.key,unit.get("id",group.force.get("formations",[]).find(unit))],"group_key":group.key,"group_name":"Home reserve" if group.key=="home" else String(group.location),"equipment_count":int(unit.get("equipment",0)),"equipment_required":int(unit.get("equipment_required",count)),"type_id":type_id,"purpose":campaign.UnitCatalog.archetype(type_id).get("purpose",""),"weapon":String(unit.get("weapon","")),"name":campaign.UnitCatalog.archetype(type_id).get("label",type_id),"glyph":glyph,"location":group.location,"count":count,"authorized":int(unit.get("authorized_count",count)),"condition":float(unit.get("personnel_condition",1)),"equipment":float(unit.get("equipment",0))/maxf(1,unit.get("equipment_required",count)),"equipment_note":("Ammo %d / %d" % [unit.get("ammunition",0),unit.get("ammunition_required",0)] if int(unit.get("ammunition_required",0))>0 else "No ammo needed"),"skill":float(unit.get("training",0)),"experience":float(unit.get("experience",0)),"in_training":attending>0,"activity":"Staff training" if attending>0 else "On duty / reserve","progress":float(campaign.training_program.get("progress_days",0))/maxf(1,campaign.training_program.get("duration_days",1)) if attending>0 else 0.0,"training_note":"%d soldiers rotating" % attending if attending>0 else "Policy: "+String(campaign.training_staff.policy(service).label)})
 		for trainee:Dictionary in campaign.training_queue:
 			var count:=int(trainee.get("count",0));var days:=float(trainee.get("required_days",1));var progress:=float(trainee.get("progress_days",0))
-			result.append({"id":"recruit:%s" % trainee.get("id",campaign.training_queue.find(trainee)),"type_id":String(trainee.get("unit","levy")),"name":campaign.UnitCatalog.archetype(String(trainee.get("unit","levy"))).get("label","Recruits"),"glyph":"◇","location":"Initial instruction","count":count,"authorized":int(trainee.get("initial_count",count)),"condition":float(trainee.get("personnel_condition",1)),"equipment":float(trainee.get("equipment_access_today",0)),"equipment_note":"Training equipment access","skill":0.0,"experience":float(trainee.get("experience",0)),"in_training":true,"activity":"Initial training","progress":progress/maxf(1,days),"training_note":"%.0f / %.0f instruction days" % [progress,days]})
+			result.append({"id":"recruit:%s" % trainee.get("id",campaign.training_queue.find(trainee)),"group_key":"recruit:%s" % trainee.get("deployment_line",trainee.get("build_batch","legacy")),"group_name":String(campaign.recruit_deploy.line(int(trainee.deployment_line)).get("name","Recruitment line %s" % trainee.deployment_line)) if trainee.has("deployment_line") else "Initial instruction","type_id":String(trainee.get("unit","levy")),"name":campaign.UnitCatalog.archetype(String(trainee.get("unit","levy"))).get("label","Recruits"),"glyph":"◇","location":"Initial instruction","count":count,"authorized":int(trainee.get("initial_count",count)),"condition":float(trainee.get("personnel_condition",1)),"equipment":float(trainee.get("equipment_access_today",0)),"equipment_note":"Training equipment access","skill":0.0,"experience":float(trainee.get("experience",0)),"in_training":true,"activity":"Initial training","progress":progress/maxf(1,days),"training_note":"%.0f / %.0f instruction days" % [progress,days]})
 	else:
 		var op=campaign.joint_operations
 		for unit:Dictionary in op.state.forces:
@@ -287,14 +291,16 @@ func _rows()->Array[Dictionary]:
 func _inspection()->void:
 	var panel_detail:=PanelContainer.new();panel_detail.add_theme_stylebox_override("panel",_skin(Color("11242c"),Color("43616a"),16));body.add_child(panel_detail)
 	var layout:=VBoxContainer.new();layout.add_theme_constant_override("separation",9);panel_detail.add_child(layout)
-	_label(layout,{"army":"FORMATION BRIEF","navy":"TASK FORCE BRIEF","air":"AIR WING BRIEF"}[service],11,Art.COLORS[service])
+	_label(layout,{"army":"FORCE COMPOSITION","navy":"TASK FORCE BRIEF","air":"AIR WING BRIEF"}[service],11,Art.COLORS[service])
 	inspection_labels.name=_label(layout,String(selected_row.name),21)
 	if bool(selected_row.get("unknown",false)):
 		_wrapped(layout,"Awaiting a dated report of this army’s formations and equipment.");return
 	inspection_labels.purpose=_wrapped(layout,String(selected_row.get("purpose","Service staff prepare this force under your standing policy.")),15,TEXT)
 	inspection_labels.skills=_label(layout,"",14,Art.COLORS[service])
+	inspection_labels.composition=_wrapped(layout,"",14,TEXT)
 	inspection_labels.activity=_wrapped(layout,"",14)
 	var buttons:=HFlowContainer.new();layout.add_child(buttons)
+	if service=="army":_button(buttons,"Recruit & deploy",func():_management(1))
 	_button(buttons,"Adjust training commitment",func():training_view=true;selected_row={};_build_body())
 	_button(buttons,"Command on map ↗",func():queue_free();MilitaryCampaign.joint_operations.open_hierarchy(service))
 	_update_inspection()
@@ -302,7 +308,8 @@ func _update_inspection()->void:
 	if inspection_labels.is_empty() or selected_row.is_empty():return
 	inspection_labels.name.text=String(selected_row.name)
 	if bool(selected_row.get("unknown",false)):return
-	inspection_labels.skills.text="Drill %d%%  ·  Experience %d%%  ·  Condition %d%%" % [selected_row.skill*100,selected_row.experience*100,selected_row.condition*100]
+	inspection_labels.composition.text=String(selected_row.get("composition",""))
+	inspection_labels.skills.text="Drill %d%%  ·  Experience %d%%  ·  Condition %d%%" % [roundi(selected_row.skill*100),roundi(selected_row.experience*100),roundi(selected_row.condition*100)]
 	inspection_labels.activity.text=String(selected_row.activity)+". "+String(selected_row.training_note)
 
 func _policy()->void:

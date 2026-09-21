@@ -1744,3 +1744,18 @@ Canonical focused validation: 67/67 tests, zero errors/failures/skips/orphans. C
 
 This is a tested land-queue delivery, not exhaustive HOI4 parity: arbitrary province/front deployment, retrofitting edited templates, global reinforcement-versus-new-unit equipment priorities, and naval/air recruitment parity remain outstanding. Details and governing user instruction: `docs/RECRUIT_DEPLOY_DESIGN.md`.
 
+
+## September 21 — Army roster force grouping
+
+Army roster now shows home reserve, individual field armies, garrisons by occupied
+location, and recruitment lines rather than one card per internal training cohort.
+Expanded composition groups roles/equipment and exposes counts, equipment shortage
+and weighted drill. Totals sum actual records without modifying campaign ownership;
+subgroup shortages remain visible through attention filters. Unreported field data
+stays unknown. Navy/air workflows and general-led command remain unchanged.
+
+Validation: 35/35 roster, recruit/deploy and training-accounting tests; private GPU
+roster captures pass, including 1024x640. A hundred one-person levy records collapse
+into one force, while separate garrisons/queue lines remain separate. No save-schema
+change. This corrects the roster; full HOI4 parity remains incomplete as documented
+in RECRUIT_DEPLOY_DESIGN.md. Generated imports and captures are excluded.
