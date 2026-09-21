@@ -1,3 +1,9 @@
+## September 20 — surface resource geography cost: INTEGRATED
+
+Worker `225cdb55`, base `20033bcc`, branch `codex/daily-simulation-speed`, integrated as canonical `cb5d095b`. Resource searches sample only authored surface catchments through a bounded independent cache; full geography reports reuse them. Searches avoid unrelated water and climate sampling. Resource quantities, regrowth, food, research and daily simulation rules remain intact.
+
+Canonical focused checks pass 16/16 with zero errors/failures/skips/orphans. The private year-31, twelve-opponent, 24-day replay matches full saved state except timestamp. Mean CPU/day improves 246.780 → 223.002 ms (9.6%); excluding first-day cold work, approximately 4.9%. This single workload does not establish year-100 or year-3000 performance. No save-schema change, shared-file conflict, player restart or release packaging. Details and raw timing: `docs/performance/SURFACE_GEOGRAPHY_COST.md` and `.json`.
+
 ## September 20 — fog corridor rasterization: INTEGRATED
 
 Worker `ff591c54`, base `d4ba4fae`, branch `codex/fog-redraw-cost`, integrated as canonical `19c6a130`. Segment painting clips each image row to the corridor's conservative horizontal bounds, avoiding irrelevant pixels inside large diagonal bounding rectangles. Original per-pixel distance, smoothing, blending and output resolution are preserved.
