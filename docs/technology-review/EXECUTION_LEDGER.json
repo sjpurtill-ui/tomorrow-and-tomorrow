@@ -99,10 +99,10 @@
     "Coupled research/material/power bootstrap and finite military production-chain validation; the new civilian structural audit assumes all raw resources and methods available"
   ],
   "next_work": [
-    "Expand the full master beyond 2993 accounted identities: 2007 remain to author. Largest gaps include energy 123, governance 120, food 119, materials 114 and machinery 107. Electronics now accounts for 228/300. Continue distinct mechanisms and disadvantaged recovery design; complete explicit historical-horizon allocation without era gates.",
-    "Continue semantic and atlas reconciliation using checker-derived coverage: 450 candidates mapped, including eight partial subjects (ceramic pipe manufacture, autonomous water-network control, autonomous habitat monitoring, regional ecological recovery coupling, rapid pathogen-platform response, cryptographic hardware, fault-tolerant quantum system integration, energy-proportional computing); 150 candidates remain unmapped. Mappings add zero discoveries and do not establish operating implementation.",
+    "User explicitly prioritizes all5000 working discoveries integrated into main. Next runtime batch: finish48 communications discoveries and associated physical production/analysis/network operation from a fresh current-main worktree; preserve original unfinished source files. Remaining master3028,unauthored1972; classification work must not block runtime delivery.",
+    "Continue semantic and atlas reconciliation using checker-derived coverage: 475 candidates mapped, eight partial subjects retained in coverage.json, and 125 unmapped. Mappings add zero discoveries and do not establish operating implementation.",
     "Preserve unfinished communications code separately. Its 604 live definitions passed a structural graph audit, but behavior and actual network links remain unfinished.",
-    "Resume operating implementation in whole systems after broad authoring coverage; preserve the full 5000-discovery, 2500-3000-year goal.",
+    "Verify final canonical test/package/launch evidence for559 baseline release2026.09.12.2 when integrator reports it. Source branch still contains old runtime versions; preserve integration fixes and uncommitted communications while planning the next isolated implementation base.",
     "At the next pacing milestone inspect the existing catalog-476 diagnostic result or poll session 52497; do not restart it solely because observation timed out. Its older loaded code cannot validate later changes."
   ],
   "constraints": [
@@ -125,15 +125,76 @@
     "target": 5000,
     "implemented_baseline": 556,
     "pending_communications": 48,
-    "authored_drafts": 2389,
-    "distinct_ids_accounted": 2993,
-    "remaining_to_author": 2007,
+    "authored_drafts": 2424,
+    "distinct_ids_accounted": 3028,
+    "remaining_to_author": 1972,
     "complete": false,
-    "atlas_candidates_mapped": 450,
+    "atlas_candidates_mapped": 475,
     "atlas_partial_mappings": 8,
     "baseline_field_allocation": "master-catalog/baseline-field-allocation.json",
     "historical_horizon_allocation_complete": false,
     "atlas_coverage_source": "master-catalog/coverage.json: atlas_coverage",
-    "atlas_fully_mapped_subjects": 442
+    "atlas_fully_mapped_subjects": 467,
+    "historical_horizon_assigned": 932,
+    "historical_horizon_unassigned": 2097,
+    "historical_horizon_coverage_source": "master-catalog/coverage.json: historical_horizon_coverage"
+  },
+  "parallel_implementation": {
+    "task_id": "01a0978a-39f5-7620-a77f-5918ccb1d8ba",
+    "originating_task_id": "01a09789-3d3c-71d1-b389-794d955f2135",
+    "scope": "Early food cooking and physically constrained preservation; design documents read-only.",
+    "status": "Substantive baseline merged canonically at a578cd4; canonical verification and release packaging pending.",
+    "reported_graph_count": 559,
+    "counting_note": "559 is a verified worker graph checkpoint, not this worktree baseline or canonical player count. Three IDs already exist among authored drafts, so they add zero to total identities.",
+    "ready_commit": "c247e8d",
+    "compatibility_parent": "bde683e55ec889a30607bd62e8ff915280b96e90",
+    "handoff": "/Users/seanpurtill/.codex/worktrees/ef8f/tomorrow-and-tomorrow/docs/TECH_FOOD_PROCESSING_HANDOFF.md",
+    "follow_on_scope": "Grain work paused until bounded food integration resolves.",
+    "integrator_task_id": "01a0978a-39f5-7620-a77f-5918ccb1d8ba",
+    "integration_scope": "Review substantive committed baseline 18b0cb7/82b574e against canonical food release; preserve source communications exclusion and running player until controlled release handling.",
+    "coordination_window": "Source remains design-only; canonical/runtime ownership reserved for designated integrator.",
+    "integration_fixes_to_preserve": [
+      "Canonical three cooking identities, shared Logistics processing time and paid inputs",
+      "Movement direction aliases to supported logistics research domain",
+      "Saved origins preserve actual chosen OR foundation and common prerequisites",
+      "research_atlas creates operating panels only for selected known discovery; repeated refresh must not accumulate panels"
+    ],
+    "reported_integration_checkpoint": {
+      "live_discoveries": 559,
+      "explicit_learning_routes": 336,
+      "recipes": 240,
+      "plants": 12,
+      "status": "Integrator report under isolated review; not yet independently verified canonical release."
+    }
+  },
+  "canonical_food_delivery": {
+    "status": "integrated_and_packaged_verified",
+    "live_discoveries": 200,
+    "integration_commit": "860cdb6964ac622c2f258f64d03b9f607be81c6b",
+    "package_source": "d388ea0631865a060dbf7cd7c0118a595591df32",
+    "release": "2026.09.12.1",
+    "overlapping_master_ids": [
+      "hearth_roasting_control",
+      "earth_oven_cooking",
+      "food_steaming_vessels"
+    ],
+    "adds_master_identities": 0,
+    "evidence": "Inspected canonical commits, integration handoff, canonical 200-node audit, build.ok exact hash and PID22048 command at this checkpoint.",
+    "broader_556_baseline_included": false
+  },
+  "canonical_baseline_integration": {
+    "status": "canonical_source_integrated_release_verification_pending",
+    "canonical_commit": "a578cd4",
+    "source_baseline": "82b574e",
+    "last_source_runtime_commit": "18b0cb7",
+    "live_discoveries": 559,
+    "explicit_learning_routes": 336,
+    "civilian_recipes": 240,
+    "operating_facility_types": 12,
+    "release_target": "2026.09.12.2",
+    "running_release_changed": false,
+    "evidence": "Canonical git HEAD/handoff inspected; worktree graph log and consolidated results inspected. Canonical final verification/package remains with designated integrator.",
+    "uncommitted_communications_included": false,
+    "master_designs_complete": false
   }
 }
