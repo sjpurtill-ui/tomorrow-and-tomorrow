@@ -27,6 +27,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"culture":
+				var panel:=preload("res://scripts/hud/culture_panel.gd").new();section.add_child(panel);panel.setup(block)
 			"settlement_overview":
 				var panel:=preload("res://scripts/hud/settlement_overview.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":

@@ -6,39 +6,15 @@ const DYNAMIC_ORDER:Array[String]=["demography","nutrition","health","labor","kn
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
 
 func meta()->Dictionary:
-	var government:=GovernmentPeopleSystem.structure_snapshot()
 	return {
-		"eyebrow":"CIVILIZATION · SOCIETY & CIVICS",
-		"title":String(government.get("name","Forming Order")).capitalize(),
-		"subtabs":["SOCIETY","CIVICS"],
+		"eyebrow":"OUR PEOPLE · VALUES & TRADITIONS",
+		"title":"Culture",
+		"subtabs":["CULTURE","COUNCIL"],
 	}
 
 func tab(sub:int)->Dictionary:
-	var capacities:Dictionary=GameState.society_capacities
-	var mean:=0.0
-	var weakest:="—"
-	var weakest_value:=2.0
-	for domain in capacities:
-		var value:=clampf(float(capacities[domain]),0.0,1.0)
-		mean+=value
-		if value<weakest_value:
-			weakest_value=value
-			weakest=String(domain)
-	mean/=maxf(1.0,float(capacities.size()))
-	var governance:Dictionary=ConsequenceEngine.governance_metrics()
-	var legitimacy:=roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.7)),0.0,1.0)*100.0)
-	var policies:=ConsequenceEngine.active_policies().size()
-	var kpis:Array=[
-		{"label":"CAPACITY","value":"%d%%" % roundi(mean*100.0),"delta":"","accent":Tokens.TEAL,"tip":"Mean of twelve aggregate capacities"},
-		{"label":"WEAKEST","value":weakest.capitalize(),"delta":"%d%%" % roundi(weakest_value*100.0),"delta_color":Tokens.RED,"accent":Tokens.RED,"tip":"Limiting capacity"},
-		{"label":"LEGITIMACY","value":"%d%%" % legitimacy,"delta":"","accent":Tokens.AMBER,"tip":"Shared acceptance of authority"},
-		{"label":"POLICIES","value":str(policies),"delta":"active","accent":Tokens.BLUE,"tip":"Standing interpreted policies"},
-	]
-	var raw_brief:Dictionary=terrain._society_attention_brief(capacities)
-	var brief:=adapt_brief(raw_brief,"warn" if weakest_value<0.4 else "info","")
-	match sub:
-		1: return {"kpis":[],"brief":{},"blocks":_council_blocks()}
-	return {"kpis":[kpis[2],kpis[3]],"brief":brief,"blocks":_society_overview()}
+	if sub==1:return {"blocks":_council_blocks()}
+	return {"blocks":_society_overview()}
 
 func _society_blocks(capacities:Dictionary)->Array:
 	var items:Array=[]
@@ -354,7 +330,7 @@ func signature()->Array:
 	var leader:=GovernmentPeopleSystem.settlement_leader(String(settlement.get("id","")))
 	var latest_order:=_latest_civic_order(String(settlement.get("id","")),int(leader.get("person_id",0)))
 	var interpreter_config:=PronouncementInterpreter.configuration_status()
-	return [GameState.society_capacities.duplicate(),ids,GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size(),GovernmentPeopleSystem.revision,GameState.player_settlements.size(),history.size(),latest_dialogue_status,String(latest_order.get("status","")),bool(interpreter_config.get("enabled",GameState.civic_api_enabled)),bool(interpreter_config.get("configured",false)),String(interpreter_config.get("model","")),bool(interpreter_config.get("structured_output",false)),GameState.civic_always_use_ai]
+	return [GameState.societal_values.get("lived",{}).duplicate(),WorldSimulation.direction.ambition,WorldSimulation.direction.cultural_memory.get("events",[]).size(),GameState.society_capacities.duplicate(),ids,GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size(),GovernmentPeopleSystem.revision,GameState.player_settlements.size(),history.size(),latest_dialogue_status,String(latest_order.get("status","")),bool(interpreter_config.get("enabled",GameState.civic_api_enabled)),bool(interpreter_config.get("configured",false)),String(interpreter_config.get("model","")),bool(interpreter_config.get("structured_output",false)),GameState.civic_always_use_ai]
 
 
 func _civic_settlement()->Dictionary:
@@ -435,8 +411,21 @@ func _remove_civic_leader(settlement_id:String,action:String)->void:
 	terrain._perform_civic_leader_removal(settlement_id,action)
 
 func _society_overview()->Array:
-	var details:=_society_blocks(GameState.society_capacities)
-	return [details[1],{"type":"actions","items":[{"label":"OUR DIRECTION","sub":"Long-term purpose and traditions","on_press":func():PeopleDirection.open_direction()}, {"label":"TALK TO OUR LEADER","sub":"Discuss a problem or give direction","on_press":jump("civ",1)},focused_action("CAPACITIES IN DETAIL","Twelve measures of what society can do",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}),{"label":"PEOPLE IN GOVERNMENT","sub":"Offices, responsibilities and policy","on_press":jump("government",0)}]}]
+	var identity:=ValuesModel.identity_snapshot(GameState.societal_values)
+	var values:Array=[]
+	var art_domains:={"hierarchy":"institutions","collective_obligation":"health","centralization":"institutions","experimentation":"knowledge","pluralism":"culture","common_stewardship":"ecology","restorative_justice":"health","openness":"logistics","ecological_restraint":"ecology","achieved_status":"labor"}
+	for value_trait:Dictionary in identity.get("traits",[]):
+		var definition:Dictionary=ValuesModel.VALUE_DEFINITIONS[String(value_trait.axis)]
+		values.append({"label":value_trait.label,"value":value_trait.value,"meaning":definition.meaning,"low":definition.low,"high":definition.high,"art":art_domains.get(String(value_trait.axis),"culture")})
+	var memories:Array=[]
+	for item:Dictionary in WorldSimulation.direction.cultural_tendencies():
+		var inherited:=preload("res://scripts/hud/culture_presenter.gd").tendency(item.inheritance)
+		if inherited.is_empty():continue
+		memories.append({"domain":item.domain,"inherited":inherited,"current":preload("res://scripts/hud/culture_presenter.gd").tendency(item.current)})
+	return [{"type":"culture","identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
+		"on_direction":func():PeopleDirection.open_direction(),"on_council":jump("civ",1),"on_government":jump("government",0),
+		"on_capacities":focused_action("Society’s strengths & needs","",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}).on_press}]
+
 func _government_overview()->Array:
 	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"OPEN GOVERNMENT","sub":"Officeholders, removals and policy","on_press":jump("government",0)},{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work","on_press":jump("civ",1)}]}]
 func _council_blocks()->Array:

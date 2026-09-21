@@ -1979,3 +1979,18 @@ Validation: 14/14 focused tests across settlement presentation, government HUD a
 strategic history; private GPU probes at 1600x1000 and 1024x640 passed, including
 actual Materials/Wealth portrait region equality and screenshot review. Test
 fixtures do not read or write campaign saves. Generated imports remain excluded.
+
+## September 21 — illustrated Culture
+
+Culture replaces the narrow government-counter report with an illustrated society
+identity, current ambition, three strongest lived values and recorded inherited
+traditions. Value spectra describe societal axes, not resident percentages;
+tied cultural tendencies remain visible and absent history invents no winner.
+Council dialogue and its report/settings actions remain available in a named tab.
+Government, capacity details and direction retain their existing destinations.
+No simulation or save-schema change. Existing research illustrations are reused.
+
+Validation: 42/42 focused tests (culture presenter, societal values, government
+HUD, dialogue continuity and civic answers/alerts). Private GPU checks at
+1600x1000 and 1024x640 pass, including Culture, Council and the conversation link;
+screenshots reviewed. Generated imports and captures excluded from delivery.
