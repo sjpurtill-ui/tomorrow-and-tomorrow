@@ -552,6 +552,8 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	var has_botany_applications:bool=not traveling and not WorldSimulation.state.field_botany.applications.is_empty()
 	if has_nutrients:
 		for resource:String in preload("res://scripts/crop_nutrition.gd").INPUTS:projected_inputs[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
+	if not has_cooling and not has_nutrients and not has_botany_trials and not has_botany_applications and float(nutrient_report.get("botany_delta",0))==0.0:
+		return _forecast_ordinary(horizon,projected_stocks,current_harvest,current_seasons,current_weather_types,environment,climate_days,current_day,non_climate,ration_factor,inaccessible_army_rations,storage_multiplier,preservation,milestones)
 	for offset in range(1,horizon+1):
 		var future_day:=current_day+float(offset)
 		var future_climate_factors:=_forecast_climate(environment,future_day,climate_days)
@@ -586,6 +588,41 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 		var eaten:=_consume_projection(projected_stocks,future_required)
 		if eaten<future_required*0.98 and first_shortage<0: first_shortage=offset
 		if offset==30 or offset==horizon:
+			milestones[offset]=_forecast_summary(offset,projected_stocks,current_day,non_climate,ration_factor,inaccessible_army_rations,first_shortage,total_produced,total_required,total_spoiled)
+	return milestones.get(horizon,{})
+
+func _forecast_ordinary(horizon:int,projected_stocks:Dictionary,harvest:Dictionary,seasons:Dictionary,weather:Dictionary,environment:Dictionary,climate_days:Dictionary,current_day:float,non_climate:float,ration_factor:float,inaccessible_army_rations:float,storage_multiplier:float,preservation:Dictionary,milestones:Dictionary)->Dictionary:
+	# Keep the same daily arithmetic and consumption order, using local numeric
+	# arrays instead of repeatedly resolving string-keyed stock dictionaries.
+	var amounts:Array[float]=[];var yields:Array[float]=[];var season:Array[float]=[];var weather_now:Array[float]=[];var spoil:Array[float]=[];var preserve:Array[float]=[]
+	for food_type:String in FOOD_TYPES:
+		amounts.append(float(projected_stocks.get(food_type,0.0)))
+		spoil.append(float(SPOILAGE[food_type]));preserve.append(float(preservation[food_type]))
+		if food_type!="Preserved food":
+			yields.append(float(harvest.get(food_type,0.0)));season.append(float(seasons[food_type]));weather_now.append(float(weather[food_type]))
+	var first_shortage:=-1;var total_produced:=0.0;var total_required:=0.0;var total_spoiled:=0.0
+	for offset:int in range(1,horizon+1):
+		var future_day:=current_day+float(offset)
+		var climate:=_forecast_climate(environment,future_day,climate_days)
+		for i:int in 4:
+			var factors:Array=climate[FOOD_TYPES[i]]
+			var produced:=yields[i]*float(factors[0])/season[i]*float(factors[1])/weather_now[i]
+			amounts[i]+=produced;total_produced+=produced
+		var season_wave:=sin(fmod(future_day,365.0)/365.0*TAU)
+		var future_climate:=non_climate*maxf(0.0,-season_wave)*0.06
+		var required:=maxf(0.0,(non_climate+future_climate)*ration_factor-inaccessible_army_rations)
+		total_required+=required
+		for i:int in 5:
+			var loss:=amounts[i]*spoil[i]*storage_multiplier*preserve[i]
+			amounts[i]=maxf(0.0,amounts[i]-loss);total_spoiled+=loss
+		var remaining:=required
+		for i:int in [2,1,0,3,4]:
+			var eaten:=minf(remaining,amounts[i])
+			amounts[i]-=eaten;remaining-=eaten
+			if remaining<=.001:break
+		if required-remaining<required*.98 and first_shortage<0:first_shortage=offset
+		if offset==30 or offset==horizon:
+			for i:int in 5:projected_stocks[FOOD_TYPES[i]]=amounts[i]
 			milestones[offset]=_forecast_summary(offset,projected_stocks,current_day,non_climate,ration_factor,inaccessible_army_rations,first_shortage,total_produced,total_required,total_spoiled)
 	return milestones.get(horizon,{})
 

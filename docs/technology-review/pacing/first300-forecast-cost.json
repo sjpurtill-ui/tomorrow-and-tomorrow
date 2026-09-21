@@ -1,0 +1,34 @@
+{
+  "base_commit": "6f5adabb1facdbc02a0dd6f82b4fb05df972920c",
+  "from_day": 46720,
+  "to_day": 46750,
+  "settlements": 20,
+  "full_world_state_equal": true,
+  "tests": 69,
+  "before": {
+    "wall_seconds": 9.099,
+    "secondary_consequences": {
+      "calls": 570,
+      "microseconds": 2545304
+    },
+    "continuation": {
+      "checked": false
+    }
+  },
+  "after": {
+    "wall_seconds": 8.778,
+    "secondary_consequences": {
+      "calls": 570,
+      "microseconds": 2213421
+    },
+    "continuation": {
+      "continuation_detail": [],
+      "continuation_equal": true,
+      "final_restore": {
+        "ok": true
+      },
+      "restore_detail": [],
+      "restored_equal": true
+    }
+  }
+}
