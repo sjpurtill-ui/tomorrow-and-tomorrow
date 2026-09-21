@@ -31,3 +31,17 @@ func test_tin_requires_actual_ore_but_can_be_studied_with_imported_material()->v
 		WorldSimulation.state.resource_stockpiles["Tin Ore"]=2.0
 		assert_bool(WorldSimulation.discovery._resource_requirements_met(entry.resource_requirements)).is_true()
 	)
+
+func test_mounted_scouting_does_not_supply_archery()->void:
+	WorldSimulation.scoped("research_gates",func()->void:
+		var entry:Dictionary=WorldSimulation.discovery.discovery_definition("mounted_archery")
+		learn(["animal_taming","pack_animals","domesticated_mounts","mounted_scouts"])
+		assert_bool(Paths.ready(entry,100000)).is_false()
+		assert_bool(preload("res://scripts/persistent_production.gd").recipe(WorldSimulation.military,"mounted_bow").has("error")).is_true()
+		learn(["bow_craft"])
+		assert_bool(Paths.ready(entry,0)).is_true()
+		learn(["mounted_archery"])
+		assert_bool(preload("res://scripts/persistent_production.gd").recipe(WorldSimulation.military,"mounted_bow").has("error")).is_false()
+		assert_bool(WorldSimulation.military.consumable_knowledge_availability("arrows").unlocked).is_true()
+		assert_str(preload("res://scripts/military_unit_catalog.gd").gate_for("horse_archer")).is_equal("mounted_archery")
+	)

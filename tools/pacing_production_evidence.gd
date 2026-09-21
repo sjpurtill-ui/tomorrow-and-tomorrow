@@ -31,7 +31,7 @@ static func capture(detailed:bool=false)->Dictionary:
 		var available:=Ops.service(service)
 		if available>0:services[service]=available
 	var military:Dictionary={}
-	for item:String in ["improvised","spear","bow","lance","siege_kit"]:
+	for item:String in ["improvised","spear","bow","lance","mounted_bow","siege_kit"]:
 		var ammunition:=String(campaign._ammunition_type_for(item))
 		military[item]={"recipe_known":not P.recipe(campaign,item).has("error"),"stored":int(campaign.military_inventory.get(item,0)),"equipped":0,"ammunition_carried":0,"ammunition_required":0,"ammunition_stored":int(campaign.military_consumables.get(ammunition,0))}
 	for force:Dictionary in [campaign.home_army]+campaign.field_armies+campaign.occupation_forces:

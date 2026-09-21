@@ -372,7 +372,7 @@ const ARCHETYPES:Dictionary={
 		"branch": "mounted",
 		"lineage": "skirmisher",
 		"era": "early states",
-		"gate": "mounted_scouts",
+		"gate": "mounted_archery",
 		"equipment": [
 			"mounted_bow"
 		],
@@ -844,7 +844,7 @@ const EQUIPMENT_GATES:Dictionary={
 	"pike": "pike_drill",
 	"crossbow": "crossbow_mechanism",
 	"mountain_kit": "military_staffs",
-	"mounted_bow": "mounted_scouts",
+	"mounted_bow": "mounted_archery",
 	"chariot_kit": "war_chariots",
 	"armored_lance": "armored_riding",
 	"elephant_kit": "elephant_training",

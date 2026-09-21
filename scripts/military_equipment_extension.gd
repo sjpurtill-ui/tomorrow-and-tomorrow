@@ -115,7 +115,7 @@ const ITEMS:Dictionary={
 	},
 	"mounted_bow": {
 		"name": "Horse Archers equipment",
-		"gate": "mounted_scouts",
+		"gate": "mounted_archery",
 		"materials": {
 			"Timber": 0.8,
 			"Stone": 0.2,

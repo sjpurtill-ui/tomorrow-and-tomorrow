@@ -3,6 +3,17 @@ extends RefCounted
 static func entries()->Array[Dictionary]:
 	return [
 	  {
+	    "id": "mounted_archery", "name": "Mounted Archery", "direction": "Warfare",
+	    "day": 650, "chance": 0.003,
+	    "requires": ["mounted_scouts", "bow_craft"],
+	    "requires_all": ["mounted_scouts", "bow_craft"],
+	    "signals": ["training", "warfare", "travel"],
+	    "observation": "Riders practice keeping a seat while drawing, releasing and replenishing arrows on the move.",
+	    "effects": {},
+	    "production_contract": "Enables horse-archer equipment and training. Bows, arrows, recruits, maintained mounts and supplies still come from ordinary production and husbandry.",
+	    "learning_routes": [{"id": "local", "label": "Mounted archery practice", "requires_all": []}]
+	  },
+	  {
 	    "id": "skirmish_pair_drill",
 	    "name": "Skirmish Pair Drill",
 	    "direction": "Warfare",
