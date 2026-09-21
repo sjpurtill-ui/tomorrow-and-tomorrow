@@ -981,7 +981,6 @@ func _process(delta: float) -> void:
 		_refresh_foreign_formation_markers()
 		_refresh_player_field_army_markers()
 		_refresh_player_scout_route_markers()
-		_refresh_nomad_sighting_markers()
 		_refresh_settlement_network()
 		_refresh_settlement_convoy_marker()
 	if travel_council_notice and travel_council_notice.visible and Time.get_ticks_msec()>travel_council_notice_until_msec:
@@ -12919,42 +12918,6 @@ func _refresh_player_field_army_markers()->void:
 		reported_armies.append(display)
 	_refresh_close_army_figures(reported_armies,marker_selected_id)
 
-
-var nomad_sighting_markers:Dictionary={}
-
-func _refresh_nomad_sighting_markers()->void:
-	## Fading indicators where returned parties saw nomadic bands that did not
-	## join. Styled quieter than landmarks: a sighting is a memory, not a place.
-	var known_ids:Dictionary={}
-	for sighting_variant in CivilizationSystem.nomad_sightings_snapshot():
-		var sighting:Dictionary=sighting_variant
-		var sighting_id:=String(sighting.get("id",""))
-		known_ids[sighting_id]=true
-		var marker:Label3D=nomad_sighting_markers.get(sighting_id,null)
-		if marker==null or not is_instance_valid(marker):
-			marker=Label3D.new()
-			marker.name="NomadSighting_%s" % sighting_id
-			marker.text="NOMADS SEEN · DAY %d" % int(sighting.get("day",0))
-			marker.font_size=9
-			marker.modulate=Color("#a08b6a")
-			marker.outline_size=4
-			marker.outline_modulate=Color(0.018,0.026,0.028,0.95)
-			marker.billboard=BaseMaterial3D.BILLBOARD_ENABLED
-			marker.fixed_size=true
-			marker.no_depth_test=true
-			marker.render_priority=8
-			var position_data:Dictionary=sighting.get("position",{})
-			var world_position:=Vector3(float(position_data.get("x",0.0)),0.0,float(position_data.get("z",0.0)))
-			world_position.y=_height_at(world_position.x,world_position.z)+0.4
-			marker.position=world_position
-			add_child(marker)
-			nomad_sighting_markers[sighting_id]=marker
-		marker.visible=_world_position_is_revealed(marker.global_position) and camera and camera.size>=8.0
-	for sighting_id in nomad_sighting_markers.keys():
-		if known_ids.has(String(sighting_id)): continue
-		var stale:Label3D=nomad_sighting_markers[sighting_id]
-		if stale and is_instance_valid(stale): stale.queue_free()
-		nomad_sighting_markers.erase(sighting_id)
 
 func _on_scout_report_returned(report:Dictionary)->void:
 	if not ScoutArchive.should_notify(report):return

@@ -20,13 +20,17 @@ static func city_record(report:Dictionary)->Dictionary:
 		if String(city.get("city_id",""))==id:return city
 	return {}
 
+static func calendar_date(day:int)->String:
+	day=maxi(0,day)
+	return "Year %d, Day %d" % [day/365+1,day%365+1]
+
 static func city_account(report:Dictionary)->String:
 	var city:=city_record(report)
 	var target:=String(city.get("name",String(report.get("target_label","the target city")).trim_prefix("OBSERVE ")))
 	var text:="Reconnaissance of %s: %d scouts returned after %d days away. " % [target,int(report.get("returned_personnel",report.get("personnel",0))),int(report.get("actual_days",report.get("duration_days",0)))]
 	if city.is_empty():text+="No usable observation of the target city was brought home. Its estimates were not refreshed."
 	else:
-		text+="%d days observing; evidence dated day %d. " % [int(city.get("observation_days",1)),int(city.get("observed_day",0))]
+		text+="%d days observing; evidence dated %s. " % [int(city.get("observation_days",1)),calendar_date(int(city.get("observed_day",0)))]
 		var visuals=preload("res://scripts/hud/city_report_visuals.gd")
 		for key:String in ["population","science_capacity","gdp","life_expectancy"]:
 			text+=String(visuals.LABELS[key])+": "+visuals.estimate(key,city.get("fields",{}).get(key,{}))+". "

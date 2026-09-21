@@ -17,7 +17,7 @@ func _init(terrain_node:Node,hud_node:Control,report_record:Dictionary={},archiv
 func meta()->Dictionary:
 	var title:=String(Archive.summary(report).title)
 	return {
-		"eyebrow":("CITY RECONNAISSANCE" if String(report.get("mission_kind",""))=="observe_city" else "THE EXPEDITION CHRONICLES")+" · DAY %d" % int(report.get("day",0)),
+		"eyebrow":("CITY RECONNAISSANCE" if String(report.get("mission_kind",""))=="observe_city" else "THE EXPEDITION CHRONICLES")+" · "+Archive.calendar_date(int(report.get("day",0))).to_upper(),
 		"title":title,
 		"subtabs":["CITY FINDINGS" if String(report.get("mission_kind",""))=="observe_city" else "DISCOVERIES","JOURNEY & ACCOUNTS"],
 	}

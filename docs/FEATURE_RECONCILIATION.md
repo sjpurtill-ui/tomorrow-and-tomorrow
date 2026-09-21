@@ -1888,3 +1888,8 @@ Base 2b0a327, branch codex/production-civilian-demand. Production now visibly na
 Read-only saved-state inspection: day 13399 (year 37), population 235, Quartermaster Kaia Almasi. Four retained levy-weapon completions, paused manual levy line; household cordage/containers already in stocks. Only adopted civilian workshop recipe was graded interior wood, blocked by Steel tooling. Isolated next-day craft call produced 3.6409236 cordage and 2.2468705 woven containers and deducted inputs. This does not establish the reported year-62 state; newer save requested.
 
 Validation: 3 production-visibility tests and 6 existing opening-craft tests passed. Saved diagnostic assertion passed; its report completion stalled when another report runner overlapped, so it is used as diagnostic evidence, not counted in the nine regression checks. No player game restart, desktop control or save overwrite. Temporary probe source removed; private diagnostic logs remain only in artifacts.
+
+## 2026-09-21 — Remove nomad sighting map labels
+
+Base 3a33c39, branch codex/remove-nomad-map-labels. Removed the map's NOMADS SEEN labels and their refresh work; sighting records and scout reports remain intact. Scout report headers and observation dates now use Year / Day of year instead of elapsed-day serials. Eight existing scout archive tests passed. No save changes or player restart.
+
