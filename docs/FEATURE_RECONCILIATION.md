@@ -1952,3 +1952,11 @@ The structural supply audit now includes actual household recipes, with their re
 - Pacing evidence includes retained output totals by resource and settlement, so retooled lines do not erase measured production.
 - Validation: 30/30 tests across opening crafts, building materials, kiln operation/save validation, settlement delivery and pacing evidence. A real-terrain year-50 checkpoint advanced one year: first kiln operating, fitted post/beam output 31 to 37, splice output 22 to 24, complete save validation passed (artifacts/capital-recovery-verified.json). Earlier cold-start and 300-year acceptance work remains separately tracked.
 
+
+### First 300 years: physical research, ammunition and final-ground viability
+- Generated founding sites now retain subsistence conditions after detailed ground sampling. Sixteen terrain seats pass food, temperature, growing-season and freshwater checks.
+- Serving formations create ammunition demand against consumable stock. Orders use normal materials and work. A real year-25 military checkpoint advanced one year: both archers supplied with 12 arrows plus 6 in reserve; 18 arrows recorded as produced and save validated.
+- Alumina refining requires chemical separation, pressure vessels, alkali chemistry and bauxite evidence; tin smelting requires ore evidence. The full structural research/production graph still has zero errors. No calendar grants or global research-rate changes.
+- Civilization readiness summaries cap at 100%; combat readiness retains its existing 150% range. Older shared summaries repair finite positive overflow without changing the input payload.
+- Validation: owned-civilization interaction/parity 19/19, projection bounds 9/9, workshop/persistent production 35/35, research gates 2/2, founding sites 3/3. Stale test inputs corrected for inherited knowledge, equal surveyed land, current production actions and settled recruitment visits. The separate legacy billion-population serialized-size threshold remains under review and is not counted as passing.
+- Runtime checkpoint 71c569e. Actual-world 25-year and isolated 300-year campaigns remain in progress. No save schema change or player launch.
