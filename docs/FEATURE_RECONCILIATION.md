@@ -2057,3 +2057,7 @@ The headless full-world probe can retain a private checkpoint every requested in
 ### First 300 years: keep planned workshop handoffs through routine reviews
 
 Routine AI and delegated-staff target reviews now leave a pending paid-batch handoff intact. Explicit player changes still cancel it. This prevents changing demand from repeatedly resetting a scheduled switch before the current batch finishes. All 46 workshop and turnover checks passed, including both routine review and manual override paths. No save-format change.
+
+### First 300 years: expose stalled workshop inputs in endurance evidence
+
+Annual diagnostic records now retain civilian line status, pending handoffs, crafting workforce and production labor share. The isolated audit accepts a checkpoint interval override so ongoing runs can retain yearly checkpoints. These diagnostics do not change game state or balance. A year-54 cold checkpoint loaded and passed exact state restoration and next-day replay. The woodland replay identifies both workshops waiting on manufactured inputs while a pending handoff waits for its input-starved batch to finish; recovery remains under investigation.

@@ -13,6 +13,7 @@ var real_geography:=false
 var terrain:Node
 var origin_hint:=Vector2.ZERO
 var checkpoint_path:=""
+var checkpoint_interval:=9125
 var restore_path:=""
 var restored:Dictionary={}
 var wood_density:=-1.0
@@ -123,6 +124,7 @@ func run()->void:
 		elif argument.begins_with("--seat="):starting_seat=maxi(0,argument.trim_prefix("--seat=").to_int())
 		elif argument.begins_with("--origin-x="):origin_hint.x=argument.trim_prefix("--origin-x=").to_float()
 		elif argument.begins_with("--origin-y="):origin_hint.y=argument.trim_prefix("--origin-y=").to_float()
+		elif argument.begins_with("--checkpoint-every="):checkpoint_interval=maxi(1,argument.trim_prefix("--checkpoint-every=").to_int())
 		elif argument.begins_with("--checkpoint="):checkpoint_path=argument.trim_prefix("--checkpoint=")
 		elif argument.begins_with("--resume="):restore_path=argument.trim_prefix("--resume=")
 		elif argument=="--profile":profile_enabled=true;timings={"enabled":true};secondary_timings={"enabled":true}
@@ -199,7 +201,7 @@ func run()->void:
 			var progress:={"progress":day,"year":float(day)/365.0,"snapshot":snapshots.back()}
 			if profile_enabled:progress["timing_interval"]=timing_interval(day)
 			print(JSON.stringify(progress))
-		if day%9125==0:checkpoint(day)
+		if day%checkpoint_interval==0:checkpoint(day)
 		if extinct:reason="population collapse";break
 		if day%30==0:await process_frame
 	if profile_enabled:timing_interval(day)

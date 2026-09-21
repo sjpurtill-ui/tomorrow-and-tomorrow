@@ -19,7 +19,7 @@ static func capture(detailed:bool=false)->Dictionary:
 		methods.append(row)
 	for job:Dictionary in campaign.equipment_queue:
 		if I.product(String(job.get("item",""))).is_empty():continue
-		lines.append({"item":job.item,"reported_state":P.state(campaign,job),"completed_on_current_line":job.get("completed",0),"target_stock":job.get("target_stock",0),"progress_days":job.get("progress_days",0),"paused":job.get("paused",false)})
+		lines.append({"item":job.item,"reported_state":P.state(campaign,job),"completed_on_current_line":job.get("completed",0),"target_stock":job.get("target_stock",0),"progress_days":job.get("progress_days",0),"paused":job.get("paused",false),"pending_change":job.get("ai_turnover",{}).duplicate(true)})
 	var current:=int(Ops.data().last_day)==int(state.elapsed_days)
 	var installed:=0;var building:=0
 	for id:String in Ops.data().plants:
@@ -48,7 +48,7 @@ static func capture(detailed:bool=false)->Dictionary:
 	for receipt:Dictionary in campaign.workshop.data.get("totals",{}).values():
 		var resource:=String(receipt.resource)
 		recorded[resource]=float(recorded.get(resource,0))+float(receipt.quantity)
-	var result:={"recorded_output":recorded,"military_capabilities":military,"household_stocks":household,"available_civilian_recipes":methods.size(),"civilian_lines":lines.size(),"manufactured_stock_kinds":stocks.size(),"installed_units":installed,"units_under_construction":building,"remaining_daily_services":services,"operations_ledger_current":current}
+	var result:={"lines":lines,"workforce":P.workforce(),"production_labor_share":campaign.production_labor_share,"recorded_output":recorded,"military_capabilities":military,"household_stocks":household,"available_civilian_recipes":methods.size(),"civilian_lines":lines.size(),"manufactured_stock_kinds":stocks.size(),"installed_units":installed,"units_under_construction":building,"remaining_daily_services":services,"operations_ledger_current":current}
 	var food:=preload("res://scripts/leader_personality.gd").food_constraints(state.simulation_metrics)
 	result["food_shortage"]=food.food_shortage
 	result["delivery_shortage"]=food.delivery_shortage
