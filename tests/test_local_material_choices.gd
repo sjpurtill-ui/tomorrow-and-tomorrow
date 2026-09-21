@@ -9,6 +9,7 @@ func before_test()->void:
 
 func test_every_starter_work_can_use_delivered_clay_and_fiber_without_timber()->void:
 	for project:Dictionary in Construction._settlement_definitions():
+		if project.has("discovery"):continue # Advanced works have their own structural requirements.
 		var cost:=Construction._settlement_project_material_plan(project)
 		assert_bool(cost.is_empty()).is_false()
 		assert_float(float(cost.get("Timber",0))).is_equal(0.0)
@@ -75,3 +76,12 @@ func test_city_supply_context_selects_its_own_materials()->void:
 	city.local_resources.resource_stockpiles={"Timber":100.0,"Fiber Plants":100.0,"Clay":0.0}
 	SettlementModel.with_city_resources("other",func()->void:assert_str(SettlementModel._available_household_recipe().family).is_equal("organic"))
 	assert_str(SettlementModel._available_household_recipe().family).is_equal("earth")
+
+func test_framed_hall_requires_actual_joined_timber_components()->void:
+	for project:Dictionary in Construction._settlement_definitions():
+		if project.name!="Framed Hall":continue
+		assert_bool(Construction._settlement_project_material_plan(project).is_empty()).is_true()
+		GameState.resource_stockpiles["Timber"]=100.0
+		assert_bool(Construction._settlement_project_material_plan(project).is_empty()).is_true()
+		GameState.resource_stockpiles["Joined Timber Components"]=6.0
+		assert_bool(Construction._settlement_project_material_plan(project).is_empty()).is_false()

@@ -780,3 +780,18 @@ func test_long_civic_conversation_prunes_chatter_but_preserves_live_order_identi
 	var status_answer:=AdvisorSystem.resolve_civic_directive(status_question,PronouncementInterpreter._local_interpretation(status_question),status_order,settlement_id,int(leader.person_id))
 	assert_str(String(status_answer.get("discussion_reference_order_id",""))).is_equal(live_id)
 	assert_str(String(status_answer.get("leader_reply",""))).contains("still underway")
+
+func test_first_year_priorities_respond_to_survival_before_establishment()->void:
+	GameState.elapsed_days=30
+	var city:Dictionary={"id":"test","primary":true,"founded_day":0}
+	GameState.water_metrics={"intake_ratio":1.0,"source_accessible":true}
+	GameState.simulation_metrics={"food_intake_ratio":1.0,"housing_ratio":1.0}
+	assert_str(GovernmentPeopleSystem._focus_decision_for_settlement(city).id).is_equal("establishment")
+	GameState.simulation_metrics.food_intake_ratio=0.7
+	assert_str(GovernmentPeopleSystem._focus_decision_for_settlement(city).id).is_equal("provisions")
+	GameState.water_metrics.intake_ratio=0.5
+	assert_str(GovernmentPeopleSystem._focus_decision_for_settlement(city).id).is_equal("water")
+	GameState.water_metrics.intake_ratio=1.0
+	GameState.simulation_metrics.food_intake_ratio=1.0
+	GameState.simulation_metrics.housing_ratio=0.8
+	assert_str(GovernmentPeopleSystem._focus_decision_for_settlement(city).id).is_equal("shelter")

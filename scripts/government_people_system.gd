@@ -981,8 +981,6 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 
 func _focus_decision_for_settlement(settlement:Dictionary)->Dictionary:
 	var age_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(settlement.get("founded_day",0)))
-	if age_days<365:
-		return {"id":"establishment","label":FOCUS_LABELS.establishment,"reason":"This place is less than a year old and still needs its first dependable works and routines."}
 	var territory:Dictionary=settlement.get("territory_context",{})
 	var is_primary:=bool(settlement.get("primary",false))
 	var water:Dictionary=WorldSimulation.state.water_metrics
@@ -1021,6 +1019,9 @@ func _focus_decision_for_settlement(settlement:Dictionary)->Dictionary:
 	var security:=float(WorldSimulation.state.society_capacities.get("security",0.4))
 	if security<0.30 and WorldSimulation.state.player_settlements.size()>1:
 		return {"id":"defense","label":FOCUS_LABELS.defense,"reason":"Several settlements must be protected while security capacity remains weak."}
+	# Founding work must yield to measured survival needs at every settlement age.
+	if age_days<365:
+		return {"id":"establishment","label":FOCUS_LABELS.establishment,"reason":"This place is less than a year old and still needs its first dependable works and routines."}
 	var leader:=settlement_leader(String(settlement.get("id","")))
 	if not leader.is_empty():
 		var skills:Dictionary=leader.get("skills",{})

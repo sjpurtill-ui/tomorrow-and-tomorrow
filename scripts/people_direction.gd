@@ -190,7 +190,7 @@ func _recommendation(role:String,known:Array)->Dictionary:
 
 func export_state()->Dictionary:
 	ensure()
-	return {"version":3,"auto_scouting":auto_scouting,"auto_settlement":auto_settlement,"auto_research":auto_research,"cultural_memory":cultural_memory.duplicate(true),"chosen_century":chosen_century,"network":WorldSimulation.communities.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true)}
+	return {"version":3,"inclination_review_day":inclination_review_day,"auto_scouting":auto_scouting,"auto_settlement":auto_settlement,"auto_research":auto_research,"cultural_memory":cultural_memory.duplicate(true),"chosen_century":chosen_century,"network":WorldSimulation.communities.export_state(),"seed":seed_value,"ambition":ambition,"chosen_day":chosen_day,"last_day":last_day,"resolved":resolved,"next_vision_day":next_vision_day,"automatic_work":automatic_work,"work_baseline":work_baseline.duplicate(true),"work_day":work_day,"history":history.duplicate(true)}
 
 func import_state(state:Dictionary)->Dictionary:
 	if int(state.get("version",0)) not in [1,2,3] or state.get("seed",0)!=WorldSimulation.state.world_seed: return {"error":"Incompatible people-direction save."}
@@ -218,7 +218,7 @@ func import_state(state:Dictionary)->Dictionary:
 	ambition=state.get("ambition",""); chosen_day=int(state.get("chosen_day",-1)); last_day=int(state.get("last_day",0)); resolved=int(state.get("resolved",0)); next_vision_day=int(state.get("next_vision_day",30)); automatic_work=bool(state.get("automatic_work",true)); work_baseline=state.get("work_baseline",{}).duplicate(true); work_day=int(state.get("work_day",-30)); history.assign(state.get("history",[]).duplicate(true)); seed_value=WorldSimulation.state.world_seed; initialized=true
 	chosen_century=imported_century
 	cultural_memory=state.get("cultural_memory",Culture.empty()).duplicate(true)
-	auto_scouting=bool(state.get("auto_scouting",true));auto_settlement=bool(state.get("auto_settlement",true));auto_research=bool(state.get("auto_research",true));inclination_review_day=-1
+	auto_scouting=bool(state.get("auto_scouting",true));auto_settlement=bool(state.get("auto_settlement",true));auto_research=bool(state.get("auto_research",true));inclination_review_day=int(state.get("inclination_review_day",-1))
 	_ensure_cultural_memory()
 	return {"ok":true}
 

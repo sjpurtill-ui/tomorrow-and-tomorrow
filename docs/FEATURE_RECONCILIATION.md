@@ -1820,3 +1820,8 @@ Generated imports and captures excluded.
 ## Research landing screen — 2026-09-21
 
 Replaces the six-button Direct Attention menu with an illustrated investigation board, actual progress, workforce and bottlenecks, all twelve research fields, direct relative-attention controls, and access to the existing visual discovery tree. Widened inquiry dock; original field reports, workforce policy and established knowledge remain available. Presentation only: no save migration or simulation rules changed. Validated with 18 research atlas/navigation tests and an isolated GPU probe at 1600x1000 and 1024x640 covering field counts, attention changes, no invented population/knowledge, field reports, tree opening and the empty state. Missing subject paintings show the investigation method instead of a misleading picture.
+
+
+## Simulation bug and balance audit — 2026-09-21
+
+On base `3c66cf8`, fixed founding-year government priorities bypassing survival emergencies and a saved daily inclination-review marker being reset by nested military state import. Older saves remain compatible. Updated the starter-material test to distinguish advanced framed construction. Added a reproducible three-scenario headless annual audit. 127 checks pass; one existing research-personality distinction test remains failing and is documented without weakening its assertion. The 12-opponent complete save round trip passes. Larger simulated settlements still exhaust food; research pacing and military ration delivery remain open balance findings. See `docs/SIMULATION_BALANCE_AUDIT_2026_09_21.md` for scope, measured before/after results and limitations. No player launch or desktop control.
