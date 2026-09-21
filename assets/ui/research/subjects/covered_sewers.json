@@ -1,0 +1,10 @@
+{
+  "id": "covered_sewers",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Covered Sewers. Show a concrete, visually clear scene demonstrating this exact practice: Enclosed channels move waste away from dense settlement while inspection points permit maintenance. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Eye-level view down an enclosed masonry sewer vault, narrow flowing waste channel and maintenance ledge, daylight enters through an inspection opening with a worker above. No cathedral, drinking-water well, or modern plastic pipes.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-24922942-3097-444b-95f2-a0190ad0223e.png",
+  "asset": "res://assets/ui/research/subjects/covered_sewers-v1.png",
+  "sha256": "247c1dce1ed05c7e83dc0c545b4c6c2ac19f4c19ce5415a93b1324bfc0c398fd",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Covered masonry waste channel and inspection access, distinct from clean-water works."
+}

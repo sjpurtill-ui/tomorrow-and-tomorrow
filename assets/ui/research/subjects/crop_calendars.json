@@ -1,0 +1,9 @@
+{
+  "id": "crop_calendars",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Crop Calendars. Show a concrete, visually clear scene demonstrating this exact practice: Planting and harvest dates are preserved across households instead of remembered separately. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-00d8a12e-d3f6-40c8-9a67-6055ccc5eb55.png",
+  "asset": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+  "sha256": "5c7f00a59c641c96fd66ec4266b165944e2edecf48027dbccfdbf4df5af380f2",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
