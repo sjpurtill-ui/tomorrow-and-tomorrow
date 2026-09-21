@@ -1722,3 +1722,9 @@ Canonical focused validation passes 33/33, zero errors/failures/skips/orphans. T
 
 No save-schema change, shared-file conflict, player restart or release packaging. Obsolete-effect pruning is not implemented: old bonuses can remain relevant as operating conditions change. Full fog rasterization, broader settlement/observer scaling, and archived-leader capacity remain unresolved. Details: `docs/performance/CHART_RESEARCH_INDEXES.md`.
 
+## September 20 — fog corridor rasterization: INTEGRATED
+
+Worker `ff591c54`, base `d4ba4fae`, branch `codex/fog-redraw-cost`, integrated as canonical `19c6a130`. Segment painting clips each image row to the corridor's conservative horizontal bounds, avoiding irrelevant pixels inside large diagonal bounding rectangles. Original per-pixel distance, smoothing, blending and output resolution are preserved.
+
+At actual planetary dimensions and 1024×512 mask resolution, synthetic long-diagonal painting measured 28.149 → 0.924 ms; regional diagonal 1.138 → 0.224 ms; horizontal 0.452 → 0.419 ms. Output bytes match. These are individual corridor costs, not total fog repaint or whole-game throughput. Canonical focused validation passes 6/6 with zero errors/failures/skips/orphans, including randomized pixel equivalence and existing refresh semantics. No save or simulation changes, shared-file conflicts, player restart or release packaging. The prior daily-tick timing increase remains unresolved. Details: `docs/performance/FOG_RASTER_COST.md`.
+
