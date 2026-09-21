@@ -453,8 +453,8 @@ func reset_for_new_world(new_seed:int)->void:
 		"security":{"Public safety":0,"Organized defense":0,"Military readiness":0,"Crisis resilience":0},"culture":{"Social cohesion":0,"Shared legitimacy":0,"Inquiry breadth":0,"Collective memory":0}
 	}
 	society_exchange=preload("res://scripts/society_exchange.gd").empty_state()
-	known_discoveries=[]
-	discovery_adoption={}
+	known_discoveries=preload("res://scripts/founding_knowledge.gd").PRACTICES.duplicate()
+	discovery_adoption=preload("res://scripts/founding_knowledge.gd").adoption()
 	knowledge_effects={}
 	society_capacities={"demography":0.5,"nutrition":0.5,"health":0.5,"labor":0.5,"knowledge":0.18,"production":0.12,"infrastructure":0.05,"logistics":0.16,"ecology":0.88,"institutions":0.25,"security":0.38,"culture":0.58}
 	society_subcategories={}

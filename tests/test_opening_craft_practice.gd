@@ -7,6 +7,8 @@ const Requirements=preload("res://scripts/technology_requirements.gd")
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(5001)
+	# Causal prerequisite tests construct their own knowledge, independent of the founding preset.
+	GameState.known_discoveries=[];GameState.discovery_adoption={}
 	DiscoverySystem.reset_for_new_world()
 	DiscoverySystem.initialize()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
@@ -83,7 +85,10 @@ func test_opening_practice_is_actor_and_secondary_city_local()->void:
 	)
 	assert_float(Craft.stock("Cordage Bundles")).is_equal(home)
 	WorldSimulation.create_actor("other",5002)
-	WorldSimulation.scoped("other",func()->void:assert_float(Craft.stock("Cordage Bundles")).is_equal(0.0))
+	WorldSimulation.scoped("other",func()->void:
+		var inherited:Dictionary=preload("res://scripts/founding_knowledge.gd").portable_supplies(WorldSimulation.state.population_exact)
+		assert_float(Craft.stock("Cordage Bundles")).is_equal(float(inherited["Cordage Bundles"]))
+	)
 
 func test_repaired_live_graph_remains_reachable()->void:
 	var graph:Array=[]

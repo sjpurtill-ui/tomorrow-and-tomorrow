@@ -1893,3 +1893,10 @@ Validation: 3 production-visibility tests and 6 existing opening-craft tests pas
 
 Base 3a33c39, branch codex/remove-nomad-map-labels. Removed the map's NOMADS SEEN labels and their refresh work; sighting records and scout reports remain intact. Scout report headers and observation dates now use Year / Day of year instead of elapsed-day serials. Eight existing scout archive tests passed. No save changes or player restart.
 
+
+## 2026-09-21 — Prehistoric pacing foundation
+
+Base 07bca5f; branch codex/prehistoric-pacing-foundations. New worlds inherit ten practical skills and finite tools/materials; spear production is available but paid, while agriculture, pottery, bows and advanced knowledge remain discoveries. The shared initialization applies to opponents too; existing saves keep their recorded state. AI supply planning now considers existing army shortages and can reuse finished unpaused military lines without discarding reserved materials or trials. Pacing evidence distinguishes recipes, inventory, equipped troops and household stocks.
+
+See docs/FIRST_300_YEARS_PACING.md for accepted targets, implementation evidence and outstanding work. Bounded isolated run reached 12.21 years, with war bows at 9.47 and selective planting at 11.38. A 300-year result is not claimed. Field equipment delivery remains unresolved even after AI supply correction. No global research multiplier or late technology calendar lock was introduced. No player launch, restart or save overwrite.
+Validation: 13 tests passed across founding knowledge, opening craft practice, and pacing production evidence.

@@ -158,6 +158,7 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 	if not exists and campaign.equipment_queue.size()>=campaign.production_line_capacity():
 		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line(String(preload("res://scripts/civilian_industry.gd").product(item).get("output","")))
 		if reusable<0:reusable=preload("res://scripts/armor_equipment.gd").reusable_line(campaign,item)
+		if reusable<0:reusable=finished_ai_line(id,campaign)
 		if reusable<0:return
 		if WorldSimulation.submit(id,{"kind":"production_retool","job":reusable,"item":item}).has("error"):return
 	ensure_line(id,item,int(recommendation.target))
@@ -166,6 +167,18 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 			if String(job.get("item",""))==item and (String(job.get("job_type",""))=="civilian" or preload("res://scripts/armor_equipment.gd").KITS.has(item)) and bool(job.get("persistent",false)):
 				job.planner_managed=true;break
 
+static func finished_ai_line(id:String,campaign:Node)->int:
+	if String(WorldSimulation.actors.get(id,{}).get("controller",""))!="ai":return -1
+	for job:Dictionary in campaign.equipment_queue:
+		if not bool(job.get("persistent",false)) or bool(job.get("paused",false)):continue
+		if float(job.get("progress_days",0))>0 or not (job.get("reserved_materials",{}) as Dictionary).is_empty():continue
+		var pending:=false
+		for key:String in job:
+			if key.ends_with("pending") or key.ends_with("trial") or key=="formed_piece":pending=true
+		if pending:continue
+		if campaign.PersistentProduction.state(campaign,job)=="Target met":return int(job.id)
+	return -1
+
 static func military_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
 	var campaign:=WorldSimulation.military
@@ -173,6 +186,7 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 		production_order(id,preload("res://scripts/cart_supply_planner.gd").recommendation())
 	var policy:=String(plan.training)
 	for service in ["army","navy","air"]:WorldSimulation.submit(id,{"kind":"training_policy","service":service,"policy":policy})
+	for demand:Dictionary in campaign.workshop.army_demands():production_order(id,demand)
 	var capacity:=campaign.recruitment_capacity()
 	var target:=mini(roundi(float(capacity)*float(plan.capacity_share)),roundi(WorldSimulation.state.population_exact*float(plan.recruit_share)))
 	if bool(plan.hungry) and not bool(plan.at_war):target=campaign._mobilized_count()

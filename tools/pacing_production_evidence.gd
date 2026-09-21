@@ -30,12 +30,23 @@ static func capture(detailed:bool=false)->Dictionary:
 	for service:String in Ops.data().services:
 		var available:=Ops.service(service)
 		if available>0:services[service]=available
-	var result:={"available_civilian_recipes":methods.size(),"civilian_lines":lines.size(),"manufactured_stock_kinds":stocks.size(),"installed_units":installed,"units_under_construction":building,"remaining_daily_services":services,"operations_ledger_current":current}
+	var military:Dictionary={}
+	for item:String in ["improvised","spear","bow","lance","siege_kit"]:
+		military[item]={"recipe_known":not P.recipe(campaign,item).has("error"),"stored":int(campaign.military_inventory.get(item,0)),"equipped":0}
+	for force:Dictionary in [campaign.home_army]+campaign.field_armies+campaign.occupation_forces:
+		for formation:Dictionary in force.get("formations",[]):
+			var weapon:=String(formation.get("weapon",""))
+			if military.has(weapon):military[weapon].equipped+=int(formation.get("equipment",0))
+	var household:Dictionary={}
+	for product:String in preload("res://scripts/opening_craft_practice.gd").PRODUCTS.values():
+		if float(state.resource_stockpiles.get(product,0))>0:household[product]=float(state.resource_stockpiles[product])
+	var result:={"military_capabilities":military,"household_stocks":household,"available_civilian_recipes":methods.size(),"civilian_lines":lines.size(),"manufactured_stock_kinds":stocks.size(),"installed_units":installed,"units_under_construction":building,"remaining_daily_services":services,"operations_ledger_current":current}
 	var food:=preload("res://scripts/leader_personality.gd").food_constraints(state.simulation_metrics)
 	result["food_shortage"]=food.food_shortage
 	result["delivery_shortage"]=food.delivery_shortage
 	result["production_food_blocked"]=preload("res://scripts/civilization_controller.gd").production_food_blocked(food)
 	if detailed:
+		result["land_training"]=campaign.training_queue.duplicate(true);result["recruits"]=campaign.aggregate_recruits;result["home_force"]=campaign.home_army.duplicate(true);result["field_forces"]=campaign.field_armies.duplicate(true)
 		result["recipes"]=methods;result["lines"]=lines;result["plants"]=plants;result["manufactured_stocks"]=stocks
 		result["limits"]="Stocks may be acquired rather than produced. Completed counts cover retained current lines only. Reported line state is not guaranteed throughput. New-line blockers exclude electricity dispatch and line-slot capacity. Remaining daily services exclude work already consumed."
 	return result

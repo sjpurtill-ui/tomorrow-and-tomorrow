@@ -103,6 +103,8 @@ func initialize() -> void:
 		# The convoy arrives with three days in portable vessels, not an abstract
 		# permanent water supply.  Continued survival requires a reachable source.
 		WorldSimulation.state.resource_stockpiles = {"Food":WorldSimulation.state.population_exact*food_days, "Freshwater":WorldSimulation.state.population_exact*3.0, "Timber":12.0*material_ratio, "Stone":0.0, "Clay":0.0, "Fiber Plants":10.0*material_ratio}
+		if WorldSimulation.state.elapsed_days<=0:
+			WorldSimulation.state.resource_stockpiles.merge(preload("res://scripts/founding_knowledge.gd").portable_supplies(WorldSimulation.state.population_exact),true)
 
 func register_local_occurrences(sites: Array[Dictionary], terrain: String, environment_profile:Dictionary={}) -> void:
 	initialize()
