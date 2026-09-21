@@ -1,0 +1,9 @@
+{
+  "id": "coal_grading",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Coal Grading. A miner compares distinct black coal samples beside trays of differently colored ash and a small test hearth; sample quality and texture, no generic open pit panorama.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c40ab6c1-cd5d-4ef8-97b1-626ab8655ac3.png",
+  "asset": "res://assets/ui/research/subjects/coal_grading-v1.png",
+  "sha256": "309d123ea45d09f9225e5279292e8fe2cbf85eb77c6ea22a4697a5a416bc23ea",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

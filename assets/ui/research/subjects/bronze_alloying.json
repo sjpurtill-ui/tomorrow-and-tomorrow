@@ -1,0 +1,9 @@
+{
+  "id": "bronze_alloying",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Bronze Alloying. A bronze-age metalworker compares copper and pale tin pieces beside a small crucible and newly cast bronze tool, balanced proportions visually suggested without text or recipes.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-2038fe57-d4ef-44ab-890b-76d875d7f2d6.png",
+  "asset": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
+  "sha256": "ce820c772da293d3ca04a30191301b8d43628fbeb535321f855eb5eb35235b67",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

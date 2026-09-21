@@ -1,0 +1,9 @@
+{
+  "id": "case_records",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Medical Case Records. Show a concrete, visually clear scene demonstrating this exact practice: Treatments and outcomes are recorded together, exposing remedies that fail as well as those that help. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Early settled communities, small earth, stone and timber buildings. Tools are stone, bone and wood unless this discovery specifically concerns metalworking. No steel tools, industrial machines, castles or grand cities. Vary the composition and climate to suit the subject.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-234bdade-5518-45ff-abce-90e05e988598.png",
+  "asset": "res://assets/ui/research/subjects/case_records-v1.png",
+  "sha256": "d839caf36f21c4d704f1c3bb44de365178e7672eab9193b39ca48d36a35e91cb",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

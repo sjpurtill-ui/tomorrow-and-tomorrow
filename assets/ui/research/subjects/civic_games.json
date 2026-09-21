@@ -1,0 +1,10 @@
+{
+  "id": "civic_games",
+  "prompt": "Recompose as early community civic games in a modest earth and timber village. Remove the vast classical stadium, temples, grand city and imperial architecture. Keep an exciting running race with three runners crossing a simple rope finish line, a few dozen villagers cheering along an earthen track, simple fiber clothing, wooden shade shelters. Beautiful realistic painterly light and clear action in the central horizontal band, no national emblems or text.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-2f9b0cc5-2c6a-4cde-8458-ff2f8209c973.png",
+  "version": 2,
+  "asset": "res://assets/ui/research/subjects/civic_games-v2.png",
+  "sha256": "8a585c46867568956d3177d2d22c19f60b0650dc61ee7e65256e48be9bade540",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}
