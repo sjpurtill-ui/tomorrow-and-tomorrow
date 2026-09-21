@@ -1955,3 +1955,8 @@ journey, scout archive and scouting staff. Native isolated Keychain CRUD self-te
 passes. No live API request or graphical verification. Save-compatible optional
 settings; existing session-only credentials cannot be recovered from an old process.
 Player PID 44896 remains on `5963192415e5`; it has not received these changes.
+
+## September 20 — pushed backup recovery
+
+Integrated all eight September 20 backup tips through ac17768. Newest Wealth and gold navigation restored; all eleven destinations retained, panel contrast and startup imports corrected. See docs/SEPTEMBER_20_BACKUP_INTEGRATION.md for source hashes, validation, conflict decisions, and explicit missing remote artwork. Existing local imports and saves preserved. Private GPU navigation passed; terrain 7/7 passed. Existing ground-sample test failure reproduced on pre-integration main.
+
