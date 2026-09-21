@@ -1945,3 +1945,10 @@ The structural supply audit now includes actual household recipes, with their re
 - Aligned foreign formation validation with the combat engine's existing 0–150% readiness range. Prepared armies no longer invalidate the world; nonfinite, negative, and above-cap values remain rejected.
 - Validation: projection bounds and player independence suites, 9/9 passed (artifacts/foreign-readiness-tests.log). Actual-world probe rerun follows integration. No save schema change.
 
+
+### First 300 years: household capital and recoverable building work
+- Household crafts reserve finite, paid components for the first adopted local installation; small settlements can reach kiln setup quantities. Existing installations remove that extra demand. Secondary-city stores remain separate.
+- A blocked kiln no longer suppresses other feasible building fabrication. Kiln heat and consumed timber now pass installation save validation, with bounded heat and negative-input rejection.
+- Pacing evidence includes retained output totals by resource and settlement, so retooled lines do not erase measured production.
+- Validation: 30/30 tests across opening crafts, building materials, kiln operation/save validation, settlement delivery and pacing evidence. A real-terrain year-50 checkpoint advanced one year: first kiln operating, fitted post/beam output 31 to 37, splice output 22 to 24, complete save validation passed (artifacts/capital-recovery-verified.json). Earlier cold-start and 300-year acceptance work remains separately tracked.
+

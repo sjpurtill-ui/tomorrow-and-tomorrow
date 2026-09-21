@@ -37,6 +37,24 @@ func test_stale_service_ledger_does_not_claim_current_operating_capability()->vo
 		assert_bool(Evidence.capture().has("recipes")).is_false()
 	)
 
+func test_produced_totals_survive_line_removal_and_consumption()->void:
+	WorldSimulation.scoped("evidence",func()->void:
+		var state=WorldSimulation.state;var host=WorldSimulation.military
+		state.settlement_site_committed=true;state.convoy_traveling=false
+		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0;state.population_allocations.Crafting=10
+		state.known_discoveries.append("clay_levigation");state.discovery_adoption.clay_levigation=1.0
+		for resource:String in ["Clay","Freshwater","Timber","Stone"]:state.resource_stockpiles[resource]=100.0
+		assert_bool(host.start_production_line("prepared_clay",1).get("ok",false)).is_true()
+		var job:Dictionary=host.equipment_queue.back()
+		var before:Dictionary=host.workshop.output_stocks(job)
+		P.advance(host,job,2.0);host.workshop.record(job,before)
+		host.equipment_queue.clear();state.resource_stockpiles["Prepared Clay"]=0.0
+		var result:=Evidence.capture(true)
+		assert_int(int(result.civilian_lines)).is_equal(0)
+		assert_float(float(result.recorded_output["Prepared Clay"])).is_equal(1.0)
+		assert_int(result.recorded_output_by_settlement.size()).is_equal(1)
+	)
+
 func test_food_and_delivery_guards_are_reported_from_current_metrics()->void:
 	WorldSimulation.scoped("evidence",func()->void:
 		var metrics:Dictionary=WorldSimulation.state.simulation_metrics

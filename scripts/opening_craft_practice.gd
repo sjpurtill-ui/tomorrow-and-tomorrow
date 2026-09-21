@@ -50,6 +50,25 @@ static func stock(item:String)->float:
 static func target(id:String)->float:
 	return maxf(.25,WorldSimulation.state.population_exact*float(TARGET_PER_PERSON[id]))
 
+static func capital_reserve()->Dictionary:
+	# Household stocks also supply the first local installation. A small city's
+	# per-person target must not keep its stock permanently below one paid build.
+	var state=WorldSimulation.state
+	if not state.resource_settlement_id.is_empty():return {}
+	var ops=preload("res://scripts/technology_operations.gd")
+	var reserve:Dictionary={}
+	for plant:String in ops.PLANTS:
+		var spec:Dictionary=ops.PLANTS[plant]
+		var record:Dictionary=ops.data().plants.get(plant,{})
+		if int(record.get("installed",0))+int(record.get("building",0))>0:continue
+		var ready:=true
+		for gate:String in [String(spec.gate)]+spec.get("requires",[]):
+			if gate not in state.known_discoveries or WorldSimulation.discovery.adoption(gate)<.25:ready=false;break
+		if not ready:continue
+		for item:String in spec.cost:
+			if item in PRODUCTS.values():reserve[item]=maxf(float(reserve.get(item,0)),float(spec.cost[item]))
+	return reserve
+
 static func factor(id:String)->float:
 	if id=="kiln_control":return clampf(preload("res://scripts/technology_operations.gd").service("kiln_heat")/4.0,0.0,1.0)
 	if id=="lime_burning":
@@ -111,13 +130,14 @@ static func advance()->Dictionary:
 	var report:Dictionary={"workers":0.0,"made":{},"inputs":{},"coverage":{}}
 	if WorldSimulation.state.settlement_site_committed and not WorldSimulation.state.convoy_traveling:
 		var remaining:=maxf(0.0,WorldSimulation.state.effective_workers("Crafting")*.18)
+		var reserve:=capital_reserve()
 		for id:String in ORDER:
 			if remaining<=.000001:break
 			if id not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1:continue
 			var recipe:Dictionary=RECIPES[id]
 			if bool(recipe.get("fire",false)) and not preload("res://scripts/fire_practice.gd").available():continue
 			var product:=String(PRODUCTS[id]);var rate:=float(recipe.rate)
-			var amount:=minf(remaining*rate,maxf(0.0,target(id)*1.20-stock(product)))
+			var amount:=minf(remaining*rate,maxf(0.0,target(id)*1.20+float(reserve.get(product,0))-stock(product)))
 			for item:String in recipe.inputs:
 				amount=minf(amount,stock(item)/float(recipe.inputs[item]))
 			if amount<=.000001:continue

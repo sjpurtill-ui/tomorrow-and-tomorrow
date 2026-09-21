@@ -6,7 +6,9 @@ static func recommendation()->Dictionary:
 	var state=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
 	if state.effective_workers("Construction")<4 or WorldSimulation.military.production_labor_share<=0:return {}
-	if _needs_controlled_kiln():return _kiln_recommendation()
+	if _needs_controlled_kiln():
+		var kiln:=_kiln_recommendation()
+		if not kiln.is_empty():return kiln
 	# Existing supplied fabric creates a small finite maintenance stock target.
 	var maintenance:Dictionary={}
 	for plot:Dictionary in state.settlement_plots:

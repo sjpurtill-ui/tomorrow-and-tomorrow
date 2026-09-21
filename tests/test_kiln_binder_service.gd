@@ -5,7 +5,10 @@ const Industry=preload("res://scripts/civilian_industry.gd")
 const Craft=preload("res://scripts/opening_craft_practice.gd")
 
 func before_test()->void:
-	WorldSimulation.clear();GameState.reset_for_new_world(7520);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
+	WorldSimulation.clear();GameState.reset_for_new_world(7520)
+	# Isolate kiln effects from the new world's inherited crafting practices.
+	GameState.known_discoveries=[];GameState.discovery_adoption={}
+	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.settlement_site_committed=true;GameState.convoy_traveling=false;GameState.resource_settlement_id="";GameState.ensure_population_total(100)
 	GameState.population_allocations.Crafting=10;GameState.population_health=1.0;GameState.simulation_metrics.labor_efficiency=1.0
@@ -41,6 +44,17 @@ func test_fired_pipe_and_quicklime_recipes_require_shared_kiln_heat()->void:
 	assert_float(float(Industry.product("fired_clay_conduits").services.kiln_heat)).is_equal(1.0)
 	assert_float(float(Industry.product("quicklime").services.kiln_heat)).is_equal(1.5)
 	assert_bool(Industry.product("quicklime").materials.has("Timber")).is_false()
+
+func test_operating_kiln_round_trips_with_heat_and_consumed_timber()->void:
+	install_kiln()
+	var restored:Dictionary=bytes_to_var(var_to_bytes(Ops.data()))
+	assert_float(float(restored.services.kiln_heat)).is_equal(4.0)
+	assert_float(float(restored.inputs.Timber)).is_equal(.5)
+	assert_bool(Ops.valid(restored)).is_true()
+	restored.services.kiln_heat=4000.01
+	assert_bool(Ops.valid(restored)).is_false()
+	restored.services.kiln_heat=4.0;restored.inputs.Timber=-.5
+	assert_bool(Ops.valid(restored)).is_false()
 
 func test_lime_effects_follow_physical_stock_and_installed_masonry()->void:
 	know(["lime_burning","lime_mortar"]);DiscoverySystem.refresh_operating_effects()

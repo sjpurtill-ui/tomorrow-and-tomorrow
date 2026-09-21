@@ -97,6 +97,22 @@ func test_new_fabric_cannot_skip_curing_through_instant_household_infill()->void
 		assert_array(events).is_empty()
 	)
 
+func test_blocked_kiln_does_not_suppress_feasible_building_work()->void:
+	WorldSimulation.scoped("builders",func()->void:
+		var state=WorldSimulation.state
+		state.settlement_site_committed=true;state.convoy_traveling=false
+		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
+		state.population_allocations.Construction=10;state.population_allocations.Crafting=10
+		state.settlement_completed.assign(["Hearth Circle"]);WorldSimulation.settlements.ensure_founded()
+		for id:String in ["kiln_control","lime_burning","building_shading_design","geometric_survey"]:learn(id)
+		state.resource_stockpiles={"Timber":20.0,"Fiber Plants":10.0,"Stone":2.0}
+		var planner=preload("res://scripts/building_material_investment.gd")
+		assert_dict(planner._kiln_recommendation()).is_empty()
+		var order:Dictionary=planner.recommendation()
+		assert_str(String(order.get("item",""))).is_equal("building_shade_lattices")
+		assert_float(float(state.resource_stockpiles.Stone)).is_equal(2.0)
+	)
+
 func test_invalid_curing_state_is_rejected_in_secondary_cities()->void:
 	WorldSimulation.scoped("builders",func()->void:
 		learn("lime_mortar")

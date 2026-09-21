@@ -96,3 +96,33 @@ func test_repaired_live_graph_remains_reachable()->void:
 	var dormant=preload("res://tools/technology-review/dormant_or_audit.gd")
 	graph=dormant.factor_common(graph,DiscoverySystem.technology_catalog)
 	assert_array(Requirements.validate(graph,dormant.pending(graph))).is_empty()
+
+func test_small_household_can_supply_its_first_kiln_without_free_components()->void:
+	know(["joinery","kiln_control"])
+	GameState.ensure_population_total(20)
+	GameState.population_health=1.0;GameState.simulation_metrics.labor_efficiency=1.0
+	GameState.population_allocations.Crafting=10;GameState.population_allocations.Construction=4
+	GameState.convoy_traveling=false
+	GameState.resource_stockpiles={"Timber":10.0,"Hafted Tool Sets":2.0,"Stone":12.0,"Clay":6.0}
+	assert_float(Craft.target("joinery")*1.2).is_less(2.0)
+	var report:=Craft.advance()
+	assert_float(Craft.stock("Joined Timber Components")).is_greater_equal(2.0)
+	assert_float(float(report.inputs.Timber)).is_greater(0.0)
+	assert_float(float(report.inputs["Hafted Tool Sets"])).is_greater(0.0)
+	assert_float(float(report.workers)).is_less_equal(GameState.effective_workers("Crafting")*.18)
+	var ops=preload("res://scripts/technology_operations.gd")
+	var before:=Craft.stock("Joined Timber Components")
+	assert_bool(ops.install("controlled_kiln").get("ok",false)).is_true()
+	assert_float(Craft.stock("Joined Timber Components")).is_equal_approx(before-2.0,.000001)
+	assert_dict(Craft.capital_reserve()).is_empty()
+
+func test_capital_reserve_needs_adopted_knowledge_and_stays_in_its_city()->void:
+	know(["joinery"])
+	assert_dict(Craft.capital_reserve()).is_empty()
+	know(["kiln_control"]);GameState.discovery_adoption.kiln_control=.1
+	assert_dict(Craft.capital_reserve()).is_empty()
+	GameState.discovery_adoption.kiln_control=1.0
+	assert_float(float(Craft.capital_reserve().get("Joined Timber Components",0))).is_equal(2.0)
+	GameState.resource_settlement_id="secondary"
+	assert_dict(Craft.capital_reserve()).is_empty()
+	GameState.resource_settlement_id=""
