@@ -378,11 +378,16 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	# Resolve each city store once; these are live references, so earlier
 	# dispatches still reduce what later destinations can request.
 	var local_stores:Dictionary={}
+	var local_populations:Dictionary={}
+	var local_positions:Dictionary={}
+	var known_routes:Dictionary={}
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
 		if not String(source.get("occupied_by","")).is_empty():continue
 		local_stores[String(source.id)]=_city_stores(source)
-		var share:=_settlement_population(source)/maxf(1.0,WorldSimulation.state.population_exact)
+		local_populations[String(source.id)]=_settlement_population(source)
+		local_positions[String(source.id)]=_record_position(source)
+		var share:=float(local_populations[String(source.id)])/maxf(1.0,WorldSimulation.state.population_exact)
 		var workforce:=0.0
 		for amount in WorldSimulation.state.population_allocations.values(): workforce+=float(amount)
 		var allocations:Dictionary=source.get("local_allocations",{})
@@ -394,7 +399,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	# One request per good per city; no citizen or merchant entities are created.
 	for destination in WorldSimulation.state.player_settlements:
 		if not String(destination.get("occupied_by","")).is_empty():continue
-		var destination_population:=_settlement_population(destination)
+		var destination_population:=float(local_populations[String(destination.id)])
 		var destination_stores:Dictionary=local_stores[String(destination.id)]
 		var trade_goods:Array=CITY_TRADE_GOODS.duplicate()
 		for item:String in water_targets.get(String(destination.id),{}):
@@ -418,14 +423,21 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 			for source in WorldSimulation.state.player_settlements:
 				if not String(source.get("occupied_by","")).is_empty():continue
 				if String(source.id)==String(destination.id) or float(available_transport.get(source.id,0.0))<=0.01: continue
-				var distance:=_record_position(source).distance_to(_record_position(destination))
+				var source_position:Vector2=local_positions[String(source.id)]
+				var destination_position:Vector2=local_positions[String(destination.id)]
+				var distance:=source_position.distance_to(destination_position)
 				if distance>float(capacity.range_km) or distance>=nearest: continue
-				var reserve:=_settlement_population(source)*45.0 if resource_name=="Food" else maxf(20.0,_settlement_population(source)*0.15)
+				var source_population:=float(local_populations[String(source.id)])
+				var reserve:=source_population*45.0 if resource_name=="Food" else maxf(20.0,source_population*0.15)
 				if resource_name not in CITY_TRADE_GOODS:reserve=0.0
 				reserve=maxf(reserve,float(water_targets.get(String(source.id),{}).get(resource_name,0)))
 				var spare:=float(local_stores[String(source.id)].get(resource_name,0.0))-reserve
 				if spare<=0.01: continue
-				if not bool(known_route_assessment(_record_position(source),_record_position(destination)).get("known",false)): continue
+				# Charts and locations cannot change between goods in this dispatch pass.
+				# Keep this cache local so tomorrow's scouting changes are always observed.
+				var route_key:=[String(source.id),String(destination.id)]
+				if not known_routes.has(route_key):known_routes[route_key]=bool(known_route_assessment(source_position,destination_position).get("known",false))
+				if not bool(known_routes[route_key]):continue
 				donor=source
 				nearest=distance
 				surplus=spare

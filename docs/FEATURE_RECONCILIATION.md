@@ -1995,3 +1995,10 @@ Validation: three new save regression cases pass (report 82), plus all 19 owned-
 The long cool-start run exposed horse-archer equipment being manufactured from mounted scouting alone while bow craft—and therefore arrow production—was unknown. Mounted archery is now a separate practice requiring both mounted scouting and bow craft; equipment and horse-archer training use that practice. Ordinary scouting remains independent. Existing inventories are retained, but no missing practice is granted to old campaigns. The pacing evidence now includes mounted bows and their ammunition alongside foot bows.
 
 Validation: three early research/material gate regressions pass (report 83), including scouting without bow craft being insufficient and completed mounted archery having an arrow recipe. The complete 884-entry graph has zero errors; 752 production routes and 28 plants remain structurally reachable. The consequence validator recognizes actual military catalog gates, with no artificial benefit added just to satisfy validation. Long campaigns will resume this runtime at their next recorded checkpoint; older mounted output remains labeled pre-fix evidence.
+
+
+## First 300 years: repeated trade route queries (September 21)
+
+Each city-trade dispatch pass now retains local population/position values and charted-route answers across cargo types. These caches end with the dispatch call, so later scouting and population changes are observed normally. Store references and transport balances stay live as dispatches consume them.
+
+Validation: 30 city-resource and rail-freight tests pass (report 84). Matched 30-day continuations from the real warm year-125 checkpoint produce exactly equal complete owned-world saves. Measured city-trade time was 2.031s before and 1.961s after; total runtime was 9.64s versus 9.75s under concurrent audits, so no overall speedup is claimed. This removes repeated work without changing progression.
