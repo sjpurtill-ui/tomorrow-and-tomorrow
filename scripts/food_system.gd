@@ -99,7 +99,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var army_required:=maxf(0,army_original-float(credited.total))
 	var provision_delivery_ratio:=1.0
 	if military_campaign!=null and military_campaign.has_method("field_provision_delivery_ratio"):
-		provision_delivery_ratio=clampf(float(military_campaign.field_provision_delivery_ratio()),0.0,1.0)
+		provision_delivery_ratio=clampf(float(military_campaign.field_provision_delivery_ratio(army_original,credited)),0.0,1.0)
 	var army_accessible:=army_required*provision_delivery_ratio
 	var accessible_demand:=maxf(0.0,demand-army_required+army_accessible)
 	var grain_issued:Dictionary={}

@@ -8,6 +8,8 @@ var target_days:=1095000
 var wall_seconds:=25.0
 var seed_value:=91420
 var output_path:="/tmp/tt-history-pacing.json"
+var wood_density:=-1.0
+var ambition_id:=""
 var profile_enabled:=false
 var timings:Dictionary={}
 var secondary_timings:Dictionary={}
@@ -73,6 +75,8 @@ func run()->void:
 		elif argument.begins_with("--wall-seconds="):wall_seconds=clampf(argument.trim_prefix("--wall-seconds=").to_float(),1,14400)
 		elif argument.begins_with("--seed="):seed_value=argument.trim_prefix("--seed=").to_int()
 		elif argument.begins_with("--out="):output_path=argument.trim_prefix("--out=")
+		elif argument.begins_with("--wood-density="):wood_density=clampf(argument.trim_prefix("--wood-density=").to_float(),0.0,1.0)
+		elif argument.begins_with("--ambition="):ambition_id=argument.trim_prefix("--ambition=")
 	for name:String in ["GameState","CivilizationSystem","MilitaryCampaign"]:root.get_node(name).set_process(false)
 	simulation=root.get_node("WorldSimulation");simulation.clear()
 	daily=load("res://scripts/civilization_day.gd");controller=load("res://scripts/civilization_controller.gd")
@@ -82,9 +86,13 @@ func run()->void:
 		var fields:Dictionary={}
 		for resource:String in ["Timber","Stone","Fiber Plants"]:
 			fields[resource]={"density":clampf(float(profile.get("resource_potentials",{}).get(resource,0)),0,1),"area_km2":9.0,"position":Vector3(point.x,0,point.y)}
+		if wood_density>=0.0:fields.Timber.density=wood_density
 		return {"environment_profile":profile,"surface_water_distance_km":.1,"surface_water_recognized":true,"surface_material_catchments":fields,"woodland_catchment":fields.Timber}
 	simulation.water_provider=func(point:Vector3)->Vector3:return point+Vector3(.1,0,0)
 	var actor:Dictionary=simulation.create_actor("pacing_reference",seed_value,Vector2.ZERO)
+	if not ambition_id.is_empty():
+		var accepted:Dictionary=simulation.submit("pacing_reference",{"kind":"ambition","id":ambition_id})
+		if accepted.has("error"):push_error(str(accepted));simulation.clear();quit(1);return
 	simulation.enabled=true # Normal resource days initialize owned world geology.
 	actor.systems.CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return true
 	previous_timing_usec=Time.get_ticks_usec() if profile_enabled else 0
@@ -97,6 +105,8 @@ func run()->void:
 		var extinct:bool=simulation.scoped("pacing_reference",func()->bool:
 			simulation.state.elapsed_days=day
 			var stamp:=Time.get_ticks_usec() if profile_enabled else 0
+			if not ambition_id.is_empty() and simulation.direction.needs_century_choice():
+				simulation.submit("pacing_reference",{"kind":"ambition","id":ambition_id})
 			controller.choose_orders("pacing_reference")
 			stamp=daily.record_timing(timings,"controller",stamp)
 			var origin:Vector2=simulation.world.player_world_origin
@@ -119,7 +129,7 @@ func run()->void:
 	catalog_count=actor.systems.DiscoverySystem.technology_catalog.size()
 	var elapsed:=float(Time.get_ticks_msec()-start)/1000.0
 	var diagnostic:Dictionary=simulation.scoped("pacing_reference",func()->Dictionary:return bottlenecks())
-	var report:={"schema":11,"secondary_timings":secondary_timings,"timing_intervals":timing_intervals,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Short or collapsed runs do not validate millennial pacing"]}
+	var report:={"schema":12,"controlled_choices":{"wood_density_override":wood_density,"century_ambition":ambition_id},"secondary_timings":secondary_timings,"timing_intervals":timing_intervals,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":"isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange","seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Wood override changes local timber catchments only, not an entire biome; ambition uses ordinary century choices, not direct technology grants","Short or collapsed runs do not validate millennial pacing"]}
 	var file:=FileAccess.open(output_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write pacing diagnostic: "+output_path);quit(1);return
 	file.store_string(JSON.stringify(report,"  "));file.close()

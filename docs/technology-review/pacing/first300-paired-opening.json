@@ -1,0 +1,192 @@
+{
+  "base": "70faecc + local army provisions and paired harness changes",
+  "method": "Same seed, starting population and synthetic river. Timber catchment density and normal century ambition are the only controlled factors. Full daily simulation, finite stocks, no foreign contact. Catchment override is not a full biome or rendered globe test.",
+  "days": 365,
+  "full_300_years_verified": false,
+  "cases": [
+    {
+      "case": "paired-sparse-makers",
+      "seed": 91420,
+      "controls": {
+        "century_ambition": "makers",
+        "wood_density_override": 0.01
+      },
+      "days": 365,
+      "target_reached": true,
+      "population": 120,
+      "food_days": 31.341890262303,
+      "timber": 0.0,
+      "completed_buildings": 4,
+      "known": 10,
+      "household_stocks": {
+        "Cordage Bundles": 5.78005187140507,
+        "Drying Mats": 3.61253241962817,
+        "Flaked Stone Tools": 0.0275422447417772,
+        "Hafted Tool Sets": 0.0149746443088107
+      },
+      "labor": {
+        "Administration": 4,
+        "Construction": 14,
+        "Crafting": 10,
+        "Defense": 2,
+        "Extraction": 6,
+        "Food": 23,
+        "Knowledge": 3,
+        "Logistics": 7,
+        "Survey": 4
+      },
+      "research_attention": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 0,
+        "health": 0,
+        "infrastructure": 2,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 1,
+        "production": 1,
+        "security": 0
+      }
+    },
+    {
+      "case": "paired-sparse-sustenance",
+      "seed": 91420,
+      "controls": {
+        "century_ambition": "sustenance",
+        "wood_density_override": 0.01
+      },
+      "days": 365,
+      "target_reached": true,
+      "population": 121,
+      "food_days": 55.8919521012976,
+      "timber": 0.0,
+      "completed_buildings": 3,
+      "known": 10,
+      "household_stocks": {
+        "Cordage Bundles": 3.88044857079792,
+        "Drying Mats": 2.4252803567487,
+        "Flaked Stone Tools": 1.59565471329782e-05,
+        "Hafted Tool Sets": 2.7175045562445e-05
+      },
+      "labor": {
+        "Administration": 4,
+        "Construction": 11,
+        "Crafting": 4,
+        "Defense": 2,
+        "Extraction": 6,
+        "Food": 28,
+        "Knowledge": 3,
+        "Logistics": 10,
+        "Survey": 5
+      },
+      "research_attention": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 1,
+        "health": 0,
+        "infrastructure": 1,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 2,
+        "production": 0,
+        "security": 0
+      }
+    },
+    {
+      "case": "paired-wood-makers",
+      "seed": 91420,
+      "controls": {
+        "century_ambition": "makers",
+        "wood_density_override": 0.65
+      },
+      "days": 365,
+      "target_reached": true,
+      "population": 120,
+      "food_days": 31.8752267329612,
+      "timber": 185.560495973452,
+      "completed_buildings": 5,
+      "known": 10,
+      "household_stocks": {
+        "Cordage Bundles": 5.77868996401808,
+        "Drying Mats": 3.6122713640968,
+        "Flaked Stone Tools": 4.33295522715965,
+        "Hafted Tool Sets": 2.88981709127744
+      },
+      "labor": {
+        "Administration": 4,
+        "Construction": 14,
+        "Crafting": 10,
+        "Defense": 2,
+        "Extraction": 6,
+        "Food": 23,
+        "Knowledge": 3,
+        "Logistics": 7,
+        "Survey": 4
+      },
+      "research_attention": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 0,
+        "health": 0,
+        "infrastructure": 2,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 1,
+        "production": 1,
+        "security": 0
+      }
+    },
+    {
+      "case": "paired-wood-sustenance",
+      "seed": 91420,
+      "controls": {
+        "century_ambition": "sustenance",
+        "wood_density_override": 0.65
+      },
+      "days": 365,
+      "target_reached": true,
+      "population": 121,
+      "food_days": 54.2689516019406,
+      "timber": 86.3776242725608,
+      "completed_buildings": 5,
+      "known": 10,
+      "household_stocks": {
+        "Cordage Bundles": 3.88236735129504,
+        "Drying Mats": 2.42687613572613,
+        "Flaked Stone Tools": 2.91106173937116,
+        "Hafted Tool Sets": 1.9415009085809
+      },
+      "labor": {
+        "Administration": 4,
+        "Construction": 11,
+        "Crafting": 4,
+        "Defense": 2,
+        "Extraction": 6,
+        "Food": 28,
+        "Knowledge": 3,
+        "Logistics": 10,
+        "Survey": 5
+      },
+      "research_attention": {
+        "culture": 0,
+        "demography": 0,
+        "ecology": 1,
+        "health": 0,
+        "infrastructure": 1,
+        "institutions": 0,
+        "knowledge": 0,
+        "labor": 0,
+        "logistics": 0,
+        "nutrition": 2,
+        "production": 0,
+        "security": 0
+      }
+    }
+  ]
+}

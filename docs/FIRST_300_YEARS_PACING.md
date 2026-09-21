@@ -69,3 +69,16 @@ These are acceptance criteria, not claims that all paths are implemented or veri
 Daily equipment and ammunition issue now includes field armies physically stationed at the home settlement, sharing finite inventory and the reserve's remaining delivery capacity. Moving, remote, engaged and convoy forces do not receive this local issue. Three focused checks cover shared stock/capacity, sub-item budgets and excluded locations. No save schema change.
 
 The ongoing seed-91420 reference run reached year 30 with seven equipped levy weapons and five equipped spears. It still had no operating civilian workshop lines, and aggregate provision delivery was about 63% despite ample stocks. This is intermediate evidence, not a 300-year pass. The run includes only the stationed-equipment patch over 3044691; later changes require separate validation.
+
+
+## Local provisions and first matched decisions
+
+Home-stationed personnel eat from ordinary settlement provisions without a cart/supply-groups technology penalty. Physically remote or moving forces retain field transport constraints. FoodSystem still consumes actual stocks; scarcity reduces deliveries. Mixed-force accounting allocates the consumed rations according to local/remote access and credits separately delivered food only to its recipient. General-campaign prepaid forces remain excluded. No save migration.
+
+Validation: 54 of 55 cases pass across seven suites, including all four new local/mixed/scarcity/credit cases. The sole failure is `test_construction_diverts_existing_city_workers_without_extra_labor` (2.0 versus expected 2.5), reproduced unchanged on pre-patch `70faecc`; it remains an unrelated construction-labor issue, not a passing check.
+
+The pacing harness now accepts `--wood-density=0.65` and `--ambition=makers` (or another normal century ambition). Leaving either absent preserves the reference scenario. The wood override changes only timber catchments; it is deliberately not described as an entire climate or biome. Ambitions use the ordinary validated choice, including subsequent century choices, without granting research or stocks.
+
+Four matched one-year runs at seed 91420 completed: wooded/sparse timber crossed with makers/sustenance. At the wooded site, makers ended with 185.56 timber and 31.88 food days; sustenance with 86.38 timber and 54.27 food days. Both completed five founding buildings. Sparse-timber counterparts exhausted timber and completed only four and three buildings respectively. Makers directed attention toward infrastructure/production; sustenance toward nutrition/ecology. All retained ten inherited practices at year one, so this does not establish divergent long-term discoveries. Household tool stocks were almost exhausted at the sparse site: viable adaptation there remains an acceptance blocker. See `technology-review/pacing/first300-paired-opening.json` for matched stocks, labor and attention.
+
+These results establish causal differences in the opening. They do not certify cold/dry/coastal starts, contact and trade, remote campaigning, or the 300-year endpoint.

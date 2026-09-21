@@ -28,7 +28,7 @@ func forget(id:String)->void:
 func test_recursive_orders_build_carts_that_increase_staffed_delivery_capacity()->void:
 	WorldSimulation.scoped("carter",func()->void:
 		setup();var host=WorldSimulation.military;var state=WorldSimulation.state
-		var before:=host._daily_delivery_capacity();var provision:=host.field_provision_delivery_ratio()
+		var before:=host._daily_delivery_capacity();var provision:=host._field_transport_delivery_ratio()
 		var timber:=float(state.resource_stockpiles.Timber);var made:Dictionary={}
 		for step in 100:
 			var order:=Planner.recommendation()
@@ -46,7 +46,7 @@ func test_recursive_orders_build_carts_that_increase_staffed_delivery_capacity()
 		assert_int(made.size()).is_greater_equal(10)
 		assert_float(float(state.resource_stockpiles.Timber)).is_less(timber)
 		assert_float(host._daily_delivery_capacity()).is_greater(before)
-		assert_float(host.field_provision_delivery_ratio()).is_greater(provision)
+		assert_float(host._field_transport_delivery_ratio()).is_greater(provision)
 		assert_dict(Planner.recommendation()).is_empty()
 		state.population_allocations.Logistics=0
 		assert_float(host._daily_delivery_capacity()).is_equal(0.0)

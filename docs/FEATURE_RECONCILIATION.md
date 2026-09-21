@@ -1905,3 +1905,8 @@ Validation: 13 tests passed across founding knowledge, opening craft practice, a
 ## September 21 — first 300 years: local field-equipment issue
 
 Task branch `codex/first-300-playable`, base `3044691`. Field armies physically stationed at home now share the existing daily replacement-equipment/ammunition budget and finite stores with the reserve. Remote, moving, engaged and convoy formations remain excluded. Combat totals and directly observed reports refresh after issue. Three focused headless checks pass. No save-schema change or player restart. Geography/decision acceptance criteria and outstanding campaign blockers are recorded in `FIRST_300_YEARS_PACING.md`. A running 300-year diagnostic is intermediate evidence only; no full campaign readiness claim.
+
+
+## September 21 — local food access and matched opening diagnostics
+
+Follow-up on `70faecc`, task `codex/first-300-playable`. Local troops share real settlement food without an artificial field transport penalty; remote/moving armies keep transport constraints. Mixed and separately delivered rations are accounted per force; prepaid campaign forces remain excluded. Four new tests pass; seven-suite run has 54 passes and one construction-labor failure reproduced on the pre-patch baseline. No save schema change or live player restart. Diagnostic knobs vary timber catchments and normal civic ambition; four complete matched one-year runs demonstrate different material stocks, labor, food reserves and construction outcomes. Sparse-site adaptation and complete 300-year readiness remain unverified. Evidence and limitations: `docs/FIRST_300_YEARS_PACING.md` and `docs/technology-review/pacing/first300-paired-opening.json`.

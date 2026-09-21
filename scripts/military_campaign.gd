@@ -2368,7 +2368,7 @@ func register_scout_interrogation(method:String,deaths:int=0)->Dictionary:
 	return {"method":normalized,"deaths":removed,"foreign_prisoners":foreign_prisoners,"reputation":war_reputation.duplicate(true)}
 
 
-func field_provision_delivery_ratio()->float:
+func _field_transport_delivery_ratio()->float:
 	if recovery.home_unavailable():return 0.0
 	var troops:=int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()
 	if troops<=0: return 1.0
@@ -2380,6 +2380,36 @@ func field_provision_delivery_ratio()->float:
 	return clampf(0.08+labor_coverage*0.42+commander_logistics*0.20+_adoption("supply_groups")*0.20+cart_coverage*0.10,0.0,1.0)
 
 
+func _force_provision_access(force:Dictionary,reserve:bool=false)->float:
+	if recovery.home_unavailable():return 0.0
+	if WorldSimulation.state.settlement_site_committed and not WorldSimulation.state.convoy_traveling:
+		if reserve:return 1.0
+		if _army_is_home(force):
+			var position:Dictionary=force.get("position",{})
+			var destination:=_movement_destination("player_home")
+			if not position.is_empty() and destination.has("position"):
+				if Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(Vector2(float(destination.position.get("x",0)),float(destination.position.get("z",0))))<=.25:return 1.0
+	return _field_transport_delivery_ratio()
+
+
+func field_provision_delivery_ratio(required:float=-1.0,air_delivery:Dictionary={})->float:
+	var total:=int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()
+	if WorldSimulation.campaign.active:total-=int(WorldSimulation.campaign.army().get("troops",0))
+	if total<=0:return 1.0
+	var need:=float(total) if required<0.0 else required
+	var accessible:=need*float(maxi(0,int(home_army.get("troops",0))))/float(total)*_force_provision_access(home_army,true)
+	var remaining:=need
+	for force:Dictionary in field_armies:
+		if bool(force.get("general_managed",false)) and WorldSimulation.campaign.active:continue
+		var share:=need*float(maxi(0,int(force.get("troops",0))))/float(total)
+		var credit:=clampf(float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0)),0.0,share)
+		remaining-=credit
+		accessible+=(share-credit)*_force_provision_access(force)
+	for force:Dictionary in occupation_forces:
+		accessible+=need*float(maxi(0,int(force.get("troops",0))))/float(total)*_field_transport_delivery_ratio()
+	return clampf(accessible/remaining,0.0,1.0) if remaining>0.0 else 1.0
+
+
 func record_daily_provisions(required:float,delivered:float,air_delivery:Dictionary={})->void:
 	if home_army.is_empty() and occupation_forces.is_empty() and field_armies.is_empty(): return
 	var need:=maxf(0.0,required)
@@ -2387,12 +2417,14 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 	var prepaid:=int(WorldSimulation.campaign.army().get("troops",0)) if WorldSimulation.campaign.active else 0
 	var total_active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-prepaid)
 	var credited:=float(air_delivery.get("total",0))
-	var delivery_ratio:=clampf(received/maxf(.01,need-credited),0,1) if need>credited else 1.0
+	var accessible:=(need-credited)*field_provision_delivery_ratio(need,air_delivery)
+	var delivery_ratio:=received/maxf(.01,accessible) if accessible>0.0 else 0.0
 	var provision_ratio:=delivery_ratio
 	if not home_army.is_empty():
 		var home_share:=float(maxi(0,int(home_army.get("troops",0))))/float(total_active)
 		var home_need:=need*home_share
-		var home_received:=home_need*delivery_ratio
+		var home_received:=minf(home_need,home_need*_force_provision_access(home_army,true)*delivery_ratio)
+		provision_ratio=home_received/home_need if home_need>0.0 else 1.0
 		home_army["provisions_required_today"]=home_need
 		home_army["provisions_delivered_today"]=home_received
 		home_army["provision_ratio"]=provision_ratio
@@ -2409,7 +2441,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		if bool(force.get("general_managed",false)) and WorldSimulation.campaign.active:continue
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
 		var field_credit:=float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0))
-		var field_received:=field_credit+maxf(0,need*share-field_credit)*delivery_ratio
+		var field_received:=minf(need*share,field_credit+maxf(0,need*share-field_credit)*_force_provision_access(force)*delivery_ratio)
 		provision_ratio=clampf(field_received/maxf(.01,need*share),0,1) if need*share>0 else 1.0
 		force["provisions_required_today"]=need*share
 		force["provisions_delivered_today"]=field_received
@@ -2424,9 +2456,9 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 	for force_index in occupation_forces.size():
 		var force:Dictionary=occupation_forces[force_index]
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
-		provision_ratio=delivery_ratio
+		provision_ratio=clampf(_field_transport_delivery_ratio()*delivery_ratio,0.0,1.0)
 		force["provisions_required_today"]=need*share
-		force["provisions_delivered_today"]=need*share*delivery_ratio
+		force["provisions_delivered_today"]=need*share*provision_ratio
 		force["provision_ratio"]=provision_ratio
 		force["provision_day"]=int(WorldSimulation.state.elapsed_days)
 		force["supply_level"]=move_toward(float(force.get("supply_level",0.5)),provision_ratio,0.08)
