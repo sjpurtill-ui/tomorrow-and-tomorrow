@@ -1,0 +1,10 @@
+{
+  "id": "canal_locks",
+  "prompt": "Fix the physical layout of this canal-lock illustration while preserving the beautiful realistic painterly style. Show the foreground wooden barge floating inside a long rectangular stone lock chamber, a pair of tall wooden upper gates CLOSED across the full chamber width, their seam meeting in the middle. Behind the closed gates is the higher canal water level. Small sluices near the bottom of the closed gates admit streams of water into the lower chamber to raise the barge. Remove the nonsensical solid stone wall behind open gates; it is a navigable water channel through the closed lock gates. Operators on the towpath turn wooden gate mechanisms. Early traditional materials, no motorboats, no text or logo. Focus on readable gates, barge, water-level difference, and attendants together in the central banner.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f99d4499-e4d6-4587-95a2-777df34a51c6.png",
+  "version": 2,
+  "asset": "res://assets/ui/research/subjects/canal_locks-v2.png",
+  "sha256": "11dddaa237de887c5004237cea2a7fb8a9fd2172771d9a5f83e8c9e25546f66d",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

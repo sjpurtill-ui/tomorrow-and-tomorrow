@@ -1,0 +1,9 @@
+{
+  "id": "caravanserais",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Caravanserais. Show a concrete, visually clear scene demonstrating this exact practice: Maintained stopping places offer shelter, protected stores, and rest along established overland trade routes. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c288b135-b47d-47f3-828d-ce2e9d09cfd1.png",
+  "asset": "res://assets/ui/research/subjects/caravanserais-v1.png",
+  "sha256": "71c11133f7b2be58637a347a3f7d844942904d44a5604cfeef2cffac22db82fb",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
