@@ -1,0 +1,10 @@
+{
+  "id": "armored_hulls",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Armored Hulls. Shipyard workers attach thick iron armor plates along a low broad ironclad hull; exposed rivets and heavy plate edges dominate, no wooden sailing frigate. Explicitly industrial naval technology, late nineteenth to early twentieth century machinery and work clothing, no ancient tunics or classical city background.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-a21c46f5-a094-4580-89bd-2f217d498ac5.png",
+  "asset": "res://assets/ui/research/subjects/armored_hulls-v1.png",
+  "sha256": "2e213c8a995662178c8d202d453a763e420fadf596b009fbddf943846f3e9c39",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Heavy riveted plates and shipyard assembly."
+}

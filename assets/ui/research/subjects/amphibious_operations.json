@@ -1,0 +1,9 @@
+{
+  "id": "amphibious_operations",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Keep the complete central aircraft or landing craft inside the frame with breathing room. The interface preserves the full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Amphibious Operations. A landing craft lowers its bow ramp on an empty training beach as troops disembark with supplies; coordinated sea-to-shore movement, no civilian casualties. Early-to-mid twentieth century machinery and uniforms. Absolutely plain unmarked aircraft and uniforms: no roundels, stars, crosses, stripes, letters, numbers, flag colors or historical national markings on ANY surface.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-4e818b1a-caf3-4f14-b974-f7996c7e71fc.png",
+  "asset": "res://assets/ui/research/subjects/amphibious_operations-v1.png",
+  "sha256": "e652cc116d1282dd08011b3de0f1fa607493a78dd059704fc99ce74282ea50cb",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

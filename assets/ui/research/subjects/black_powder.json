@@ -1,0 +1,10 @@
+{
+  "id": "black_powder",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Composite Propellant. A restrained historical ordnance still life: a sealed dark powder cask, a small closed horn and an early cannon in distant context. No recipe, quantities, mixing instructions or instructional diagram.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-15546ff3-407b-4af6-b8af-8b22021374b6.png",
+  "asset": "res://assets/ui/research/subjects/black_powder-v1.png",
+  "sha256": "862a66327ab1c7b037cec526a4744d96787f1379a2338c8d53b131f57127292e",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Closed propellant cask and horn with distant ordnance; no recipe or misleading workshop subject."
+}
