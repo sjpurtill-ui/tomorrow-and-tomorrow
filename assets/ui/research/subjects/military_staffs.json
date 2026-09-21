@@ -1,0 +1,10 @@
+{
+  "id": "military_staffs",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Military Staff Planning. Show a concrete, visually clear scene demonstrating this exact practice: Specialized officers reconcile intelligence, movement, stores, terrain, and timing before orders are issued. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Officers in plain early-modern field coats around a campaign map in a tent, one compares supply ledgers while another receives a scout report and the commander considers the terrain. No named nation, medals, rifles dominating the scene or modern electronics.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-93f0d941-cb74-4c7c-ad0e-45b56736a44c.png",
+  "asset": "res://assets/ui/research/subjects/military_staffs-v1.png",
+  "sha256": "c03008eb9e7582f750f76348131eec5ed48dce162a5f1eb48f2399b373671b9e",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Command officers reconcile terrain map, report and supply ledger."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "mine_drainage",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Mine Drainage. An early mine drainage sump and chain of lifting buckets carry groundwater up from a dark working level into a channel; focus on water removal, no modern electric pump.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-41d2d5d0-f1d1-4b12-8b25-32c7a683e68e.png",
+  "asset": "res://assets/ui/research/subjects/mine_drainage-v1.png",
+  "sha256": "06c32e46f13616e671660c12df7563aa8c51215559c76e8bf1332847047d9858",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

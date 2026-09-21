@@ -1,0 +1,10 @@
+{
+  "id": "mounted_firearms",
+  "version": 2,
+  "prompt": "Completely recompose this illustration to represent MOUNTED FIREARMS as horse-mobile musket troops, not an ordinary cannon crew. A foreground dragoon in plain unmarked gunpowder-era clothing has dismounted beside his saddled horse and holds a long flintlock musket; another rider carries a carbine. Farther behind them a team of horses tows a compact light field gun along a muddy road. The horse and soldier with musket are the clear principal subject. Misty northern woodland clearing, no lake, stone bridge, burning city, sea or castle. Beautiful realistic painterly game illustration, wide 3:2, central-square subject also readable in a horizontal banner. No modern rifles, national insignia, banners, text or logos.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-5806417c-763c-4235-93f9-dc70cd34bb4c.png",
+  "asset": "res://assets/ui/research/subjects/mounted_firearms-v2.png",
+  "sha256": "9488ea5d87c3520ef604817f360ba927670204f9140c8d2ba5a8daa25d99bed3",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

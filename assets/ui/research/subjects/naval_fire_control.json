@@ -1,0 +1,10 @@
+{
+  "id": "naval_fire_control",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Naval Fire Control. Officers at an optical naval rangefinder coordinate with a battleship gun director; long stereo-optic tube and shipboard context, no generic cannon blast. Explicitly industrial naval technology, late nineteenth to early twentieth century machinery and work clothing, no ancient tunics or classical city background.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-b0f22f98-24dc-43e6-963e-6d348c10f55c.png",
+  "asset": "res://assets/ui/research/subjects/naval_fire_control-v1.png",
+  "sha256": "3d23ee7fb1b4e2c942242a19fecae2a27968fb31ee22f7ef5a02251c2a82976b",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Optical observation and gun coordination on a ship; illustrative, not a calibrated instrument diagram."
+}

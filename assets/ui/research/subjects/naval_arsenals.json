@@ -1,0 +1,10 @@
+{
+  "id": "naval_arsenals",
+  "prompt": "Revise this painting to the EARLY NAVAL ARSENAL stage: remove every cannon, cannonball and gunport, and replace the enormous ship of the line with a large wooden rowing galley being built in a long covered boatshed. Foreground craftspeople organize matched oars, coils of rope, replacement planks, sailcloth and racks of bows and spears. A low galley hull with exposed wooden ribs, banks of rowing benches and a ram at its bow is unmistakable behind them. Wooden hoists lift a timber spar, not a gun. Ancient shipyard workers in plain practical tunics. Keep premium realistic painterly art and detailed wood textures, central wide-banner subject. No gunpowder, industrial hardware, tricorn hats, national emblems or text.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-2d271ce5-ef9c-458b-a501-f55656c6b512.png",
+  "version": 2,
+  "asset": "res://assets/ui/research/subjects/naval_arsenals-v2.png",
+  "sha256": "131f9f4e5440ff65797b5ca0c7669784bb24d26c152dd3ab216779be38d3852b",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}
