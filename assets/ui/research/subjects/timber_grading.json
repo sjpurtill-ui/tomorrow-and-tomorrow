@@ -1,0 +1,10 @@
+{
+  "id": "timber_grading",
+  "prompt": "Correct this early Timber Grading illustration by removing the metal axe on the stump at far left. Leave a plain wooden mallet and a loose rough stone there instead. Preserve the comparison of wood samples, distinct grain and bark, the worker examining a branch, composition and realistic light. This is a pre-metal community; no metal implements or fittings anywhere.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-63efedd4-9e81-4b0e-bb9a-721efbf0eb49.png",
+  "version": 2,
+  "mode": "built-in image_gen / edit",
+  "asset": "res://assets/ui/research/subjects/timber_grading-v2.png",
+  "sha256": "9d7dbfa7c3e8b493b8104e0c0e83d8072364d7c43fc7caa956d0496b2d62e77e",
+  "review": "source checked; banner pending"
+}

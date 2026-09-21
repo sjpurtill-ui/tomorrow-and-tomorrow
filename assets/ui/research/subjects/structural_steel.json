@@ -1,0 +1,10 @@
+{
+  "id": "structural_steel",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Structural Steel Frames. A rising steel building skeleton with riveted columns and beams, workers aligning a heavy crossbeam against an industrial city skyline; no concrete-only frame.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-13e7eb18-48a3-493d-89e6-f674daa0c753.png",
+  "asset": "res://assets/ui/research/subjects/structural_steel-v1.png",
+  "sha256": "1c8426e7f37f52fe984cc3036c336d5021899df37c7bab377480c5cde92cd4da",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Riveted steel building skeleton, beam placement and industrial city."
+}

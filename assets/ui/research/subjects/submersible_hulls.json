@@ -1,0 +1,10 @@
+{
+  "id": "submersible_hulls",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Submersible Hulls. An early submarine's curved pressure hull is assembled from circular steel ribs and plates in a dry dock, engineers inspecting a watertight hatch; no surface battleship. Industrial era equipment and clothing, no ancient city or peasant tunics. Paint an identifiable subject rather than a technical construction diagram.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-154d3f6a-54c2-4444-b032-583c5dfaedac.png",
+  "asset": "res://assets/ui/research/subjects/submersible_hulls-v1.png",
+  "sha256": "4d3c99eff3757d05ee7612412092fb1862e84fc278169b706a9933fbaff8cc27",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Curved pressure hull with ribs, plates and hatch."
+}
