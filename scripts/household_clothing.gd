@@ -20,7 +20,7 @@ static func spend(item:String,amount:float)->void:
 	else:WorldSimulation.state.resource_stockpiles[item]=maxf(0,available(item)-amount)
 static func materials(id:String,installation:bool=false)->Dictionary:
 	var result:Dictionary=K.METHODS[id].cost.duplicate() if installation else K.METHODS[id].inputs.duplicate()
-	if not installation and id=="bone_needle_sewing" and (available("Woven Cloth")<float(result.get("Woven Cloth",0)) or available("Spun Yarn")<float(result.get("Spun Yarn",0))):
+	if not installation and id=="bone_needle_sewing" and available("Raw Hides")>=.70 and available("Fiber Plants")>=.10 and (available("Woven Cloth")<float(result.get("Woven Cloth",0)) or available("Spun Yarn")<float(result.get("Spun Yarn",0))):
 		result={"Raw Hides":.70,"Fiber Plants":.10}
 	# Existing sewing/cutting skills can use an imported figured fabric. Pattern
 	# origin is retained in the garment lot; it grants no insulation multiplier.

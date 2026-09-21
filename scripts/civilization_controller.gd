@@ -82,6 +82,7 @@ static func choose_orders(id:String)->void:
 					if not bool(WorldSimulation.resources.water_access_snapshot(known).accessible):continue
 					if not WorldSimulation.submit(id,{"kind":"move","destination":destination}).has("error"):return
 		return
+	preload("res://scripts/ai_workshop_turnover.gd").advance(id,WorldSimulation.military)
 	if not review_due(id,day):return
 	var plan:=current_plan(id)
 	research_orders(id,plan)
@@ -182,7 +183,9 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line(String(preload("res://scripts/civilian_industry.gd").product(item).get("output","")))
 		if reusable<0:reusable=preload("res://scripts/armor_equipment.gd").reusable_line(campaign,item)
 		if reusable<0:reusable=finished_ai_line(id,campaign)
-		if reusable<0:return
+		if reusable<0:
+			preload("res://scripts/ai_workshop_turnover.gd").request(id,campaign,item,int(recommendation.target))
+			return
 		if WorldSimulation.submit(id,{"kind":"production_retool","job":reusable,"item":item}).has("error"):return
 	ensure_line(id,item,int(recommendation.target))
 	if managed:

@@ -169,6 +169,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		job.required_days=job.work_per_item
 		job.erase("planner_managed")
 		job.erase("staff_idle")
+		job.erase("ai_turnover")
 		return {"ok":true,"message":"Line retooled. Existing setup tools remain assigned; missing tools are added. Some efficiency is retained; unfinished work is discarded without refunding consumed materials."}
 	return {"error":"Select a persistent production line."}
 
@@ -316,6 +317,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		return
 	var per_item:=float(job.work_per_item)
 	var units:=work/per_item
+	if job.has("ai_turnover"):units=minf(units,maxf(0,1.0-float(job.progress_days)/per_item))
 	if int(job.target_stock)>0:
 		units=minf(units,maxf(0.0,int(job.target_stock)-stock(host,job)-float(job.progress_days)/per_item))
 	var possible:=units
@@ -351,6 +353,9 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 		for resource:String in yields:
 			WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))+produced*float(yields[resource])
 	else: host.military_inventory[String(job.item)]=stock(host,job)+produced
+	if produced>0 and job.has("ai_turnover"):
+		job.progress_days=0.0
+		job.paused=true
 	if possible>0: job.efficiency=move_toward(float(job.efficiency),1.0,.0025*(.65+host._adoption("workshop_standards"))*minf(1,possible/maxf(.000001,units)))
 
 static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> Dictionary:
@@ -400,6 +405,10 @@ static func validate_saved(payload: Dictionary) -> String:
 		if not job is Dictionary: return "Invalid production line."
 		if not bool(job.get("persistent",false)): continue
 		if job.has("planner_managed") and not job.planner_managed is bool:return "Invalid production management flag."
+		if job.has("ai_turnover"):
+			var next:Variant=job.ai_turnover
+			if not next is Dictionary or not next.get("item") is String or String(next.item).is_empty() or String(next.item).length()>100 or not next.get("target") is int or int(next.target)<1 or int(next.target)>MAX_TARGET:return "Invalid planned production change."
+
 		for key in ["target_stock","progress_days","work_per_item","allocation","efficiency","completed"]:
 			var value: Variant=job.get(key,null)
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0: return "Invalid persistent production value: "+key

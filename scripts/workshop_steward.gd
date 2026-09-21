@@ -101,12 +101,13 @@ func schedule(demand:Dictionary)->Dictionary:
 	var item:=String(demand.get("item",""));var target:=clampi(int(demand.get("target",1)),1,P.MAX_TARGET)
 	for job:Dictionary in host.equipment_queue:
 		if String(job.item)!=item:continue
-		if not bool(job.get("planner_managed",false)) or bool(job.get("paused",false)):
+		if not bool(job.get("planner_managed",false)) or (bool(job.get("paused",false)) and not bool(job.get("staff_idle",false))):
 			return {"message":"%s is under your control; staff have left its order unchanged." % P.product_name(item)}
-		if int(job.target_stock)==target:return {"message":"Supplying %s · target %d in stores." % [P.product_name(item),target]}
+		if int(job.target_stock)==target and not bool(job.get("staff_idle",false)):return {"message":"Supplying %s · target %d in stores." % [P.product_name(item),target]}
 		var updated:Dictionary=host.configure_production_line(int(job.id),target,false)
 		if updated.has("error"):return updated
 		job.planner_managed=true
+		job.erase("staff_idle")
 		return {"changed":true,"message":"Adjusted %s to current demand: %d in stores." % [P.product_name(item),target]}
 	var result:Dictionary={}
 	if host.equipment_queue.size()<host.production_line_capacity():result=host.start_production_line(item,target)

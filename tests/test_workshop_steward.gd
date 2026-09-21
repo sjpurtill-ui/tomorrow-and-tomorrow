@@ -191,3 +191,18 @@ func test_equipped_archers_request_paid_arrows_and_count_existing_ammunition()->
 	assert_int(int(MilitaryCampaign.military_consumables.arrows)).is_equal(9)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber)
 	assert_array(MilitaryCampaign.workshop.army_demands()).is_empty()
+
+func test_staff_idle_line_resumes_when_its_demand_returns()->void:
+	var job:=start(1)
+	MilitaryCampaign.workshop.delegate_lines()
+	Production.advance(MilitaryCampaign,job,100)
+	MilitaryCampaign.workshop.advance(1)
+	assert_bool(job.paused).is_true()
+	assert_bool(job.staff_idle).is_true()
+	MilitaryCampaign.military_inventory.improvised=0
+	var result:=MilitaryCampaign.workshop.schedule({"item":"improvised","target":1})
+	assert_bool(result.get("changed",false)).is_true()
+	assert_bool(job.paused).is_false()
+	assert_bool(job.has("staff_idle")).is_false()
+	Production.advance(MilitaryCampaign,job,100)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(1)

@@ -226,6 +226,8 @@ func test_sewing_supply_uses_collected_bone_and_real_yarn_production()->void:
 		clothing.advance(0,100,false,50)
 		assert_str(String(F.clothing_recommendation().get("item",""))).is_equal("spun_yarn")
 		C.civilian_orders("paper_ruler",{})
+		assert_array(WorldSimulation.military.equipment_queue).override_failure_message(str(WorldSimulation.actors.paper_ruler.orders)).is_not_empty()
+		if WorldSimulation.military.equipment_queue.is_empty():return
 		var job:Dictionary=WorldSimulation.military.equipment_queue[0]
 		preload("res://scripts/persistent_production.gd").advance(WorldSimulation.military,job,20)
 		assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(1.0)

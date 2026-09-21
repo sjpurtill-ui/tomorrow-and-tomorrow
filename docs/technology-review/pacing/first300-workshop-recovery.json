@@ -1,0 +1,139 @@
+{
+  "from_day": 45625,
+  "to_day": 46720,
+  "target_reached": true,
+  "save_check": {
+    "ok": true
+  },
+  "final": {
+    "active_inquiries": 3,
+    "army_provision_delivery_ratio": 1.0,
+    "army_provisions_delivered": 175.890457876046,
+    "army_provisions_required": 175.890457876046,
+    "completed_buildings": 6,
+    "day": 46720,
+    "food_consumption": 175.890457876046,
+    "food_days": 212.285457923905,
+    "food_demand_breakdown": {
+      "adults": 108.795706362524,
+      "army_field": 175.890457876046,
+      "base": 159.345046402996,
+      "children": 41.8383471544805,
+      "climate": 0.0,
+      "elders": 8.71099288599088,
+      "labor": 15.35,
+      "lactation": 0.475411473050632,
+      "mission_absent": 0.0,
+      "occupation_relief": 0.0,
+      "pregnancy": 0.72,
+      "prisoner_custody": 0.0,
+      "rationing": 0.0,
+      "total": 175.890457876046,
+      "travel": 0.0
+    },
+    "food_eaten": 175.890457876046,
+    "food_intake_ratio": 1.0,
+    "food_security": 0.979999999999999,
+    "knowledge_workers": 68,
+    "known": 118,
+    "material_stocks": {
+      "Clay": 8.96370678906175,
+      "Fiber Plants": 169.341489920505,
+      "Stone": 283.13255477522,
+      "Timber": 3.43545967393107
+    },
+    "plot_history_records": 207,
+    "population": 2099,
+    "production": {
+      "available_civilian_recipes": 75,
+      "civilian_lines": 2,
+      "delivery_shortage": false,
+      "food_shortage": false,
+      "household_stocks": {
+        "Cordage Bundles": 9.05422307273856,
+        "Drying Mats": 5.66027517051494,
+        "Flaked Stone Tools": 6.78949248632556,
+        "Hafted Tool Sets": 4.52790344876371,
+        "Joined Timber Components": 3.39616510230896,
+        "Unfired Clay Vessels": 6.79233020461793,
+        "Woven Containers": 5.66027517051494
+      },
+      "installed_units": 1,
+      "manufactured_stock_kinds": 7,
+      "military_capabilities": {
+        "bow": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "improvised": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 13,
+          "recipe_known": true,
+          "stored": 196
+        },
+        "lance": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "mounted_bow": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "siege_kit": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "spear": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 192,
+          "recipe_known": true,
+          "stored": 206
+        }
+      },
+      "operations_ledger_current": true,
+      "production_food_blocked": false,
+      "recorded_output": {
+        "Building Runoff Channels": 115.0,
+        "Fitted Post Beam Sets": 45.0,
+        "Fitted Timber Splice Sets": 31.0,
+        "Loom Weights": 5.0,
+        "Prepared Fibers": 572.0,
+        "Rope Coils": 3.0,
+        "Spun Yarn": 563.0,
+        "Thatch Panels": 4.0,
+        "improvised": 279.0,
+        "spear": 2190.0
+      },
+      "remaining_daily_services": {
+        "kiln_heat": 2.03202988390136
+      },
+      "units_under_construction": 0
+    },
+    "resource_deposits": 45,
+    "settled": true,
+    "settlement_count": 20,
+    "settlement_plots": 28,
+    "year": 128.0
+  },
+  "scope": "Real warm year-125 checkpoint, ordinary three-year continuation. Includes daily progression evaluation and AI batch turnover; no grants."
+}

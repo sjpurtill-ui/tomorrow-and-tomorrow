@@ -2018,3 +2018,12 @@ Capability evaluations now refresh their adoption profile each simulated day. Pr
 The 25-year whole-world comparison restored its captured state exactly but exposed this next-day profile divergence. It also exposed a probe-only omission: the probe now rebinds the same opponent geography callables that the normal terrain scene reconnects after loading. The diagnostic retains its own explicitly named checkpoint alongside its report for repeatable investigation; unique user-save-directory test slots are still removed.
 
 Validation: all eight progression and three whole-save regressions pass (report 88), including adoption changing within one month. The actual-world 25-year continuation is rerunning with the corrected probe and retained checkpoint; it is not yet counted as passed.
+
+
+## First 300 years: workshop starvation and resumption (September 21)
+
+AI workshops can now finish one paid ordinary batch before changing to another feasible needed product, rather than waiting forever for an intermediate stock target that households continually consume. One change is pending at a time; advanced trials, reserved materials, paused orders and player-controlled lines are protected. The ordinary commands still pay for tooling and all new output. A supply shock cancels the planned change and resumes the original line. Saved change requests are validated.
+
+The player steward also recognizes its own idle pause and resumes that line when demand returns; manual pauses remain protected. Sewing chooses the hide alternative only when a complete hide/fiber batch is available, allowing a missing-yarn request when cloth is available but the hide alternative cannot run. This resolves the previously failing collected-bone/yarn regression without granting supplies.
+
+Validation: 59 planner/steward/opening-craft cases pass (report 91), and five new turnover cases plus 36 inherited/steward cases pass (report 92). The real warm year-125 checkpoint reaches year 128 with a valid save, 192 equipped spears and 206 spare spears, 2,190 lifetime spears produced, and continuing runoff, post/beam, splice and textile output. Earlier continuation had locked both lines into textiles and lost replacement equipment. This recovery includes daily progression evaluation and the turnover fix; it is not yet a 300-year pass.
