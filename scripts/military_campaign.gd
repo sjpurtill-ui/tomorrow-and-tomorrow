@@ -2956,7 +2956,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	army_templates.clear()
 	for template_variant in payload.get("army_templates",[]):
 		if template_variant is Dictionary: army_templates.append((template_variant as Dictionary).duplicate(true))
-	if army_templates.is_empty(): army_templates=_default_army_templates()
+	if army_templates.is_empty() and not payload.has("army_templates"): army_templates=_default_army_templates()
 	next_army_template_id=maxi(1,int(payload.get("next_army_template_id",army_templates.size()+1)))
 	next_field_army_id=maxi(1,int(payload.get("next_field_army_id",1)))
 	for force in field_armies: next_field_army_id=maxi(next_field_army_id,int(force.get("army_id",0))+1)

@@ -1,0 +1,25 @@
+{
+  "seed": 9241,
+  "days": 3,
+  "opponents": 3,
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_differences": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "legacy_campaign": false,
+      "message": "World restored \u00e2\u20ac\u201d day 3, population 120.",
+      "ok": true
+    },
+    "loaded": {
+      "legacy_campaign": false,
+      "message": "World restored \u00e2\u20ac\u201d day 3, population 120.",
+      "ok": true
+    },
+    "restore_detail": [],
+    "restore_differences": [],
+    "restored_equal": true
+  },
+  "errors": [],
+  "scope": "Actual terrain, whole game, exact restore and next-day comparison; short regression, not 300-year evidence"
+}

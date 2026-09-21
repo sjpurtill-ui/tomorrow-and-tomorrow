@@ -118,6 +118,9 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	CivilizationSystem.reset_for_new_world()
 	WorldFacts.reset_for_new_world()
 	PronouncementInterpreter.reset_for_new_world()
+	# Rebuild omitted catalog caches before restoring the saved random stream.
+	# Lazy initialization on the next day would reseed research after loading.
+	DiscoverySystem.initialize()
 	for system_name in REFLECTED_SYSTEMS:
 		_apply_reflected(get_node("/root/"+system_name),payload.get("reflected_%s" % system_name,{}))
 	_apply_reflected(DiscoverySystem.society_model,payload.get("reflected_society_model",{}),SOCIETY_REFLECT_SKIP)

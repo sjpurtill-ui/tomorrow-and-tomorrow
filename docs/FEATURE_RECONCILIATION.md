@@ -1981,3 +1981,10 @@ The structural supply audit now includes actual household recipes, with their re
 ### First 300 years: matched decisions and current evidence ledger
 - Added current readiness status and a reproducible five-year matched comparison at the same seed/terrain site. Makers and Military change research emphasis and actual output without resource grants; both complete and validate saves.
 - New cool opening completes 25 years with 194 people, 25 known practices, 57 spears and 8 fitted post/beam sets produced. Twenty player-panel logic tests pass. Full 300-year endpoints remain pending; no completion or visual-review claim.
+
+
+## First 300 years: whole-game continuation (September 21)
+
+Saving and loading no longer reseeds the human research stream, inserts an explicitly absent lazy army template, or reranks civilization summaries outside their strategic update. The owned-world payload now retains the human projection so opponents see the same human state on their next day. Older payloads reconstruct the omitted projection before opponents advance. No stocks or discoveries are granted.
+
+Validation: three new save regression cases pass (report 82), plus all 19 owned-world cases (report 81). An actual-terrain three-day player-plus-three-opponent probe restores its complete captured state exactly and produces an exactly equal next day after load, including research RNG and opponent relations. The earlier payload-only check did not cover this. A developed 25-year whole-world continuation run is in progress; the 300-year endpoint remains outstanding. Unique diagnostic save slots are removed after use; player saves are untouched.

@@ -5063,7 +5063,9 @@ func import_state(payload:Dictionary)->Dictionary:
 	if not errors.is_empty():
 		_apply_state(previous)
 		return {"error":"Invalid civilization state.","details":errors}
-	_rebuild_competition()
+	# Current saves retain the score/rank at the last strategic update. Loading
+	# is not another update; legacy schemas still need their derived scores built.
+	if incoming_version!=SAVE_VERSION:_rebuild_competition()
 	if not incoming.has("city_intelligence"): city_intelligence.migrate()
 	world_changed.emit(competition_snapshot())
 	return {"ok":true,"version":SAVE_VERSION}

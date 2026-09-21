@@ -3,11 +3,12 @@ func _ready()->void:
 	call_deferred("run")
 func run()->void:
 	GameState.reset_for_new_world(9241)
-	var count:=36;var duration:=3;var output:=""
+	var count:=36;var duration:=3;var output:="";var verify_restore:=false
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--opponents="):count=int(argument.get_slice("=",1))
 		if argument.begins_with("--days="):duration=int(argument.get_slice("=",1))
 		if argument.begins_with("--out="):output=argument.trim_prefix("--out=")
+		if argument=="--verify-restore":verify_restore=true
 	GameState.opponent_count=count
 	CivilizationSystem.reset_for_new_world()
 	var terrain=load("res://scripts/local_terrain.gd").new()
@@ -54,6 +55,13 @@ func run()->void:
 	var human_save_check:Dictionary=SaveSystem._validate_human_payload(bytes_to_var(var_to_bytes(human_payload)),GameState.world_seed)
 	if human_save_check.has("error"):errors.append(human_save_check.error)
 
+	var continuation:Dictionary={}
+	if verify_restore:
+		continuation=preload("res://tools/verify_campaign_save.gd").verify(player_start,func()->void:
+			CivilizationSystem.set_scout_geography_authority(func(point:Vector2)->bool:return terrain._height_at(point.x,point.y)>.012)
+			CivilizationSystem.ground_survey_authority=Callable(terrain,"_survey_ground_at"))
+		if continuation.has("error"):errors.append(continuation.error)
+		print("SAVE CONTINUATION ",JSON.stringify(continuation))
 	print("WORLD ERRORS ",errors)
 	print("AVERAGE DAY MS ",float(total_ms)/maxi(1,completed))
 	var settlements:Array=[]
@@ -64,7 +72,7 @@ func run()->void:
 		settlements.append(summary)
 		print("CIV ",JSON.stringify(summary))
 	if not output.is_empty():
-		var report:={"target_days":duration,"completed_days":completed,"target_reached":completed==duration,"waterless":waterless,"save_check":save_check,"human_save_check":human_save_check,"errors":errors,"actors":settlements,"average_day_ms":float(total_ms)/maxi(1,completed),"limitations":["Headless actual world; no visual verification","No forced contact or wars","Binary payload validation covers player and opponents; rendered load journey is separate"]}
+		var report:={"target_days":duration,"completed_days":completed,"target_reached":completed==duration,"waterless":waterless,"save_check":save_check,"human_save_check":human_save_check,"continuation":continuation,"errors":errors,"actors":settlements,"average_day_ms":float(total_ms)/maxi(1,completed),"limitations":["Headless actual world; no visual verification","No forced contact or wars","Binary payload validation covers player and opponents; rendered load journey is separate"]}
 		var file:=FileAccess.open(output,FileAccess.WRITE);file.store_string(JSON.stringify(report));file.close()
 	WorldSimulation.clear();terrain.free()
 	get_tree().quit(0 if errors.is_empty() and waterless==0 and completed==duration else 1)

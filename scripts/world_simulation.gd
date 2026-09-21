@@ -345,7 +345,7 @@ func capture_actor(id:String)->Dictionary:
 	)
 
 func export_state()->Dictionary:
-	var result:={"version":1,"enabled":enabled,"seed":_seed,"last_day":last_day,"actors":{},"geography_stock":geography_stock.duplicate(true),"relation_baselines":relation_baselines.duplicate(true)}
+	var result:={"version":1,"enabled":enabled,"seed":_seed,"last_day":last_day,"actors":{},"geography_stock":geography_stock.duplicate(true),"relation_baselines":relation_baselines.duplicate(true),"human_projection":human_projection.duplicate(true)}
 	for id:String in actors:
 		result.actors[id]={"controller":actors[id].controller,"last_day":actors[id].last_day,"origin":actors[id].origin,"sequence":actors[id].sequence,"orders":actors[id].orders.duplicate(true),"state":capture_actor(id)}
 	return result
@@ -356,6 +356,7 @@ func validate_payload(payload:Dictionary)->String:
 	if not payload.get("actors") is Dictionary:return "Invalid civilization ownership register."
 	if payload.actors.size()>CivilizationSystem.MAX_RIVAL_CIVILIZATIONS:return "Too many civilization owners."
 	if not payload.get("geography_stock",{}) is Dictionary:return "Invalid shared world reserves."
+	if not payload.get("human_projection",{}) is Dictionary:return "Invalid human civilization projection."
 	for reserve in payload.get("geography_stock",{}).values():
 		if not reserve is Dictionary:return "Invalid world reserve."
 		for key in ["remaining","initial_amount"]:
@@ -433,6 +434,7 @@ func _restore_state(payload:Dictionary)->Dictionary:
 	_seed=int(payload.seed);last_day=int(payload.last_day)
 	geography_stock=payload.get("geography_stock",{}).duplicate(true)
 	relation_baselines=payload.get("relation_baselines",{}).duplicate(true)
+	human_projection=payload.get("human_projection",{}).duplicate(true)
 	var failures:Array[String]=[]
 	for id:String in payload.actors:
 		var saved:Dictionary=payload.actors[id]
@@ -459,6 +461,8 @@ func _restore_state(payload:Dictionary)->Dictionary:
 		)
 	if not failures.is_empty():return {"error":"; ".join(failures)}
 	enabled=bool(payload.enabled)
+	# Older saves omitted the human observer view. Rebuild it before rivals act.
+	if enabled and human_projection.is_empty():refresh_projections()
 	return {"ok":true}
 
 func advance_day(day:int,daily_context:Dictionary,construction:Callable=Callable())->Dictionary:
