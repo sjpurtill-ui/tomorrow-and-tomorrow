@@ -1,0 +1,9 @@
+{
+  "id": "geometric_survey",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Geometric Survey. Show a concrete, visually clear scene demonstrating this exact practice: Angles, baselines, and repeatable procedures turn land measurement into geometry. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-d48dccf4-979b-4001-b833-d624d6aaff48.png",
+  "asset": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+  "sha256": "48cad53888d09e5032fd5fc72fc64918bfec8ccc63d6927b7f10810b8c236717",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

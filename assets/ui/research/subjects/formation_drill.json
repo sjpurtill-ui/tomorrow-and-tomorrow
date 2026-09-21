@@ -1,0 +1,9 @@
+{
+  "id": "formation_drill",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Formation Drill. A modest early group practices keeping spacing and turning together under a leader's hand signal. Simple wooden staffs and rough clothing; cohesive motion, no battle, polished armor or metal weapons.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-4c536ea2-342d-4d8e-b59e-408dfdcde433.png",
+  "asset": "res://assets/ui/research/subjects/formation_drill-v1.png",
+  "sha256": "24a2417defd6f283693fa0a5f786c27bcbf61c060820d872440611ad1f213444",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

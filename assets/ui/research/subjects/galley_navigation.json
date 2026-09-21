@@ -1,0 +1,9 @@
+{
+  "id": "galley_navigation",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Galley Navigation. Show a concrete, visually clear scene demonstrating this exact practice: Develop and demonstrate galley navigation through trained crews, reliable equipment and repeatable supply. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-4cd14084-06d4-4a1b-bd68-706148fb1d7c.png",
+  "asset": "res://assets/ui/research/subjects/galley_navigation-v1.png",
+  "sha256": "022a697f626e272b8cc78af3833a9af5ae9987cfccc03e5347f30074720cc488",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

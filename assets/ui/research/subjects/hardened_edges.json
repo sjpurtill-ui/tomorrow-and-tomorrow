@@ -1,0 +1,9 @@
+{
+  "id": "hardened_edges",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Hardened Iron Edges. A traditional smith quenches only the cutting edge of a forged iron blade while the body remains warm; close on edge and rising steam, no modern rifle.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-01705436-5183-4ee8-a2c5-845486a2da82.png",
+  "asset": "res://assets/ui/research/subjects/hardened_edges-v1.png",
+  "sha256": "383a3b8a092a2bfd33dc6281a156031f26772f69496117658521b0c89ea8dd3c",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

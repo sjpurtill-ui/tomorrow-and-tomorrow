@@ -1,0 +1,9 @@
+{
+  "id": "hafted_weapons",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Hafted Weapons. Show a concrete, visually clear scene demonstrating this exact practice: Tool hafting is adapted into balanced thrusting weapons whose bindings survive repeated impact. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-240c65f3-d840-466c-8a8a-059f3fb3c0f9.png",
+  "asset": "res://assets/ui/research/subjects/hafted_weapons-v1.png",
+  "sha256": "1259fbd4df3772b73067563451bddb4afd2f1a09f765fca578602569f3d677a4",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
