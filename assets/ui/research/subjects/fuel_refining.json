@@ -1,0 +1,10 @@
+{
+  "id": "fuel_refining",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Liquid Fuel Refining. An early industrial petroleum refinery with distinct distillation towers, connecting pipes and storage tanks at dawn, engineers small for scale; no coal mine or nuclear station. Industrial era equipment and clothing, no ancient city or peasant tunics. Paint an identifiable subject rather than a technical construction diagram.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-34dac802-2f26-462c-8f56-353c4551f5c0.png",
+  "asset": "res://assets/ui/research/subjects/fuel_refining-v1.png",
+  "sha256": "d682fa517f16eeeba7d526908fb645a9c0f517ddfadb6d85c8076b47497fecf0",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Distinct distillation columns, pipework and petroleum storage."
+}

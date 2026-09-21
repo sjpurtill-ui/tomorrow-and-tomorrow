@@ -1,0 +1,10 @@
+{
+  "id": "graphite_crucibles",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Graphite Crucibles. A thick dark graphite crucible holding glowing molten material is lifted from a small foundry furnace; close texture of the heat-resistant vessel, no pottery wheel.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-3c28b2b6-b2de-4e13-9334-11575593368a.png",
+  "asset": "res://assets/ui/research/subjects/graphite_crucibles-v1.png",
+  "sha256": "59b2cd4f40c2757271865801eacfc22635d168d403a84f0b1ec89e7f31ba29cc",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Dark heat-resistant vessels and glowing charge remain fully visible, distinct from pottery."
+}
