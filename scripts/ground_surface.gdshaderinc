@@ -23,14 +23,32 @@ vec3 apply_climate_surface(vec3 earth,vec2 point,vec2 origin,float pixel_world,f
 	float dry = 1.0-smoothstep(0.22,0.48,rain);
 	float cold = 1.0-smoothstep(0.13,0.27,warm);
 	float fine = 1.0-smoothstep(0.0008,0.0025,pixel_world);
-	float grain = (precise_surface_noise(point,origin,110,1,vec2(0.0))-0.5)*0.11*fine;
+	float surface_grain = precise_surface_noise(point,origin,110,1,vec2(0.0));
+	float grain = (surface_grain-0.5)*0.11*fine;
 	float soil_mass = precise_surface_noise(point,origin,5,1,vec2(0.0))*0.5+precise_surface_noise(point,origin,17,1,vec2(0.0))*0.5;
 	float soil_detail = 1.0-smoothstep(0.02,0.10,pixel_world);
 	vec3 soil = mix(vec3(0.365,0.29,0.18),vec3(0.51,0.445,0.32),fields.z);
 	soil = mix(soil,vec3(0.31,0.32,0.30),cold*0.72);
 	soil *= 0.96+(soil_mass-0.5)*0.22*soil_detail+grain;
+	// Arid open ground exposes the parent material. Preserve separate warm
+	// sedimentary, dark volcanic and cool metamorphic soil families instead of
+	// tinting the same grass photograph brown. These are surface tones, not new
+	// exposed deposits, dunes, cracks, watercourses or terrain geometry.
+	float arid_detail=dry*(1.0-cold)*(1.0-smoothstep(0.018,0.10,pixel_world));
+	if (arid_detail>0.0) {
+		float weathering=smoothstep(0.24,0.78,soil_mass);
+		vec3 sediment_soil=mix(vec3(0.315,0.235,0.13),vec3(0.60,0.50,0.32),weathering);
+		vec3 volcanic_soil=mix(vec3(0.15,0.15,0.14),vec3(0.40,0.385,0.335),weathering);
+		vec3 metamorphic_soil=mix(vec3(0.245,0.245,0.215),vec3(0.49,0.47,0.39),weathering);
+		vec3 parent_soil=sediment_soil*fields.z+volcanic_soil*fields.w+metamorphic_soil*max(0.0,1.0-fields.z-fields.w);
+		// Reuse the existing three world-anchored noise samples. The broad
+		// 60–200 m tones represent surface mixtures, never giant individual rocks.
+		float resolved_grain=1.0-smoothstep(0.001,0.006,pixel_world);
+		parent_soil*=1.0+(surface_grain-0.5)*0.20*resolved_grain;
+		soil=mix(soil,parent_soil,arid_detail);
+	}
 	// Do not turn wet grassland or existing woodland into a decorative desert.
-	earth = mix(earth,soil,dry*(1.0-forest_mask)*0.62);
+	earth = mix(earth,soil,dry*(1.0-forest_mask)*(0.62+arid_detail*0.24));
 	float damp = smoothstep(0.62,0.88,rain)*(1.0-forest_mask);
 	earth *= 1.0-damp*0.10;
 	return earth;
