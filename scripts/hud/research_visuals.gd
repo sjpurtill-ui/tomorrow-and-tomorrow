@@ -2,33 +2,37 @@ extends RefCounted
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const NAMES:={"demography":"People & homes","nutrition":"Food & farming","health":"Health & care","labor":"Work & tools","knowledge":"Learning & records","production":"Craft & industry","infrastructure":"Water & building","logistics":"Transport & supply","ecology":"Land & nature","institutions":"Government","security":"Defense","culture":"Culture & memory"}
 const COLORS:={"demography":Color("cf9c78"),"nutrition":Color("adbb77"),"health":Color("92c1ab"),"labor":Color("d5b57d"),"knowledge":Color("9db9d7"),"production":Color("d6a36d"),"infrastructure":Color("90bccc"),"logistics":Color("b7af83"),"ecology":Color("84b895"),"institutions":Color("baa2cd"),"security":Color("d28c7c"),"culture":Color("c29cb0")}
-# Explicit topic assignments; never infer a specific invention from its broad field.
-const DISCOVERY_ART:={"stone_sorting":"stone-selection-v1"}
+const Painting=preload("res://scripts/hud/subject_painting.gd")
+const ART_MANIFEST="res://assets/ui/research/subject-art-manifest.json"
+const CACHE_LIMIT:=64
+static var assignments:Dictionary={}
 static var textures:Dictionary={}
+static func manifest()->Dictionary:
+	if assignments.is_empty():assignments=JSON.parse_string(FileAccess.get_file_as_string(ART_MANIFEST))
+	return assignments
 static func art(domain:String)->Texture2D:
-	if not textures.has(domain):
-		var path:="res://assets/ui/research/%s-v1.png" % domain
-		textures[domain]=load(path) if ResourceLoader.exists(path) else null
-	return textures[domain]
+	# Field art is used only for a field overview, never as a discovery fallback.
+	return texture_at("res://assets/ui/research/%s-v1.png" % domain)
+static func texture_at(path:String)->Texture2D:
+	if path.is_empty() or not ResourceLoader.exists(path):return null
+	if textures.has(path):
+		var existing:Texture2D=textures[path];textures.erase(path);textures[path]=existing;return existing
+	if textures.size()>=CACHE_LIMIT:textures.erase(textures.keys()[0])
+	textures[path]=load(path);return textures[path]
 static func subject_art_key(item:Dictionary)->String:
 	if not bool(item.get("exposed",true)):return ""
-	return DISCOVERY_ART.get(String(item.get("id","")),"")
+	return String(manifest().get(String(item.get("id","")),{}).get("path",""))
+static func focus_for(item:Dictionary)->Vector2:
+	var point:Array=manifest().get(String(item.get("id","")),{}).get("focus",[.5,.5])
+	return Vector2(float(point[0]),float(point[1]))
 static func for_discovery(item:Dictionary)->Texture2D:
-	var key:=subject_art_key(item)
-	if key=="":return art(String(item.get("domain",item.get("dynamic","knowledge"))))
-	if not textures.has(key):textures[key]=load("res://assets/ui/research/%s.png" % key)
-	return textures[key]
-static func paint_discovery(parent:Node,item:Dictionary,height:float=96)->TextureRect:
-	var image:=paint(parent,String(item.get("domain",item.get("dynamic","knowledge"))),height)
-	image.texture=for_discovery(item)
-	if subject_art_key(item)=="":
-		var caption:=label(image,"FIELD ILLUSTRATION",10,T.INK)
-		caption.name="FieldIllustrationCaption";caption.position=Vector2(8,8)
-		caption.add_theme_stylebox_override("normal",T.flat(Color(0.035,.065,.075,.9),Color.TRANSPARENT,0,3,5))
-		caption.text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING
-		caption.custom_minimum_size=Vector2(ceilf(caption.get_theme_font("font").get_string_size(caption.text,HORIZONTAL_ALIGNMENT_LEFT,-1,10).x)+12,22)
-		caption.size=caption.custom_minimum_size
-	return image
+	return texture_at(subject_art_key(item))
+static func crop_region(texture:Texture2D,target:Vector2,focus:Vector2)->Rect2:
+	return Painting.crop_region(texture,target,focus)
+static func paint_discovery(parent:Node,item:Dictionary,height:float=96)->Control:
+	var image:=Painting.new();image.texture=for_discovery(item);image.focus=focus_for(item)
+	image.custom_minimum_size.y=height;image.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	parent.add_child(image);return image
 static func color(domain:String)->Color:return COLORS.get(domain,T.TEAL)
 static func name_for(domain:String)->String:return NAMES.get(domain,domain.capitalize())
 static func team(item:Dictionary)->float:

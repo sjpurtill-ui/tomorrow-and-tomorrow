@@ -11,18 +11,18 @@ func settle()->void:
 func run()->void:
 	GameState.reset_for_new_world(314159);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	for node:Node in [GameState,CivilizationSystem,MilitaryCampaign]:node.set_process(false)
-	GameState.known_discoveries.append_array(["stone_sorting","clay_shaping"])
+	GameState.known_discoveries.append_array(["stone_sorting","clay_shaping","oral_epics"])
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://artifacts/discovery-art/"))
 	var errors:=0
 	for dimensions:Vector2i in [Vector2i(1200,900),Vector2i(800,600)]:
 		var canvas:=SubViewport.new();canvas.size=dimensions;canvas.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(canvas)
 		var host:=Host.new();canvas.add_child(host);var hud:=Control.new();host.add_child(hud)
-		for id:String in ["stone_sorting","clay_shaping"]:
+		for id:String in ["stone_sorting","clay_shaping","oral_epics"]:
 			var popup:=DiscoveryNotice.announce(host,hud,[{"id":id,"day":1129}]);await settle()
 			var inside:=Rect2(Vector2.ZERO,Vector2(dimensions)).encloses(popup.next_button.get_global_rect())
 			if not inside:errors+=1
 			if id=="stone_sorting" and popup.hero.texture.resource_path!="res://assets/ui/research/stone-selection-v1.png":errors+=1
-			if id=="clay_shaping" and popup.hero.get_node("FieldIllustrationCaption").size.x<90:errors+=1
+			if popup.hero.get_node_or_null("FieldIllustrationCaption")!=null:errors+=1
 			if host.game_speed!=0:errors+=1
 			canvas.get_texture().get_image().save_png("res://artifacts/discovery-art/%s-%d.png" % [id,dimensions.x])
 			print("DISCOVERY_ART ",id," ",dimensions," artwork=",popup.hero.texture.resource_path," controls_inside=",inside)

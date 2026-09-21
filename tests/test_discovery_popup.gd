@@ -64,13 +64,14 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	assert_str(popup.effect_cards.survey_speed.value.text).is_equal("+3%")
 	assert_str(popup.effect_cards.tool_quality.value.text).is_equal("+4%")
 	popup.close()
-func test_generic_art_is_labeled_and_hidden_questions_do_not_reveal_subject_art()->void:
+func test_subject_art_never_falls_back_to_a_field_or_reveals_hidden_questions()->void:
 	var Art=preload("res://scripts/hud/research_visuals.gd")
 	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
-	assert_str(popup.hero.get_node("FieldIllustrationCaption").text).is_equal("FIELD ILLUSTRATION")
-	assert_float(popup.hero.get_node("FieldIllustrationCaption").size.x).is_greater(90.0)
+	assert_str(popup.hero.texture.resource_path).is_equal("res://assets/ui/research/subjects/food_drying-v1.png")
+	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
 	var hidden:={"id":"stone_sorting","domain":"production","exposed":false}
 	assert_str(Art.subject_art_key(hidden)).is_empty()
-	assert_str(Art.for_discovery(hidden).resource_path).is_equal("res://assets/ui/research/production-v1.png")
-	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).is_equal("res://assets/ui/research/production-v1.png")
+	assert_object(Art.for_discovery(hidden)).is_null()
+	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).is_equal("res://assets/ui/research/subjects/clay_shaping-v1.png")
+	assert_object(Art.for_discovery({"id":"unknown_subject","domain":"production","exposed":true})).is_null()
 	popup.close()
