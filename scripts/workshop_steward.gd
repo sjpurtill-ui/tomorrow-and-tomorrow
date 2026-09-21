@@ -10,7 +10,7 @@ func _init(campaign:Node)->void:
 	host=campaign
 	reset()
 func reset()->void:
-	data={"enabled":true,"last_day":-1,"status":"Staff review workshop needs each day.","receipts":[],"tracking_day":-1}
+	data={"enabled":true,"last_day":-1,"status":"Staff review workshop needs each day.","receipts":[],"totals":{},"tracking_day":-1}
 func owner()->String:
 	for office:String in ["Quartermaster","Steward"]:
 		var person:Dictionary=WorldSimulation.government.officeholder(office)
@@ -135,19 +135,41 @@ func output_stocks(job:Dictionary)->Dictionary:
 func record(job:Dictionary,before:Dictionary)->void:
 	var day:=int(WorldSimulation.state.elapsed_days)
 	if int(data.tracking_day)<0:data.tracking_day=day
+	var city_id:=String(WorldSimulation.state.resource_settlement_id)
+	var city_name:=String(WorldSimulation.state.settlement_name)
+	if city_id.is_empty():
+		for city:Dictionary in WorldSimulation.state.player_settlements:
+			if bool(city.get("primary",false)):city_id=String(city.id);city_name=String(city.name);break
 	var after:=output_stocks(job)
 	for resource:String in after:
 		var amount:=float(after[resource])-float(before.get(resource,after[resource]))
 		if amount<=.0000001:continue
+		var entry:={"day":day,"item":String(job.item),"resource":resource,"kind":String(job.get("job_type","production")),"quantity":amount,"settlement_id":city_id,"settlement_name":city_name}
+		_add_total(data.totals,entry)
 		var combined:=false
 		for receipt:Dictionary in data.receipts:
-			if int(receipt.day)==day and String(receipt.item)==String(job.item) and String(receipt.resource)==resource and String(receipt.kind)==String(job.get("job_type","production")):
+			if String(receipt.get("settlement_id",""))==city_id and int(receipt.day)==day and String(receipt.item)==String(job.item) and String(receipt.resource)==resource and String(receipt.kind)==String(job.get("job_type","production")):
 				receipt.quantity=float(receipt.quantity)+amount;combined=true;break
-		if not combined:data.receipts.push_front({"day":day,"item":String(job.item),"resource":resource,"kind":String(job.get("job_type","production")),"quantity":amount})
+		if not combined:data.receipts.push_front(entry)
 	while data.receipts.size()>MAX_RECEIPTS:data.receipts.pop_back()
 func restore(payload:Dictionary)->void:
 	reset()
 	data.merge(payload.duplicate(true),true)
+	if not payload.has("totals"):
+		for receipt:Dictionary in data.receipts:_add_total(data.totals,receipt)
+static func _add_total(totals:Dictionary,receipt:Dictionary)->void:
+	var key:=JSON.stringify([receipt.get("settlement_id",""),receipt.kind,receipt.resource])
+	if not totals.has(key):totals[key]=receipt.duplicate(true);totals[key].quantity=0.0
+	totals[key].quantity=float(totals[key].quantity)+float(receipt.quantity)
+	if int(receipt.day)>=int(totals[key].day):
+		totals[key].day=receipt.day
+		totals[key]["settlement_name"]=receipt.get("settlement_name","Settlement not recorded")
+static func history_totals(receipts:Array,totals:Dictionary={})->Array:
+	if not totals.is_empty():return totals.values()
+	var reconstructed:Dictionary={}
+	for receipt:Dictionary in receipts:_add_total(reconstructed,receipt)
+	return reconstructed.values()
+
 static func validate(payload:Variant)->String:
 	if not payload is Dictionary:return "Invalid workshop management."
 	if not payload.get("enabled",true) is bool:return "Invalid workshop delegation."
@@ -156,10 +178,13 @@ static func validate(payload:Variant)->String:
 		if not (value is int or value is float) or not is_finite(float(value)) or float(value)<-1 or float(value)!=floorf(float(value)):return "Invalid workshop date."
 	if not payload.get("status","") is String:return "Invalid workshop status."
 	if not payload.get("receipts",[]) is Array or payload.get("receipts",[]).size()>MAX_RECEIPTS:return "Invalid workshop receipts."
-	for receipt:Variant in payload.get("receipts",[]):
+	if not payload.get("totals",{}) is Dictionary:return "Invalid production totals."
+	for receipt:Variant in payload.get("receipts",[])+payload.get("totals",{}).values():
 		if not receipt is Dictionary:return "Invalid workshop receipt."
 		for key:String in ["item","resource","kind"]:
 			if not receipt.get(key,"") is String or String(receipt.get(key,"")).is_empty():return "Invalid workshop product."
+		for field:String in ["settlement_id","settlement_name"]:
+			if receipt.has(field) and not receipt[field] is String:return "Invalid production settlement."
 		for key:String in ["day","quantity"]:
 			var value:Variant=receipt.get(key,null)
 			if not (value is int or value is float) or not is_finite(float(value)) or float(value)<0:return "Invalid workshop output."

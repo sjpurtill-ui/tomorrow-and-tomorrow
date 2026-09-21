@@ -83,7 +83,7 @@ func refresh(editors:bool=false)->void:
 	var data:=WorldSimulation.military.production_lines_snapshot()
 	summary.text="SHARED WORKSHOPS · %d / %d lines\n%s\n%s" % [data.lines.size(),int(data.capacity),WorldSimulation.military.workshop.owner(),String(WorldSimulation.military.workshop.data.status)]
 	if not board.get_global_rect().has_point(board.get_global_mouse_position()) or editors:
-		board.setup({"lines":data.lines,"receipts":WorldSimulation.military.workshop.data.receipts,"day":int(WorldSimulation.state.elapsed_days),"view_state":board_state,"on_open":func(id:int):
+		board.setup({"lines":data.lines,"receipts":WorldSimulation.military.workshop.data.receipts,"totals":WorldSimulation.military.workshop.data.totals,"day":int(WorldSimulation.state.elapsed_days),"view_state":board_state,"on_open":func(id:int):
 			for index:int in line_choice.item_count:
 				if int(line_choice.get_item_metadata(index))==id:line_choice.select(index)
 			manual.show();refresh(true)})

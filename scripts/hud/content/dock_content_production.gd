@@ -33,7 +33,7 @@ func _action(id:int,action:String,value:float)->void:
 		break
 	terrain._report_military_action(result);hud.request_immediate_dock_refresh()
 func _history()->Dictionary:
-	return {"blocks":[{"type":"production_board","lines":[],"receipts":MilitaryCampaign.workshop.data.receipts,"day":int(GameState.elapsed_days),"view_state":{"mode":1}}]}
+	return {"blocks":[{"type":"production_board","lines":[],"receipts":MilitaryCampaign.workshop.data.receipts,"totals":MilitaryCampaign.workshop.data.totals,"day":int(GameState.elapsed_days),"view_state":{"mode":1}}]}
 func signature()->Array:
 	return [MilitaryCampaign.production_lines_snapshot(),GameState.elapsed_days,selected_line,MilitaryCampaign.workshop.data.enabled]
 

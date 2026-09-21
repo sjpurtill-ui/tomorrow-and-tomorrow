@@ -602,7 +602,7 @@ func _production_overview()->Dictionary:
 	var data:=MilitaryCampaign.production_lines_snapshot()
 	var manager=MilitaryCampaign.workshop
 	return {"blocks":[{"type":"text","heading":"SHARED WORKSHOPS · %d / %d LINES" % [data.lines.size(),int(data.capacity)],"text":("MANAGED · " if bool(manager.data.enabled) else "MANUAL · ")+manager.owner()+"\n"+String(manager.data.status)},
-		{"type":"production_board","lines":data.lines,"receipts":manager.data.receipts,"day":int(GameState.elapsed_days),"view_state":production_view,"on_open":func(id:int):
+		{"type":"production_board","lines":data.lines,"receipts":manager.data.receipts,"totals":manager.data.totals,"day":int(GameState.elapsed_days),"view_state":production_view,"on_open":func(id:int):
 			var action:=focused_action("PRODUCTION ORDER","Workshop detail",_workshop_job_report.bind(id))
 			(action.on_press as Callable).call()},
 		{"type":"actions","items":[focused_action("MANAGEMENT","Delegate routine scheduling or override it",_workshop_management_report),focused_action("ADD ORDER","Choose a product and stock target",_equipment_catalog)]}]}

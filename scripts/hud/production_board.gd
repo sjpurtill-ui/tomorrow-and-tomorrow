@@ -28,16 +28,17 @@ func _rebuild()->void:
 		button.pressed.connect(func():mode=index;view.get("view_state",{})["mode"]=index;_rebuild())
 		tabs.add_child(button)
 	if mode==1:
-		add_child(_label("ADDED TO STORES · LATEST 30 DAYS",10,T.GOLD))
-		var totals:Dictionary={}
-		for receipt:Dictionary in view.get("receipts",[]):
-			if int(receipt.day)<int(view.get("day",0))-29:continue
-			var key:=String(receipt.kind)+":"+String(receipt.resource)
-			if not totals.has(key):totals[key]=receipt.duplicate(true);totals[key].quantity=0.0
-			totals[key].quantity=float(totals[key].quantity)+float(receipt.quantity)
-		for receipt:Dictionary in totals.values():_receipt(receipt)
-		if totals.is_empty():add_child(_label("No completed output recorded yet. Existing stock is not counted as new production.",12,T.MUTED))
-		add_child(_label("Actual additions, including co-products; repairs are marked separately. Issued or consumed goods remain in this record. Up to 256 daily product entries are retained.",10,T.MUTED))
+		add_child(_label("RECORDED OUTPUT BY SETTLEMENT",14,T.GOLD))
+		var totals:=preload("res://scripts/workshop_steward.gd").history_totals(view.get("receipts",[]),view.get("totals",{}))
+		totals.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return String(a.get("settlement_name","Settlement not recorded"))+String(a.resource)<String(b.get("settlement_name","Settlement not recorded"))+String(b.resource))
+		var previous:=""
+		for receipt:Dictionary in totals:
+			var city:=String(receipt.get("settlement_name","Settlement not recorded"))
+			if city.is_empty():city="Settlement not recorded"
+			if city!=previous:add_child(_label(city,18,T.INK));previous=city
+			_receipt(receipt)
+		if totals.is_empty():add_child(_label("No completed workshop output recorded yet.",12,T.MUTED))
+		add_child(_label("Quantities produced, including goods since issued or consumed. Repairs are listed separately. Totals begin with retained records; earlier unrecorded production cannot be reconstructed.",11,T.MUTED))
 		return
 	var count:=0
 	for line:Dictionary in view.get("lines",[]):
@@ -93,4 +94,4 @@ func _receipt(receipt:Dictionary)->void:
 	body.add_child(_label(String(receipt.resource) if receipt.kind=="civilian" else P.product_name(String(receipt.item)),13,T.INK))
 	var day:=int(receipt.day)
 	body.add_child(_label(("Repaired · " if receipt.kind=="repair" else "Last output · ")+"Year %d, Day %d" % [day/365+1,day%365+1],10,T.MUTED))
-	row.add_child(T.make_label("+%.1f" % float(receipt.quantity),20,T.GREEN))
+	row.add_child(T.make_label(str(snappedf(float(receipt.quantity),.001)),20,T.GREEN))

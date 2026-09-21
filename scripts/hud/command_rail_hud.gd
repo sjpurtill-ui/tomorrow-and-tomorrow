@@ -712,7 +712,7 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	dock.present(providers[section],sub)
 	set_active_section(section)
 	_layout()
-	_dock_signature=(providers[section] as Object).signature()+[sub]
+	_dock_signature=(providers[section] as Object).signature().duplicate(true)+[sub]
 	dock.visible=true
 	if not was_open:
 		# Slide in from the rail edge over 160 ms.
@@ -739,7 +739,7 @@ func open_detail(provider:Object,sub:int=0)->void:
 	_layout()
 	detail_dock.present(provider,sub)
 	if not returning.is_empty():detail_dock.body_scroll.set_deferred("scroll_vertical",returning.scroll)
-	_detail_signature=(provider as Object).signature()+[sub]
+	_detail_signature=(provider as Object).signature().duplicate(true)+[sub]
 	detail_dock.visible=true
 
 func close_detail()->void:
@@ -748,7 +748,7 @@ func close_detail()->void:
 		var previous:Dictionary=detail_history.pop_back()
 		detail_dock.present(previous.provider,previous.sub)
 		detail_dock.body_scroll.set_deferred("scroll_vertical",previous.scroll)
-		_detail_signature=previous.provider.signature()+[previous.sub]
+		_detail_signature=previous.provider.signature().duplicate(true)+[previous.sub]
 		return
 	detail_dock.visible=false
 	dock.visible=active_section!="" and dock.provider!=null
@@ -758,12 +758,12 @@ func live_refresh_dock()->void:
 	## Called on the terrain's 0.75s live-report tick; rebuilds the dock body
 	## only when the active provider's signature changes.
 	if dock and dock.visible and dock.provider and not _dock_interaction_active(dock):
-		var signature:Array=(dock.provider as Object).signature()+[dock.sub]
+		var signature:Array=(dock.provider as Object).signature().duplicate(true)+[dock.sub]
 		if signature.hash()!=_dock_signature.hash():
 			_dock_signature=signature
 			dock.rebuild_body()
 	if detail_dock and detail_dock.visible and detail_dock.provider and not _dock_interaction_active(detail_dock):
-		var detail_signature:Array=(detail_dock.provider as Object).signature()+[detail_dock.sub]
+		var detail_signature:Array=(detail_dock.provider as Object).signature().duplicate(true)+[detail_dock.sub]
 		if detail_signature.hash()!=_detail_signature.hash():
 			_detail_signature=detail_signature
 			detail_dock.rebuild_body()
@@ -771,18 +771,18 @@ func live_refresh_dock()->void:
 
 func request_immediate_dock_refresh()->void:
 	## Player actions are different from background simulation refreshes. The
-	## background path waits until the pointer leaves the dock so controls never
-	## move underneath a click; an action that has already completed must redraw
+	## background path waits during active clicks or text editing; an action
+	## that has already completed must redraw
 	## immediately. Defer one frame so the emitting button/row can finish safely.
 	call_deferred("_refresh_active_dock_after_action")
 
 
 func _refresh_active_dock_after_action()->void:
 	if detail_dock and detail_dock.visible and detail_dock.provider:
-		_detail_signature=detail_dock.provider.signature()+[detail_dock.sub]
+		_detail_signature=detail_dock.provider.signature().duplicate(true)+[detail_dock.sub]
 		detail_dock.rebuild_body()
 	elif dock and dock.visible and dock.provider:
-		_dock_signature=dock.provider.signature()+[dock.sub]
+		_dock_signature=dock.provider.signature().duplicate(true)+[dock.sub]
 		dock.rebuild_body()
 
 # --- Refresh ----------------------------------------------------------------
@@ -799,14 +799,11 @@ func _unhandled_key_input(event:InputEvent)->void:
 		get_viewport().set_input_as_handled()
 
 func _dock_interaction_active(panel:Control)->bool:
-	## Never rebuild while the player is mid-typing in a dock input, and never
-	## rebuild under the pointer: destroying the hovered control closes its
-	## tooltip instantly and can pull a button out from under a click. The body
-	## refreshes on the next tick after the pointer leaves the panel.
-	if panel.get_global_rect().has_point(panel.get_global_mouse_position()): return true
+	## Hovering must not freeze progress. Protect an active click or text edit only.
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT): return true
 	for editor_variant in panel.find_children("*","LineEdit",true,false):
 		var editor:=editor_variant as LineEdit
-		if editor and (editor.has_focus() or not editor.text.strip_edges().is_empty()): return true
+		if editor and editor.has_focus(): return true
 	return false
 
 func handle_escape()->bool:
