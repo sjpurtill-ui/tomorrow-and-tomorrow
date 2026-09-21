@@ -1,0 +1,9 @@
+{
+  "id": "salt_working",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Salt Working. Shallow coastal evaporation pans with white salt crystals, workers scraping and gathering the dried salt into baskets; bright reflective water and mineral crust, no snowy landscape.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-1bcf7704-667b-482c-ac68-981ea3b31f57.png",
+  "asset": "res://assets/ui/research/subjects/salt_working-v1.png",
+  "sha256": "91af58ae177bfcc123f77caaeb423c74f5dd9009e558e8f008bf39592c636167",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

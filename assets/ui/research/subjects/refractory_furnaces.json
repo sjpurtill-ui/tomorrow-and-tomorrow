@@ -1,0 +1,10 @@
+{
+  "id": "refractory_furnaces",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Refractory Furnaces. A furnace builder fits thick pale refractory bricks into a cutaway furnace lining, distinct heat-resistant inner wall and outer shell visible; no metal pouring scene.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-5c5a2ec6-15c1-43f1-b0fd-7644ad1cbe6a.png",
+  "asset": "res://assets/ui/research/subjects/refractory_furnaces-v1.png",
+  "sha256": "ac925f47982f5a091814daa2f00808f44bdcf099ed9f5cdef047ddd50c55176e",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Pale heat-resistant inner lining and darker outer shell remain clearly distinct; full composition approved."
+}

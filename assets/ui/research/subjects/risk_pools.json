@@ -1,0 +1,10 @@
+{
+  "id": "risk_pools",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Mutual Risk Pools. Show a concrete, visually clear scene demonstrating this exact practice: Many households contribute to reserves that absorb rare fires, deaths, wrecks, and failed harvests. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Households contribute small purses and grain sacks to a communal reserve chest while a clerk records shares; at the other side of the same table, reserve supplies are handed to a family whose burned house can be seen in the distance.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-3d36ad0c-38c1-4c35-b058-b71121ec27e1.png",
+  "asset": "res://assets/ui/research/subjects/risk_pools-v1.png",
+  "sha256": "3422cddb5cb667b2ecfae02e9b54c9272d2533208b217322872f626c391c1f8e",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Shared contributions and relief distribution are visible in one connected scene."
+}
