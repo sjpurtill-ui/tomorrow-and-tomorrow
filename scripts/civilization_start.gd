@@ -30,8 +30,17 @@ static func choose(origin:Vector2,ground:Callable)->Vector2:
 			if float(sample.get("height",-1))<=.02 or float(sample.get("slope",1))>.48:continue
 			if not bool(sample.get("founding_valid",true)):continue
 			if sample.has("environment_profile") and not supports_founders(sample.environment_profile):continue
+			if sample.has("surface_material_catchments") and not supports_founding_materials(sample.surface_material_catchments):continue
 			var water:=float(sample.get("river_distance_km",INF))
 			if water>6:continue
 			var value:=radius*.02+water*3.0+float(sample.get("slope",0))*12.0-float(sample.get("fertility",0))
 			if value<score:score=value;best=point
 	return best
+
+static func supports_founding_materials(fields:Dictionary)->bool:
+	# The inherited generalist kit depends on wood handles, stone tools and
+	# bindings. Generated starts need actual working catchments, not macro-map
+	# potential. Later deliberate settlement may depend on trade or substitutes.
+	for item:String in ["Timber","Stone","Fiber Plants"]:
+		if float(fields.get(item,{}).get("density",0))<(.03 if item=="Stone" else .08):return false
+	return true

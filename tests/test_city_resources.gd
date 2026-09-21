@@ -197,3 +197,26 @@ func test_finished_conduits_travel_before_secondary_installation()->void:
 	assert_array(water.data().lines).is_empty()
 	assert_bool("wooden_log_conduits" in GameState.known_discoveries).is_false()
 	WorldSimulation.context_provider=previous
+
+func test_arrived_timber_is_available_to_daily_household_work()->void:
+	MilitaryCampaign.reset_for_new_world()
+	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
+	EconomySystem.reset_for_new_world();EconomySystem.initialize()
+	ConsequenceEngine.reset_for_new_world();ConsequenceEngine.initialize()
+	GameState.resource_stockpiles.Timber=0.0
+	GameState.resource_stockpiles["Hafted Tool Sets"]=0.0
+	GameState.resource_stockpiles["Flaked Stone Tools"]=10.0
+	GameState.resource_stockpiles["Cordage Bundles"]=10.0
+	GameState.population_allocations.Crafting=20
+	var primary:=String(GameState.player_settlements[0].id)
+	GameState.city_trade_shipments=[{"id":999,"source_id":"dawngate","destination_id":primary,"resource":"Timber","quantity":2.0,"travel_days":1.0,"arrival_day":1.0}]
+	var observed:={"tools_before_construction":0.0}
+	var context:Dictionary=preload("res://scripts/civilization_day.gd").context(Vector2.ZERO)
+	context.settled=true;context.surface_water_distance_km=.1;context.surface_water_recognized=true
+	preload("res://scripts/civilization_day.gd").advance(1,context,func()->void:
+		if GameState.resource_settlement_id.is_empty():observed.tools_before_construction=float(GameState.resource_stockpiles.get("Hafted Tool Sets",0)))
+	assert_float(float(observed.tools_before_construction)).is_greater(0.0)
+	var timber:=float(GameState.resource_stockpiles.Timber)
+	SettlementModel.receive_city_trade_arrivals()
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(timber)
+	assert_float(timber).is_less(2.0)

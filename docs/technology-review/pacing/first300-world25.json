@@ -1,0 +1,320 @@
+{
+  "actors": [
+    {
+      "cities": 2,
+      "discoveries": 38,
+      "food_days": 124.761427478756,
+      "id": "player",
+      "population": 164,
+      "production": {
+        "available_civilian_recipes": 15,
+        "civilian_lines": 0,
+        "delivery_shortage": false,
+        "food_shortage": false,
+        "household_stocks": {
+          "Cordage Bundles": 5.25831196052377,
+          "Drying Mats": 3.28670019301114,
+          "Joined Timber Components": 3.17708333299258e-08,
+          "Unfired Clay Vessels": 3.94404023161337,
+          "Woven Containers": 3.28670019301114
+        },
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "military_capabilities": {
+          "bow": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "improvised": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 3,
+            "recipe_known": true,
+            "stored": 0
+          },
+          "lance": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "siege_kit": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "spear": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": true,
+            "stored": 0
+          }
+        },
+        "operations_ledger_current": true,
+        "production_food_blocked": false,
+        "recorded_output": {
+          "Cordage Bundles": 491.81835208261,
+          "Drying Mats": 379.400913344813,
+          "Flaked Stone Tools": 22.8933624914244,
+          "Hafted Tool Sets": 18.8383906161912,
+          "Joined Timber Components": 12.0731660882129,
+          "Unfired Clay Vessels": 504.157257269579,
+          "Woven Containers": 100.772480191559,
+          "improvised": 27.0
+        },
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "cities": 1,
+      "discoveries": 30,
+      "food_days": 35.1386326590976,
+      "id": "civ_01",
+      "population": 189,
+      "production": {
+        "available_civilian_recipes": 7,
+        "civilian_lines": 0,
+        "delivery_shortage": false,
+        "food_shortage": false,
+        "household_stocks": {
+          "Cordage Bundles": 9.07109748414145,
+          "Drying Mats": 5.66987564988135,
+          "Joined Timber Components": 1.73373020406047e-08,
+          "Woven Containers": 5.66987564988135
+        },
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "military_capabilities": {
+          "bow": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "improvised": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": true,
+            "stored": 0
+          },
+          "lance": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "siege_kit": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "spear": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 5,
+            "recipe_known": true,
+            "stored": 0
+          }
+        },
+        "operations_ledger_current": true,
+        "production_food_blocked": false,
+        "recorded_output": {
+          "improvised": 10.0,
+          "spear": 21.0
+        },
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "cities": 3,
+      "discoveries": 37,
+      "food_days": 138.621354912112,
+      "id": "civ_02",
+      "population": 181,
+      "production": {
+        "available_civilian_recipes": 6,
+        "civilian_lines": 0,
+        "delivery_shortage": false,
+        "food_shortage": false,
+        "household_stocks": {
+          "Cordage Bundles": 3.83618728422063,
+          "Drying Mats": 2.39801762313934,
+          "Flaked Stone Tools": 2.87641943626288,
+          "Hafted Tool Sets": 1.91828000617358,
+          "Joined Timber Components": 1.4388105738836,
+          "Unfired Clay Vessels": 2.8776211477672
+        },
+        "installed_units": 0,
+        "manufactured_stock_kinds": 0,
+        "military_capabilities": {
+          "bow": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "improvised": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 5,
+            "recipe_known": true,
+            "stored": 1
+          },
+          "lance": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "siege_kit": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "spear": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": true,
+            "stored": 0
+          }
+        },
+        "operations_ledger_current": true,
+        "production_food_blocked": false,
+        "recorded_output": {
+          "improvised": 20.0,
+          "javelin": 39.0
+        },
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    },
+    {
+      "cities": 2,
+      "discoveries": 35,
+      "food_days": 126.584443099866,
+      "id": "civ_03",
+      "population": 154,
+      "production": {
+        "available_civilian_recipes": 13,
+        "civilian_lines": 0,
+        "delivery_shortage": false,
+        "food_shortage": false,
+        "household_stocks": {
+          "Cordage Bundles": 4.96693999654884,
+          "Drying Mats": 3.10509684035257,
+          "Flaked Stone Tools": 3.72456107983048,
+          "Hafted Tool Sets": 2.48390397653741,
+          "Joined Timber Components": 1.86305810421154,
+          "Unfired Clay Vessels": 3.72611620842308,
+          "Woven Containers": 3.10509684035257
+        },
+        "installed_units": 0,
+        "manufactured_stock_kinds": 1,
+        "military_capabilities": {
+          "bow": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "improvised": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 5,
+            "recipe_known": true,
+            "stored": 0
+          },
+          "lance": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "siege_kit": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 0,
+            "recipe_known": false,
+            "stored": 0
+          },
+          "spear": {
+            "ammunition_carried": 0,
+            "ammunition_required": 0,
+            "ammunition_stored": 0,
+            "equipped": 8,
+            "recipe_known": true,
+            "stored": 12
+          }
+        },
+        "operations_ledger_current": true,
+        "production_food_blocked": false,
+        "recorded_output": {
+          "Fitted Timber Splice Sets": 27.0,
+          "improvised": 20.0,
+          "spear": 28.0
+        },
+        "remaining_daily_services": {},
+        "units_under_construction": 0
+      }
+    }
+  ],
+  "average_day_ms": 116.934246575342,
+  "completed_days": 9125,
+  "errors": [],
+  "human_save_check": {
+    "ok": true
+  },
+  "limitations": [
+    "Headless actual world; no visual verification",
+    "No forced contact or wars",
+    "Binary payload validation covers player and opponents; rendered load journey is separate"
+  ],
+  "save_check": {
+    "ok": true
+  },
+  "target_days": 9125,
+  "target_reached": true,
+  "waterless": 0,
+  "runtime_commit": "a3e997f",
+  "seed": 9241
+}

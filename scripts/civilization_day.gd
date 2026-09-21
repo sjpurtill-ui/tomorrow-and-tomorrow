@@ -24,6 +24,9 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	var stamp:=Time.get_ticks_usec() if not timings.is_empty() else 0
 	WorldSimulation.state.elapsed_days=day
 	WorldSimulation.state.convoy_traveling=bool(daily_context.get("traveling",false))
+	# Returned cargo belongs to today's local work, before households, building
+	# and workshops compete for it. Dispatch of new shipments remains later.
+	WorldSimulation.settlements.receive_city_trade_arrivals()
 	if WorldSimulation.military.recovery.home_unavailable():
 		WorldSimulation.military.recovery.advance(day)
 		for city in WorldSimulation.state.player_settlements:

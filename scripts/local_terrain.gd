@@ -11529,6 +11529,8 @@ func _civilization_start(origin:Vector2)->Vector2:
 		var sample:=_survey_ground_at(point)
 		sample["founding_valid"]=bool(_settlement_surface_assessment(Vector3(point.x,0,point.y)).valid)
 		sample["environment_profile"]=PlanetEnvironment.profile_at(point,sample)
+		if bool(sample.founding_valid) and float(sample.get("river_distance_km",INF))<=6 and preload("res://scripts/civilization_start.gd").supports_founders(sample.environment_profile):
+			sample["surface_material_catchments"]=_civilization_surface_materials(point)
 		return sample)
 
 func _find_world_start_position()->Vector3:

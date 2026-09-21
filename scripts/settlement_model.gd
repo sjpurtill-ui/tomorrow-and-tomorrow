@@ -322,10 +322,8 @@ func _record_city_trade(entry:Dictionary)->void:
 	WorldSimulation.state.city_trade_history.push_front(entry.duplicate(true))
 	if WorldSimulation.state.city_trade_history.size()>128: WorldSimulation.state.city_trade_history.resize(128)
 
-func process_city_trade(route_assessor:Callable=Callable())->void:
+func receive_city_trade_arrivals()->void:
 	var today:=int(WorldSimulation.state.elapsed_days)
-	if WorldSimulation.state.last_city_trade_day>=today: return
-	WorldSimulation.state.last_city_trade_day=today
 	# Departed shipments remain physical cargo even if logistics later declines.
 	var pending:Array[Dictionary]=[]
 	for shipment in WorldSimulation.state.city_trade_shipments:
@@ -348,6 +346,12 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		arrived.merge({"status":"delivered","day":today,"delivered":delivered,"lost":quantity-delivered},true)
 		_record_city_trade(arrived)
 	WorldSimulation.state.city_trade_shipments=pending
+
+func process_city_trade(route_assessor:Callable=Callable())->void:
+	var today:=int(WorldSimulation.state.elapsed_days)
+	if WorldSimulation.state.last_city_trade_day>=today: return
+	WorldSimulation.state.last_city_trade_day=today
+	receive_city_trade_arrivals()
 	preload("res://scripts/rail_freight.gd").advance(today)
 	var capacity:=city_trade_capacity()
 	if not bool(capacity.ready) or WorldSimulation.state.player_settlements.size()<2: return
