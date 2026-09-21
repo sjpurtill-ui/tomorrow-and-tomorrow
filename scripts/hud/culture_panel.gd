@@ -29,15 +29,26 @@ func setup(block:Dictionary)->void:
 		spectrum.add_theme_stylebox_override("background",T.flat(T.TRACK));spectrum.add_theme_stylebox_override("fill",T.flat(T.GREEN))
 		_note(card,String(value.low).capitalize()+"  ↔  "+String(value.high).capitalize())
 	_rule(self)
-	add_child(T.make_label("WHAT OUR HISTORY LEAVES WITH US",11,T.GOLD))
-	_note(self,"Inherited influences and the strongest current tendency. These describe cultural memory, not percentages of residents.")
-	memory_grid=GridContainer.new();memory_grid.columns=3;memory_grid.add_theme_constant_override("h_separation",22);memory_grid.add_theme_constant_override("v_separation",14);add_child(memory_grid)
+	add_child(T.make_label("HOW CULTURE SHAPES PLAY",11,T.GOLD))
+	memory_grid=GridContainer.new();memory_grid.columns=3;memory_grid.add_theme_constant_override("h_separation",22);memory_grid.add_theme_constant_override("v_separation",18);add_child(memory_grid)
+	for effect:Dictionary in data.get("effects",[]):
+		_effect_card(memory_grid,effect)
+	_rule(self)
+	add_child(T.make_label("REPUTATION FROM OUR CONDUCT",11,T.GOLD))
+	_note(self,"Built by treatment of prisoners and conquered people. Different neighbors also remember their own dealings with us.")
+	var reputation_grid:=GridContainer.new();reputation_grid.name="ReputationGrid";reputation_grid.columns=3;reputation_grid.add_theme_constant_override("h_separation",22);reputation_grid.add_theme_constant_override("v_separation",18);add_child(reputation_grid)
+	for reputation:Dictionary in data.get("reputation",[]):
+		var card:=_effect_card(reputation_grid,reputation)
+		card.tooltip_text=String(reputation.tip)
+		var meter:=ProgressBar.new();meter.show_percentage=false;meter.custom_minimum_size.y=6;meter.value=float(reputation.value)*100;card.add_child(meter)
+		meter.add_theme_stylebox_override("background",T.flat(T.TRACK));meter.add_theme_stylebox_override("fill",T.flat(T.GOLD))
+	var roots:=VBoxContainer.new();roots.visible=false
+	var toggle:=Button.new();toggle.text="Cultural roots ▸";add_child(toggle);add_child(roots)
+	toggle.pressed.connect(func():roots.visible=not roots.visible;toggle.text="Cultural roots ▾" if roots.visible else "Cultural roots ▸")
 	for memory:Dictionary in data.memories:
-		var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;memory_grid.add_child(card)
-		card.add_child(T.make_label(String(memory.domain).capitalize(),11,T.GOLD))
-		card.add_child(_serif(String(memory.inherited),19))
-		_note(card,"Now · "+String(memory.current))
-	if data.memories.is_empty():_note(self,"No lasting traditions have been recorded yet. Shared choices will leave their mark as time advances.")
+		_note(roots,String(memory.domain).capitalize()+" · "+String(memory.current))
+		if String(memory.inherited)!=String(memory.current):_note(roots,"Inherited: "+String(memory.inherited))
+	if data.memories.is_empty():_note(roots,"No lasting traditions recorded yet.")
 	_rule(self)
 	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",10);add_child(actions)
 	_button(actions,"Speak with our leader",data.on_council,"Open the council conversation")
@@ -45,6 +56,16 @@ func setup(block:Dictionary)->void:
 	_button(actions,"People in government",data.on_government,"Review officeholders and policies")
 	resized.connect(_culture_layout);_culture_layout()
 func _culture_layout()->void:
-	var columns:=3 if size.x>=650 else 2
+	var columns:=3 if size.x>=650 else 2 if size.x>=450 else 1
 	if values_grid:values_grid.columns=columns
 	if memory_grid:memory_grid.columns=columns
+
+	var reputation_grid:=get_node_or_null("ReputationGrid") as GridContainer
+	if reputation_grid:reputation_grid.columns=columns
+
+func _effect_card(parent:Control,item:Dictionary)->VBoxContainer:
+	var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_constant_override("separation",8);parent.add_child(card)
+	card.add_child(T.make_label(String(item.label).to_upper(),11,T.GOLD))
+	card.add_child(_serif(String(item.title),19))
+	_note(card,String(item.detail))
+	return card

@@ -330,7 +330,7 @@ func signature()->Array:
 	var leader:=GovernmentPeopleSystem.settlement_leader(String(settlement.get("id","")))
 	var latest_order:=_latest_civic_order(String(settlement.get("id","")),int(leader.get("person_id",0)))
 	var interpreter_config:=PronouncementInterpreter.configuration_status()
-	return [GameState.societal_values.get("lived",{}).duplicate(),WorldSimulation.direction.ambition,WorldSimulation.direction.cultural_memory.get("events",[]).size(),GameState.society_capacities.duplicate(),ids,GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size(),GovernmentPeopleSystem.revision,GameState.player_settlements.size(),history.size(),latest_dialogue_status,String(latest_order.get("status","")),bool(interpreter_config.get("enabled",GameState.civic_api_enabled)),bool(interpreter_config.get("configured",false)),String(interpreter_config.get("model","")),bool(interpreter_config.get("structured_output",false)),GameState.civic_always_use_ai]
+	return [GameState.elapsed_days,WorldSimulation.direction.auto_scouting,MilitaryCampaign.war_reputation_snapshot(),GameState.societal_values.get("lived",{}).duplicate(),WorldSimulation.direction.ambition,WorldSimulation.direction.cultural_memory.get("events",[]).size(),GameState.society_capacities.duplicate(),ids,GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size(),GovernmentPeopleSystem.revision,GameState.player_settlements.size(),history.size(),latest_dialogue_status,String(latest_order.get("status","")),bool(interpreter_config.get("enabled",GameState.civic_api_enabled)),bool(interpreter_config.get("configured",false)),String(interpreter_config.get("model","")),bool(interpreter_config.get("structured_output",false)),GameState.civic_always_use_ai]
 
 
 func _civic_settlement()->Dictionary:
@@ -422,7 +422,11 @@ func _society_overview()->Array:
 		var inherited:=preload("res://scripts/hud/culture_presenter.gd").tendency(item.inheritance)
 		if inherited.is_empty():continue
 		memories.append({"domain":item.domain,"inherited":inherited,"current":preload("res://scripts/hud/culture_presenter.gd").tendency(item.current)})
-	return [{"type":"culture","identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
+	var research:Dictionary={}
+	for domain in DYNAMIC_ORDER:research[domain]=WorldSimulation.direction.research_multiplier(domain)
+	var presenter=preload("res://scripts/hud/culture_presenter.gd")
+	var effects:=presenter.effects(WorldSimulation.direction.cultural_memory,int(GameState.elapsed_days),research,WorldSimulation.direction.auto_scouting,float(GameState.simulation_metrics.get("food_intake_ratio",1)))
+	return [{"type":"culture","effects":effects,"reputation":presenter.reputation(MilitaryCampaign.war_reputation_snapshot()),"identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
 		"on_direction":func():PeopleDirection.open_direction(),"on_council":jump("civ",1),"on_government":jump("government",0),
 		"on_capacities":focused_action("Society’s strengths & needs","",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}).on_press}]
 
