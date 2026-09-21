@@ -259,6 +259,7 @@ static func can_supply_equipment(campaign:Node,item:String)->bool:
 static func ensure_line(id:String,item:String,target:int)->void:
 	for job in WorldSimulation.military.equipment_queue:
 		if String(job.get("item",""))==item:
+			if job.has("ai_turnover"):return
 			if bool(job.get("persistent",false)) and int(job.get("target_stock",0))!=target:
 				WorldSimulation.submit(id,{"kind":"production_target","job":int(job.id),"target":target,"paused":bool(job.get("paused",false))})
 			return

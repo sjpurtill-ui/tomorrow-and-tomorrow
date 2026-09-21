@@ -81,3 +81,13 @@ func test_invalid_turnover_save_is_rejected()->void:
 		job.ai_turnover={"item":"spear","target":-2}
 		assert_str(P.validate_saved({"equipment_queue":[job]})).is_not_empty()
 	)
+
+func test_routine_target_review_keeps_the_committed_batch_handoff()->void:
+	WorldSimulation.scoped("turnover",func()->void:
+		var host=WorldSimulation.military;var job:=line()
+		assert_bool(T.request("turnover",host,"spear",5)).is_true()
+		preload("res://scripts/civilization_controller.gd").ensure_line("turnover","spun_yarn",20)
+		assert_bool(job.has("ai_turnover")).is_true()
+		P.advance(host,job,100.0);T.advance("turnover",host)
+		assert_str(job.item).is_equal("spear")
+	)

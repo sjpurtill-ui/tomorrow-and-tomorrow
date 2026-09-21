@@ -2053,3 +2053,7 @@ Validation: two read-stability checks and 23 demographic, monthly scope and full
 ### First 300 years: resumable full-world endurance check
 
 The headless full-world probe can retain a private checkpoint every requested interval and repeat an explicitly selected century ambition through ordinary commands. It continues actual daily simulation; it does not advance the calendar without economic, demographic and research work. The year-30 checkpoint/resume smoke check passed, including exact whole-state restoration and next-day replay. The live player-plus-three-opponent run targets day 109500 with makers renewed at ordinary century choices and checkpoints every 25 years. No endpoint result is claimed yet; diagnostic saves remain untracked.
+
+### First 300 years: keep planned workshop handoffs through routine reviews
+
+Routine AI and delegated-staff target reviews now leave a pending paid-batch handoff intact. Explicit player changes still cancel it. This prevents changing demand from repeatedly resetting a scheduled switch before the current batch finishes. All 46 workshop and turnover checks passed, including both routine review and manual override paths. No save-format change.

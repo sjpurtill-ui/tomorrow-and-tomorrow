@@ -112,6 +112,7 @@ func schedule(demand:Dictionary)->Dictionary:
 		if String(job.item)!=item:continue
 		if not bool(job.get("planner_managed",false)) or (bool(job.get("paused",false)) and not bool(job.get("staff_idle",false))):
 			return {"message":"%s is under your control; staff have left its order unchanged." % P.product_name(item)}
+		if job.has("ai_turnover"):return {"message":"Finishing the current batch before the scheduled product change."}
 		if int(job.target_stock)==target and not bool(job.get("staff_idle",false)):return {"message":"Supplying %s · target %d in stores." % [P.product_name(item),target]}
 		var updated:Dictionary=host.configure_production_line(int(job.id),target,false)
 		if updated.has("error"):return updated

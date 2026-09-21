@@ -260,6 +260,8 @@ func test_delegated_consumed_input_yields_but_manual_override_cancels_switch()->
 	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_false()
 	MilitaryCampaign.workshop.delegate_line(int(job.id))
 	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_true()
+	MilitaryCampaign.workshop.schedule({"item":"spun_yarn","target":20})
+	assert_bool(job.has("ai_turnover")).is_true()
 	MilitaryCampaign.configure_production_line(int(job.id),7,true)
 	assert_bool(job.has("ai_turnover")).is_false()
 	turn.advance("player",MilitaryCampaign,true)
