@@ -1,0 +1,10 @@
+{
+  "id": "contagion_mapping",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Contagion Mapping. Show a concrete, visually clear scene demonstrating this exact practice: Cases are mapped through households, water, work, and movement to distinguish environmental from contagious illness. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Overhead view of an early public-health investigator placing small dark case marks on a hand-drawn street map beside household records; a neighborhood pump is visible beyond the desk. The clusters are visible; no readable labels or modern digital screens.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-66262528-3795-476c-8f34-82eac51149eb.png",
+  "asset": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+  "sha256": "1824f0e1162d576a2a2c578d4c317123a44f351f0047fbebf9148a0f47e18f61",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Household case clusters on street map with neighborhood water pump and case records."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "civic_infirmaries",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Civic Infirmaries. Show a concrete, visually clear scene demonstrating this exact practice: Dedicated institutions concentrate carers, records, clean supplies, and difficult cases. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-b7068574-414b-4072-87e1-038b2b1c6b53.png",
+  "asset": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+  "sha256": "65337b4c5c3fefcd8390039eebab76744f51fc9a544dd0e1e7730dc260853949",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
