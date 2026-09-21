@@ -80,13 +80,11 @@ func _draw()->void:
 		var color:=Art.color(item.domain) if item.get("exposed",false) else T.MUTED
 		draw_style_box(T.flat(Color("182a31"),T.GOLD if item.id==owner_view.selected_id else color.darkened(.25),2 if item.id==owner_view.selected_id else 1,6,0),rect)
 		var texture:=Art.for_discovery(item)
+		var bounds:=Rect2(at(origin+Vector2(2,2)),Vector2(CARD.x-4,70)*zoom_level)
 		if texture:
-			# Subject art belongs only to an exposed discovery; generic field art
-			# remains visibly labeled, including redacted branches.
-			draw_texture_rect_region(texture,Rect2(at(origin+Vector2(2,2)),Vector2(CARD.x-4,70)*zoom_level),Rect2(0,texture.get_height()*.20,texture.get_width(),texture.get_height()*.48),Color.WHITE if item.get("exposed",false) else Color(.3,.3,.3))
-		if Art.subject_art_key(item)=="":
-			draw_rect(Rect2(at(origin+Vector2(6,6)),Vector2(126,19)*zoom_level),Color(.035,.065,.075,.9))
-			words("FIELD ILLUSTRATION",origin+Vector2(10,19),9,T.INK)
+			draw_texture_rect(texture,Art.image_rect(texture,bounds),false)
+		else:
+			words("?",origin+Vector2(CARD.x*.5-6,48),26,T.MUTED)
 		words(String(item.name),origin+Vector2(11,97),16,T.INK)
 		words(Art.status(item),origin+Vector2(11,117),11,color)
 		if active:

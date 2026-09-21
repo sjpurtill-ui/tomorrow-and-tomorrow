@@ -100,5 +100,24 @@ func test_every_research_field_has_a_distinct_painted_asset()->void:
 func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
 	GameState.known_discoveries.append("stone_sorting")
 	var view:=fixture();view.set_view("known");view.select("stone_sorting")
+	for frame in 8:await get_tree().process_frame
 	assert_str(view.bindings.stone_sorting.painting.texture.resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
 	assert_str(view.detail_body.get_child(0).texture.resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+func test_long_archive_keeps_only_visible_card_paintings_and_loads_new_rows_on_scroll()->void:
+	for item:Dictionary in DiscoverySystem.technology_catalog:
+		if item.id not in GameState.known_discoveries:GameState.known_discoveries.append(item.id)
+	var view:=fixture();view.set_view("known")
+	for frame in 10:await get_tree().process_frame
+	var first:TextureRect=view.bindings[view.records[0].id].painting
+	assert_object(first.texture).is_not_null()
+	var loaded:=0
+	for entry:Dictionary in view.bindings.values():
+		if entry.painting.texture:loaded+=1
+	assert_int(loaded).is_greater(0);assert_int(loaded).is_less_equal(12)
+	view.scroll.scroll_vertical=roundi(view.scroll.get_v_scroll_bar().max_value)
+	for frame in 10:await get_tree().process_frame
+	assert_object(first.texture).is_null()
+	loaded=0
+	for entry:Dictionary in view.bindings.values():
+		if entry.painting.texture:loaded+=1
+	assert_int(loaded).is_greater(0);assert_int(loaded).is_less_equal(12)
