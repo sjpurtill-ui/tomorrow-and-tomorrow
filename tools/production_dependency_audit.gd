@@ -8,6 +8,13 @@ static func missing(costs:Dictionary,available:Dictionary)->Array[String]:
 	for item:String in costs:
 		if float(costs[item])>0 and not available.has(item):result.append(item)
 	return result
+static func household_recipes()->Dictionary:
+	var craft:Script=load("res://scripts/opening_craft_practice.gd")
+	var result:Dictionary={}
+	for id:String in craft.RECIPES:
+		var recipe:Dictionary=craft.RECIPES[id]
+		result["household:"+id]={"output":craft.PRODUCTS[id],"gate":id,"materials":recipe.inputs.duplicate(),"days":1.0/float(recipe.rate),"household_practice":true}
+	return result
 static func operating_routes()->Dictionary:
 	var result:Dictionary=load("res://scripts/nmr_acquisition.gd").dependency_routes()
 	result.merge(load("res://scripts/sec_acquisition.gd").dependency_routes())

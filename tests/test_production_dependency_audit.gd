@@ -36,7 +36,9 @@ func test_empty_storage_is_not_a_source_of_electricity()->void:
 func test_live_civilian_products_and_installations_have_structural_supply_paths()->void:
 	var ids:Array=[];DiscoverySystem.initialize()
 	for entry:Dictionary in DiscoverySystem.technology_catalog:ids.append(entry.id)
-	var result:=Audit.audit(preload("res://scripts/civilian_industry.gd").PRODUCTS,preload("res://scripts/technology_operations.gd").PLANTS,ResourceSystem.catalog.keys()+preload("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),ids,preload("res://tools/production_dependency_audit.gd").operating_routes(),load("res://scripts/sec_specialist_supply.gd").RESERVE)
+	var products:=preload("res://scripts/civilian_industry.gd").PRODUCTS.duplicate(true)
+	products.merge(Audit.household_recipes())
+	var result:=Audit.audit(products,preload("res://scripts/technology_operations.gd").PLANTS,ResourceSystem.catalog.keys()+preload("res://scripts/household_clothing.gd").HUNTING_BYPRODUCTS.keys(),ids,preload("res://tools/production_dependency_audit.gd").operating_routes(),load("res://scripts/sec_specialist_supply.gd").RESERVE)
 	assert_array(result.errors).is_empty();assert_dict(result.blocked_products).is_empty();assert_dict(result.blocked_plants).is_empty()
 	assert_int(int(result.reachable_products)).is_equal(int(result.product_count))
 
@@ -100,3 +102,16 @@ func test_machine_acceptance_requires_inspection_supplies_and_reports_conditiona
 	var supplied:=Audit.audit(products,{},["Metal","Slide","Microscope"],["method"])
 	assert_dict(supplied.blocked_products).is_empty()
 	assert_array(supplied.conditional_quality_outcomes_assumed).contains(["machine"])
+
+func test_household_fabric_is_manufactured_from_inputs_not_declared_a_raw_resource()->void:
+	var recipes:=Audit.household_recipes()
+	var raw:=["Timber","Stone","Flint","Fiber Plants","Clay","Freshwater"]
+	var known:Array=[]
+	for item:Dictionary in recipes.values():known.append(item.gate)
+	var result:=Audit.audit(recipes,{},raw,known)
+	assert_array(result.errors).is_empty()
+	assert_dict(result.blocked_products).is_empty()
+	assert_int(int(result.reachable_products)).is_equal(recipes.size())
+	assert_float(float(recipes["household:joinery"].materials["Hafted Tool Sets"])).is_equal(.03)
+	raw.erase("Flint")
+	assert_array(Audit.audit(recipes,{},raw,known).errors).is_not_empty()

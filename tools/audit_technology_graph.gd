@@ -62,6 +62,7 @@ func run()->void:
 	var discovery_ids:Array=[]
 	for entry:Dictionary in discovery.technology_catalog:discovery_ids.append(entry.id)
 	var products:Dictionary=load("res://scripts/civilian_industry.gd").PRODUCTS.duplicate(true)
+	products.merge(load("res://tools/production_dependency_audit.gd").household_recipes())
 	# Deferred settlement trials consume physical inputs after component manufacture.
 	# Include them only in this audit closure; generic recipes do not execute the
 	# machine-workshop inspection contract at runtime.
