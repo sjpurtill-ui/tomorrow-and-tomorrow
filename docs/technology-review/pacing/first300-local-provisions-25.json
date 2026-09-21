@@ -1,0 +1,192 @@
+{
+  "tested_revision": "019684a (same runtime code as working tree at run launch)",
+  "scenario": "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange",
+  "seed": 91420,
+  "target_days": 9125,
+  "simulated_days": 9125,
+  "target_reached": true,
+  "wall_seconds": 226.655,
+  "full_campaign_verified": false,
+  "final": {
+    "active_inquiries": 4,
+    "army_provision_delivery_ratio": 1.0,
+    "army_provisions_delivered": 21.28,
+    "army_provisions_required": 21.28,
+    "completed_buildings": 5,
+    "day": 9125,
+    "food_consumption": 84.4164357641269,
+    "food_days": 57.3543684144897,
+    "food_demand_breakdown": {
+      "adults": 51.8340419491002,
+      "army_field": 21.28,
+      "base": 76.4690336179657,
+      "children": 19.3689844147685,
+      "climate": 0.0,
+      "elders": 5.26600725409705,
+      "labor": 7.36,
+      "lactation": 0.227402146161114,
+      "mission_absent": 0.0,
+      "occupation_relief": 0.0,
+      "pregnancy": 0.36,
+      "prisoner_custody": 0.0,
+      "rationing": 0.0,
+      "total": 84.4164357641269,
+      "travel": 0.0
+    },
+    "food_eaten": 84.4164357641269,
+    "food_intake_ratio": 1.0,
+    "food_security": 0.979974629095545,
+    "knowledge_workers": 7,
+    "known": 24,
+    "material_stocks": {
+      "Clay": 178.973907522461,
+      "Fiber Plants": 237.698061987793,
+      "Stone": 48.246271219814,
+      "Timber": 308.23774363219
+    },
+    "plot_history_records": 82,
+    "population": 192,
+    "production": {
+      "available_civilian_recipes": 5,
+      "civilian_lines": 1,
+      "delivery_shortage": false,
+      "food_shortage": false,
+      "household_stocks": {
+        "Cordage Bundles": 4.32502558803555,
+        "Drying Mats": 2.70744922284419,
+        "Flaked Stone Tools": 3.23601437644711,
+        "Hafted Tool Sets": 2.16410773694252,
+        "Joined Timber Components": 1.62446953370651,
+        "Unfired Clay Vessels": 3.24893906741303
+      },
+      "installed_units": 0,
+      "manufactured_stock_kinds": 1,
+      "military_capabilities": {
+        "bow": {
+          "equipped": 0,
+          "recipe_known": true,
+          "stored": 0
+        },
+        "improvised": {
+          "equipped": 9,
+          "recipe_known": true,
+          "stored": 0
+        },
+        "lance": {
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "siege_kit": {
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "spear": {
+          "equipped": 7,
+          "recipe_known": true,
+          "stored": 12
+        }
+      },
+      "operations_ledger_current": true,
+      "production_food_blocked": false,
+      "remaining_daily_services": {},
+      "units_under_construction": 0
+    },
+    "resource_deposits": 57,
+    "settled": true,
+    "settlement_count": 3,
+    "settlement_plots": 22,
+    "year": 25.0
+  },
+  "discoveries": [
+    {
+      "day": 2044,
+      "id": "hide_floats",
+      "year": 5.6
+    },
+    {
+      "day": 2085,
+      "id": "bow_craft",
+      "year": 5.71232876712329
+    },
+    {
+      "day": 2310,
+      "id": "seed_selection",
+      "year": 6.32876712328767
+    },
+    {
+      "day": 3060,
+      "id": "joinery",
+      "year": 8.38356164383562
+    },
+    {
+      "day": 4406,
+      "id": "drainage",
+      "year": 12.0712328767123
+    },
+    {
+      "day": 4727,
+      "id": "river_craft",
+      "year": 12.9506849315068
+    },
+    {
+      "day": 5784,
+      "id": "herbal_classification",
+      "year": 15.8465753424658
+    },
+    {
+      "day": 6261,
+      "id": "grown_frame_selection",
+      "year": 17.1534246575342
+    },
+    {
+      "day": 6549,
+      "id": "rigid_pipe_bedding",
+      "year": 17.9424657534247
+    },
+    {
+      "day": 6713,
+      "id": "clay_testing",
+      "year": 18.3917808219178
+    },
+    {
+      "day": 7668,
+      "id": "caulking_fiber_preparation",
+      "year": 21.0082191780822
+    },
+    {
+      "day": 8117,
+      "id": "timber_post_beam_connections",
+      "year": 22.2383561643836
+    },
+    {
+      "day": 8504,
+      "id": "clay_shaping",
+      "year": 23.2986301369863
+    },
+    {
+      "day": 9034,
+      "id": "crossbow_mechanism",
+      "year": 24.7506849315069
+    }
+  ],
+  "production_lines": [
+    {
+      "completed_on_current_line": 42,
+      "item": "fitted_post_beam_sets",
+      "paused": false,
+      "progress_days": 3.10325561356154,
+      "reported_state": "Working",
+      "target_stock": 2
+    }
+  ],
+  "limits": [
+    "One isolated seat, not a full world or a player campaign",
+    "Synthetic local water and land authority; surface densities come from macro resource potentials, not rendered catchment sampling",
+    "No foreign acquisition, war or dependency-recovery scenario",
+    "Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue",
+    "Wood override changes local timber catchments only, not an entire biome; ambition uses ordinary century choices, not direct technology grants",
+    "Short or collapsed runs do not validate millennial pacing"
+  ]
+}
