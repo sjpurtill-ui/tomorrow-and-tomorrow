@@ -1,0 +1,10 @@
+{
+  "id": "powder_artillery",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Powder Artillery. Show a concrete, visually clear scene demonstrating this exact practice: Controlled powder charges propel standardized projectiles from reinforced barrels. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. A single early bronze cannon on a heavy wooden carriage just fired on an open proving field, drifting white smoke, its complete barrel and wheels visible, crew at a safe distance. Historical game scene only; no loading steps, cutaways or manufacturing details.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-062a686a-10b1-4f18-9ab1-789698bc80b1.png",
+  "asset": "res://assets/ui/research/subjects/powder_artillery-v1.png",
+  "sha256": "eb32790497f80cbb69d468a56249b9b30052916d78e72a8eec39754d7bcb982b",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Whole early cannon and carriage with smoke on a proving ground."
+}

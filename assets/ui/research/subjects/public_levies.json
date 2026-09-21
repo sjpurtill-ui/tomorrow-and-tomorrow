@@ -1,0 +1,9 @@
+{
+  "id": "public_levies",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Scheduled Public Levies. Show a concrete, visually clear scene demonstrating this exact practice: Public labor and material obligations become scheduled, recorded, and appealable. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-68c135ec-e5f6-4995-a912-b41365a786de.png",
+  "asset": "res://assets/ui/research/subjects/public_levies-v1.png",
+  "sha256": "adf3542ede4b49e7a41c9444105004a8fd9786dda7188e985123095653c49744",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

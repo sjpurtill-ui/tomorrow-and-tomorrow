@@ -1,0 +1,10 @@
+{
+  "id": "preventive_inoculation",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Preventive Inoculation. Show a concrete, visually clear scene demonstrating this exact practice: Controlled exposure is organized to reduce the danger of later epidemics, despite immediate individual risk. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Calm early-modern care room with a physician attending an adult patient's rolled sleeve; small lancet and a covered vial on a tray, attentive record keeper. Non-graphic historical concept scene, no procedural close-up or modern disposable syringe.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-23e8149b-7570-4f8a-9079-eac2120af110.png",
+  "asset": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+  "sha256": "d02229ee20c64b7de51182bb868d9a406c5067d8620e0cd8b4818cc1de640d21",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Early care room with rolled sleeve, lancet and recorder; no modern injection kit."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "public_credit",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Public Credit. Show a concrete, visually clear scene demonstrating this exact practice: Future tax and store revenues support present projects through recorded obligations. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-7e2df74e-75c8-4f3d-a1f2-5f8ec9b1283e.png",
+  "asset": "res://assets/ui/research/subjects/public_credit-v1.png",
+  "sha256": "f524906f3c29fadb2c303b81060823d7e71110e61cb2d54de14a6c4bf9bba2d4",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

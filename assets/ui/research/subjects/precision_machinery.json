@@ -1,0 +1,10 @@
+{
+  "id": "precision_machinery",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Precision Machinery. Show a concrete, visually clear scene demonstrating this exact practice: Measured components, bearings, guides, and cutting tools reproduce controlled motion. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. An early industrial precision lathe in a daylight machine shop, close oblique view of carriage, leadscrew and cutting tool with a machinist checking a turned brass component using calipers. No CNC screens.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-654d0881-a7ed-4b7b-a0c1-699608608eff.png",
+  "asset": "res://assets/ui/research/subjects/precision_machinery-v1.png",
+  "sha256": "95f68f06f0d765af285c891ec995eae911b76d7fd2ac1e13b7de72f23f1a8770",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Lathe carriage, leadscrew, measured brass components and calipers."
+}
