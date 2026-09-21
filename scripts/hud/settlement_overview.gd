@@ -25,11 +25,18 @@ func setup(block:Dictionary)->void:
 	cards=GridContainer.new();cards.columns=3;cards.add_theme_constant_override("h_separation",16);cards.add_theme_constant_override("v_separation",16);add_child(cards)
 	for item:Dictionary in data.cards:
 		var panel:=VBoxContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cards.add_child(panel)
-		var art:TextureRect=Food.picture(int(item.art),0,112) if item.kind=="food" else Buildings.picture(int(item.art),0,112)
-		if item.kind!="food":
-			var source:=art.texture as AtlasTexture
-			var crop:=source.region;crop.position.y+=crop.size.y*.20;crop.size.y*=.70;source.region=crop
-		art.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.add_child(art)
+		if bool(item.get("show_art",true)):
+			var art:TextureRect=Food.picture(int(item.art),0,112) if item.kind=="food" else Buildings.picture(int(item.art),0,112)
+			if item.kind!="food":
+				var source:=art.texture as AtlasTexture
+				var crop:=source.region;crop.position.y+=crop.size.y*.20;crop.size.y*=.70;source.region=crop
+			art.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.add_child(art)
+		else:
+			var empty:=T.make_label(String(item.get("empty_label","NOT BUILT")),13,T.MUTED)
+			empty.custom_minimum_size.y=112
+			empty.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+			empty.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+			panel.add_child(empty)
 		panel.add_child(_serif(String(item.title),20));_note(panel,String(item.detail))
 		_button(panel,String(item.action),item.on_press,String(item.detail))
 	_rule(self)

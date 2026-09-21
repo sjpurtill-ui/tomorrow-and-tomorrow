@@ -18,7 +18,7 @@ func _local_tab(sub:int)->Dictionary:
 		projects.append(_project(project,current,done))
 	var stocks:Dictionary={}
 	for resource in ["Timber","Stone","Clay","Fiber Plants"]:stocks[resource]=float(GameState.resource_stockpiles.get(resource,0))
-	return {"blocks":[{"type":"construction_queue","projects":projects,"selected":selected_project,"priority":priority,"stocks":stocks,"city":String(city.get("name","Founding camp")),"builders":int(GameState.population_allocations.get("Construction",0)),"carriers":int(GameState.population_allocations.get("Logistics",0)),"can_prioritize":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"committed":GameState.settlement_site_committed,"completed":GameState.settlement_completed.size(),"on_select":_select,"on_priority":_priority,"on_site":terrain._on_settlement_action_pressed,"on_record":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud,GameState.selected_player_settlement_id))}]}
+	return {"blocks":[{"type":"construction_queue","shelter":preload("res://scripts/hud/shelter_status.gd").describe(GameState.settlement_completed,GameState.housing_capacity,GameState.population_total),"projects":projects,"selected":selected_project,"priority":priority,"stocks":stocks,"city":String(city.get("name","Founding camp")),"builders":int(GameState.population_allocations.get("Construction",0)),"carriers":int(GameState.population_allocations.get("Logistics",0)),"can_prioritize":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"committed":GameState.settlement_site_committed,"completed":GameState.settlement_completed.size(),"on_select":_select,"on_priority":_priority,"on_site":terrain._on_settlement_action_pressed,"on_record":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud,GameState.selected_player_settlement_id))}]}
 func _project(project:Dictionary,current:Dictionary,done:bool)->Dictionary:
 	var title:=String(project.name)
 	var materials:Dictionary=Construction._settlement_project_material_plan(project)
@@ -40,7 +40,7 @@ func _project(project:Dictionary,current:Dictionary,done:bool)->Dictionary:
 		if String(required) not in GameState.settlement_completed:blockers.push_front("Awaiting "+String(required))
 	for role:String in project.minimum:
 		var available:=int(GameState.population_allocations.get(role,0))
-		if available<int(project.minimum[role]):blockers.append("%s: %d / %d" % [role,available,int(project.minimum[role])])
+		if available<=0:blockers.append("No %s workers assigned" % role)
 	var discovery:=String(project.get("discovery",""))
 	if not discovery.is_empty() and DiscoverySystem.adoption(discovery)<.10:blockers.push_front("Practice not yet adopted")
 	if bool(project.get("requires_water",false)) and not bool(GameState.water_metrics.get("source_accessible",false)):blockers.push_front("Water access needed")

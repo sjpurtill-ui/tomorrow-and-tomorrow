@@ -6,6 +6,7 @@ func setup(block:Dictionary)->void:
 	var manager:=T.make_label("LEADER MANAGED" if String(data.get("priority","")).is_empty() else "PRIORITY OVERRIDE",12,T.GOLD);manager.size_flags_horizontal=Control.SIZE_EXPAND_FILL;header.add_child(manager)
 	header.add_child(T.make_label(String(data.get("city","")),12,T.BODY))
 	if not String(data.get("priority","")).is_empty():_button(header,"↶",func():data.on_priority.call(""),"Return all construction to leader choice")
+	if data.has("shelter"):add_child(T.make_label(String(data.shelter.detail),12,T.BODY))
 	var reserves:=HBoxContainer.new();reserves.add_theme_constant_override("separation",12);add_child(reserves)
 	for resource:String in data.get("stocks",{}):
 		var group:=HBoxContainer.new();group.size_flags_horizontal=Control.SIZE_EXPAND_FILL;group.tooltip_text=resource;reserves.add_child(group)

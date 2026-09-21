@@ -483,7 +483,12 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 	for deposit in WorldSimulation.state.resource_deposits:
 		if String(deposit.get("landscape_source",""))!=source:continue
 		existing_fronts.append(deposit)
-		if float(deposit.get("remaining",0.0))>0.001:return
+		if float(deposit.get("remaining",0.0))>0.001:
+			# Founding surveys already create these exposed surface fronts. They
+			# need the same access transition as newly created fronts, not mining.
+			deposit.stage="developed" if String(deposit.stage)=="developed" else "accessible"
+			deposit.clues=1.0;deposit.access=1.0;deposit.blockers=[]
+			return
 	if existing_fronts.size()>=MAX_SURFACE_FRONTS_PER_RESOURCE:return
 	if not existing_fronts.is_empty() or density<minimum_density:
 		field=_next_surface_front(resource,source,context,minimum_density)

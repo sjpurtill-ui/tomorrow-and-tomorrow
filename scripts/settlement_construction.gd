@@ -21,8 +21,10 @@ static func _settlement_project_available(project: Dictionary) -> bool:
 			return false
 	var discovery:=String(project.get("discovery",""))
 	if not discovery.is_empty() and (discovery not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(discovery)<0.10):return false
+	# Crew targets describe normal staffing. Smaller crews still do proportional
+	# work; only a completely missing required trade prevents construction.
 	for role in project.minimum:
-		if int(WorldSimulation.state.population_allocations.get(role, 0)) < int(project.minimum[role]):
+		if int(WorldSimulation.state.population_allocations.get(role, 0)) <= 0:
 			return false
 	if bool(project.get("known_resource", false)) and WorldSimulation.resources.visible_deposits().is_empty():
 		return false

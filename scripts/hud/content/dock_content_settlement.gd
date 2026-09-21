@@ -168,13 +168,13 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	var population:=int(settlement.get("population",GameState.population_total))
 	var metrics:Dictionary=GameState.simulation_metrics
 	var food:="%.1f days in reserve" % float(metrics.food_days) if metrics.has("food_days") else "Reserve report pending"
-	var housing:="%d people · %d shelter capacity" % [population,GameState.housing_capacity]
+	var shelter:=preload("res://scripts/hud/shelter_status.gd").describe(GameState.settlement_completed,GameState.housing_capacity,population)
 	var age:=maxi(0,int(GameState.elapsed_days)-int(settlement.get("founded_day",0)))
 	return [{"type":"settlement_overview","leader":management.get("leader",{}),"focus":String(management.get("focus_label","Balanced")),"managed":bool(management.get("auto_manage",true)),
 		"reason":String(management.get("focus_reason","The local leader is assessing this settlement’s needs.")),"effect":String(management.get("focus_effect","")),
 		"metrics":[{"label":"Residents","value":str(population)},{"label":"Years since founding","value":"%.1f" % (float(age)/365.0)},{"label":"Life expectancy · years","value":"%.1f" % GameState.projected_life_expectancy()}],
 		"cards":[
-			{"kind":"building","art":1,"title":"Homes & shelter","detail":housing,"action":"View buildings","on_press":jump("construction",0)},
+			{"kind":"building","art":1,"title":"Homes & shelter","show_art":shelter.built,"empty_label":shelter.empty_label,"detail":shelter.detail,"action":"View buildings","on_press":jump("construction",0)},
 			{"kind":"food","art":0,"title":"Food & water","detail":food,"action":"View provisions","on_press":jump("economy",0)},
 			{"kind":"building","art":3,"title":"Work & production","detail":"Local workshops and active production","action":"View production","on_press":jump("production",0)}],
 		"on_leader":jump("civ",1),"on_priority":focused_action("Local priority","",_people_report.bind("priority")).on_press,

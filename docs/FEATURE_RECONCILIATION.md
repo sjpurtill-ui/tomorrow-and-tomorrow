@@ -1,3 +1,19 @@
+## September 21 — Shelter status and stalled early construction
+
+Overview and Buildings now share a shelter status: starting camp places do not
+claim completion of Lean-to Shelters, and unbuilt shelters have no finished-house
+illustration. Existing exposed surface fronts created by founding surveys now
+become usable instead of returning before their access transition. Smaller crews
+can advance projects at the existing proportional work rate; each required trade,
+knowledge, prerequisites, and delivered material bill remain necessary.
+
+Eight targeted headless checks pass. A read-only, isolated replay of the saved
+Year 10 city's material flow and construction, holding staffing fixed, completed
+Storage Pits at day +35, Gathering Yard +88, Open Work Area +157 and Lean-to Shelters
++219. No save migration or stock grants. The pre-existing all-starter-recipes test
+in test_local_material_choices also fails on unchanged 489d47f; it is not fixed
+here. Player launch and visual review are left to the user.
+
 ## September 16 — T05 operating infrastructure checkpoint
 
 Integrated worker sources `f7c5051` and `5579203` at canonical commits
