@@ -6,7 +6,7 @@ const DEFAULT_MAP_SCROLL_SPEED:=4.0
 const MIN_MAP_SCROLL_SPEED:=0.5
 const MAX_MAP_SCROLL_SPEED:=12.0
 var ui_scale:=1.25
-var render_scale:=0.75
+var render_scale:=1.0
 var shadows:=false
 var frame_limit:=60
 var music_volume:=1.0
@@ -19,7 +19,7 @@ func _ready()->void:
 	var config:=ConfigFile.new()
 	if config.load(config_path)==OK:
 		ui_scale=clampf(float(config.get_value("display","ui_scale",1.25)),1.0,1.75)
-		render_scale=clampf(float(config.get_value("display","render_scale",0.75)),0.5,1.0)
+		render_scale=clampf(float(config.get_value("display","render_scale",1.0)),0.5,1.0)
 		shadows=bool(config.get_value("display","shadows",false))
 		frame_limit=int(config.get_value("display","frame_limit",60))
 		music_volume=clampf(float(config.get_value("display","music_volume",1.0)),0.0,1.0)
@@ -48,7 +48,8 @@ func apply()->void:
 	window.content_scale_aspect=Window.CONTENT_SCALE_ASPECT_EXPAND
 	window.content_scale_size=logical_size(window.size,density,ui_scale)
 	window.content_scale_factor=1.0
-	# The canvas remains at output resolution; only the 3D image is downsampled.
+	# Native resolution is the default. Lower render scales are an explicit
+	# performance choice; the canvas always remains at output resolution.
 	window.scaling_3d_mode=Viewport.SCALING_3D_MODE_BILINEAR
 	window.scaling_3d_scale=render_scale
 	Engine.max_fps=frame_limit
@@ -108,7 +109,7 @@ func add_controls(parent:Node)->void:
 	var appearance:=_choice(parent,"Interface colors",["Light","Dark"],1 if color_theme=="dark" else 0,func(index:int):set_color_theme("dark" if index==1 else "light"))
 	appearance.name="ColorTheme"
 	_choice(parent,"Text & interface size",["100%","125%","150%","175%"],clampi(roundi((ui_scale-1)*4),0,3),func(index:int):ui_scale=1.0+index*.25;apply();persist())
-	_choice(parent,"3D resolution",["50% · fastest","75% · balanced","100% · sharpest"],[0.5,0.75,1.0].find(render_scale),func(index:int):render_scale=[0.5,0.75,1.0][index];apply();persist())
+	_choice(parent,"3D resolution",["50% · fastest","75% · balanced","100% · native"],[0.5,0.75,1.0].find(render_scale),func(index:int):render_scale=[0.5,0.75,1.0][index];apply();persist())
 	_choice(parent,"Terrain shadows",["Off · faster","On"],1 if shadows else 0,func(index:int):shadows=index==1;apply();persist())
 	_choice(parent,"Frame limit",["30 fps","60 fps","120 fps"],[30,60,120].find(frame_limit),func(index:int):frame_limit=[30,60,120][index];apply();persist())
 	var music_label:=Label.new();music_label.text="Music volume · %d%%"%roundi(music_volume*100);parent.add_child(music_label)
