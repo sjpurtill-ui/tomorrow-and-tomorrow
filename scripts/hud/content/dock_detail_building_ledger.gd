@@ -23,6 +23,18 @@ func tab(sub:int)->Dictionary:
 	active_sub=sub
 	var summary:=GameState.building_ledger_summary(settlement_id)
 	var records:Array[Dictionary]=summary.get("records",[])
+	if not settlement_id.is_empty():
+		records.assign(records.filter(func(row:Dictionary)->bool:return String(row.get("settlement_id",""))==settlement_id))
+		var local_materials:Dictionary={}
+		var local_kinds:Dictionary={}
+		for row:Dictionary in records:
+			if bool(row.get("counts_materials",false)):
+				for material in row.get("materials",{}):local_materials[material]=float(local_materials.get(material,0))+float(row.materials[material])
+			if String(row.get("event","")) in ["founded","started","infilled","rebuilt","legacy_completed","legacy_surviving_fabric"] or (String(row.get("event",""))=="completed" and int(row.get("plot_id",-1))<0):
+				var kind:=String(row.get("kind","Building")).replace("_"," ").capitalize()
+				local_kinds[kind]=int(local_kinds.get(kind,0))+1
+		summary.materials=local_materials
+		summary.kinds=local_kinds
 	var materials:Dictionary=summary.get("materials",{})
 	var kinds:Dictionary=summary.get("kinds",{})
 	var damaged:=0
@@ -130,6 +142,7 @@ func _page_actions(sub:int,page:int,total:int)->Dictionary:
 
 func _change_page(sub:int,delta:int)->void:
 	pages[sub]=maxi(0,int(pages.get(sub,0))+delta)
+	if is_instance_valid(hud):hud.request_immediate_dock_refresh()
 
 func _material_text(materials_variant:Variant)->String:
 	var materials:Dictionary=materials_variant if materials_variant is Dictionary else {}

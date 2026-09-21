@@ -1,9 +1,14 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 const Construction:=preload("res://scripts/settlement_construction.gd")
 var selected_project:=""
+var history_filter:=""
+var history:RefCounted
+
 func meta()->Dictionary:
-	return {"eyebrow":"BUILDINGS & INFRASTRUCTURE","title":"Construction","serif":true,"subtabs":["PROJECTS","COMPLETED"]}
+	return {"eyebrow":"BUILDINGS & INFRASTRUCTURE","title":"Construction","serif":true,"subtabs":["PROJECTS","COMPLETED","SETTLEMENTS","HISTORY"]}
 func tab(sub:int)->Dictionary:
+	if sub==2:return _settlements_tab()
+	if sub==3:return _history_tab()
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _local_tab(sub)))
 func _local_tab(sub:int)->Dictionary:
 	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
@@ -54,4 +59,46 @@ func _select(title:String)->void:
 func _priority(title:String)->void:
 	terrain._report_military_action(Construction.set_priority(GameState.selected_player_settlement_id,title));hud.request_immediate_dock_refresh()
 func signature()->Array:
-	return [GameState.selected_player_settlement_id,GameState.settlement_site_committed,GameState.settlement_projects.duplicate(true),GameState.settlement_completed.duplicate(),GameState.resource_stockpiles.duplicate(),GameState.population_allocations.duplicate(),GameState.elapsed_days,GameState.settlement_network_revision,selected_project]
+	return [GameState.selected_player_settlement_id,GameState.settlement_site_committed,GameState.settlement_projects.duplicate(true),GameState.settlement_completed.duplicate(),GameState.resource_stockpiles.duplicate(),GameState.population_allocations.duplicate(),GameState.elapsed_days,GameState.settlement_network_revision,selected_project,GameState.building_ledger.size(),GameState.next_building_record_id,history_filter,history.signature() if history!=null else []]
+
+func _settlements_tab()->Dictionary:
+	var blocks:Array=[{"type":"text","heading":"CONSTRUCTION BY SETTLEMENT","text":"Completed works count finished projects. A shelter project can provide several structures. History records later building changes, repairs and losses."}]
+	for city:Dictionary in GameState.player_settlements:
+		var id:=String(city.get("id",""))
+		var report:Dictionary=SettlementModel.with_city_resources(id,func()->Dictionary:
+			return _settlement_report(GameState.settlement_completed,GameState.settlement_projects))
+		blocks.append({"type":"text","heading":String(city.get("name","Settlement")),"text":"%d completed works · %d underway" % [report.completed,report.underway]})
+		if not report.items.is_empty():blocks.append({"type":"rows","items":report.items})
+		blocks.append({"type":"actions","items":[{"label":"CONSTRUCTION HISTORY","sub":String(city.get("name","Settlement")),"on_press":_open_city_record.bind(id)}]})
+	if GameState.player_settlements.is_empty():blocks.append({"type":"text","heading":"SETTLEMENTS","text":"Choose a settlement site to begin construction."})
+	return {"blocks":blocks}
+
+static func _settlement_report(completed:Array,progress:Dictionary)->Dictionary:
+	var items:Array=[]
+	var underway:=0
+	for title in completed:
+		items.append({"name":String(title),"value":"1 completed work","accent":Tokens.GREEN})
+	for project:Dictionary in Construction._settlement_definitions():
+		var title:=String(project.name)
+		if title in completed or float(progress.get(title,0))<=0:continue
+		underway+=1
+		items.append({"name":title,"value":"%.1f%%" % (100.0*clampf(float(progress[title])/float(project.days),0,1)),"sub":"Work in progress","accent":Tokens.AMBER})
+	return {"completed":completed.size(),"underway":underway,"items":items}
+
+func _open_city_record(id:String)->void:
+	hud.open_detail(preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud,id))
+
+func _history_tab()->Dictionary:
+	if history==null:history=preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud)
+	history.settlement_id=history_filter
+	var result:Dictionary=history.tab(0)
+	var filters:Array=[{"label":"ALL SETTLEMENTS","on_press":_filter_history.bind("")}]
+	for city:Dictionary in GameState.player_settlements:
+		filters.append({"label":String(city.get("name","Settlement")),"on_press":_filter_history.bind(String(city.get("id","")))})
+	result.blocks.push_front({"type":"actions","items":filters})
+	return result
+
+func _filter_history(id:String)->void:
+	history_filter=id
+	if history!=null:history.pages[0]=0
+	hud.request_immediate_dock_refresh()
