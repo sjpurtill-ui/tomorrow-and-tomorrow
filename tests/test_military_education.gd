@@ -18,7 +18,7 @@ const Land=preload("res://scripts/military_unit_catalog.gd")
 const Education=preload("res://scripts/military_education_knowledge.gd")
 
 func test_military_contracts_have_reachable_graph_and_supported_roles()->void:
-	assert_int(Education.entries().size()).is_equal(8)
+	assert_int(Education.entries().size()).is_equal(9)
 	assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(Education.entries(),DiscoverySystem.technology_catalog)).is_empty()
 	var graph:Array=[]
 	for entry:Dictionary in DiscoverySystem.technology_catalog:graph.append(P.graph_entry(entry))
@@ -84,3 +84,9 @@ func test_education_description_explains_new_order_limit()->void:
 	var summary:=DiscoverySystem._discovery_effect_summary(DiscoverySystem.discovery_definition("skirmish_pair_drill"))
 	assert_str(summary).contains("Existing orders retain their schedule")
 	assert_str(summary).contains("skirmisher 15%")
+
+func test_mounted_archery_explains_actual_equipment_and_supplies()->void:
+	var summary:=DiscoverySystem._discovery_effect_summary(DiscoverySystem.discovery_definition("mounted_archery"))
+	assert_str(summary).contains("horse-archer equipment")
+	assert_str(summary).contains("arrows")
+	assert_str(summary).contains("maintained mounts")

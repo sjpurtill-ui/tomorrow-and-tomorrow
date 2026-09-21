@@ -2002,3 +2002,10 @@ Validation: three early research/material gate regressions pass (report 83), inc
 Each city-trade dispatch pass now retains local population/position values and charted-route answers across cargo types. These caches end with the dispatch call, so later scouting and population changes are observed normally. Store references and transport balances stay live as dispatches consume them.
 
 Validation: 30 city-resource and rail-freight tests pass (report 84). Matched 30-day continuations from the real warm year-125 checkpoint produce exactly equal complete owned-world saves. Measured city-trade time was 2.031s before and 1.961s after; total runtime was 9.64s versus 9.75s under concurrent audits, so no overall speedup is claimed. This removes repeated work without changing progression.
+
+
+## First 300 years: military research explanation and combined regression (September 21)
+
+A research entry with no numeric effect now uses its authored production contract before falling back to generic prerequisite text. Mounted archery therefore explains horse-archer equipment, arrows and maintained mounts. The education catalog count fixture includes the newly added practice.
+
+Validation: all eight military education cases pass (report 87), including the new explanation check. The other six suites in report 85 passed all 111 cases across military development, training accounting, joint operations, civilization projection bounds, player independence and government people. The sole earlier failure was the corrected eight-versus-nine catalog fixture. This validates the combined checkpoint; long campaign endpoints remain in progress.
