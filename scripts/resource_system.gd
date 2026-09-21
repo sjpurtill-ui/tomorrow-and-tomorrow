@@ -686,7 +686,9 @@ func _ensure_deposit_fields(deposit:Dictionary)->void:
 		if not deposit.has(key): deposit[key]=defaults[key].duplicate() if defaults[key] is Array else defaults[key]
 
 func _is_material_resource(resource_name:String)->bool:
-	return resource_name not in ["Freshwater","Fertile Soil","Game"]
+	# Household craft stocks represent maintained tools/containers in use. Their
+	# owner applies material-specific wear; raw-yard loss must not charge it again.
+	return resource_name not in ["Freshwater","Fertile Soil","Game"] and resource_name not in preload("res://scripts/opening_craft_practice.gd").DECAY
 
 const MATERIAL_PROFILES:={
 		"Timber":{"family":"organic","bulk":1.35,"store":"yard","loss":0.0012,"base_yield":0.34},
@@ -814,7 +816,10 @@ func _apply_material_storage_losses(events:Array[Dictionary])->Dictionary:
 		var decay:=amount*maxf(0.0,float(profile.loss)+WorldSimulation.discovery.effect("storage_loss"))
 		var available_bulk:=maxf(0.0,float(capacities[store])-float(used[store]))
 		var overflow_units:=maxf(0.0,amount-available_bulk/bulk)
-		var overflow_loss:=overflow_units*0.035
+		# Exposed stone/flint is durable. An overfull yard adds handling loss,
+		# not the rapid spoilage used for organic or containment-dependent stock.
+		var exposure_rate:=0.0005 if String(profile.family)=="mineral" and store=="yard" else 0.035
+		var overflow_loss:=overflow_units*exposure_rate
 		var loss:=minf(amount,decay+overflow_loss)
 		WorldSimulation.state.resource_stockpiles[resource_name]=amount-loss
 		used[store]=float(used[store])+maxf(0.0,amount-loss)*bulk

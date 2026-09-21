@@ -1913,3 +1913,8 @@ Follow-up on `70faecc`, task `codex/first-300-playable`. Local troops share real
 
 
 25-year follow-up for `019684a` completed all 9,125 daily ticks: three settlements, 24 known practices, equipped spears, full local food delivery and a civilian fitted-timber line with 42 completed batches. Compact evidence in `docs/technology-review/pacing/first300-local-provisions-25.json`. This is a bounded economic progression result, not complete 300-year readiness or a full-world test.
+
+
+## September 21 — founding craft wear and durable mineral exposure
+
+Base `31706d5`, task `codex/first-300-playable`. Household tools and containers use their own material-specific wear rather than also being classified as bulk yard minerals and charged a second decay. Exposed durable yard minerals retain modest handling loss rather than perishable overflow loss; organic, liquid and containment-dependent stocks retain storage constraints. Thirteen founding/craft/storage tests pass, including one-year finite flint survival, single-owner tool wear, repeated-day idempotence and perishable overflow. No free materials, knowledge, save-schema changes or player restart. Sparse-site campaign recovery still requires matched validation.
