@@ -15,6 +15,7 @@ var technology_catalog:Array[Dictionary]=[]
 var technology_limits:Dictionary={}
 var catalog_by_id:Dictionary={}
 var catalog_by_channel:Dictionary={}
+var _candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 var latest_context:Dictionary={}
 var established_threads_cache:Array[Dictionary]=[]
 var established_threads_signature:=""
@@ -36,6 +37,7 @@ func reset_for_new_world()->void:
 	technology_limits.clear()
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
+	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	latest_context.clear()
 	established_threads_cache.clear()
 	established_threads_signature=""
@@ -88,6 +90,7 @@ func initialize() -> void:
 		return
 	catalog_by_id.clear()
 	catalog_by_channel.clear()
+	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	rng.seed = WorldSimulation.state.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
 	catalog.append_array(SocietyKnowledgeCatalog.entries())
@@ -492,17 +495,19 @@ func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=n
 	return OpeningOpportunities.ready(id) and Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
 func _channel_has_candidate(channel:String,current_day:int)->bool:
-	var known:=Pathways.Requirements.index_known(WorldSimulation.state.known_discoveries)
-	for discovery:Dictionary in (catalog_by_channel.get(channel,[]) as Array):
+	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
+	var known:Dictionary=_candidate_index.known
+	for discovery:Dictionary in candidates:
 		if _discovery_is_eligible(discovery,current_day,known):return true
 	return false
 
 
 func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
-	var known:=Pathways.Requirements.index_known(WorldSimulation.state.known_discoveries)
+	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
+	var known:Dictionary=_candidate_index.known
 	var best:Dictionary={}
 	var best_score:=-INF
-	for discovery_variant in (catalog_by_channel.get(channel,[]) as Array):
+	for discovery_variant in candidates:
 		var discovery:Dictionary=discovery_variant
 		if not _discovery_is_eligible(discovery,current_day,known): continue
 		var score:=_candidate_score(discovery)

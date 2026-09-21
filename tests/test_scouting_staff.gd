@@ -99,7 +99,7 @@ func test_organized_scouting_evolves_into_real_deposit_prospecting()->void:
 	assert_int((mission.discoveries as Array).size()).is_equal(1)
 
 func test_expansion_city_can_be_selected_as_the_physical_scout_origin()->void:
-	GameState.player_settlements.append({"id":"rivermeet","name":"Rivermeet","position":Vector2(500,0),"primary":false,"population_share":.2,"occupied_by":"player"})
+	GameState.player_settlements.append({"id":"rivermeet","name":"Rivermeet","position":Vector2(500,0),"primary":false,"population_share":.2,"occupied_by":"player","local_resources":{"food_stocks":{"Preserved food":1000.0},"resource_stockpiles":{"Food":1000.0}}})
 	assert_bool(bool(system.scouting_staff.set_origin("rivermeet").get("ok",false))).is_true()
 	var quote:Dictionary=system.scout_mission_quote(30,"open_world","east",4,false,"rivermeet")
 	assert_bool(bool(quote.get("can_dispatch",false))).override_failure_message(str(quote)).is_true()

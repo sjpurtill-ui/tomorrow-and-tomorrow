@@ -1,0 +1,133 @@
+{
+  "chart": [
+    {
+      "bucket_references": 75,
+      "first_query_build_us": 114,
+      "indexed_query_us": 6.4075,
+      "linear_query_us": 24.75,
+      "points_per_trail": 64,
+      "trails": 1
+    },
+    {
+      "bucket_references": 4464,
+      "first_query_build_us": 6420,
+      "indexed_query_us": 6.3125,
+      "linear_query_us": 1481.75,
+      "points_per_trail": 64,
+      "trails": 64
+    },
+    {
+      "bucket_references": 18472,
+      "first_query_build_us": 27586,
+      "indexed_query_us": 6.5575,
+      "linear_query_us": 6174.25,
+      "points_per_trail": 64,
+      "trails": 256
+    },
+    {
+      "bucket_references": 73888,
+      "first_query_build_us": 113888,
+      "indexed_query_us": 8.865,
+      "linear_query_us": 24416.0,
+      "points_per_trail": 64,
+      "trails": 1024
+    }
+  ],
+  "research": [
+    {
+      "channels": 36,
+      "indexed_all_channels_us": 3278.2,
+      "known": 0,
+      "linear_all_channels_us": 3434
+    },
+    {
+      "channels": 36,
+      "indexed_all_channels_us": 280.8,
+      "known": 441,
+      "linear_all_channels_us": 2215
+    },
+    {
+      "channels": 36,
+      "indexed_all_channels_us": 292.2,
+      "known": 883,
+      "linear_all_channels_us": 4475
+    }
+  ],
+  "world_baseline": {
+    "days": 24,
+    "failures": [],
+    "max_ms": 657.122,
+    "mean_ms": 247.559125,
+    "median_ms": 225.34,
+    "mode": "baseline",
+    "opponents": 12,
+    "p95_ms": 324.815,
+    "samples_ms": [
+      657.122,
+      324.815,
+      192.35,
+      195.806,
+      196.926,
+      268.768,
+      213.811,
+      220.056,
+      213.391,
+      202.576,
+      241.971,
+      262.469,
+      248.364,
+      229.965,
+      234.203,
+      221.641,
+      237.267,
+      223.72,
+      222.868,
+      249.108,
+      213.041,
+      225.34,
+      219.017,
+      226.824
+    ],
+    "simulation_state_matches": false,
+    "start_day": 11238
+  },
+  "world_optimized": {
+    "days": 24,
+    "failures": [],
+    "max_ms": 807.209,
+    "mean_ms": 259.375333333333,
+    "median_ms": 232.51,
+    "mode": "optimized",
+    "opponents": 12,
+    "p95_ms": 342.012,
+    "samples_ms": [
+      807.209,
+      342.012,
+      205.009,
+      206.138,
+      204.146,
+      275.407,
+      215.77,
+      222.194,
+      214.417,
+      208.951,
+      240.698,
+      269.774,
+      245.921,
+      227.442,
+      238.751,
+      223.357,
+      240.21,
+      228.654,
+      239.023,
+      255.88,
+      222.111,
+      232.51,
+      223.654,
+      235.77
+    ],
+    "simulation_state_matches": true,
+    "start_day": 11238
+  },
+  "base": "e1f2f8e2"
+}

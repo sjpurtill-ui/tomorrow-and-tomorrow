@@ -101,6 +101,8 @@ var captured_foreign_scouts:Dictionary={}
 var foreign_scout_reports_denied:=0
 var revealed_areas:Array[Dictionary]=[]
 var fog_revision:=0
+# Derived chart geometry; objects are excluded from reflected campaign saves.
+var _revealed_chart_index:RefCounted
 var player_world_origin:=Vector2.ZERO
 var foreign_formations:Array[Dictionary]=[]
 var foreign_sightings:Array[Dictionary]=[]
@@ -140,6 +142,7 @@ func initialize()->void:
 
 
 func reset_for_new_world()->void:
+	_revealed_chart_index=null
 	open_scout_plan_cache.clear()
 	chronicle.reset()
 	neighborhood_generated=false
@@ -520,10 +523,11 @@ func military_movement_destinations()->Array[Dictionary]:
 
 
 func _position_is_revealed(position:Vector2)->bool:
-	for area_variant in revealed_areas:
-		var area:Dictionary=area_variant
-		if _revealed_record_contains(area,position): return true
-	return false
+	if _revealed_chart_index==null or int(_revealed_chart_index.get_meta("revision",-1))!=fog_revision or int(_revealed_chart_index.get_meta("record_count",-1))!=revealed_areas.size():
+		_revealed_chart_index=preload("res://scripts/scout_chart_index.gd").new(revealed_areas)
+		_revealed_chart_index.set_meta("revision",fog_revision)
+		_revealed_chart_index.set_meta("record_count",revealed_areas.size())
+	return _revealed_chart_index.contains(position)
 
 
 func _revealed_record_contains(area:Dictionary,position:Vector2,margin:float=1.0)->bool:
@@ -5335,6 +5339,7 @@ func _apply_state(payload:Dictionary)->void:
 	captured_player_scouts=(payload.get("captured_player_scouts",{}) as Dictionary).duplicate(true)
 	captured_foreign_scouts=(payload.get("captured_foreign_scouts",{}) as Dictionary).duplicate(true)
 	foreign_scout_reports_denied=maxi(0,int(payload.get("foreign_scout_reports_denied",0)))
+	_revealed_chart_index=null
 	revealed_areas.assign((payload.get("revealed_areas",[]) as Array).duplicate(true))
 	fog_revision=maxi(0,int(payload.get("fog_revision",0)))
 	var origin:Dictionary=payload.get("player_world_origin",{})
