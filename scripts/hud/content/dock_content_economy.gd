@@ -181,7 +181,7 @@ func _materials_blocks()->Array:
 
 func signature()->Array:
 	var result:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,_local_signature)
-	result.append_array([selected_material,materials_priorities,selected_food,show_priorities,GameState.settlement_network_revision,GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
+	result.append_array([selected_account,show_work,GameState.economy_stage,GameState.public_treasury,GameState.private_currency,GameState.currency_hoards,GameState.mutual_aid_reserve,GameState.weighed_metal_circulation,selected_material,materials_priorities,selected_food,show_priorities,GameState.settlement_network_revision,GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
 	return result
 
 func _local_signature()->Array:
@@ -205,14 +205,19 @@ func _trade_block()->Dictionary:
 	if trade.shipments.is_empty(): lines.append("No deliveries in transit.")
 	return {"type":"text","heading":"INTERCITY TRADE","text":"\n".join(lines)}
 
+var selected_account:=""
+var show_work:=false
 func _wealth_tab()->Dictionary:
-	var economy:=Indicators.economy()
-	var blocks:Array=[Charts.stocks(GameState.selected_player_settlement_id)]
-	if GameState.economy_stage in ["currency","weighed_metal"]: blocks.append(Charts.finance(GameState.selected_player_settlement_id))
-	else: blocks.append({"type":"text","heading":"WEALTH BEFORE MONEY","text":"This economy uses direct allocation and reciprocity. Material stores above belong to the selected city. No issued-currency treasury or household-currency trend exists yet."})
-	blocks.append({"type":"text","heading":"WHAT REAL GDP MEANS","text":"Real GDP is %.1f output-equivalent units per day: %.1f effective assigned worker-days × %.0f%% economy-wide labor productivity. Per-capita output is %.2f. It is a flow of current work, not stored wealth or a currency balance." % [float(economy.gdp),float(economy.effective_workers),float(economy.productivity)*100.0,float(economy.gdp_per_capita)]})
-	blocks.append({"type":"text","heading":"WHAT THESE ACCOUNTS COVER","text":"Goods and reserves are physical wealth. Currency balances are separate city accounts and must not be added to GDP or material units. The current aggregate records do not provide a historical monetary valuation of buildings, land, private enterprises or household possessions."})
-	return {"kpis":[{"label":"REAL GDP / DAY","value":"%.1f" % float(economy.gdp),"delta":"selected city","accent":Tokens.BLUE,"tip":"Effective assigned worker-days × current labor productivity"},{"label":"GDP / PERSON","value":"%.2f" % float(economy.gdp_per_capita),"delta":"real output","accent":Tokens.TEAL,"tip":"Daily real GDP divided by the selected city's population"},{"label":"PRODUCTIVITY","value":"%d%%" % roundi(float(economy.productivity)*100.0),"delta":"per effective worker","accent":Tokens.AMBER,"tip":"The same labor productivity multiplier used to calculate real GDP"}],"brief":{},"blocks":blocks}
+	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	var stage:=GameState.economy_stage
+	var accounts:Array=[]
+	var history:Array=Charts.finance(GameState.selected_player_settlement_id).get("items",[]) if stage in ["currency","weighed_metal"] else []
+	var definitions:Array=[["treasury","Public treasury",GameState.public_treasury,0],["private_currency","Household money",GameState.private_currency,1],["hoards","Private hoards",GameState.currency_hoards,2],["aid","Mutual aid",GameState.mutual_aid_reserve,3]] if stage=="currency" else [["metal","Exchange metal",GameState.weighed_metal_circulation,-1]] if stage=="weighed_metal" else []
+	for definition:Array in definitions:
+		var points:Array=[]
+		for row:Dictionary in history:points.append({"day":row.day,"value":row.get(definition[0],null)})
+		accounts.append({"key":definition[0],"name":definition[1],"balance":float(definition[2]),"art":definition[3],"points":points})
+	return {"blocks":[{"type":"wealth_ledger","title":"Wealth","stage":stage,"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(GameState.selected_player_settlement_id),"managed":city.get("auto_manage",true),"economy":Indicators.economy(),"accounts":accounts,"selected":selected_account,"show_work":show_work,"on_select":func(key:String):selected_account="" if selected_account==key else key;hud.request_immediate_dock_refresh(),"on_work":func():show_work=not show_work;hud.request_immediate_dock_refresh(),"on_history":focused_action("Account history","",func()->Dictionary:return {"blocks":[Charts.finance(GameState.selected_player_settlement_id)]}).on_press,"on_stores":jump("economy",1),"on_policy":jump("government",0)}]}
 
 func open_expanded_tab(sub:int)->bool:
 	return false

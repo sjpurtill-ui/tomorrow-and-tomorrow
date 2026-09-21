@@ -13,16 +13,19 @@ signal menu_requested
 signal escape_pressed
 
 const SECTIONS:Array[Dictionary]=[
-	{"id":"settlement","tooltip":"Settlement · people, housing and history · F1"},
-	{"id":"construction","tooltip":"Construction · buildings, infrastructure and ongoing work · F7"},
-	{"id":"production","tooltip":"Production · civilian goods and military equipment · F9"},
-	{"id":"economy","tooltip":"Economy · food, water and materials · F2"},
-	{"id":"government","tooltip":"Government · officeholders, authority and policy · F3"},
-	{"id":"civ","tooltip":"Civilization · society and civic dialogue · F4"},
-	{"id":"inquiry","tooltip":"Inquiry · research attention and findings · F5"},
-	{"id":"world","tooltip":"World · contacts, scouting and standing · F6"},
-	{"id":"military","tooltip":"Military · formations, training and supply · F8"},
+	{"id":"settlement","label":"Overview","icon":0,"tooltip":"Settlement overview · F1"},
+	{"id":"government","label":"People","icon":1,"tooltip":"Government and officeholders · F3"},
+	{"id":"economy","label":"Food","icon":2,"sub":0,"tooltip":"Food and water · F2"},
+	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"tooltip":"Material stores and supply"},
+	{"id":"wealth","label":"Wealth","icon":4,"section":"economy","sub":2,"tooltip":"Wealth and economic output"},
+	{"id":"construction","label":"Buildings","icon":5,"tooltip":"Construction and infrastructure · F7"},
+	{"id":"production","label":"Production","icon":6,"tooltip":"Civilian and military production · F9"},
+	{"id":"civ","label":"Culture","icon":7,"tooltip":"Society and civic dialogue · F4"},
+	{"id":"military","label":"Security","icon":8,"tooltip":"Military forces and supply · F8"},
+	{"id":"inquiry","label":"Research","tooltip":"Inquiry and discoveries · F5"},
+	{"id":"world","label":"World","tooltip":"Scouting and contacts · F6"},
 ]
+const ApprovedArt:=preload("res://scripts/hud/approved_ui_art.gd")
 const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 day/s","3 days/s"]
 const MAX_QUEUE_CARDS:=3
 
@@ -166,7 +169,7 @@ func _build_frame()->void:
 func _build_rail()->void:
 	rail_panel=PanelContainer.new()
 	rail_panel.name="CommandRail"
-	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER,0,0)
+	var style:=Tokens.flat(Color("29332c"),Color("a8935e"),0,0)
 	style.border_color=Tokens.BORDER
 	style.border_width_right=1
 	style.content_margin_top=6.0
@@ -178,21 +181,17 @@ func _build_rail()->void:
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",3)
 	rail_panel.add_child(column)
-	var header:=Label.new()
-	header.text="T·T"
-	header.name="RailHeader"
-	header.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
-	header.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	header.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	Tokens.style_label(header,9,Tokens.GOLD,0.1)
+	var header:=ApprovedArt.picture(Rect2(15,7,46,47),45,46)
 	column.add_child(header)
 	var header_rule:=ColorRect.new()
 	header_rule.color=Tokens.BORDER
 	header_rule.custom_minimum_size=Vector2(0,1)
 	column.add_child(header_rule)
+	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
+	var entries:=VBoxContainer.new();entries.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entries.add_theme_constant_override("separation",0);scroll.add_child(entries)
 	for section in SECTIONS:
 		var button:=_make_rail_button(section)
-		column.add_child(button)
+		entries.add_child(button)
 	var spacer:=Control.new()
 	spacer.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	column.add_child(spacer)
@@ -203,9 +202,9 @@ func _build_rail()->void:
 	menu_button.tooltip_text="Pause, view controls, restart, or begin a new world."
 	menu_button.add_theme_font_size_override("font_size",15)
 	menu_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
-	menu_button.add_theme_stylebox_override("normal",Tokens.rail_button_style(false))
-	menu_button.add_theme_stylebox_override("hover",Tokens.rail_button_style(false,true))
-	menu_button.add_theme_stylebox_override("pressed",Tokens.rail_button_style(true))
+	menu_button.add_theme_stylebox_override("normal",_approved_rail_style(false))
+	menu_button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
+	menu_button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
 	menu_button.pressed.connect(func()->void: menu_requested.emit())
 	column.add_child(menu_button)
 
@@ -214,22 +213,23 @@ func _make_rail_button(section:Dictionary)->Button:
 	var button:=Button.new()
 	button.name="Rail"+id.capitalize().replace(" ","")
 	if id=="civ": button.name="RailCivilization"
-	button.custom_minimum_size=Vector2(0,Tokens.RAIL_BUTTON_HEIGHT)
+	button.custom_minimum_size=Vector2(0,68 if section.has("icon") else 30)
 	button.tooltip_text=String(section.tooltip)
-	button.add_theme_stylebox_override("normal",Tokens.rail_button_style(false))
-	button.add_theme_stylebox_override("hover",Tokens.rail_button_style(false,true))
-	button.add_theme_stylebox_override("pressed",Tokens.rail_button_style(true))
+	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
+	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
+	button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
 	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	button.pressed.connect(func()->void: toggle_section(id))
+	button.pressed.connect(func()->void:
+		var target:=String(section.get("section",id));var target_sub:=int(section.get("sub",0))
+		section_requested.emit("" if active_section==target and dock and dock.sub==target_sub else target,target_sub))
 	var content:=VBoxContainer.new()
 	content.set_anchors_preset(Control.PRESET_FULL_RECT)
 	content.alignment=BoxContainer.ALIGNMENT_CENTER
 	content.add_theme_constant_override("separation",0)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
-	var glyph:=NavIcon.new(id)
-	glyph.set_icon_color(Tokens.TEXT_DIM)
-	content.add_child(glyph)
+	if section.has("icon"):content.add_child(ApprovedArt.icon(int(section.icon)))
+	var label:=Tokens.make_label(String(section.label),11,Color("eee3c2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	var badge:=Label.new()
 	badge.visible=false
 	badge.custom_minimum_size=Vector2(16,16)
@@ -244,7 +244,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	button.add_child(badge)
 	rail_buttons[id]=button
 	rail_badges[id]=badge
-	rail_icons[id]=glyph
+
 	return button
 
 func toggle_section(id:String)->void:
@@ -257,9 +257,10 @@ func set_active_section(id:String)->void:
 	active_section=id
 	for section_id in rail_buttons:
 		var button:Button=rail_buttons[section_id]
-		var active:bool=String(section_id)==id
-		button.add_theme_stylebox_override("normal",Tokens.rail_button_style(active))
-		button.add_theme_stylebox_override("hover",Tokens.rail_button_style(active,true))
+		var target:=String(section_id);var active:bool=target==id
+		if id=="economy":active=target==["economy","materials","wealth"][clampi(dock.sub if dock else 0,0,2)]
+		button.add_theme_stylebox_override("normal",_approved_rail_style(active))
+		button.add_theme_stylebox_override("hover",_approved_rail_style(active,true))
 		var icon:Control=rail_icons.get(section_id)
 		if icon:
 			if icon.has_method("set_active"): icon.set_active(active)
@@ -676,6 +677,7 @@ func _build_dock()->void:
 	add_child(dock)
 	dock.close_requested.connect(func()->void: section_requested.emit("",0))
 	dock.tab_changed.connect(func(sub:int)->void:
+		set_active_section(active_section)
 		_dock_signature=[]
 		if dock.provider and dock.provider.has_method("open_expanded_tab") and dock.provider.open_expanded_tab(sub): close_dock())
 	detail_dock=DockPanelScript.new()
@@ -703,6 +705,7 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	_layout()
 	set_active_section(section)
 	dock.present(providers[section],sub)
+	set_active_section(section)
 	_layout()
 	_dock_signature=(providers[section] as Object).signature()+[sub]
 	dock.visible=true
@@ -1055,3 +1058,7 @@ func show_action_feedback(message:String)->void:
 	action_feedback.show();feedback_sequence+=1;var sequence:=feedback_sequence
 	_layout.call_deferred()
 	get_tree().create_timer(9.0).timeout.connect(func():if is_instance_valid(action_feedback) and sequence==feedback_sequence:action_feedback.hide())
+
+func _approved_rail_style(active:bool,hover:bool=false)->StyleBoxFlat:
+	var style:=Tokens.flat(Color("66643b") if active else Color("3e4738") if hover else Color("29332c"),Color("ab9357"),0,0)
+	style.border_color=Color("ab9357");style.border_width_left=2 if active else 0;return style

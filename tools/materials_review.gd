@@ -35,7 +35,7 @@ func render()->void:
 	assert(data.rows[4].points[0].value==null)
 	assert(not provider.open_expanded_tab(1))
 	assert(provider.meta().subtabs==["FOOD & WATER","MATERIALS","WEALTH"])
-	assert(provider._local_tab(2).kpis[0].label=="REAL GDP / DAY")
+	assert(provider._local_tab(2).blocks[0].type=="wealth_ledger")
 	var stocks_before:Dictionary=state.resource_stockpiles.duplicate(true)
 	data.on_select.call("Stone")
 	assert(provider.selected_material=="Stone")

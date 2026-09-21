@@ -170,7 +170,7 @@ func rebuild()->void:
 func rebuild_body()->void:
 	if provider==null: return
 	var data:Dictionary=provider.tab(sub)
-	if not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="materials_ledger":title_label.text="Materials"
+	if not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","") in ["materials_ledger","wealth_ledger"]:title_label.text=String(data.blocks[0].title)
 	_rebuild_kpis(data.get("kpis",[]))
 	_rebuild_brief(data.get("brief",{}))
 	var scroll_position:=body_scroll.scroll_vertical
