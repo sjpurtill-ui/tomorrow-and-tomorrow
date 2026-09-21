@@ -1860,9 +1860,10 @@ func _paint_discovery_segment(image:Image,start:Vector2,finish:Vector2,radius_km
 
 
 func _refresh_discovery_mask(force:bool=false)->void:
-	var snapshot:Dictionary=CivilizationSystem.fog_snapshot()
-	var revision:=int(snapshot.get("revision",0))
-	var current_origin:Dictionary=snapshot.get("current_origin",{})
+	# Read the cheap live header before copying accumulated exploration trails.
+	# Convoy origin still updates every frame, even when no new area is revealed.
+	var revision:=CivilizationSystem.fog_revision
+	var current_origin:Dictionary={"x":CivilizationSystem.player_world_origin.x,"z":CivilizationSystem.player_world_origin.y}
 	var living_vegetation:Array[WeakRef]=[]
 	for reference:WeakRef in vegetation_fog_materials:
 		var material:=reference.get_ref() as ShaderMaterial
@@ -1875,6 +1876,7 @@ func _refresh_discovery_mask(force:bool=false)->void:
 		if material==null or not is_instance_valid(material): continue
 		material.set_shader_parameter("fog_current_origin",Vector2(float(current_origin.get("x",0.0)),float(current_origin.get("z",0.0))))
 	if not force and revision==rendered_fog_revision: return
+	var snapshot:Dictionary=CivilizationSystem.fog_snapshot()
 	var width:=1024
 	var height:=512
 	var image:=Image.create(width,height,false,Image.FORMAT_L8)

@@ -1,0 +1,164 @@
+{
+  "baseline": {
+    "buildings": [
+      {
+        "finished_early_works_us": 12.4666666666667,
+        "records": 0
+      },
+      {
+        "finished_early_works_us": 730.5,
+        "records": 1000
+      },
+      {
+        "finished_early_works_us": 9251.06666666667,
+        "records": 10000
+      },
+      {
+        "finished_early_works_us": 88161.1666666667,
+        "records": 100000
+      }
+    ],
+    "map": [
+      {
+        "areas": 0,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 3.125
+      },
+      {
+        "areas": 64,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 2746.60833333333
+      },
+      {
+        "areas": 256,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 11463.7583333333
+      },
+      {
+        "areas": 1024,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 49586.1916666667
+      }
+    ]
+  },
+  "optimized": {
+    "buildings": [
+      {
+        "finished_early_works_us": 4.16666666666667,
+        "records": 0
+      },
+      {
+        "finished_early_works_us": 4.33333333333333,
+        "records": 1000
+      },
+      {
+        "finished_early_works_us": 4.13333333333333,
+        "records": 10000
+      },
+      {
+        "finished_early_works_us": 4.6,
+        "records": 100000
+      }
+    ],
+    "map": [
+      {
+        "areas": 0,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 0.716666666666667
+      },
+      {
+        "areas": 64,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 0.683333333333333
+      },
+      {
+        "areas": 256,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 0.741666666666667
+      },
+      {
+        "areas": 1024,
+        "points_per_trail": 64,
+        "unchanged_frame_us": 0.741666666666667
+      }
+    ]
+  },
+  "base": "e7a22a40",
+  "scope": "Synthetic accumulated records, actual unchanged-map refresh and completed-work functions; not whole-game FPS or naturally simulated campaign ages.",
+  "world_baseline": {
+    "days": 24,
+    "failures": [],
+    "max_ms": 1822.717,
+    "mean_ms": 587.472041666667,
+    "median_ms": 533.228,
+    "mode": "baseline",
+    "opponents": 12,
+    "p95_ms": 701.435,
+    "samples_ms": [
+      1822.717,
+      634.683,
+      440.223,
+      487.696,
+      459.576,
+      701.435,
+      511.354,
+      481.718,
+      490.253,
+      485.685,
+      543.73,
+      641.869,
+      595.14,
+      534.324,
+      623.216,
+      437.894,
+      457.085,
+      536.527,
+      533.228,
+      589.545,
+      554.197,
+      502.294,
+      507.904,
+      527.036
+    ],
+    "simulation_state_matches": false,
+    "start_day": 11238
+  },
+  "world_optimized": {
+    "days": 24,
+    "failures": [],
+    "max_ms": 2290.053,
+    "mean_ms": 588.059833333333,
+    "median_ms": 500.562,
+    "mode": "optimized",
+    "opponents": 12,
+    "p95_ms": 772.954,
+    "samples_ms": [
+      2290.053,
+      635.978,
+      461.236,
+      482.046,
+      453.525,
+      547.02,
+      428.931,
+      458.87,
+      435.931,
+      428.214,
+      524.75,
+      542.477,
+      620.249,
+      772.954,
+      733.475,
+      498.803,
+      410.204,
+      383.688,
+      402.784,
+      460.17,
+      510.819,
+      610.904,
+      519.793,
+      500.562
+    ],
+    "simulation_state_matches": true,
+    "start_day": 11238
+  }
+}
