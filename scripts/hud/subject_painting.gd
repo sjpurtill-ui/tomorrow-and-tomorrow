@@ -3,8 +3,22 @@ extends Control
 var texture:Texture2D
 var focus:=Vector2(.5,.5)
 var contain:bool=false
+var fetch:Callable
+var scroll:ScrollContainer
 func _ready()->void:
 	clip_contents=true;resized.connect(queue_redraw)
+	if is_instance_valid(scroll):
+		resized.connect(refresh)
+		visibility_changed.connect(refresh)
+		scroll.resized.connect(refresh)
+		scroll.get_v_scroll_bar().value_changed.connect(func(_value:float)->void:refresh())
+		call_deferred("refresh")
+func refresh()->void:
+	if not is_instance_valid(scroll) or not fetch.is_valid():return
+	if is_visible_in_tree() and size.y>0 and scroll.get_global_rect().intersects(get_global_rect()):
+		if texture==null:texture=fetch.call()
+	else:texture=null
+	queue_redraw()
 static func crop_region(source_texture:Texture2D,target:Vector2,focal_point:Vector2)->Rect2:
 	var source:=source_texture.get_size();var scale:=maxf(target.x/source.x,target.y/source.y)
 	var extent:=target/maxf(scale,.0001);var origin:=source*focal_point-extent*.5
