@@ -160,3 +160,18 @@ func test_rival_research_population_and_allocation_compound_without_person_entit
 	assert_int(large_findings).is_greater_equal(small_findings)
 	assert_bool(earlier_completion).is_true()
 	assert_int((large.discovery_profile.domains as Dictionary).size()).is_equal(12)
+
+func test_adoption_profile_updates_within_same_month()->void:
+	WorldSimulation.clear()
+	GameState.reset_for_new_world(9241)
+	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
+	ProgressionSystem.reset_for_new_world()
+	GameState.discovery_adoption["seasonal_patterns"]=.1
+	GameState.elapsed_days=1
+	ProgressionSystem.process_day(1)
+	var before:=ProgressionSystem.cached_player_profile.duplicate(true)
+	GameState.discovery_adoption["seasonal_patterns"]=.9
+	GameState.elapsed_days=2
+	ProgressionSystem.process_day(2)
+	assert_bool(ProgressionSystem.cached_player_profile!=before).is_true()
+	assert_dict(ProgressionSystem.cached_player_profile).is_equal(ProgressionSystem._build_player_discovery_profile())

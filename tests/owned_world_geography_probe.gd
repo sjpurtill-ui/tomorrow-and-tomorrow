@@ -59,7 +59,8 @@ func run()->void:
 	if verify_restore:
 		continuation=preload("res://tools/verify_campaign_save.gd").verify(player_start,func()->void:
 			CivilizationSystem.set_scout_geography_authority(func(point:Vector2)->bool:return terrain._height_at(point.x,point.y)>.012)
-			CivilizationSystem.ground_survey_authority=Callable(terrain,"_survey_ground_at"))
+			CivilizationSystem.ground_survey_authority=Callable(terrain,"_survey_ground_at")
+			WorldSimulation.bind_geography(),output+".save" if not output.is_empty() else "")
 		if continuation.has("error"):errors.append(continuation.error)
 		print("SAVE CONTINUATION ",JSON.stringify(continuation))
 	print("WORLD ERRORS ",errors)

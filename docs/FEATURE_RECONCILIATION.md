@@ -2009,3 +2009,12 @@ Validation: 30 city-resource and rail-freight tests pass (report 84). Matched 30
 A research entry with no numeric effect now uses its authored production contract before falling back to generic prerequisite text. Mounted archery therefore explains horse-archer equipment, arrows and maintained mounts. The education catalog count fixture includes the newly added practice.
 
 Validation: all eight military education cases pass (report 87), including the new explanation check. The other six suites in report 85 passed all 111 cases across military development, training accounting, joint operations, civilization projection bounds, player independence and government people. The sole earlier failure was the corrected eight-versus-nine catalog fixture. This validates the combined checkpoint; long campaign endpoints remain in progress.
+
+
+## First 300 years: daily adoption evaluations (September 21)
+
+Capability evaluations now refresh their adoption profile each simulated day. Previously a monthly cached sample could differ after loading, when that unsaved cache rebuilt; this also left within-month progression percentages stale. No research or materials are granted, and all existing capability requirements remain.
+
+The 25-year whole-world comparison restored its captured state exactly but exposed this next-day profile divergence. It also exposed a probe-only omission: the probe now rebinds the same opponent geography callables that the normal terrain scene reconnects after loading. The diagnostic retains its own explicitly named checkpoint alongside its report for repeatable investigation; unique user-save-directory test slots are still removed.
+
+Validation: all eight progression and three whole-save regressions pass (report 88), including adoption changing within one month. The actual-world 25-year continuation is rerunning with the corrected probe and retained checkpoint; it is not yet counted as passed.

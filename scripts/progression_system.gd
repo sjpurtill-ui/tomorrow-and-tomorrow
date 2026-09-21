@@ -66,8 +66,9 @@ func process_day(day:int=-1)->Array[Dictionary]:
 	if evaluated_day==last_evaluated_day and known_count==cached_known_count: return []
 	last_evaluated_day=evaluated_day
 	# Full profile scans are fixed by the discovery catalog, never population.
-	# Re-evaluate monthly, or immediately when a discovery is established.
-	if cached_profile_day<0 or floori(float(evaluated_day)/30.0)!=floori(float(cached_profile_day)/30.0) or known_count!=cached_known_count:
+	# Adoption advances daily; a monthly sample made progression stale and
+	# changed the next evaluation when a load rebuilt the omitted cache.
+	if cached_profile_day!=evaluated_day or known_count!=cached_known_count:
 		cached_player_profile=_build_player_discovery_profile()
 		cached_profile_day=evaluated_day
 		cached_known_count=known_count
