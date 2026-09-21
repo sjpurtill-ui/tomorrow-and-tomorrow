@@ -1,3 +1,15 @@
+## September 21 — Top-bar hover detail panels
+
+All six top-right indicators now construct themed detail panels on hover rather
+than displaying prose descriptions. Panels contain a headline, explicit city or
+all-settlement scope, numeric rows, current status, and applicable coverage bars.
+Food uses actual ration flows, water separates reserve from drinking coverage,
+health labels projections, and science/output show their contributing factors.
+Snapshots are rebuilt on opening within selected-city resource/population scopes.
+Five headless checks cover all panel construction, food units, missing water data,
+city isolation, and HUD compilation. No game launch or visual review was performed;
+the user owns those checks. Existing stat click destinations are retained.
+
 ## September 21 — Shelter status and stalled early construction
 
 Overview and Buildings now share a shelter status: starting camp places do not

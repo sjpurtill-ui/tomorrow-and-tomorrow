@@ -400,7 +400,8 @@ func _build_kpi_strip()->void:
 		var def:Dictionary=KPI_DEFS[index]
 		if index>0:
 			var divider:=ColorRect.new();divider.color=Tokens.BORDER;divider.custom_minimum_size=Vector2(1,26);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;divider.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(divider);kpi_separators.append(divider)
-		var chip:=Button.new()
+		var chip:=preload("res://scripts/hud/kpi_detail_chip.gd").new()
+		chip.metric_id=String(def.id)
 		chip.name="Kpi"+String(def.id).capitalize()
 		# Reserve one stable width for every state. In particular, the longer
 		# shortage wording must not make the whole strip collide with the clock
@@ -452,7 +453,7 @@ func _build_kpi_strip()->void:
 		value_row.add_child(delta)
 		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width)}
 
-func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color,tooltip:String)->void:
+func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color,_tooltip:String)->void:
 	var parts:Dictionary=kpi_chips.get(id,{})
 	if parts.is_empty(): return
 	(parts.value as Label).text=value_text
@@ -460,9 +461,9 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	delta.text=delta_text
 	delta.add_theme_color_override("font_color",delta_color)
 	var chip:Button=parts.chip
-	chip.tooltip_text=tooltip
+	chip.tooltip_text="View details"
 	# Width is intentionally independent of live text so a deficit cannot move
-	# the complete top bar. The tooltip retains the unabridged explanation.
+	# the complete top bar. Hover details read fresh state when opened.
 	chip.custom_minimum_size=Vector2(float(parts.width),Tokens.CHIP_HEIGHT)
 
 # --- Decision queue ---------------------------------------------------------
