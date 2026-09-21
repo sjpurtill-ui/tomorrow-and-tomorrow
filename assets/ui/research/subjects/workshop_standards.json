@@ -1,0 +1,9 @@
+{
+  "id": "workshop_standards",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Workshop Standards. A traditional workshop compares several matching wooden patterns, metal gauges and nearly identical components on a bench; repeatability and quality inspection, no anonymous factory panorama.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f6499fc5-8df9-490e-ace6-150b721859d5.png",
+  "asset": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+  "sha256": "80876d2eb670e5a2d3f789517625cb387b1c926c4bde8174fa68cd773520692f",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
