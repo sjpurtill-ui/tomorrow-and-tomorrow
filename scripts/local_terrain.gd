@@ -1851,7 +1851,25 @@ func _paint_discovery_segment(image:Image,start:Vector2,finish:Vector2,radius_km
 	var radius_pixels:=maxf(1.0,(radius_km/world_width*float(width)+radius_km/world_depth*float(height))*0.5)
 	var padding:=radius_pixels*1.25
 	for pixel_y in range(maxi(0,floori(minf(a.y,b.y)-padding)),mini(height,ceili(maxf(a.y,b.y)+padding)+1)):
-		for pixel_x in range(maxi(0,floori(minf(a.x,b.x)-padding)),mini(width,ceili(maxf(a.x,b.x)+padding)+1)):
+		# A pixel inside the corridor must be within padding of a segment point
+		# on this row. Clip that segment's parameter range before scanning x;
+		# long diagonals otherwise test their entire bounding rectangle.
+		var left:=minf(a.x,b.x)
+		var right:=maxf(a.x,b.x)
+		var dy:=float(b.y)-float(a.y)
+		if absf(dy)>0.000001:
+			var t0:=(float(pixel_y)-padding-float(a.y))/dy
+			var t1:=(float(pixel_y)+padding-float(a.y))/dy
+			var low:=clampf(minf(t0,t1),0.0,1.0)
+			var high:=clampf(maxf(t0,t1),0.0,1.0)
+			var x0:=lerpf(float(a.x),float(b.x),low)
+			var x1:=lerpf(float(a.x),float(b.x),high)
+			left=minf(x0,x1)
+			right=maxf(x0,x1)
+		# One conservative guard pixel covers floating-point endpoint rounding.
+		var first_x:=maxi(maxi(0,floori(minf(a.x,b.x)-padding)),floori(left-padding)-1)
+		var end_x:=mini(mini(width,ceili(maxf(a.x,b.x)+padding)+1),ceili(right+padding)+2)
+		for pixel_x in range(first_x,end_x):
 			var pixel:=Vector2(float(pixel_x),float(pixel_y))
 			var distance:=pixel.distance_to(Geometry2D.get_closest_point_to_segment(pixel,a,b))/radius_pixels
 			if distance>1.25: continue

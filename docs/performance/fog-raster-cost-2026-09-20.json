@@ -1,0 +1,24 @@
+{
+  "base": "d4ba4fae",
+  "samples": [
+    {
+      "after_us": 924,
+      "before_us": 28149,
+      "case": "long diagonal",
+      "pixels_identical": true
+    },
+    {
+      "after_us": 224,
+      "before_us": 1138,
+      "case": "regional diagonal",
+      "pixels_identical": true
+    },
+    {
+      "after_us": 419,
+      "before_us": 452,
+      "case": "horizontal",
+      "pixels_identical": true
+    }
+  ],
+  "scope": "1024x512 L8 fog mask, actual planetary dimensions; single synthetic corridor paints compared against the original painter; not whole-game FPS"
+}
