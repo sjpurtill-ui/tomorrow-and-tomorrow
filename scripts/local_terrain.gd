@@ -399,6 +399,7 @@ var map_snapshot_elapsed:=0.1
 var map_snapshot_refreshes:=0
 var rendered_resource_overlay_signature:=""
 var civilization_geography_cache:Dictionary={}
+var civilization_surface_cache:Dictionary={}
 var military_attention_dialog:ConfirmationDialog
 var military_attention_seen:Dictionary={}
 
@@ -1347,14 +1348,22 @@ func _cached_civilization_geography(origin:Vector2)->Dictionary:
 func _civilization_geography(origin:Vector2)->Dictionary:
 	return _cached_civilization_geography(origin).duplicate(true)
 
+func _cached_civilization_surface_materials(origin:Vector2)->Dictionary:
+	# Catchment potential is authored geography, independent of current stocks.
+	# Search points must not build water-source and climate reports as a side effect.
+	var key:=[GameState.world_seed,origin]
+	if not civilization_surface_cache.has(key):
+		if civilization_surface_cache.size()>=512:civilization_surface_cache.erase(civilization_surface_cache.keys()[0])
+		civilization_surface_cache[key]=_surface_material_catchments(Vector3(origin.x,0,origin.y))
+	return civilization_surface_cache[key]
+
 func _civilization_surface_materials(origin:Vector2)->Dictionary:
-	# A resource-front search needs catchments, not climate and water reports.
-	return (_cached_civilization_geography(origin).surface_material_catchments as Dictionary).duplicate(true)
+	return _cached_civilization_surface_materials(origin).duplicate(true)
 
 func _sample_civilization_geography(origin:Vector2)->Dictionary:
 	var ground:=_survey_ground_at(origin)
 	var water_distance:=_river_distance_at(origin.x,origin.y)*KM_PER_WORLD_UNIT
-	var catchments:=_surface_material_catchments(Vector3(origin.x,0,origin.y))
+	var catchments:=_cached_civilization_surface_materials(origin)
 	var water_sources:=_water_conveyance_sources(Vector3(origin.x,_height_at(origin.x,origin.y),origin.y))
 	return {"water_conveyance_sources":water_sources,"environment_profile":PlanetEnvironment.profile_at(origin,ground),"surface_water_distance_km":water_distance,"surface_water_recognized":water_distance<=72.0,"surface_material_catchments":catchments,"woodland_catchment":catchments.Timber,"terrain_height_at":Callable(self,"_height_at"),"buildable_land_at":func(x:float,z:float)->bool:return _height_at(x,z)>SEA_LEVEL+.012,"river_distance_at":Callable(self,"_river_distance_at"),"drainage_tangent_at":Callable(self,"_drainage_tangent_at"),"moisture_at":Callable(self,"_land_moisture_at")}
 
