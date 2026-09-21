@@ -8,7 +8,7 @@ static func crop(rect:Rect2)->Texture2D:
 static func picture(rect:Rect2,width:float,height:float)->TextureRect:
 	var image:=TextureRect.new();image.texture=crop(rect);image.custom_minimum_size=Vector2(width,height);image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE;return image
 static func icon(index:int)->TextureRect:
-	var ys:=[72,150,229,306,388,468,549,629,708]
+	var ys:=[72,150,229,306,388,468,549,620,697]
 	return picture(Rect2(15,ys[index],47,40),40,36)
 static func account(index:int)->TextureRect:
 	var ys:=[353,444,531,621]

@@ -27,7 +27,7 @@ static var BODY:=Color("30352f")
 static var BODY_2:=Color("3e443d")
 static var TEXT_SOFT:=Color("4c554e")
 static var TEXT_DIM:=Color("566058")
-static var MUTED:=Color("687169")
+static var MUTED:=Color("4c554e")
 static var DISABLED:=Color("8c918a")
 static var LAYER_ON_FG:=Color("343b37")
 static var GOLD:=Color("8a6118")
@@ -61,7 +61,7 @@ static func set_color_mode(mode:String)->void:
 		WARN_BG=Color(201.0/255.0,169.0/255.0,90.0/255.0,0.08);WARN_BORDER=Color("7d6a3a");DANGER_BG=Color(198.0/255.0,116.0/255.0,98.0/255.0,0.12);DANGER_BORDER=Color("8a4f44");INFO_BG=Color(121.0/255.0,168.0/255.0,160.0/255.0,0.10);INFO_BORDER=Color("3e5f5a")
 	else:
 		PANEL_BG=Color("e9dfcff2");PANEL_BG_SOLID=Color("eee5d6fa");DOCK_BG=Color("f2eadcfb");TILE_BG=Color("dfd2be");ROW_BG=Color("e8dece");ACTIVE_BG=Color("d3c1a5");HOVER_BG=Color("ddd0bd");CLOSE_HOVER_BG=Color("dfc8bd");BUTTON_BG=Color("e0d4c2");FIELD_BG=Color("f7f1e7");SPEED_IDLE_BG=Color("ded2c0");TRACK=Color("c9baa4");TOOLBAR_BG=Color("ebe1d2f2");MAP_LABEL_BG=Color("eee5d7e8")
-		BORDER=Color("9b896e");BORDER_2=Color("87745b");BORDER_SOFT=Color("b9a991");LAYER_ON_BORDER=Color("4b746c");INK=Color("20231f");BODY=Color("30352f");BODY_2=Color("3e443d");TEXT_SOFT=Color("4c554e");TEXT_DIM=Color("566058");MUTED=Color("687169");DISABLED=Color("8c918a");LAYER_ON_FG=Color("30362f")
+		BORDER=Color("9b896e");BORDER_2=Color("87745b");BORDER_SOFT=Color("b9a991");LAYER_ON_BORDER=Color("4b746c");INK=Color("20231f");BODY=Color("30352f");BODY_2=Color("3e443d");TEXT_SOFT=Color("4c554e");TEXT_DIM=Color("566058");MUTED=Color("4c554e");DISABLED=Color("8c918a");LAYER_ON_FG=Color("30362f")
 		GOLD=Color("8a6118");GOLD_BRIGHT=Color("704b0d");GOLD_WASH=Color(138.0/255.0,97.0/255.0,24.0/255.0,0.13);GREEN=Color("536d32");RED=Color("a34435");AMBER=Color("805d1d");TEAL=Color("356f66");BLUE=Color("4d6389");VIOLET=Color("695587");GLYPH_DARK=Color("f4efe5")
 		WARN_BG=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.10);WARN_BORDER=Color("8d6c20");DANGER_BG=Color(166.0/255.0,79.0/255.0,64.0/255.0,0.10);DANGER_BORDER=Color("a64f40");INFO_BG=Color(66.0/255.0,124.0/255.0,115.0/255.0,0.10);INFO_BORDER=Color("427c73")
 

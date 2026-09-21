@@ -3,9 +3,7 @@ const PATH:="res://assets/ui/provisions/food-atlas.png"
 static var atlas:Texture2D
 static func texture(index:int)->Texture2D:
 	if atlas==null:
-		var image:=Image.load_from_file(PATH)
-		if image==null:return null
-		atlas=ImageTexture.create_from_image(image)
+		atlas=load(PATH) as Texture2D
 	var result:=AtlasTexture.new();result.atlas=atlas
 	var cell:=Vector2(atlas.get_width()/2.0,atlas.get_height()/3.0)
 	result.region=Rect2(Vector2(index%2,index/2)*cell+Vector2(0,cell.y*.06),Vector2(cell.x,cell.y*.85))

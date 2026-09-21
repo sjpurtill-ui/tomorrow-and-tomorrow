@@ -52,11 +52,11 @@ func test_small_window_keeps_dismissal_buttons_onscreen_and_body_scrollable()->v
 	assert_bool(Rect2(0,0,800,600).encloses(popup.dismiss_button.get_global_rect())).is_true()
 	assert_float(popup.body.get_combined_minimum_size().x).is_less_equal(popup.scroll.size.x)
 	popup.close()
-func test_wide_window_uses_a_narrow_art_led_announcement_panel()->void:
+func test_wide_window_uses_the_responsive_art_and_summary_layout()->void:
 	var f:=fixture(1440,900);var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
 	for i in 5:await get_tree().process_frame
-	assert_float(popup.panel.size.x).is_equal(600.0)
-	assert_float(popup.panel.size.y).is_greater(popup.panel.size.x)
+	assert_float(popup.panel.size.x).is_equal(740.0)
+	assert_float(popup.panel.size.y).is_equal(730.0)
 	popup.close()
 func test_existing_modal_pause_remains_while_discovery_is_read_and_after_dismissal()->void:
 	var f:=fixture();var existing=Pause.new();existing.acquire(f.host)
@@ -67,7 +67,7 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	var f:=fixture();GameState.known_discoveries.append("stone_sorting")
 	var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"stone_sorting","day":1129}])
 	assert_str(popup.heading.text).is_equal("Stone Selection")
-	assert_str(Art.source_texture(popup.hero.texture).resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
+	assert_str(Art.source_texture(popup.hero.texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
 	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
 	assert_str(popup.effect_cards.survey_speed.value.text).is_equal("+3%")
 	assert_str(popup.effect_cards.tool_quality.value.text).is_equal("+4%")
@@ -91,6 +91,6 @@ func test_full_illustration_and_footer_fit_after_resizing_to_phone_width()->void
 		assert_bool(popup.panel.get_global_rect().encloses(popup.next_button.get_global_rect())).is_true()
 		assert_bool(popup.panel.get_global_rect().encloses(popup.dismiss_button.get_global_rect())).is_true()
 		assert_float(popup.body.get_combined_minimum_size().x).is_less_equal(popup.scroll.size.x+.1)
-		assert_bool(popup.hero.contain).is_true()
+		assert_bool(popup.hero is Control).is_true()
 		assert_bool(popup.introduction.vertical).is_equal(width<628)
 	popup.close()

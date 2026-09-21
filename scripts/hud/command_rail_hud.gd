@@ -94,6 +94,8 @@ func _ready()->void:
 
 func _layout()->void:
 	var view:=get_viewport().get_visible_rect().size
+	for button:Button in rail_buttons.values():
+		button.custom_minimum_size.y=clampf((view.y-104.0)/SECTIONS.size(),52.0,68.0)
 	if top_frame:
 		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
 		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,56)
@@ -192,9 +194,6 @@ func _build_rail()->void:
 	for section in SECTIONS:
 		var button:=_make_rail_button(section)
 		entries.add_child(button)
-	var spacer:=Control.new()
-	spacer.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	column.add_child(spacer)
 	var menu_button:=Button.new()
 	menu_button.name="RailMenu"
 	menu_button.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
@@ -213,7 +212,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	var button:=Button.new()
 	button.name="Rail"+id.capitalize().replace(" ","")
 	if id=="civ": button.name="RailCivilization"
-	button.custom_minimum_size=Vector2(0,68 if section.has("icon") else 30)
+	button.custom_minimum_size=Vector2(0,58)
 	button.tooltip_text=String(section.tooltip)
 	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
 	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
@@ -229,6 +228,11 @@ func _make_rail_button(section:Dictionary)->Button:
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
 	if section.has("icon"):content.add_child(ApprovedArt.icon(int(section.icon)))
+	else:
+		var symbol:=NavIcon.new(id)
+		symbol.set_icon_color(Color("e1cc91"))
+		symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+		content.add_child(symbol)
 	var label:=Tokens.make_label(String(section.label),11,Color("eee3c2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	var badge:=Label.new()
 	badge.visible=false

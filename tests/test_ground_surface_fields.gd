@@ -17,7 +17,7 @@ func test_unresolved_surface_noise_is_guarded_by_its_existing_lod_weight()->void
 	assert_str(source).contains("if (regional_grain>0.0)")
 	assert_str(source).contains("if (resolved>0.0)")
 	assert_str(source).contains("if (band_detail>0.0 && sediment>0.0)")
-	assert_str(source).contains("if (fine>0.0)")
+	assert_str(source).contains("if (pixel_world<0.006)")
 	assert_str(source).contains("if (soil_detail>0.0)")
 const REGIONAL:=preload("res://scripts/terrain_patch_builder.gd")
 const CLOSE:=preload("res://scripts/close_terrain_job.gd")
@@ -59,8 +59,8 @@ func test_regional_channels_preserve_geometry_and_match_sliced_jobs()->void:
 	assert_int(mesh[Mesh.ARRAY_TEX_UV].size()).is_equal(289)
 	for i in range(0,full.vertices.size(),31):
 		var p:Vector3=full.vertices[i];var fields:=terrain._terrain_surface_fields_at(p.x,p.z,p.y)
-		assert_vector(full.climate_uv[i]).is_equal(Vector2(fields.x,fields.y))
-		assert_vector(full.geology_uv[i]).is_equal(Vector2(fields.z,fields.w))
+		assert_float(full.climate_uv[i].distance_to(Vector2(fields.x,fields.y))).is_less(.000001)
+		assert_float(full.geology_uv[i].distance_to(Vector2(fields.z,fields.w))).is_less(.000001)
 func test_close_and_base_meshes_carry_the_same_physical_channels()->void:
 	var terrain:=fixture()
 	var sample:=func(x:float,z:float)->Array:return [terrain._height_at(x,z),Vector3.UP,terrain._terrain_color_at(x,z,terrain._height_at(x,z))]

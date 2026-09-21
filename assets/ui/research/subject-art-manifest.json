@@ -1175,83 +1175,6 @@
       0.5
     ]
   },
-  "nuclear_propulsion": {
-    "path": "res://assets/ui/research/subjects/nuclear_propulsion-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "remote_aircraft": {
-    "path": "res://assets/ui/research/subjects/remote_aircraft-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "rifled_barrels": {
-    "path": "res://assets/ui/research/subjects/rifled_barrels-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "metallic_cartridges": {
-    "path": "res://assets/ui/research/subjects/metallic_cartridges-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "automatic_actions": {
-    "path": "res://assets/ui/research/subjects/automatic_actions-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "internal_combustion": {
-    "path": "res://assets/ui/research/subjects/internal_combustion-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "armored_vehicles": {
-    "path": "res://assets/ui/research/subjects/armored_vehicles-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "indirect_fire": {
-    "path": "res://assets/ui/research/subjects/indirect_fire-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "armor_piercing_weapons": {
-    "path": "res://assets/ui/research/subjects/armor_piercing_weapons-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "atomic_physics": {
-    "path": "res://assets/ui/research/subjects/atomic_physics-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "reactor_engineering": {
-    "path": "res://assets/ui/research/subjects/reactor_engineering-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
   "festival_calendar": {
     "path": "res://assets/ui/research/subjects/festival_calendar-v1.png",
     "focus": [
@@ -1376,6 +1299,2008 @@
     "focus": [
       0.5,
       0.5
+    ]
+  },
+  "mine_airways": {
+    "path": "res://assets/ui/research/paper/mine_airways.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "nut_kernel_shelling": {
+    "path": "res://assets/ui/research/paper/nut_kernel_shelling.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "acorn_leaching": {
+    "path": "res://assets/ui/research/paper/acorn_leaching.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "root_grating_dewatering": {
+    "path": "res://assets/ui/research/paper/root_grating_dewatering.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "pulse_splitting": {
+    "path": "res://assets/ui/research/paper/pulse_splitting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "fruit_pulp_screening": {
+    "path": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "textile_dye_fixation": {
+    "path": "res://assets/ui/research/paper/textile_dye_fixation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "resist_dye_patterning": {
+    "path": "res://assets/ui/research/paper/resist_dye_patterning.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "textile_printing": {
+    "path": "res://assets/ui/research/paper/textile_printing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "textile_calendering": {
+    "path": "res://assets/ui/research/paper/textile_calendering.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "textile_waterproofing": {
+    "path": "res://assets/ui/research/paper/textile_waterproofing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "garment_seam_sealing": {
+    "path": "res://assets/ui/research/paper/garment_seam_sealing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "zipper_chain_closures": {
+    "path": "res://assets/ui/research/paper/zipper_chain_closures.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "leather_thickness_skiving": {
+    "path": "res://assets/ui/research/paper/leather_thickness_skiving.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "buttonhole_edge_reinforcement": {
+    "path": "res://assets/ui/research/paper/buttonhole_edge_reinforcement.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "snap_fastener_closures": {
+    "path": "res://assets/ui/research/paper/snap_fastener_closures.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "textile_braiding": {
+    "path": "res://assets/ui/research/paper/textile_braiding.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "quilted_layer_assembly": {
+    "path": "res://assets/ui/research/paper/quilted_layer_assembly.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "leather_goods_patterning": {
+    "path": "res://assets/ui/research/paper/leather_goods_patterning.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "sewing_machine_mechanisms": {
+    "path": "res://assets/ui/research/paper/sewing_machine_mechanisms.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "photovoltaic_power": {
+    "path": "res://assets/ui/research/paper/photovoltaic_power.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "chloralkali_cells": {
+    "path": "res://assets/ui/research/paper/chloralkali_cells.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "compound_pulleys": {
+    "path": "res://assets/ui/research/paper/compound_pulleys.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "gear_ratios": {
+    "path": "res://assets/ui/research/paper/gear_ratios.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "mineral_streak_tests": {
+    "path": "res://assets/ui/research/paper/mineral_streak_tests.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "relative_stratigraphy": {
+    "path": "res://assets/ui/research/paper/relative_stratigraphy.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "litter_bearer_drill": {
+    "path": "res://assets/ui/research/paper/litter_bearer_drill.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "casualty_transfer_records": {
+    "path": "res://assets/ui/research/paper/casualty_transfer_records.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "germination_trials": {
+    "path": "res://assets/ui/research/paper/germination_trials.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "seed_cleaning": {
+    "path": "res://assets/ui/research/paper/seed_cleaning.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "nutrient_response_trials": {
+    "path": "res://assets/ui/research/paper/nutrient_response_trials.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "catalytic_ammonia_synthesis": {
+    "path": "res://assets/ui/research/paper/catalytic_ammonia_synthesis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "battery_bank_wiring": {
+    "path": "res://assets/ui/research/paper/battery_bank_wiring.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cylinder_boring": {
+    "path": "res://assets/ui/research/paper/cylinder_boring.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "pneumatic_pressing": {
+    "path": "res://assets/ui/research/paper/pneumatic_pressing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "specimen_slide_mounting": {
+    "path": "res://assets/ui/research/paper/specimen_slide_mounting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "compound_microscopy": {
+    "path": "res://assets/ui/research/paper/compound_microscopy.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "refractory_brick_firing": {
+    "path": "res://assets/ui/research/paper/refractory_brick_firing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ceramic_crucibles": {
+    "path": "res://assets/ui/research/paper/ceramic_crucibles.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "tinplate_coating": {
+    "path": "res://assets/ui/research/paper/tinplate_coating.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "food_retorts": {
+    "path": "res://assets/ui/research/paper/food_retorts.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rope_laying": {
+    "path": "res://assets/ui/research/paper/rope_laying.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "sail_seaming": {
+    "path": "res://assets/ui/research/paper/sail_seaming.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "carvel_frame_construction": {
+    "path": "res://assets/ui/research/paper/carvel_frame_construction.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "clinker_shell_construction": {
+    "path": "res://assets/ui/research/paper/clinker_shell_construction.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "three_plate_lapping": {
+    "path": "res://assets/ui/research/paper/three_plate_lapping.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "straightedge_scraping": {
+    "path": "res://assets/ui/research/paper/straightedge_scraping.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "machine_way_scraping": {
+    "path": "res://assets/ui/research/paper/machine_way_scraping.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "lead_screw_cutting": {
+    "path": "res://assets/ui/research/paper/lead_screw_cutting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "split_feed_nuts": {
+    "path": "res://assets/ui/research/paper/split_feed_nuts.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cross_slide_assembly": {
+    "path": "res://assets/ui/research/paper/cross_slide_assembly.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "four_jaw_chucks": {
+    "path": "res://assets/ui/research/paper/four_jaw_chucks.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "tailstock_fitting": {
+    "path": "res://assets/ui/research/paper/tailstock_fitting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "toolbit_heat_treatment": {
+    "path": "res://assets/ui/research/paper/toolbit_heat_treatment.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "centre_lathe_assembly": {
+    "path": "res://assets/ui/research/paper/centre_lathe_assembly.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "drill_bit_fluting": {
+    "path": "res://assets/ui/research/paper/drill_bit_fluting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "quill_feed_mechanisms": {
+    "path": "res://assets/ui/research/paper/quill_feed_mechanisms.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "column_drilling_machines": {
+    "path": "res://assets/ui/research/paper/column_drilling_machines.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "milling_cutter_relief": {
+    "path": "res://assets/ui/research/paper/milling_cutter_relief.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "milling_table_feeds": {
+    "path": "res://assets/ui/research/paper/milling_table_feeds.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "milling_spindle_heads": {
+    "path": "res://assets/ui/research/paper/milling_spindle_heads.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "horizontal_milling_machines": {
+    "path": "res://assets/ui/research/paper/horizontal_milling_machines.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "worm_dividing_heads": {
+    "path": "res://assets/ui/research/paper/worm_dividing_heads.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "drill_jig_bushings": {
+    "path": "res://assets/ui/research/paper/drill_jig_bushings.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "drill_jig_layout": {
+    "path": "res://assets/ui/research/paper/drill_jig_layout.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "gauge_block_lapping": {
+    "path": "res://assets/ui/research/paper/gauge_block_lapping.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "bench_vise_screws": {
+    "path": "res://assets/ui/research/paper/bench_vise_screws.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "basic_machine_shops": {
+    "path": "res://assets/ui/research/paper/basic_machine_shops.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "precision_toolrooms": {
+    "path": "res://assets/ui/research/paper/precision_toolrooms.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "reamed_bore_finishing": {
+    "path": "res://assets/ui/research/paper/reamed_bore_finishing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "reciprocating_profile_slotting": {
+    "path": "res://assets/ui/research/paper/reciprocating_profile_slotting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "gear_shaping_generation": {
+    "path": "res://assets/ui/research/paper/gear_shaping_generation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "progressive_profile_broaching": {
+    "path": "res://assets/ui/research/paper/progressive_profile_broaching.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "interchangeable_component_fits": {
+    "path": "res://assets/ui/research/paper/interchangeable_component_fits.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "abrasive_grinding_control": {
+    "path": "res://assets/ui/research/paper/abrasive_grinding_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "centerless_grinding": {
+    "path": "res://assets/ui/research/paper/centerless_grinding.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cylindrical_grinding": {
+    "path": "res://assets/ui/research/paper/cylindrical_grinding.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "surface_grinding": {
+    "path": "res://assets/ui/research/paper/surface_grinding.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "abrasive_belt_finishing": {
+    "path": "res://assets/ui/research/paper/abrasive_belt_finishing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "metal_spinning_forming": {
+    "path": "res://assets/ui/research/paper/metal_spinning_forming.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rotary_swaging": {
+    "path": "res://assets/ui/research/paper/rotary_swaging.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "tube_rotary_draw_bending": {
+    "path": "res://assets/ui/research/paper/tube_rotary_draw_bending.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "roll_formed_sections": {
+    "path": "res://assets/ui/research/paper/roll_formed_sections.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "centrifugal_tube_casting": {
+    "path": "res://assets/ui/research/paper/centrifugal_tube_casting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "metal_annealing_control": {
+    "path": "res://assets/ui/research/paper/metal_annealing_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "surface_carburization": {
+    "path": "res://assets/ui/research/paper/surface_carburization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "metal_casting_feed_design": {
+    "path": "res://assets/ui/research/paper/metal_casting_feed_design.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "brazed_joint_qualification": {
+    "path": "res://assets/ui/research/paper/brazed_joint_qualification.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "arc_welding_processes": {
+    "path": "res://assets/ui/research/paper/arc_welding_processes.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "resistance_welding": {
+    "path": "res://assets/ui/research/paper/resistance_welding.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "continuous_metal_casting": {
+    "path": "res://assets/ui/research/paper/continuous_metal_casting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "bolt_blank_forging": {
+    "path": "res://assets/ui/research/paper/bolt_blank_forging.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "nut_blank_forging": {
+    "path": "res://assets/ui/research/paper/nut_blank_forging.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "nut_bore_drilling": {
+    "path": "res://assets/ui/research/paper/nut_bore_drilling.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "thread_tap_cutting": {
+    "path": "res://assets/ui/research/paper/thread_tap_cutting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "thread_die_cutting": {
+    "path": "res://assets/ui/research/paper/thread_die_cutting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "external_thread_cutting": {
+    "path": "res://assets/ui/research/paper/external_thread_cutting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "internal_thread_tapping": {
+    "path": "res://assets/ui/research/paper/internal_thread_tapping.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "thread_pitch_gauging": {
+    "path": "res://assets/ui/research/paper/thread_pitch_gauging.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "matched_thread_inspection": {
+    "path": "res://assets/ui/research/paper/matched_thread_inspection.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "washer_punching": {
+    "path": "res://assets/ui/research/paper/washer_punching.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cotter_pin_forming": {
+    "path": "res://assets/ui/research/paper/cotter_pin_forming.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "castellated_nut_slotting": {
+    "path": "res://assets/ui/research/paper/castellated_nut_slotting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "split_pin_locking": {
+    "path": "res://assets/ui/research/paper/split_pin_locking.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "steel_wire_drawing": {
+    "path": "res://assets/ui/research/paper/steel_wire_drawing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "spring_wire_coiling": {
+    "path": "res://assets/ui/research/paper/spring_wire_coiling.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "coil_spring_tempering": {
+    "path": "res://assets/ui/research/paper/coil_spring_tempering.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "split_washer_cutting": {
+    "path": "res://assets/ui/research/paper/split_washer_cutting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rivet_blank_heading": {
+    "path": "res://assets/ui/research/paper/rivet_blank_heading.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rivet_hole_alignment": {
+    "path": "res://assets/ui/research/paper/rivet_hole_alignment.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "hot_rivet_setting": {
+    "path": "res://assets/ui/research/paper/hot_rivet_setting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cold_rivet_setting": {
+    "path": "res://assets/ui/research/paper/cold_rivet_setting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "thread_rolling_die_making": {
+    "path": "res://assets/ui/research/paper/thread_rolling_die_making.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "bolt_thread_rolling": {
+    "path": "res://assets/ui/research/paper/bolt_thread_rolling.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "standard_fastener_kitting": {
+    "path": "res://assets/ui/research/paper/standard_fastener_kitting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "radio_telegraphy": {
+    "path": "res://assets/ui/research/paper/radio_telegraphy.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rammed_earth_construction": {
+    "path": "res://assets/ui/research/paper/rammed_earth_construction.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "thatched_roofing": {
+    "path": "res://assets/ui/research/paper/thatched_roofing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "fired_roof_tiles": {
+    "path": "res://assets/ui/research/paper/fired_roof_tiles.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "adobe_wall_construction": {
+    "path": "res://assets/ui/research/paper/adobe_wall_construction.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "wattle_and_daub_walls": {
+    "path": "res://assets/ui/research/paper/wattle_and_daub_walls.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "clay_pipe_forming": {
+    "path": "res://assets/ui/research/paper/clay_pipe_forming.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "clay_pipe_socket_jointing": {
+    "path": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "dry_dock_services": {
+    "path": "res://assets/ui/research/paper/dry_dock_services.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "hull_condition_surveys": {
+    "path": "res://assets/ui/research/paper/hull_condition_surveys.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "aggregate_road_foundations": {
+    "path": "res://assets/ui/research/paper/aggregate_road_foundations.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rail_gauge_standards": {
+    "path": "res://assets/ui/research/paper/rail_gauge_standards.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rail_track_foundations": {
+    "path": "res://assets/ui/research/paper/rail_track_foundations.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "wagonway_haulage": {
+    "path": "res://assets/ui/research/paper/wagonway_haulage.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rail_vehicle_braking": {
+    "path": "res://assets/ui/research/paper/rail_vehicle_braking.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "clinical_observation_rounds": {
+    "path": "res://assets/ui/research/paper/clinical_observation_rounds.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "clinical_pulse_assessment": {
+    "path": "res://assets/ui/research/paper/clinical_pulse_assessment.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "nursing_care_organization": {
+    "path": "res://assets/ui/research/paper/nursing_care_organization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "drop_spindles": {
+    "path": "res://assets/ui/research/paper/drop_spindles.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "plain_weaving": {
+    "path": "res://assets/ui/research/paper/plain_weaving.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "spinning_wheels": {
+    "path": "res://assets/ui/research/paper/spinning_wheels.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "yarn_count_standards": {
+    "path": "res://assets/ui/research/paper/yarn_count_standards.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "yarn_tension_control": {
+    "path": "res://assets/ui/research/paper/yarn_tension_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ring_spinning_systems": {
+    "path": "res://assets/ui/research/paper/ring_spinning_systems.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rotor_spinning_systems": {
+    "path": "res://assets/ui/research/paper/rotor_spinning_systems.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "drawloom_pattern_control": {
+    "path": "res://assets/ui/research/paper/drawloom_pattern_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "punched_card_loom_control": {
+    "path": "res://assets/ui/research/paper/punched_card_loom_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "shield_equipment_fitting": {
+    "path": "res://assets/ui/research/paper/shield_equipment_fitting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "textile_armor_layering": {
+    "path": "res://assets/ui/research/paper/textile_armor_layering.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "lamellar_armor_assembly": {
+    "path": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "scale_armor_attachment": {
+    "path": "res://assets/ui/research/paper/scale_armor_attachment.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "mail_armor_fabrication": {
+    "path": "res://assets/ui/research/paper/mail_armor_fabrication.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "articulated_plate_armor": {
+    "path": "res://assets/ui/research/paper/articulated_plate_armor.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "bow_drill_drive": {
+    "path": "res://assets/ui/research/paper/bow_drill_drive.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "treadle_lathe_drive": {
+    "path": "res://assets/ui/research/paper/treadle_lathe_drive.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "water_powered_hammers": {
+    "path": "res://assets/ui/research/paper/water_powered_hammers.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "mechanical_screw_presses": {
+    "path": "res://assets/ui/research/paper/mechanical_screw_presses.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cam_motion_design": {
+    "path": "res://assets/ui/research/paper/cam_motion_design.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "belt_power_transmission": {
+    "path": "res://assets/ui/research/paper/belt_power_transmission.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "hydrocarbon_steam_cracking": {
+    "path": "res://assets/ui/research/paper/hydrocarbon_steam_cracking.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_chain_models": {
+    "path": "res://assets/ui/research/paper/polymer_chain_models.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_film_extrusion": {
+    "path": "res://assets/ui/research/paper/polymer_film_extrusion.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_melt_rheology": {
+    "path": "res://assets/ui/research/paper/polymer_melt_rheology.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_monomer_purification": {
+    "path": "res://assets/ui/research/paper/polymer_monomer_purification.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_reaction_heat_management": {
+    "path": "res://assets/ui/research/paper/polymer_reaction_heat_management.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "radical_chain_polymerization": {
+    "path": "res://assets/ui/research/paper/radical_chain_polymerization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "thermoplastic_processing": {
+    "path": "res://assets/ui/research/paper/thermoplastic_processing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_injection_molding": {
+    "path": "res://assets/ui/research/paper/polymer_injection_molding.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_thermoforming": {
+    "path": "res://assets/ui/research/paper/polymer_thermoforming.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "industrial_catalyst_design": {
+    "path": "res://assets/ui/research/paper/industrial_catalyst_design.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "condensative_step_polymerization": {
+    "path": "res://assets/ui/research/paper/condensative_step_polymerization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "adhesive_bond_design": {
+    "path": "res://assets/ui/research/paper/adhesive_bond_design.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "engineered_wood_lamination": {
+    "path": "res://assets/ui/research/paper/engineered_wood_lamination.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "wood_methanol_recovery": {
+    "path": "res://assets/ui/research/paper/wood_methanol_recovery.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "silver_cupellation": {
+    "path": "res://assets/ui/research/paper/silver_cupellation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "formaldehyde_synthesis": {
+    "path": "res://assets/ui/research/paper/formaldehyde_synthesis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "urea_synthesis": {
+    "path": "res://assets/ui/research/paper/urea_synthesis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "enzyme_catalysis": {
+    "path": "res://assets/ui/research/paper/enzyme_catalysis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ring_opening_polymerization": {
+    "path": "res://assets/ui/research/paper/ring_opening_polymerization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "metallurgical_mass_balances": {
+    "path": "res://assets/ui/research/paper/metallurgical_mass_balances.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "nickel_metal_recovery": {
+    "path": "res://assets/ui/research/paper/nickel_metal_recovery.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "biomass_gasification": {
+    "path": "res://assets/ui/research/paper/biomass_gasification.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "gas_composition_analysis": {
+    "path": "res://assets/ui/research/paper/gas_composition_analysis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "additive_step_polymerization": {
+    "path": "res://assets/ui/research/paper/additive_step_polymerization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ethylene_oxide_synthesis": {
+    "path": "res://assets/ui/research/paper/ethylene_oxide_synthesis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ethylene_glycol_hydrolysis": {
+    "path": "res://assets/ui/research/paper/ethylene_glycol_hydrolysis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "coal_light_oil_recovery": {
+    "path": "res://assets/ui/research/paper/coal_light_oil_recovery.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "aromatic_nitration": {
+    "path": "res://assets/ui/research/paper/aromatic_nitration.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "aromatic_amine_hydrogenation": {
+    "path": "res://assets/ui/research/paper/aromatic_amine_hydrogenation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "isocyanate_synthesis": {
+    "path": "res://assets/ui/research/paper/isocyanate_synthesis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_blow_molding": {
+    "path": "res://assets/ui/research/paper/polymer_blow_molding.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_solution_processing": {
+    "path": "res://assets/ui/research/paper/polymer_solution_processing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_solvent_recovery": {
+    "path": "res://assets/ui/research/paper/polymer_solvent_recovery.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_molecular_weight_control": {
+    "path": "res://assets/ui/research/paper/polymer_molecular_weight_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_additive_formulation": {
+    "path": "res://assets/ui/research/paper/polymer_additive_formulation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_foam_cell_control": {
+    "path": "res://assets/ui/research/paper/polymer_foam_cell_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "selective_polymer_depolymerization": {
+    "path": "res://assets/ui/research/paper/selective_polymer_depolymerization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ionic_chain_polymerization": {
+    "path": "res://assets/ui/research/paper/ionic_chain_polymerization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_weathering_trials": {
+    "path": "res://assets/ui/research/paper/polymer_weathering_trials.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "alumina_refining": {
+    "path": "res://assets/ui/research/paper/alumina_refining.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "aluminum_electrolysis": {
+    "path": "res://assets/ui/research/paper/aluminum_electrolysis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "coordination_polymerization": {
+    "path": "res://assets/ui/research/paper/coordination_polymerization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "polymer_tacticity_characterization": {
+    "path": "res://assets/ui/research/paper/polymer_tacticity_characterization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "copolymer_sequence_control": {
+    "path": "res://assets/ui/research/paper/copolymer_sequence_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "nuclear_magnetic_resonance_spectroscopy": {
+    "path": "res://assets/ui/research/paper/nuclear_magnetic_resonance_spectroscopy.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "size_exclusion_chromatography": {
+    "path": "res://assets/ui/research/paper/size_exclusion_chromatography.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "edible_resource_recognition": {
+    "path": "res://assets/ui/research/paper/edible_resource_recognition.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "fiber_pulp_beating": {
+    "path": "res://assets/ui/research/paper/fiber_pulp_beating.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "parchment_record_preparation": {
+    "path": "res://assets/ui/research/paper/parchment_record_preparation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "metal_type_casting": {
+    "path": "res://assets/ui/research/paper/metal_type_casting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "movable_type_composition": {
+    "path": "res://assets/ui/research/paper/movable_type_composition.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "core_formed_glass": {
+    "path": "res://assets/ui/research/paper/core_formed_glass.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "glass_blowing": {
+    "path": "res://assets/ui/research/paper/glass_blowing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "glass_batch_composition_control": {
+    "path": "res://assets/ui/research/paper/glass_batch_composition_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "glass_annealing_schedules": {
+    "path": "res://assets/ui/research/paper/glass_annealing_schedules.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ceramic_slip_casting": {
+    "path": "res://assets/ui/research/paper/ceramic_slip_casting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ceramic_glaze_formulation": {
+    "path": "res://assets/ui/research/paper/ceramic_glaze_formulation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "high_fire_stoneware": {
+    "path": "res://assets/ui/research/paper/high_fire_stoneware.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "hide_tanning": {
+    "path": "res://assets/ui/research/paper/hide_tanning.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "foil_capacitors": {
+    "path": "res://assets/ui/research/paper/foil_capacitors.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "electromagnetic_relays": {
+    "path": "res://assets/ui/research/paper/electromagnetic_relays.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "wound_transformers": {
+    "path": "res://assets/ui/research/paper/wound_transformers.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "binary_adders": {
+    "path": "res://assets/ui/research/paper/binary_adders.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "hardwired_sequence_control": {
+    "path": "res://assets/ui/research/paper/hardwired_sequence_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "diode_control_stores": {
+    "path": "res://assets/ui/research/paper/diode_control_stores.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "burin_engraving": {
+    "path": "res://assets/ui/research/paper/burin_engraving.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rolling_intaglio_printing": {
+    "path": "res://assets/ui/research/paper/rolling_intaglio_printing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "jurisdiction_boundaries": {
+    "path": "res://assets/ui/research/paper/jurisdiction_boundaries.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "official_mandate_registers": {
+    "path": "res://assets/ui/research/paper/official_mandate_registers.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "public_office_handover": {
+    "path": "res://assets/ui/research/paper/public_office_handover.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "petition_registers": {
+    "path": "res://assets/ui/research/paper/petition_registers.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "habitat_observation_records": {
+    "path": "res://assets/ui/research/paper/habitat_observation_records.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "comparative_anatomy": {
+    "path": "res://assets/ui/research/paper/comparative_anatomy.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "biological_classification": {
+    "path": "res://assets/ui/research/paper/biological_classification.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "biological_reference_collections": {
+    "path": "res://assets/ui/research/paper/biological_reference_collections.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "developmental_stage_series": {
+    "path": "res://assets/ui/research/paper/developmental_stage_series.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "heredity_experiments": {
+    "path": "res://assets/ui/research/paper/heredity_experiments.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "plant_transpiration_measurement": {
+    "path": "res://assets/ui/research/paper/plant_transpiration_measurement.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "plant_pathology_diagnosis": {
+    "path": "res://assets/ui/research/paper/plant_pathology_diagnosis.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "plant_resistance_trait_trials": {
+    "path": "res://assets/ui/research/paper/plant_resistance_trait_trials.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "laboratory_notebooks": {
+    "path": "res://assets/ui/research/paper/laboratory_notebooks.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "experimental_protocol_publication": {
+    "path": "res://assets/ui/research/paper/experimental_protocol_publication.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "microscopic_cell_observation": {
+    "path": "res://assets/ui/research/paper/microscopic_cell_observation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cell_theory": {
+    "path": "res://assets/ui/research/paper/cell_theory.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cell_division_observation": {
+    "path": "res://assets/ui/research/paper/cell_division_observation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "tissue_histology": {
+    "path": "res://assets/ui/research/paper/tissue_histology.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "biological_staining": {
+    "path": "res://assets/ui/research/paper/biological_staining.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "microbial_observation": {
+    "path": "res://assets/ui/research/paper/microbial_observation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "microbial_isolation_methods": {
+    "path": "res://assets/ui/research/paper/microbial_isolation_methods.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "microbial_growth_measurement": {
+    "path": "res://assets/ui/research/paper/microbial_growth_measurement.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "aseptic_laboratory_practice": {
+    "path": "res://assets/ui/research/paper/aseptic_laboratory_practice.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "instrument_sterilization": {
+    "path": "res://assets/ui/research/paper/instrument_sterilization.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cell_culture_methods": {
+    "path": "res://assets/ui/research/paper/cell_culture_methods.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "live_cell_time_lapse": {
+    "path": "res://assets/ui/research/paper/live_cell_time_lapse.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "mineral_pigment_preparation": {
+    "path": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "textile_dye_extraction": {
+    "path": "res://assets/ui/research/paper/textile_dye_extraction.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "fluid_film_bearings": {
+    "path": "res://assets/ui/research/paper/fluid_film_bearings.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "cutting_fluid_management": {
+    "path": "res://assets/ui/research/paper/cutting_fluid_management.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "machine_tool_stiffness_assessment": {
+    "path": "res://assets/ui/research/paper/machine_tool_stiffness_assessment.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "machine_condition_monitoring": {
+    "path": "res://assets/ui/research/paper/machine_condition_monitoring.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "numerical_machine_control": {
+    "path": "res://assets/ui/research/paper/numerical_machine_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "gear_power_skiving": {
+    "path": "res://assets/ui/research/paper/gear_power_skiving.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "wire_electrical_discharge_machining": {
+    "path": "res://assets/ui/research/paper/wire_electrical_discharge_machining.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "sinker_electrical_discharge_machining": {
+    "path": "res://assets/ui/research/paper/sinker_electrical_discharge_machining.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "electrochemical_machining": {
+    "path": "res://assets/ui/research/paper/electrochemical_machining.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "abrasive_waterjet_cutting": {
+    "path": "res://assets/ui/research/paper/abrasive_waterjet_cutting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ultrasonic_abrasive_machining": {
+    "path": "res://assets/ui/research/paper/ultrasonic_abrasive_machining.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "incremental_sheet_forming": {
+    "path": "res://assets/ui/research/paper/incremental_sheet_forming.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "ultrasonic_metal_joining": {
+    "path": "res://assets/ui/research/paper/ultrasonic_metal_joining.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "material_phase_diagrams": {
+    "path": "res://assets/ui/research/paper/material_phase_diagrams.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "steel_normalizing_control": {
+    "path": "res://assets/ui/research/paper/steel_normalizing_control.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "induction_surface_hardening": {
+    "path": "res://assets/ui/research/paper/induction_surface_hardening.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "metal_grain_size_measurement": {
+    "path": "res://assets/ui/research/paper/metal_grain_size_measurement.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "residual_stress_assessment": {
+    "path": "res://assets/ui/research/paper/residual_stress_assessment.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "metal_fracture_toughness_testing": {
+    "path": "res://assets/ui/research/paper/metal_fracture_toughness_testing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "welding_metallurgy": {
+    "path": "res://assets/ui/research/paper/welding_metallurgy.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "vacuum_metal_melting": {
+    "path": "res://assets/ui/research/paper/vacuum_metal_melting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "investment_casting_process": {
+    "path": "res://assets/ui/research/paper/investment_casting_process.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "lost_foam_casting": {
+    "path": "res://assets/ui/research/paper/lost_foam_casting.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "honed_bore_finishing": {
+    "path": "res://assets/ui/research/paper/honed_bore_finishing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "short_stroke_superfinishing": {
+    "path": "res://assets/ui/research/paper/short_stroke_superfinishing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "timber_post_beam_connections": {
+    "path": "res://assets/ui/research/paper/timber_post_beam_connections.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "timber_splice_connections": {
+    "path": "res://assets/ui/research/paper/timber_splice_connections.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "timber_lateral_bracing": {
+    "path": "res://assets/ui/research/paper/timber_lateral_bracing.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "timber_moisture_movement_design": {
+    "path": "res://assets/ui/research/paper/timber_moisture_movement_design.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "building_drainage_coordination": {
+    "path": "res://assets/ui/research/paper/building_drainage_coordination.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "building_wind_load_assessment": {
+    "path": "res://assets/ui/research/paper/building_wind_load_assessment.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "building_capillary_breaks": {
+    "path": "res://assets/ui/research/paper/building_capillary_breaks.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "roof_flashing_interfaces": {
+    "path": "res://assets/ui/research/paper/roof_flashing_interfaces.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "rainscreen_wall_assemblies": {
+    "path": "res://assets/ui/research/paper/rainscreen_wall_assemblies.png",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  "building_shading_design": {
+    "path": "res://assets/ui/research/paper/building_shading_design.png",
+    "focus": [
+      0.5,
+      0.65
     ]
   }
 }

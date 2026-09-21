@@ -141,33 +141,26 @@ func test_every_research_field_has_a_distinct_painted_asset()->void:
 func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
 	GameState.known_discoveries.append("stone_sorting")
 	var view:=fixture();view.set_view("known");view.select("stone_sorting")
-	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
-	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
+	for frame in 8:await get_tree().process_frame
+	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
 
-func test_reviewed_paper_images_are_specific_and_fill_a_subject_focused_frame()->void:
+func test_reviewed_images_resolve_their_explicit_assignments()->void:
 	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
-	for id:String in Art.DISCOVERY_ART:
+	for id:String in Art.manifest():
 		var item:Dictionary={"id":id,"domain":"knowledge","exposed":true}
 		var picture:=Art.paint_discovery(parent,item,104)
-		var source:=Art.source_texture(picture.texture)
-		assert_str(source.resource_path).is_equal("res://assets/ui/research/paper/"+id+".png")
-		assert_int(source.get_width()).is_equal(source.get_height())
-		assert_int(Art.subject_order.size()).is_less_equal(Art.SUBJECT_CACHE_LIMIT)
-		assert_bool(picture.texture is AtlasTexture).is_true()
-		assert_float(picture.texture.region.position.y).is_greater(0.0)
-		assert_float(picture.texture.region.size.y).is_less(source.get_height())
-		assert_int(picture.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_COVERED)
-		assert_bool(picture.has_node("PaperMat")).is_false()
-		assert_bool(picture.has_node("FieldIllustrationCaption")).is_false()
+		assert_object(picture.texture).is_not_null()
+		assert_str(picture.texture.resource_path).is_equal(Art.manifest()[id].path)
+		assert_int(Art.textures.size()).is_less_equal(Art.CACHE_LIMIT)
 		item.exposed=false
 		assert_str(Art.subject_art_key(item)).is_empty()
 		picture.free()
 
-func test_missing_subject_art_retains_an_explicit_field_fallback()->void:
+func test_missing_subject_does_not_claim_an_unrelated_field_painting()->void:
 	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
-	var picture:=Art.paint_discovery(parent,{"id":"single_crystal_growth","domain":"production","exposed":true},104)
-	assert_bool(picture.has_node("FieldIllustrationCaption")).is_true()
-	assert_str(picture.texture.resource_path).is_equal("res://assets/ui/research/production-v1.png")
+	var picture:=Art.paint_discovery(parent,{"id":"unassigned_test_subject","domain":"production","exposed":true},104)
+	assert_object(picture.texture).is_null()
 
 func test_known_microscopy_has_one_live_panel_and_locked_method_has_none()->void:
 	GameState.known_discoveries.append("laboratory_notebooks")

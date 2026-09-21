@@ -38,6 +38,24 @@ if ($null -eq $godotExecutable) {
     throw "Godot executable was not found under $godotPackageRoot"
 }
 
+# A Git update can add global script classes and textures that the local
+# editor cache has never seen. Import each new commit before player startup.
+$importCommit = & git -C $projectRoot rev-parse HEAD
+$importMarker = Join-Path $projectRoot '.godot/launcher-import-commit.txt'
+$previousImport = if (Test-Path -LiteralPath $importMarker) { (Get-Content -LiteralPath $importMarker -Raw).Trim() } else { '' }
+if ($previousImport -ne $importCommit) {
+    $importDirectory = Join-Path $projectRoot 'artifacts'
+    [IO.Directory]::CreateDirectory($importDirectory) | Out-Null
+    $importLog = Join-Path $importDirectory 'launcher-import.log'
+    $importArguments = @('--headless', '--editor', '--import', '--path', ('"' + $projectRoot + '"'), '--log-file', ('"' + $importLog + '"'))
+    Write-Output 'Importing updated game scripts and artwork before launch...'
+    $importProcess = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $importArguments -WorkingDirectory $projectRoot -WindowStyle Hidden -Wait -PassThru
+    if ($importProcess.ExitCode -ne 0 -or (Select-String -LiteralPath $importLog -Pattern '^SCRIPT ERROR:|^ERROR:' -Quiet)) {
+        throw "Game import failed; player launch stopped. Inspect $importLog"
+    }
+    [IO.File]::WriteAllText($importMarker, $importCommit)
+}
+
 # Codex and terminals opened before the key was configured do not inherit a
 # later user-environment change. Explicitly copy the user-scoped credential
 # into this launcher's process without storing or printing it.

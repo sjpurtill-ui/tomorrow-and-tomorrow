@@ -279,76 +279,6 @@
       0.5
     ]
   },
-  "paratrooper": {
-    "path": "res://assets/ui/military/subjects/paratrooper-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "combat_engineer": {
-    "path": "res://assets/ui/military/subjects/combat_engineer-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "anti_tank": {
-    "path": "res://assets/ui/military/subjects/anti_tank-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "anti_air": {
-    "path": "res://assets/ui/military/subjects/anti_air-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "armored_car": {
-    "path": "res://assets/ui/military/subjects/armored_car-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "light_tank": {
-    "path": "res://assets/ui/military/subjects/light_tank-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "heavy_tank": {
-    "path": "res://assets/ui/military/subjects/heavy_tank-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "tank_destroyer": {
-    "path": "res://assets/ui/military/subjects/tank_destroyer-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "mechanized_infantry": {
-    "path": "res://assets/ui/military/subjects/mechanized_infantry-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "air_assault": {
-    "path": "res://assets/ui/military/subjects/air_assault-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
   "war_canoe": {
     "path": "res://assets/ui/military/portraits/war-canoe-v1.png",
     "focus": [
@@ -363,13 +293,6 @@
       0.5
     ]
   },
-  "heavy_galley": {
-    "path": "res://assets/ui/military/subjects/heavy_galley-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
   "sailing_warship": {
     "path": "res://assets/ui/military/portraits/sailing-warship-v1.png",
     "focus": [
@@ -377,113 +300,8 @@
       0.5
     ]
   },
-  "sailing_frigate": {
-    "path": "res://assets/ui/military/subjects/sailing_frigate-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "ship_of_line": {
-    "path": "res://assets/ui/military/subjects/ship_of_line-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "steam_corvette": {
-    "path": "res://assets/ui/military/subjects/steam_corvette-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "ironclad": {
-    "path": "res://assets/ui/military/subjects/ironclad-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "torpedo_boat": {
-    "path": "res://assets/ui/military/subjects/torpedo_boat-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
   "destroyer": {
     "path": "res://assets/ui/military/portraits/steel-warship-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "light_cruiser": {
-    "path": "res://assets/ui/military/subjects/light_cruiser-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "heavy_cruiser": {
-    "path": "res://assets/ui/military/subjects/heavy_cruiser-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "battleship": {
-    "path": "res://assets/ui/military/subjects/battleship-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "submarine": {
-    "path": "res://assets/ui/military/subjects/submarine-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "aircraft_carrier": {
-    "path": "res://assets/ui/military/subjects/aircraft_carrier-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "amphibious_ship": {
-    "path": "res://assets/ui/military/subjects/amphibious_ship-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "missile_patrol": {
-    "path": "res://assets/ui/military/subjects/missile_patrol-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "missile_destroyer": {
-    "path": "res://assets/ui/military/subjects/missile_destroyer-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "nuclear_submarine": {
-    "path": "res://assets/ui/military/subjects/nuclear_submarine-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "fleet_support": {
-    "path": "res://assets/ui/military/subjects/fleet_support-v1.png",
     "focus": [
       0.5,
       0.5
@@ -497,20 +315,6 @@
     ],
     "contain": true
   },
-  "airship": {
-    "path": "res://assets/ui/military/subjects/airship-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "recon_plane": {
-    "path": "res://assets/ui/military/subjects/recon_plane-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
   "fighter": {
     "path": "res://assets/ui/military/portraits/propeller-aircraft-v1.png",
     "focus": [
@@ -518,92 +322,8 @@
       0.5
     ]
   },
-  "heavy_fighter": {
-    "path": "res://assets/ui/military/subjects/heavy_fighter-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "close_air_support": {
-    "path": "res://assets/ui/military/subjects/close_air_support-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "tactical_bomber": {
-    "path": "res://assets/ui/military/subjects/tactical_bomber-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "strategic_bomber": {
-    "path": "res://assets/ui/military/subjects/strategic_bomber-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "naval_bomber": {
-    "path": "res://assets/ui/military/subjects/naval_bomber-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "transport_aircraft": {
-    "path": "res://assets/ui/military/subjects/transport_aircraft-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
   "jet_fighter": {
     "path": "res://assets/ui/military/portraits/jet-aircraft-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "jet_bomber": {
-    "path": "res://assets/ui/military/subjects/jet_bomber-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "transport_helicopter": {
-    "path": "res://assets/ui/military/subjects/transport_helicopter-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "attack_helicopter": {
-    "path": "res://assets/ui/military/subjects/attack_helicopter-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "recon_drone": {
-    "path": "res://assets/ui/military/subjects/recon_drone-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "strike_drone": {
-    "path": "res://assets/ui/military/subjects/strike_drone-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "convoy_transport": {
-    "path": "res://assets/ui/military/subjects/convoy_transport-v1.png",
     "focus": [
       0.5,
       0.5

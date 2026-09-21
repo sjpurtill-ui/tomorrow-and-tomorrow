@@ -26,7 +26,9 @@ var back_mode:bool=false
 
 func _ready()->void:
 	name="DockPanel" if name=="" or String(name).begins_with("@") else name
-	add_theme_stylebox_override("panel",Tokens.dock_style())
+	var panel_style:=Tokens.dock_style()
+	panel_style.bg_color.a=1.0
+	add_theme_stylebox_override("panel",panel_style)
 	clip_contents=true
 	var root:=VBoxContainer.new()
 	root.add_theme_constant_override("separation",0)
