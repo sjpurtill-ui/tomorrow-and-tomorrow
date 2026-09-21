@@ -47,7 +47,7 @@ func _ready()->void:
 	map.force_selected.connect(_select_force)
 	panel=PanelContainer.new();add_child(panel);panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	panel.offset_top=16;panel.offset_right=-16;panel.offset_left=-536
-	var skin:=T.flat(Color("0b171f"),Color("526b75"),1,8,14);panel.add_theme_stylebox_override("panel",skin);panel.add_theme_font_size_override("font_size",14)
+	var skin:=T.flat(T.DOCK_BG,T.BORDER,1,8,14);panel.add_theme_stylebox_override("panel",skin);panel.add_theme_font_size_override("font_size",14)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
 	var heading:=_row(column)
 	var heading_copy:=VBoxContainer.new();heading_copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading_copy.add_theme_constant_override("separation",1);heading.add_child(heading_copy)
@@ -57,11 +57,11 @@ func _ready()->void:
 	var close:=_button(heading,"×",queue_free);close.custom_minimum_size=Vector2(42,42);close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.tooltip_text="Close command view"
 	var tabs:=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(tabs)
 	var orders:=VBoxContainer.new();orders.name="Objectives";orders.add_theme_constant_override("separation",9);tabs.add_child(orders)
-	_step_label(orders,"1", "CHOOSE A COMMAND", "Click a row to select everyone beneath it")
+	_step_label(orders,"1", "SELECT YOUR FORCE", "Select a force or a headquarters and its subordinates")
 	tree=CommandTree.new();tree.service=domain;orders.add_child(tree);tree.custom_minimum_size.y=180;tree.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;tree.command_selected.connect(_selected)
 	var scroll:=ScrollContainer.new();orders_scroll=scroll;scroll.custom_minimum_size.y=100;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;orders.add_child(scroll)
 	var controls:=VBoxContainer.new();controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_theme_constant_override("separation",8);scroll.add_child(controls)
-	_step_label(controls,"2", "SET THE OBJECTIVE", "A draft is not issued until you confirm below")
+	_step_label(controls,"2", "CHOOSE ITS OBJECTIVE", "A draft is not issued until you confirm below")
 	var selection_card:=_card(controls,"info")
 	selected_label=_label(selection_card,"No command selected",17)
 	selected_label.autowrap_mode=TextServer.AUTOWRAP_OFF;selected_label.clip_text=true
@@ -79,7 +79,7 @@ func _ready()->void:
 	mission.item_selected.connect(func(_index:int):_refresh_targets())
 	mission_hint=_label(controls,"");mission_hint.max_lines_visible=2;mission_hint.modulate=Color("efa092");mission_hint.hide()
 	cities=OptionButton.new();cities.clip_text=true;controls.add_child(cities)
-	_step_label(controls,"3", "MARK THE AREA", "Choose an existing zone on the map or draw one")
+	_step_label(controls,"3", "DRAW THE OPERATING ZONE", "Snap corners into place; right-click closes the zone")
 	var zone_card:=_card(controls,"warn")
 	region_label=_label(zone_card,"No zone selected",15)
 	region_label.max_lines_visible=1
@@ -112,7 +112,24 @@ func _ready()->void:
 	var links:=_row(organization)
 	_button(links,"Forces & training",func():queue_free();MilitaryCampaign.open_roster(domain))
 	_button(links,"Army builds" if domain=="army" else "Ports & ships" if domain=="navy" else "Airbases & aircraft",_management)
+	_install_command_theme()
 	_refresh_targets()
+func _install_command_theme()->void:
+	var theme:=Theme.new()
+	for type:String in ["Label","Button","OptionButton","LineEdit","Tree","TabBar","TabContainer","PopupMenu"]:
+		for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color","font_selected_color","font_unselected_color"]:theme.set_color(state,type,T.INK)
+		theme.set_color("font_disabled_color",type,T.TEXT_DIM)
+	for type:String in ["Button","OptionButton","LineEdit"]:
+		for state:String in ["normal","hover","pressed","disabled","read_only"]:
+			theme.set_stylebox(state,type,T.flat(T.HOVER_BG if state=="hover" else T.BUTTON_BG,T.BORDER_SOFT,1,4,8))
+	for type:String in ["TabContainer","TabBar"]:
+		theme.set_stylebox("panel",type,T.flat(T.DOCK_BG,Color.TRANSPARENT,0,0,6))
+		for state:String in ["tab_selected","tab_unselected","tab_hovered"]:theme.set_stylebox(state,type,T.flat(T.ACTIVE_BG if state=="tab_selected" else T.ROW_BG,T.BORDER_SOFT,1,4,10))
+	for state:String in ["title_button_normal","title_button_hover","title_button_pressed"]:theme.set_stylebox(state,"Tree",T.flat(T.TILE_BG,T.BORDER_SOFT,1,2,6))
+	theme.set_stylebox("panel","PopupMenu",T.flat(T.DOCK_BG,T.BORDER,1,4,8))
+	theme.set_stylebox("hover","PopupMenu",T.flat(T.HOVER_BG))
+	panel.theme=theme
+
 func _row(parent:Node)->HBoxContainer:
 	var result:=HBoxContainer.new();result.add_theme_constant_override("separation",6);parent.add_child(result);return result
 
@@ -125,7 +142,7 @@ func _step_label(parent:Node,number:String,title:String,explanation:String)->HBo
 	return row
 
 func _card(parent:Node,tone:String="info")->VBoxContainer:
-	var frame:=PanelContainer.new();var style:=T.brief_style(tone);style.content_margin_top=6;style.content_margin_bottom=6;frame.add_theme_stylebox_override("panel",style);frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(frame)
+	var frame:=PanelContainer.new();var style:=T.flat(T.ROW_BG,T.BORDER_SOFT,1,5,10);style.content_margin_top=6;style.content_margin_bottom=6;frame.add_theme_stylebox_override("panel",style);frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(frame)
 	var content:=VBoxContainer.new();content.add_theme_constant_override("separation",5);frame.add_child(content)
 	return content
 
@@ -162,7 +179,7 @@ func _update_preparation()->void:
 		preparation_note.tooltip_text=unavailable+"\n\n"+String(prepared.tooltip);preparation_note.modulate=Color("efa092")
 	preparation_box.tooltip_text=String(prepared.tooltip)
 func _label(parent:Node,text:String,size:int=14)->Label:
-	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",size);parent.add_child(result);return result
+	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",size);result.add_theme_color_override("font_color",T.INK);parent.add_child(result);return result
 func _button(parent:Node,text:String,callback:Callable)->Button:
 	var result:=Button.new();result.text=text;result.custom_minimum_size.y=36;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	result.add_theme_stylebox_override("normal",T.action_button_style(false));result.add_theme_stylebox_override("hover",T.action_button_style(false,true));result.add_theme_stylebox_override("pressed",T.action_button_style(true));parent.add_child(result);return result
@@ -214,7 +231,7 @@ func _edit_current_order()->void:
 	_update_current_order()
 	_report({"message":"Current order loaded as a draft. Issue objective applies changes."})
 func _draw_zone()->void:
-	map.begin_boundary();_report({"message":"Click boundary points on the main map. Enter finishes; right-click undoes; Escape cancels."})
+	map.boundary_title=area_name.text;map.begin_boundary();_report({"message":"Click corners. Snap to corners or 45° alignments. Right-click / Enter closes; Backspace undoes; Escape cancels."})
 func _mission()->String:return String(mission.get_item_metadata(mission.selected))
 func _refresh_mission_availability()->void:
 	if not is_instance_valid(mission) or not is_instance_valid(apply_button) or not is_instance_valid(mission_hint):return
@@ -313,7 +330,7 @@ func _update_status()->void:
 func _process(delta:float)->void:
 	if panel==null:return
 	var view:=get_viewport().get_visible_rect().size
-	panel.offset_left=-minf(520,view.x*.54)-16;panel.offset_bottom=view.y-16
+	panel.offset_left=-minf(520,view.x*.54)-16;panel.offset_bottom=minf(view.y-16,820)
 	# An editor hot reload can leave an older, already-open panel without these
 	# new controls. It remains usable until the player closes and reopens it.
 	if is_instance_valid(finish_button):finish_button.visible=map.drawing

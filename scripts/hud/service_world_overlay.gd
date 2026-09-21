@@ -12,6 +12,8 @@ var domain:="navy"
 var selected:Dictionary={}
 var selected_force:=0
 var drawing:=false
+var boundary_title:=""
+const SNAP_PIXELS:=12.0
 var vertices:Array=[]
 var op:RefCounted
 var ground_cache:Dictionary={}
@@ -28,9 +30,9 @@ func cancel_boundary()->void:
 	drawing=false;vertices.clear();queue_redraw()
 func undo_vertex()->void:
 	if not vertices.is_empty():vertices.pop_back();queue_redraw()
-func finish_boundary(title:String)->void:
+func finish_boundary(title:String="")->void:
 	if not drawing:return
-	var result:Dictionary=MilitaryCampaign.command_hierarchy.create_region(domain,vertices,title)
+	var result:Dictionary=MilitaryCampaign.command_hierarchy.create_region(domain,vertices,title if not title.is_empty() else boundary_title)
 	if result.has("ok"):
 		selected=result.region;cancel_boundary();region_selected.emit(selected)
 	boundary_feedback.emit(result)
@@ -57,14 +59,41 @@ func screen_to_world(point:Vector2)->Dictionary:
 	if hit.is_empty():return {}
 	return {"x":float(hit.position.x),"z":float(hit.position.z)}
 
+func snapped_vertex(screen:Vector2)->Dictionary:
+	var hit:=screen_to_world(screen)
+	if hit.is_empty():return {}
+	var closest:=SNAP_PIXELS
+	var result:=hit
+	var anchors:Array=vertices.duplicate()
+	for region:Dictionary in MilitaryCampaign.command_hierarchy.known_regions(domain):
+		anchors.append_array(region.get("vertices",[]))
+	for anchor:Dictionary in anchors:
+		var at:=world_to_screen(Vector2(anchor.x,anchor.z))
+		var distance:=at.distance_to(screen)
+		if at.is_finite() and distance<closest:closest=distance;result=anchor.duplicate()
+	if closest<SNAP_PIXELS:return result
+	if not vertices.is_empty():
+		var origin:=Vector2(vertices[-1].x,vertices[-1].z)
+		var delta:=Vector2(hit.x,hit.z)-origin
+		var angle:=snappedf(delta.angle(),PI/4)
+		var aligned:=origin+Vector2.from_angle(angle)*delta.length()
+		if world_to_screen(aligned).distance_to(screen)<SNAP_PIXELS:return {"x":aligned.x,"z":aligned.y}
+	return hit
+
 func handle_map_input(event:InputEvent)->bool:
 	if not (event is InputEventMouseButton) or not event.pressed:return false
 	if event.button_index not in [MOUSE_BUTTON_LEFT,MOUSE_BUTTON_RIGHT]:return false
 	# Called only after GUI has refused the event; never steals panel clicks.
 	if drawing:
-		if event.button_index==MOUSE_BUTTON_RIGHT:undo_vertex();return true
-		var vertex:=screen_to_world(event.position)
+		if event.button_index==MOUSE_BUTTON_RIGHT:
+			if vertices.size()<3:
+				cancel_boundary();boundary_feedback.emit({"message":"Drawing stopped. A zone needs at least three corners."})
+			else:finish_boundary()
+			return true
+		var vertex:=snapped_vertex(event.position)
 		if vertex.is_empty():return true
+		if vertices.size()>=3 and Vector2(vertex.x,vertex.z).is_equal_approx(Vector2(vertices[0].x,vertices[0].z)):
+			finish_boundary();return true
 		if vertices.size()>=64:boundary_feedback.emit({"error":"A boundary can contain at most 64 points."});return true
 		if vertices.is_empty() or Vector2(vertex.x,vertex.z).distance_to(Vector2(vertices[-1].x,vertices[-1].z))>.001:vertices.append(vertex)
 		queue_redraw();return true
@@ -124,13 +153,22 @@ func _draw()->void:
 		_line(region.vertices,Color("ffd477") if active else color,true)
 		_caption(world_to_screen(op.point(region)),String(region.name),Color("ffd477") if active else color)
 	if drawing:
-		_line(vertices,Color("ffd477"))
+		var preview:Array=vertices.duplicate()
+		var cursor:=snapped_vertex(get_local_mouse_position())
+		if not cursor.is_empty():preview.append(cursor)
+		var fill:=PackedVector2Array()
+		for point:Dictionary in preview:
+			var at:=world_to_screen(Vector2(point.x,point.z))
+			if not at.is_finite():fill.clear();break
+			fill.append(at)
+		if fill.size()>=3 and not Geometry2D.triangulate_polygon(fill).is_empty():draw_colored_polygon(fill,Color(1,.83,.46,.13))
+		_line(preview,Color("ffd477"),preview.size()>=3)
+		if not cursor.is_empty():
+			var at:=world_to_screen(Vector2(cursor.x,cursor.z))
+			if at.is_finite():draw_arc(at,8,0,TAU,24,Color("ffd477"),2,true)
 		for point:Dictionary in vertices:
 			var projected:=world_to_screen(Vector2(point.x,point.z))
 			if projected.is_finite():draw_circle(projected,4,Color("ffd477"))
-		if not vertices.is_empty():
-			var a:=world_to_screen(Vector2(vertices[-1].x,vertices[-1].z))
-			if a.is_finite():draw_line(a,get_local_mouse_position(),Color(1,.83,.46,.55),1,true)
 	if domain=="army":_draw_land();return
 	for base:Dictionary in op.state.bases:
 		if base.owner!="player" or base.domain!=domain:continue
