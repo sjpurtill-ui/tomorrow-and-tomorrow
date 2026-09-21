@@ -176,8 +176,26 @@ func _update_hero(rows:Array[Dictionary])->void:
 	hero_values.attention.text=str(attention);hero_values.attention.add_theme_color_override("font_color",WARNING if attention else GOOD)
 	policy_shortcut.text="Training · %s ›" % MilitaryCampaign.training_staff.policy(service).label
 
+func _training_level(drill:float)->String:
+	return ["Untrained","Basic","Trained","Well drilled","Fully drilled"][clampi(floori(drill*5),0,4)]
+
+func _attention_reasons(data:Dictionary)->Array[String]:
+	var reasons:Array[String]=[]
+	if bool(data.get("unknown",false)):return ["Awaiting field report"]
+	var required:=int(data.get("gear_required",data.get("authorized",0)))
+	var equipped:=int(data.get("gear",roundi(float(data.get("equipment",1))*required)))
+	if equipped<required and (float(data.get("equipment",1))<.8 or bool(data.get("needs_attention",false))):
+		reasons.append("Missing gear: %d of %d" % [required-equipped,required])
+	if float(data.get("condition",1))<.75:reasons.append("Poor condition: %d%%" % roundi(float(data.condition)*100))
+	elif bool(data.get("poor_condition",false)):reasons.append("Some formations in poor condition")
+	var shortfall:=int(data.get("authorized",0))-int(data.get("count",0))
+	if shortfall>0:reasons.append("Short %d %s" % [shortfall,{"army":"soldiers","navy":"vessels","air":"aircraft"}[service]])
+	var activity:=String(data.get("activity",""))
+	if "waiting" in activity.to_lower() or "paused" in activity.to_lower():reasons.append(activity)
+	return reasons
+
 func _attention(data:Dictionary)->bool:
-	return bool(data.get("needs_attention",false)) or bool(data.get("unknown",false)) or float(data.get("equipment",0))<.8 or float(data.get("condition",0))<.75 or "waiting" in String(data.get("activity","")).to_lower() or "paused" in String(data.get("activity","")).to_lower()
+	return not _attention_reasons(data).is_empty()
 func _filtered(rows:Array[Dictionary])->Array[Dictionary]:
 	if roster_filter=="attention":return rows.filter(_attention)
 	if roster_filter=="training":return rows.filter(func(data:Dictionary)->bool:return bool(data.get("in_training",false)))
@@ -204,13 +222,16 @@ func _unit_card(data:Dictionary)->void:
 		cell.add_theme_constant_override("separation",2);row.add_child(cell)
 		var heading_row:=HBoxContainer.new();cell.add_child(heading_row)
 		var icon:=TextureRect.new();icon.texture=Art.symbol({"personnel":"people","equipment":"equipment","skill":"skill"}[key],MUTED);icon.custom_minimum_size=Vector2(14,14);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;heading_row.add_child(icon)
-		_label(heading_row,{"personnel":"STRENGTH","equipment":"GEAR","skill":"DRILL"}[key],9,MUTED)
+		_label(heading_row,{"personnel":"PERSONNEL" if service=="army" else "STRENGTH","equipment":"GEAR","skill":"TRAINING"}[key],9,MUTED)
 		binding[key]=_label(cell,"",16)
-		binding[key+"_bar"]=_bar(cell,Art.COLORS[service] if key=="skill" else GOOD,{"personnel":"people","equipment":"segments","skill":"chevrons"}[key])
+		binding[key+"_bar"]=_bar(cell,Art.COLORS[service] if key=="skill" else GOOD,{"personnel":"people","equipment":"segments","skill":"patch"}[key])
 		binding[key+"_bar"].marks=5
+		if key=="skill":
+			binding.skill_bar.custom_minimum_size=Vector2(44,32)
+			binding.skill_bar.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 		binding[key+"_note"]=_label(cell,"",10,MUTED);binding[key+"_note"].text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	var activity:=VBoxContainer.new();activity.custom_minimum_size.x=104;activity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;activity.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(activity)
-	binding.activity=_label(activity,"",12,Art.COLORS[service]);binding.activity.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	binding.activity=_label(activity,"",12,Art.COLORS[service]);binding.activity.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	binding.activity_bar=_bar(activity,Art.COLORS[service]);binding.activity_bar.custom_minimum_size.x=70
 	binding.activity_note=_label(activity,"",10,MUTED);binding.activity_note.visible=false
 	var chosen:=data.duplicate(true)
@@ -228,19 +249,21 @@ func _update_row(binding:Dictionary,data:Dictionary)->void:
 		binding.equipment.text="Not reported";binding.skill.text="Not reported";binding.activity.text="◌ Awaiting report"
 		for key:String in ["personnel","equipment","skill","activity"]:binding[key+"_bar"].visible=false;binding[key+"_note"].text=""
 		return
-	binding.personnel.text="%d / %d" % [data.count,data.authorized];binding.personnel_bar.value=float(data.count)/maxf(1,data.authorized)*100
+	binding.personnel.text="%d %s" % [data.count,{"army":"soldiers","navy":"vessels","air":"aircraft"}[service]];binding.personnel_bar.value=float(data.count)/maxf(1,data.authorized)*100
 	binding.personnel_bar.marks=clampi(int(data.authorized),1,5)
-	binding.personnel_note.text="Condition %d%%" % roundi(data.condition*100)
+	binding.personnel_note.text="%d planned · Condition %d%%" % [data.authorized,roundi(data.condition*100)]
+	binding.personnel_bar.visible=false
 	binding.equipment.text="%d%%" % roundi(data.equipment*100);binding.equipment_bar.value=data.equipment*100
 	binding.equipment_bar.ink=WARNING if data.equipment<.8 else GOOD;binding.equipment.add_theme_color_override("font_color",WARNING if data.equipment<.8 else TEXT)
 	binding.equipment_note.text=String(data.equipment_note);binding.equipment_note.tooltip_text=String(data.equipment_note)
-	binding.skill.text="%d%%" % roundi(data.skill*100);binding.skill_bar.value=data.skill*100
-	binding.skill_note.text="Experience %d%%" % roundi(data.experience*100)
+	binding.skill.text=_training_level(float(data.skill));binding.skill_bar.value=data.skill*100
+	binding.skill_note.text="Drill %d%% · Experience %d%%" % [roundi(data.skill*100),roundi(data.experience*100)]
 	var activity:=String(data.activity)
 	if activity=="On duty / reserve":activity="Needs gear" if data.equipment<.8 else "Reserve"
-	binding.activity.text=("!  " if _attention(data) else "●  ")+activity;binding.activity_bar.value=data.progress*100
+	var reasons:=_attention_reasons(data)
+	binding.activity.text="\n".join(reasons) if not reasons.is_empty() else activity;binding.activity_bar.value=data.progress*100
 	binding.activity_bar.visible=data.progress>0 and bool(data.get("in_training",false))
-	binding.activity_note.text=String(data.training_note);binding.activity.tooltip_text=String(data.activity)+"\n"+String(data.training_note)
+	binding.activity_note.text=String(data.training_note);binding.activity.tooltip_text="\n".join(reasons)+"\n"+String(data.training_note)
 	binding.activity_note.visible=false
 	for key:String in ["personnel","equipment","skill"]:binding[key+"_bar"].queue_redraw()
 func _rows()->Array[Dictionary]:
@@ -310,7 +333,7 @@ func _update_inspection()->void:
 	if bool(selected_row.get("unknown",false)):return
 	inspection_labels.composition.text=String(selected_row.get("composition",""))
 	inspection_labels.skills.text="Drill %d%%  ·  Experience %d%%  ·  Condition %d%%" % [roundi(selected_row.skill*100),roundi(selected_row.experience*100),roundi(selected_row.condition*100)]
-	inspection_labels.activity.text=String(selected_row.activity)+". "+String(selected_row.training_note)
+	inspection_labels.activity.text=" · ".join(_attention_reasons(selected_row))+"\n"+String(selected_row.training_note)
 
 func _policy()->void:
 	_label(body,"How much should we train?",23)
@@ -328,7 +351,8 @@ func _policy()->void:
 		var icons:ProgressBar=_bar(card,Art.COLORS[service],"people");icons.marks=20;icons.value=float(definition.share)*100;icons.custom_minimum_size.y=26
 		_label(card,"%d%% rotate" % roundi(float(definition.share)*100),23)
 		_label(card,"Target drill  %d%%" % roundi(float(definition.target)*100),13,Art.COLORS[service])
-		var skill:=_bar(card,Art.COLORS[service],"chevrons");skill.value=float(definition.target)*100
+		var skill:=_bar(card,Art.COLORS[service],"patch");skill.value=float(definition.target)*100
+		skill.custom_minimum_size=Vector2(44,32);skill.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 		var description:=_wrapped(card,String(definition.description),12);description.custom_minimum_size.x=140
 		var effort:=_label(card,{"suspended":"CONSERVE STORES","maintain":"LOW COMMITMENT","regular":"SUSTAINED COMMITMENT","intensive":"HIGH COMMITMENT"}[id],10,MUTED)
 		effort.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS

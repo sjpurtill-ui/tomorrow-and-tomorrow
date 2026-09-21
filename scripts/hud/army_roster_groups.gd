@@ -9,7 +9,7 @@ static func group(rows:Array[Dictionary])->Array[Dictionary]:
 		var key:=String(row.get("group_key",row.id))
 		if not groups.has(key):
 			var entry:=row.duplicate(true)
-			entry.merge({"id":key,"name":row.get("group_name",row.name),"count":0,"authorized":0,"condition":0.0,"equipment":0.0,"skill":0.0,"experience":0.0,"progress":0.0,"in_training":false,"needs_attention":false,"gear":0.0,"gear_required":0.0,"parts":{},"largest":0},true)
+			entry.merge({"id":key,"name":row.get("group_name",row.name),"count":0,"authorized":0,"condition":0.0,"equipment":0.0,"skill":0.0,"experience":0.0,"progress":0.0,"in_training":false,"needs_attention":false,"poor_condition":false,"gear":0.0,"gear_required":0.0,"parts":{},"largest":0},true)
 			groups[key]=entry;result.append(entry)
 		var entry:Dictionary=groups[key]
 		var count:=int(row.count)
@@ -19,6 +19,7 @@ static func group(rows:Array[Dictionary])->Array[Dictionary]:
 		entry.gear+=float(row.get("equipment_count",float(row.equipment)*required));entry.gear_required+=required
 		entry.in_training=bool(entry.in_training) or bool(row.in_training)
 		entry.needs_attention=bool(entry.needs_attention) or float(row.equipment)<.8 or float(row.condition)<.75
+		entry.poor_condition=bool(entry.poor_condition) or float(row.condition)<.75
 		if count>int(entry.largest):entry.largest=count;entry.type_id=row.type_id
 		var part:=String(row.name)
 		if not String(row.get("weapon","")).is_empty():part+=" · "+String(row.weapon).replace("_"," ").capitalize()
