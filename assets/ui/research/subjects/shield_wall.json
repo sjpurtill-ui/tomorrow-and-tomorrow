@@ -1,0 +1,10 @@
+{
+  "id": "shield_wall",
+  "prompt": "Replace developed steel-armored warriors with the earliest shield-wall drill. A close overlapping row of rawhide-covered wooden shields, visible wooden rims and leather lacing, no metal shield bosses; simple padded fiber and hide clothing, bare heads or cloth caps; wooden spears with unmistakable chipped stone points. Preserve the strong diagonal perspective and sense of disciplined shoulder-to-shoulder defense. No steel, iron helmets, mail armor, national banners or readable text. Keep faces and shield overlap in the middle horizontal band.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-ccb6be9b-1e77-429a-9678-e3ce7efe97b9.png",
+  "version": 2,
+  "asset": "res://assets/ui/research/subjects/shield_wall-v2.png",
+  "sha256": "cad26edbef586641c509f3530b9869887c39c3d57420f54ffb8a38db2828e004",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

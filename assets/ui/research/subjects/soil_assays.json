@@ -1,0 +1,9 @@
+{
+  "id": "soil_assays",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Comparative Soil Assays. Show a concrete, visually clear scene demonstrating this exact practice: Soils are compared by drainage, texture, crop response, and amendments rather than color alone. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-7ee0199a-1642-4e92-b1fc-73ffa07e0718.png",
+  "asset": "res://assets/ui/research/subjects/soil_assays-v1.png",
+  "sha256": "74364021d5b38dfb1ed19d81ba3c60e738c6b5acec3ddfe09e40c01ec69ced5c",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
