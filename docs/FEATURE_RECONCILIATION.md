@@ -1880,3 +1880,11 @@ Validation: tests/test_culture_gameplay_effects.gd — 3 focused tests passed (e
 
 Based on a6cc421, branch codex/culture-roots-refresh. Culture provider now owns the roots disclosure state; panel rebuilds preserve both open and closed choices. Expanded roots use responsive compact cards, with earlier tendencies shown only when different. Disclosure uses explicit readable theme colors. No simulation or save changes. Four culture tests pass, including opening, rebuilding, closing and rebuilding again with the provider-owned state. No player restart or desktop control; visual review remains with the user.
 
+
+## 2026-09-21 — Expose civilian craft production and management
+
+Base 2b0a327, branch codex/production-civilian-demand. Production now visibly names its workshop officeholder and scheduling status. All/Civilian includes household craft output and stocks by settlement with material, fire, staffing and adoption blockers. Household craft completion now adds actual gross quantities to the existing saved production totals per settlement, once per daily craft pass; older lifetime amounts are not invented. Up to six known workshop recipes show setup blockers, with the full catalog under Add. No crafting recipe, labor allocation, automatic order, pause, or discovery was overridden. Existing manual orders stay manual.
+
+Read-only saved-state inspection: day 13399 (year 37), population 235, Quartermaster Kaia Almasi. Four retained levy-weapon completions, paused manual levy line; household cordage/containers already in stocks. Only adopted civilian workshop recipe was graded interior wood, blocked by Steel tooling. Isolated next-day craft call produced 3.6409236 cordage and 2.2468705 woven containers and deducted inputs. This does not establish the reported year-62 state; newer save requested.
+
+Validation: 3 production-visibility tests and 6 existing opening-craft tests passed. Saved diagnostic assertion passed; its report completion stalled when another report runner overlapped, so it is used as diagnostic evidence, not counted in the nine regression checks. No player game restart, desktop control or save overwrite. Temporary probe source removed; private diagnostic logs remain only in artifacts.

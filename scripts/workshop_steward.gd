@@ -152,6 +152,20 @@ func record(job:Dictionary,before:Dictionary)->void:
 				receipt.quantity=float(receipt.quantity)+amount;combined=true;break
 		if not combined:data.receipts.push_front(entry)
 	while data.receipts.size()>MAX_RECEIPTS:data.receipts.pop_back()
+func record_household(made:Dictionary)->void:
+	if WorldSimulation.actor_id!="player" or made.is_empty():return
+	var day:=int(WorldSimulation.state.elapsed_days)
+	if int(data.tracking_day)<0:data.tracking_day=day
+	var city_id:=String(WorldSimulation.state.resource_settlement_id)
+	var city_name:=String(WorldSimulation.state.settlement_name)
+	if city_id.is_empty():
+		for city:Dictionary in WorldSimulation.state.player_settlements:
+			if bool(city.get("primary",false)):city_id=String(city.id);city_name=String(city.name);break
+	for resource:String in made:
+		var amount:=float(made[resource])
+		if amount<=0:continue
+		_add_total(data.totals,{"day":day,"item":resource,"resource":resource,"kind":"household","quantity":amount,"settlement_id":city_id,"settlement_name":city_name})
+
 func restore(payload:Dictionary)->void:
 	reset()
 	data.merge(payload.duplicate(true),true)

@@ -7,9 +7,11 @@ func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;name="IllustratedProductionQueue";add_theme_constant_override("separation",0)
 	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",8);add_child(header)
 	var management:=T.make_label("LEADER MANAGED" if bool(data.get("managed",true)) else "MANUAL SCHEDULING",12,T.GOLD)
+	management.text+=" · "+String(data.get("owner","No workshop officeholder"));management.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	management.tooltip_text=String(data.get("owner",""));management.size_flags_horizontal=Control.SIZE_EXPAND_FILL;header.add_child(management)
 	_button(header,"Manage",data.get("on_manage"),"Leader scheduling and labor allocation")
 	_button(header,"+",data.get("on_add"),"Add a production line")
+	var status:=T.make_label(String(data.get("status","")),12,T.BODY);status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(status)
 	var reserves:=HBoxContainer.new();reserves.add_theme_constant_override("separation",12);add_child(reserves)
 	for resource:String in data.get("stocks",{}):
 		var group:=HBoxContainer.new();group.size_flags_horizontal=Control.SIZE_EXPAND_FILL;group.tooltip_text=resource;reserves.add_child(group)

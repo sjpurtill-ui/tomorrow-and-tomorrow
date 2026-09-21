@@ -130,6 +130,7 @@ static func advance()->Dictionary:
 			var work:=amount/rate;remaining-=work;report.workers+=work
 	for id:String in ORDER:report.coverage[id]=factor(id)
 	data().report=report
+	WorldSimulation.military.workshop.record_household(report.made)
 	WorldSimulation.discovery.refresh_operating_effects()
 	return report.duplicate(true)
 
