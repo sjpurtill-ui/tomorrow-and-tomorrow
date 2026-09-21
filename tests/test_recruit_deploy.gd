@@ -153,3 +153,16 @@ func test_invalid_saved_line_is_rejected_without_replacing_current_forces()->voi
 	assert_bool(MilitaryCampaign.import_state(saved).has("error")).is_true()
 	assert_int(int(MilitaryCampaign.recruit_deploy.data.lines[0].id)).is_equal(1)
 	assert_int(MilitaryCampaign._queued_trainees()).is_equal(10)
+
+func test_template_card_train_button_queues_selected_batch_settings()->void:
+	var board=auto_free(preload("res://scripts/hud/recruit_deploy_board.gd").new());add_child(board)
+	board.setup({"edit_template":func(_id:int):pass})
+	board.parallel.value=2;board.serial.value=3
+	var train:Button=board.find_child("TrainTemplate1",true,false)
+	assert_object(train).is_not_null()
+	train.pressed.emit()
+	assert_int(MilitaryCampaign.recruit_deploy.data.lines.size()).is_equal(1)
+	var line:Dictionary=MilitaryCampaign.recruit_deploy.data.lines[0]
+	assert_int(line.parallel).is_equal(2)
+	assert_int(line.remaining+line.slots.size()).is_equal(6)
+	assert_int(board.live.size()).is_equal(3)

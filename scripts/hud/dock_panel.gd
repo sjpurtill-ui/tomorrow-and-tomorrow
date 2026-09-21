@@ -180,6 +180,21 @@ func rebuild_body()->void:
 		body.remove_child(child)
 		child.queue_free()
 	Blocks.render(body,data.get("blocks",[]))
+	var military_board:bool=not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="recruit_deploy"
+	var dock_skin:=Tokens.dock_style()
+	if military_board:dock_skin.bg_color=Color("151e19");dock_skin.border_color=Color("69715b");dock_skin.set_corner_radius_all(0)
+	add_theme_stylebox_override("panel",dock_skin)
+	if military_board:title_label.text="Recruit & Deploy"
+	title_label.add_theme_color_override("font_color",Color("e8e9df") if military_board else Tokens.INK)
+	eyebrow_label.add_theme_color_override("font_color",Color("d9b772") if military_board else Tokens.GOLD)
+	close_button.add_theme_color_override("font_color",Color("e8e9df") if military_board else Tokens.TEXT_DIM)
+	for index in tab_buttons.size():
+		if military_board:
+			tab_buttons[index].add_theme_stylebox_override("normal",Tokens.flat(Color("47533a") if index==sub else Color("26302b"),Color("69715b"),1,0,10))
+			tab_buttons[index].add_theme_color_override("font_color",Color("e8e9df"))
+			for state:String in ["hover","pressed"]:
+				tab_buttons[index].add_theme_stylebox_override(state,tab_buttons[index].get_theme_stylebox("normal"))
+			tab_buttons[index].add_theme_color_override("font_hover_color",Color("ffffff"))
 	body_scroll.scroll_vertical=scroll_position
 
 

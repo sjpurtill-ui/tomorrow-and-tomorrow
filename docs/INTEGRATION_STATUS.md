@@ -2009,3 +2009,21 @@ roster captures pass, including 1024x640. A hundred one-person levy records coll
 into one force, while separate garrisons/queue lines remain separate. No save-schema
 change. This corrects the roster; full HOI4 parity remains incomplete as documented
 in RECRUIT_DEPLOY_DESIGN.md. Generated imports and captures are excluded.
+
+## September 21 — Recruit & Deploy screen rebuilt
+
+Replaces the narrow dropdown form with a wide dark military workspace. Recruitment
+lines occupy the left column; visible illustrated templates with composition,
+headcount and direct Train/Edit buttons occupy the right. Batch/parallel/repeat
+settings remain real queue inputs. Line priorities, pause/cancel, assembly target,
+auto deployment and early deployment remain wired to the existing recruitment
+system. Empty queue explains its state; active lines expose separate personnel,
+equipment and instruction bars. Columns stack in narrower layouts. No save or
+simulation changes and no claim that remaining HOI4 mechanical gaps are complete.
+
+Validation: 22/22 focused recruit/deploy and government HUD tests, including the
+actual Train button creating two parallel formations across three batches.
+Private GPU captures pass for empty and active queues at 1600x1000 and 1024x640,
+with no horizontal overflow. Reference: Paradox's HOI IV Strategy Guide,
+https://forumcontent.paradoxplaza.com/public/paradox/banners/HoI_IV_Strategy_Guide.pdf
+Generated imports and captures excluded.
