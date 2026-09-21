@@ -2,6 +2,9 @@ extends RefCounted
 ## Exact circle/capsule queries accelerated by spatial buckets. This index never
 ## adds knowledge; it contains only the same physical chart records as the map.
 const CELL:=128.0
+# Very long or numerous segments fall back to exact checks, not unlimited buckets.
+const MAX_BUCKET_REFERENCES:=262144
+var bucket_references:=0
 var buckets:Dictionary={}
 var wide:Array[Dictionary]=[]
 func _init(records:Array)->void:
@@ -15,10 +18,12 @@ func _init(records:Array)->void:
 			add_segment(center,center,radius)
 func point(value:Dictionary)->Vector2:return Vector2(float(value.get("x",0)),float(value.get("z",0)))
 func add_segment(a:Vector2,b:Vector2,radius:float)->void:
-	var segment:={"a":a,"b":b,"radius2":radius*radius}
+	var segment:={"a":a,"b":b,"radius":radius}
 	var low:=Vector2i(floori((minf(a.x,b.x)-radius)/CELL),floori((minf(a.y,b.y)-radius)/CELL))
 	var high:=Vector2i(floori((maxf(a.x,b.x)+radius)/CELL),floori((maxf(a.y,b.y)+radius)/CELL))
-	if (high.x-low.x+1)*(high.y-low.y+1)>512:wide.append(segment);return
+	var cells:=(high.x-low.x+1)*(high.y-low.y+1)
+	if cells>512 or bucket_references+cells>MAX_BUCKET_REFERENCES:wide.append(segment);return
+	bucket_references+=cells
 	for x in range(low.x,high.x+1):
 		for y in range(low.y,high.y+1):
 			var key:=Vector2i(x,y)
@@ -31,4 +36,4 @@ func contains(position:Vector2)->bool:
 		if touches(segment,position):return true
 	return false
 func touches(segment:Dictionary,position:Vector2)->bool:
-	return position.distance_squared_to(Geometry2D.get_closest_point_to_segment(position,segment.a,segment.b))<=float(segment.radius2)
+	return position.distance_to(Geometry2D.get_closest_point_to_segment(position,segment.a,segment.b))<=float(segment.radius)
