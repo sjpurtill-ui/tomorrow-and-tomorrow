@@ -1825,3 +1825,8 @@ Replaces the six-button Direct Attention menu with an illustrated investigation 
 ## Simulation bug and balance audit — 2026-09-21
 
 On base `3c66cf8`, fixed founding-year government priorities bypassing survival emergencies and a saved daily inclination-review marker being reset by nested military state import. Older saves remain compatible. Updated the starter-material test to distinguish advanced framed construction. Added a reproducible three-scenario headless annual audit. 127 checks pass; one existing research-personality distinction test remains failing and is documented without weakening its assertion. The 12-opponent complete save round trip passes. Larger simulated settlements still exhaust food; research pacing and military ration delivery remain open balance findings. See `docs/SIMULATION_BALANCE_AUDIT_2026_09_21.md` for scope, measured before/after results and limitations. No player launch or desktop control.
+
+
+## Secondary settlement locator zoom — 2026-09-21
+
+Secondary city dots now use the primary city's stage-dependent close-view cutoff, updated on camera motion without requiring a network rebuild. Names and physical city fabric remain separate and visible under their existing rules. This removes the oversized yellow locator over a small settlement during close inspection and restores it at regional zoom. No simulation or save changes. Focused headless regression passes for close/far/close transitions and retained labels. The broader architecture suite stopped at its strategic river-edge mesh test (empty surface, 74 cases executed); this pass does not claim that suite is clean or GPU visual verification. User retains visual review; no running player restart.

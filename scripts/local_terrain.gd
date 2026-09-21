@@ -3405,6 +3405,7 @@ func _update_scale_lod() -> void:
 		# Physical fabric and claim detail retire before true world view; the bounded
 		# civic-symbol layer remains so a civilization never disappears from its planet.
 		settlement_network_marker_root.visible=camera.size>=0.82 and camera.size<=18000.0
+		_update_secondary_settlement_blips()
 	if settlement_network_fabric_root:
 		settlement_network_fabric_root.visible=camera.size<=2600.0
 	_update_settlement_surface_lod_materials()
@@ -7445,6 +7446,7 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 	# Preserve an almost fixed screen-space weight through regional, continental and
 	# planetary zoom. The former 3 km cap reduced every world city below one pixel.
 	var marker_radius:=clampf(camera.size*0.0032,0.055,64.0) if camera!=null else 0.055
+	var marker_profiles:Array[Dictionary]=[]
 	for index in marker_set.size():
 		var settlement:Dictionary=marker_set[index]
 		var visual_profile:=_settlement_expansion_visual_profile(settlement)
@@ -7453,15 +7455,18 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 		var origin:=Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y)+0.004,position_2d.y)
 		multi.set_instance_transform(index,Transform3D(Basis().scaled(Vector3.ONE*marker_radius*float(visual_profile.marker_scale)),origin))
 		multi.set_instance_color(index,visual_profile.color)
+		marker_profiles.append(visual_profile)
 	var blips:=MultiMeshInstance3D.new()
 	blips.name="SecondarySettlementBlips"
 	blips.multimesh=multi
+	blips.set_meta("marker_profiles",marker_profiles)
 	var material:=StandardMaterial3D.new()
 	material.albedo_color=Color.WHITE
 	material.vertex_color_use_as_albedo=true
 	material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
 	blips.material_override=material
 	settlement_network_marker_root.add_child(blips)
+	_update_secondary_settlement_blips()
 	var label_limit:=_secondary_settlement_label_limit()
 	if prioritized.size()>label_limit: prioritized.resize(label_limit)
 	for index in prioritized.size():
@@ -7486,6 +7491,26 @@ func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
 		label.position=Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y)+marker_radius*2.2,position_2d.y)
 		settlement_network_marker_root.add_child(label)
 		_update_city_flag(label)
+
+
+func _update_secondary_settlement_blips()->void:
+	if camera==null or settlement_network_marker_root==null:return
+	var blips:=settlement_network_marker_root.get_node_or_null("SecondarySettlementBlips") as MultiMeshInstance3D
+	if blips==null or blips.multimesh==null:return
+	var profiles:Array=blips.get_meta("marker_profiles",[])
+	var any_visible:=false
+	var radius:=clampf(camera.size*0.0032,0.055,64.0)
+	# Names remain visible independently. Each city's locator retires at the same
+	# threshold as the primary city's, leaving physical buildings unobscured.
+	# Update on camera motion, not only when the settlement network rebuilds.
+	for index in mini(profiles.size(),blips.multimesh.instance_count):
+		var profile:Dictionary=profiles[index]
+		var size:=radius*float(profile.marker_scale) if camera.size>_settlement_stage_marker_zoom(profile) else 0.0
+		any_visible=any_visible or size>0.0
+		var placement:=blips.multimesh.get_instance_transform(index)
+		placement.basis=Basis().scaled(Vector3.ONE*size)
+		blips.multimesh.set_instance_transform(index,placement)
+	blips.visible=any_visible
 
 
 func _secondary_settlement_urban_radius(settlement:Dictionary)->float:
