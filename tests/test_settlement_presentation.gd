@@ -24,3 +24,8 @@ func test_history_does_not_truncate_to_three_events()->void:
 	var discoveries:Array=[]
 	for day in 40:discoveries.append({"name":"Recorded event", "day":day})
 	assert_int(History.events({"id":"home"},discoveries,[]).size()).is_equal(40)
+
+func test_legacy_building_keys_are_presented_as_readable_names()->void:
+	var events:=History.events({"id":"home"},[],[{"settlement_id":"home","kind":"household_garden_strip","material_family":"earth","event":"rebuilt"}])
+	assert_str(events[0].title).is_equal("Household Garden Strip · Rebuilt")
+	assert_str(events[0].description).is_equal("Earth construction")

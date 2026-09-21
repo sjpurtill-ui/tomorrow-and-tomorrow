@@ -14,7 +14,9 @@ static func events(settlement:Dictionary,discoveries:Array,buildings:Array)->Arr
 		result.append(event)
 	for entry:Dictionary in buildings:
 		if String(entry.get("settlement_id",""))!=city_id:continue
-		var kind:=String(entry.get("kind","Building"))
-		result.append({"day":int(entry.get("day",0)),"kind":"Building","scope":city,"title":kind+" · "+String(entry.get("event","recorded")).capitalize(),"description":String(entry.get("material_family","")),"art":preload("res://scripts/hud/construction_art.gd").building(kind)})
+		var kind:=String(entry.get("kind","Building")).replace("_"," ").capitalize()
+		var material:=String(entry.get("material_family",""))
+		var description:=String({"organic":"Timber and plant materials","earth":"Earth construction","masonry":"Masonry construction"}.get(material,material.replace("_"," ").capitalize()))
+		result.append({"day":int(entry.get("day",0)),"kind":"Building","scope":city,"title":kind+" · "+String(entry.get("event","recorded")).capitalize(),"description":description,"art":preload("res://scripts/hud/construction_art.gd").building(kind)})
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.day)>int(b.day))
 	return result
