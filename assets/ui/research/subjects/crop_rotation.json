@@ -1,0 +1,9 @@
+{
+  "id": "crop_rotation",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Crop Rotation. Show a concrete, visually clear scene demonstrating this exact practice: Different crops are sequenced to preserve soil and disrupt recurring pests. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-22c49242-48ed-4931-a5f1-608300e61f38.png",
+  "asset": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+  "sha256": "5f34e1b24ec70ecd90a41bb873a49fa5818b1b5e6637d66a4542a505d8cf079e",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
