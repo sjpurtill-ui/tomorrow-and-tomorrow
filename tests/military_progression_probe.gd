@@ -46,13 +46,13 @@ func _ready()->void:
 	_expect(bool(cavalry_state.get("can_prototype",false)),"understood cavalry cannot prototype")
 	_expect(not bool(cavalry_state.get("can_field",true)),"understood cavalry can field normally")
 
-	# Prototype path: one bounded experimental cohort; a second is refused.
+	# Prototype understanding permits recruitment; inefficiency replaces arbitrary cohort limits.
 	MilitaryCampaign.raise_recruits(40)
 	var prototype:Dictionary=MilitaryCampaign.start_training("cavalry","sword_shield",20)
 	_expect(bool(prototype.get("prototype",false)),"prototype flag missing: %s" % prototype.get("error",prototype.get("message","")))
-	_expect(int(prototype.get("accepted",0))<=MilitaryCampaign.PROTOTYPE_COHORT_LIMIT,"prototype cohort exceeded limit (%d)" % int(prototype.get("accepted",0)))
+	_expect(int(prototype.get("accepted",0))==20,"prototype recruitment did not accept 20 available people")
 	var second:Dictionary=MilitaryCampaign.start_training("cavalry","sword_shield",8)
-	_expect(second.has("error"),"second prototype cohort was allowed")
+	_expect(int(second.get("accepted",0))==8,"second prototype cohort was arbitrarily blocked")
 
 	# Experimental equipment: bounded batch of an understood item; oversize refused.
 	GameState.resource_stockpiles["Timber"]=500.0

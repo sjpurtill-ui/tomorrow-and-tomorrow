@@ -60,6 +60,10 @@ const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_concep
 var _claim_shape_cache:Dictionary={}
 var _local_population_scope:=false
 var _national_population_in_scope:=0.0
+var _national_civilian_workforce_fraction:=1.0
+
+func civilian_workforce_fraction()->float:
+	return _national_civilian_workforce_fraction if _local_population_scope else WorldSimulation.state.civilian_workforce_fraction()
 
 func national_population()->float:
 	return _national_population_in_scope if _local_population_scope else WorldSimulation.state.population_exact
@@ -145,6 +149,7 @@ func with_local_population(operation:Callable,commit_demographics:=false)->Varia
 	var state:=WorldSimulation.state
 	if _local_population_scope or state.player_settlements.is_empty(): return operation.call()
 	_national_population_in_scope=state.population_exact
+	_national_civilian_workforce_fraction=state.civilian_workforce_fraction()
 	var saved:Dictionary={}
 	for field in ["population_exact","population_total","population_allocations","population_allocation_percentages","population_cohorts","pregnancy_cohorts","demographic_remainders","death_progress"]:
 		saved[field]=state.get(field)

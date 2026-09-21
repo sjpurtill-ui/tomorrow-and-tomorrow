@@ -51,3 +51,11 @@ usability study. Preserve the player's running session and saves during testing.
 
 The multi-millennial full campaign is the long-term vision. This slice establishes
 the command loop, not all eras, diplomacy, naval warfare or political institutions.
+
+## Recruitment rule — September 20
+
+Recruitment may exhaust actual available adults; no technology, law percentage,
+prototype headcount or classroom ceiling may forbid drafting. Costs and outcomes
+must carry the constraint. See `RECRUIT_DEPLOY_DESIGN.md` for the integrated queue
+workflow, workforce consequences and remaining HOI4 parity gaps. This changes
+recruitment authority, not the general-led battlefield direction above.

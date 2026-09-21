@@ -41,6 +41,9 @@ func set_policy(service:String,id:String)->Dictionary:
 	return {"ok":true,"message":"%s training: %s. Staff handle selection, rotations and supplies automatically." % [service.capitalize(),POLICIES[id].label]}
 static func initial_days(days:float)->float:return maxf(45.0,days*3.0)
 static func service_days(days:float)->float:return maxf(90.0,days*3.0)
+func instruction_food()->float:
+	# Initial instruction may consume civilian reserves; shortages are consequences.
+	return maxf(0.0,WorldSimulation.food.total_stored())
 func spendable_food()->float:
 	return maxf(0.0,WorldSimulation.food.total_stored()-maxf(1.0,WorldSimulation.state.population_exact)*0.9*RESERVE_DAYS)
 func snapshot(service:String)->Dictionary:

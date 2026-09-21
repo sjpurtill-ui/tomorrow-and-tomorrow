@@ -1,6 +1,7 @@
 extends Node
 
 const PersistentProduction = preload("res://scripts/persistent_production.gd")
+var recruit_deploy=preload("res://scripts/recruit_deploy.gd").new(self)
 var training_staff=preload("res://scripts/military_training_staff.gd").new(self)
 var production_labor_share:float = .35
 var workshop=preload("res://scripts/workshop_steward.gd").new(self)
@@ -143,6 +144,7 @@ func _process(_delta:float)->void:
 
 func reset_for_new_world()->void:
 	command_hierarchy.reset()
+	recruit_deploy.reset()
 	training_staff.reset()
 	joint_operations.reset()
 	recovery.reset()
@@ -206,7 +208,7 @@ func raise_recruits(count:int)->Dictionary:
 	var raised:=mini(maxi(0,count),maxi(0,capacity-_mobilized_count()))
 	aggregate_recruits+=raised
 	army_changed.emit(home_army.duplicate(true))
-	var message:="%d people entered the recruit reserve; %d now await training." % [raised,aggregate_recruits] if raised>0 else "No recruits were raised; mobilization capacity is full or the available labor cohort is exhausted."
+	var message:="%d people entered the recruit reserve; %d now await training." % [raised,aggregate_recruits] if raised>0 else "No recruits were raised; no uncommitted adults are available."
 	return {"requested":count,"raised":raised,"recruit_reserve":aggregate_recruits,"capacity":capacity,"message":message}
 
 func _stand_down_aggregate(requested:int)->Dictionary:
@@ -265,7 +267,6 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	var accepted:=mini(maxi(0,count),aggregate_recruits)
 	if accepted<=0: return {"error":"No recruits are available for training."}
 	var prototype:=bool(gate.get("prototype",false))
-	if prototype: accepted=mini(accepted,PROTOTYPE_COHORT_LIMIT)
 	var base_training_days:=UnitCatalog.training_days(unit)
 	var training_days:=maxf(3.0,base_training_days*(PROTOTYPE_TRAINING_MULTIPLIER if prototype else 1.0))
 	var order_id:=next_training_order_id; next_training_order_id+=1
@@ -613,12 +614,13 @@ func production_lines_snapshot()->Dictionary:
 
 
 func recruitment_capacity()->int:
-	var population:=WorldSimulation.state.able_population()
-	var share:=0.04
-	if _adoption("watch_rotation")>=0.10: share=0.08
-	if _adoption("public_levies")>=0.15: share=0.18
-	if _adoption("professional_corps")>=0.20: share=0.30
-	return maxi(1,roundi(float(population)*share))
+	# People, not a technology/law percentage. Away civilians cannot also enlist.
+	WorldSimulation.state.initialize_population_model()
+	var adults:=maxi(0,roundi(float(WorldSimulation.state.population_cohorts.get("working_age",0))))
+	var away:=int(WorldSimulation.world.player_population_commitments().get("working_absent",0))
+	away+=preload("res://scripts/scholar_visits.gd").absent(WorldSimulation.state,int(WorldSimulation.state.elapsed_days))
+	return maxi(0,adults-away)
+
 
 
 func _mobilized_count()->int:
@@ -1238,8 +1240,7 @@ func disband_field_army(army_id:int)->Dictionary:
 # --- Army builds (templates) -------------------------------------------------
 
 func _default_army_templates()->Array[Dictionary]:
-	# The starter build must respect the same mobilization ceiling the player's
-	# own designs are clamped to, or TRAIN under-delivers on day one.
+	# Start with a modest design; later designs may exceed current population.
 	return [{"template_id":1,"name":"LEVY BAND","entries":[{"unit":"levy","weapon":"improvised","count":clampi(recruitment_capacity(),1,20)}]}]
 
 
@@ -1268,7 +1269,7 @@ func _matching_training_count(unit:String,weapon:String)->int:
 	var total:=0
 	for order_variant in training_queue:
 		var order:Dictionary=order_variant
-		if String(order.get("mode",""))=="reinforce": continue
+		if String(order.get("mode",""))=="reinforce" or order.has("deployment_line"): continue
 		if String(order.get("unit",""))==unit and String(order.get("weapon",""))==weapon: total+=maxi(0,int(order.get("count",0)))
 	return total
 
@@ -1302,7 +1303,6 @@ func army_template_snapshot()->Dictionary:
 
 
 func create_army_template(name:String="")->Dictionary:
-	if army_templates.size()>=8: return {"error":"Keep at most eight army builds; delete one first."}
 	var label:=name.strip_edges()
 	if label=="": label="BUILD %d" % next_army_template_id
 	var template:Dictionary={"template_id":next_army_template_id,"name":label.to_upper(),"entries":[]}
@@ -1327,13 +1327,6 @@ func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)-
 	var template:Dictionary=army_templates[index]
 	var entries:Array=template.get("entries",[])
 	var applied:=delta
-	if delta>0:
-		# A build is a mobilization order. Its target can never exceed what the
-		# society could actually raise, otherwise TRAIN silently under-delivers.
-		var planned:=0
-		for entry_variant in entries: planned+=maxi(0,int((entry_variant as Dictionary).get("count",0)))
-		applied=mini(delta,maxi(0,recruitment_capacity()-planned))
-		if applied<=0: return {"error":"Mobilization capacity is %d and this build already claims all of it. Population growth and security practices such as an organized watch or public levies raise the ceiling." % recruitment_capacity()}
 	var found:=false
 	for entry_index in range(entries.size()-1,-1,-1):
 		var entry:Dictionary=entries[entry_index]
@@ -2542,6 +2535,7 @@ func export_state()->Dictionary:
 		"aggregate_recruits":aggregate_recruits,
 		"training_queue":training_queue.duplicate(true),
 		"training_strategy":training_staff.data.duplicate(true),
+		"recruit_deploy":recruit_deploy.data.duplicate(true),
 		"training_timing_version":1,
 		"training_injury_pool":training_injury_pool,
 		"training_injury_recovery_accumulator":training_injury_recovery_accumulator,
@@ -2579,6 +2573,8 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	var recruitment_error:=String(recruit_deploy.validate_saved(payload))
+	if not recruitment_error.is_empty():return {"error":recruitment_error}
 	if not preload("res://scripts/combined_arms_doctrine.gd").valid_tree(payload):return {"error":"Invalid practiced military doctrine."}
 	var command_error:=String(command_hierarchy.validate(payload.get("command_hierarchy",{})))
 	if command_error!="":return {"error":command_error}
@@ -2852,6 +2848,7 @@ func validate_state()->Array[String]:
 
 func _apply_imported_state(payload:Dictionary)->void:
 	command_hierarchy.import_state(payload.get("command_hierarchy",{}))
+	recruit_deploy.load_state(payload.get("recruit_deploy",{}))
 	training_staff.load_state(payload.get("training_strategy",{}))
 	joint_operations.reset()
 	if payload.has("joint_operations"):joint_operations.import_state(payload.joint_operations)
@@ -3041,7 +3038,6 @@ func _formation_index(formation_id:int)->int:
 	return -1
 
 
-const PROTOTYPE_COHORT_LIMIT:=8
 const PROTOTYPE_TRAINING_MULTIPLIER:=2.5
 
 
@@ -3104,7 +3100,6 @@ func _training_gate(unit:String,weapon:String)->Dictionary:
 	var weapon_discovery:=String(EQUIPMENT_KNOWLEDGE.get(weapon,""))
 	var weapon_understood:=bool(weapon_gate.unlocked) or (weapon_discovery!="" and not weapon_discovery.begins_with("__") and weapon_discovery in WorldSimulation.state.known_discoveries)
 	if unit_understood and weapon_understood:
-		if _prototype_formation_exists(unit): return {"error":"An experimental %s cohort already exists; establish the practice (adoption) before raising more." % unit.replace("_"," ")}
 		return {"prototype":true}
 	if not bool(unit_gate.unlocked): return {"error":unit_gate.reason,"required_discovery":unit_gate.discovery}
 	return {"error":weapon_gate.reason,"required_discovery":weapon_gate.discovery}
@@ -3495,9 +3490,12 @@ func _process_military_day()->void:
 	workshop.advance(last_processed_day)
 	_process_equipment_production_day()
 	_process_training_injuries_day()
+	recruit_deploy.prepare()
 	_process_requested_templates()
 	_ensure_automatic_basic_training()
-	if not home_fighting:_process_training_day()
+	if not home_fighting:
+		_process_training_day()
+		recruit_deploy.deploy_ready()
 	_process_training_program_day()
 	_process_field_army_movement_day()
 	_process_army_runners_day()
@@ -3969,18 +3967,29 @@ func _complete_training_program(definition:Dictionary)->void:
 func _process_training_day()->void:
 	if training_queue.is_empty(): return
 	var policy:Dictionary=training_staff.policy("army")
-	if float(policy.intake)<=0 or training_staff.spendable_food()<=0:return
-	var rations:=float(_queued_trainees())*.18*float(policy.intake)
-	var paid:=WorldSimulation.food.issue_for_obligation(minf(rations,training_staff.spendable_food()),"military_training","Initial army instruction",1.0,_queued_trainees())
+	if float(policy.intake)<=0 or training_staff.instruction_food()<=0:return
+	var paused_lines:Dictionary={}
+	for line:Dictionary in recruit_deploy.data.lines:
+		if bool(line.paused):paused_lines[int(line.id)]=true
+	var attending:=0
+	for order:Dictionary in training_queue:
+		if paused_lines.has(int(order.get("deployment_line",-1))):continue
+		if (order.has("deployment_line") or order.has("build_batch")) and float(order.progress_days)>=float(order.required_days):continue
+		attending+=int(order.count)
+	if attending<=0:return
+	var rations:=float(attending)*.18*float(policy.intake)
+	var paid:=WorldSimulation.food.issue_for_obligation(minf(rations,training_staff.instruction_food()),"military_training","Initial army instruction",1.0,attending)
 	training_staff.record_food("army",paid)
-	var training_rate:=_effective_training_rate(_queued_trainees())*float(policy.intake)*clampf(paid/maxf(.001,rations),0,1)
+	var training_rate:=_effective_training_rate(attending)*float(policy.intake)*clampf(paid/maxf(.001,rations),0,1)
 	var training_equipment_budget:=military_inventory.duplicate(true)
 	for index in range(training_queue.size()-1,-1,-1):
 		var training:Dictionary=training_queue[index]
+		if training.has("deployment_line") and paused_lines.has(int(training.deployment_line)):continue
+		if training.has("deployment_line") and float(training.progress_days)>=float(training.required_days):continue
 		if training.has("build_batch") and float(training.progress_days)>=float(training.required_days):continue
 		var weapon:=String(training.get("weapon","improvised"))
 		var reserved_examples:=maxi(0,int(training.get("reserved_equipment",0)))
-		var available_examples:=maxi(0,int(training_equipment_budget.get(weapon,0)))+reserved_examples
+		var available_examples:=(0 if training.has("deployment_line") else maxi(0,int(training_equipment_budget.get(weapon,0))))+reserved_examples
 		var examples_required:=_equipment_required_for(String(training.get("unit","levy")),int(training.get("count",1)))
 		var examples:=mini(maxi(1,examples_required),available_examples)
 		training_equipment_budget[weapon]=maxi(0,available_examples-examples-reserved_examples)
@@ -3988,7 +3997,11 @@ func _process_training_day()->void:
 		var access_floor:=0.55 if weapon=="improvised" else 0.25
 		if training.has("personnel_condition"):training.personnel_condition=move_toward(float(training.personnel_condition),_trainee_condition(),.014)
 		var progress_increment:=training_rate*(access_floor+(1.0-access_floor)*equipment_access)
-		training["progress_days"]=float(training.get("progress_days",0.0))+progress_increment
+		if training.has("deployment_line"):
+			var manpower:=float(training.count)/maxi(1,int(training.get("target_count",training.count)))
+			var ceiling:=float(training.required_days)*minf(manpower,equipment_access)
+			progress_increment=minf(progress_increment,maxf(0,ceiling-float(training.progress_days)))
+		training["progress_days"]=minf(float(training.required_days),float(training.get("progress_days",0.0))+progress_increment)
 		training["equipment_access_today"]=equipment_access
 		training["equipment_access_sum"]=float(training.get("equipment_access_sum",0.0))+equipment_access*progress_increment
 		training["instruction_progress_sum"]=float(training.get("instruction_progress_sum",0.0))+progress_increment
@@ -4007,7 +4020,7 @@ func _process_training_day()->void:
 		if float(training.progress_days)<float(training.required_days):
 			training_queue[index]=training
 			continue
-		if training.has("build_batch"):
+		if training.has("build_batch") or training.has("deployment_line"):
 			training_queue[index]=training;continue
 		_complete_training(training)
 		training_queue.remove_at(index)
@@ -4107,9 +4120,9 @@ func _complete_training(training:Dictionary)->void:
 		var reinforcement_target:Dictionary=formations[target_index]
 		equipment_needed=maxi(0,int(reinforcement_target.get("equipment_required",_equipment_required_for(String(training.unit),int(reinforcement_target.get("authorized_count",reinforcement_target.get("count",0))))))-int(reinforcement_target.get("equipment",0)))
 	var reserved:=int(training.get("reserved_equipment",0))
-	var issued:=mini(equipment_needed,reserved+int(military_inventory.get(weapon,0)))
+	var issued:=mini(equipment_needed,reserved+(0 if training.has("deployment_line") else int(military_inventory.get(weapon,0))))
 	military_inventory[weapon]=int(military_inventory.get(weapon,0))+reserved-issued
-	var new_training:=_training_quality(String(training.unit),retained_experience)*equipment_training_factor
+	var new_training:=_training_quality(String(training.unit),retained_experience)*equipment_training_factor*clampf(float(training.get("progress_days",training.get("required_days",1)))/maxf(1,float(training.get("required_days",1))),0,1)
 	if training.has("prior_skill"):new_training=maxf(new_training,float(training.prior_skill))
 	if target_index>=0:
 		var target:Dictionary=formations[target_index]
@@ -4774,21 +4787,22 @@ func training_progress_snapshot()->Dictionary:
 	var base_rate:=_effective_training_rate(trainees)
 	var policy:Dictionary=training_staff.policy("army")
 	var ration_bill:=float(trainees)*.18*float(policy.intake)
-	var funding:=clampf(training_staff.spendable_food()/maxf(.001,ration_bill),0,1)
+	var funding:=clampf(training_staff.instruction_food()/maxf(.001,ration_bill),0,1)
 	base_rate*=float(policy.intake)*funding
 	for index in range(training_queue.size()-1,-1,-1):
 		var order:Dictionary=training_queue[index]
 		var weapon:=String(order.get("weapon","improvised"))
 		var needed:=_equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))
-		var examples:=mini(maxi(1,needed),maxi(0,int(budget.get(weapon,0))))
-		budget[weapon]=maxi(0,int(budget.get(weapon,0))-examples)
+		var reserved:=int(order.get("reserved_equipment",0))
+		var examples:=mini(maxi(1,needed),reserved+(0 if order.has("deployment_line") else maxi(0,int(budget.get(weapon,0)))))
+		budget[weapon]=maxi(0,int(budget.get(weapon,0))-maxi(0,examples-reserved))
 		var access:=clampf(float(examples)/maxf(1,needed),0,1)
 		var floor_access:=.55 if weapon=="improvised" else .25
 		var rate:=base_rate*(floor_access+(1-floor_access)*access)
 		var progress:=float(order.get("progress_days",0)); var required:=maxf(1,float(order.get("required_days",1)))
 		var reasons:Array[String]=[]
 		if policy.id=="suspended":reasons.append("Instruction suspended by training policy")
-		elif funding<1:reasons.append("Staff protecting civilian food reserves")
+		elif funding<1:reasons.append("Insufficient rations for instruction")
 		if trainees>capacity: reasons.append("Crowded classes: %d trainees / %d places" % [trainees,capacity])
 		if access<.999: reasons.append("Limited practice equipment: %d of %d" % [examples,needed])
 		if reasons.is_empty(): reasons.append("Normal instruction pace")
@@ -4841,7 +4855,7 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 func template_recruitment_blocker()->String:
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return "Resolve the battle or aftermath before recruiting."
 	if recovery.home_unavailable():return "Home is occupied."
-	if _mobilized_count()>=recruitment_capacity() and aggregate_recruits<=0:return "Mobilization full: %d of %d people; growth or military institutions must expand capacity." % [_mobilized_count(),recruitment_capacity()]
+	if _mobilized_count()>=recruitment_capacity() and aggregate_recruits<=0:return "All available adults committed: %d of %d people." % [_mobilized_count(),recruitment_capacity()]
 	return "Available places will enter training on the next simulation day while the order is active."
 func cancel_template_recruitment(template_id:int)->Dictionary:
 	var index:=_template_index(template_id)
