@@ -18,7 +18,7 @@ var domain:=""
 var query:=""
 var leader_filter:=""
 var view_mode:="active"
-var show_locked:=false
+var show_locked:=true
 var tree_scope:="frontier"
 var selected_id:=""
 var records:Array[Dictionary]=[]
@@ -54,6 +54,8 @@ var narrow_details:=false
 var announcements:OptionButton
 var detail_back:Button
 func _ready()->void:
+	# This overlay lives under a CanvasLayer, outside the dock theme hierarchy.
+	theme=T.control_theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var dismiss:=ColorRect.new();dismiss.color=Color(0,0,0,.25);dismiss.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(dismiss)
 	dismiss.gui_input.connect(func(event:InputEvent)->void:if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:_close())
@@ -98,6 +100,7 @@ func _ready()->void:
 	empty=VBoxContainer.new();content.add_child(empty)
 	detail_scroll=ScrollContainer.new();detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_child(detail_scroll)
 	detail_body=VBoxContainer.new();detail_body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail_body.add_theme_constant_override("separation",9);detail_scroll.add_child(detail_body)
+	panel.minimum_size_changed.connect(_layout.call_deferred)
 	resized.connect(_layout);_layout();refresh(true)
 func _layout()->void:
 	if panel==null:return
@@ -159,7 +162,12 @@ func refresh(refit:bool)->void:
 	var science:=Indicators.science()
 	stats.text="SCIENCE %.1f  ·  %.1f minds × %d%% education  ·  %d staffed / %d projects" % [float(science.capacity),float(science.minds),roundi(float(science.education)*100.0),staffed,active]
 	tabs.active.text="Being researched · %d" % active;tabs.known.text="Established · %d" % known
-	for id:String in tabs:tabs[id].modulate=T.GOLD if id==view_mode else Color.WHITE
+	for id:String in tabs:
+		var tab:Button=tabs[id]
+		tab.modulate=Color.WHITE
+		tab.add_theme_stylebox_override("normal",T.action_button_style(id==view_mode))
+		tab.add_theme_stylebox_override("hover",T.action_button_style(id==view_mode,true))
+		tab.add_theme_color_override("font_color",T.INK)
 	records.clear()
 	var hidden:=0
 	for item:Dictionary in all_records:
@@ -185,8 +193,8 @@ func refresh(refit:bool)->void:
 	var layout_key:=view_mode+str(ids)
 	if layout_key!=last_layout:
 		last_layout=layout_key;plot.arrange();_build_cards()
-		if refit and view_mode=="tree":plot.call_deferred("center_selected")
-	elif refit and view_mode=="tree":plot.call_deferred("center_selected")
+		if refit and view_mode=="tree":plot.call_deferred("fit")
+	elif refit and view_mode=="tree":plot.call_deferred("fit")
 	if selected_id not in ids:selected_id=String(ids[0]) if not ids.is_empty() else ""
 	_update_cards();select(selected_id)
 func _build_cards()->void:
@@ -202,7 +210,7 @@ func _build_cards()->void:
 		box.add_child(margin)
 		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",5);margin.add_child(body)
 		var name:=Art.label(body,String(item.name),17,T.INK,true)
-		var status:=Art.label(body,"",11,Art.color(item.domain))
+		var status:=Art.label(body,"",11,Art.text_color(item.domain))
 		var date:=Art.label(body,"",10,T.GOLD)
 		var lead:=Art.label(body,"",12,T.BODY,true)
 		var team:=Art.label(body,"",13,T.BODY)
@@ -242,9 +250,9 @@ func select(id:String,open_detail:bool=false)->void:
 	for item:Dictionary in records:
 		if item.id!=id:continue
 		Art.paint_discovery(detail_body,item,180 if not main.vertical else 150)
-		Art.label(detail_body,Art.name_for(item.domain).to_upper(),11,Art.color(item.domain))
+		Art.label(detail_body,Art.name_for(item.domain).to_upper(),11,Art.text_color(item.domain))
 		Art.label(detail_body,item.name,21,T.INK,true)
-		Art.label(detail_body,Art.status(item),13,Art.color(item.domain))
+		Art.label(detail_body,Art.status(item),13,Art.text_color(item.domain))
 		if item.known:Art.label(detail_body,_discovery_date(item).capitalize(),11,T.GOLD)
 		if item.known:
 			var operations:VBoxContainer=preload("res://scripts/hud/technology_operations_panel.gd").new()
@@ -268,7 +276,7 @@ func select(id:String,open_detail:bool=false)->void:
 		if not assignment.is_empty():
 			var leader:Dictionary=assignment.leader
 			var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);detail_body.add_child(row)
-			var badge:=Art.label(row,"—" if leader.vacant else Art.initials(leader.name),20,Art.color(item.domain));badge.custom_minimum_size=Vector2(40,42);badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+			var badge:=Art.label(row,"—" if leader.vacant else Art.initials(leader.name),20,Art.text_color(item.domain));badge.custom_minimum_size=Vector2(40,42);badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 			var who:=VBoxContainer.new();who.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(who)
 			Art.label(who,"SUPERVISING LEADER",9,T.MUTED);Art.label(who,leader.name,16,T.INK,true)
 			Art.label(who,String(leader.office)+(" · acting for "+String(leader.requested_office) if leader.acting else ""),11,T.TEXT_SOFT,true)

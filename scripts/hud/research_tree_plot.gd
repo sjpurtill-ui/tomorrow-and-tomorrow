@@ -2,9 +2,8 @@ extends Control
 const Art=preload("res://scripts/hud/research_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const UI_FONT:=preload("res://assets/fonts/battle/Barlow-Medium.ttf")
-# The graph is navigation, not a second card gallery. Artwork remains in the
-# selected detail pane, leaving compact nodes and legible relationships here.
-const CARD:=Vector2(244,138)
+# Illustrated nodes show the visible frontier; unknown outcomes stay unnamed.
+const CARD:=Vector2(280,220)
 var owner_view:Control
 var boxes:Dictionary={}
 var center:=Vector2.ZERO
@@ -14,7 +13,7 @@ var press:=Vector2.ZERO
 var moved:=false
 func _ready()->void:
 	clip_contents=true;mouse_default_cursor_shape=Control.CURSOR_DRAG;focus_mode=Control.FOCUS_ALL
-	resized.connect(func()->void:queue_redraw())
+	resized.connect(fit)
 func arrange()->void:
 	boxes.clear();var depths:Dictionary={};var rows:Dictionary={}
 	for item:Dictionary in owner_view.records:depths[item.id]=0
@@ -28,13 +27,18 @@ func arrange()->void:
 		if not changed:break
 	for item:Dictionary in owner_view.records:
 		var col:=int(depths[item.id]);var row:=int(rows.get(col,0));rows[col]=row+1
-		boxes[item.id]=Rect2(Vector2(col*294,row*158),CARD)
+		boxes[item.id]=Rect2(Vector2(col*344,row*246),CARD)
 	queue_redraw()
 func fit()->void:
 	if boxes.is_empty():return
 	var bounds:Rect2=boxes.values()[0]
 	for rect:Rect2 in boxes.values():bounds=bounds.merge(rect)
-	center=bounds.get_center();zoom_level=clampf(minf(size.x/(bounds.size.x+60),size.y/(bounds.size.y+60)),.4,1.0);queue_redraw()
+	zoom_level=clampf(minf(size.x/(bounds.size.x+60),size.y/(bounds.size.y+60)),.85,1.2)
+	center=bounds.get_center()
+	# Keep the beginning visible when a readable graph is taller than its pane.
+	if bounds.size.y*zoom_level>size.y-48:center.y=bounds.position.y+size.y/(2*zoom_level)-24/zoom_level
+	if bounds.size.x*zoom_level>size.x-48:center.x=bounds.position.x+size.x/(2*zoom_level)-24/zoom_level
+	queue_redraw()
 func at(point:Vector2)->Vector2:return (point-center)*zoom_level+size*.5
 func zoom_at(factor:float,anchor:Vector2)->void:
 	var world:Vector2=(anchor-size*.5)/zoom_level+center;zoom_level=clampf(zoom_level*factor,.35,1.65);center=world-(anchor-size*.5)/zoom_level;queue_redraw()
@@ -62,14 +66,14 @@ func words(text:String,point:Vector2,font:int,color:Color,width:float=CARD.x-22)
 	if shown!=text:shown=shown.trim_suffix(" ")+"…"
 	draw_string(UI_FONT,at(point),shown,HORIZONTAL_ALIGNMENT_LEFT,width*zoom_level,maxi(8,roundi(font*zoom_level)),color)
 func _draw()->void:
-	draw_rect(Rect2(Vector2.ZERO,size),Color("0b181e"))
+	draw_rect(Rect2(Vector2.ZERO,size),T.FIELD_BG)
 	# Every required foundation.
 	for item:Dictionary in owner_view.records:
 		for req in item.requires:
 			if not boxes.has(req):continue
 			var a:Vector2=boxes[req].position+Vector2(CARD.x,CARD.y*.5);var b:Vector2=boxes[item.id].position+Vector2(0,CARD.y*.5)
 			var selected:bool=item.id==owner_view.selected_id or req==owner_view.selected_id
-			var color:=T.GOLD if selected else Color("354d58")
+			var color:=T.GOLD if selected else T.BORDER_2
 			var midway:=(a.x+b.x)*.5
 			draw_polyline(PackedVector2Array([at(a),at(Vector2(midway,a.y)),at(Vector2(midway,b.y)),at(b)]),color,maxf(1,zoom_level*2),true)
 			draw_circle(at(b),3*zoom_level,color)
@@ -100,15 +104,22 @@ func _draw()->void:
 		var color:=Art.color(item.domain) if item.get("exposed",false) else T.MUTED
 		draw_style_box(T.flat(Color("182a31"),T.GOLD if item.id==owner_view.selected_id else color.darkened(.25),2 if item.id==owner_view.selected_id else 1,6,0),rect)
 		draw_rect(Rect2(at(origin+Vector2(0,0)),Vector2(5,CARD.y)*zoom_level),color)
-		words(Art.name_for(String(item.domain)).to_upper(),origin+Vector2(14,20),9,color)
-		words(String(item.name),origin+Vector2(14,46),15,T.INK)
-		words(Art.status(item),origin+Vector2(14,67),11,color)
+		var picture:Texture2D=Art.for_discovery(item) if bool(item.get("exposed",false)) else null
+		var image_rect:=Rect2(at(origin+Vector2(14,10)),Vector2(CARD.x-28,72)*zoom_level)
+		if picture:
+			draw_texture_rect_region(picture,image_rect,Art.crop_region(picture,Vector2(CARD.x-28,72),Art.focus_for(item)))
+		else:
+			draw_rect(image_rect,T.TILE_BG)
+			words("FIELD INVESTIGATION" if bool(item.get("exposed",false)) else "BEYOND CURRENT KNOWLEDGE",origin+Vector2(24,50),12,T.MUTED)
+		words(Art.name_for(String(item.domain)).to_upper(),origin+Vector2(14,102),11,Art.text_color(item.domain))
+		words(String(item.name),origin+Vector2(14,128),17,T.INK)
+		words(Art.status(item),origin+Vector2(14,150),11,Art.text_color(item.domain))
 		var choice_count:=(item.get("requires_any",[]) as Array).size()
 		var route_count:=maxi(0,(item.get("pathways",[]) as Array).size()-1)
 		var branch_text:="%d choice fork%s" % [choice_count,"" if choice_count==1 else "s"] if choice_count>0 else "%d alternate approach%s" % [route_count,"" if route_count==1 else "es"] if route_count>0 else String(item.get("subcategory","")).capitalize()
-		words(branch_text,origin+Vector2(14,91),11,T.TEAL if choice_count+route_count>0 else T.TEXT_SOFT)
+		words(branch_text,origin+Vector2(14,173),11,T.TEAL if choice_count+route_count>0 else T.TEXT_SOFT)
 		if active:
-			words(Art.workforce(Art.team(item))+" · %d%% evidence" % roundi(float(item.progress)*100),origin+Vector2(14,113),11,T.BODY)
-			var bar:=Rect2(at(origin+Vector2(14,122)),Vector2(CARD.x-28,5)*zoom_level);draw_rect(bar,Color("30434a"));bar.size.x*=clampf(float(item.progress),0,1);draw_rect(bar,color)
+			words(Art.workforce(Art.team(item))+" · %d%% evidence" % roundi(float(item.progress)*100),origin+Vector2(14,195),11,T.BODY)
+			var bar:=Rect2(at(origin+Vector2(14,206)),Vector2(CARD.x-28,5)*zoom_level);draw_rect(bar,Color("30434a"));bar.size.x*=clampf(float(item.progress),0,1);draw_rect(bar,color)
 		else:
-			words("Select for findings" if item.known else "Select to direct this team" if item.ready else "Earlier knowledge needed",origin+Vector2(14,117),11,T.MUTED)
+			words("Select for findings" if item.known else "Select to direct this team" if item.ready else "Earlier knowledge needed",origin+Vector2(14,199),11,T.MUTED)

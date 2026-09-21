@@ -29,6 +29,7 @@ func _ready()->void:
 		if (saved_speed is float or saved_speed is int) and is_finite(float(saved_speed)):
 			map_scroll_speed=clampf(float(saved_speed),MIN_MAP_SCROLL_SPEED,MAX_MAP_SCROLL_SPEED)
 		if frame_limit not in [30,60,120]:frame_limit=60
+	get_tree().node_added.connect(_theme_boundary)
 	get_window().size_changed.connect(apply)
 	Tokens.set_color_mode(color_theme)
 	apply()
@@ -43,6 +44,9 @@ func apply()->void:
 	if applying:return
 	applying=true
 	var window:=get_window()
+	# CanvasLayer overlays and embedded dialogs must share the selected palette.
+	window.theme=Tokens.control_theme()
+	_theme_existing(get_tree().root)
 	var density:=DisplayServer.screen_get_scale(window.current_screen) if DisplayServer.get_name()!="headless" else 1.0
 	window.content_scale_mode=Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	window.content_scale_aspect=Window.CONTENT_SCALE_ASPECT_EXPAND
@@ -118,3 +122,13 @@ func add_controls(parent:Node)->void:
 	music.value_changed.connect(func(value:float):music_volume=value/100;music_label.text="Music volume · %d%%"%roundi(value);apply_music();persist())
 	parent.add_child(music)
 	var hint:=Label.new();hint.text="Changes apply immediately. Lower 3D resolution keeps text sharp. UI size is limited on small windows to keep controls reachable. A frame limit is a ceiling, not a performance promise.";hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;hint.add_theme_font_size_override("font_size",14);parent.add_child(hint)
+
+func _theme_boundary(node:Node)->void:
+	# CanvasLayers and plain Nodes break Control theme inheritance.
+	if node is Control and not node.get_parent() is Control and node.theme==null:
+		node.theme=Tokens.control_theme()
+	elif node is Window and node.theme==null:
+		node.theme=Tokens.control_theme()
+func _theme_existing(node:Node)->void:
+	_theme_boundary(node)
+	for child:Node in node.get_children():_theme_existing(child)

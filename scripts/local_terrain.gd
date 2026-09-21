@@ -14209,6 +14209,7 @@ func _inspect_location_local(position: Vector3) -> void:
 			var neighbors:Dictionary=advice.neighbors
 			water_text+="[color=#e9bf70]%s[/color]\n%s\n\n" % [String(neighbors.title),String(neighbors.text)]
 			lens_body.text=water_text+lens_body.text
+	lens_body.text=preload("res://scripts/hud/hud_tokens.gd").readable_report(lens_body.text)
 	var graphical:=revealed and contact_context.is_empty() and settlement_plot.is_empty()
 	lens_survey.visible=graphical; lens_body.visible=not graphical
 	if graphical:

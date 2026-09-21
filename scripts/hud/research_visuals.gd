@@ -36,6 +36,7 @@ static func paint_discovery(parent:Node,item:Dictionary,height:float=96,scroll:S
 	image.custom_minimum_size.y=height;image.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	parent.add_child(image);return image
 static func color(domain:String)->Color:return COLORS.get(domain,T.TEAL)
+static func text_color(domain:String)->Color:return color(domain).darkened(.48) if T.is_light() else color(domain)
 static func name_for(domain:String)->String:return NAMES.get(domain,domain.capitalize())
 static func team(item:Dictionary)->float:
 	var assignment:Dictionary=item.get("assignment",{})

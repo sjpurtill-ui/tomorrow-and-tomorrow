@@ -70,7 +70,7 @@ static func is_light()->bool:return color_mode=="light"
 static func control_theme()->Theme:
 	if _control_theme:return _control_theme
 	var result:=Theme.new()
-	for type_name:String in ["Label","Button","OptionButton","CheckBox","LineEdit","RichTextLabel"]:
+	for type_name:String in ["Label","Button","OptionButton","CheckBox","CheckButton","LineEdit","RichTextLabel","PopupMenu"]:
 		result.set_color("font_color",type_name,BODY)
 		result.set_color("font_hover_color",type_name,INK)
 		result.set_color("font_focus_color",type_name,INK)
@@ -78,6 +78,15 @@ static func control_theme()->Theme:
 		result.set_color("font_disabled_color",type_name,DISABLED)
 	result.set_color("default_color","RichTextLabel",BODY)
 	result.set_color("font_placeholder_color","LineEdit",MUTED)
+	result.set_color("font_selected_color","LineEdit",INK)
+	result.set_color("selection_color","LineEdit",ACTIVE_BG)
+	result.set_color("caret_color","LineEdit",INK)
+	result.set_stylebox("panel","PopupMenu",flat(PANEL_BG_SOLID,BORDER,1,3,6))
+	result.set_stylebox("hover","PopupMenu",flat(HOVER_BG))
+	result.set_stylebox("panel","AcceptDialog",flat(PANEL_BG_SOLID,BORDER,1,4,12))
+	result.set_color("title_color","Window",INK)
+	result.set_color("title_outline_modulate","Window",Color.TRANSPARENT)
+	result.set_stylebox("embedded_border","Window",flat(PANEL_BG_SOLID,BORDER,1,4,8))
 	for type_name:String in ["Button","OptionButton"]:
 		result.set_stylebox("normal",type_name,action_button_style(false))
 		result.set_stylebox("hover",type_name,action_button_style(false,true))
@@ -233,3 +242,17 @@ static func make_label(text:String,size:int,color:Color,spacing_em:float=0.0)->L
 	var label:=Label.new()
 	label.text=text
 	return style_label(label,size,color,spacing_em)
+
+static func readable_report(bbcode:String)->String:
+	if not is_light():return bbcode
+	var pattern:=RegEx.new();pattern.compile("\\[color=(#[0-9a-fA-F]{6})\\]")
+	var result:=bbcode
+	for match_result:RegExMatch in pattern.search_all(bbcode):
+		var ink:=Color(match_result.get_string(1))
+		var background:=DOCK_BG.srgb_to_linear().get_luminance()
+		for step in 20:
+			var foreground:=ink.srgb_to_linear().get_luminance()
+			if (background+.05)/(foreground+.05)>=4.5:break
+			ink=ink.darkened(.10)
+		result=result.replace(match_result.get_string(),"[color=#"+ink.to_html(false)+"]")
+	return result
