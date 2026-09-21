@@ -1,0 +1,9 @@
+{
+  "id": "mounted_scouts",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Mounted Scouting. A lightly equipped rider pauses on a high ridge to observe river crossings below, another rider returning in the distance; reconnaissance, no cavalry charge or laden pack animals.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-71e58378-eed7-4f8e-bb38-7d27ccf1bfa7.png",
+  "asset": "res://assets/ui/research/subjects/mounted_scouts-v1.png",
+  "sha256": "9f57e0ca6d107637aecb9d75f60b20afe9d1444f65214a564869dc9693aab6c1",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

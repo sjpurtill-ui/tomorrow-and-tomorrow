@@ -1,0 +1,9 @@
+{
+  "id": "lime_burning",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Lime Burning. An early masonry lime kiln with white limestone near its mouth and pale calcined lumps cooling beside it; smoke and low glow, no metal smelting or pottery workshop. These are early settled communities. Use small earth, stone and timber buildings and simple fiber clothing. Tools are stone, bone and wood unless this discovery specifically concerns metalworking. No steel tools, modern objects, medieval castles, grand cities or industrial machinery. Make this scene composition distinct, with varied climate and terrain.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-44ef53de-d71a-4939-94d6-e53f27fedb31.png",
+  "asset": "res://assets/ui/research/subjects/lime_burning-v1.png",
+  "sha256": "1ac5064c2740805d89ac83e6604e3247e710652bcb1a5457b1dab33500325bcc",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
