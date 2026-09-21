@@ -105,6 +105,7 @@ func test_first_powered_industry_builds_generation_then_retools_into_finished_pa
 		assert_array(WorldSimulation.military.equipment_queue).is_empty()
 		for day in range(1,31):
 			state.elapsed_days=day;Ops.advance(day)
+			preload("res://scripts/ai_workshop_turnover.gd").advance("power_ruler",WorldSimulation.military)
 			C.civilian_orders("power_ruler",{})
 			for job:Dictionary in WorldSimulation.military.equipment_queue:P.advance(WorldSimulation.military,job,1.0)
 		assert_float(float(state.resource_stockpiles.Paper)).is_equal(2.0)

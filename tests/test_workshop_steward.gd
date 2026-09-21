@@ -206,3 +206,43 @@ func test_staff_idle_line_resumes_when_its_demand_returns()->void:
 	assert_bool(job.has("staff_idle")).is_false()
 	Production.advance(MilitaryCampaign,job,100)
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(1)
+
+func test_delegated_player_workshops_supply_real_building_improvements()->void:
+	GameState.settlement_plots[0].material_family="organic"
+	GameState.settlement_plots[0].id=1
+	GameState.population_allocations.Construction=20
+	GameState.known_discoveries.assign(["building_shading_design","seasonal_patterns","geometric_survey"])
+	GameState.discovery_adoption.building_shading_design=1.0
+	GameState.resource_stockpiles.merge({"Stone":2.0,"Timber":20.0,"Fiber Plants":10.0},true)
+	MilitaryCampaign.workshop.advance(2)
+	assert_array(MilitaryCampaign.equipment_queue).is_not_empty()
+	if MilitaryCampaign.equipment_queue.is_empty():return
+	var job:Dictionary=MilitaryCampaign.equipment_queue[0]
+	assert_str(String(job.item)).is_equal("building_shade_lattices")
+	assert_bool(bool(job.planner_managed)).is_true()
+	assert_float(float(GameState.resource_stockpiles.get("Building Shade Lattices",0))).is_equal(0.0)
+	var timber:=float(GameState.resource_stockpiles.Timber)
+	Production.advance(MilitaryCampaign,job,100)
+	assert_float(float(GameState.resource_stockpiles.get("Building Shade Lattices",0))).is_greater(0.0)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber)
+
+func test_delegated_player_commissions_a_needed_kiln_without_free_installation()->void:
+	GameState.population_allocations.Construction=20
+	GameState.known_discoveries.assign(["kiln_control","lime_burning"])
+	GameState.discovery_adoption.kiln_control=1.0
+	GameState.resource_stockpiles.merge({"Stone":12.0,"Clay":6.0,"Joined Timber Components":2.0},true)
+	MilitaryCampaign.workshop.set_enabled(false)
+	MilitaryCampaign.workshop.advance(1)
+	assert_dict(GameState.technology_operations.plants).is_empty()
+	MilitaryCampaign.workshop.set_enabled(true)
+	MilitaryCampaign.workshop.advance(2)
+	assert_bool(GameState.technology_operations.plants.has("controlled_kiln")).is_true()
+	if not GameState.technology_operations.plants.has("controlled_kiln"):return
+	var kiln:Dictionary=GameState.technology_operations.plants.controlled_kiln
+	assert_int(int(kiln.building)).is_equal(1)
+	assert_int(int(kiln.installed)).is_equal(0)
+	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(0.0)
+	assert_float(float(GameState.resource_stockpiles.Clay)).is_equal(0.0)
+	assert_float(float(GameState.resource_stockpiles["Joined Timber Components"])).is_equal(0.0)
+	MilitaryCampaign.workshop.advance(3)
+	assert_int(int(kiln.building)).is_equal(1)

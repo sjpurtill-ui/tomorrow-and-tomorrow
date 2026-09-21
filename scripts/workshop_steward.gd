@@ -56,7 +56,7 @@ func advance(day:int)->void:
 		job.target_stock=P.stock(host,job)+1 if finishing else maxi(1,target)
 		job.paused=target==0 and not finishing
 		job["staff_idle"]=bool(job.paused)
-	var civilian:=Planner.recommendation()
+	var civilian:=preload("res://scripts/civilian_investment_planner.gd").recommendation()
 	if not civilian.is_empty():demands.append(civilian)
 	# Alternate first consideration; a standing military order cannot starve
 	# civilian supply planning forever, and vice versa.
@@ -98,6 +98,10 @@ func army_demands()->Array[Dictionary]:
 		result.append(upstream if not upstream.is_empty() else {"item":item,"target":int(totals[item])})
 	return result
 func schedule(demand:Dictionary)->Dictionary:
+	if String(demand.get("kind",""))=="plant_install":
+		var installed:=WorldSimulation.submit("player",demand)
+		if installed.has("error"):return installed
+		return {"changed":true,"message":"Work commissioned: %s. Materials and labor are paid through construction." % String(demand.get("plant","")).replace("_"," ")}
 	var item:=String(demand.get("item",""));var target:=clampi(int(demand.get("target",1)),1,P.MAX_TARGET)
 	for job:Dictionary in host.equipment_queue:
 		if String(job.item)!=item:continue
