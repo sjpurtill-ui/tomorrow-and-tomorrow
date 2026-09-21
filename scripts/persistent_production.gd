@@ -131,6 +131,7 @@ static func configure(host: Node, id: int, target: int, paused: bool) -> Diction
 			job.target_stock=target;job.paused=paused
 			job.erase("planner_managed")
 			job.erase("staff_idle")
+			job.erase("ai_turnover")
 			return {"ok":true,"message":"Production line updated."}
 	return {"error":"Select a persistent production line."}
 

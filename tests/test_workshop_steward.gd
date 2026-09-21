@@ -246,3 +246,42 @@ func test_delegated_player_commissions_a_needed_kiln_without_free_installation()
 	assert_float(float(GameState.resource_stockpiles["Joined Timber Components"])).is_equal(0.0)
 	MilitaryCampaign.workshop.advance(3)
 	assert_int(int(kiln.building)).is_equal(1)
+
+func test_delegated_consumed_input_yields_but_manual_override_cancels_switch()->void:
+	for id:String in ["drop_spindles","fiber_retting"]:
+		GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
+	GameState.resource_stockpiles.merge({"Prepared Fibers":100.0,"Stone":100.0,"Clay":100.0,"Fiber Plants":100.0},true)
+	var order:=MilitaryCampaign.start_production_line("spun_yarn",12)
+	assert_bool(order.get("ok",false)).override_failure_message(str(order)).is_true()
+	if order.has("error"):return
+	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
+	Production.advance(MilitaryCampaign,job,float(job.work_per_item)*1.5)
+	var turn=preload("res://scripts/ai_workshop_turnover.gd")
+	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_false()
+	MilitaryCampaign.workshop.delegate_line(int(job.id))
+	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_true()
+	MilitaryCampaign.configure_production_line(int(job.id),7,true)
+	assert_bool(job.has("ai_turnover")).is_false()
+	turn.advance("player",MilitaryCampaign,true)
+	assert_str(job.item).is_equal("spun_yarn")
+	assert_bool(job.paused).is_true()
+	MilitaryCampaign.workshop.delegate_line(int(job.id))
+	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_true()
+	Production.advance(MilitaryCampaign,job,100.0)
+	turn.advance("player",MilitaryCampaign,true)
+	assert_str(job.item).is_equal("improvised")
+	assert_bool(job.planner_managed).is_true()
+
+func test_disabling_management_cancels_a_planned_switch()->void:
+	var job:=start(0)
+	Production.advance(MilitaryCampaign,job,float(job.work_per_item)*1.5)
+	MilitaryCampaign.workshop.delegate_line(int(job.id))
+	var turn=preload("res://scripts/ai_workshop_turnover.gd")
+	GameState.resource_stockpiles.Stone=5.0
+	assert_bool(turn.request("player",MilitaryCampaign,"spear",3,true)).is_true()
+	Production.advance(MilitaryCampaign,job,100.0)
+	assert_bool(job.paused).is_true()
+	MilitaryCampaign.workshop.set_enabled(false)
+	assert_bool(job.has("ai_turnover")).is_false()
+	assert_bool(job.paused).is_false()
+	assert_str(job.item).is_equal("improvised")

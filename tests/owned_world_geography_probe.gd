@@ -3,14 +3,24 @@ func _ready()->void:
 	call_deferred("run")
 func run()->void:
 	GameState.reset_for_new_world(9241)
-	var count:=36;var duration:=3;var output:="";var verify_restore:=false
+	var count:=36;var duration:=3;var output:="";var verify_restore:=false;var resume:=""
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--opponents="):count=int(argument.get_slice("=",1))
 		if argument.begins_with("--days="):duration=int(argument.get_slice("=",1))
 		if argument.begins_with("--out="):output=argument.trim_prefix("--out=")
 		if argument=="--verify-restore":verify_restore=true
-	GameState.opponent_count=count
-	CivilizationSystem.reset_for_new_world()
+		if argument.begins_with("--resume="):resume=argument.trim_prefix("--resume=")
+	if resume.is_empty():
+		GameState.opponent_count=count
+		CivilizationSystem.reset_for_new_world()
+	else:
+		var slot:="first300_resume_%d_%d" % [OS.get_process_id(),Time.get_ticks_usec()]
+		var path:=SaveSystem.slot_path(slot)
+		if FileAccess.file_exists(path) or DirAccess.copy_absolute(resume,path)!=OK:
+			push_error("Cannot copy diagnostic checkpoint to private test slot.");get_tree().quit(1);return
+		var loaded:=SaveSystem.load_game(slot)
+		DirAccess.remove_absolute(path)
+		if loaded.has("error"):push_error(str(loaded));get_tree().quit(1);return
 	var terrain=load("res://scripts/local_terrain.gd").new()
 	terrain._configure_shape();terrain._configure_noise();terrain._prepare_river_course()
 	CivilizationSystem.set_scout_geography_authority(func(point:Vector2)->bool:return terrain._height_at(point.x,point.y)>.012)
@@ -20,8 +30,10 @@ func run()->void:
 	WorldSimulation.start_provider=Callable(terrain,"_civilization_start")
 	WorldSimulation.route_provider=Callable(terrain,"_analyze_convoy_route")
 	var player_start:Vector2=terrain._civilization_start(preload("res://scripts/civilization_start.gd").candidate(GameState.world_seed,0))
-	CivilizationSystem.register_player_origin(player_start)
-	GameState.settlement_founded_at=Vector3(player_start.x,0,player_start.y)
+	if resume.is_empty():
+		CivilizationSystem.register_player_origin(player_start)
+		GameState.settlement_founded_at=Vector3(player_start.x,0,player_start.y)
+	else:player_start=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
 	var start=Time.get_ticks_msec()
 	WorldSimulation.start_world()
 	print("REAL WORLD START ",Time.get_ticks_msec()-start," ms, actors ",WorldSimulation.actors.size())
@@ -30,10 +42,13 @@ func run()->void:
 		var context:Dictionary=terrain._civilization_geography(actor.origin)
 		if float(context.surface_water_distance_km)>6:waterless+=1
 	print("WATERLESS STARTS ",waterless)
-	WorldSimulation.submit("player",{"kind":"ambition","id":"makers"})
-	WorldSimulation.submit("player",{"kind":"found"})
-	var total_ms:=0;var completed:=0;var errors:Array=[]
-	for day in range(1,duration+1):
+	if resume.is_empty():
+		WorldSimulation.submit("player",{"kind":"ambition","id":"makers"})
+		WorldSimulation.submit("player",{"kind":"found"})
+	var first_day:=int(GameState.elapsed_days)
+	duration+=first_day
+	var total_ms:=0;var completed:=first_day;var errors:Array=[]
+	for day in range(first_day+1,duration+1):
 		start=Time.get_ticks_msec()
 		WorldSimulation.advance_day(day,preload("res://scripts/civilization_day.gd").context(player_start))
 		total_ms+=Time.get_ticks_msec()-start
@@ -64,7 +79,7 @@ func run()->void:
 		if continuation.has("error"):errors.append(continuation.error)
 		print("SAVE CONTINUATION ",JSON.stringify(continuation))
 	print("WORLD ERRORS ",errors)
-	print("AVERAGE DAY MS ",float(total_ms)/maxi(1,completed))
+	print("AVERAGE DAY MS ",float(total_ms)/maxi(1,completed-first_day))
 	var settlements:Array=[]
 	for id:String in ["player"]+WorldSimulation.actors.keys():
 		var summary:Dictionary=WorldSimulation.scoped(id,func()->Dictionary:
@@ -73,7 +88,7 @@ func run()->void:
 		settlements.append(summary)
 		print("CIV ",JSON.stringify(summary))
 	if not output.is_empty():
-		var report:={"target_days":duration,"completed_days":completed,"target_reached":completed==duration,"waterless":waterless,"save_check":save_check,"human_save_check":human_save_check,"continuation":continuation,"errors":errors,"actors":settlements,"average_day_ms":float(total_ms)/maxi(1,completed),"limitations":["Headless actual world; no visual verification","No forced contact or wars","Binary payload validation covers player and opponents; rendered load journey is separate"]}
+		var report:={"resumed_from_day":first_day,"target_days":duration,"completed_days":completed,"target_reached":completed==duration,"waterless":waterless,"save_check":save_check,"human_save_check":human_save_check,"continuation":continuation,"errors":errors,"actors":settlements,"average_day_ms":float(total_ms)/maxi(1,completed-first_day),"limitations":["Headless actual world; no visual verification","No forced contact or wars","Binary payload validation covers player and opponents; rendered load journey is separate"]}
 		var file:=FileAccess.open(output,FileAccess.WRITE);file.store_string(JSON.stringify(report));file.close()
 	WorldSimulation.clear();terrain.free()
 	get_tree().quit(0 if errors.is_empty() and waterless==0 and completed==duration else 1)

@@ -18,6 +18,10 @@ func owner()->String:
 	return "No workshop officeholder"
 func set_enabled(enabled:bool)->Dictionary:
 	data.enabled=enabled
+	if not enabled:
+		for job:Dictionary in host.equipment_queue:
+			if job.has("ai_turnover") and bool(job.get("planner_managed",false)):
+				job.erase("ai_turnover");job.paused=false
 	data.status="Staff review workshop needs each day." if enabled else "Scheduling is manual. Existing orders continue."
 	return {"ok":true,"message":data.status}
 func delegate_lines()->Dictionary:
@@ -44,6 +48,7 @@ func advance(day:int)->void:
 	if not WorldSimulation.state.settlement_site_committed:return
 	if WorldSimulation.government.officeholder("Quartermaster").is_empty() and WorldSimulation.government.officeholder("Steward").is_empty():
 		data.status="Appoint a steward or quartermaster to manage the workshops.";return
+	preload("res://scripts/ai_workshop_turnover.gd").advance("player",host,true)
 	var demands:=army_demands()
 	for job:Dictionary in host.equipment_queue:
 		if not bool(job.get("planner_managed",false)) or not bool(job.get("persistent",false)) or String(job.get("job_type",""))!="production":continue
@@ -128,7 +133,10 @@ func schedule(demand:Dictionary)->Dictionary:
 			if result.has("error"):continue
 			result=host.configure_production_line(int(job.id),target,false)
 			result["job_id"]=int(job.id);break
-		if result.is_empty():return {"message":"All lines are occupied. Staff wait for a delegated line to finish; manual orders are protected."}
+		if result.is_empty():
+			if preload("res://scripts/ai_workshop_turnover.gd").request("player",host,item,target,true):
+				return {"changed":true,"message":"Finishing the current batch, then supplying %s." % P.product_name(item)}
+			return {"message":"All lines are occupied. Staff wait for a delegated line to finish; manual orders are protected."}
 	if result.has("error"):return result
 	for job:Dictionary in host.equipment_queue:
 		if int(job.id)==int(result.get("job_id",-1)):job.planner_managed=true
