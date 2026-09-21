@@ -1,0 +1,10 @@
+{
+  "id": "ram_crew",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Battering Ram Crews. A wheeled timber battering ram under a sloping rawhide-covered protective roof, crew pushing the hanging log toward a wooden gate, heavy log head clearly visible. No cannon.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-1351129d-06f1-49c7-8da4-b1af17a44990.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/ram_crew-v1.png",
+  "sha256": "0b9576453d5d190b4803ac94a0cdd141bfc16a0e867673a5dd19ff5fca7d2eb5",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

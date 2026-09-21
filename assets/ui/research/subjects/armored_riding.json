@@ -1,0 +1,9 @@
+{
+  "id": "armored_riding",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Armored Riding. Show a concrete, visually clear scene demonstrating this exact practice: Develop and demonstrate armored riding through trained crews, reliable equipment and repeatable supply. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-6ede5336-e1be-4940-aef2-6ca247bd2ad4.png",
+  "asset": "res://assets/ui/research/subjects/armored_riding-v1.png",
+  "sha256": "df8f5b83bfabaaf1c3b1657cc5754c8f88d0f4ed93fb0d9c986a5aa0712dd8e1",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

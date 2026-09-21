@@ -1,0 +1,10 @@
+{
+  "id": "sharpshooter",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Sharpshooters. Industrial marksman lying behind a fallen log with a long accurate bolt-action rifle and slim optical sight, patient focused eye and camouflage cloth, distant misty valley.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-5d03cbae-b3cb-4abd-aa98-fe3a9a25d5e5.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/sharpshooter-v1.png",
+  "sha256": "1a006f8176a681de69aed0b3b4966e2f8072cbdbc9509b9585366661e42a8810",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

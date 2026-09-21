@@ -1,0 +1,10 @@
+{
+  "id": "trebuchet_crew",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Trebuchet Crews. A large counterweight trebuchet on a timber trestle, short arm with heavy wooden weight box and very long arm with sling, crew preparing the release. Full recognizable machine in three-quarter side view.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-b477afac-c7a9-4f69-a178-be56406e4e04.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/trebuchet_crew-v1.png",
+  "sha256": "0fe6ec13786f4f89c97f66e3f913e815de94efd5d847a190d8c755f884b94114",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

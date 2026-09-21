@@ -1,0 +1,10 @@
+{
+  "id": "skirmisher",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Skirmisher. A lightly equipped early-iron bow scout moving through sparse scrub ahead of a distant shield line; short simple bow, spare arrows, light tunic, cautious low posture.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-26a15883-46be-48fa-88d0-88cf670705d7.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/skirmisher-v1.png",
+  "sha256": "49a33edb6f10eef03af733afe8be4dffc8968048432d1a2c21cb6eaeb7eb4435",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
