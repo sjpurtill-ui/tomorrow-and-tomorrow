@@ -1,0 +1,10 @@
+{
+  "id": "field_artillery",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Field Artillery. A gunpowder-era smoothbore bronze field cannon on large wooden spoked wheels, crew using a rammer beside a smoking barrel, early plain coats and no modern helmets. The gun and wheels dominate.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-006e85a8-26fb-495f-8543-a70b09a1067b.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/field_artillery-v1.png",
+  "sha256": "397707dfa2037fa78acf9ec491d1e6b55df48c37d6e1cc7ce677c2962c3f70c5",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

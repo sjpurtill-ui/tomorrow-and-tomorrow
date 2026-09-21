@@ -1,0 +1,10 @@
+{
+  "id": "javelineer",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Javelineers. Early-state javelineer with three short throwing spears, one drawn back ready to throw and two held with a light shield. Distinguish short javelins from long pikes.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f05ed477-4a33-4312-a46a-800dd228bc78.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/javelineer-v1.png",
+  "sha256": "697916ac74e243f87bff446fb1d8ebec6d2cf9e3df6ce44b39c98c473e63eb23",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

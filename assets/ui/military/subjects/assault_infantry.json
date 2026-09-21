@@ -1,0 +1,10 @@
+{
+  "id": "assault_infantry",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Assault Infantry. Industrial-era trench assault troops moving through a narrow trench with short weapons, hand grenades and satchels, plain steel helmets and mud-stained uniforms, no gore.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-a78c9020-04bf-471c-922c-08e4d13a63a9.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/assault_infantry-v1.png",
+  "sha256": "770cbe0226d2b46d6c1c8de2c6e9f9a243b92bad6ddd021864e27e06a7d21060",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

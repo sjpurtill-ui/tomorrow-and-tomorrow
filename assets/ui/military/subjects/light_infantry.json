@@ -1,0 +1,10 @@
+{
+  "id": "light_infantry",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Light Infantry. An early-state lightly equipped bow infantry patrol scrambling across broken rocky ground, short bow in hand, minimal textile armor and small quiver, unlike massed archer lines.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-52f3f8bc-37d1-4d61-840b-0584a7ce719c.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/light_infantry-v1.png",
+  "sha256": "c9c3c3a53eecf4aba21395dff38200a6c7f8d5c47fb552b65731b7e004c23637",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

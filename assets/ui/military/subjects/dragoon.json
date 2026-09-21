@@ -1,0 +1,10 @@
+{
+  "id": "dragoon",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Dragoons. Gunpowder-era dragoon holding a long firearm while fighting on foot beside a saddled horse; simple riding coat, boots, no national colors, horse and dismounted action equally clear.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-35908a28-2519-4185-9fa4-8455d16cadb6.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/dragoon-v1.png",
+  "sha256": "6b2ef6274de5009eb3d7eafa2c01f2feab2cca040ae58b3b061e475cc8890097",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

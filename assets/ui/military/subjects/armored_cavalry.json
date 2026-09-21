@@ -1,0 +1,10 @@
+{
+  "id": "armored_cavalry",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Armored Cavalry. Heavily protected lance cavalry, rider in overlapping metal scales and horse wearing layered scale barding, advancing deliberately. Long lance held forward; no gunpowder or modern insignia.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-180fdfe1-5097-4e80-afa6-3f7a648f267d.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/armored_cavalry-v1.png",
+  "sha256": "c638a49d19f83c7982ec85536a58671052f35c621073772d9c5eaa7f08ff98d7",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

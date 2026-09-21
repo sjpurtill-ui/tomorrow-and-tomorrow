@@ -1,0 +1,776 @@
+[
+  {
+    "description": "Screens, harasses, and scouts ahead of the line; the army's forward eyes.",
+    "domain": "army",
+    "equipment": [
+      "bow"
+    ],
+    "era": "early iron",
+    "id": "skirmisher",
+    "name": "Skirmisher",
+    "asset": "res://assets/ui/military/subjects/skirmisher-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Skirmisher. A lightly equipped early-iron bow scout moving through sparse scrub ahead of a distant shield line; short simple bow, spare arrows, light tunic, cautious low posture."
+  },
+  {
+    "description": "Breaks fortifications and builds the works that protect a besieging army.",
+    "domain": "army",
+    "equipment": [
+      "siege_kit"
+    ],
+    "era": "early states",
+    "id": "siege_engineer",
+    "name": "Siege Engineers",
+    "asset": "res://assets/ui/military/subjects/siege_engineer-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Siege Engineers. Early-state engineers positioning a wooden siege ladder against an earthen fort while their leader measures a timber brace. Visible rope, wooden structure and tools; no gunpowder or modern tools."
+  },
+  {
+    "description": "Massed fire against formations and works alike.",
+    "domain": "army",
+    "equipment": [
+      "field_gun"
+    ],
+    "era": "gunpowder",
+    "id": "field_artillery",
+    "name": "Field Artillery",
+    "asset": "res://assets/ui/military/subjects/field_artillery-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Field Artillery. A gunpowder-era smoothbore bronze field cannon on large wooden spoked wheels, crew using a rammer beside a smoking barrel, early plain coats and no modern helmets. The gun and wheels dominate."
+  },
+  {
+    "description": "Sustained suppression; makes open ground impassable.",
+    "domain": "army",
+    "equipment": [
+      "machine_gun"
+    ],
+    "era": "industrial",
+    "id": "machine_gun_company",
+    "name": "Machine-Gun Company",
+    "asset": "res://assets/ui/military/subjects/machine_gun_company-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Machine-Gun Company. An industrial-era tripod-mounted water-cooled heavy machine gun, box of cloth ammunition belt feeding visibly into the receiver, two crew crouched behind an earthen emplacement, plain muted uniforms."
+  },
+  {
+    "description": "Operational mobility for infantry; reach without exhaustion.",
+    "domain": "army",
+    "equipment": [
+      "motorized_kit"
+    ],
+    "era": "mechanization",
+    "id": "motorized_infantry",
+    "name": "Motorized Infantry",
+    "asset": "res://assets/ui/military/subjects/motorized_infantry-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Motorized Infantry. Industrial soldiers stepping down from the open canvas-backed troop bed of a rugged military truck on a dusty road, rifles slung and tired faces, clear wheels and truck cab; no tracked armored carrier."
+  },
+  {
+    "description": "Stop mounted charges with ranked reach",
+    "domain": "army",
+    "equipment": [
+      "spear"
+    ],
+    "era": "early states",
+    "id": "spearman",
+    "name": "Spearmen",
+    "asset": "res://assets/ui/military/subjects/spearman-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Spearmen. Several early-state infantry holding bronze-tipped spears in a close ranked line, simple woven tunics and small hide shields, lead spearman full upper body and long spear visible."
+  },
+  {
+    "description": "Break shielded infantry at close quarters",
+    "domain": "army",
+    "equipment": [
+      "axe"
+    ],
+    "era": "early states",
+    "id": "axeman",
+    "name": "Axemen",
+    "asset": "res://assets/ui/military/subjects/axeman-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Axemen. Early-state foot soldier holding a distinctive bronze axe and small wooden shield, leather and woven armor, advancing through dry scrub, blade and handle clearly visible."
+  },
+  {
+    "description": "Cheap standoff harassment with stone ammunition",
+    "domain": "army",
+    "equipment": [
+      "sling"
+    ],
+    "era": "early states",
+    "id": "slinger",
+    "name": "Slingers",
+    "asset": "res://assets/ui/military/subjects/slinger-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Slingers. A lightly clothed ancient slinger releasing a long woven sling overhead, pouch and both cords visibly attached and trailing through the motion; small bag of rounded stones at belt, open rocky hillside."
+  },
+  {
+    "description": "Disrupt a charge before withdrawing",
+    "domain": "army",
+    "equipment": [
+      "javelin"
+    ],
+    "era": "early states",
+    "id": "javelineer",
+    "name": "Javelineers",
+    "asset": "res://assets/ui/military/subjects/javelineer-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Javelineers. Early-state javelineer with three short throwing spears, one drawn back ready to throw and two held with a light shield. Distinguish short javelins from long pikes."
+  },
+  {
+    "description": "Deny cavalry and frontal approaches; exposed to missiles",
+    "domain": "army",
+    "equipment": [
+      "pike"
+    ],
+    "era": "early states",
+    "id": "pikeman",
+    "name": "Pikemen",
+    "asset": "res://assets/ui/military/subjects/pikeman-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Pikemen. Dense disciplined rank of early pike soldiers with very long straight pikes held forward over each other, quilted jackets and simple helmets. Low diagonal view emphasizes exceptional pike length."
+  },
+  {
+    "description": "Pierce armor with deliberate ranged volleys",
+    "domain": "army",
+    "equipment": [
+      "crossbow"
+    ],
+    "era": "early states",
+    "id": "crossbowman",
+    "name": "Crossbowmen",
+    "asset": "res://assets/ui/military/subjects/crossbowman-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Crossbowmen. An early crossbow soldier aiming a wooden-stock crossbow, clearly visible transverse bow and taut string, short bolt on the top groove, small belt quiver, no longbow or firearm."
+  },
+  {
+    "description": "Close assault against missile troops and lighter infantry",
+    "domain": "army",
+    "equipment": [
+      "sword_shield"
+    ],
+    "era": "early states",
+    "id": "heavy_swordsman",
+    "name": "Armored Swordsmen",
+    "asset": "res://assets/ui/military/subjects/heavy_swordsman-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Armored Swordsmen. Armored early-state foot soldier with a short iron sword and large oval wooden shield, layered scale armor, deliberate close assault posture. No mounted horse and no firearm."
+  },
+  {
+    "description": "Screen and exploit broken ground; avoid sustained shock",
+    "domain": "army",
+    "equipment": [
+      "bow"
+    ],
+    "era": "early states",
+    "id": "light_infantry",
+    "name": "Light Infantry",
+    "asset": "res://assets/ui/military/subjects/light_infantry-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Light Infantry. An early-state lightly equipped bow infantry patrol scrambling across broken rocky ground, short bow in hand, minimal textile armor and small quiver, unlike massed archer lines."
+  },
+  {
+    "description": "Hold difficult terrain with portable weapons and specialist kit",
+    "domain": "army",
+    "equipment": [
+      "mountain_kit"
+    ],
+    "era": "industrial",
+    "id": "mountain_infantry",
+    "name": "Mountain Infantry",
+    "asset": "res://assets/ui/military/subjects/mountain_infantry-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Mountain Infantry. Industrial-era mountain riflemen climbing a snow-covered rocky slope with coils of rope, packs and ice tools. A bolt-action rifle slung across the closest soldier, plain hooded wool clothing, no national badge."
+  },
+  {
+    "description": "Scout, pursue, and attack exposed missile troops",
+    "domain": "army",
+    "equipment": [
+      "lance"
+    ],
+    "era": "early states",
+    "id": "light_cavalry",
+    "name": "Light Cavalry",
+    "asset": "res://assets/ui/military/subjects/light_cavalry-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Light Cavalry. Light early-state rider on a nimble horse, small shield and light lance, simple textile clothing without heavy horse armor, galloping on a dry plain."
+  },
+  {
+    "description": "Mobile missile harassment; weak in a fixed melee",
+    "domain": "army",
+    "equipment": [
+      "mounted_bow"
+    ],
+    "era": "early states",
+    "id": "horse_archer",
+    "name": "Horse Archers",
+    "asset": "res://assets/ui/military/subjects/horse_archer-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Horse Archers. An ancient mounted archer turning in the saddle to draw a compact recurved bow, visible bowstring and nocked arrow, horse running to the side, no firearms."
+  },
+  {
+    "description": "Fast missile and shock platforms on open ground",
+    "domain": "army",
+    "equipment": [
+      "chariot_kit"
+    ],
+    "era": "early states",
+    "id": "chariot",
+    "name": "War Chariots",
+    "asset": "res://assets/ui/military/subjects/chariot-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: War Chariots. Light two-wheeled wooden war chariot pulled by two horses, driver controlling reins and archer riding beside, spoked wheels and compact wicker-sided platform completely readable."
+  },
+  {
+    "description": "Massed shock against an unprepared line",
+    "domain": "army",
+    "equipment": [
+      "armored_lance"
+    ],
+    "era": "early states",
+    "id": "armored_cavalry",
+    "name": "Armored Cavalry",
+    "asset": "res://assets/ui/military/subjects/armored_cavalry-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Armored Cavalry. Heavily protected lance cavalry, rider in overlapping metal scales and horse wearing layered scale barding, advancing deliberately. Long lance held forward; no gunpowder or modern insignia."
+  },
+  {
+    "description": "Heavy shock and morale pressure; vulnerable to dispersed missiles",
+    "domain": "army",
+    "equipment": [
+      "elephant_kit"
+    ],
+    "era": "early states",
+    "id": "war_elephant",
+    "name": "War Elephants",
+    "asset": "res://assets/ui/military/subjects/war_elephant-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: War Elephants. One large war elephant carrying a simple timber fighting platform, driver seated behind its head and two spear-armed soldiers above, textured hide and cloth padding, tropical dust and warm light."
+  },
+  {
+    "description": "Ride to position and fight dismounted with firearms",
+    "domain": "army",
+    "equipment": [
+      "dragoon_kit"
+    ],
+    "era": "gunpowder",
+    "id": "dragoon",
+    "name": "Dragoons",
+    "asset": "res://assets/ui/military/subjects/dragoon-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Dragoons. Gunpowder-era dragoon holding a long firearm while fighting on foot beside a saddled horse; simple riding coat, boots, no national colors, horse and dismounted action equally clear."
+  },
+  {
+    "description": "Breach gates under protective timber",
+    "domain": "army",
+    "equipment": [
+      "ram"
+    ],
+    "era": "early states",
+    "id": "ram_crew",
+    "name": "Battering Ram Crews",
+    "asset": "res://assets/ui/military/subjects/ram_crew-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Battering Ram Crews. A wheeled timber battering ram under a sloping rawhide-covered protective roof, crew pushing the hanging log toward a wooden gate, heavy log head clearly visible. No cannon."
+  },
+  {
+    "description": "Mechanical bombardment of walls and concentrated troops",
+    "domain": "army",
+    "equipment": [
+      "catapult"
+    ],
+    "era": "early states",
+    "id": "catapult_crew",
+    "name": "Catapult Crews",
+    "asset": "res://assets/ui/military/subjects/catapult_crew-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Catapult Crews. An early torsion catapult with a short throwing arm seated in twisted rope bundles and a stout wooden frame; crew loading a rounded stone. Mechanical parts clearly coherent, no counterweight trebuchet."
+  },
+  {
+    "description": "Heavy long-range siege bombardment; costly to move",
+    "domain": "army",
+    "equipment": [
+      "trebuchet"
+    ],
+    "era": "early states",
+    "id": "trebuchet_crew",
+    "name": "Trebuchet Crews",
+    "asset": "res://assets/ui/military/subjects/trebuchet_crew-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Trebuchet Crews. A large counterweight trebuchet on a timber trestle, short arm with heavy wooden weight box and very long arm with sling, crew preparing the release. Full recognizable machine in three-quarter side view."
+  },
+  {
+    "description": "Demolish fortifications with heavy powder guns",
+    "domain": "army",
+    "equipment": [
+      "bombard"
+    ],
+    "era": "gunpowder",
+    "id": "bombard_crew",
+    "name": "Bombard Crews",
+    "asset": "res://assets/ui/military/subjects/bombard_crew-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Bombard Crews. A huge early gunpowder bombard with short broad iron barrel on a low heavy timber bed, stone cannonballs and rammer nearby, crew tending it outside a stone fort. No modern wheeled howitzer."
+  },
+  {
+    "description": "Move light guns quickly with mounted columns",
+    "domain": "army",
+    "equipment": [
+      "horse_gun"
+    ],
+    "era": "gunpowder",
+    "id": "horse_artillery",
+    "name": "Horse Artillery",
+    "asset": "res://assets/ui/military/subjects/horse_artillery-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Horse Artillery. A lightweight gunpowder field gun hitched to a limber drawn by a team of horses, mounted crew moving quickly along a lane. Side view clearly includes the cannon, limber and horses."
+  },
+  {
+    "description": "Portable high-angle fire against covered infantry",
+    "domain": "army",
+    "equipment": [
+      "mortar"
+    ],
+    "era": "industrial",
+    "id": "mortar_crew",
+    "name": "Mortar Teams",
+    "asset": "res://assets/ui/military/subjects/mortar_crew-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Mortar Teams. Two industrial-era soldiers operating a compact infantry mortar with angled tube, bipod and baseplate, one holding a finned mortar round over the muzzle. A shallow protected position, no long artillery barrel."
+  },
+  {
+    "description": "Area saturation with high ammunition demand",
+    "domain": "army",
+    "equipment": [
+      "rocket_launcher"
+    ],
+    "era": "mechanization",
+    "id": "rocket_artillery",
+    "name": "Rocket Artillery",
+    "asset": "res://assets/ui/military/subjects/rocket_artillery-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Rocket Artillery. A mechanized-era truck carrying multiple parallel launch rails, one unguided rocket accelerating away with smoke; rear three-quarter angle shows launch rails and truck wheels clearly."
+  },
+  {
+    "description": "Early close-range gunpowder fire with low cohesion",
+    "domain": "army",
+    "equipment": [
+      "hand_cannon"
+    ],
+    "era": "gunpowder",
+    "id": "hand_cannoneer",
+    "name": "Hand Cannoneers",
+    "asset": "res://assets/ui/military/subjects/hand_cannoneer-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Hand Cannoneers. Earliest gunpowder infantry holding a short thick metal hand-cannon tube on a simple wooden pole stock, second hand bringing a glowing slow match toward its touch hole. No musket trigger, flintlock, magazine or modern rifle."
+  },
+  {
+    "description": "Assault enclosed defenses and close infantry positions",
+    "domain": "army",
+    "equipment": [
+      "grenadier_kit"
+    ],
+    "era": "gunpowder",
+    "id": "grenadier",
+    "name": "Grenadiers",
+    "asset": "res://assets/ui/military/subjects/grenadier-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Grenadiers. Early gunpowder grenadier advancing beside a wooden breastwork with a round iron hand grenade and short smoking fuse, musket slung. Plain practical coat, no national helmet or emblem."
+  },
+  {
+    "description": "Precision harassment; low mass and weak close defense",
+    "domain": "army",
+    "equipment": [
+      "marksman_rifle"
+    ],
+    "era": "industrial",
+    "id": "sharpshooter",
+    "name": "Sharpshooters",
+    "asset": "res://assets/ui/military/subjects/sharpshooter-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Sharpshooters. Industrial marksman lying behind a fallen log with a long accurate bolt-action rifle and slim optical sight, patient focused eye and camouflage cloth, distant misty valley."
+  },
+  {
+    "description": "Infiltrate and clear trenches at close range",
+    "domain": "army",
+    "equipment": [
+      "assault_kit"
+    ],
+    "era": "industrial",
+    "id": "assault_infantry",
+    "name": "Assault Infantry",
+    "asset": "res://assets/ui/military/subjects/assault_infantry-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Assault Infantry. Industrial-era trench assault troops moving through a narrow trench with short weapons, hand grenades and satchels, plain steel helmets and mud-stained uniforms, no gore."
+  },
+  {
+    "description": "Train for shore landings and fighting around ports",
+    "domain": "army",
+    "equipment": [
+      "marine_kit"
+    ],
+    "era": "early states",
+    "id": "marines",
+    "name": "Marines",
+    "asset": "res://assets/ui/military/subjects/marines-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Marines. Early-state naval infantry stepping from a wooden oared landing boat onto a rocky shore, short swords, small shields, ropes and plain linen. Ancient equipment, absolutely no firearms, camouflage, modern helmets or landing craft."
+  },
+  {
+    "description": "Air insertion infantry; requires transport aircraft for a drop",
+    "domain": "army",
+    "equipment": [
+      "airborne_kit"
+    ],
+    "era": "mechanization",
+    "id": "paratrooper",
+    "name": "Airborne Infantry",
+    "asset": "res://assets/ui/military/subjects/paratrooper-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Airborne Infantry. Mechanized-era airborne infantry under round parachute canopies descending toward open fields, nearest paratrooper harness, boots, pack and slung rifle readable; transport aircraft small in background."
+  },
+  {
+    "description": "Breach field defenses and support fortified fighting",
+    "domain": "army",
+    "equipment": [
+      "engineering_kit"
+    ],
+    "era": "industrial",
+    "id": "combat_engineer",
+    "name": "Combat Engineers",
+    "asset": "res://assets/ui/military/subjects/combat_engineer-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Combat Engineers. Industrial combat engineers laying a wooden footbridge across a damaged trench, one handles a coil of wire and another joins a timber support, rifles slung, practical tool pouches and protective helmets."
+  },
+  {
+    "description": "Defeat armor at the cost of general infantry firepower",
+    "domain": "army",
+    "equipment": [
+      "anti_tank_kit"
+    ],
+    "era": "mechanization",
+    "id": "anti_tank",
+    "name": "Antitank Teams",
+    "asset": "res://assets/ui/military/subjects/anti_tank-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Antitank Teams. Mechanized antitank team operating a compact towed antitank gun with low shield and long narrow barrel, shell loader beside the breech, tracks of an approaching tank in the distance."
+  },
+  {
+    "description": "Protect concentrations from aircraft; vulnerable to ground assault",
+    "domain": "army",
+    "equipment": [
+      "anti_air_gun"
+    ],
+    "era": "mechanization",
+    "id": "anti_air",
+    "name": "Antiaircraft Batteries",
+    "asset": "res://assets/ui/military/subjects/anti_air-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Antiaircraft Batteries. An antiaircraft battery with a long gun barrel elevated steeply into the sky, four-legged platform, aiming crew at handwheels and dark aircraft high in the distance; no ground-level field-gun pose."
+  },
+  {
+    "description": "Fast protected reconnaissance; light armor only",
+    "domain": "army",
+    "equipment": [
+      "armored_car_kit"
+    ],
+    "era": "mechanization",
+    "id": "armored_car",
+    "name": "Armored Reconnaissance",
+    "asset": "res://assets/ui/military/subjects/armored_car-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Armored Reconnaissance. A compact four-wheeled armored reconnaissance car with sloped riveted hull and small turret, exposed rugged wheels, crew member observing from hatch, dusty rolling grassland."
+  },
+  {
+    "description": "Exploit gaps quickly; avoid heavier armor",
+    "domain": "army",
+    "equipment": [
+      "light_tank_kit"
+    ],
+    "era": "mechanization",
+    "id": "light_tank",
+    "name": "Light Tanks",
+    "asset": "res://assets/ui/military/subjects/light_tank-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Light Tanks. A small fast tracked tank with compact narrow hull, small road wheels and a light turret gun, moving across broken terrain. Clearly lighter and smaller than a heavy breakthrough tank, no national markings."
+  },
+  {
+    "description": "Break defended fronts with heavy protection and a large supply burden",
+    "domain": "army",
+    "equipment": [
+      "heavy_tank_kit"
+    ],
+    "era": "mechanization",
+    "id": "heavy_tank",
+    "name": "Heavy Tanks",
+    "asset": "res://assets/ui/military/subjects/heavy_tank-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Heavy Tanks. A massive heavy tracked breakthrough tank with broad tracks, thick slab armor, wide turret and large cannon, earth collapsing under its weight. Low three-quarter view emphasizes mass, no national markings."
+  },
+  {
+    "description": "Concentrate armor-piercing fire; weak against close infantry",
+    "domain": "army",
+    "equipment": [
+      "tank_destroyer_kit"
+    ],
+    "era": "mechanization",
+    "id": "tank_destroyer",
+    "name": "Tank Destroyers",
+    "asset": "res://assets/ui/military/subjects/tank_destroyer-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Tank Destroyers. Low-profile tracked tank destroyer with fixed angular casemate and exceptionally long antitank gun, no rotating tank turret, concealed at a treeline."
+  },
+  {
+    "description": "Protected infantry keeps pace with armored forces",
+    "domain": "army",
+    "equipment": [
+      "mechanized_kit"
+    ],
+    "era": "mechanization",
+    "id": "mechanized_infantry",
+    "name": "Mechanized Infantry",
+    "asset": "res://assets/ui/military/subjects/mechanized_infantry-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Mechanized Infantry. Infantry dismounting through the rear door of a tracked armored personnel carrier, armored side plates and continuous tracks clearly visible, soldiers carrying rifles close to the vehicle."
+  },
+  {
+    "description": "Helicopter-lift infantry; land movement remains on foot without lift",
+    "domain": "army",
+    "equipment": [
+      "air_assault_kit"
+    ],
+    "era": "mechanization",
+    "id": "air_assault",
+    "name": "Air Assault Infantry",
+    "asset": "res://assets/ui/military/subjects/air_assault-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Air Assault Infantry. Modern infantry departing a hovering medium troop helicopter on a grassy landing zone, rotor wash whipping vegetation, side door open and soldiers carrying packs and rifles. Helicopter transport and landing clearly central."
+  },
+  {
+    "description": "Strike force",
+    "domain": "navy",
+    "gate": "naval_arsenals",
+    "id": "heavy_galley",
+    "name": "Heavy Boarding Galleys",
+    "asset": "res://assets/ui/military/subjects/heavy_galley-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Heavy Boarding Galleys. A massive ancient wooden boarding galley, multiple banks of long oars, raised fighting platforms and boarding bridge, many shield-bearing marines on deck, no cannon or steam engines."
+  },
+  {
+    "description": "Convoy escort",
+    "domain": "navy",
+    "gate": "naval_gunnery",
+    "id": "sailing_frigate",
+    "name": "Sailing Frigates",
+    "asset": "res://assets/ui/military/subjects/sailing_frigate-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Sailing Frigates. A lean fast three-masted wooden frigate with one principal gun deck and broadside gunports, taut sails, complete ship three-quarter profile at sea, no enormous three-deck battleship."
+  },
+  {
+    "description": "Strike force",
+    "domain": "navy",
+    "gate": "naval_gunnery",
+    "id": "ship_of_line",
+    "name": "Ships of the Line",
+    "asset": "res://assets/ui/military/subjects/ship_of_line-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Ships of the Line. A towering three-masted wooden ship of the line, multiple stacked rows of broadside gunports and full square sails, heavy stern, imposing full hull, warm sea haze."
+  },
+  {
+    "description": "Convoy escort",
+    "domain": "navy",
+    "gate": "steam_propulsion",
+    "id": "steam_corvette",
+    "name": "Steam Corvettes",
+    "asset": "res://assets/ui/military/subjects/steam_corvette-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Steam Corvettes. A compact early steam corvette with one black funnel, modest auxiliary masts and rigging, low gun deck and steam wake; slim small hull, no modern missile systems."
+  },
+  {
+    "description": "Strike force",
+    "domain": "navy",
+    "gate": "armored_hulls",
+    "id": "ironclad",
+    "name": "Ironclads",
+    "asset": "res://assets/ui/military/subjects/ironclad-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Ironclads. Early armored ironclad with low sloped riveted iron casemate, black funnel and heavy waterline hull, smoky coast, clearly transitional sail-to-steam armor; no modern superstructure."
+  },
+  {
+    "description": "Convoy raiding",
+    "domain": "navy",
+    "gate": "naval_torpedoes",
+    "id": "torpedo_boat",
+    "name": "Torpedo Boats",
+    "asset": "res://assets/ui/military/subjects/torpedo_boat-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Torpedo Boats. Small very fast early steel torpedo boat riding low through spray, two exposed torpedo tubes on deck and one small funnel, compact open bridge, no large destroyer hull."
+  },
+  {
+    "description": "Patrol",
+    "domain": "navy",
+    "gate": "armored_hulls",
+    "id": "light_cruiser",
+    "name": "Light Cruisers",
+    "asset": "res://assets/ui/military/subjects/light_cruiser-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Light Cruisers. A slender industrial light cruiser with several small gun turrets, two funnels and scout-scale superstructure, high cruising speed, three-quarter broadside in blue sea."
+  },
+  {
+    "description": "Strike force",
+    "domain": "navy",
+    "gate": "naval_fire_control",
+    "id": "heavy_cruiser",
+    "name": "Heavy Cruisers",
+    "asset": "res://assets/ui/military/subjects/heavy_cruiser-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Heavy Cruisers. A broad long heavy cruiser with substantial twin or triple medium-caliber gun turrets, armored superstructure and two funnels, larger turrets than light cruiser but not oversized battleship guns."
+  },
+  {
+    "description": "Strike force",
+    "domain": "navy",
+    "gate": "naval_fire_control",
+    "id": "battleship",
+    "name": "Battleships",
+    "asset": "res://assets/ui/military/subjects/battleship-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Battleships. Huge industrial battleship with massive triple main-gun turrets, very broad armored hull and towering rangefinder superstructure, low bow angle at sea, no carrier flight deck."
+  },
+  {
+    "description": "Convoy raiding",
+    "domain": "navy",
+    "gate": "submersible_hulls",
+    "id": "submarine",
+    "name": "Submarines",
+    "asset": "res://assets/ui/military/subjects/submarine-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Submarines. A conventional diesel-electric submarine running surfaced in a cold gray sea, narrow hull, modest conning tower, small deck gun and wake, no nuclear missile tubes or enormous modern sail."
+  },
+  {
+    "description": "Strike force",
+    "domain": "navy",
+    "gate": "carrier_aviation",
+    "id": "aircraft_carrier",
+    "name": "Aircraft Carriers",
+    "asset": "res://assets/ui/military/subjects/aircraft_carrier-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Aircraft Carriers. A fleet aircraft carrier with broad flat flight deck, side island and orderly small propeller aircraft on deck, underway at sea, entire flight-deck silhouette readable."
+  },
+  {
+    "description": "Invasion support",
+    "domain": "navy",
+    "gate": "amphibious_operations",
+    "id": "amphibious_ship",
+    "name": "Amphibious Assault Ships",
+    "asset": "res://assets/ui/military/subjects/amphibious_ship-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Amphibious Assault Ships. Modern amphibious assault ship with helicopter deck and stern well deck open, a small landing craft departing into the wake, helicopters visible, no aircraft carrier jet catapults."
+  },
+  {
+    "description": "Strike force",
+    "domain": "navy",
+    "gate": "guided_weapons",
+    "id": "missile_patrol",
+    "name": "Missile Patrol Boats",
+    "asset": "res://assets/ui/military/subjects/missile_patrol-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Missile Patrol Boats. Small modern missile patrol boat, compact angular bridge and several angled box-shaped antiship missile launchers behind it, fast white wake in coastal waters."
+  },
+  {
+    "description": "Convoy escort",
+    "domain": "navy",
+    "gate": "naval_missiles",
+    "id": "missile_destroyer",
+    "name": "Missile Destroyers",
+    "asset": "res://assets/ui/military/subjects/missile_destroyer-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Missile Destroyers. Modern guided-missile destroyer with angular radar mast, enclosed forward gun, rectangular vertical launch cells and clean steel hull, ocean swell, no national markings."
+  },
+  {
+    "description": "Convoy raiding",
+    "domain": "navy",
+    "gate": "nuclear_propulsion",
+    "id": "nuclear_submarine",
+    "name": "Nuclear Submarines",
+    "asset": "res://assets/ui/military/subjects/nuclear_submarine-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Nuclear Submarines. A large modern nuclear-powered submarine surfaced in dark ocean, long smooth rounded black hull and clean tall sail with retractable masts, no deck gun or flags."
+  },
+  {
+    "description": "Convoy escort",
+    "domain": "navy",
+    "gate": "naval_logistics",
+    "id": "fleet_support",
+    "name": "Fleet Support Ships",
+    "asset": "res://assets/ui/military/subjects/fleet_support-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Fleet Support Ships. Naval replenishment ship with tanker storage hull, supply cranes and fuel hoses rigged toward a distant escort, active underway resupply, clear logistics role."
+  },
+  {
+    "description": "Reconnaissance",
+    "domain": "air",
+    "gate": "powered_flight",
+    "id": "airship",
+    "name": "Patrol Airships",
+    "asset": "res://assets/ui/military/subjects/airship-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Patrol Airships. Large elongated rigid patrol airship with visible gondolas, tail fins and small propellers, drifting above a coast in pale morning sky; not a round hot-air balloon."
+  },
+  {
+    "description": "Reconnaissance",
+    "domain": "air",
+    "gate": "powered_flight",
+    "id": "recon_plane",
+    "name": "Reconnaissance Aircraft",
+    "asset": "res://assets/ui/military/subjects/recon_plane-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Reconnaissance Aircraft. An early unarmed two-seat fabric reconnaissance biplane banking over patchwork fields, observer in rear cockpit holding a camera, wire bracing and open cockpits clearly visible."
+  },
+  {
+    "description": "Interception",
+    "domain": "air",
+    "gate": "advanced_airframes",
+    "id": "heavy_fighter",
+    "name": "Heavy Fighters",
+    "asset": "res://assets/ui/military/subjects/heavy_fighter-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Heavy Fighters. Twin-engine propeller heavy fighter with compact cockpit and concentrated nose guns, two distinct engine nacelles and broad wings, climbing through broken cloud, no bomb bay focus."
+  },
+  {
+    "description": "Close air support",
+    "domain": "air",
+    "gate": "aerial_bombardment",
+    "id": "close_air_support",
+    "name": "Ground-Attack Aircraft",
+    "asset": "res://assets/ui/military/subjects/close_air_support-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Ground-Attack Aircraft. Rugged single-engine propeller ground-attack aircraft flying low over fields with bombs on underwing racks, armored cockpit and clear ground-support profile, no civilian markings."
+  },
+  {
+    "description": "Logistics strike",
+    "domain": "air",
+    "gate": "aerial_bombardment",
+    "id": "tactical_bomber",
+    "name": "Tactical Bombers",
+    "asset": "res://assets/ui/military/subjects/tactical_bomber-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Tactical Bombers. Twin-engine medium bomber with glazed bombardier nose and modest bomb bay, banking over distant rail junction, medium-size airframe rather than enormous four-engine bomber."
+  },
+  {
+    "description": "Strategic bombing",
+    "domain": "air",
+    "gate": "advanced_airframes",
+    "id": "strategic_bomber",
+    "name": "Strategic Bombers",
+    "asset": "res://assets/ui/military/subjects/strategic_bomber-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Strategic Bombers. Large four-engine propeller strategic bomber with broad wings, multiple defensive gun positions and deep fuselage, high-altitude cloudscape, complete aircraft silhouette."
+  },
+  {
+    "description": "Naval strike",
+    "domain": "air",
+    "gate": "naval_aviation",
+    "id": "naval_bomber",
+    "name": "Naval Bombers",
+    "asset": "res://assets/ui/military/subjects/naval_bomber-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Naval Bombers. Single-engine propeller torpedo bomber low over ocean, long torpedo clearly mounted under the fuselage, distant ships below, wing folds hinted by joints, no land-bombing scene."
+  },
+  {
+    "description": "Air supply",
+    "domain": "air",
+    "gate": "airborne_operations",
+    "id": "transport_aircraft",
+    "name": "Transport Aircraft",
+    "asset": "res://assets/ui/military/subjects/transport_aircraft-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Transport Aircraft. Twin-engine propeller cargo aircraft on an airstrip with large side cargo door open, crates loading up a ramp, no guns, clear supply transport role."
+  },
+  {
+    "description": "Strategic bombing",
+    "domain": "air",
+    "gate": "jet_propulsion",
+    "id": "jet_bomber",
+    "name": "Jet Bombers",
+    "asset": "res://assets/ui/military/subjects/jet_bomber-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Jet Bombers. Large swept-wing multi-engine jet bomber crossing a high cloud bank, long fuselage and large wing-mounted engine pods, no propellers or fighter-sized profile."
+  },
+  {
+    "description": "Air supply",
+    "domain": "air",
+    "gate": "rotary_wing",
+    "id": "transport_helicopter",
+    "name": "Transport Helicopters",
+    "asset": "res://assets/ui/military/subjects/transport_helicopter-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Transport Helicopters. Large twin-rotor troop transport helicopter carrying a suspended cargo net under its broad fuselage, long tandem rotor layout, supplies on a remote clearing below."
+  },
+  {
+    "description": "Close air support",
+    "domain": "air",
+    "gate": "guided_weapons",
+    "id": "attack_helicopter",
+    "name": "Attack Helicopters",
+    "asset": "res://assets/ui/military/subjects/attack_helicopter-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Attack Helicopters. A narrow tandem-cockpit attack helicopter with chin-mounted cannon and small stub wings carrying rocket pods, terrain-following flight along a valley, no broad cargo fuselage."
+  },
+  {
+    "description": "Reconnaissance",
+    "domain": "air",
+    "gate": "remote_aircraft",
+    "id": "recon_drone",
+    "name": "Reconnaissance Drones",
+    "asset": "res://assets/ui/military/subjects/recon_drone-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Reconnaissance Drones. Small unarmed fixed-wing reconnaissance drone with long slender wings, compact camera sensor turret and rear pusher propeller, scouting above dry hills. No weapons under wings."
+  },
+  {
+    "description": "Close air support",
+    "domain": "air",
+    "gate": "remote_aircraft",
+    "id": "strike_drone",
+    "name": "Strike Drones",
+    "asset": "res://assets/ui/military/subjects/strike_drone-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Strike Drones. Armed medium remotely piloted aircraft with long straight wings, rear pusher propeller, bulbous sensor nose and two visible underwing guided munitions, high clear sky."
+  },
+  {
+    "description": "Carry supplies and troops along escorted sea routes.",
+    "domain": "navy",
+    "gate": "ocean_sailing",
+    "id": "convoy_transport",
+    "name": "Convoy Transports",
+    "asset": "res://assets/ui/military/subjects/convoy_transport-v1.png",
+    "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Convoy Transports. Ocean-going wooden cargo sailing vessel with broad loaded hull, furled working sails and crates lashed on deck, sailing with two merchant companions, no rows of broadside guns."
+  }
+]
