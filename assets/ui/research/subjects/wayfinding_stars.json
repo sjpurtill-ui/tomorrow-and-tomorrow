@@ -1,0 +1,9 @@
+{
+  "id": "wayfinding_stars",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Celestial Wayfinding. A lone traveler reads a clear star-filled sky above recognizable distant hills, pointing toward a stable star pattern; night navigation, no compass, sextant or drawn map.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-71863a8d-db8b-4b90-943d-2d3812257748.png",
+  "asset": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
+  "sha256": "7f898c2704f2acb81e8d0662e71706c85b3aa0df746ae83ed86c809b58952e9d",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

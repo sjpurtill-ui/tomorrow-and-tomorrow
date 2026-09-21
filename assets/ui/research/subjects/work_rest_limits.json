@@ -1,0 +1,10 @@
+{
+  "id": "work_rest_limits",
+  "prompt": "Correct this early work and rest illustration: replace EVERY metal hammer with wooden mallets, remove the monumental aqueduct and grand buildings. Two tired workers resting with water and a sun/moon tally board beside a modest early stone and timber construction site. Preserve subject: protected rest and shift limits. Use wood, stone, bone and simple textiles only. Keep the faces and rest gesture together in the central horizontal band. No text labels, logos, flags or UI.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-0477bf8f-c613-4f0a-9ce9-56e0b9706fb8.png",
+  "version": 2,
+  "asset": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+  "sha256": "a37b9d47da99741105857b0cc39c50b0fc07c0053dad51ad7ff38d55643387a0",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

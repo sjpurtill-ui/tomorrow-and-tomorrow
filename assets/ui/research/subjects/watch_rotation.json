@@ -1,0 +1,9 @@
+{
+  "id": "watch_rotation",
+  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Organized Watch. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. Two early settlement sentries quietly exchange a watch shift at dawn. The arriving guard accepts a plain wooden staff while the tired outgoing guard heads toward simple huts. A third sentry watches a distant approach. Quiet vigilance and a clear handover, early hides and rough cloth. No armor, metal weapons, modern insignia, fortification or pitched battle. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-99cbbb9c-b3bf-4bfd-9809-f46fba6bb920.png",
+  "asset": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+  "sha256": "e4804460ac6b9beb8bb43bfe49ec76bc1b17445710f1b3fc80d211c0708d87f0",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
