@@ -174,3 +174,39 @@ func test_material_flow_calls_a_depleted_source_exhausted()->void:
 	var brief:Dictionary=renderer._material_constraint_brief({"lost_today":2.0,"losses_by_resource":{"Clay":1.7}},1,100.0,20.0)
 	assert_str(String(brief.status)).contains("STORAGE IS LOSING")
 	assert_str(String(brief.why)).contains("Clay")
+
+func test_regrowth_does_not_trap_extractors_on_a_depleted_front()->void:
+	ResourceSystem._ensure_woodland_supply(_context(0.7))
+	var first:Dictionary=GameState.resource_deposits[0]
+	first.remaining=0.2
+	GameState.population_allocations.Logistics=12
+	WorldSimulation.context_provider=func(point:Vector2)->Dictionary:
+		return {"woodland_catchment":{"density":0.8,"area_km2":9.0,"position":Vector3(point.x,0,point.y)},"surface_material_catchments":{}}
+	var timber:=float(GameState.resource_stockpiles.Timber)
+	ResourceSystem._ensure_woodland_supply(_context(0.7))
+	assert_int(GameState.resource_deposits.size()).is_equal(2)
+	assert_float(float(first.remaining)).is_equal(0.2)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(timber)
+	ResourceSystem._ensure_woodland_supply(_context(0.7))
+	assert_int(GameState.resource_deposits.size()).is_equal(2)
+
+func test_overstock_releases_workers_for_missing_materials_without_free_output()->void:
+	GameState.resource_stockpiles={"Timber":0.0,"Stone":1000.0}
+	GameState.population_allocations.Extraction=10
+	GameState.population_allocations.Logistics=10
+	var timber:=ResourceSystem._deposit("Timber",Vector3.ZERO,.7,1000.0,0)
+	var stone:=ResourceSystem._deposit("Stone",Vector3.ZERO,.7,1000.0,1)
+	for deposit:Dictionary in [timber,stone]:
+		deposit.stage="accessible";deposit.access=1.0;deposit.route=1.0
+	GameState.resource_deposits=[timber,stone]
+	ResourceSystem._process_material_flow({"settled":false,"origin":Vector3.ZERO,"tools":1.0})
+	assert_float(float(timber.daily_yield)).is_greater(float(stone.daily_yield)*5.0)
+	assert_float(float(timber.remaining)).is_less(1000.0)
+	assert_float(float(timber.lifetime_extracted)).is_greater(0.0)
+	assert_float(float(GameState.material_metrics.extraction_workers)).is_less_equal(10.0)
+func test_fractional_work_is_not_reported_as_no_extractors()->void:
+	var deposit:=ResourceSystem._deposit("Timber",Vector3.ZERO,.7,100.0,0)
+	deposit.stage="accessible";deposit.workers=0;deposit.daily_yield=.08;deposit.route=1.0
+	var events:Array[Dictionary]=[]
+	ResourceSystem._update_deposit_bottleneck(deposit,1.0,events)
+	assert_str(String(deposit.bottleneck)).is_equal("Flowing")

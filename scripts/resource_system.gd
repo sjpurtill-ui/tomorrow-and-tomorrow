@@ -490,7 +490,10 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 			# need the same access transition as newly created fronts, not mining.
 			deposit.stage="developed" if String(deposit.stage)=="developed" else "accessible"
 			deposit.clues=1.0;deposit.access=1.0;deposit.blockers=[]
-			return
+			# A trickle of regrowth is not a working supply. Keep the depleted
+			# front and its recovery, but seek another real front when its reserve
+			# is below the same working threshold used by extraction allocation.
+			if float(deposit.remaining)>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):return
 	if existing_fronts.size()>=MAX_SURFACE_FRONTS_PER_RESOURCE:return
 	if not existing_fronts.is_empty() or density<minimum_density:
 		field=_next_surface_front(resource,source,context,minimum_density)
@@ -755,7 +758,11 @@ func _deposit_priority(deposit:Dictionary)->float:
 		# not create workers, reveal deposits, or produce stone from nothing.
 		named*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("stone_priority"))*3.0
 	var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))
-	var scarcity:=1.0+1.0/(1.0+stored/20.0)
+	# Once a local store is well supplied, release its share of the same finite
+	# workforce. The previous floor of 1 kept most workers gathering already
+	# overflowing materials while essential timber had no stock at all.
+	var working_stock:=maxf(20.0,WorldSimulation.state.population_exact*.08)
+	var scarcity:=2.0/(1.0+maxf(0.0,stored)/working_stock)
 	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.distance_km)/45.0))
 
 func _extraction_priority(deposit:Dictionary)->float:
@@ -832,7 +839,7 @@ func _apply_material_storage_losses(events:Array[Dictionary])->Dictionary:
 func _update_deposit_bottleneck(deposit:Dictionary,carriers:float,events:Array[Dictionary])->void:
 	var bottleneck:="Flowing"
 	if deposit_exhausted(deposit):bottleneck="Source exhausted"
-	elif int(deposit.workers)<=0: bottleneck="No extractors assigned"
+	elif float(deposit.get("daily_yield",0.0))<=0.0: bottleneck="No extractors assigned"
 	elif float(deposit.stock_at_source)>maxf(2.0,float(deposit.extracted_today)*4.0): bottleneck="Material accumulating at source"
 	elif carriers<=0.0: bottleneck="No carriers assigned"
 	elif float(deposit.route)<0.45: bottleneck="Access route is slow"

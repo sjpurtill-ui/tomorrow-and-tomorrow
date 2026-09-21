@@ -98,20 +98,43 @@ static func expansion_orders(id:String,plan:Dictionary)->void:
 	# Evaluate candidates only inside returned knowledge. Duration, founders,
 	# supplies, and land/water checks belong to the same founding transaction.
 	var best:Dictionary={};var best_value:=-INF
-	for index in 16:
-		var point:=home+Vector2.from_angle(TAU*float(index)/16.0)*float(plan.settle_distance)
+	for point:Vector2 in expansion_candidates(home,float(plan.settle_distance)):
 		if not bool(WorldSimulation.settlements.known_land_assessment(point).known):continue
 		var quote:=WorldSimulation.settlements.settlement_convoy_quote(point,0)
 		if not bool(quote.get("ok",false)):continue
 		var context:=preload("res://scripts/civilization_day.gd").context(point)
 		if not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):continue
-		var environment:Dictionary=context.environment_profile
-		var p:Dictionary=plan.personality
-		var value:=float(environment.get("food_potential",0))*(.6+float(p.empathy))
-		value+=float(environment.get("forest",0))*(.2+float(p.discipline))
-		value+=float(environment.get("water_access",0))*(.4+float(p.openness))
+		var value:=expansion_site_value(context,plan)
 		if value>best_value:best={"kind":"settle","destination":point};best_value=value
 	if not best.is_empty():WorldSimulation.submit(id,best)
+
+static func expansion_candidates(home:Vector2,distance:float)->Array[Vector2]:
+	var points:Array[Vector2]=[]
+	# A single ring can miss known resources closer to home and eventually fill
+	# all of its sites. Keep the search bounded while considering nearby options.
+	for scale:float in [.5,1.0,1.5]:
+		for index in 16:points.append(home+Vector2.from_angle(TAU*float(index)/16.0)*distance*scale)
+	return points
+
+static func expansion_site_value(context:Dictionary,plan:Dictionary)->float:
+	var environment:Dictionary=context.environment_profile
+	var p:Dictionary=plan.personality
+	var value:=float(environment.get("food_potential",0))*(.6+float(p.empathy))
+	value+=float(environment.get("water_access",0))*(.4+float(p.openness))
+	# Use measured local cover, not the nonexistent profile "forest" key.
+	# A material-starved capital has a reason to found a supplying settlement;
+	# ordinary convoy costs, known routes and finite city trade still apply.
+	var fields:Dictionary=context.get("surface_material_catchments",{}).duplicate()
+	if context.has("woodland_catchment"):fields["Timber"]=context.woodland_catchment
+	else:fields["Timber"]={"density":environment.get("woodland",0)}
+	var target:=maxf(6.0,WorldSimulation.state.population_exact*.06)
+	for material:String in ["Timber","Stone","Fiber Plants","Clay"]:
+		var density:=float(fields.get(material,{}).get("density",0))
+		if density<(.03 if material=="Stone" else .08):density=0.0
+		var shortage:=clampf(1.0-float(WorldSimulation.state.resource_stockpiles.get(material,0))/target,0.0,1.0)
+		value+=density*((.2+float(p.discipline)) if material=="Timber" else .1)
+		value+=density*shortage*3.0
+	return value
 
 ## Transport exclusion is hunger, but does not mean home stores cannot feed
 ## craftspeople. Keep making the carts and goods needed to recover delivery.

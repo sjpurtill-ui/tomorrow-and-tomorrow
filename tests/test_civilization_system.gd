@@ -1367,18 +1367,22 @@ func test_competition_includes_player_and_every_rival_with_explicit_victory_stat
 
 
 func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:
+	var ordinary_bytes:=JSON.stringify(system.export_state()).length()
+	var civilization_count:int=system.civilizations.size()
 	GameState.ensure_population_total(1_000_000_000)
 	for index in system.civilizations.size():
 		var civ:Dictionary=system.civilizations[index]
 		civ["population"]=1_000_000_000.0
 		civ["cohorts"]=system._scaled_cohorts(civ.cohorts,1_000_000_000.0)
 		system.civilizations[index]=civ
+	# Compare the same world before and after the population change. Only the
+	# digits in aggregate counts/cohorts may grow, not per-person records.
+	assert_int(system.civilizations.size()).is_equal(civilization_count)
+	assert_int(JSON.stringify(system.export_state()).length()).is_less(ordinary_bytes+civilization_count*512)
 	system.advance_to_day(36_500)
 	assert_int(system.civilizations.size()).is_between(system.MIN_RIVAL_CIVILIZATIONS,system.MAX_RIVAL_CIVILIZATIONS)
-	# Richer bounded war, intelligence, travel, and collection histories increase
-	# the fixed record payload without making it depend on population; the payload
-	# scales only with the world's drawn rival count, never with entity counts.
-	assert_int(JSON.stringify(system.export_state()).length()).is_less(150_000+system.civilizations.size()*30_000)
+	# Long-run validation enforces each history/formation/region collection's
+	# own bound, independent of the current breadth of the serialized schema.
 	assert_array(system.validate_state()).is_empty()
 
 
