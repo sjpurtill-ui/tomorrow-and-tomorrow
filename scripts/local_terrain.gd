@@ -14117,7 +14117,23 @@ func _map_inspection_summary(position:Vector3)->String:
 	return "CHARTED LAND SELECTED  •  %s  •  NEXT: ACTIONS → FOUND NEW SETTLEMENT" % resource_note
 
 
+func _open_owned_settlement_at(position:Vector3)->bool:
+	if hud==null or not GameState.settlement_site_committed or not _world_position_is_revealed(position):
+		return false
+	var settlement:Dictionary=_settlement_model().settlement_at_world(Vector2(position.x,position.z))
+	if not bool(settlement.get("inside_border",false)): return false
+	var selected:Dictionary=_settlement_model().select_settlement(String(settlement.get("id","")))
+	if not bool(selected.get("ok",false)): return false
+	_close_lens()
+	_on_hud_section_requested("settlement",0)
+	if travel_status_label:
+		travel_status_label.text="%s SELECTED  •  settlement overview" % String(settlement.get("name","SETTLEMENT")).to_upper()
+	return true
+
 func _inspect_location(position: Vector3) -> void:
+	# Select the clicked city before entering a temporary city-resource scope.
+	# Ground inside an owned boundary uses the same overview as its name card.
+	if _open_owned_settlement_at(position): return
 	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: _inspect_location_local(position))
 
 func _inspect_location_local(position: Vector3) -> void:
