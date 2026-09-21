@@ -3,13 +3,15 @@ func _ready()->void:
 	call_deferred("run")
 func run()->void:
 	GameState.reset_for_new_world(9241)
-	var count:=36;var duration:=3;var output:="";var verify_restore:=false;var resume:=""
+	var count:=36;var duration:=3;var output:="";var verify_restore:=false;var resume:="";var checkpoint_every:=0;var century_ambition:=""
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--opponents="):count=int(argument.get_slice("=",1))
 		if argument.begins_with("--days="):duration=int(argument.get_slice("=",1))
 		if argument.begins_with("--out="):output=argument.trim_prefix("--out=")
 		if argument=="--verify-restore":verify_restore=true
 		if argument.begins_with("--resume="):resume=argument.trim_prefix("--resume=")
+		if argument.begins_with("--checkpoint-every="):checkpoint_every=maxi(0,argument.trim_prefix("--checkpoint-every=").to_int())
+		if argument.begins_with("--century-ambition="):century_ambition=argument.trim_prefix("--century-ambition=")
 	if resume.is_empty():
 		GameState.opponent_count=count
 		CivilizationSystem.reset_for_new_world()
@@ -50,6 +52,8 @@ func run()->void:
 	var total_ms:=0;var completed:=first_day;var errors:Array=[]
 	for day in range(first_day+1,duration+1):
 		start=Time.get_ticks_msec()
+		if not century_ambition.is_empty() and WorldSimulation.direction.needs_century_choice():
+			WorldSimulation.submit("player",{"kind":"ambition","id":century_ambition})
 		WorldSimulation.advance_day(day,preload("res://scripts/civilization_day.gd").context(player_start))
 		total_ms+=Time.get_ticks_msec()-start
 		completed=day
@@ -57,6 +61,10 @@ func run()->void:
 		if day%365==0:
 			errors=CivilizationSystem.validate_state()
 			if not errors.is_empty():break
+		if checkpoint_every>0 and day%checkpoint_every==0 and not output.is_empty():
+			var saved:=retain_checkpoint(output+".save")
+			if saved.has("error"):errors.append(saved.error);break
+			print("CHECKPOINT DAY ",day)
 		if day%30==0:await get_tree().process_frame
 	errors=CivilizationSystem.validate_state()
 	var save_check:Dictionary=WorldSimulation.check_payload(bytes_to_var(var_to_bytes(WorldSimulation.export_state())))
@@ -92,3 +100,13 @@ func run()->void:
 		var file:=FileAccess.open(output,FileAccess.WRITE);file.store_string(JSON.stringify(report));file.close()
 	WorldSimulation.clear();terrain.free()
 	get_tree().quit(0 if errors.is_empty() and waterless==0 and completed==duration else 1)
+
+func retain_checkpoint(destination:String)->Dictionary:
+	var slot:="first300_checkpoint_%d_%d" % [OS.get_process_id(),Time.get_ticks_usec()]
+	var path:=SaveSystem.slot_path(slot)
+	if FileAccess.file_exists(path):return {"error":"Private diagnostic slot already exists."}
+	var saved:=SaveSystem.save_game(slot)
+	if saved.has("error"):return saved
+	var copied:=DirAccess.copy_absolute(path,destination)
+	DirAccess.remove_absolute(path)
+	return {"ok":true} if copied==OK else {"error":"Could not retain diagnostic checkpoint."}
