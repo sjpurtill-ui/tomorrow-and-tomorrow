@@ -1,3 +1,11 @@
+## September 20 — recruitment queues and consequence-based drafting: INTEGRATED
+
+Worker `a6be7587`, base `e91927a3`, branch `codex/military-recruit-deploy`, integrated as canonical `b1b7139e`. Land recruitment now has parallel/serial/repeating formation lines, separate manpower/equipment/training bars, priority, pause/cancel, automatic deployment and early deployment from 20% training. Deployment transfers actual trainees and reservations into a new home army or an existing army at home. No arbitrary recruitment percentage, prototype headcount or classroom intake cap; actual available working-age people remain the physical limit. Away civilians cannot be drafted twice. Mobilization beyond Defense allocation reduces actual civilian workers, including local settlement calculations. Initial instruction may consume civilian food reserves.
+
+Canonical focused validation: 67/67 tests, zero errors/failures/skips/orphans. Covers population and equipment conservation, real instruction completion, early deployment, priority, cancellation, pause costs, workforce loss/recovery, binary save roundtrip, invalid-save rejection, UI construction and existing service training. No graphical player launch, restart or performance/balance claim. Optional save fields preserve existing saves; simulation outcomes intentionally change. No shared-file conflicts.
+
+This is a tested land-queue delivery, not exhaustive HOI4 parity: arbitrary province/front deployment, retrofitting edited templates, global reinforcement-versus-new-unit equipment priorities, and naval/air recruitment parity remain outstanding. Details and governing user instruction: `docs/RECRUIT_DEPLOY_DESIGN.md`.
+
 ## September 20 — surface resource geography cost: INTEGRATED
 
 Worker `225cdb55`, base `20033bcc`, branch `codex/daily-simulation-speed`, integrated as canonical `cb5d095b`. Resource searches sample only authored surface catchments through a bounded independent cache; full geography reports reuse them. Searches avoid unrelated water and climate sampling. Resource quantities, regrowth, food, research and daily simulation rules remain intact.
