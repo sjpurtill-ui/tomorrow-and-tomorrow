@@ -1940,3 +1940,8 @@ Forty-two government/local-provision checks and 49 founding/geography/subsistenc
 ## September 21 — household inputs in production dependency checks
 
 The structural supply audit now includes actual household recipes, with their real inputs and knowledge gates. Joined timber is therefore traced through tools and raw materials instead of being incorrectly reported as missing or being declared a free raw resource. Thirteen dependency tests pass, including missing-input and bootstrap-cycle failures. The full runtime graph reports no graph errors and structural reachability for 752 production/analytical routes and 28 plants across 883 discoveries. This assumes obtainable raw inputs and known methods; it does not certify research timing, finite supply, actual installation or campaign outcomes.
+
+### First 300 years: prepared opponent formations
+- Aligned foreign formation validation with the combat engine's existing 0–150% readiness range. Prepared armies no longer invalidate the world; nonfinite, negative, and above-cap values remain rejected.
+- Validation: projection bounds and player independence suites, 9/9 passed (artifacts/foreign-readiness-tests.log). Actual-world probe rerun follows integration. No save schema change.
+

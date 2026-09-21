@@ -5626,7 +5626,9 @@ func validate_state()->Array[String]:
 			if not commanded is Dictionary or not is_finite(float(commanded.get("x",NAN))) or not is_finite(float(commanded.get("z",NAN))):errors.append("Invalid foreign command position.")
 		if not is_finite(leg_days) or leg_days<=0.0: errors.append("Foreign formation travel duration must be finite and positive.")
 		if not is_finite(share) or share<=0.0 or share>1.0: errors.append("Foreign formation strength share must be normalized and positive.")
-		if not is_finite(readiness) or readiness<0.0 or readiness>1.0: errors.append("Foreign formation readiness must be normalized.")
+		# Shared forces retain the combat simulator's preparation range (0–1.5).
+		# A prepared opponent must not make an otherwise valid world unloadable.
+		if not is_finite(readiness) or readiness<0.0 or readiness>1.5: errors.append("Foreign formation readiness is outside the combat range.")
 		if String(formation.get("kind",""))=="scout":
 			for trait_key in ["concealment","evasion"]:
 				var trait_value:=float(formation.get(trait_key,NAN))

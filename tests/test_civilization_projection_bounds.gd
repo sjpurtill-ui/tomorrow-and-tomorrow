@@ -40,3 +40,14 @@ func test_new_military_projection_is_bounded_without_deleting_commitments()->voi
 	assert_float(float(summary.military_share)).is_less_equal(1.0)
 	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(10)
 	MilitaryCampaign.reset_for_new_world()
+
+func test_prepared_foreign_formation_uses_the_same_readiness_range_as_combat()->void:
+	var payload:=CivilizationSystem.export_state()
+	payload.foreign_formations[0].readiness=1.25
+	assert_bool(CivilizationSystem.import_state(payload).has("error")).is_false()
+	assert_float(float(CivilizationSystem.foreign_formations[0].readiness)).is_equal(1.25)
+func test_out_of_range_foreign_readiness_is_still_rejected()->void:
+	for value in [-.1,1.5001,INF,NAN]:
+		var payload:=CivilizationSystem.export_state()
+		payload.foreign_formations[0].readiness=value
+		assert_bool(CivilizationSystem.import_state(payload).has("error")).is_true()
