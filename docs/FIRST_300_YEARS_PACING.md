@@ -42,3 +42,30 @@ Seed 91420, current isolated daily harness: a 60-second bounded run reached day 
 Follow-up supply inspection found the AI did not order replacement weapons for existing formations and could not reuse finished military lines through its civilian-only reuse path. The controller now considers existing force demand and reuses only finished, unpaused, unreserved AI-owned lines. Human-controlled lines and unfinished trials remain excluded. A subsequent year-one run stocked both levy weapons and spears, but equipped counts remained zero: deployed-force equipment delivery remains an open issue and prevents claiming the military pacing target is achieved.
 
 Validation: founding knowledge, finite one-time supplies, paid spear production, AI line reuse protection, causal opening crafts, isolated city/actor stocks, and production-evidence tests. Existing causal tests now explicitly start with empty knowledge; independent civilizations are expected to retain their own founding supplies instead of zero stocks. No player save was overwritten or migrated.
+
+
+## Geography and decisions: acceptance criteria
+
+The opening is a viable community with inherited skills, not an identical resource bundle that cancels its location. Placement should change both opportunity and cost. Knowledge, adoption, materials, staffed production and usable capability are separate stages.
+
+| Starting circumstances | Decisions the player should face | Evidence required |
+| --- | --- | --- |
+| Reliable river and fertile land | Expand cultivation and storage, or retain a diverse food economy; invest in flood resilience | Different food reliability, surplus, labor and flood losses, not just a yield label |
+| Woodland and good stone | Specialize in tools, timber and construction; decide how much to extract and preserve | Actual output, regrowth pressure and building completion; maintained tools consume material |
+| Dry country or sparse timber | Prioritize water, preservation, exchange or relocation; choose locally feasible building methods | A viable alternative with costs; no timber or freshwater created by a research unlock |
+| Coast and waterways | Develop water access, boats and exchange if local conditions support them | Recognized navigable access and real transported stocks; coast alone must not count as drinking water |
+| Cold or short growing season | Secure seasonal reserves, shelter and clothing before expanding commitments | Winter consumption and survival costs visible before a crisis |
+| Limited ore or isolation | Develop substitutes, obtain samples through contact, trade for inputs, or settle a resource site | Knowledge alone cannot operate an unavailable material chain; isolation limits acquisition |
+| Nearby societies | Choose exchange, accommodation, competition or conquest | Contact, reputation and transport change outcomes; opponents obey the same physical constraints |
+
+Research choices must alter practical opportunity: a choice has a discoverable benefit, prerequisites, a credible route to adoption, and an opportunity cost in labor or attention. Civic choices must change the ability to carry out that route through priorities, obligations, legitimacy or institutional capacity. Leaders handle routine work within those choices. Do not require the player to repair every idle line manually.
+
+Compare matched runs: same seed and population with different environmental conditions; then the same site with different research/civic priorities. Change one factor at a time before running combined scenarios. Record at years 25, 75, 150 and 300: survival and reserves; local materials and shortages; actual household/workshop outputs; completed buildings by settlement; discoveries versus adopted and operating capabilities; troops trained/equipped/supplied; contacts and exchange. Record first capability dates and periods stalled, with causes. A second viable path is required where the design promises alternatives. A universally rich synthetic river site cannot validate globe placement.
+
+These are acceptance criteria, not claims that all paths are implemented or verified. Current unresolved cases include at-home food delivery being capped by field logistics, idle civilian workshops, advanced knowledge without an operating industry, remote replacement delivery, and full-world interaction/performance.
+
+## Stationed equipment delivery checkpoint
+
+Daily equipment and ammunition issue now includes field armies physically stationed at the home settlement, sharing finite inventory and the reserve's remaining delivery capacity. Moving, remote, engaged and convoy forces do not receive this local issue. Three focused checks cover shared stock/capacity, sub-item budgets and excluded locations. No save schema change.
+
+The ongoing seed-91420 reference run reached year 30 with seven equipped levy weapons and five equipped spears. It still had no operating civilian workshop lines, and aggregate provision delivery was about 63% despite ample stocks. This is intermediate evidence, not a 300-year pass. The run includes only the stationed-equipment patch over 3044691; later changes require separate validation.

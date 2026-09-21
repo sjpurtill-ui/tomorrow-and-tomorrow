@@ -3520,9 +3520,10 @@ func _process_military_day()->void:
 	var pending_equipment_load:=_next_equipment_delivery_load()
 	var ammunition_delivered:=_deliver_ammunition(remaining_delivery_load if pending_equipment_load<=0.0 else 0.0)
 	var ammunition_load_used:=float(home_army.get("ammunition_delivery_load_used",0.0))
-	home_army["delivery_load_bank"]=maxf(0.0,remaining_delivery_load-ammunition_load_used)
+	var field_load_used:=_deliver_stationed_field_equipment(maxf(0.0,remaining_delivery_load-ammunition_load_used))
+	home_army["delivery_load_bank"]=maxf(0.0,remaining_delivery_load-ammunition_load_used-field_load_used)
 	home_army["delivery_load_capacity_today"]=daily_delivery_capacity
-	home_army["delivery_load_used_today"]=equipment_load_used+ammunition_load_used
+	home_army["delivery_load_used_today"]=equipment_load_used+ammunition_load_used+field_load_used
 	var recovery_multiplier:=0.35+supply*0.55+_adoption("battlefield_medicine")*0.55
 	var medical:Dictionary=preload("res://scripts/field_medicine.gd").provide(home_army,supply)
 	var prepared:Dictionary=simulator.advance_preparation_day(home_army,{"medical_recovery":medical.recovery,"equipment_replacements":0,"manpower_replacements":0,"organization_recovery":(0.025+logistics*0.055)*(0.35+supply*0.65),"recovery_multiplier":recovery_multiplier,"doctrine_levels":preload("res://scripts/combined_arms_doctrine.gd").levels(),"doctrine_supply":supply})
@@ -3716,6 +3717,37 @@ func _deliver_inventory_replacements(delivery_limit:float)->int:
 	home_army["equipment_delivery_load_used"]=maxf(0.0,delivery_limit-remaining_capacity)
 	return delivered
 
+
+func _deliver_stationed_field_equipment(delivery_limit:float)->float:
+	# Home reserve and armies physically at the home settlement share one delivery
+	# budget and inventory. This is not remote resupply or free equipment.
+	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:return 0.0
+	var destination:=_movement_destination("player_home")
+	if destination.has("error"):return 0.0
+	var home_position:Dictionary=destination.get("position",{})
+	var point:=Vector2(float(home_position.get("x",0)),float(home_position.get("z",0)))
+	var reserve:=home_army
+	var remaining:=maxf(0,delivery_limit)
+	for index in field_armies.size():
+		if remaining<=.000001:break
+		var army:Dictionary=field_armies[index]
+		var location:Dictionary=army.get("position",{})
+		if not _army_is_home(army) or location.is_empty():continue
+		if Vector2(float(location.get("x",0)),float(location.get("z",0))).distance_to(point)>.25:continue
+		if command_hierarchy.battle.engaged(int(army.get("army_id",-1))):continue
+		home_army=army
+		var delivered:=_deliver_inventory_replacements(remaining)
+		remaining=maxf(0,remaining-float(home_army.get("equipment_delivery_load_used",0)))
+		var ammunition:=_deliver_ammunition(remaining if _next_equipment_delivery_load()<=0 else 0.0)
+		remaining=maxf(0,remaining-float(home_army.get("ammunition_delivery_load_used",0)))
+		home_army["equipment_delivered_today"]=delivered
+		home_army["ammunition_delivered_today"]=ammunition
+		var rebuilt:Dictionary=simulator.create_formation_force(String(army.get("name","Army")),home_army.get("formations",[]),float(army.get("morale",1)),float(army.get("readiness",1)))
+		for key:String in ["troops","attack","defense","armor","penetration","formations"]:home_army[key]=rebuilt[key]
+		home_army["last_report"]=_army_report_snapshot(home_army)
+		field_armies[index]=home_army
+		home_army=reserve
+	return maxf(0,delivery_limit-remaining)
 
 func _next_equipment_delivery_load()->float:
 	var next_load:=INF

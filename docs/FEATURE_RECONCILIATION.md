@@ -1900,3 +1900,8 @@ Base 07bca5f; branch codex/prehistoric-pacing-foundations. New worlds inherit te
 
 See docs/FIRST_300_YEARS_PACING.md for accepted targets, implementation evidence and outstanding work. Bounded isolated run reached 12.21 years, with war bows at 9.47 and selective planting at 11.38. A 300-year result is not claimed. Field equipment delivery remains unresolved even after AI supply correction. No global research multiplier or late technology calendar lock was introduced. No player launch, restart or save overwrite.
 Validation: 13 tests passed across founding knowledge, opening craft practice, and pacing production evidence.
+
+
+## September 21 — first 300 years: local field-equipment issue
+
+Task branch `codex/first-300-playable`, base `3044691`. Field armies physically stationed at home now share the existing daily replacement-equipment/ammunition budget and finite stores with the reserve. Remote, moving, engaged and convoy formations remain excluded. Combat totals and directly observed reports refresh after issue. Three focused headless checks pass. No save-schema change or player restart. Geography/decision acceptance criteria and outstanding campaign blockers are recorded in `FIRST_300_YEARS_PACING.md`. A running 300-year diagnostic is intermediate evidence only; no full campaign readiness claim.
