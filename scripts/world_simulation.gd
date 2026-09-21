@@ -206,7 +206,9 @@ func project(civ:Dictionary)->void:
 	civ.food_days=maxf(0.0,float(metrics.get("food_days",0)))
 	civ.institutions=float(state.society_capacities.get("institutions",0))
 	civ.food_capacity=maxf(0,float(metrics.get("food_production",0)))
-	civ.military_population=military._mobilized_count()
+	# A population share is a bounded demographic summary, not the raw military
+	# commitment ledger (which can retain absent personnel after population loss).
+	civ.military_population=minf(float(military._mobilized_count()),maxf(0,state.population_exact))
 	civ.military_share=float(civ.military_population)/maxf(1,state.population_exact)
 	civ.military_readiness=float(military.home_army.get("readiness",0))
 	civ.military_stockpile=0.0

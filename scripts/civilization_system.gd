@@ -5049,6 +5049,14 @@ func import_state(payload:Dictionary)->Dictionary:
 		for metric in ["cohesion","knowledge","production","logistics","ecology"]:
 			var value:=float(civ.get(metric,-1.0))
 			if is_finite(value) and value>1.0: civ[metric]=1.0
+		var population:=float(civ.get("population",NAN))
+		var personnel:=float(civ.get("military_population",NAN))
+		var share:=float(civ.get("military_share",NAN))
+		# Repair only finite overflow in the shared demographic projection. Owned
+		# military state remains intact; invalid negative/nonfinite data still fails.
+		if is_finite(population) and population>=1 and is_finite(personnel) and personnel>population and is_finite(share) and share>=0:
+			civ.military_population=population
+			civ.military_share=1.0
 	var previous:=export_state()
 	_apply_state(incoming)
 	var errors:=validate_state()
