@@ -1,0 +1,10 @@
+{
+  "id": "crossbowman",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Crossbowmen. An early crossbow soldier aiming a wooden-stock crossbow, clearly visible transverse bow and taut string, short bolt on the top groove, small belt quiver, no longbow or firearm.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-280bfbc8-d61f-44d6-ad37-f9750e55cc82.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/crossbowman-v1.png",
+  "sha256": "7bced9d5b41fc5ced87cd4732e841f5c03fc7563eff033dcb64571c2cd895c25",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

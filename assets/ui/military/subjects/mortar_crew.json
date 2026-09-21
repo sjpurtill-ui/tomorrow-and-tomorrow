@@ -1,0 +1,10 @@
+{
+  "id": "mortar_crew",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Mortar Teams. Two industrial-era soldiers operating a compact infantry mortar with angled tube, bipod and baseplate, one holding a finned mortar round over the muzzle. A shallow protected position, no long artillery barrel.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-16a12206-8428-45b4-ae7d-257a7871e47b.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/mortar_crew-v1.png",
+  "sha256": "7ad26a64a6c7403a05e21d1264f35e4decbd274a85cbbf16d9524f5124e53edd",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "motorized_infantry",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Motorized Infantry. Industrial soldiers stepping down from the open canvas-backed troop bed of a rugged military truck on a dusty road, rifles slung and tired faces, clear wheels and truck cab; no tracked armored carrier.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f51d5677-3bd0-490c-bc7f-1ad2bdf42a9e.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/motorized_infantry-v1.png",
+  "sha256": "00a4ac8fdbc0dba7c0ff5027702e89643554b76b8f0cefaeee974504b6ec70d9",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

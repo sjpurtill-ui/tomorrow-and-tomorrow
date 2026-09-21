@@ -1,24 +1,13 @@
 extends Node
 ## Painted UI artwork only. Roster portraits never render the world unit meshes.
 const COLORS:={"army":Color("d9b772"),"navy":Color("76bbce"),"air":Color("a9bbec")}
+const Painting=preload("res://scripts/hud/subject_painting.gd")
 static var symbols:Dictionary={}
-const PORTRAITS:={
-	"levy":"levy",
-	"line_infantry":"shield-infantry", "spearman":"shield-infantry", "armored_foot":"shield-infantry",
-	"archer":"bow-infantry", "longbowman":"bow-infantry",
-	"cavalry":"cavalry", "light_cavalry":"cavalry",
-	"musketeer":"gunpowder-infantry", "grenadier":"gunpowder-infantry",
-	"rifle_infantry":"rifle-infantry", "sharpshooter":"rifle-infantry", "mountain_infantry":"rifle-infantry",
-	"motorized_infantry":"rifle-infantry", "mechanized_infantry":"rifle-infantry", "assault_infantry":"rifle-infantry",
-	"armored_formation":"armor", "light_tank":"armor", "heavy_tank":"armor",
-	"modern_artillery":"field-artillery",
-	"war_canoe":"war-canoe", "galley":"galley", "heavy_galley":"galley",
-	"sailing_warship":"sailing-warship", "sailing_frigate":"sailing-warship", "ship_of_line":"sailing-warship",
-	"destroyer":"steel-warship", "light_cruiser":"steel-warship",
-	"observation_balloon":"observation-balloon",
-	"fighter":"propeller-aircraft", "heavy_fighter":"propeller-aircraft", "recon_plane":"propeller-aircraft",
-	"jet_fighter":"jet-aircraft"
-}
+const ART_MANIFEST="res://assets/ui/military/subject-art-manifest.json"
+static var assignments:Dictionary={}
+static func manifest()->Dictionary:
+	if assignments.is_empty():assignments=JSON.parse_string(FileAccess.get_file_as_string(ART_MANIFEST))
+	return assignments
 
 static func artwork(service:String)->Texture2D:
 	return load("res://assets/ui/military/%s-roster-v1.png" % service)
@@ -49,7 +38,7 @@ static func symbol(kind:String,color:Color,pixels:int=64)->Texture2D:
 	symbols[cache_key]=ImageTexture.create_from_image(image);return symbols[cache_key]
 
 static func illustration_path(type_id:String)->String:
-	return "res://assets/ui/military/portraits/%s-v1.png" % PORTRAITS[type_id] if PORTRAITS.has(type_id) else ""
+	return String(manifest().get(type_id,{}).get("path",""))
 
 static func role_symbol(type_id:String,service:String)->String:
 	if "balloon" in type_id or "airship" in type_id:return "balloon"
@@ -61,26 +50,29 @@ static func role_symbol(type_id:String,service:String)->String:
 	if "bow" in type_id or "skirmish" in type_id or "sling" in type_id:return "ranged"
 	return "army"
 
-func portrait(type_id:String,service:String,unknown:bool=false)->TextureRect:
-	var image:=TextureRect.new();image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+func portrait(type_id:String,service:String,unknown:bool=false)->Control:
+	var image:=Painting.new()
 	image.mouse_filter=Control.MOUSE_FILTER_IGNORE;image.clip_contents=true
 	if unknown:
-		image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		image.contain=true
 		image.texture=symbol("unknown",COLORS[service]);image.tooltip_text="Awaiting a formation report"
 		return image
 	var path:=illustration_path(type_id)
-	image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	if not path.is_empty():
+	var assignment:Dictionary=manifest().get(type_id,{})
+	var focal:Array=assignment.get("focus",[.5,.5])
+	image.focus=Vector2(float(focal[0]),float(focal[1]))
+	image.contain=bool(assignment.get("contain",false))
+	if not path.is_empty() and ResourceLoader.exists(path):
 		image.texture=load(path)
 		image.tooltip_text="Painted role illustration. Actual personnel, equipment and training are listed alongside."
 	else:
-		# Unillustrated types use a service landscape and role insignia, never an unrelated weapon or vehicle.
-		image.texture=artwork(service)
+		# Unknown legacy types use a neutral role insignia; named catalogue types require their own art.
+		image.texture=null
 		var shade:=ColorRect.new();shade.color=Color(0.025,0.06,0.075,.7);shade.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		image.add_child(shade);shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		var badge:=TextureRect.new();badge.texture=symbol(role_symbol(type_id,service),COLORS[service])
 		badge.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;badge.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;image.add_child(badge)
 		badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);badge.offset_left=22;badge.offset_right=-22;badge.offset_top=22;badge.offset_bottom=-22
-		image.tooltip_text="Service artwork and role insignia. Actual equipment is listed alongside."
+		image.tooltip_text="Role insignia. Actual equipment is listed alongside."
 	return image

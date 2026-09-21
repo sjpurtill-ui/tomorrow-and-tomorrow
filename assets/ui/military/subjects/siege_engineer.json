@@ -1,0 +1,10 @@
+{
+  "id": "siege_engineer",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Siege Engineers. Early-state engineers positioning a wooden siege ladder against an earthen fort while their leader measures a timber brace. Visible rope, wooden structure and tools; no gunpowder or modern tools.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-0316528a-12bd-4397-a8bb-f46c2c7237e6.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/siege_engineer-v1.png",
+  "sha256": "65eebbc2e3db406b16ae0ece9e290403c3474b428e4b7c5443cb4a50e3ed5d57",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

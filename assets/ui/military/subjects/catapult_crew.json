@@ -1,0 +1,10 @@
+{
+  "id": "catapult_crew",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Catapult Crews. An early torsion catapult with a short throwing arm seated in twisted rope bundles and a stout wooden frame; crew loading a rounded stone. Mechanical parts clearly coherent, no counterweight trebuchet.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-393237fc-ef77-4ad1-a6e2-394a3e1f2e95.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/catapult_crew-v1.png",
+  "sha256": "ac82e79881706410d62b13c8a4956d94ccadf3463f6d8149c22be24ef87a7534",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

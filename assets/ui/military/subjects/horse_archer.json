@@ -1,0 +1,10 @@
+{
+  "id": "horse_archer",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Horse Archers. An ancient mounted archer turning in the saddle to draw a compact recurved bow, visible bowstring and nocked arrow, horse running to the side, no firearms.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-1156b9a7-4eec-4104-b4d7-f3ca25340c00.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/horse_archer-v1.png",
+  "sha256": "490ac2660fb9d2814215904dae4c2da046f7ac7f0c01690a5b807c8f4c388ee5",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

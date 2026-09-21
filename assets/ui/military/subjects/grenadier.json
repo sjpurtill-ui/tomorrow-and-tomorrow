@@ -1,0 +1,10 @@
+{
+  "id": "grenadier",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Grenadiers. Early gunpowder grenadier advancing beside a wooden breastwork with a round iron hand grenade and short smoking fuse, musket slung. Plain practical coat, no national helmet or emblem.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-46041012-72df-4fd9-a6a4-b724fb83bac4.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/grenadier-v1.png",
+  "sha256": "98d1573aa7f88343c1a2baebf8bc3ba0d74402367d1421baa19215e86d43696b",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

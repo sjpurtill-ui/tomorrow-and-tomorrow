@@ -1,0 +1,10 @@
+{
+  "id": "spearman",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Spearmen. Several early-state infantry holding bronze-tipped spears in a close ranked line, simple woven tunics and small hide shields, lead spearman full upper body and long spear visible.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-3e5cc419-5fcf-45cb-980e-6438e42ffa55.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/spearman-v1.png",
+  "sha256": "920496b16a829eaf3416e686d8e16551fa85a694be1639c42115f8b30e5cb003",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

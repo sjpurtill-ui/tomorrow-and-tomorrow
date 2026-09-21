@@ -1,0 +1,10 @@
+{
+  "id": "marines",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Marines. Early-state naval infantry stepping from a wooden oared landing boat onto a rocky shore, short swords, small shields, ropes and plain linen. Ancient equipment, absolutely no firearms, camouflage, modern helmets or landing craft.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-cca57396-bd16-446d-b268-b32e08aa2b0f.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/marines-v1.png",
+  "sha256": "bcf6ba22c4291ff40070343a1238a851bbc3322b7366db01195f357df945364e",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

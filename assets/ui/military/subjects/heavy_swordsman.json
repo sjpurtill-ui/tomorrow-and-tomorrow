@@ -1,0 +1,10 @@
+{
+  "id": "heavy_swordsman",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Armored Swordsmen. Armored early-state foot soldier with a short iron sword and large oval wooden shield, layered scale armor, deliberate close assault posture. No mounted horse and no firearm.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-8705c98e-36ce-4991-ac69-fc4b422e1d0b.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/heavy_swordsman-v1.png",
+  "sha256": "8476604df54407814c2c5ff94946ca64557b6466e03bcea92399bf101bfd02b5",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

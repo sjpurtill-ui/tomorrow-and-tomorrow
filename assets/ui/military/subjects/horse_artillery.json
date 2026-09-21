@@ -1,0 +1,10 @@
+{
+  "id": "horse_artillery",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Horse Artillery. A lightweight gunpowder field gun hitched to a limber drawn by a team of horses, mounted crew moving quickly along a lane. Side view clearly includes the cannon, limber and horses.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-dcd2eda9-59a3-4f7f-b967-40275feccfba.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/horse_artillery-v1.png",
+  "sha256": "e9e7a4c3426140bb5c0e020c6190b0c233f7587bf79602ce69bbbe8b79f3b378",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

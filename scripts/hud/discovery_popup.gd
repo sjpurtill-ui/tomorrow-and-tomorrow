@@ -22,7 +22,7 @@ var next_button:Button
 var dismiss_button:Button
 var effect_cards:Dictionary={}
 var heading:Label
-var hero:TextureRect
+var hero:Control
 var closing:=false
 static func announce(terrain_node:Node,hud_node:Node,events:Array[Dictionary])->CanvasLayer:
 	if events.is_empty() or not is_instance_valid(hud_node):return null

@@ -1,0 +1,10 @@
+{
+  "id": "chariot",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: War Chariots. Light two-wheeled wooden war chariot pulled by two horses, driver controlling reins and archer riding beside, spoked wheels and compact wicker-sided platform completely readable.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-46f8b971-cfc1-4e05-8ebf-24cab7742be1.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/chariot-v1.png",
+  "sha256": "86403d29272f4e96dcc5b5a11b17047c0516672c9529cd435d4d3cad5256cf41",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

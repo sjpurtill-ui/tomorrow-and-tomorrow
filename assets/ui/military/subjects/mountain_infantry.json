@@ -1,0 +1,10 @@
+{
+  "id": "mountain_infantry",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Mountain Infantry. Industrial-era mountain riflemen climbing a snow-covered rocky slope with coils of rope, packs and ice tools. A bolt-action rifle slung across the closest soldier, plain hooded wool clothing, no national badge.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-e9637d5c-6526-4b63-9663-da2cc3cd72a5.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/mountain_infantry-v1.png",
+  "sha256": "f810712fa23907bdcea9dd0addd7d647753467c7a63cbccdd3b945bdeecb9ead",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

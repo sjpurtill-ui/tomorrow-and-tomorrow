@@ -17,7 +17,7 @@ func test_roster_has_service_artwork_actual_counts_and_distinct_portraits_withou
 	assert_object(screen.bindings[0].portrait.texture).is_not_null()
 	assert_str(Art.illustration_path("levy")).ends_with("levy-v1.png")
 	assert_str(Art.illustration_path("armored_formation")).ends_with("armor-v1.png")
-	assert_str(Art.illustration_path("war_elephant")).is_empty()
+	assert_str(Art.illustration_path("war_elephant")).ends_with("war_elephant-v1.png")
 	assert_bool(screen.portraits.find_children("*","SubViewport",true,false).is_empty()).is_true()
 	assert_str(Art.role_symbol("armored_formation","army")).is_equal("armor")
 	for service:String in ["army","navy","air"]:assert_object(Art.artwork(service)).is_not_null()
@@ -77,7 +77,7 @@ func test_compact_rows_and_small_army_panel_leave_the_map_visible()->void:
 	for frame in 8:await await_idle_frame()
 	assert_float(screen.bindings[0].card.size.y).is_less_equal(104)
 	assert_float(screen.panel.size.y).is_less_equal(510)
-	for type_id:String in Art.PORTRAITS:
+	for type_id:String in Art.manifest():
 		assert_bool(ResourceLoader.exists(Art.illustration_path(type_id))).override_failure_message(type_id).is_true()
 	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
 	screen.bindings[0].card.gui_input.emit(click)

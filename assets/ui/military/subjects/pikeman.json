@@ -1,0 +1,10 @@
+{
+  "id": "pikeman",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Pikemen. Dense disciplined rank of early pike soldiers with very long straight pikes held forward over each other, quilted jackets and simple helmets. Low diagonal view emphasizes exceptional pike length.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-4859a5c7-a29b-403a-9043-e66fba115748.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/pikeman-v1.png",
+  "sha256": "b0a3aee1fb955c7c58d7af58f7463bdf5a63e451cb11e70810e9adba649534a9",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

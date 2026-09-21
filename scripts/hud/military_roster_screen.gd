@@ -193,7 +193,7 @@ func _unit_card(data:Dictionary)->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 	var art:=PanelContainer.new();art.custom_minimum_size=Vector2(68,82);art.clip_contents=true
 	art.add_theme_stylebox_override("panel",_skin(Color("0e1d25"),Color("344c55"),0));row.add_child(art)
-	var portrait:TextureRect=portraits.portrait(String(data.get("type_id","")),service,bool(data.get("unknown",false)));art.add_child(portrait)
+	var portrait:Control=portraits.portrait(String(data.get("type_id","")),service,bool(data.get("unknown",false)));art.add_child(portrait)
 	var names:=VBoxContainer.new();names.custom_minimum_size.x=118;names.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	names.size_flags_vertical=Control.SIZE_SHRINK_CENTER;names.add_theme_constant_override("separation",4);row.add_child(names)
 	var title:=_label(names,String(data.name),16);title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.tooltip_text=String(data.name)

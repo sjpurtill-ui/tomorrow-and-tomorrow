@@ -1,0 +1,10 @@
+{
+  "id": "slinger",
+  "prompt": "A standalone premium realistic painterly unit portrait for Tomorrow and Tomorrow. A neutral civilization-independent military unit, no identifiable national insignia, emblems, flags, slogans, text, numbers, borders or UI. Natural proportions and carefully constructed equipment, no blocky voxel characters or toy geometry. Wide 3:2 image composed so the defining soldier, weapon or entire vehicle stays readable in the central square portrait crop. Rich atmospheric lighting and varied environments; mature strategy-game art, no gore. Specific unit: Slingers. A lightly clothed ancient slinger releasing a long woven sling overhead, pouch and both cords visibly attached and trailing through the motion; small bag of rounded stones at belt, open rocky hillside.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-e07fcc7f-c57d-4257-9128-841b0f157b44.png",
+  "collection": "military",
+  "asset": "res://assets/ui/military/subjects/slinger-v1.png",
+  "sha256": "937f6b7f46733a3f366a522f52e2f8af6d750b9b00206ce39d6538b7ad82d620",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
