@@ -5041,6 +5041,14 @@ func import_state(payload:Dictionary)->Dictionary:
 	for mission:Dictionary in incoming.get("scout_missions",[])+incoming.get("foreign_formations",[])+[incoming.get("diplomatic_mission",{})]:
 		if not rumor_network.valid_carried(mission): return {"error":"Invalid carried rumors."}
 		if not city_intelligence.valid_carried(mission): return {"error":"Invalid carried city observations."}
+	# Older shared-rule projections copied uncapped capacity into normalized
+	# summaries. Repair only finite positive overflow in this derived read model;
+	# the authoritative actor resources and production remain untouched.
+	for civ:Dictionary in incoming.get("civilizations",[]):
+		if not bool(civ.get("shared_rules",false)): continue
+		for metric in ["cohesion","knowledge","production","logistics","ecology"]:
+			var value:=float(civ.get(metric,-1.0))
+			if is_finite(value) and value>1.0: civ[metric]=1.0
 	var previous:=export_state()
 	_apply_state(incoming)
 	var errors:=validate_state()

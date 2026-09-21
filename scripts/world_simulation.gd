@@ -202,7 +202,8 @@ func project(civ:Dictionary)->void:
 	for key in GameState.POPULATION_AGE_COHORTS:civ.cohorts[key]=float(state.population_cohorts.get(key,0))
 	civ.health=state.population_health
 	var metrics:=state.simulation_metrics
-	for pair in [["cohesion","cohesion"],["knowledge","knowledge"],["production","material_capacity"],["logistics","logistics"],["ecology","ecology"],["food_days","food_days"]]:civ[pair[0]]=float(metrics.get(pair[1],0))
+	for pair in [["cohesion","cohesion"],["knowledge","knowledge"],["production","material_capacity"],["logistics","logistics"],["ecology","ecology"]]:civ[pair[0]]=clampf(float(metrics.get(pair[1],0)),0.0,1.0)
+	civ.food_days=maxf(0.0,float(metrics.get("food_days",0)))
 	civ.institutions=float(state.society_capacities.get("institutions",0))
 	civ.food_capacity=maxf(0,float(metrics.get("food_production",0)))
 	civ.military_population=military._mobilized_count()
