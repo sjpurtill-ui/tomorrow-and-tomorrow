@@ -1,0 +1,9 @@
+{
+  "id": "aerial_bombardment",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Keep the complete aircraft, including both wingtips, nose and tail, inside the composition with breathing room. The interface preserves the full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Aerial Bombardment. An unmarked historical bomber opens its bomb bay above an empty coastal military proving range, viewed from alongside; no people harmed, cities, explosions or national insignia. Distinct silhouettes with believable aircraft proportions and coherent wing/propeller geometry; early twentieth century setting.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-abbd5c02-cd22-40a4-808b-fcecb005c474.png",
+  "asset": "res://assets/ui/research/subjects/aerial_bombardment-v1.png",
+  "sha256": "f3695b13ab41554fc5e4a029d098de3e2a1eba0716541e7314db779add50d05a",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

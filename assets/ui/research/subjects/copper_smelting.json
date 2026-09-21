@@ -1,0 +1,10 @@
+{
+  "id": "copper_smelting",
+  "version": 2,
+  "prompt": "Correct this historical game illustration of the first copper smelting. Remove the forged steel blacksmith tongs entirely. The seated worker now examines several COOLED reddish copper beads on a flat stone using his bare fingertips away from the hearth; they are not glowing. Keep the green copper ore basket, the small earthen charcoal hearth, early rough clothing and existing rich realistic painterly style. His face, examining hand, beads and green ore should remain legible together in the central horizontal banner. No iron, steel, metal tools, anvil, modern equipment or text.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-b599f107-2b01-4279-aa53-afa4773efcc8.png",
+  "asset": "res://assets/ui/research/subjects/copper_smelting-v2.png",
+  "sha256": "dbc9b13751466fb9cc8c9f8db4d4e00a0cf8ef3ec7b294d5eeac84b282eba7e0",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

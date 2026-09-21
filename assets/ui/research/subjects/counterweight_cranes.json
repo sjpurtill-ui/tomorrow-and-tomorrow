@@ -1,0 +1,9 @@
+{
+  "id": "counterweight_cranes",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Counterweight Cranes. Show a concrete, visually clear scene demonstrating this exact practice: Counterweights and controlled lifting tackle let crews handle heavier loads at transfer points. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c0a9bb69-d983-40c8-bfa3-2eb89878e9a4.png",
+  "asset": "res://assets/ui/research/subjects/counterweight_cranes-v1.png",
+  "sha256": "b5e3930cfcb1ec02793e123d465729de548679c0ac42802b531f2d8e6392cd93",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

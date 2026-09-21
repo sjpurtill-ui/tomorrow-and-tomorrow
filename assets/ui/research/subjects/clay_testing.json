@@ -1,0 +1,9 @@
+{
+  "id": "clay_testing",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Clay Testing. Hands compare small clay test tiles with visibly different shrinkage cracks and textures beside raw samples. Material comparison and test pieces, not decorative pottery-making.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-e4b6f58b-c349-4162-9239-8921dc879ec3.png",
+  "asset": "res://assets/ui/research/subjects/clay_testing-v1.png",
+  "sha256": "5623178be1b28d2e55654894e0391fb1bd02378eb0f8f26626b7e1dabb43e405",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "urban_street_plans",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Urban Street Plans. Show a concrete, visually clear scene demonstrating this exact practice: Growth corridors, markets, drainage, firebreaks, and public ways are reserved before building closes them. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f36775b3-5500-40bc-905f-8c9c1a28105b.png",
+  "asset": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+  "sha256": "9be482717e765c6d96eeace31f590c89af1ae3c5019e4689bae8025ae8fb41e9",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

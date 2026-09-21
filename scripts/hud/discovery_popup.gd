@@ -13,7 +13,10 @@ var surface:Control
 var panel:PanelContainer
 var body:VBoxContainer
 var scroll:ScrollContainer
-var footer:HBoxContainer
+var footer:BoxContainer
+var introduction:BoxContainer
+var discovery_summary:VBoxContainer
+var benefits:GridContainer
 var counter:Label
 var next_button:Button
 var dismiss_button:Button
@@ -42,17 +45,22 @@ func _ready()->void:
 	Art.button(top,"×",close).tooltip_text="Dismiss all · Escape or click outside"
 	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(scroll)
 	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",12);scroll.add_child(body)
-	footer=HBoxContainer.new();footer.add_theme_constant_override("separation",8);column.add_child(footer)
+	footer=BoxContainer.new();footer.add_theme_constant_override("separation",8);column.add_child(footer)
 	Art.button(footer,"View in research",open_research).size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	dismiss_button=Art.button(footer,"Dismiss all",close)
 	next_button=Art.button(footer,"Continue",advance)
 	surface.resized.connect(layout);layout()
 func layout()->void:
 	var extent:=get_viewport().get_visible_rect().size
-	# The discovery art is square and reads better in a narrower announcement
-	# column. Keep the available height for the explanation and effect cards.
-	panel.size=Vector2(minf(600,extent.x-48),minf(730,extent.y-48));panel.position=(extent-panel.size)*.5
-	if is_instance_valid(hero):hero.custom_minimum_size.y=210 if extent.y>=750 else 142
+	var target:=Vector2(minf(740,extent.x-48),minf(730,extent.y-48))
+	var narrow:=target.x<580
+	footer.vertical=narrow
+	if is_instance_valid(introduction):introduction.vertical=narrow
+	if is_instance_valid(discovery_summary):discovery_summary.custom_minimum_size.x=0 if narrow else 270
+	if is_instance_valid(hero):
+		hero.custom_minimum_size=Vector2(0 if narrow else 250,minf(200,(target.x-36)*.667) if narrow else 210)
+	if is_instance_valid(benefits):benefits.columns=1 if narrow else 2
+	panel.size=target;panel.position=(extent-target)*.5
 func enqueue(events:Array[Dictionary])->void:
 	for event:Dictionary in events:
 		var id:=String(event.get("id",""))
@@ -71,23 +79,26 @@ func advance()->void:
 func render()->void:
 	for child in body.get_children():body.remove_child(child);child.queue_free()
 	effect_cards.clear()
+	benefits=null
 	var domain:=String(current.get("dynamic","knowledge"))
-	hero=Art.paint_discovery(body,current,210 if get_viewport().get_visible_rect().size.y>=750 else 142)
-	var label_row:=HBoxContainer.new();body.add_child(label_row)
+	introduction=BoxContainer.new();introduction.add_theme_constant_override("separation",18);body.add_child(introduction)
+	hero=Art.paint_discovery(introduction,current,210);hero.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	discovery_summary=VBoxContainer.new();discovery_summary.size_flags_horizontal=Control.SIZE_EXPAND_FILL;discovery_summary.add_theme_constant_override("separation",10);introduction.add_child(discovery_summary)
+	var label_row:=VBoxContainer.new();discovery_summary.add_child(label_row)
 	Art.label(label_row,Art.name_for(domain).to_upper(),11,Art.color(domain)).size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	Art.label(label_row,"Year %d · Day %d" % [int(current.get("day",0))/365+1,int(current.get("day",0))%365+1],11,T.MUTED).custom_minimum_size.x=112
-	heading=Art.label(body,String(current.get("name","New discovery")),32,T.INK,true)
-	Art.label(body,String(current.get("description","")),17,T.BODY,true)
+	heading=Art.label(discovery_summary,String(current.get("name","New discovery")),28,T.INK,true)
+	Art.label(discovery_summary,String(current.get("description","")),16,T.BODY,true)
 	var effects:Dictionary=current.get("effects",{})
 	if not effects.is_empty():
 		Art.label(body,"WHAT CHANGES",11,T.GOLD)
-		var cards:=GridContainer.new();cards.columns=2;cards.add_theme_constant_override("h_separation",8);cards.add_theme_constant_override("v_separation",8);body.add_child(cards)
+		var cards:=GridContainer.new();benefits=cards;cards.columns=2;cards.add_theme_constant_override("h_separation",8);cards.add_theme_constant_override("v_separation",8);body.add_child(cards)
 		for key:String in effects:
 			var value:=float(effects[key]);var beneficial:bool=(value<0) if key in COSTS else (value>0)
 			var ink:=T.GREEN if beneficial else T.AMBER
 			var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_stylebox_override("panel",T.flat(Color("1b2e34"),ink.darkened(.55),1,5,10));cards.add_child(card)
 			var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
-			var amount:=Art.label(row,percent(value),24,ink);amount.custom_minimum_size.x=96
+			var amount:=Art.label(row,percent(value),24,ink);amount.custom_minimum_size.x=72
 			var names:=VBoxContainer.new();names.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(names)
 			Art.label(names,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(key,key.replace("_"," ")).capitalize(),13,T.INK,true)
 			Art.label(names,"Benefit" if beneficial else "Trade-off",10,ink)

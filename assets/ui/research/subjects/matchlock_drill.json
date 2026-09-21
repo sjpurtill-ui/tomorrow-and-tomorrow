@@ -1,0 +1,9 @@
+{
+  "id": "matchlock_drill",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Matchlock Arms and Drill. Show a concrete, visually clear scene demonstrating this exact practice: Develop and demonstrate matchlock arms and drill through trained crews, reliable equipment and repeatable supply. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-4d6c9c38-fc40-426e-b43f-80122f5f2200.png",
+  "asset": "res://assets/ui/research/subjects/matchlock_drill-v1.png",
+  "sha256": "2b345c9937cd736559e3dcf66ce0331c17f16ed6e94d6c87cfc09365a795cd2c",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

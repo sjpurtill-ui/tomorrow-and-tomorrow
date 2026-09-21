@@ -1,0 +1,10 @@
+{
+  "id": "trained_midwives",
+  "version": 1,
+  "prompt": "Create a beautiful realistic painterly illustration for a historical civilization game's discovery Trained Midwives. A fully clothed experienced adult woman teaches three fully clothed adult trainees in a quiet modest teaching room. She demonstrates wrapping a simple cloth practice doll on a table, with clean folded linen, a water bowl and a ledger of recorded outcomes nearby. This is a calm classroom lesson in professional caregiving: no actual birth, no patient, no nudity, no medical procedure. Warm side light through a reed blind, dark ochre plaster walls, close composition around the women's attentive faces and demonstration at the same vertical level. Landscape 3:2, readable central wide banner crop, no text labels, logos, modern equipment or flags.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f5d81be7-2b86-45b8-8507-6d6d32bb33e4.png",
+  "asset": "res://assets/ui/research/subjects/trained_midwives-v1.png",
+  "sha256": "42121e638081e69f12fbd6e1ac93c04776d0e25ef1accfa1223c775127ac6e67",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

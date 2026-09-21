@@ -1,0 +1,10 @@
+{
+  "id": "curtain_wall_systems",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Glazed Curtain Walls. A modern high-rise facade under construction with a glass curtain-wall panel being fitted to slender mullions in front of the structural frame, elegant reflections, no solid masonry load-bearing wall.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-d195c806-2d91-430c-87a5-4b082de637c1.png",
+  "asset": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png",
+  "sha256": "5728c10dd3f8141f38c4283d62be6fed17557e0ec54f5beab3a594929c32761b",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Glass panel attached to mullions in front of the structural floor frame."
+}

@@ -1,0 +1,9 @@
+{
+  "id": "wound_cleaning",
+  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Wound Cleaning. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. A compassionate early healer gently pours clear water from a simple hollow wooden scoop over a small, non-graphic scrape on another adult's forearm. Clean woven cloth and a stream beside them. Tender natural close-up of careful washing. No herbs, surgery, blood, bandage wrapping, metal medical tools, ceramic vessels or modern clinic. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-ba050309-d13a-4645-8f5f-0630d4b338e9.png",
+  "asset": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+  "sha256": "8dfbe02f43d5fe90ecc9eb63d2b362949032e2c330af5abb2a8890c86bb93ec9",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

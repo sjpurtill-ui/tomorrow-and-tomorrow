@@ -1,0 +1,9 @@
+{
+  "id": "cargo_seals",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Cargo Seals. Show a concrete, visually clear scene demonstrating this exact practice: Marked seals allow comparison of dispatched and received cargo to identify losses along a route. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. These are early settled communities. Use small earth, stone and timber buildings and simple fiber clothing. Tools are stone, bone and wood unless this discovery specifically concerns metalworking. No steel tools, modern objects, medieval castles, grand cities or industrial machinery. Make this scene composition distinct, with varied climate and terrain.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-d3e8a412-513f-450e-8189-615ec8090261.png",
+  "asset": "res://assets/ui/research/subjects/cargo_seals-v1.png",
+  "sha256": "6b9f7f566e54329431f1ba4b45a110f308cd4db0a0d4732d3b6fb3086691f530",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

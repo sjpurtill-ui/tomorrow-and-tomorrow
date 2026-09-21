@@ -1,0 +1,9 @@
+{
+  "id": "mine_shoring",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Timbered Mine Shoring. An old mine gallery with regularly spaced stout timber posts and crossbeams, a worker inspects a support joint; structural supports and safe passage, no rails or electric lamps.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-641862d1-f5e1-4430-8ca5-663212eb1586.png",
+  "asset": "res://assets/ui/research/subjects/mine_shoring-v1.png",
+  "sha256": "213d7b8e31898e32e068747e0ad2cddd3d1d924553f7cd7c06a51055628c69c7",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

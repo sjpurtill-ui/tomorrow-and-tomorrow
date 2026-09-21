@@ -1,0 +1,10 @@
+{
+  "id": "work_motion_studies",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Work Motion Studies. Show a concrete, visually clear scene demonstrating this exact practice: Measured comparisons of tool placement and repeated movements reduce wasted effort at workshops. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-ce95a3ec-f6ef-4839-a2c6-7a2a2a7bef49.png",
+  "asset": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+  "sha256": "7138f33c920ad5ba677f821b3cdb6eb0c03d7ff01fc155cbe1bab574e307707b",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Tool placement, observed movements and timed comparison are distinct from ordinary craft production."
+}

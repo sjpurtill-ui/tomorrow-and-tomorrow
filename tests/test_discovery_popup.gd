@@ -72,13 +72,25 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	assert_str(popup.effect_cards.survey_speed.value.text).is_equal("+3%")
 	assert_str(popup.effect_cards.tool_quality.value.text).is_equal("+4%")
 	popup.close()
-func test_reviewed_art_is_cropped_and_hidden_questions_do_not_reveal_subject_art()->void:
+func test_subject_art_is_specific_and_hidden_questions_do_not_reveal_it()->void:
+	var Art=preload("res://scripts/hud/research_visuals.gd")
 	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
+	assert_str(popup.hero.texture.resource_path).ends_with("food_drying-v1.png")
 	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
-	assert_bool(popup.hero.texture is AtlasTexture).is_true()
-	assert_int(popup.hero.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_COVERED)
 	var hidden:={"id":"stone_sorting","domain":"production","exposed":false}
 	assert_str(Art.subject_art_key(hidden)).is_empty()
-	assert_str(Art.for_discovery(hidden).resource_path).is_equal("res://assets/ui/research/production-v1.png")
-	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).is_equal("res://assets/ui/research/paper/clay_shaping.png")
+	assert_object(Art.for_discovery(hidden)).is_null()
+	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).ends_with("clay_shaping-v1.png")
+	popup.close()
+func test_full_illustration_and_footer_fit_after_resizing_to_phone_width()->void:
+	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12},{"id":"drainage","day":12}])
+	for width:int in [1200,340,800]:
+		f.canvas.size=Vector2i(width,640)
+		for i in 10:await get_tree().process_frame
+		assert_bool(Rect2(0,0,width,640).grow(.1).encloses(popup.panel.get_global_rect())).is_true()
+		assert_bool(popup.panel.get_global_rect().encloses(popup.next_button.get_global_rect())).is_true()
+		assert_bool(popup.panel.get_global_rect().encloses(popup.dismiss_button.get_global_rect())).is_true()
+		assert_float(popup.body.get_combined_minimum_size().x).is_less_equal(popup.scroll.size.x+.1)
+		assert_int(popup.hero.stretch_mode).is_equal(TextureRect.STRETCH_KEEP_ASPECT_CENTERED)
+		assert_bool(popup.introduction.vertical).is_equal(width<628)
 	popup.close()

@@ -1,0 +1,9 @@
+{
+  "id": "comparative_chronicles",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Comparative Chronicles. Show a concrete, visually clear scene demonstrating this exact practice: Competing written accounts are checked against dates and records rather than repeating one official memory. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-54e13fc1-f56e-4d0f-af40-8589ad230c21.png",
+  "asset": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+  "sha256": "21ea809441e6882f9d2e406931fd84ba461ea72dbe63788c55898a79ce21d777",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

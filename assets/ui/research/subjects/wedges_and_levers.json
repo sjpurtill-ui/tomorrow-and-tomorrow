@@ -1,0 +1,9 @@
+{
+  "id": "wedges_and_levers",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Wedges and Levers. Workers lift a heavy stone a small distance using a stout wooden lever on a stone fulcrum and carefully spaced wedges; leverage clearly readable, no pulley crane.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-a7d94f35-22e9-4625-8315-d29d571e43c6.png",
+  "asset": "res://assets/ui/research/subjects/wedges_and_levers-v1.png",
+  "sha256": "4357617990043540edfd96018fb6e552f2580590201dd4849355cefcbdbdd94a",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "crew_handoffs",
+  "prompt": "Correct this early construction crew handoff illustration. Replace EVERY metal hammer or tool with wooden mallets, bone implements or stone tools. Simplify the huge timber building to one modest early communal house frame. Preserve the main clear action: a departing worker handing a wooden mallet to a fresh arriving worker while others finish their shift. Realistic painted game illustration, no metal tools, text, UI, flags or modern machinery.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-efef3a06-c2f7-46f4-84d4-b617ab99656e.png",
+  "version": 2,
+  "asset": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+  "sha256": "6ee21a3c9c24e8a3b2ac7a801f7d3550405a0c7167608f9b0491dc0dcf790730",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "naval_aviation",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Keep the complete central aircraft or landing craft inside the frame with breathing room. The interface preserves the full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Naval Aviation. A floatplane is lowered from a cruiser by a deck crane toward calm water, ship and seaplane clearly readable; no aircraft carrier runway. Early-to-mid twentieth century machinery and uniforms. Absolutely plain unmarked aircraft and uniforms: no roundels, stars, crosses, stripes, letters, numbers, flag colors or historical national markings on ANY surface.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-1002a9a4-57c7-482a-8e3f-3072e76abdee.png",
+  "asset": "res://assets/ui/research/subjects/naval_aviation-v1.png",
+  "sha256": "ca6b5c4267b1d0b2b65fb60d9e6dd3b7610c4e6f014d465532b06f048fbde117",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

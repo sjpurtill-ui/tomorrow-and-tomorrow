@@ -1,0 +1,9 @@
+{
+  "id": "fermentation_control",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Controlled Fermentation. Show a concrete, visually clear scene demonstrating this exact practice: Temperature, vessels, and starter cultures are managed to reproduce fermentation. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-d1224cb2-298f-4108-a7b3-baaee6b0295e.png",
+  "asset": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+  "sha256": "a0682a54b343411a5aa755aa1fcad61a880b3759eca4de024d2174a416d9acb7",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

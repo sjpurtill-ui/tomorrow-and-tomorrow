@@ -1,0 +1,1381 @@
+{
+  "seasonal_patterns": {
+    "path": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
+    "focus": [
+      0.5,
+      0.38
+    ]
+  },
+  "seed_selection": {
+    "path": "res://assets/ui/research/subjects/seed_selection-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "food_drying": {
+    "path": "res://assets/ui/research/subjects/food_drying-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "smoking": {
+    "path": "res://assets/ui/research/subjects/smoking-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "cordage": {
+    "path": "res://assets/ui/research/subjects/cordage-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "basketry": {
+    "path": "res://assets/ui/research/subjects/basketry-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "charcoal": {
+    "path": "res://assets/ui/research/subjects/charcoal-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "clay_shaping": {
+    "path": "res://assets/ui/research/subjects/clay_shaping-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "pit_firing": {
+    "path": "res://assets/ui/research/subjects/pit_firing-v1.png",
+    "focus": [
+      0.5,
+      0.58
+    ]
+  },
+  "joinery": {
+    "path": "res://assets/ui/research/subjects/joinery-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "drainage": {
+    "path": "res://assets/ui/research/subjects/drainage-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "well_siting": {
+    "path": "res://assets/ui/research/subjects/well_siting-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "wound_cleaning": {
+    "path": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "herbal_classification": {
+    "path": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "clean_water": {
+    "path": "res://assets/ui/research/subjects/clean_water-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "tallies": {
+    "path": "res://assets/ui/research/subjects/tallies-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "standard_measures": {
+    "path": "res://assets/ui/research/subjects/standard_measures-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "route_memory": {
+    "path": "res://assets/ui/research/subjects/route_memory-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "labor_rotations": {
+    "path": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "customary_law": {
+    "path": "res://assets/ui/research/subjects/customary_law-v1.png",
+    "focus": [
+      0.5,
+      0.39
+    ]
+  },
+  "public_stores": {
+    "path": "res://assets/ui/research/subjects/public_stores-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "watch_rotation": {
+    "path": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+    "focus": [
+      0.5,
+      0.42
+    ]
+  },
+  "formation_drill": {
+    "path": "res://assets/ui/research/subjects/formation_drill-v1.png",
+    "focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "supply_groups": {
+    "path": "res://assets/ui/research/subjects/supply_groups-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "animal_taming": {
+    "path": "res://assets/ui/research/subjects/animal_taming-v1.png",
+    "focus": [
+      0.5,
+      0.44
+    ]
+  },
+  "pack_animals": {
+    "path": "res://assets/ui/research/subjects/pack_animals-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "domesticated_mounts": {
+    "path": "res://assets/ui/research/subjects/domesticated_mounts-v1.png",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  },
+  "mounted_scouts": {
+    "path": "res://assets/ui/research/subjects/mounted_scouts-v1.png",
+    "focus": [
+      0.5,
+      0.37
+    ]
+  },
+  "hide_floats": {
+    "path": "res://assets/ui/research/subjects/hide_floats-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "river_craft": {
+    "path": "res://assets/ui/research/subjects/river_craft-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "coastal_watercraft": {
+    "path": "res://assets/ui/research/subjects/coastal_watercraft-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "stone_sorting": {
+    "path": "res://assets/ui/research/stone-selection-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "controlled_flaking": {
+    "path": "res://assets/ui/research/subjects/controlled_flaking-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "hafted_tools": {
+    "path": "res://assets/ui/research/subjects/hafted_tools-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "timber_grading": {
+    "path": "res://assets/ui/research/subjects/timber_grading-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "timber_seasoning": {
+    "path": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "framed_construction": {
+    "path": "res://assets/ui/research/subjects/framed_construction-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "fiber_grading": {
+    "path": "res://assets/ui/research/subjects/fiber_grading-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "woven_carriers": {
+    "path": "res://assets/ui/research/subjects/woven_carriers-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "rope_rigging": {
+    "path": "res://assets/ui/research/subjects/rope_rigging-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "clay_testing": {
+    "path": "res://assets/ui/research/subjects/clay_testing-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "clay_tempering": {
+    "path": "res://assets/ui/research/subjects/clay_tempering-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "sealed_vessels": {
+    "path": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "kiln_control": {
+    "path": "res://assets/ui/research/subjects/kiln_control-v1.png",
+    "focus": [
+      0.5,
+      0.43
+    ]
+  },
+  "quarry_reading": {
+    "path": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+    "focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "wedges_and_levers": {
+    "path": "res://assets/ui/research/subjects/wedges_and_levers-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "lime_burning": {
+    "path": "res://assets/ui/research/subjects/lime_burning-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "lime_mortar": {
+    "path": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "salt_working": {
+    "path": "res://assets/ui/research/subjects/salt_working-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "curing_regimens": {
+    "path": "res://assets/ui/research/subjects/curing_regimens-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "peat_drying": {
+    "path": "res://assets/ui/research/subjects/peat_drying-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "ore_assaying": {
+    "path": "res://assets/ui/research/subjects/ore_assaying-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "copper_smelting": {
+    "path": "res://assets/ui/research/subjects/copper_smelting-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "copper_casting": {
+    "path": "res://assets/ui/research/subjects/copper_casting-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "bronze_alloying": {
+    "path": "res://assets/ui/research/subjects/bronze_alloying-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "mine_shoring": {
+    "path": "res://assets/ui/research/subjects/mine_shoring-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "mine_drainage": {
+    "path": "res://assets/ui/research/subjects/mine_drainage-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "bitumen_sealing": {
+    "path": "res://assets/ui/research/subjects/bitumen_sealing-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "iron_assaying": {
+    "path": "res://assets/ui/research/subjects/iron_assaying-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "bloomery_smelting": {
+    "path": "res://assets/ui/research/subjects/bloomery_smelting-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "forge_welding": {
+    "path": "res://assets/ui/research/subjects/forge_welding-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "hardened_edges": {
+    "path": "res://assets/ui/research/subjects/hardened_edges-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "coal_grading": {
+    "path": "res://assets/ui/research/subjects/coal_grading-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "coke_firing": {
+    "path": "res://assets/ui/research/subjects/coke_firing-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "refractory_furnaces": {
+    "path": "res://assets/ui/research/subjects/refractory_furnaces-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "blast_furnace": {
+    "path": "res://assets/ui/research/subjects/blast_furnace-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "sulfur_purification": {
+    "path": "res://assets/ui/research/subjects/sulfur_purification-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "nitrate_cultivation": {
+    "path": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "black_powder": {
+    "path": "res://assets/ui/research/subjects/black_powder-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "phosphate_dressing": {
+    "path": "res://assets/ui/research/subjects/phosphate_dressing-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "graphite_marking": {
+    "path": "res://assets/ui/research/subjects/graphite_marking-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "graphite_crucibles": {
+    "path": "res://assets/ui/research/subjects/graphite_crucibles-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "material_accounting": {
+    "path": "res://assets/ui/research/subjects/material_accounting-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "workshop_standards": {
+    "path": "res://assets/ui/research/subjects/workshop_standards-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "crop_calendars": {
+    "path": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  },
+  "managed_fallow": {
+    "path": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "seed_reserves": {
+    "path": "res://assets/ui/research/subjects/seed_reserves-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "irrigation_schedules": {
+    "path": "res://assets/ui/research/subjects/irrigation_schedules-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "crop_rotation": {
+    "path": "res://assets/ui/research/subjects/crop_rotation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "grain_milling": {
+    "path": "res://assets/ui/research/subjects/grain_milling-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "fermentation_control": {
+    "path": "res://assets/ui/research/subjects/fermentation_control-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "regional_granaries": {
+    "path": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "soil_assays": {
+    "path": "res://assets/ui/research/subjects/soil_assays-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "intensive_gardens": {
+    "path": "res://assets/ui/research/subjects/intensive_gardens-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "birth_attendants": {
+    "path": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "latrine_siting": {
+    "path": "res://assets/ui/research/subjects/latrine_siting-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "isolation_practice": {
+    "path": "res://assets/ui/research/subjects/isolation_practice-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "case_records": {
+    "path": "res://assets/ui/research/subjects/case_records-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "trained_midwives": {
+    "path": "res://assets/ui/research/subjects/trained_midwives-v1.png",
+    "focus": [
+      0.5,
+      0.48
+    ]
+  },
+  "public_baths": {
+    "path": "res://assets/ui/research/subjects/public_baths-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "surgical_anatomy": {
+    "path": "res://assets/ui/research/subjects/surgical_anatomy-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "civic_infirmaries": {
+    "path": "res://assets/ui/research/subjects/civic_infirmaries-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "contagion_mapping": {
+    "path": "res://assets/ui/research/subjects/contagion_mapping-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "preventive_inoculation": {
+    "path": "res://assets/ui/research/subjects/preventive_inoculation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "pictographic_records": {
+    "path": "res://assets/ui/research/subjects/pictographic_records-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "place_value": {
+    "path": "res://assets/ui/research/subjects/place_value-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "phonetic_notation": {
+    "path": "res://assets/ui/research/subjects/phonetic_notation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "formal_archives": {
+    "path": "res://assets/ui/research/subjects/formal_archives-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "geometric_survey": {
+    "path": "res://assets/ui/research/subjects/geometric_survey-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "regional_maps": {
+    "path": "res://assets/ui/research/subjects/regional_maps-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "public_schools": {
+    "path": "res://assets/ui/research/subjects/public_schools-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "paper_making": {
+    "path": "res://assets/ui/research/subjects/paper_making-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "printing_process": {
+    "path": "res://assets/ui/research/subjects/printing_process-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "experimental_controls": {
+    "path": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "statistical_inference": {
+    "path": "res://assets/ui/research/subjects/statistical_inference-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "household_councils": {
+    "path": "res://assets/ui/research/subjects/household_councils-v1.png",
+    "focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "census_rolls": {
+    "path": "res://assets/ui/research/subjects/census_rolls-v1.png",
+    "focus": [
+      0.5,
+      0.44
+    ]
+  },
+  "public_levies": {
+    "path": "res://assets/ui/research/subjects/public_levies-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "specialized_courts": {
+    "path": "res://assets/ui/research/subjects/specialized_courts-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "property_registers": {
+    "path": "res://assets/ui/research/subjects/property_registers-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "craft_guilds": {
+    "path": "res://assets/ui/research/subjects/craft_guilds-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "public_credit": {
+    "path": "res://assets/ui/research/subjects/public_credit-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "risk_pools": {
+    "path": "res://assets/ui/research/subjects/risk_pools-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "professional_service": {
+    "path": "res://assets/ui/research/subjects/professional_service-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "graded_roads": {
+    "path": "res://assets/ui/research/subjects/graded_roads-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "timber_bridges": {
+    "path": "res://assets/ui/research/subjects/timber_bridges-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "canal_locks": {
+    "path": "res://assets/ui/research/subjects/canal_locks-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "water_mills": {
+    "path": "res://assets/ui/research/subjects/water_mills-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "urban_street_plans": {
+    "path": "res://assets/ui/research/subjects/urban_street_plans-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "covered_sewers": {
+    "path": "res://assets/ui/research/subjects/covered_sewers-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "precision_machinery": {
+    "path": "res://assets/ui/research/subjects/precision_machinery-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "hafted_weapons": {
+    "path": "res://assets/ui/research/subjects/hafted_weapons-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "bow_craft": {
+    "path": "res://assets/ui/research/subjects/bow_craft-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "shield_wall": {
+    "path": "res://assets/ui/research/subjects/shield_wall-v2.png",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  },
+  "field_fortifications": {
+    "path": "res://assets/ui/research/subjects/field_fortifications-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "fortified_stores": {
+    "path": "res://assets/ui/research/subjects/fortified_stores-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "siege_engineering": {
+    "path": "res://assets/ui/research/subjects/siege_engineering-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "bronze_weaponry": {
+    "path": "res://assets/ui/research/subjects/bronze_weaponry-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "professional_corps": {
+    "path": "res://assets/ui/research/subjects/professional_corps-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "military_staffs": {
+    "path": "res://assets/ui/research/subjects/military_staffs-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "battlefield_medicine": {
+    "path": "res://assets/ui/research/subjects/battlefield_medicine-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "powder_artillery": {
+    "path": "res://assets/ui/research/subjects/powder_artillery-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "structural_steel": {
+    "path": "res://assets/ui/research/subjects/structural_steel-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "reinforced_concrete": {
+    "path": "res://assets/ui/research/subjects/reinforced_concrete-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "safety_lifts": {
+    "path": "res://assets/ui/research/subjects/safety_lifts-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "curtain_wall_systems": {
+    "path": "res://assets/ui/research/subjects/curtain_wall_systems-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "pike_drill": {
+    "path": "res://assets/ui/research/subjects/pike_drill-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "crossbow_mechanism": {
+    "path": "res://assets/ui/research/subjects/crossbow_mechanism-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "war_chariots": {
+    "path": "res://assets/ui/research/subjects/war_chariots-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "armored_riding": {
+    "path": "res://assets/ui/research/subjects/armored_riding-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "elephant_training": {
+    "path": "res://assets/ui/research/subjects/elephant_training-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "counterweight_engines": {
+    "path": "res://assets/ui/research/subjects/counterweight_engines-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "matchlock_drill": {
+    "path": "res://assets/ui/research/subjects/matchlock_drill-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "mounted_firearms": {
+    "path": "res://assets/ui/research/subjects/mounted_firearms-v2.png",
+    "focus": [
+      0.5,
+      0.38
+    ]
+  },
+  "galley_navigation": {
+    "path": "res://assets/ui/research/subjects/galley_navigation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "naval_arsenals": {
+    "path": "res://assets/ui/research/subjects/naval_arsenals-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "ocean_sailing": {
+    "path": "res://assets/ui/research/subjects/ocean_sailing-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "naval_gunnery": {
+    "path": "res://assets/ui/research/subjects/naval_gunnery-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "steam_propulsion": {
+    "path": "res://assets/ui/research/subjects/steam_propulsion-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "armored_hulls": {
+    "path": "res://assets/ui/research/subjects/armored_hulls-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "naval_torpedoes": {
+    "path": "res://assets/ui/research/subjects/naval_torpedoes-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "naval_fire_control": {
+    "path": "res://assets/ui/research/subjects/naval_fire_control-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "submersible_hulls": {
+    "path": "res://assets/ui/research/subjects/submersible_hulls-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "naval_logistics": {
+    "path": "res://assets/ui/research/subjects/naval_logistics-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "aerostat_observation": {
+    "path": "res://assets/ui/research/subjects/aerostat_observation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "fuel_refining": {
+    "path": "res://assets/ui/research/subjects/fuel_refining-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "powered_flight": {
+    "path": "res://assets/ui/research/subjects/powered_flight-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "fighter_tactics": {
+    "path": "res://assets/ui/research/subjects/fighter_tactics-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "aerial_bombardment": {
+    "path": "res://assets/ui/research/subjects/aerial_bombardment-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "advanced_airframes": {
+    "path": "res://assets/ui/research/subjects/advanced_airframes-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "naval_aviation": {
+    "path": "res://assets/ui/research/subjects/naval_aviation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "carrier_aviation": {
+    "path": "res://assets/ui/research/subjects/carrier_aviation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "airborne_operations": {
+    "path": "res://assets/ui/research/subjects/airborne_operations-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "amphibious_operations": {
+    "path": "res://assets/ui/research/subjects/amphibious_operations-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "jet_propulsion": {
+    "path": "res://assets/ui/research/subjects/jet_propulsion-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "rotary_wing": {
+    "path": "res://assets/ui/research/subjects/rotary_wing-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "guided_weapons": {
+    "path": "res://assets/ui/research/subjects/guided_weapons-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "naval_missiles": {
+    "path": "res://assets/ui/research/subjects/naval_missiles-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "nuclear_propulsion": {
+    "path": "res://assets/ui/research/subjects/nuclear_propulsion-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "remote_aircraft": {
+    "path": "res://assets/ui/research/subjects/remote_aircraft-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "rifled_barrels": {
+    "path": "res://assets/ui/research/subjects/rifled_barrels-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "metallic_cartridges": {
+    "path": "res://assets/ui/research/subjects/metallic_cartridges-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "automatic_actions": {
+    "path": "res://assets/ui/research/subjects/automatic_actions-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "internal_combustion": {
+    "path": "res://assets/ui/research/subjects/internal_combustion-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "armored_vehicles": {
+    "path": "res://assets/ui/research/subjects/armored_vehicles-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "indirect_fire": {
+    "path": "res://assets/ui/research/subjects/indirect_fire-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "armor_piercing_weapons": {
+    "path": "res://assets/ui/research/subjects/armor_piercing_weapons-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "atomic_physics": {
+    "path": "res://assets/ui/research/subjects/atomic_physics-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "reactor_engineering": {
+    "path": "res://assets/ui/research/subjects/reactor_engineering-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "festival_calendar": {
+    "path": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "oral_epics": {
+    "path": "res://assets/ui/research/subjects/oral_epics-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "public_theatre": {
+    "path": "res://assets/ui/research/subjects/public_theatre-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "civic_games": {
+    "path": "res://assets/ui/research/subjects/civic_games-v2.png",
+    "focus": [
+      0.5,
+      0.45
+    ]
+  },
+  "comparative_chronicles": {
+    "path": "res://assets/ui/research/subjects/comparative_chronicles-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "public_libraries": {
+    "path": "res://assets/ui/research/subjects/public_libraries-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "crew_handoffs": {
+    "path": "res://assets/ui/research/subjects/crew_handoffs-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "apprentice_contracts": {
+    "path": "res://assets/ui/research/subjects/apprentice_contracts-v1.png",
+    "focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "work_rest_limits": {
+    "path": "res://assets/ui/research/subjects/work_rest_limits-v2.png",
+    "focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "work_motion_studies": {
+    "path": "res://assets/ui/research/subjects/work_motion_studies-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "shared_childcare": {
+    "path": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "maternal_recovery": {
+    "path": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "child_growth_records": {
+    "path": "res://assets/ui/research/subjects/child_growth_records-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "household_space_planning": {
+    "path": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "wayfinding_stars": {
+    "path": "res://assets/ui/research/subjects/wayfinding_stars-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "caravanserais": {
+    "path": "res://assets/ui/research/subjects/caravanserais-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "counterweight_cranes": {
+    "path": "res://assets/ui/research/subjects/counterweight_cranes-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "cargo_seals": {
+    "path": "res://assets/ui/research/subjects/cargo_seals-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  }
+}

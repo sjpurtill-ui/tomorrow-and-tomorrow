@@ -1,0 +1,9 @@
+{
+  "id": "regional_granaries",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Regional Granaries. Show a concrete, visually clear scene demonstrating this exact practice: Surplus is distributed among measured, inspected stores rather than concentrated in one vulnerable reserve. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-433244ac-1739-4b65-8047-d11c0d1b8737.png",
+  "asset": "res://assets/ui/research/subjects/regional_granaries-v1.png",
+  "sha256": "4a9e022fe15294daeb6dc67309344eaabca490022fd9c0bbdc46e877aa91bb81",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "reinforced_concrete",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Reinforced Concrete. Builders pour concrete around a visible reinforcing steel cage in a structural column, wet concrete and rebar clearly contrasted; no steel skyscraper panorama.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-42384435-0d5c-402c-86df-609cb630706b.png",
+  "asset": "res://assets/ui/research/subjects/reinforced_concrete-v1.png",
+  "sha256": "7968879f74fdea2cb18fdd42b763ea75f83520020fb6ea81d0611bcb7beb4fdd",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "herbal_classification",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Medicinal Classification. An early healer compares leaves, roots and flowers in separate groups on a dark mat, each plant distinct and hands examining botanical features, no potion bottles or modern lab.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f066f19e-8f35-43f5-80e7-de99b7d53738.png",
+  "asset": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+  "sha256": "36c6783b4ff439cf7d02f4e9c811fac3702d358c8c2410131eb2a579a3200fa7",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

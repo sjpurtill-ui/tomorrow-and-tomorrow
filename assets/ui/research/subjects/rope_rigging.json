@@ -1,0 +1,9 @@
+{
+  "id": "rope_rigging",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Rope Rigging. A small lifting crew guides a suspended stone using thick ropes and simple wooden pulley blocks; show clearly threaded tackle and controlled lift, no modern crane.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-47f0a0de-035d-4d8a-aca7-639121c01f14.png",
+  "asset": "res://assets/ui/research/subjects/rope_rigging-v1.png",
+  "sha256": "ea6658c9f2169528a5f4f3e257aef894afe2b91b0bcbb7a8e712007c8b862643",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

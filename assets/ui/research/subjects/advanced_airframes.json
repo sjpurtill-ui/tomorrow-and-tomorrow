@@ -1,0 +1,9 @@
+{
+  "id": "advanced_airframes",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Keep the complete aircraft, including both wingtips, nose and tail, inside the composition with breathing room. The interface preserves the full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Advanced Airframes. An aircraft workshop shows an all-metal monoplane airframe with stressed skin panels and clean aerodynamic wing structure, engineers inspecting ribs; no fabric biplane. Distinct silhouettes with believable aircraft proportions and coherent wing/propeller geometry; early twentieth century setting.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-5684a5ed-8bef-486e-baf6-09032c31ce28.png",
+  "asset": "res://assets/ui/research/subjects/advanced_airframes-v1.png",
+  "sha256": "c5cd1e7edbf75a7f70cb0099b60a129c23b52db606400cce6aa031de5ae7efdf",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

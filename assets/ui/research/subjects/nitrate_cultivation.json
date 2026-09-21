@@ -1,0 +1,10 @@
+{
+  "id": "nitrate_cultivation",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Nitrate Beds. Workers tend raised earth beds beneath a ventilated shelter, drainage channels and compost-like layers visible; historical nitrate-rich earth cultivation, no explosives or chemistry recipe.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-dad921c3-86d4-499f-8667-a4415b8408d6.png",
+  "asset": "res://assets/ui/research/subjects/nitrate_cultivation-v1.png",
+  "sha256": "0d037fd699fc36d32bc9a4fa71c9cdcdafc24d12fe2ad9af50abf72eea114980",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Sheltered managed organic-earth beds and drainage depict the assigned subject."
+}

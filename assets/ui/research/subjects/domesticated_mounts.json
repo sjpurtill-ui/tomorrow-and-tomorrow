@@ -1,0 +1,9 @@
+{
+  "id": "domesticated_mounts",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Domesticated Mounts. A calm horse accepts an early rider while another person steadies it in an open grassy enclosure; simple reins and a plain riding pad, no armor, stirrups or saddle cargo.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-4f45c0e1-8838-46e8-bf05-9c210c7fd1b2.png",
+  "asset": "res://assets/ui/research/subjects/domesticated_mounts-v1.png",
+  "sha256": "7fb8deea4a8ae91fefae469a790bdd087809a1db14eaca6fd7cb230c4a08e888",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

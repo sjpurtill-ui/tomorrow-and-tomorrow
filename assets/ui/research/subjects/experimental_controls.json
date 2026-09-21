@@ -1,0 +1,10 @@
+{
+  "id": "experimental_controls",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Experimental Controls. Show a concrete, visually clear scene demonstrating this exact practice: Investigators deliberately vary one condition while holding others stable and preserve failed trials. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Two matched rows of seedlings in identical earthenware pots; one row receives light through an open shutter, the other is under a wooden shade. Investigator records comparative growth. No modern laboratory glassware.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c072ec92-dd0d-4dda-a1c0-a725f9b0b392.png",
+  "asset": "res://assets/ui/research/subjects/experimental_controls-v1.png",
+  "sha256": "bb8677a13db974ad1448354cc87fe633e70a6da1dde052089e73664be2ab26c5",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Matched pots with deliberate shade/light comparison and recorded observations."
+}

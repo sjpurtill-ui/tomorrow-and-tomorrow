@@ -1,0 +1,9 @@
+{
+  "id": "public_schools",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Public Instruction. Show a concrete, visually clear scene demonstrating this exact practice: Teaching is organized beyond households and occupations, widening access to preserved knowledge. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c8d7a56e-52e1-4d8c-bde5-d557cd199ca1.png",
+  "asset": "res://assets/ui/research/subjects/public_schools-v1.png",
+  "sha256": "18717bce42a9bb4761f5c375f7fe1efa201cd80b42b1e9958f27a0c054b833cb",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

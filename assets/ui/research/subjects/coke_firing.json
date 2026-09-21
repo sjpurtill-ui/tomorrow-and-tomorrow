@@ -1,0 +1,10 @@
+{
+  "id": "coke_firing",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Coke Firing. A row of historical coke ovens with a worker drawing out porous glowing coke into a cooling area; clear black porous fuel, no cooking stove or charcoal mound.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-a1f981c9-ec91-4be5-a80f-9cc659d121d9.png",
+  "asset": "res://assets/ui/research/subjects/coke_firing-v1.png",
+  "sha256": "179872eac8f97eaffe5796dc41d7dd93b0a04fdf0ffdef1485f3f6ef6260ed1f",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Distinct porous coke drawn from masonry ovens; full composition approved."
+}

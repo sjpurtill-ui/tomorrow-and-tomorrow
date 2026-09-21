@@ -1,0 +1,9 @@
+{
+  "id": "graded_roads",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Graded Roads. Show a concrete, visually clear scene demonstrating this exact practice: Road surfaces are crowned, drained, and repaired according to traffic and terrain. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Depict the early practice in a small pre-metal community: simple timber, earth, natural fiber and stone tools. No steel, iron or bronze implements, forge, complex masonry city, medieval castle, tall sailing ship, modern clothes, written alphabet or printed paper. Any records use simple marks or clay tokens if the named practice calls for them.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-2eb28279-64b7-4d39-ba9e-45465a20d929.png",
+  "asset": "res://assets/ui/research/subjects/graded_roads-v1.png",
+  "sha256": "181e91ac4252da1bd087fb7445828e7673a915124098072ea25d634965453535",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

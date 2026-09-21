@@ -1,0 +1,9 @@
+{
+  "id": "guided_weapons",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the complete important subject and action with balanced breathing room, preserving all machinery and people in the full 3:2 illustration. The interface will display the entire image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Guided Weapons. A neutral military technician inspects the sensor nose and control fins of a guided missile on a maintenance cradle, no schematics, instructions, markings or launch attack. This is a twentieth-century technical scene: industrial architecture, practical modern work clothes. Every aircraft, weapon and vessel must be absolutely unmarked: no roundels, stars, crosses, stripes, letters, numbers or flags on any surface. No instructional cutaway or technical diagram.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-15fdb5c5-3862-4953-9f1d-f49270cb5139.png",
+  "asset": "res://assets/ui/research/subjects/guided_weapons-v1.png",
+  "sha256": "48e826cfc44622a90094f96ced02223f8ec013225e0470663b3099cd03ccb5f9",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

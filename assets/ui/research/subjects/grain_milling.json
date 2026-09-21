@@ -1,0 +1,9 @@
+{
+  "id": "grain_milling",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Rotary Grain Milling. Show a concrete, visually clear scene demonstrating this exact practice: Rotary stones convert stored grain into digestible flour with less labor. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f3f475e5-8d67-4d9c-b2fb-eee2f70f73b2.png",
+  "asset": "res://assets/ui/research/subjects/grain_milling-v1.png",
+  "sha256": "68b67f2e13d285f1843e2ab424cb8fb05b3745c051780f7f35fe29cd9bff407d",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

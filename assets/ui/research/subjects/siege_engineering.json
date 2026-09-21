@@ -1,0 +1,10 @@
+{
+  "id": "siege_engineering",
+  "version": 2,
+  "prompt": "Correct the technology in this historical game illustration: replace the large counterweight trebuchet with an EARLY TORSION CATAPULT, a low stout timber frame, twisted rope spring and single throwing arm with sling, with no hanging counterweight and no tall trebuchet triangle. Engineers inspect the catapult and its rope windlass beside low wicker protective screens and simple ladder frames. Keep the beautiful grounded painterly art and planning activity, but use a modest early stone fort in the background, no heraldic banners, no written labels, no gunpowder or advanced medieval machinery. Composition: catapult and workers clearly readable in the central horizontal banner.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-15bd026d-4041-4e21-b69d-a0173830a176.png",
+  "asset": "res://assets/ui/research/subjects/siege_engineering-v2.png",
+  "sha256": "362e61c52b622af70884cf5098c9422747cb2c9372e9fad6875d09c52c611e07",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "public_libraries",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Public Libraries. Show a concrete, visually clear scene demonstrating this exact practice: Catalogued shared collections let readers outside elite households compare and teach competing ideas. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-5dd33845-88e3-41c6-99a8-1cc00f226536.png",
+  "asset": "res://assets/ui/research/subjects/public_libraries-v1.png",
+  "sha256": "b367ef2db569e6b25cf57a99b1075c2e1c9c0f5804d5a72bb9ce976d54564a51",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Public readers compare catalogued scrolls and books; open collection and communal reading are clear."
+}

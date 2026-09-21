@@ -1,0 +1,10 @@
+{
+  "id": "aerostat_observation",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the whole important mechanism, tools and people clearly within the composition, with balanced breathing room. The interface will preserve this full image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Aerostat Observation. A tethered observation balloon with a small basket and observer floats above an army camp, long tether clearly visible; no airplane or free-flying airship. Industrial era equipment and clothing, no ancient city or peasant tunics. Paint an identifiable subject rather than a technical construction diagram.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-be345eee-a8ff-49e4-b235-4dfd0b0bc916.png",
+  "asset": "res://assets/ui/research/subjects/aerostat_observation-v1.png",
+  "sha256": "3adba4ec47fdb20826158a5816a68f055e697b9f9f7266a04f28313fbdf53fd3",
+  "mode": "built-in image_gen / new image",
+  "review": "source approved; native layout pending",
+  "review_note": "Tethered balloon, observer and ground winch visible."
+}
