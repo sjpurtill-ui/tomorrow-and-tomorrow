@@ -1714,3 +1714,11 @@ Synthetic 1,024-trail/64-point unchanged-map refresh fell from 49.586 ms to 0.00
 
 The audit identifies remaining full fog repaint cost, settlement/observer-view scaling, and a separate uncorrected succession cap that counts deceased leaders. Those are not implemented fixes. Details and raw measurements: `docs/performance/CAMPAIGN_ACCUMULATION.md`.
 
+## September 20 — chart geometry and completed research: INTEGRATED
+
+Worker `55d92b91`, base `e1f2f8e2`, branch `codex/settlement-map-scaling`, integrated as canonical `e37cdd03`. Visibility queries reuse an exact per-civilization spatial index that rebuilds on exploration changes and clears on reset/import; bucket references are capped with exact fallback. Completed discoveries leave active candidate scans through an unsaved membership/channel index. Live branching, resources, imports, practice and scoring remain unchanged; knowledge, adoption and benefits remain in the campaign.
+
+Canonical focused validation passes 33/33, zero errors/failures/skips/orphans. The 24-day twelve-opponent replay matches saved state apart from timestamp. Synthetic large-chart queries improve 24.416 → 0.0089 ms after a 113.9 ms cold build; completed-catalog channel checks improve 4.475 → 0.292 ms. Daily replay mean was 247.56 → 259.38 ms, so this delivery does not establish an overall daily speedup. The normal map-query workload is outside that harness. The existing scout-origin test fixture now provides local food as required by the prior local-provisions change.
+
+No save-schema change, shared-file conflict, player restart or release packaging. Obsolete-effect pruning is not implemented: old bonuses can remain relevant as operating conditions change. Full fog rasterization, broader settlement/observer scaling, and archived-leader capacity remain unresolved. Details: `docs/performance/CHART_RESEARCH_INDEXES.md`.
+
