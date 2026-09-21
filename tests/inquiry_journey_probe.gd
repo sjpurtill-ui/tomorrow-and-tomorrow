@@ -10,8 +10,10 @@ func _ready()->void:
 	for size in [Vector2i(1280,900),Vector2i(800,600)]:
 		get_window().size=size;await frames()
 		hud.open_dock("inquiry",0);await capture("inquiry-%d"%size.x)
-		await click_label("KNOWLEDGE & SOCIETY");await capture("inquiry-directions-%d"%size.x)
-		await click_label("Security");await capture("inquiry-security-%d"%size.x)
+		var board=hud.dock.find_child("InquiryBoard",true,false)
+		for field:Dictionary in board.data.fields:
+			if field.id=="security":field.on_open.call();break
+		await frames();await capture("inquiry-security-%d"%size.x)
 		var weight:=int(GameState.research_allocations.security)
 		var people:=GameState.population_total
 		var known:=GameState.known_discoveries.duplicate()

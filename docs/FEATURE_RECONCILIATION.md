@@ -1777,3 +1777,7 @@ Private GPU captures pass for empty and active queues at 1600x1000 and 1024x640,
 with no horizontal overflow. Reference: Paradox's HOI IV Strategy Guide,
 https://forumcontent.paradoxplaza.com/public/paradox/banners/HoI_IV_Strategy_Guide.pdf
 Generated imports and captures excluded.
+
+## Research landing screen — 2026-09-21
+
+Replaces the six-button Direct Attention menu with an illustrated investigation board, actual progress, workforce and bottlenecks, all twelve research fields, direct relative-attention controls, and access to the existing visual discovery tree. Widened inquiry dock; original field reports, workforce policy and established knowledge remain available. Presentation only: no save migration or simulation rules changed. Validated with 18 research atlas/navigation tests and an isolated GPU probe at 1600x1000 and 1024x640 covering field counts, attention changes, no invented population/knowledge, field reports, tree opening and the empty state. Missing subject paintings show the investigation method instead of a misleading picture.

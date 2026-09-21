@@ -68,7 +68,7 @@ func tab(sub:int)->Dictionary:
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
-	return {"kpis":[kpis[0],kpis[1],kpis[3]],"brief":brief,"blocks":_attention_overview()}
+	return {"kpis":[kpis[0],kpis[1],kpis[3]],"blocks":[_discovery_board()]}
 
 func _attention_blocks()->Array:
 	var latest:=_latest_discovery_block()
@@ -300,3 +300,16 @@ func _research_work_report()->Dictionary:
 	var state:=GovernmentPeopleSystem.settlement_management(id)
 	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
 	return {"blocks":[{"type":"text","heading":"LOCAL RESEARCH WORK","text":"%d people currently work in Knowledge. Local leaders allocate their time alongside food, water and other needs. Current priority: %s."%[int(GameState.population_allocations.get("Knowledge",0)),String(state.get("focus_label","Delegated"))]},{"type":"actions","items":[{"label":"PRIORITIZE RESEARCH","sub":"Use local recovery while occupied" if occupied else "Ask the leader to shift local work","disabled":occupied,"on_press":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh()},{"label":"DELEGATE PRIORITY","sub":"Use local recovery while occupied" if occupied else "Let the leader choose again","disabled":occupied,"on_press":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]},{"type":"text","text":"This changes the local work priority, not discovery outcomes. Essential needs can still constrain research; observations and investigations develop as time advances."}]}
+
+func _discovery_board()->Dictionary:
+	var fields:Array=[]
+	var total:=0
+	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
+	var investigations:=DiscoverySystem.active_investigation_records()
+	for id:String in DOMAIN_COLORS:
+		var weight:=maxi(0,int(GameState.research_allocations.get(id,0)))
+		var count:=0
+		for record:Dictionary in investigations:
+			if String(record.get("dynamic",""))==id:count+=1
+		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
+	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("RESEARCH WORK",_research_work_report),"on_domain":open_domain}
