@@ -1,3 +1,11 @@
+## September 20 — accumulated exploration and construction cost: INTEGRATED
+
+Worker `f2f1df03`, base `e7a22a40`, branch `codex/campaign-accumulation`, integrated as canonical `bc28072b`. Unchanged map frames check the fog revision before copying explored trails; live convoy-origin uniforms still update. Early-work material history is read only when a plot needs conversion. No territory, materials, permanent records or simulation rules are removed.
+
+Synthetic 1,024-trail/64-point unchanged-map refresh fell from 49.586 ms to 0.0007 ms per call with no materials attached; finished early-work checks at 100,000 unrelated history records fell from 88.161 ms to about 0.0046 ms. These are component stress measurements, not campaign FPS or naturally reached ages. The 24-day twelve-opponent replay matches full saved state except timestamp; its daily CPU mean is essentially unchanged. Canonical focused checks pass 8/8, zero errors/failures/skips/orphans. No shared-file conflict, save-schema change, player restart or release packaging.
+
+The audit identifies remaining full fog repaint cost, settlement/observer-view scaling, and a separate uncorrected succession cap that counts deceased leaders. Those are not implemented fixes. Details and raw measurements: `docs/performance/CAMPAIGN_ACCUMULATION.md`.
+
 ## September 20 — daily society calculations: INTEGRATED
 
 Worker `20a480d7` from base `1fc946b0`, branch `codex/campaign-daily-cost`, integrated as canonical `a3d03025`. Daily subcategories reuse per-office doctrine contributions within each evaluation; axis-only cultural effects skip unrelated political alignment work; monthly adoption hoists unchanged common factors. Existing formulas, live appointment/state changes, legacy profiles, food and research behavior are preserved.

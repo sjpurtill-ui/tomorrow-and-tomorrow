@@ -1706,3 +1706,11 @@ Worker `20a480d7` from base `1fc946b0`, branch `codex/campaign-daily-cost`, inte
 
 The 24-day, twelve-opponent year-31 replay measured 239.91 → 234.39 ms mean CPU per day (2.3%). Full saved state matches except the timestamp. Canonical focused validation passes 21/21 with no errors, failures, skips or orphans. A pre-existing leadership fixture now isolates its partial settlement records from background city processing. No save-schema change, shared-file conflict, player restart or release packaging. This modest gain does not establish year-100 or year-3000 performance. Details: `docs/performance/CAMPAIGN_SOCIETY_COST.md`.
 
+## September 20 — accumulated exploration and construction cost: INTEGRATED
+
+Worker `f2f1df03`, base `e7a22a40`, branch `codex/campaign-accumulation`, integrated as canonical `bc28072b`. Unchanged map frames check the fog revision before copying explored trails; live convoy-origin uniforms still update. Early-work material history is read only when a plot needs conversion. No territory, materials, permanent records or simulation rules are removed.
+
+Synthetic 1,024-trail/64-point unchanged-map refresh fell from 49.586 ms to 0.0007 ms per call with no materials attached; finished early-work checks at 100,000 unrelated history records fell from 88.161 ms to about 0.0046 ms. These are component stress measurements, not campaign FPS or naturally reached ages. The 24-day twelve-opponent replay matches full saved state except timestamp; its daily CPU mean is essentially unchanged. Canonical focused checks pass 8/8, zero errors/failures/skips/orphans. No shared-file conflict, save-schema change, player restart or release packaging.
+
+The audit identifies remaining full fog repaint cost, settlement/observer-view scaling, and a separate uncorrected succession cap that counts deceased leaders. Those are not implemented fixes. Details and raw measurements: `docs/performance/CAMPAIGN_ACCUMULATION.md`.
+
