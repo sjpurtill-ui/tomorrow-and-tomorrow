@@ -1,0 +1,10 @@
+{
+  "id": "labor_rotations",
+  "prompt": "Correct the tools in this early Labor Rotations illustration. Replace every metal shovel or spade blade, including the tool handed between the central workers and the tools on the ground, with a broad carved wooden digging blade or a plain wooden digging stick. There must be no metal anywhere. Preserve the clear handover between arriving rested workers and departing tired workers, the people, light, earthen construction, composition and realistic painterly quality. This is a pre-metal small community.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-168cc122-20c1-447a-ada0-4fe465c602dd.png",
+  "version": 2,
+  "mode": "built-in image_gen / edit",
+  "asset": "res://assets/ui/research/subjects/labor_rotations-v2.png",
+  "sha256": "a5e0893cc340d46ed1a03aebfbe94aca028cdd067725b5b4cb5121cb26d10701",
+  "review": "source checked; banner pending"
+}

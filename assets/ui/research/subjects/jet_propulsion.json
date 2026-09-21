@@ -1,0 +1,9 @@
+{
+  "id": "jet_propulsion",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Show the complete important subject and action with balanced breathing room, preserving all machinery and people in the full 3:2 illustration. The interface will display the entire image. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Jet Propulsion. Close engineering view of a real turbine jet engine on a test stand, compressor blades and turbine housing visible, a controlled blue-orange exhaust distant; no propeller or futuristic spacecraft. This is a twentieth-century technical scene: industrial architecture, practical modern work clothes. Every aircraft, weapon and vessel must be absolutely unmarked: no roundels, stars, crosses, stripes, letters, numbers or flags on any surface. No instructional cutaway or technical diagram.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-25a184da-3df4-46a4-876a-918997731d7d.png",
+  "asset": "res://assets/ui/research/subjects/jet_propulsion-v1.png",
+  "sha256": "05a0dfc9daf0cbee4036ad02393b411556d79cb6dc4e223065c04129d58dc4da",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

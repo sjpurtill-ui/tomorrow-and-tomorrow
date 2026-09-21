@@ -1,0 +1,9 @@
+{
+  "id": "managed_fallow",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Managed Fallow. Show a concrete, visually clear scene demonstrating this exact practice: Leaving selected ground uncultivated restores yields more reliably than abandoning fields at random. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c0f1b1c2-1144-4ac0-9e8f-364eefd29856.png",
+  "asset": "res://assets/ui/research/subjects/managed_fallow-v1.png",
+  "sha256": "d5ca01103fefd1c26075d9abe00cd4f9509e79309eea01d7c3f927ee414aabeb",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

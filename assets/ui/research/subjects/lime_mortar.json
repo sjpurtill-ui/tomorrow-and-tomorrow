@@ -1,0 +1,9 @@
+{
+  "id": "lime_mortar",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Lime Mortar. A mason mixes pale lime, sand and water in a trough and beds a stone into a fresh mortar joint; close-up on mortar and masonry, no cement mixer. These are early settled communities. Use small earth, stone and timber buildings and simple fiber clothing. Tools are stone, bone and wood unless this discovery specifically concerns metalworking. No steel tools, modern objects, medieval castles, grand cities or industrial machinery. Make this scene composition distinct, with varied climate and terrain.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-157e924c-357e-4176-bcff-2b9a5901ef36.png",
+  "asset": "res://assets/ui/research/subjects/lime_mortar-v1.png",
+  "sha256": "382ca7319d2631f12a690323eeefd35b3e7988b949ed9f0a7a5cecb4e8272395",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "latrine_siting",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Latrine Siting. Show a concrete, visually clear scene demonstrating this exact practice: Waste pits are placed according to slope, water flow, soil, and settlement use. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-af0453ac-cf1c-45fb-9a6b-e2a5d84d05c4.png",
+  "asset": "res://assets/ui/research/subjects/latrine_siting-v1.png",
+  "sha256": "7c5c74227404a06ee4e2d322f9457cb77516b03637ecfc5ca20c27a9223763a3",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "kiln_control",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Controlled Kilns. An early potter adjusts a small enclosed ceramic kiln's fire opening and air vent, chamber and stacked plain pots visible in warm glow; no open pit fire or modern controller.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-303b1f54-68c9-4b61-bd93-cabdc20ed812.png",
+  "asset": "res://assets/ui/research/subjects/kiln_control-v1.png",
+  "sha256": "2e61c48b4f49803908e4b1c4ddd6eda73dbb4acf099c4f9bd1415c1536905c8e",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
