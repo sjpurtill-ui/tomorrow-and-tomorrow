@@ -226,7 +226,9 @@ func test_construction_diverts_existing_city_workers_without_extra_labor()->void
 	var raw:=GameState.effective_workers("Construction",true)
 	assert_float(GameState.effective_workers("Construction")).is_equal_approx(raw*.75,.001)
 	op.advance(1)
-	assert_float(float(base.construction_work)).is_equal_approx(raw*.25*.1,.001)
+	# The fixture places 20% of residents in the second city. Only the
+	# primary city's remaining 80% supplies this base's construction labor.
+	assert_float(float(base.construction_work)).is_equal_approx(raw*.8*.25*.1,.001)
 
 func test_airlift_food_is_credited_only_to_receiving_army_and_spent_once()->void:
 	MilitaryCampaign.field_armies=[{"army_id":1,"name":"Remote army","troops":10,"formations":[],"position":{"x":20.0,"z":2.0},"status":"stationed","delivered_field_food":5.0},{"army_id":2,"name":"Other army","troops":10,"formations":[],"position":{"x":30.0,"z":2.0},"status":"stationed"}]

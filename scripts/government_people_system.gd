@@ -1073,6 +1073,23 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 		weights.Survey=float(weights.get("Survey",0.0))+7.0
 		weights.Logistics=float(weights.get("Logistics",0.0))+10.0
 		weights.Construction=float(weights.get("Construction",0.0))+4.0
+	# Use the city's measured output per share of labor. Fixed extra weights can
+	# leave a poor site permanently short even while its leader says "provisions".
+	# Keep the subsistence floor after stores recover, avoiding daily oscillation
+	# back to the allocation that caused the deficit. More productive methods
+	# naturally release labor for the ruler's other priorities.
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	var demand:=maxf(0.0,float(metrics.get("food_consumption",0)))
+	var produced:=maxf(0.0,float(metrics.get("food_production",0)))
+	var previous_share:=clampf(float(metrics.get("food_labor_share",0)),0.0,1.0)
+	if demand>0.0 and previous_share>0.0:
+		var buffer:=1.08 if bool(guard.food) else 1.02
+		var ceiling:=.72 if bool(guard.water) else .85
+		var needed:=clampf(previous_share*demand*buffer/maxf(.01,produced),0.0,ceiling)
+		var other:=0.0
+		for role:String in weights:
+			if role!="Food":other+=maxf(0.0,float(weights[role]))
+		weights.Food=maxf(float(weights.get("Food",0)),other*needed/maxf(.01,1.0-needed))
 	return guard
 
 

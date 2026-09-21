@@ -136,7 +136,10 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var forecast_90:=_forecast(90,harvest,demand_breakdown,traveling,provision_delivery_ratio,milestones,nutrient_report)
 	var forecast_30:Dictionary=milestones[30]
 	var weather_factor:=_weather_yield_factor(_environment_mix(),WorldSimulation.state.elapsed_days)
+	var working_total:=0.0
+	for role:String in WorldSimulation.state.POPULATION_ROLES:working_total+=maxf(0.0,WorldSimulation.state.effective_workers(role))
 	var result:={
+		"food_labor_share":workers/maxf(1.0,working_total),
 		"clothing":clothing.coverage,
 		"clothing_workers":clothing.workers,
 		"cultivation_base_harvest":float(nutrient_report.get("base_harvest",0)),

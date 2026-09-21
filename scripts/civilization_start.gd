@@ -4,8 +4,21 @@ extends RefCounted
 static func candidate(seed_value:int,seat:int)->Vector2:
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=seed_value^((seat+1)*32452843)
-	var desired:=Vector2(rng.randf_range(-18000,18000),rng.randf_range(-8000,8000))
-	return PlanetEnvironment.nearest_viable_land(desired,seed_value^((seat+1)*104729))
+	var best:=Vector2.ZERO;var best_score:=-INF
+	# Generated communities share a generalist founding kit. Select places where
+	# that kit has a plausible subsistence base, not merely a patch of dry ground.
+	# This does not restrict later player settlement or grant local resources.
+	for attempt in 48:
+		var desired:=Vector2(rng.randf_range(-18000,18000),rng.randf_range(-8000,8000))
+		var point:=PlanetEnvironment.nearest_viable_land(desired,seed_value^((seat+1)*104729+attempt))
+		var profile:=PlanetEnvironment.profile_at(point)
+		var score:=float(profile.food_potential)+minf(.3,float(profile.growing_season)*.3)
+		if score>best_score:best=point;best_score=score
+		if supports_founders(profile):return point
+	return best
+
+static func supports_founders(profile:Dictionary)->bool:
+	return bool(profile.get("land",false)) and float(profile.get("food_potential",0))>=.4 and float(profile.get("mean_temperature_c",-100))>=6.0 and float(profile.get("growing_season",0))>=.35
 
 static func choose(origin:Vector2,ground:Callable)->Vector2:
 	var best:=origin;var score:=INF

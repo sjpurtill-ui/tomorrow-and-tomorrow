@@ -1928,3 +1928,10 @@ Base `aef4f3c`. The AI can recruit researched, supplied archers to complement ex
 ## September 21 — terrain-backed campaign diagnostics and checkpoints
 
 The isolated daily pacing diagnostic can now use actual LocalTerrain water, land, material and route services (`--real-geography`) at a chosen globe position. It can write bounded campaign checkpoints every 25 years and at exit, resume them, and validate the binary save payload at completion. A two-day terrain-backed run plus one restored day matched an uninterrupted three-day run in every reported snapshot and bottleneck field; both save validations passed. No rendered test window, fabricated local water in terrain mode, or user save access. Terrain-backed isolated runs still do not include foreign contact or certify a whole player world.
+
+
+## September 21 — geography-dependent subsistence and generated starts
+
+Base `d12d669`. Daily food results retain the actual share of local labor producing food. Settlement management uses observed output/demand to maintain a subsistence allocation floor, with a reserve margin and room for other essential roles; higher yields release labor. Unknown ledgers keep the prior policy. Generated civilization candidates now require a generalist subsistence base (food potential, growing season and temperature), rather than equating dry land with a viable founding site. Player-directed later settlement is not restricted and no resources are granted. The diagnostic supports actual generated seat selection.
+
+Forty-two government/local-provision checks and 49 founding/geography/subsistence/joint-operation checks pass. Thirty-six generated candidates across three seeds are deterministic and satisfy the founding filter. The pre-existing joint-construction fixture now expects the primary city's 80% share of workers, excluding the fixture's 20% satellite population; runtime construction accounting was already correct. No save-schema change or player restart. Full 300-year campaigns and actual starting-site survival remain validation work, not implied by these focused checks.

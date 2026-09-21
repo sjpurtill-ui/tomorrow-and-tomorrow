@@ -8,6 +8,7 @@ var target_days:=1095000
 var wall_seconds:=25.0
 var seed_value:=91420
 var output_path:="/tmp/tt-history-pacing.json"
+var starting_seat:=-1
 var real_geography:=false
 var terrain:Node
 var origin_hint:=Vector2.ZERO
@@ -76,7 +77,7 @@ func bottlenecks()->Dictionary:
 	return result
 func checkpoint(day:int)->void:
 	if checkpoint_path.is_empty():return
-	var payload:={"day":day,"seed":seed_value,"real_geography":real_geography,"origin_hint":origin_hint,"wood_density":wood_density,"ambition":ambition_id,"world":simulation.export_state(),"snapshots":snapshots,"discoveries":discoveries}
+	var payload:={"day":day,"seed":seed_value,"real_geography":real_geography,"starting_seat":starting_seat,"origin_hint":origin_hint,"wood_density":wood_density,"ambition":ambition_id,"world":simulation.export_state(),"snapshots":snapshots,"discoveries":discoveries}
 	var file:=FileAccess.open(checkpoint_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write diagnostic checkpoint: "+checkpoint_path);return
 	file.store_buffer(var_to_bytes(payload));file.close()
@@ -84,6 +85,7 @@ func checkpoint(day:int)->void:
 func run()->void:
 	for argument:String in OS.get_cmdline_user_args():
 		if argument=="--real-geography":real_geography=true
+		elif argument.begins_with("--seat="):starting_seat=maxi(0,argument.trim_prefix("--seat=").to_int())
 		elif argument.begins_with("--origin-x="):origin_hint.x=argument.trim_prefix("--origin-x=").to_float()
 		elif argument.begins_with("--origin-y="):origin_hint.y=argument.trim_prefix("--origin-y=").to_float()
 		elif argument.begins_with("--checkpoint="):checkpoint_path=argument.trim_prefix("--checkpoint=")
@@ -99,7 +101,7 @@ func run()->void:
 		var incoming:Variant=bytes_to_var(FileAccess.get_file_as_bytes(restore_path))
 		if not incoming is Dictionary or not incoming.get("world") is Dictionary:push_error("Invalid diagnostic checkpoint.");quit(1);return
 		restored=incoming
-		seed_value=int(restored.seed);real_geography=bool(restored.real_geography);origin_hint=restored.origin_hint;wood_density=float(restored.wood_density);ambition_id=String(restored.ambition)
+		seed_value=int(restored.seed);starting_seat=int(restored.get("starting_seat",-1));real_geography=bool(restored.real_geography);origin_hint=restored.origin_hint;wood_density=float(restored.wood_density);ambition_id=String(restored.ambition)
 	for name:String in ["GameState","CivilizationSystem","MilitaryCampaign"]:root.get_node(name).set_process(false)
 	simulation=root.get_node("WorldSimulation");simulation.clear()
 	daily=load("res://scripts/civilization_day.gd");controller=load("res://scripts/civilization_controller.gd")
@@ -120,7 +122,7 @@ func run()->void:
 		simulation.water_provider=Callable(terrain,"_surface_water_site_near")
 		simulation.context_provider=Callable(terrain,"_civilization_geography")
 		simulation.route_provider=Callable(terrain,"_analyze_convoy_route")
-		start_point=terrain._civilization_start(origin_hint)
+		start_point=terrain._civilization_start(load("res://scripts/civilization_start.gd").candidate(seed_value,starting_seat) if starting_seat>=0 else origin_hint)
 	var actor:Dictionary={}
 	if restored.is_empty():actor=simulation.create_actor("pacing_reference",seed_value,start_point)
 	else:
@@ -173,7 +175,7 @@ func run()->void:
 	checkpoint(day)
 	var save_check:Dictionary=simulation.check_payload(bytes_to_var(var_to_bytes(simulation.export_state())))
 	var scenario:="isolated AI seat; rendered-terrain geography services; naturally sampled water/materials; no foreign exchange" if real_geography else "isolated AI seat; seeded planet at origin; synthetic recognized river 0.1 km away; macro-profile surface catchments; world geology and matching hydrology record enabled; no foreign exchange"
-	var report:={"schema":13,"checkpoint":checkpoint_path,"resumed_from_day":start_day,"save_check":save_check,"real_geography":real_geography,"origin_hint":{"x":origin_hint.x,"y":origin_hint.y},"controlled_choices":{"wood_density_override":wood_density,"century_ambition":ambition_id},"secondary_timings":secondary_timings,"timing_intervals":timing_intervals,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":scenario,"seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day-start_day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Terrain mode uses real sampling without rendering; reference mode uses synthetic local water/land authority and macro material densities","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Wood override changes local timber catchments only, not an entire biome; ambition uses ordinary century choices, not direct technology grants","Short or collapsed runs do not validate millennial pacing"]}
+	var report:={"schema":13,"checkpoint":checkpoint_path,"resumed_from_day":start_day,"save_check":save_check,"real_geography":real_geography,"starting_seat":starting_seat,"origin_hint":{"x":origin_hint.x,"y":origin_hint.y},"controlled_choices":{"wood_density_override":wood_density,"century_ambition":ambition_id},"secondary_timings":secondary_timings,"timing_intervals":timing_intervals,"timings":timings,"profiling_enabled":profile_enabled,"bottlenecks":diagnostic,"scenario":scenario,"seed":seed_value,"target_days":target_days,"simulated_days":day,"stop_reason":reason,"wall_seconds":elapsed,"days_per_second":float(day-start_day)/maxf(.001,elapsed),"live_catalog":catalog_count,"target_reached":day==target_days,"full_campaign_verified":false,"initial":snapshots[0],"final":final,"annual_snapshots":snapshots,"discoveries":discoveries,"limitations":["One isolated seat, not a full world or a player campaign","Terrain mode uses real sampling without rendering; reference mode uses synthetic local water/land authority and macro material densities","No foreign acquisition, war or dependency-recovery scenario","Controller and daily economic/demographic/research rules are live; no unlocks, refill or population rescue","Wood override changes local timber catchments only, not an entire biome; ambition uses ordinary century choices, not direct technology grants","Short or collapsed runs do not validate millennial pacing"]}
 	var file:=FileAccess.open(output_path,FileAccess.WRITE)
 	if file==null:push_error("Cannot write pacing diagnostic: "+output_path);quit(1);return
 	file.store_string(JSON.stringify(report,"  "));file.close()
