@@ -1,0 +1,9 @@
+{
+  "id": "pack_animals",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Pack Animal Husbandry. A donkey bearing balanced panniers in a simple wooden saddle frame is checked by a handler before a trail journey. Focus on the load-bearing saddle and balanced baggage, no mounted warrior.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-b321aa06-c6ae-4476-b61f-c1f5359e8d81.png",
+  "asset": "res://assets/ui/research/subjects/pack_animals-v1.png",
+  "sha256": "b96f463c71b14dc8b156d408bfeac22c16632ca82f41c4d234ca7d2aceac9c8d",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
