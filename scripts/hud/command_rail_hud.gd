@@ -183,7 +183,7 @@ func _build_rail()->void:
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",3)
 	rail_panel.add_child(column)
-	var header:=ApprovedArt.picture(Rect2(15,7,46,47),45,46)
+	var header:=ApprovedArt.symbol(Rect2(15,7,46,47),45,46)
 	column.add_child(header)
 	var header_rule:=ColorRect.new()
 	header_rule.color=Tokens.BORDER
