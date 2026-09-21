@@ -30,6 +30,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"cabinet":
 				var cabinet:=preload("res://scripts/hud/government_cabinet_widget.gd").new()
 				section.add_child(cabinet);cabinet.setup(block)
+			"wealth_ledger":
+				var panel:=preload("res://scripts/hud/wealth_ledger.gd").new()
+				section.add_child(panel);panel.setup(block)
 			"materials_ledger":
 				var panel:=preload("res://scripts/hud/materials_ledger.gd").new()
 				section.add_child(panel);panel.setup(block)
