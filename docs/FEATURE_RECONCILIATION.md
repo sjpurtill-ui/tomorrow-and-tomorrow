@@ -1923,3 +1923,8 @@ Base `31706d5`, task `codex/first-300-playable`. Household tools and containers 
 ## September 21 — basic mixed forces and culture restore
 
 Base `aef4f3c`. The AI can recruit researched, supplied archers to complement existing spear troops before learning coordinated-screen doctrine. Pending recruits count toward the bounded composition target; no people, equipment or doctrine bonuses are granted. Home reinforcement uses the same basic composition rule and checks actual position, preventing a stale home label from teleporting support. Doctrine benefits still require researched, rehearsed formations. Culture validation accepts finite whole-number days preserved by JSON as floats, while rejecting fractional, negative, nonfinite and nonnumeric days. Twenty-six recruitment, reinforcement, doctrine and culture restore checks pass, including binary/JSON roundtrips. No save schema change or player restart.
+
+
+## September 21 — terrain-backed campaign diagnostics and checkpoints
+
+The isolated daily pacing diagnostic can now use actual LocalTerrain water, land, material and route services (`--real-geography`) at a chosen globe position. It can write bounded campaign checkpoints every 25 years and at exit, resume them, and validate the binary save payload at completion. A two-day terrain-backed run plus one restored day matched an uninterrupted three-day run in every reported snapshot and bottleneck field; both save validations passed. No rendered test window, fabricated local water in terrain mode, or user save access. Terrain-backed isolated runs still do not include foreign contact or certify a whole player world.
