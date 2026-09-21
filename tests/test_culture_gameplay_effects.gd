@@ -28,3 +28,17 @@ func test_culture_ui_builds_compact_effects_and_collapsed_roots()->void:
 	assert_str(text).contains("HOW CULTURE SHAPES PLAY")
 	assert_str(text).contains("REPUTATION FROM OUR CONDUCT")
 	assert_str(text).not_contains("Now ·")
+
+func test_roots_open_and_closed_state_survive_live_body_rebuild()->void:
+	var provider=Provider.new(null,null)
+	var noop:=func():pass
+	var block:={"view_state":provider.culture_view_state,"identity":{"name":"Test","summary":""},"direction":{},"values":[],"memories":[{"domain":"justice","current":"Restoration","inherited":"Restoration"}],"on_direction":noop,"on_council":noop,"on_capacities":noop,"on_government":noop}
+	var panel:Control=auto_free(preload("res://scripts/hud/culture_panel.gd").new());add_child(panel);panel.setup(block)
+	assert_bool(panel.get_node("CulturalRoots").visible).is_false()
+	panel.get_node("CulturalRootsToggle").pressed.emit()
+	assert_bool(provider.culture_view_state.roots_open).is_true()
+	var rebuilt:Control=auto_free(preload("res://scripts/hud/culture_panel.gd").new());add_child(rebuilt);rebuilt.setup(block)
+	assert_bool(rebuilt.get_node("CulturalRoots").visible).is_true()
+	rebuilt.get_node("CulturalRootsToggle").pressed.emit()
+	var closed:Control=auto_free(preload("res://scripts/hud/culture_panel.gd").new());add_child(closed);closed.setup(block)
+	assert_bool(closed.get_node("CulturalRoots").visible).is_false()

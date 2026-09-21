@@ -2,6 +2,8 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## CIVILIZATION section: society and civic dialogue. Government has its own
 ## first-class rail destination.
 
+var culture_view_state:Dictionary={"roots_open":false}
+
 const DYNAMIC_ORDER:Array[String]=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
 
@@ -426,7 +428,7 @@ func _society_overview()->Array:
 	for domain in DYNAMIC_ORDER:research[domain]=WorldSimulation.direction.research_multiplier(domain)
 	var presenter=preload("res://scripts/hud/culture_presenter.gd")
 	var effects:=presenter.effects(WorldSimulation.direction.cultural_memory,int(GameState.elapsed_days),research,WorldSimulation.direction.auto_scouting,float(GameState.simulation_metrics.get("food_intake_ratio",1)))
-	return [{"type":"culture","effects":effects,"reputation":presenter.reputation(MilitaryCampaign.war_reputation_snapshot()),"identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
+	return [{"type":"culture","view_state":culture_view_state,"effects":effects,"reputation":presenter.reputation(MilitaryCampaign.war_reputation_snapshot()),"identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
 		"on_direction":func():PeopleDirection.open_direction(),"on_council":jump("civ",1),"on_government":jump("government",0),
 		"on_capacities":focused_action("Society’s strengths & needs","",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}).on_press}]
 

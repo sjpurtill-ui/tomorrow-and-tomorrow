@@ -2,6 +2,7 @@ extends "res://scripts/hud/settlement_overview.gd"
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
 var values_grid:GridContainer
 var memory_grid:GridContainer
+var roots_grid:GridContainer
 func setup(block:Dictionary)->void:
 	data=block;name="CulturePanel";add_theme_constant_override("separation",18)
 	var opening:=HBoxContainer.new();opening.add_theme_constant_override("separation",22);add_child(opening)
@@ -42,12 +43,28 @@ func setup(block:Dictionary)->void:
 		card.tooltip_text=String(reputation.tip)
 		var meter:=ProgressBar.new();meter.show_percentage=false;meter.custom_minimum_size.y=6;meter.value=float(reputation.value)*100;card.add_child(meter)
 		meter.add_theme_stylebox_override("background",T.flat(T.TRACK));meter.add_theme_stylebox_override("fill",T.flat(T.GOLD))
-	var roots:=VBoxContainer.new();roots.visible=false
-	var toggle:=Button.new();toggle.text="Cultural roots ▸";add_child(toggle);add_child(roots)
-	toggle.pressed.connect(func():roots.visible=not roots.visible;toggle.text="Cultural roots ▾" if roots.visible else "Cultural roots ▸")
+	# The provider owns view state so daily body rebuilds preserve the disclosure.
+	var view_state:Dictionary=data.get("view_state",{})
+	var roots:=VBoxContainer.new();roots.name="CulturalRoots";roots.visible=bool(view_state.get("roots_open",false));roots.add_theme_constant_override("separation",12)
+	var toggle:=Button.new();toggle.name="CulturalRootsToggle";toggle.text="Cultural roots ▾" if roots.visible else "Cultural roots ▸"
+	toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	toggle.add_theme_color_override("font_color",T.INK)
+	toggle.add_theme_color_override("font_hover_color",T.INK)
+	toggle.add_theme_color_override("font_pressed_color",T.INK)
+	toggle.add_theme_stylebox_override("normal",T.flat(T.TRACK))
+	toggle.add_theme_stylebox_override("hover",T.flat(T.TRACK))
+	toggle.add_theme_stylebox_override("pressed",T.flat(T.TRACK))
+	add_child(toggle);add_child(roots)
+	toggle.pressed.connect(func():
+		roots.visible=not roots.visible
+		view_state["roots_open"]=roots.visible
+		toggle.text="Cultural roots ▾" if roots.visible else "Cultural roots ▸")
+	roots_grid=GridContainer.new();roots_grid.columns=3;roots_grid.add_theme_constant_override("h_separation",22);roots_grid.add_theme_constant_override("v_separation",18);roots.add_child(roots_grid)
 	for memory:Dictionary in data.memories:
-		_note(roots,String(memory.domain).capitalize()+" · "+String(memory.current))
-		if String(memory.inherited)!=String(memory.current):_note(roots,"Inherited: "+String(memory.inherited))
+		var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_constant_override("separation",6);roots_grid.add_child(card)
+		card.add_child(T.make_label(String(memory.domain).to_upper(),11,T.GOLD))
+		card.add_child(_serif(String(memory.current),19))
+		if String(memory.inherited)!=String(memory.current):_note(card,"Earlier · "+String(memory.inherited))
 	if data.memories.is_empty():_note(roots,"No lasting traditions recorded yet.")
 	_rule(self)
 	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",10);add_child(actions)
@@ -59,6 +76,7 @@ func _culture_layout()->void:
 	var columns:=3 if size.x>=650 else 2 if size.x>=450 else 1
 	if values_grid:values_grid.columns=columns
 	if memory_grid:memory_grid.columns=columns
+	if roots_grid:roots_grid.columns=columns
 
 	var reputation_grid:=get_node_or_null("ReputationGrid") as GridContainer
 	if reputation_grid:reputation_grid.columns=columns

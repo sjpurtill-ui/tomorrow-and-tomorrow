@@ -1875,3 +1875,8 @@ Validation: tests/test_building_settlement_history.gd — 3 passed, covering pro
 Based on e17b231, branch codex/culture-gameplay-effects. Replaced the expanded inheritance list with compact work-priority, actual research-multiplier, and scouting-target cards. Food shortage and manual scouting overrides are explicit. Cultural roots remain expandable; different inherited/current tendencies remain visible there. Conduct reputation shows mercy, fear, and grievance with qualitative levels, meters, concise existing gameplay consequences, and hover explanations of what builds them. No reputation is fabricated from cultural ideals. Day and reputation changes refresh the open Culture dock. No simulation or save-format changes.
 
 Validation: tests/test_culture_gameplay_effects.gd — 3 focused tests passed (effect calculation and overrides, empty/earned reputation, headless UI construction). Visual review remains with the user; no game restart or desktop control.
+
+## 2026-09-21 — Cultural roots survives live refresh
+
+Based on a6cc421, branch codex/culture-roots-refresh. Culture provider now owns the roots disclosure state; panel rebuilds preserve both open and closed choices. Expanded roots use responsive compact cards, with earlier tendencies shown only when different. Disclosure uses explicit readable theme colors. No simulation or save changes. Four culture tests pass, including opening, rebuilding, closing and rebuilding again with the provider-owned state. No player restart or desktop control; visual review remains with the user.
+
