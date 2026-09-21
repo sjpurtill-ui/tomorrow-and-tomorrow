@@ -1960,3 +1960,22 @@ Player PID 44896 remains on `5963192415e5`; it has not received these changes.
 
 Integrated all eight September 20 backup tips through ac17768. Newest Wealth and gold navigation restored; all eleven destinations retained, panel contrast and startup imports corrected. See docs/SEPTEMBER_20_BACKUP_INTEGRATION.md for source hashes, validation, conflict decisions, and explicit missing remote artwork. Existing local imports and saves preserved. Private GPU navigation passed; terrain 7/7 passed. Existing ground-sample test failure reproduced on pre-integration main.
 
+
+## September 21 — illustrated settlement and consistent leaders
+
+Overview now uses an illustrated settlement panel with the actual local leader,
+local population and reserve figures, and direct links to shelter, provisions,
+production and civic dialogue. History pages all retained local building records
+and civilization discoveries newest first, with subject art, dates and explicit
+scope, followed by recorded population and reserve charts. Unknown past values
+are not fabricated. Birth/death and architectural ledgers remain accessible.
+
+A shared person portrait resolver replaces the fixed Wealth mockup face and the
+Materials lookup of a nonexistent `id`. Overview, Materials, Wealth, officeholders
+and civic dialogue use the persistent `person_id`, or an explicit portrait index.
+No save-schema change; the five existing portrait illustrations are reused.
+
+Validation: 14/14 focused tests across settlement presentation, government HUD and
+strategic history; private GPU probes at 1600x1000 and 1024x640 passed, including
+actual Materials/Wealth portrait region equality and screenshot review. Test
+fixtures do not read or write campaign saves. Generated imports remain excluded.

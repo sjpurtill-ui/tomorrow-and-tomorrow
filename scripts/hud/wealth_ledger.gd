@@ -1,5 +1,6 @@
 extends "res://scripts/hud/production_queue.gd"
 const Approved:=preload("res://scripts/hud/approved_ui_art.gd")
+const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Spark:=preload("res://scripts/hud/material_stock_spark.gd")
 const PALETTE:=[Color("6b7d50"),Color("497c96"),Color("93958a"),Color("b89339")]
 func setup(block:Dictionary)->void:
@@ -7,7 +8,7 @@ func setup(block:Dictionary)->void:
 	var money:=String(data.stage)=="currency";var metal:=String(data.stage)=="weighed_metal"
 	var status:=HBoxContainer.new();add_child(status);var stage:=_serif("Coin economy" if money else "Weighed-metal exchange" if metal else "Wealth before money",16);stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;status.add_child(stage);status.add_child(T.make_label(String(data.city),12,T.MUTED))
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",14);add_child(head)
-	if not data.leader.is_empty():head.add_child(Approved.picture(Rect2(104,139,97,92),80,80))
+	if not data.leader.is_empty():head.add_child(Portrait.picture(data.leader,80,100))
 	var manager:=VBoxContainer.new();manager.size_flags_horizontal=Control.SIZE_EXPAND_FILL;manager.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(manager)
 	var name_label:=_serif(String(data.leader.get("name","Founding camp")),16);name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;manager.add_child(name_label);manager.add_child(T.make_label("Leader managed" if bool(data.managed) else "Directed priorities",12,T.MUTED))
 	for spec in [["%.1f" % float(data.economy.gdp),"Output / day"],["%.2f" % float(data.economy.gdp_per_capita),"Output / person"],["%d%%" % roundi(float(data.economy.productivity)*100),"Productivity"]]:

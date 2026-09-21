@@ -42,30 +42,8 @@ func _city_tab(sub:int)->Dictionary:
 			items.push_front({"label":"FOUND SETTLEMENT","sub":"Commit the convoy’s present site","primary":not traveling,"on_press":terrain._on_settlement_action_pressed})
 			if traveling:items.push_front({"label":"HALT & FORAGE","sub":"Camp here and replenish before another leg","primary":true,"on_press":terrain._halt_founding_convoy_to_forage,"tip":"The convoy stops at its current physical position. Food workers forage locally while time advances; no food is invented."})
 		return {"brief":{"tone":String(travel_advice.get("tone","info")),"title":"A home is taking shape" if committed else "TRAVEL COUNCIL · "+String(travel_advice.get("status","CHOOSE A HOME")),"why":"Unpause with the time controls above. The Hearth Circle emerges through ordinary work; local leadership and priorities become available once it is complete." if committed else String(travel_advice.get("reason","The founding convoy may enter black-map ground and camp to forage before continuing."))+" The caravan may enter black-map ground; founding commits its current location."},"blocks":[{"type":"actions","items":items}]}
-	var local_population:=maxi(1,int(settlement.get("population",GameState.population_total)))
-	var local_share:=float(local_population)/maxf(1.0,float(GameState.population_total))
-	var management:=GovernmentPeopleSystem.settlement_management(settlement_id)
-	var leader:Dictionary=management.get("leader",{})
-	var metrics:Dictionary=GameState.simulation_metrics
-	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
-	var survival:=Indicators.health()
-	var productive:=maxi(0,roundi(float(profile.get("productive",terrain._able_population()))*local_share))
-	var efficiency:=roundi(float(metrics.get("labor_efficiency",0.0))*100.0)
-	var births:=roundi(float(metrics.get("births_expected_next_year",0.0))*local_share)
-	var leader_name:=String(leader.get("name","vacant"))
-	var leader_age:=int(leader.get("age",0))
-	var focus_reason:=String(management.get("focus_reason","Local priorities have not yet been reassessed."))
-	var focus_effect:=String(management.get("focus_effect","Labor remains spread across ordinary local needs."))
-	var kpis:Array=[
-		{"label":"LOCAL POP.","value":str(local_population),"delta":"+%d /yr" % births if births>0 else "—","delta_color":Tokens.GREEN if births>0 else Tokens.MUTED,"accent":Tokens.GREEN,"tip":"This settlement's bounded share of the civilization population"},
-		{"label":"LOCAL LEADER","value":leader_name.substr(0,15),"delta":"age %d" % leader_age if not leader.is_empty() else "vacant","accent":Tokens.TEAL if not leader.is_empty() else Tokens.RED,"tip":"A named person who ages, gains experience, and manages local needs"},
-		{"label":"FOCUS","value":String(management.get("focus_label","BALANCED")).replace(" THE PLACE","").substr(0,15),"delta":"delegated" if bool(management.get("auto_manage",true)) else "directed","accent":Tokens.BLUE,"tip":"%s %s" % [focus_reason,focus_effect]},
-		{"label":"EFFICIENCY","value":"%d%%" % efficiency,"delta":"LE %.1f · IMR %.0f‰" % [float(survival.life_expectancy),float(survival.infant_mortality_per_1000)],"accent":Tokens.AMBER,"tip":"Local labor efficiency. Health outcomes are life expectancy and projected infant deaths per 1,000 live births."},
-	]
-	var brief:Dictionary={"tone":"info" if not leader.is_empty() else "warn","title":"%s is managing %s" % [leader_name,String(settlement.get("name","this settlement"))] if not leader.is_empty() else "This settlement has no local leader","why":"WHY · %s\nEFFECT · %s" % [focus_reason,focus_effect] if not leader.is_empty() else "Appoint a person from the local governing pool so routine needs are handled without micromanagement."}
-	match sub:
-		1: return {"kpis":kpis,"brief":brief,"blocks":_history_blocks(metrics,settlement)}
-	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_overview_blocks(settlement)}
+	if sub==1:return {"blocks":_history_blocks(GameState.simulation_metrics,settlement)}
+	return {"blocks":_overview_blocks(settlement)}
 
 
 func _selected_settlement()->Dictionary:
@@ -170,58 +148,39 @@ func _material_totals_text(materials:Dictionary)->String:
 		parts.append("%s %.1f" % [String(material_name),float(materials[material_name])])
 	return " · ".join(parts)
 
-func _history_blocks(metrics:Dictionary,settlement:Dictionary)->Array:
-	var pregnancy:Dictionary=GameState.pregnancy_summary()
-	var births:=GameState.lifetime_births
-	var deaths:=GameState.lifetime_deaths
-	var net:=births-deaths
-	var chronicle_items:Array=[]
-	var log:Array=GameState.discovery_log
-	for index in range(log.size()-1,maxi(-1,log.size()-4),-1):
-		var event:Dictionary=log[index]
-		chronicle_items.append({
-			"name":String(event.get("name",event.get("title","Event"))),
-			"sub":"Day %d" % int(event.get("day",0)),
-			"value":"","accent":Tokens.AMBER,
-			"tip":String(event.get("causal_mechanism","")),
-		})
-	var founded_day:=int(settlement.get("founded_day",0))
-	var leader:Dictionary=GovernmentPeopleSystem.settlement_leader(String(settlement.get("id","")))
-	var blocks:Array=[
-		{"type":"tiles","heading":"SINCE FOUNDING","items":[
-			{"label":"BIRTHS","value":str(births),"note":"%d pregnancies active" % int(pregnancy.get("active",0)),"note_color":Tokens.GREEN,"tip":"Total births since the expedition began"},
-			{"label":"DEATHS","value":str(deaths),"note":"all causes","note_color":Tokens.RED if deaths>0 else Tokens.MUTED,"tip":"Total deaths since the expedition began"},
-			{"label":"NET","value":"%+d" % net,"note":"births − deaths","note_color":Tokens.GREEN if net>=0 else Tokens.RED,"tip":"Natural change since founding"},
-			{"label":"LIFE EXPECT.","value":"%.1f y" % GameState.projected_life_expectancy(),"note":"projected at birth","note_color":Tokens.MUTED,"tip":"Average years a newborn would live if current age-specific risks persisted; this is not a maximum age"},
-		]},
-		{"type":"text","heading":"PLACE RECORD","text":"%s was founded on day %d. Current local leader: %s, %s." % [String(settlement.get("name","This settlement")),founded_day,String(leader.get("name","vacant")),String(leader.get("title","no office assigned")).to_lower()]},
-	]
-	if not chronicle_items.is_empty():
-		blocks.append({"type":"rows","heading":"CHRONICLE","items":chronicle_items})
-	else:
-		blocks.append({"type":"text","heading":"CHRONICLE","text":"Nothing notable has been recorded yet. Events accumulate here as the settlement lives."})
-	blocks.append({"type":"actions","items":[{
-		"label":"FULL LEDGER","sub":"births, deaths, causes, maternity","primary":true,
-		"on_press":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(terrain,hud)),
-		"tip":"Open the complete population record beside this panel",
-	}]})
-	return blocks
+func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
+	var id:=String(settlement.get("id",""))
+	return [
+		{"type":"chronicle","heading":"THE RECORDED YEARS","events":preload("res://scripts/hud/settlement_history_data.gd").events(settlement,GameState.discovery_log,GameState.building_ledger)},
+		Charts.population(id,true),
+		Charts.reserves(id),
+		{"type":"actions","heading":"EXPLORE THE RECORD","items":[
+			{"label":"POPULATION LEDGER","sub":"Civilization-wide births, deaths and health","on_press":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(terrain,hud))},
+			{"label":"BUILDING RECORD","sub":"Local construction, damage and rebuilding","on_press":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud,id))}]}]
+
 
 func signature()->Array:
-	return [GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size()]
+	return [GameState.discovery_log.hash(),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size()]
 
 func _overview_blocks(settlement:Dictionary)->Array:
 	var id:=String(settlement.get("id",""))
-	return [
-		{"type":"text","heading":"YOUR ROLE","text":"Choose this place’s direction. Its local leader assigns routine work; you do not need to distribute every worker. Buildings emerge from needs, labor and available materials."},
-		{"type":"actions","heading":"SHAPE THIS PLACE","items":[
-			{"label":"LOCAL LEADER","sub":"automatic appointment · manage in Civics","primary":true,"on_press":jump("civ",1)},
-			focused_action("LOCAL PRIORITY","Let the leader decide, or give a direction",_people_report.bind("priority"))]},
-		{"type":"actions","heading":"UNDERSTAND YOUR SETTLEMENT","items":[
-			focused_action("POPULATION","Growth and age groups",_people_report.bind("population")),
-			focused_action("DAILY WORK","Who works where, and why",_people_report.bind("work")),
-			{"label":"FOOD & MATERIALS","sub":"Reserves, sources and constraints","on_press":jump("economy",0)},
-			{"label":"RENAME","sub":"Change this place’s map name","on_press":terrain._open_settlement_naming_panel.bind(id)}]}]
+	var management:=GovernmentPeopleSystem.settlement_management(id)
+	var population:=int(settlement.get("population",GameState.population_total))
+	var metrics:Dictionary=GameState.simulation_metrics
+	var food:="%.1f days in reserve" % float(metrics.food_days) if metrics.has("food_days") else "Reserve report pending"
+	var housing:="%d people · %d shelter capacity" % [population,GameState.housing_capacity]
+	var age:=maxi(0,int(GameState.elapsed_days)-int(settlement.get("founded_day",0)))
+	return [{"type":"settlement_overview","leader":management.get("leader",{}),"focus":String(management.get("focus_label","Balanced")),"managed":bool(management.get("auto_manage",true)),
+		"reason":String(management.get("focus_reason","The local leader is assessing this settlement’s needs.")),"effect":String(management.get("focus_effect","")),
+		"metrics":[{"label":"Residents","value":str(population)},{"label":"Years since founding","value":"%.1f" % (float(age)/365.0)},{"label":"Life expectancy · years","value":"%.1f" % GameState.projected_life_expectancy()}],
+		"cards":[
+			{"kind":"building","art":1,"title":"Homes & shelter","detail":housing,"action":"View buildings","on_press":jump("construction",0)},
+			{"kind":"food","art":0,"title":"Food & water","detail":food,"action":"View provisions","on_press":jump("economy",0)},
+			{"kind":"building","art":3,"title":"Work & production","detail":"Local workshops and active production","action":"View production","on_press":jump("production",0)}],
+		"on_leader":jump("civ",1),"on_priority":focused_action("Local priority","",_people_report.bind("priority")).on_press,
+		"on_population":focused_action("Population","",_people_report.bind("population")).on_press,"on_work":focused_action("Daily work","",_people_report.bind("work")).on_press,
+		"on_rename":terrain._open_settlement_naming_panel.bind(id)}]
+
 
 func _people_report(kind:String)->Dictionary:
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_people_report(kind)))

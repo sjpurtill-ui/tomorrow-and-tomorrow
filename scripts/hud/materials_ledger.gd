@@ -1,18 +1,13 @@
 extends "res://scripts/hud/production_queue.gd"
 const Materials:=preload("res://scripts/hud/materials_art.gd")
-static var portraits:Texture2D
+const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Spark:=preload("res://scripts/hud/material_stock_spark.gd")
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;add_theme_constant_override("separation",5)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",14);add_child(head)
 	var leader:Dictionary=data.leader
 	if not leader.is_empty():
-		if portraits==null:
-			var path:="res://assets/portraits/founding_leaders.png"
-			portraits=load(path) as Texture2D if ResourceLoader.exists(path) else ImageTexture.create_from_image(Image.load_from_file(path))
-		var portrait:=TextureRect.new();var atlas:=AtlasTexture.new();atlas.atlas=portraits
-		var cell:=Vector2(atlas.atlas.get_width()/5.0,atlas.atlas.get_height());atlas.region=Rect2(Vector2(posmod(int(leader.get("id",0)),5)*cell.x,0),cell)
-		portrait.texture=atlas;portrait.custom_minimum_size=Vector2(90,100);portrait.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;portrait.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;portrait.tooltip_text="Leader portrait illustration";head.add_child(portrait)
+		head.add_child(Portrait.picture(leader,80,100))
 	var manager:=VBoxContainer.new();manager.size_flags_horizontal=Control.SIZE_EXPAND_FILL;manager.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(manager)
 	manager.add_child(T.make_label(String(data.city),12,T.MUTED));manager.add_child(_serif(String(leader.get("name","Founding camp")),18));manager.add_child(T.make_label("Leader managed" if bool(data.managed) else "Directed priorities",12,T.MUTED))
 	_gauge(head,"Storage",float(data.storage)/float(data.capacity) if float(data.capacity)>0 else -1,"%.1f / %.1f bulk" % [float(data.storage),float(data.capacity)])

@@ -27,6 +27,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"settlement_overview":
+				var panel:=preload("res://scripts/hud/settlement_overview.gd").new();section.add_child(panel);panel.setup(block)
+			"chronicle":
+				var panel:=preload("res://scripts/hud/settlement_chronicle.gd").new();section.add_child(panel);panel.setup(block)
 			"cabinet":
 				var cabinet:=preload("res://scripts/hud/government_cabinet_widget.gd").new()
 				section.add_child(cabinet);cabinet.setup(block)
@@ -470,14 +474,8 @@ static func _render_conversation(parent:VBoxContainer,block:Dictionary)->void:
 	header.add_theme_constant_override("separation",9)
 	stack.add_child(header)
 	var leader_name:=String(block.get("leader_name","Settlement leader"))
-	var avatar:=PanelContainer.new()
-	avatar.custom_minimum_size=Vector2(34,34)
-	avatar.add_theme_stylebox_override("panel",Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,1,17))
-	header.add_child(avatar)
-	var initials:=Tokens.make_label(_conversation_initials(leader_name),11,Tokens.GOLD_BRIGHT,0.05)
-	initials.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	initials.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	avatar.add_child(initials)
+	if not (block.get("leader",{}) as Dictionary).is_empty():
+		header.add_child(preload("res://scripts/hud/person_portrait.gd").picture(block.leader,48,60))
 	var identity:=VBoxContainer.new()
 	identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	identity.add_theme_constant_override("separation",0)

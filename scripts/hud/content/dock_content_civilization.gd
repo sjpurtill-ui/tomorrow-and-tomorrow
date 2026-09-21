@@ -162,7 +162,7 @@ func _council_all_blocks()->Array:
 			{"label":"EXECUTE","color":Tokens.RED,"on_press":_remove_civic_leader.bind(settlement_id,"execute"),"tip":"Kill this leader by decree. A successor takes office automatically, with severe political cost."},
 		]
 		blocks.append({
-			"type":"conversation","leader_name":String(leader.get("name","the appointed leader")),
+			"type":"conversation","leader":leader,"leader_name":String(leader.get("name","the appointed leader")),
 			"leader_title":String(leader.get("title","local leader")),"disposition":String(disposition.get("label","pragmatic")).to_lower(),
 			"state":latest_state,"state_color":_directive_state_color(latest_state),"items":dialogue_turns,
 			"empty_text":"Speak plainly. %s will answer according to their character and what %s can actually do." % [String(leader.get("name","The leader")),String(settlement.get("name","this settlement"))],
