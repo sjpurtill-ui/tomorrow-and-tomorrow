@@ -61,7 +61,7 @@ func advance(day:int)->void:
 	# Alternate first consideration; a standing military order cannot starve
 	# civilian supply planning forever, and vice versa.
 	if day%2==0 and not civilian.is_empty():demands.push_front(demands.pop_back())
-	data.status="No additional feasible supply order. Existing lines continue."
+	data.status="No additional feasible supply order. Existing lines continue." if not host.equipment_queue.is_empty() else "Workshop idle: no feasible order for current needs. Household crafts are recorded separately from production lines."
 	for demand:Dictionary in demands:
 		var result:=schedule(demand)
 		data.status=String(result.get("message",result.get("error",data.status)))
@@ -72,6 +72,15 @@ func army_demands()->Array[Dictionary]:
 		if not bool(template.get("recruitment_requested",false)):continue
 		var quote:Dictionary=host.template_training_quote(int(template.template_id))
 		for item:String in quote.get("equipment",{}):totals[item]=int(totals.get(item,0))+int(quote.equipment[item])
+	# Serving troops need replacement and initial equipment even when no new
+	# recruitment template has been requested. Demand is only their missing gear;
+	# already issued equipment and stored inventory must not be manufactured twice.
+	for force:Dictionary in [host.home_army]+host.field_armies+host.occupation_forces:
+		for formation:Dictionary in force.get("formations",[]):
+			var item:=String(formation.get("weapon","improvised"))
+			var required:=maxi(0,int(formation.get("equipment_required",formation.get("count",0))))
+			var missing:=maxi(0,required-int(formation.get("equipment",0)))
+			if missing>0:totals[item]=int(totals.get(item,0))+missing
 	var result:Array[Dictionary]=[]
 	for item:String in totals:
 		if int(totals[item])<=int(host.military_inventory.get(item,0)):continue

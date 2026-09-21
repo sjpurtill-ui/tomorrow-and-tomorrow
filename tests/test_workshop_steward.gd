@@ -152,3 +152,22 @@ func test_player_manager_does_not_take_over_foreign_actor()->void:
 		WorldSimulation.military.workshop.advance(7)
 		assert_dict(WorldSimulation.military.workshop.data).is_equal(before))
 	WorldSimulation.clear()
+
+func test_serving_unequipped_reserve_creates_paid_supply_without_new_recruitment()->void:
+	MilitaryCampaign.army_templates=[]
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Reserve",[{"id":1,"unit":"levy","weapon":"improvised","count":3,"equipment":0,"training":.4}],.8,.7)
+	assert_int(MilitaryCampaign.workshop.army_demands()[0].target).is_equal(3)
+	var before:=float(GameState.resource_stockpiles.Timber)
+	MilitaryCampaign.workshop.advance(100)
+	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(1)
+	for day in range(101,104):
+		GameState.elapsed_days=day
+		MilitaryCampaign.workshop.advance(day)
+		MilitaryCampaign._process_equipment_production_day()
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(3)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(before-1.05,.00001)
+	assert_array(MilitaryCampaign.workshop.data.receipts).is_not_empty()
+	assert_array(MilitaryCampaign.workshop.army_demands()).is_empty()
+	MilitaryCampaign.military_inventory.improvised=0
+	MilitaryCampaign.home_army.formations[0].equipment=3
+	assert_array(MilitaryCampaign.workshop.army_demands()).is_empty()
