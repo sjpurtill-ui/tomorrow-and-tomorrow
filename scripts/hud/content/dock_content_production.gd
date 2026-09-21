@@ -16,7 +16,7 @@ func tab(sub:int)->Dictionary:
 	return {"blocks":[{"type":"production_queue","lines":lines,"total_lines":snapshot.lines.size(),"capacity":snapshot.capacity,"stocks":stocks,"selected":selected_line,"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":MilitaryCampaign.workshop.owner(),"on_select":_select,"on_action":_action,"on_detail":workshop._open_workshop_job,
 		"on_add":focused_action("ADD PRODUCTION LINE","Known products",workshop._equipment_catalog).on_press,
 		"on_manage":focused_action("WORKSHOP MANAGEMENT","Delegation",workshop._workshop_management_report).on_press,
-		"on_history":focused_action("PRODUCTION HISTORY","Completed output",_history).on_press}]}
+		"on_history":focused_action("PRODUCTION HISTORY","Completed output",_history).on_press},{"type":"actions","items":[focused_action("EQUIPMENT REPAIRS","Restore damaged military equipment",_repairs)]}]}
 func _select(id:int)->void:
 	selected_line=-1 if selected_line==id else id;hud.request_immediate_dock_refresh()
 func _action(id:int,action:String,value:float)->void:
@@ -36,3 +36,12 @@ func _history()->Dictionary:
 	return {"blocks":[{"type":"production_board","lines":[],"receipts":MilitaryCampaign.workshop.data.receipts,"day":int(GameState.elapsed_days),"view_state":{"mode":1}}]}
 func signature()->Array:
 	return [MilitaryCampaign.production_lines_snapshot(),GameState.elapsed_days,selected_line,MilitaryCampaign.workshop.data.enabled]
+
+func _repairs()->Dictionary:
+	_ensure_workshop()
+	var items:Array=[]
+	for item:String in MilitaryCampaign.damaged_equipment:
+		var count:=int(MilitaryCampaign.damaged_equipment[item])
+		if count<=0:continue
+		items.append(focused_action("REPAIR "+item.replace("_"," ").to_upper(),"%d damaged sets" % count,workshop._supply_order_report.bind("repair",item)))
+	return {"blocks":[{"type":"text","text":"No equipment needs repair."}]} if items.is_empty() else {"blocks":[{"type":"actions","heading":"DAMAGED EQUIPMENT","items":items}]}

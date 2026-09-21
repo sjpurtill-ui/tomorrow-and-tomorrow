@@ -14,7 +14,7 @@ signal escape_pressed
 
 const SECTIONS:Array[Dictionary]=[
 	{"id":"settlement","label":"Overview","icon":0,"tooltip":"Settlement overview · F1"},
-	{"id":"government","label":"People","icon":1,"tooltip":"Government and officeholders · F3"},
+	{"id":"government","label":"Government","icon":1,"tooltip":"Government and officeholders · F3"},
 	{"id":"economy","label":"Food","icon":2,"sub":0,"tooltip":"Food and water · F2"},
 	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"tooltip":"Material stores and supply"},
 	{"id":"wealth","label":"Wealth","icon":4,"section":"economy","sub":2,"tooltip":"Wealth and economic output"},

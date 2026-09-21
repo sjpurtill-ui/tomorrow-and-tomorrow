@@ -25,8 +25,8 @@ func meta()->Dictionary:
 	if GeneralCampaign.active:return {"eyebrow":"GENERAL COMMAND","title":"The Alderford War","subtabs":["GENERAL"]}
 	return {
 		"eyebrow":"MILITARY COMMAND",
-		"title":"Watch & Field",
-		"subtabs":["FORCES","RECRUIT & DEPLOY","TRAINING","SUPPLY"],
+		"title":"Military",
+		"subtabs":["FORCES","RECRUIT & DEPLOY","TRAINING","LOGISTICS"],
 	}
 
 func open_expanded_tab(sub:int)->bool:
@@ -304,34 +304,25 @@ func _supply_blocks(army:Dictionary,capabilities:Dictionary)->Array:
 	var blocks:Array=[{"type":"tiles","heading":"SUPPLY","items":tiles}]
 	var medical:Dictionary=capabilities.get("medical_support",{})
 	if not medical.is_empty():blocks.append({"type":"text","heading":"HOME MEDICAL SUPPORT","text":preload("res://scripts/field_medicine.gd").describe(medical)})
-	var job_items:Array=[]
-	for job_variant in (army.get("equipment_queue",[]) as Array):
-		var job:Dictionary=job_variant
-		job_items.append({
-			"name":String(job.item).replace("_"," ").capitalize() if bool(job.get("persistent",false)) else "%s ×%d" % [String(job.get("item","gear")).replace("_"," ").capitalize(),int(job.get("count",0))],
-			"sub":("%s · %d finished · %.0f%% efficiency" % [MilitaryCampaign.PersistentProduction.state(MilitaryCampaign,job),int(job.completed),float(job.efficiency)*100]) if bool(job.get("persistent",false)) else "%d / %d finished · %.2f / %.2f workshop work-days" % [int(job.get("completed",0)),int(job.get("count",0)),float(job.get("progress_days",0)),float(job.get("required_days",1))],
-			"value":"","accent":Tokens.GOLD,
-			"tip":"Work-days measure production effort, not elapsed calendar time. Click to review the line.","on_click":func():_open_workshop_job(int(job.id)),
-		})
-	if not job_items.is_empty():
-		blocks.append({"type":"rows","heading":"WORKSHOP LINES","items":job_items})
-	var repair_items:Array=[]
+	var stores:Array=[]
+	for item in inventory:
+		if int(inventory[item])>0:stores.append({"name":String(item).replace("_"," ").capitalize(),"value":str(inventory[item]),"sub":"Available in military stores"})
+	if not stores.is_empty():blocks.append({"type":"rows","heading":"EQUIPMENT IN RESERVE","items":stores})
+	else:blocks.append({"type":"text","heading":"EQUIPMENT IN RESERVE","text":"No spare equipment in military stores."})
+	var ammunition:Array=[]
+	for item:String in army.get("military_consumables",{}):
+		if int(army.military_consumables[item])>0:ammunition.append({"name":item.replace("_"," ").capitalize(),"value":str(army.military_consumables[item]),"sub":"Available in military stores"})
+	if not ammunition.is_empty():blocks.append({"type":"rows","heading":"AMMUNITION & CONSUMABLES","items":ammunition})
+	var equipped:=0;var required:=0
+	for formation:Dictionary in army.get("formations",[]):
+		equipped+=int(formation.get("equipment",0));required+=int(formation.get("equipment_required",0))
+	if required>0:blocks.append({"type":"tiles","heading":"HOME FORCE EQUIPMENT","items":[{"label":"ISSUED / REQUIRED","value":"%d / %d" % [equipped,required],"note":"%d missing sets" % maxi(0,required-equipped),"note_color":Tokens.AMBER if equipped<required else Tokens.GREEN}]})
+	var repairs:Array=[]
 	for item in damaged:
-		if int(damaged[item])<=0 or repair_items.size()>=2: continue
-		var item_id:=String(item)
-		var item_count:=int(damaged[item])
-		repair_items.append({
-			"label":"REPAIR %s" % item_id.replace("_"," ").to_upper(),"sub":"×%d damaged" % item_count,"primary":true,
-			"on_press":func()->void:var action:=focused_action("REPAIR "+item_id.replace("_"," ").to_upper(),"",_supply_order_report.bind("repair",item_id));action.on_press.call(),
-			"tip":"Queue repair work; costs far less than new production",
-		})
-	repair_items.append({
-		"label":"BUILD CARTS","sub":"review materials and workshop time",
-		"on_press":func()->void:var action:=focused_action("BUILD CARTS","",_supply_order_report.bind("transport","transport_cart"));action.on_press.call(),
-		"tip":"Queue transport cart production on a workshop line",
-	})
-	blocks.append({"type":"actions","items":repair_items})
-	blocks.append({"type":"text","text":"Missions take their provisions at departure. Field forces are supplied only as far as carts and carriers reach; each army's runners consume nothing but carry everything you know."})
+		if int(damaged[item])>0:repairs.append({"name":String(item).replace("_"," ").capitalize(),"value":str(damaged[item]),"sub":"Damaged · unavailable until repaired","accent":Tokens.AMBER})
+	if not repairs.is_empty():blocks.append({"type":"rows","heading":"REPAIR NEEDS","items":repairs})
+	blocks.append({"type":"actions","items":[{"label":"OPEN MILITARY PRODUCTION","sub":"Equipment, ammunition, transport and repair orders","on_press":jump("production",2)}]})
+
 	return blocks
 
 func signature()->Array:
@@ -436,7 +427,8 @@ func _force_report(kind:String)->Dictionary:
 	return {"blocks":chosen}
 
 func _supply_overview()->Array:
-	return _production_overview().blocks+[{"type":"actions","items":[focused_action("SUPPLY & REPAIRS","Transport, ammunition and damaged equipment",func()->Dictionary:return {"blocks":_supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())}),{"label":"CIVILIAN STORES","sub":"Materials and finished civilian goods","on_press":jump("economy",1)}]}]
+	return _supply_blocks(MilitaryCampaign.campaign_army_snapshot(),MilitaryCampaign.military_capabilities())
+
 
 func _ammunition_known()->bool:
 	for item:String in MilitaryCampaign.CONSUMABLE_KNOWLEDGE:

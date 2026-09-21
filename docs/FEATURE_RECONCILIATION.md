@@ -1,3 +1,14 @@
+## September 21 — Military logistics and Government navigation
+
+People is labeled Government. Watch & Field is titled Military and its Supply
+tab is Logistics. Logistics shows supply coverage, transport, spare equipment,
+ammunition, home-force equipment shortages and damaged gear; it no longer embeds
+production queues or workshop orders. Its production link opens the military
+filter. Repair ordering moved to Production without changing simulation rules.
+Four headless checks pass for navigation labels, removal of duplicate production,
+repair-order availability and actual inventory values. No player launch or visual
+inspection was performed, per the user's preference.
+
 ## September 21 — Top-bar hover detail panels
 
 All six top-right indicators now construct themed detail panels on hover rather
