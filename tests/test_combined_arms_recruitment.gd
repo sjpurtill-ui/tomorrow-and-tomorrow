@@ -40,7 +40,9 @@ func test_existing_and_pending_support_bound_further_orders()->void:
 func test_research_adoption_supply_and_training_guards()->void:
 	WorldSimulation.scoped("recruitment",func()->void:
 		var plan:=setup();var state=WorldSimulation.state;var host=WorldSimulation.military
-		state.discovery_adoption.skirmisher_infantry_screens=.1;assert_dict(recommend(plan)).is_empty()
+		state.known_discoveries.erase("skirmisher_infantry_screens");state.discovery_adoption.erase("skirmisher_infantry_screens")
+		assert_str(String(recommend(plan).unit)).is_equal("skirmisher")
+		assert_dict(preload("res://scripts/combined_arms_doctrine.gd").levels()).is_empty()
 		state.discovery_adoption.skirmisher_infantry_screens=1.0;state.discovery_adoption.bow_craft=.01;assert_dict(recommend(plan)).is_empty()
 		state.discovery_adoption.bow_craft=1.0;host.military_inventory.bow=0;state.resource_stockpiles.clear();assert_dict(recommend(plan)).is_empty()
 		host.military_inventory.bow=100;plan.hungry=true;assert_dict(recommend(plan)).is_empty()

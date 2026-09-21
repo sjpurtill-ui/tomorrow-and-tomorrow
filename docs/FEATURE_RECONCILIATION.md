@@ -1918,3 +1918,8 @@ Follow-up on `70faecc`, task `codex/first-300-playable`. Local troops share real
 ## September 21 — founding craft wear and durable mineral exposure
 
 Base `31706d5`, task `codex/first-300-playable`. Household tools and containers use their own material-specific wear rather than also being classified as bulk yard minerals and charged a second decay. Exposed durable yard minerals retain modest handling loss rather than perishable overflow loss; organic, liquid and containment-dependent stocks retain storage constraints. Thirteen founding/craft/storage tests pass, including one-year finite flint survival, single-owner tool wear, repeated-day idempotence and perishable overflow. No free materials, knowledge, save-schema changes or player restart. Sparse-site campaign recovery still requires matched validation.
+
+
+## September 21 — basic mixed forces and culture restore
+
+Base `aef4f3c`. The AI can recruit researched, supplied archers to complement existing spear troops before learning coordinated-screen doctrine. Pending recruits count toward the bounded composition target; no people, equipment or doctrine bonuses are granted. Home reinforcement uses the same basic composition rule and checks actual position, preventing a stale home label from teleporting support. Doctrine benefits still require researched, rehearsed formations. Culture validation accepts finite whole-number days preserved by JSON as floats, while rejecting fractional, negative, nonfinite and nonnumeric days. Twenty-six recruitment, reinforcement, doctrine and culture restore checks pass, including binary/JSON roundtrips. No save schema change or player restart.

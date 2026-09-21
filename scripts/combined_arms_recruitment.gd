@@ -16,8 +16,10 @@ static func recommendation(primary:String,plan:Dictionary,can_supply:Callable)->
 		counts[unit]=int(counts.get(unit,0))+maxi(0,int(order.get("count",0)))
 	var best:Dictionary={};var score:=-INF
 	var levels:=D.levels()
-	for id:String in levels:
-		if float(levels[id])<.25:continue
+	# A basic mix of spear troops and archers does not require the later
+	# coordinated-screen doctrine; that research still owns its combat bonus.
+	for id:String in D.RULES:
+		if id!="skirmisher_infantry_screens" and float(levels.get(id,0))<.25:continue
 		var rule:Dictionary=D.RULES[id]
 		if primary not in rule.targets:continue
 		var targets:=0;var support:=0

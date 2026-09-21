@@ -3,7 +3,7 @@ const D=preload("res://scripts/combined_arms_doctrine.gd")
 const Sim=preload("res://scripts/combat_simulator.gd")
 var sim:RefCounted
 func before_test()->void:
-	WorldSimulation.clear();GameState.reset_for_new_world(414);DiscoverySystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();DiscoverySystem.initialize()
+	WorldSimulation.clear();GameState.reset_for_new_world(414);PeopleDirection.reset_for_new_world();DiscoverySystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();DiscoverySystem.initialize()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	sim=auto_free(Sim.new())
 func after_test()->void:

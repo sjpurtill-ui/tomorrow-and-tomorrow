@@ -27,10 +27,12 @@ const PROFILES:={
 	"retribution":{"justice":{"vengeance":0.5,"terror":0.5},"strength":{"prestige":1.0},"belonging":{"might_makes_right":1.0}},
 	"orthodoxy":{"truth":{"political_usefulness":0.5,"tradition":0.5},"difference":{"assimilation":0.5,"separation":0.5},"authority":{"personal_domination":1.0}}}
 static func empty()->Dictionary:return {"version":1,"inheritance":{},"recent":{},"recent_day":0,"choices":{},"events":[]}
+static func _valid_day(value:Variant)->bool:
+	return (value is int or value is float) and is_finite(float(value)) and float(value)>=0.0 and float(value)<=1e12 and float(value)==floorf(float(value))
 static func valid(state:Variant)->bool:
 	if not state is Dictionary or state.get("version",0)!=1:return false
 	if not state.get("choices") is Dictionary or not state.get("events") is Array or state.events.size()>1024:return false
-	if not state.get("recent_day") is int or state.recent_day<0:return false
+	if not _valid_day(state.get("recent_day")):return false
 	for channel in ["inheritance","recent"]:
 		if not state.get(channel) is Dictionary:return false
 		for domain in state[channel]:
@@ -42,7 +44,7 @@ static func valid(state:Variant)->bool:
 		var weight:Variant=state.choices[key]
 		if not PROFILES.has(key) or not (weight is float or weight is int) or not is_finite(float(weight)) or weight<0:return false
 	for event in state.events:
-		if not event is Dictionary or not event.get("id") is String or not event.get("choice") is String or not event.get("day") is int or not event.get("weight") is float:return false
+		if not event is Dictionary or not event.get("id") is String or not event.get("choice") is String or not _valid_day(event.get("day")) or not (event.get("weight") is float or event.get("weight") is int):return false
 		if not PROFILES.has(event.choice) or event.day<0 or not is_finite(event.weight) or event.weight<=0:return false
 	return true
 static func record(state:Dictionary,id:String,choice:String,day:int,weight:float)->bool:

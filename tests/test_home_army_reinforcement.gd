@@ -37,7 +37,7 @@ func test_normal_order_moves_only_requested_support_and_preserves_issued_stocks(
 func test_distant_moving_embarked_and_battle_committed_armies_cannot_teleport_support()->void:
 	WorldSimulation.scoped("attachment",func()->void:
 		var id:=setup();var host=WorldSimulation.military;var before:=totals()
-		for condition:Dictionary in [{"location_id":"distant_city"},{"status":"moving"},{"embarked":true}]:
+		for condition:Dictionary in [{"location_id":"distant_city"},{"position":{"x":100000.0,"z":100000.0}},{"status":"moving"},{"embarked":true}]:
 			var original:Dictionary=host.field_armies[0].duplicate(true)
 			host.field_armies[0].merge(condition,true)
 			assert_bool(H.transfer(host,id,"skirmisher",10).has("error")).is_true()
@@ -87,4 +87,16 @@ func test_monthly_controller_attaches_the_available_supporting_contingent()->voi
 		assert_dict(totals()).is_equal(before)
 		assert_int(int(host.field_armies[0].troops)).is_equal(90)
 		assert_int(int(host.home_army.troops)).is_equal(40)
+	)
+
+func test_basic_archers_can_join_spears_before_screen_doctrine_is_learned()->void:
+	WorldSimulation.scoped("attachment",func()->void:
+		setup();var state=WorldSimulation.state;var host=WorldSimulation.military
+		state.known_discoveries.erase("skirmisher_infantry_screens");state.discovery_adoption.erase("skirmisher_infantry_screens")
+		var before:=totals()
+		var order:=H.recommendation(host)
+		assert_str(String(order.unit)).is_equal("skirmisher")
+		assert_bool(H.transfer(host,int(order.army),String(order.unit),int(order.count)).get("ok",false)).is_true()
+		assert_dict(totals()).is_equal(before)
+		assert_dict(D.levels()).is_empty()
 	)

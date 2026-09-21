@@ -8,6 +8,11 @@ static func available(host:Node,army_id:int)->Dictionary:
 	if index<0:return {"error":"Select an existing field army."}
 	var army:Dictionary=host.field_armies[index]
 	if host.command_hierarchy.battle.engaged(army_id) or bool(army.get("embarked",false)) or String(army.get("status",""))!="stationed" or String(army.get("location_id",""))!="player_home":return {"error":"The army must be stationed at home and free of battle or transport commitments."}
+	var destination:Dictionary=host._movement_destination("player_home")
+	var position:Dictionary=army.get("position",{})
+	if position.is_empty() or not destination.has("position"):return {"error":"The army needs a confirmed position at home."}
+	var home:Dictionary=destination.position
+	if Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(Vector2(float(home.get("x",0)),float(home.get("z",0))))>.25:return {"error":"The army must physically return home before receiving these reinforcements."}
 	return {"index":index}
 static func transfer(host:Node,army_id:int,unit:String,count:int)->Dictionary:
 	var access:=available(host,army_id)
@@ -34,8 +39,8 @@ static func recommendation(host:Node)->Dictionary:
 	var levels:=D.levels()
 	for army:Dictionary in host.field_armies:
 		if available(host,int(army.army_id)).has("error"):continue
-		for id:String in levels:
-			if float(levels[id])<.25:continue
+		for id:String in D.RULES:
+			if id!="skirmisher_infantry_screens" and float(levels.get(id,0))<.25:continue
 			var rule:Dictionary=D.RULES[id];var targets:=0;var support:=0
 			for formation:Dictionary in army.formations:
 				if formation.get("unit","") in rule.targets:targets+=maxi(0,int(formation.count))
