@@ -1,0 +1,9 @@
+{
+  "id": "paper_making",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Sheet Fiber Writing Material. Show a concrete, visually clear scene demonstrating this exact practice: Pulped fibers are formed into light sheets suitable for dense records and wide circulation. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-d75bc725-c5f9-497b-9f83-7d640e9578ce.png",
+  "asset": "res://assets/ui/research/subjects/paper_making-v1.png",
+  "sha256": "4a1041822bfec752b7e57be1f18c1babfa4dc8b49890761d5fd1975eef45fcf1",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

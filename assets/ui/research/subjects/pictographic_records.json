@@ -1,0 +1,9 @@
+{
+  "id": "pictographic_records",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Pictographic Records. Show a concrete, visually clear scene demonstrating this exact practice: Marks begin preserving categories, events, and obligations rather than quantities alone. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-5319c07b-4b1f-4355-b9e8-82615d6ae4cd.png",
+  "asset": "res://assets/ui/research/subjects/pictographic_records-v1.png",
+  "sha256": "8100ec30e3fd2e3a2f5feac7b108709517d24a9bacc2cb126c9c5411285243ae",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
