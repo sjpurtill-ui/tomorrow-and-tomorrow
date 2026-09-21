@@ -2245,9 +2245,14 @@ func _apply_completed_work_materials(plot:Dictionary,materials:Dictionary)->void
 
 func _synchronize_early_works(day:int,events:Array[Dictionary])->void:
 	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed:
-		var shelter_materials:=_completed_work_materials("Lean-to Shelters")
+		var shelter_materials:Dictionary={}
+		var shelter_materials_read:=false
 		for plot in WorldSimulation.state.settlement_plots:
 			if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"] or String(plot.get("form","")) not in ["portable_shelter_cluster","light_shelter_cluster"]: continue
+			# Old construction records matter only when a plot actually converts.
+			if not shelter_materials_read:
+				shelter_materials=_completed_work_materials("Lean-to Shelters")
+				shelter_materials_read=true
 			plot["form"]="lean_to_household_cluster"
 			_apply_completed_work_materials(plot,shelter_materials)
 			if String(plot.get("material_family","organic"))=="earth":plot["form"]="earthen_household"
@@ -2258,9 +2263,9 @@ func _synchronize_early_works(day:int,events:Array[Dictionary])->void:
 			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Shelters Took Root","plot_id":int(plot.id)})
 	if "Framed Hall" in WorldSimulation.state.settlement_completed:
-		var hall_materials:=_completed_work_materials("Framed Hall")
 		for plot in WorldSimulation.state.settlement_plots:
 			if String(plot.get("land_use",""))!="communal" or String(plot.get("form",""))!="open_hearth_yard":continue
+			var hall_materials:=_completed_work_materials("Framed Hall")
 			plot["form"]="timber_frame_hall"
 			_apply_completed_work_materials(plot,hall_materials)
 			plot["roof_plan"]="thatched_ridge"
