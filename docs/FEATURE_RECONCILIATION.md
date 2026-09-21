@@ -1973,3 +1973,7 @@ The structural supply audit now includes actual household recipes, with their re
 - Generated starts require measured wood, stone and fiber catchments for the inherited generalist kit, alongside food, season, temperature and fresh water. Forty-eight real sites across three seeds pass; later chosen settlements may depend on trade.
 - Intercity cargo is received before daily household/tool work and later workshops. Dispatch remains later and receiving twice cannot duplicate cargo. Thirty-three city-resource and owned-world checks pass, including daily imported-tool production and shared player/opponent balances.
 - The retained treeless cool start recovered under f4cb449 by year 104: 36 equipped spears, 5 equipped bows, 30 arrows carried and 30 spare. The five-year continuation to year 105 completed and its save validated. This does not imply the same industrial path as wooded starts.
+
+### First 300 years: repeated intercity store lookups
+- Resolve each city's live store reference once per dispatch pass instead of repeatedly initializing its complete resource schema for every source/destination/good comparison. Earlier dispatches still debit the same dictionary seen by later destinations.
+- Validation: 44 city, rail and siege checks pass. A 30-day replay of the same real year-100 checkpoint produces an exactly equal complete exported world before/after, with both binary saves valid. Phase timing was 1.270 s versus 1.152 s, but concurrent workloads made total wall time noisier; no broad speedup claim is made.

@@ -375,9 +375,13 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				var leather:=preload("res://scripts/household_clothing.gd").leather_target(WorldSimulation.state.population_exact)
 				if leather>0:needs["Flexible Leather"]=leather
 				return needs))
+	# Resolve each city store once; these are live references, so earlier
+	# dispatches still reduce what later destinations can request.
+	var local_stores:Dictionary={}
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
 		if not String(source.get("occupied_by","")).is_empty():continue
+		local_stores[String(source.id)]=_city_stores(source)
 		var share:=_settlement_population(source)/maxf(1.0,WorldSimulation.state.population_exact)
 		var workforce:=0.0
 		for amount in WorldSimulation.state.population_allocations.values(): workforce+=float(amount)
@@ -391,7 +395,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	for destination in WorldSimulation.state.player_settlements:
 		if not String(destination.get("occupied_by","")).is_empty():continue
 		var destination_population:=_settlement_population(destination)
-		var destination_stores:=_city_stores(destination)
+		var destination_stores:Dictionary=local_stores[String(destination.id)]
 		var trade_goods:Array=CITY_TRADE_GOODS.duplicate()
 		for item:String in water_targets.get(String(destination.id),{}):
 			if item not in trade_goods:trade_goods.append(item)
@@ -419,7 +423,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				var reserve:=_settlement_population(source)*45.0 if resource_name=="Food" else maxf(20.0,_settlement_population(source)*0.15)
 				if resource_name not in CITY_TRADE_GOODS:reserve=0.0
 				reserve=maxf(reserve,float(water_targets.get(String(source.id),{}).get(resource_name,0)))
-				var spare:=float(_city_stores(source).get(resource_name,0.0))-reserve
+				var spare:=float(local_stores[String(source.id)].get(resource_name,0.0))-reserve
 				if spare<=0.01: continue
 				if not bool(known_route_assessment(_record_position(source),_record_position(destination)).get("known",false)): continue
 				donor=source
