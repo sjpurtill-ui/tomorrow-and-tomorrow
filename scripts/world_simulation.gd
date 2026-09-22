@@ -258,8 +258,12 @@ func project(civ:Dictionary)->void:
 		region["position"]=city.position
 		region["boundary"]=city.get("boundary",[]).duplicate()
 		region.name=city.name
-		region.population=local.population
-		region.population_share=float(local.population)/maxf(1,state.population_exact)
+		# Local work snapshots floor each town at one person. The atlas must use
+		# unfloored shares or a declining multi-town civ gains phantom residents.
+		var record:Dictionary=settlements.settlement_record(String(city.id))
+		var share:float=1.0-settlements._committed_satellite_share() if primary else maxf(0.0,float(record.get("population_share",0.0)))
+		region.population=maxf(0.0,state.population_exact)*share
+		region.population_share=share
 		region.controller=String(city.get("occupied_by",civ.id))
 		if region.controller=="human":region.controller="player"
 		if String(region.controller).is_empty():region.controller=String(civ.id)

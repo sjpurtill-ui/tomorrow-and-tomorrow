@@ -417,6 +417,7 @@ func _ready() -> void:
 		var restored:Dictionary=SaveSystem.load_game()
 		if restored.has("error"):
 			push_error("Saved campaign could not be reopened: "+String(restored.error))
+			for detail in restored.get("details",[]):push_error("Save validation: "+String(detail))
 			get_tree().quit(1)
 			return
 		get_tree().root.set_meta("saved_campaign_resumed",true)

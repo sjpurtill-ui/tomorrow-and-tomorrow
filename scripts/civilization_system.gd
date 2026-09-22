@@ -5076,6 +5076,7 @@ func import_state(payload:Dictionary)->Dictionary:
 		if is_finite(population) and population>=1 and is_finite(personnel) and personnel>population and is_finite(share) and share>=0:
 			civ.military_population=population
 			civ.military_share=1.0
+		_repair_floored_region_projection(civ)
 	var previous:=export_state()
 	_apply_state(incoming)
 	var errors:=validate_state()
@@ -5088,6 +5089,28 @@ func import_state(payload:Dictionary)->Dictionary:
 	if not incoming.has("city_intelligence"): city_intelligence.migrate()
 	world_changed.emit(competition_snapshot())
 	return {"ok":true,"version":SAVE_VERSION}
+
+
+func _repair_floored_region_projection(civ:Dictionary)->void:
+	# Only legacy shared map summaries with the known one-person town floor.
+	# Authoritative actor demographics and settlement records are not changed.
+	var population:=float(civ.get("population",NAN))
+	if not bool(civ.get("shared_rules",false)) or not is_finite(population) or population<1.0:return
+	var represented:=0.0
+	var floors:=0
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		var count:=float(region.get("population",NAN))
+		if not is_finite(count) or count<0.0:return
+		if count>0.0:
+			if not bool(region.get("settlement_founded",false)) or String(region.get("local_city_id","")).is_empty():return
+			var share:=float(region.get("population_share",NAN))
+			if not is_finite(share) or absf(share-count/population)>0.00001:return
+			if count==1.0:floors+=1
+		represented+=count
+	if represented<=population or represented-population>float(floors):return
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		region.population=float(region.population)*population/represented
+		region.population_share=float(region.population)/population
 
 
 func _migrate_legacy_state(payload:Dictionary)->Dictionary:
