@@ -1,0 +1,35 @@
+{
+  "runtime": "7168fb51bca50d7c03b82f2e9d63a6f29b6f1cec",
+  "source": "Real-geography seed 91420 military-priority saved campaign",
+  "from_day": 110016,
+  "final_day": 110381,
+  "target_reached": true,
+  "stop_reason": "target reached",
+  "equipped_before": 2302,
+  "equipped_after": 7063,
+  "recorded_output_and_repair_deltas": {
+    "Building Runoff Channels": 9.0,
+    "Fitted Post Beam Sets": 7.0,
+    "bow": 217.0,
+    "improvised": 3659.0,
+    "spear": 1673.0
+  },
+  "food_intake_ratio": 1.0,
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "limitations": [
+    "One year of sustained recovery, not an uninterrupted final-build campaign from founding.",
+    "Recorded equipment receipts include repairs and manufacture.",
+    "Scarce timber still delays individual orders; this does not promise unconstrained output."
+  ]
+}
