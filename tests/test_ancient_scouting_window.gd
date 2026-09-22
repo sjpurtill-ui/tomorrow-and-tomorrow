@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 const Sheet = preload("res://scripts/hud/scouting_policy_panel.gd")
 const Art = preload("res://scripts/hud/scouting_window_art.gd")
+const Tokens = preload("res://scripts/hud/hud_tokens.gd")
 var viewport: SubViewport
 var sheet: Control
 
@@ -97,3 +98,26 @@ func test_advanced_capability_retires_the_primitive_expedition_art() -> void:
 	assert_bool(sheet.ancient).is_false()
 	assert_bool(sheet.hero.get_child(0).texture==Art.HERO).is_false()
 	assert_float(sheet.slider.value).is_equal(5.0)
+
+func test_light_and_dark_preferences_keep_scouting_surfaces_readable()->void:
+	var original:=Tokens.color_mode
+	for mode:String in ["light","dark"]:
+		Tokens.color_mode=mode
+		sheet.queue_free();await await_idle_frame()
+		sheet=Sheet.new();viewport.add_child(sheet);await await_idle_frame()
+		var card:StyleBoxFlat=sheet.latest_card.get_theme_stylebox("panel")
+		assert_float(card.bg_color.a).is_equal(1.0)
+		for ink:Color in [Art.INK,Art.SOFT,Art.GOLD]:
+			assert_float(contrast(ink,card.bg_color)).is_greater_equal(4.5)
+			# Worst-case white texel at the panel's maximum texture opacity.
+			assert_float(contrast(ink,Art.CLAY.lerp(Color.WHITE,.10))).is_greater_equal(4.5)
+		var origin:StyleBoxFlat=sheet.origin_selector.get_theme_stylebox("normal")
+		assert_float(contrast(sheet.origin_selector.get_theme_color("font_color"),origin.bg_color)).is_greater_equal(4.5)
+		var popup:PopupMenu=sheet.origin_selector.get_popup()
+		assert_float(contrast(popup.get_theme_color("font_color"),(popup.get_theme_stylebox("panel") as StyleBoxFlat).bg_color)).is_greater_equal(4.5)
+	Tokens.color_mode=original
+
+func contrast(a:Color,b:Color)->float:
+	var first:=a.srgb_to_linear().get_luminance()
+	var second:=b.srgb_to_linear().get_luminance()
+	return (maxf(first,second)+.05)/(minf(first,second)+.05)

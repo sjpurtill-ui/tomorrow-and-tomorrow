@@ -2313,3 +2313,8 @@ Validation: 40 distinct focused tests passed across terrain LOD (14, report 196)
 ## September 22 — bounded settlement reference checkpoint
 
 Added two opt-in reference probes and docs/SETTLEMENT_REFERENCE_CHECKPOINT.md. Measured one current-save day and 23-plot fabric construction; built an isolated grounding/clearing prototype with identical geometry across three aerial camera heights. Final private GPU run exited zero with no script errors or visible windows. No game rendering/simulation files or saves changed. Prototype imagery and diagnostic outputs remain local artifacts; private data is excluded from Git. This checkpoint is not an accepted final art pass or an installed performance fix. See the report for measurements, limitations and the next bounded growth/destruction proof.
+## September 22 — scouting readability
+
+Scouting's illustrated dark palette now explicitly preserves its surface colors instead of letting the generic light-mode helper turn dark cards pale while retaining pale ink. Party/find cards are opaque dark brown, the clay texture is reduced to 10% opacity, and departure-selector/menu colors match the screen. Later-era framing also retains a compatible dark surface. Scouting policy and simulation behavior are unchanged.
+
+Validation: 8/8 scouting-panel tests passed, zero errors/failures/orphans (report 197). Added contrast checks of at least 4.5:1 for body/secondary/heading ink, the worst-case texture backdrop, and the city selector/menu in both UI color modes. Existing live policy, party details, returned finds, narrow-window layout and era-art checks pass. No player launch or desktop control.

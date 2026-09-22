@@ -15,6 +15,13 @@ const SURFACE = preload("res://assets/ui/scouting/ancient-clay-v2.jpg")
 const STONE = preload("res://assets/ui/scouting/ancient-find-v2.jpg")
 static var icons: Dictionary = {}
 
+static func flat(bg:Color,border:Color=Color.TRANSPARENT,border_width:int=0,radius:int=0,pad:float=0.0)->StyleBoxFlat:
+	# This illustrated window owns a paired dark surface/light ink palette.
+	# The generic light-mode surface conversion must not change only one half.
+	var style:=T.flat(bg,border,border_width,radius,pad)
+	style.bg_color=bg
+	return style
+
 static func icon(kind: String) -> Texture2D:
 	if icons.has(kind): return icons[kind]
 	var path: String = {
@@ -35,7 +42,7 @@ static func style_button(node: Button, primary := false) -> void:
 	for state: String in ["normal", "hover", "pressed", "hover_pressed", "focus", "disabled"]:
 		var active := state in ["pressed", "hover_pressed"]
 		var color := Color("483925") if active else Color("3b3025") if state == "hover" else TILE
-		var style := T.flat(color, GOLD if active or state == "focus" or primary else BORDER, 1, 4, 8)
+		var style := flat(color, GOLD if active or state == "focus" or primary else BORDER, 1, 4, 8)
 		node.add_theme_stylebox_override(state, style)
 		node.add_theme_color_override("font_" + state + "_color", INK)
 	node.add_theme_color_override("font_color", INK)
@@ -43,7 +50,7 @@ static func style_button(node: Button, primary := false) -> void:
 	node.add_theme_font_size_override("font_size", 15)
 
 static func style_slider(slider: HSlider) -> void:
-	var track := T.flat(Color("15120f"), BORDER, 1, 3)
+	var track := flat(Color("15120f"), BORDER, 1, 3)
 	track.content_margin_top = 4; track.content_margin_bottom = 4
 	slider.add_theme_stylebox_override("slider", track)
 	slider.add_theme_stylebox_override("grabber_area", T.flat(GOLD, Color.TRANSPARENT, 0, 3))

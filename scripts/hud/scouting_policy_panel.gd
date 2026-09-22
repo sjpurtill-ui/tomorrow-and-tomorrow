@@ -64,7 +64,7 @@ func _stack(parent: Node, gap := 8) -> VBoxContainer:
 
 func _card(parent: Node) -> PanelContainer:
 	var node := PanelContainer.new()
-	node.add_theme_stylebox_override("panel", T.flat(Color(.08,.065,.05,.70), Art.BORDER, 1, 4, 12))
+	node.add_theme_stylebox_override("panel", Art.flat(Art.TILE, Art.BORDER, 1, 4, 12))
 	node.size_flags_horizontal = SIZE_EXPAND_FILL; parent.add_child(node)
 	return node
 
@@ -80,12 +80,12 @@ func _ready() -> void:
 			dim.accept_event(); close_requested.emit())
 	panel = PanelContainer.new(); panel.name = "ScoutDispatchCard"
 	panel.set_meta("viewport_fit_hosted", true); add_child(panel)
-	var frame := T.flat(Art.CLAY if ancient else T.DOCK_BG, Art.BORDER, 1, 7, 1)
+	var frame := Art.flat(Art.CLAY if ancient else Color("152329"), Art.BORDER, 1, 7, 1)
 	frame.shadow_color = Color(0,0,0,.5); frame.shadow_size = 14
 	panel.add_theme_stylebox_override("panel", frame)
 	var texture := TextureRect.new(); texture.texture = Art.SURFACE
 	texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE; texture.stretch_mode = TextureRect.STRETCH_SCALE
-	texture.mouse_filter = MOUSE_FILTER_IGNORE; texture.modulate.a = .56 if ancient else .06; panel.add_child(texture)
+	texture.mouse_filter = MOUSE_FILTER_IGNORE; texture.modulate.a = .10 if ancient else .04; panel.add_child(texture)
 	var shell := _stack(panel, 0)
 	hero = Control.new(); hero.name = "ExpeditionArtwork"; hero.custom_minimum_size.y = 155; hero.clip_contents = true; shell.add_child(hero)
 	var image := TextureRect.new(); image.texture = Art.HERO if ancient else preload("res://assets/textures/expeditions/chronicle-mountains.png")
@@ -143,6 +143,11 @@ func _ready() -> void:
 	label(focuses, "WHERE SHOULD THEY LEAVE FROM?", 11, Art.GOLD)
 	origin_selector = OptionButton.new(); origin_selector.name="ScoutOrigin"; origin_selector.custom_minimum_size.y=36
 	origin_selector.size_flags_horizontal=SIZE_EXPAND_FILL; focuses.add_child(origin_selector)
+	Art.style_button(origin_selector)
+	var origin_popup:=origin_selector.get_popup()
+	origin_popup.add_theme_stylebox_override("panel",Art.flat(Art.TILE,Art.BORDER,1,4,8))
+	origin_popup.add_theme_stylebox_override("hover",Art.flat(Color("483925"),Art.GOLD,1,3,4))
+	for key:String in ["font_color","font_hover_color"]:origin_popup.add_theme_color_override(key,Art.INK)
 	_refresh_origin_options()
 	origin_selector.item_selected.connect(func(index:int):
 		CivilizationSystem.scouting_staff.set_origin(String(origin_selector.get_item_metadata(index))); refresh())
@@ -279,7 +284,7 @@ func _make_party(id: int) -> void:
 		if expanded[id]: _reveal.call_deferred(mission_rows[id].detail))
 	toggle.size_flags_horizontal=SIZE_SHRINK_END; toggle.custom_minimum_size=Vector2(32,32); toggle.tooltip_text="Party details"
 	var bar := ProgressBar.new(); bar.show_percentage=false; bar.custom_minimum_size.y=3
-	bar.add_theme_stylebox_override("background",T.flat(Color("15120f"),Color.TRANSPARENT,0,2))
+	bar.add_theme_stylebox_override("background",Art.flat(Color("15120f"),Color.TRANSPARENT,0,2))
 	bar.add_theme_stylebox_override("fill",T.flat(Art.GOLD,Color.TRANSPARENT,0,2)); body.add_child(bar)
 	var detail := label(body,"",12,Art.SOFT); detail.visible=false
 	mission_rows[id]={"card":card,"title":caption,"subtitle":subtitle,"toggle":toggle,"bar":bar,"detail":detail}
