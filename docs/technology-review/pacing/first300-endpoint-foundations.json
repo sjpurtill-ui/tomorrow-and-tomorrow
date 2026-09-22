@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "runtime_catalog": "7168fb51bca50d7c03b82f2e9d63a6f29b6f1cec",
+  "method": "Chronological endpoint audit beginning with inherited founding practices; evaluate recorded origin prerequisites and independently match a current authored learning route.",
+  "recorded_discoveries_checked": 611,
+  "cases": [
+    {
+      "name": "playable300-military-current-supplies-retrofit-arrivals-staffing-range-cache-hydrogen-workshops-cont1-resources",
+      "day": 109500,
+      "known": 319,
+      "recorded_routes_checked": 309,
+      "recorded_route_errors": [],
+      "missing_origin_records": [],
+      "historical_missing_under_current_catalog": [],
+      "missing_now": []
+    },
+    {
+      "name": "current300-warm-succession-fast-supplies-retrofit-arrivals-staffing-range-cache-hydrogen-workshops-cont1",
+      "day": 109500,
+      "known": 312,
+      "recorded_routes_checked": 302,
+      "recorded_route_errors": [],
+      "missing_origin_records": [],
+      "historical_missing_under_current_catalog": [
+        {
+          "id": "hydrogen_flame_glassworking",
+          "missing": {
+            "ready": false,
+            "routes": [
+              {
+                "missing": {
+                  "missing_all": [],
+                  "missing_any": [
+                    [
+                      "water_electrolysis",
+                      "chloralkali_cells"
+                    ]
+                  ],
+                  "ready": false
+                },
+                "route": "local"
+              }
+            ]
+          },
+          "year": 185.906849315068
+        }
+      ],
+      "missing_now": [
+        {
+          "id": "hydrogen_flame_glassworking",
+          "missing": {
+            "ready": false,
+            "routes": [
+              {
+                "missing": {
+                  "missing_all": [],
+                  "missing_any": [
+                    [
+                      "water_electrolysis",
+                      "chloralkali_cells"
+                    ]
+                  ],
+                  "ready": false
+                },
+                "route": "local"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Both campaigns span fixes and used the isolated harness before its scouting correction.",
+    "This verifies prerequisite availability, not historical environmental signals, inquiry cost, adoption or production capacity.",
+    "Warm hydrogen_flame_glassworking at year 185.9068 predates the corrected hydrogen-production gate; retained knowledge is not proof of that current gate.",
+    "Full 300-year readiness remains unproven."
+  ]
+}
