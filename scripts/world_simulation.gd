@@ -184,13 +184,14 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 		for id:String in ids:
 			var detail:Dictionary={} if timings.is_empty() else timings.get_or_add(id,{"enabled":true,"phases":{"enabled":true},"secondary":{"enabled":true}})
 			var run:Dictionary={"day":day}
-			job.add_group(id,[S.step("controller",detail,func()->Variant:
+			job.add_group(id,[S.step("controller_start",detail,func()->Variant:
 				if int(actors[id].last_day)>=day:
 					run.skip=true;run.halt=true
 					return null
 				state.elapsed_days=day
-				preload("res://scripts/civilization_controller.gd").choose_orders(id)
-				return null
+				var orders:Array=[]
+				for part:Array in preload("res://scripts/civilization_controller.gd").order_steps(id):orders.append(S.step(String(part[0]),detail,part[1]))
+				return orders
 			),S.step("context",detail,func()->Array:
 				var origin:Vector2=world.player_world_origin
 				if state.settlement_site_committed:origin=Vector2(state.settlement_founded_at.x,state.settlement_founded_at.z)

@@ -81,11 +81,16 @@ func stepped_day(target:int,context:Dictionary,report:Dictionary)->int:
 	while WorldSimulation.day_in_progress():
 		var job=WorldSimulation._day_job
 		WorldSimulation.pump_day(0)
-		steps.append(job.last_step.duplicate());count+=1
+		steps.append(job.last_step.merged({"day":target}));count+=1
 	return count
 
 func summarize_steps(report:Dictionary)->void:
 	var records:Array=report.step_records
+	var first_day:=int(records[0].day)
+	var warm:Array=records.filter(func(r:Dictionary)->bool:return int(r.day)>first_day).map(func(r:Dictionary)->int:return int(r.usec))
+	warm.sort()
+	report["warm_steps"]={"count":warm.size(),"p95_ms":warm[int(warm.size()*.95)]/1000.0,"p99_ms":warm[int(warm.size()*.99)]/1000.0,"max_ms":warm[-1]/1000.0,"over_16ms":warm.filter(func(v:int)->bool:return v>16000).size(),"over_33ms":warm.filter(func(v:int)->bool:return v>33000).size()}
+	print("WARM_STEPS ",JSON.stringify(report.warm_steps))
 	var durations:Array=[]
 	var by_label:Dictionary={}
 	for record:Dictionary in records:

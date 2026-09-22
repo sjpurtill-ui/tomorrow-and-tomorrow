@@ -60,14 +60,17 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 	),
 		S.step("operations",timings,func()->void:preload("res://scripts/technology_operations.gd").advance(day,daily_context)),
 		S.step("discovery",timings,func()->void:run.result.discoveries=WorldSimulation.discovery.process_day(daily_context)),
-		S.step("resources",timings,func()->void:
-			run.result.resources=WorldSimulation.resources.process_day(daily_context)
+		S.step("resources",timings,func()->void:run.result.resources=WorldSimulation.resources.process_day(daily_context)),
+		S.step("civilian_review_due",timings,func()->Array:
 			# Review new investment against today's delivered inputs, before recurring
 			# consumption makes every setup appear permanently unaffordable.
-			if String(WorldSimulation.actors.get(WorldSimulation.actor_id,{}).get("controller",""))=="ai" and controller.civilian_arrival_review_due(WorldSimulation.actor_id,day):
-				controller.civilian_orders(WorldSimulation.actor_id,controller.current_plan(WorldSimulation.actor_id))
-			elif WorldSimulation.actor_id=="player":
+			var id:=WorldSimulation.actor_id
+			var parts:Array=[]
+			if String(WorldSimulation.actors.get(id,{}).get("controller",""))=="ai" and controller.civilian_arrival_review_due(id,day):
+				for part:Array in controller.civilian_order_steps(id,func()->Dictionary:return controller.current_plan(id)):parts.append(S.step(String(part[0]),timings,part[1]))
+			elif id=="player":
 				WorldSimulation.military.workshop.review_arrivals()
+			return parts
 	),
 		S.step("consequences",timings,func()->void:
 			WorldSimulation.state.synchronize_population_allocations()
