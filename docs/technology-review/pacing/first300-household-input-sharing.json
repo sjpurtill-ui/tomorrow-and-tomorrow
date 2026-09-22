@@ -1,0 +1,36 @@
+{
+  "base_commit": "e987494e15d9265d8cf45572a289e70974dca82b",
+  "change": "Household crafting shares scarce recipe inputs with active workshop orders in proportion to existing crafting labor allocation.",
+  "source": "Actual seed 91420 military campaign; real geography",
+  "days": [
+    109986,
+    110016
+  ],
+  "household_trace": {
+    "timber_after_food": 0.338933450592205,
+    "timber_household_consumption_before_fix": 0.338933450592205,
+    "day": 109987
+  },
+  "equipped_before": 2164,
+  "equipped_after": 2302,
+  "improvised_output_or_repair_receipts": 167,
+  "food_intake_ratio": 1.0,
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "tests": "11 passed: household sharing and opening craft practice",
+  "limitations": [
+    "30 days does not prove sustainable year-long military supply.",
+    "Long campaigns remain unfinished; no claim of full 300-year readiness.",
+    "Existing line still reports Missing Timber between production opportunities."
+  ]
+}

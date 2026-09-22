@@ -118,6 +118,23 @@ static func ensure_initialized()->void:
 	if bool(data().get("initialized",false)):return
 	data().initialized=true
 
+static func workshop_input_reserve()->Dictionary:
+	# Household work and ordered production share crafting labor. When inputs
+	# are scarce, household work must not consume the workshop's entire share
+	# simply because it runs first. Only reserve actual outstanding recipe bills.
+	if not WorldSimulation.state.resource_settlement_id.is_empty():return {}
+	var host=WorldSimulation.military
+	var share:=maxf(0.0,host.production_labor_share)
+	if share<=0:return {}
+	var bills:Dictionary={}
+	for job:Dictionary in host.equipment_queue:
+		if not bool(job.get("persistent",false)) or bool(job.get("paused",false)):continue
+		if int(job.get("target_stock",0))>0 and host.PersistentProduction.stock(host,job)>=int(job.target_stock):continue
+		var remaining:=clampf(1.0-float(job.get("progress_days",0))/maxf(.001,float(job.work_per_item)),0.0,1.0)
+		for item:String in job.get("materials",{}):bills[item]=float(bills.get(item,0))+float(job.materials[item])*remaining
+	for item:String in bills:bills[item]=minf(float(bills[item]),stock(item)*share/(share+.18))
+	return bills
+
 static func advance()->Dictionary:
 	ensure_initialized()
 	var day:=int(WorldSimulation.state.elapsed_days)
@@ -131,6 +148,7 @@ static func advance()->Dictionary:
 	if WorldSimulation.state.settlement_site_committed and not WorldSimulation.state.convoy_traveling:
 		var remaining:=maxf(0.0,WorldSimulation.state.effective_workers("Crafting")*.18)
 		var reserve:=capital_reserve()
+		var workshop_reserve:=workshop_input_reserve()
 		for id:String in ORDER:
 			if remaining<=.000001:break
 			if id not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(id)<.1:continue
@@ -139,7 +157,7 @@ static func advance()->Dictionary:
 			var product:=String(PRODUCTS[id]);var rate:=float(recipe.rate)
 			var amount:=minf(remaining*rate,maxf(0.0,target(id)*1.20+float(reserve.get(product,0))-stock(product)))
 			for item:String in recipe.inputs:
-				amount=minf(amount,stock(item)/float(recipe.inputs[item]))
+				amount=minf(amount,maxf(0.0,stock(item)-float(workshop_reserve.get(item,0)))/float(recipe.inputs[item]))
 			if amount<=.000001:continue
 			for item:String in recipe.inputs:
 				var used:=amount*float(recipe.inputs[item])
