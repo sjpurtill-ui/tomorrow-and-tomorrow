@@ -3,7 +3,6 @@
     63875,
     63905
   ],
-  "population": 120,
   "checkpoint_population": 8604,
   "settlements": 33,
   "before_seconds": 16.338,
@@ -16,5 +15,6 @@
   "limitations": [
     "single timing pair under concurrent load",
     "no rendered performance claim"
-  ]
+  ],
+  "initial_campaign_population": 120
 }

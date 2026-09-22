@@ -2109,3 +2109,8 @@ Both headless harnesses now bind the same stable surface-material provider alrea
 ### First 300 years: reuse eligibility within one building-upgrade decision
 
 Choosing one retrofit now checks its unchanged knowledge, adoption and component availability once before comparing plots, retaining authored method order and existing tie behavior. Repair payment computes its unchanged bill once. No eligibility persists across calls. The same 33-settlement military checkpoint advanced 30 ordinary days in 16.338 seconds before and 12.599 after; whole exported world states are exactly equal. All 20 construction checks and exact save/next-day checks pass. This is a single headless timing pair, not a frame-rate claim. Evidence: pacing/first300-retrofit-selection-performance.json.
+
+
+### First 300 years: civic/exploration verification and current evidence guide
+
+All 69 civic implementation, administration, answers/alerts, culture-effect, scouting-staff and route-planning checks pass on be3a3ad. The pacing assessment now separates current evidence and remaining endpoint checks from archived development observations, including the superseded construction-labor failure. A fresh current-build 300-year campaign and a default twelve-opponent 25-year run are active alongside the recovered endurance campaigns. No endpoint completion or visual verification is claimed.
