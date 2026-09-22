@@ -91,3 +91,50 @@ func test_routine_target_review_keeps_the_committed_batch_handoff()->void:
 		P.advance(host,job,100.0);T.advance("turnover",host)
 		assert_str(job.item).is_equal("spear")
 	)
+
+func test_starved_partial_batch_is_saved_then_resumed_without_duplicate_work()->void:
+	WorldSimulation.scoped("turnover",func()->void:
+		var host=WorldSimulation.military;var state=WorldSimulation.state
+		state.resource_stockpiles["Prepared Fibers"]=1.5
+		var job:=line()
+		assert_float(float(state.resource_stockpiles["Prepared Fibers"])).is_equal(0.0)
+		assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(1.0)
+		var partial:=float(job.progress_days)
+		assert_bool(T.request("turnover",host,"retted_fibers",2)).is_true()
+		T.advance("turnover",host)
+		assert_str(job.item).is_equal("retted_fibers")
+		assert_float(float(job.suspended_batches.spun_yarn.progress_days)).is_equal(partial)
+		assert_float(float(state.resource_stockpiles["Prepared Fibers"])).is_equal(0.0)
+		assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(1.0)
+	)
+	var saved:=bytes_to_var(var_to_bytes(WorldSimulation.export_state())) as Dictionary
+	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
+	WorldSimulation.scoped("turnover",func()->void:
+		var host=WorldSimulation.military;var state=WorldSimulation.state;var job:Dictionary=host.equipment_queue.back()
+		assert_bool(job.suspended_batches.has("spun_yarn")).is_true()
+		var before:=float(state.resource_stockpiles["Fiber Plants"])
+		P.advance(host,job,100.0)
+		assert_float(float(state.resource_stockpiles["Prepared Fibers"])).is_equal(2.0)
+		assert_float(float(state.resource_stockpiles["Fiber Plants"])).is_less(before)
+		assert_bool(T.request("turnover",host,"spun_yarn",2)).is_true()
+		T.advance("turnover",host)
+		assert_str(job.item).is_equal("spun_yarn")
+		assert_dict(job.suspended_batches).is_empty()
+		assert_float(float(job.progress_days)).is_equal(float(job.work_per_item)*.5)
+		P.advance(host,job,float(job.work_per_item)*.5)
+		assert_float(float(state.resource_stockpiles["Spun Yarn"])).is_equal(2.0)
+		assert_float(float(state.resource_stockpiles["Prepared Fibers"])).is_equal(1.5)
+		assert_float(float(job.progress_days)).is_equal(0.0)
+	)
+
+func test_invalid_or_recursive_suspended_batch_is_rejected()->void:
+	WorldSimulation.scoped("turnover",func()->void:
+		var host=WorldSimulation.military;var job:=line()
+		WorldSimulation.state.resource_stockpiles["Prepared Fibers"]=0.0
+		T.request("turnover",host,"retted_fibers",2);T.advance("turnover",host)
+		var batch:Dictionary=job.suspended_batches.spun_yarn
+		batch.suspended_batches={}
+		assert_str(P.validate_saved({"equipment_queue":[job]})).is_not_empty()
+		batch.erase("suspended_batches");batch.progress_days=batch.work_per_item
+		assert_str(P.validate_saved({"equipment_queue":[job]})).is_not_empty()
+	)

@@ -1,0 +1,340 @@
+{
+  "initial_checkpoint_day": 45625,
+  "comparison_day": 45990,
+  "baseline_runtime": "127599c without suspended ordinary batches",
+  "baseline": {
+    "active_inquiries": 4,
+    "army_provision_delivery_ratio": 1.0,
+    "army_provisions_delivered": 192.593974431646,
+    "army_provisions_required": 192.593974431646,
+    "completed_buildings": 6,
+    "day": 45990,
+    "food_consumption": 192.593974431646,
+    "food_days": 225.642896415627,
+    "food_demand_breakdown": {
+      "adults": 119.249011356419,
+      "army_field": 192.593974431646,
+      "base": 174.502922991682,
+      "children": 46.1794172497153,
+      "climate": 0.0,
+      "elders": 9.07449438554763,
+      "labor": 16.73,
+      "lactation": 0.521051439964166,
+      "mission_absent": 0.0,
+      "occupation_relief": 0.0,
+      "pregnancy": 0.84,
+      "prisoner_custody": 0.0,
+      "rationing": 0.0,
+      "total": 192.593974431646,
+      "travel": 0.0
+    },
+    "food_eaten": 192.593974431646,
+    "food_intake_ratio": 1.0,
+    "food_security": 0.979999999999999,
+    "knowledge_workers": 77,
+    "known": 118,
+    "material_stocks": {
+      "Clay": 62.9320472732786,
+      "Fiber Plants": 61.0483094123313,
+      "Stone": 96.0908888607307,
+      "Timber": 32.927722398191
+    },
+    "plot_history_records": 206,
+    "population": 2389,
+    "production": {
+      "available_civilian_recipes": 80,
+      "civilian_lines": 2,
+      "delivery_shortage": false,
+      "food_shortage": false,
+      "household_stocks": {
+        "Cordage Bundles": 9.92348544198923,
+        "Drying Mats": 6.20369930481659,
+        "Flaked Stone Tools": 7.44132507645309,
+        "Hafted Tool Sets": 4.96261177471891,
+        "Joined Timber Components": 3.72221958288995,
+        "Unfired Clay Vessels": 7.4444391657799,
+        "Woven Containers": 6.20369930481659
+      },
+      "installed_units": 1,
+      "lines": [
+        {
+          "completed_on_current_line": 103,
+          "item": "spun_yarn",
+          "paused": false,
+          "pending_change": {
+            "item": "thatch_panels",
+            "target": 1
+          },
+          "progress_days": 1.16557280614803,
+          "reported_state": "Missing Prepared Fibers",
+          "target_stock": 16
+        },
+        {
+          "completed_on_current_line": 1,
+          "item": "roof_flashing_pieces",
+          "paused": false,
+          "pending_change": {},
+          "progress_days": 1.54127593714754,
+          "reported_state": "Missing Refined Copper",
+          "target_stock": 2
+        }
+      ],
+      "manufactured_stock_kinds": 8,
+      "military_capabilities": {
+        "bow": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "improvised": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 5,
+          "recipe_known": true,
+          "stored": 1
+        },
+        "lance": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "mounted_bow": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "siege_kit": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "spear": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 228,
+          "recipe_known": true,
+          "stored": 211
+        }
+      },
+      "operations_ledger_current": true,
+      "production_food_blocked": false,
+      "production_labor_share": 0.35,
+      "recorded_output": {
+        "Building Runoff Channels": 187.0,
+        "Fitted Post Beam Sets": 54.0,
+        "Fitted Timber Splice Sets": 33.0,
+        "Loom Weights": 7.0,
+        "Prepared Fibers": 122.0,
+        "Refined Copper": 15.0,
+        "Roof Flashing Pieces": 31.0,
+        "Rope Coils": 6.0,
+        "Spun Yarn": 121.0,
+        "Thatch Panels": 9.0,
+        "improvised": 81.0,
+        "spear": 2152.0
+      },
+      "remaining_daily_services": {
+        "kiln_heat": 1.98367237459806
+      },
+      "units_under_construction": 0,
+      "workforce": {
+        "condition_factor": 0.412276471631605,
+        "health": 0.969999999999998,
+        "labor_efficiency": 0.511301799029235,
+        "logistics": 1.0,
+        "powered_factor": 1.0,
+        "workers": 145.917287630402,
+        "workplace_condition": 0.831265000727213
+      }
+    },
+    "resource_deposits": 61,
+    "settled": true,
+    "settlement_count": 25,
+    "settlement_plots": 26,
+    "year": 126.0
+  },
+  "recovered": {
+    "active_inquiries": 4,
+    "army_provision_delivery_ratio": 1.0,
+    "army_provisions_delivered": 192.593563897124,
+    "army_provisions_required": 192.593563897124,
+    "completed_buildings": 6,
+    "day": 45990,
+    "food_consumption": 192.593563897124,
+    "food_days": 225.634306757978,
+    "food_demand_breakdown": {
+      "adults": 119.249005000602,
+      "army_field": 192.593563897124,
+      "base": 174.502514163235,
+      "children": 46.1790150344767,
+      "climate": 0.0,
+      "elders": 9.07449412815673,
+      "labor": 16.73,
+      "lactation": 0.521049733889289,
+      "mission_absent": 0.0,
+      "occupation_relief": 0.0,
+      "pregnancy": 0.84,
+      "prisoner_custody": 0.0,
+      "rationing": 0.0,
+      "total": 192.593563897124,
+      "travel": 0.0
+    },
+    "food_eaten": 192.593563897124,
+    "food_intake_ratio": 1.0,
+    "food_security": 0.979999999999999,
+    "knowledge_workers": 77,
+    "known": 118,
+    "material_stocks": {
+      "Clay": 59.0623901837957,
+      "Fiber Plants": 10.7402200480213,
+      "Stone": 91.6938384811824,
+      "Timber": 23.2247865714788
+    },
+    "plot_history_records": 206,
+    "population": 2389,
+    "production": {
+      "available_civilian_recipes": 80,
+      "civilian_lines": 1,
+      "delivery_shortage": false,
+      "food_shortage": false,
+      "household_stocks": {
+        "Cordage Bundles": 9.92345256757691,
+        "Drying Mats": 6.20367873648826,
+        "Flaked Stone Tools": 7.44130043600765,
+        "Hafted Tool Sets": 4.96259532579545,
+        "Joined Timber Components": 3.72220724189296,
+        "Unfired Clay Vessels": 7.44441448378591,
+        "Woven Containers": 6.20367873648826
+      },
+      "installed_units": 1,
+      "lines": [
+        {
+          "completed_on_current_line": 0,
+          "item": "spun_yarn",
+          "paused": false,
+          "pending_change": {},
+          "progress_days": 1.30707298379885,
+          "reported_state": "Working",
+          "target_stock": 16
+        }
+      ],
+      "manufactured_stock_kinds": 9,
+      "military_capabilities": {
+        "bow": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "improvised": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 5,
+          "recipe_known": true,
+          "stored": 1
+        },
+        "lance": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "mounted_bow": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "siege_kit": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 0,
+          "recipe_known": false,
+          "stored": 0
+        },
+        "spear": {
+          "ammunition_carried": 0,
+          "ammunition_required": 0,
+          "ammunition_stored": 0,
+          "equipped": 228,
+          "recipe_known": true,
+          "stored": 235
+        }
+      },
+      "operations_ledger_current": true,
+      "production_food_blocked": false,
+      "production_labor_share": 0.35,
+      "recorded_output": {
+        "Building Runoff Channels": 189.0,
+        "Fitted Post Beam Sets": 54.0,
+        "Fitted Timber Splice Sets": 33.0,
+        "Loom Weights": 7.0,
+        "Prepared Fibers": 167.0,
+        "Refined Copper": 15.0,
+        "Roof Flashing Pieces": 31.0,
+        "Rope Coils": 6.0,
+        "Spun Yarn": 152.0,
+        "Thatch Panels": 10.0,
+        "improvised": 81.0,
+        "spear": 2176.0
+      },
+      "remaining_daily_services": {
+        "kiln_heat": 1.98099845805226
+      },
+      "units_under_construction": 0,
+      "workforce": {
+        "condition_factor": 0.411714250857703,
+        "health": 0.969999999999998,
+        "labor_efficiency": 0.510608708058935,
+        "logistics": 1.0,
+        "powered_factor": 1.0,
+        "workers": 145.917287630402,
+        "workplace_condition": 0.831258211224261
+      }
+    },
+    "resource_deposits": 61,
+    "settled": true,
+    "settlement_count": 25,
+    "settlement_plots": 26,
+    "year": 126.0
+  },
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "tests_passed": 60,
+  "limitations": [
+    "One actual isolated woodland seat; not a completed 300-year or full-world result.",
+    "No materials, population or discoveries granted for recovery."
+  ]
+}

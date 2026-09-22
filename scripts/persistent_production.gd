@@ -167,6 +167,13 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		AlloyTrials.clear(job)
 		Casting.clear(job)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
+		var suspended:Dictionary=job.get("suspended_batches",{})
+		if suspended.has(item):
+			var batch:Dictionary=suspended[item]
+			# Previously paid work belongs to this exact recipe and is restored once.
+			if batch.materials==definition.materials and float(batch.work_per_item)==float(definition.work_per_item):
+				job.progress_days=float(batch.progress_days)
+				suspended.erase(item)
 		job.required_days=job.work_per_item
 		job.erase("planner_managed")
 		job.erase("staff_idle")
@@ -406,6 +413,14 @@ static func validate_saved(payload: Dictionary) -> String:
 		if not job is Dictionary: return "Invalid production line."
 		if not bool(job.get("persistent",false)): continue
 		if job.has("planner_managed") and not job.planner_managed is bool:return "Invalid production management flag."
+		if job.has("suspended_batches"):
+			if not job.suspended_batches is Dictionary or job.suspended_batches.size()>32:return "Invalid suspended workshop batches."
+			for item:Variant in job.suspended_batches:
+				var batch:Variant=job.suspended_batches[item]
+				if not item is String or not batch is Dictionary or batch.has("suspended_batches") or not bool(batch.get("persistent",false)) or batch.get("item")!=item:return "Invalid suspended workshop batch."
+				var batch_error:=validate_saved({"equipment_queue":[batch]})
+				if not batch_error.is_empty():return batch_error
+				if float(batch.progress_days)<=0 or float(batch.progress_days)>=float(batch.work_per_item):return "Invalid suspended workshop progress."
 		if job.has("ai_turnover"):
 			var next:Variant=job.ai_turnover
 			if not next is Dictionary or not next.get("item") is String or String(next.item).is_empty() or String(next.item).length()>100 or not next.get("target") is int or int(next.target)<1 or int(next.target)>MAX_TARGET:return "Invalid planned production change."
