@@ -4,6 +4,23 @@ const Ops=preload("res://scripts/technology_operations.gd")
 const P=preload("res://scripts/persistent_production.gd")
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("evidence",117)
 func after_test()->void:WorldSimulation.clear()
+func test_government_counts_distinguish_candidates_and_dual_officeholders()->void:
+	WorldSimulation.scoped("evidence",func()->void:
+		WorldSimulation.government.people.assign([
+			{"status":"active","office_key":"Steward","local_leader_of":"capital"},
+			{"status":"active","office_key":"","local_leader_of":"village"},
+			{"status":"active","office_key":"Scholar","local_leader_of":""},
+			{"status":"active","office_key":"","local_leader_of":""},
+			{"status":"deceased","office_key":"Steward","local_leader_of":"capital"},
+			{"status":"detained","office_key":"","local_leader_of":""}])
+		var counts:Dictionary=Evidence.capture().government
+		assert_int(counts.recorded_people).is_equal(6)
+		assert_int(counts.active_roster).is_equal(4)
+		assert_int(counts.officeholders).is_equal(3)
+		assert_int(counts.central_officeholders).is_equal(2)
+		assert_int(counts.settlement_leaders).is_equal(2)
+		assert_int(counts.unappointed_candidates).is_equal(1)
+	)
 func test_real_partial_production_is_reported_without_mutating_state()->void:
 	WorldSimulation.scoped("evidence",func()->void:
 		var state=WorldSimulation.state;state.settlement_site_committed=true;state.convoy_traveling=false

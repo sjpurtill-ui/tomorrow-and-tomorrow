@@ -2114,3 +2114,7 @@ Choosing one retrofit now checks its unchanged knowledge, adoption and component
 ### First 300 years: civic/exploration verification and current evidence guide
 
 All 69 civic implementation, administration, answers/alerts, culture-effect, scouting-staff and route-planning checks pass on be3a3ad. The pacing assessment now separates current evidence and remaining endpoint checks from archived development observations, including the superseded construction-labor failure. A fresh current-build 300-year campaign and a default twelve-opponent 25-year run are active alongside the recovered endurance campaigns. No endpoint completion or visual verification is claimed.
+
+## 2026-09-21 — Correct government evidence labels
+
+The pacing report previously called every active named government roster member a serving person, including candidates without a post. Separate distinct officeholders, central posts, settlement leaders and unappointed candidates; retain a distinct count of all recorded people. Schema 16 documents the meaning of older snapshot keys. A direct read of the cold year-155 checkpoint confirms 90 active records means 36 distinct officeholders and 54 candidates across 33 settlements. This changes reporting only; saves, population, labor and succession behavior are unchanged. Validation: pacing production evidence suite, including dual-role and inactive-person counts.

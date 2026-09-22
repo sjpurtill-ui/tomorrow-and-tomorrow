@@ -50,7 +50,17 @@ static func capture(detailed:bool=false)->Dictionary:
 		recorded[resource]=float(recorded.get(resource,0))+float(receipt.quantity)
 	var result:={"lines":lines,"workforce":P.workforce(),"production_labor_share":campaign.production_labor_share,"recorded_output":recorded,"military_capabilities":military,"household_stocks":household,"available_civilian_recipes":methods.size(),"civilian_lines":lines.size(),"manufactured_stock_kinds":stocks.size(),"installed_units":installed,"units_under_construction":building,"remaining_daily_services":services,"operations_ledger_current":current}
 	var government:=WorldSimulation.government
-	result["government"]={"historical_people":government.people.size(),"serving_people":government.people.filter(func(person:Dictionary)->bool:return person.get("status","active")=="active").size(),"stage":government.government_stage}
+	var roster:={"recorded_people":government.people.size(),"active_roster":0,"officeholders":0,"central_officeholders":0,"settlement_leaders":0,"unappointed_candidates":0,"stage":government.government_stage}
+	for person:Dictionary in government.people:
+		if person.get("status","active")!="active":continue
+		roster.active_roster+=1
+		var central:=String(person.get("office_key",""))!=""
+		var local:=String(person.get("local_leader_of",""))!=""
+		roster.central_officeholders+=int(central)
+		roster.settlement_leaders+=int(local)
+		roster.officeholders+=int(central or local)
+		roster.unappointed_candidates+=int(not central and not local)
+	result["government"]=roster
 	var food:=preload("res://scripts/leader_personality.gd").food_constraints(state.simulation_metrics)
 	result["food_shortage"]=food.food_shortage
 	result["delivery_shortage"]=food.delivery_shortage
