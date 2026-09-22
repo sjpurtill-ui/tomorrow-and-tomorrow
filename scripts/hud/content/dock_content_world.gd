@@ -78,6 +78,7 @@ func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:
 		{"type":"text","heading":"NEXT","text":String(knowledge.get("next_step",""))},
 	]
 	var history:Dictionary=CivilizationSystem.chronicle.snapshot(int(GameState.elapsed_days))
+	blocks.push_front(preload("res://scripts/undertaking_rewards.gd").victory_block(GameState))
 	blocks.push_front({"type":"text","heading":String(history.title).to_upper(),"text":"Year %d · %s\n\n%s"%[int(history.year),String(history.summary),String(history.next)]})
 	var records:Array=[]
 	for item:Dictionary in history.recent:

@@ -346,6 +346,7 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	if "Storage Pits" in WorldSimulation.state.settlement_completed: portable_days+=2.0
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: portable_days+=1.0+WorldSimulation.discovery.effect("container_capacity")*2.0
 	var capacity:=population*portable_days+maxf(0.0,float(works.get("cistern_capacity",0.0)))
+	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"water_capacity")
 	var stored_before:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Freshwater",0.0)))
 	var available:=minf(capacity,stored_before+collected)
 	var drinking_consumed:=minf(drinking_required,available)

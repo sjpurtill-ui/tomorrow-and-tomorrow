@@ -2281,3 +2281,6 @@ Food reports now explicitly expose combined edible stocks. The top bar uses that
 
 ### Live information bar (2026-09-22)
 The command bar now refreshes its date and civilization totals every 0.75 seconds independently of legacy interface controls or report navigation. The terrain callback also updates the current HUD before checking for legacy controls. Eight KPI tests pass, including changing visible food/water/date labels without navigation and the total-food regression. Save format unchanged.
+
+### Practical wonder rewards and victory (2026-09-22)
+Undertakings now provide local storage, preservation, crafting/research effectiveness, household attraction and traveler-carried diplomatic reputation. Three diverse landmarks with twenty years of maintained operation and accounts reaching two foreign societies earn a persistent Enduring Civilization victory. Buildings and World expose the requirements. Optional save fields validated; 12 targeted wonder tests pass (report 184). See docs/UNDERTAKING_REWARDS.md for exact effects and remaining extensions.

@@ -228,7 +228,7 @@ static func attraction()->float:
 	var longevity:=clampf((float(health.life_expectancy)-15.0)/55.0,0.0,1.0)
 	var infant_survival:=1.0-clampf((float(health.infant_mortality_per_1000)-4.0)/176.0,0.0,1.0)
 	var health_quality:=longevity*.58+infant_survival*.42
-	return clampf(s.food_security*.28+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18+health_quality*.24+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15,0,1)
+	return clampf(s.food_security*.28+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18+health_quality*.24+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15+preload("res://scripts/undertaking_rewards.gd").local_bonus(s,"attraction"),0,1)
 
 static func connection(id:String)->Dictionary:
 	id=owner_id(id)
@@ -273,6 +273,7 @@ static func encounter(mission:Dictionary,source:String,source_name:String,positi
 	var recipient:=WorldSimulation.actor_id
 	var source_state:=owner_state(source)
 	if source_state==null or owner_id(source)==recipient:return
+	preload("res://scripts/undertaking_rewards.gd").share_accounts(WorldSimulation.state,owner_id(source),day)
 	var existing:Dictionary=data().collections
 	var index:int=WorldSimulation.world._civilization_index(source)
 	var opinion:=float(WorldSimulation.world.civilizations[index].player_relation.get("opinion",0)) if index>=0 else 0.0

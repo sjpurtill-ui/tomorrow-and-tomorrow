@@ -1,5 +1,6 @@
 extends RefCounted
 const Catalog=preload("res://scripts/undertaking_catalog.gd")
+const Rewards=preload("res://scripts/undertaking_rewards.gd")
 static func current_city(state:Node)->Dictionary:
 	for city:Dictionary in state.player_settlements:
 		if String(city.id)==String(state.resource_settlement_id) or (state.resource_settlement_id.is_empty() and bool(city.get("primary",false))):return city
@@ -15,7 +16,9 @@ static func benefit(state:Node,role:String)->float:
 	for r:Dictionary in current_city(state).get("undertakings",[]):
 		var d:=Catalog.get_definition(String(r.id))
 		if r.status=="functioning" and d.get("role","")==role:bonus+=float(d.bonus)*float(r.condition)
-	return minf(.12,bonus)
+	if role=="Crafting":bonus+=Rewards.local_bonus(state,"craft")
+	if role=="Knowledge":bonus+=Rewards.local_bonus(state,"research")
+	return minf(.30,bonus)
 static func possibilities(city:Dictionary)->Array:
 	var result:Array=[]
 	var state=WorldSimulation.state
@@ -65,6 +68,7 @@ static func advance_all(day:int)->void:
 		WorldSimulation.settlements.with_city_resources(String(city.id),func()->void:
 			WorldSimulation.settlements.with_local_population(func()->void:
 				for r:Dictionary in city.undertakings:advance_record(WorldSimulation.state,r,day)))
+	Rewards.record_victory(WorldSimulation.state,day)
 static func advance_record(state:Node,r:Dictionary,day:int)->void:
 	if day<=int(r.last_day):return
 	# The calendar calls once per day. Loading never awards skipped work.
@@ -130,6 +134,7 @@ static func valid(cities:Array)->bool:
 				if not (r.get(key) is float or r.get(key) is int) or not is_finite(float(r[key])) or float(r[key])<0:return false
 			if float(r.progress)>float(definition.work)+.001 or float(r.quality)>float(r.progress)+.001 or float(r.condition)>1:return false
 			if not r.get("reason") is String or not r.get("legacy") is String:return false
+		if not Rewards.valid(city):return false
 	return true
 
 

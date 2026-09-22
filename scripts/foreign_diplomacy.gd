@@ -78,6 +78,9 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	var score:float=float(relation.get("opinion",0))*.5+float(p.trust)*.4+(.20 if priority==accord else 0)+(.18 if tone==favorite else (-.15 if tone=="firm" else 0)) + (.28 if generous else 0)
 	score+=preload("res://scripts/society_exchange.gd").counterpart_value(id,p.personality)
 	var reasons:Array[String]=[]
+	var wonder_reputation:=preload("res://scripts/undertaking_rewards.gd").diplomatic_bonus(WorldSimulation.state,preload("res://scripts/society_exchange.gd").owner_id(id),int(WorldSimulation.state.elapsed_days))
+	score+=wonder_reputation
+	if wonder_reputation>.005:reasons.append("Travelers have brought accounts of your civilization's achievements.")
 	var ties:Dictionary=preload("res://scripts/society_exchange.gd").known_relation(id)
 	if float(ties.get("respect",0))>.02:reasons.append("Useful knowledge and cultural exchange give this relationship weight.")
 	if float(ties.get("resentment",0))>.02:reasons.append("The movement of households has created political friction.")

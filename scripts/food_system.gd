@@ -414,6 +414,7 @@ func _spoil(traveling: bool) -> Dictionary:
 	var preservation:=WorldSimulation.discovery.food_storage_multipliers(FOOD_TYPES,traveling)
 	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
 	storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
+	if not traveling:storage_multiplier*=1.0-preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"spoilage")
 	if traveling: storage_multiplier*=1.28
 	result["Food batches"]=Batches.spoil(traveling,storage_multiplier)
 	result["Grain processing"]=Grain.spoil(false,storage_multiplier*float(preservation["Dry staples"]))
@@ -446,6 +447,7 @@ func _food_storage_capacity()->float:
 	if "Storage Pits" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*84.0
 	if "Public Stores" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*120.0*preload("res://scripts/opening_craft_practice.gd").factor("public_stores")
 	capacity+=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Sealed Clay Vessels",0.0)))*18.0
+	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"food_capacity")
 	return capacity
 
 func _consume(required: float,grain_report:Dictionary={}) -> Dictionary:
