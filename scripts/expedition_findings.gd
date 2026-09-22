@@ -11,6 +11,7 @@ const STORIES:Dictionary={
 	"Game":["The hunting grounds beyond home","The route crosses a newly recorded source of game.","A possible hunting destination or staging ground. Its animals have not been delivered to the settlement."],
 	"Timber":["The far timber country","The party charted a timber stand along its route.","Useful to people living nearby or to a future outpost; hauling ordinary timber all the way home may not be worthwhile."],
 	"Stone":["The stone country","The scouts marked exposed workable stone along the route.","A local building source for a future foothold, rather than a reason to haul rock across the world."],
+	"Clay":["A new clay source","The scouts located clay-bearing ground along their route.","A finite source for pottery and building repairs. Workers must establish access and haul the clay; this report adds no supplies."],
 	"Fiber Plants":["Cordage along the road","The party recorded plants suitable for cordage and weaving.","A practical resupply note for travelers. This is a minor field observation, not the prize of the expedition."],
 	"Copper Ore":["The copper-bearing hills","The scouts marked an occurrence of copper ore in the high country.","A potential metalworking supply. Roads, tools, specialists and the right processing knowledge must come before production."],
 	"Tin Ore":["The tin country","The party returned with the location of a tin-bearing deposit.","A new source for your developing metal economy. Finding the ore does not confer the knowledge or labor to work it."],

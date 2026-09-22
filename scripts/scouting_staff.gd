@@ -1,7 +1,7 @@
 extends RefCounted
 ## Standing allocation controls physical parties, never fog or population directly.
 const EXCHANGE=preload("res://scripts/society_exchange.gd")
-const FOCI:={"exploration":"Exploration & discovery","recruitment":"Seek nomadic tribes","prospecting":"Rare-resource prospecting"}
+const FOCI:={"exploration":"Exploration & discovery","recruitment":"Seek nomadic tribes","prospecting":"Resource prospecting"}
 var host:Node
 var data:Dictionary={}
 func _init(world:Node)->void:host=world;reset()
@@ -104,7 +104,7 @@ func advance(day:int)->void:
 			data.food_spent=float(data.food_spent)+float(party.provisions)
 			var purpose:="chart unvisited ground"
 			if data.focus=="recruitment":purpose="search for scarce wandering bands"
-			elif data.focus=="prospecting":purpose="prospect for rare mineral and fuel occurrences"
+			elif data.focus=="prospecting":purpose="survey material, mineral and fuel sources"
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
 			return
 	data.status=last_reason

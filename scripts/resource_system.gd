@@ -195,6 +195,7 @@ func _deposit(resource_name: String, position: Vector3, quality: float, amount: 
 
 func register_expedition_occurrence(resource_name:String,position:Vector2,profile:Dictionary)->Dictionary:
 	if not catalog.has(resource_name) or not recognition_ready(resource_name):return {}
+	if WorldSimulation.enabled:return preload("res://scripts/civilization_resources.gd").survey_occurrence(resource_name,position)
 	for existing_variant in WorldSimulation.state.resource_deposits:
 		var existing:Dictionary=existing_variant
 		var location:Vector3=existing.get("position",Vector3.ZERO)

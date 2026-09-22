@@ -328,3 +328,32 @@ func test_staff_route_cache_uses_current_logistics_range()->void:
 	system.open_scout_plan_cache.clear()
 	var rebuilt:Dictionary=system.scout_mission_quote(90,"open_world","",6,true)
 	assert_bool(cached.route_plan==rebuilt.route_plan).override_failure_message("A saved/reloaded route must match a quote after logistics changes.").is_true()
+
+func test_exploration_finds_replacement_clay_without_delivering_or_refilling_it()->void:
+	GameState.resource_stockpiles.Clay=0.0
+	var old:=ResourceSystem._deposit("Clay",Vector3.ZERO,1.0,0.0,0)
+	old.stage="developed";old.initial_amount=100.0
+	GameState.resource_deposits=[old]
+	system.set_ground_survey_authority(func(_point:Vector2)->Dictionary:
+		return {"biome":"floodplain","resource_potentials":{"Clay":.92},"signature":"test-clay"})
+	var mission:Dictionary={"target_kind":"explore","mission_id":92,"origin_position":{"x":0.0,"z":0.0},"discoveries":[]}
+	var route:Array=[{"x":0.0,"z":0.0},{"x":30.0,"z":0.0},{"x":60.0,"z":0.0},{"x":0.0,"z":0.0}]
+	system._resolve_prospecting(mission,route,300)
+	assert_int(GameState.resource_deposits.size()).is_equal(2)
+	assert_str(String(GameState.resource_deposits[1].resource)).is_equal("Clay")
+	assert_str(String(GameState.resource_deposits[1].stage)).is_equal("surveyed")
+	assert_float(float(old.remaining)).is_equal(0.0)
+	assert_float(float(GameState.resource_stockpiles.Clay)).is_equal(0.0)
+	system._resolve_prospecting(mission,route,301)
+	assert_int(GameState.resource_deposits.size()).is_equal(2)
+
+func test_exploration_cannot_invent_clay_on_unsuitable_ground()->void:
+	GameState.resource_stockpiles.Clay=0.0
+	GameState.resource_deposits=[ResourceSystem._deposit("Clay",Vector3.ZERO,1.0,0.0,0)]
+	system.set_ground_survey_authority(func(_point:Vector2)->Dictionary:
+		return {"biome":"hills","resource_potentials":{"Clay":.1}})
+	var mission:Dictionary={"target_kind":"explore","discoveries":[]}
+	system._resolve_prospecting(mission,[{"x":0.0,"z":0.0},{"x":30.0,"z":0.0},{"x":60.0,"z":0.0}],300)
+	assert_int(GameState.resource_deposits.size()).is_equal(1)
+	assert_array(mission.discoveries).is_empty()
+

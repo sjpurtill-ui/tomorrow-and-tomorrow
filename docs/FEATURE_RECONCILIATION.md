@@ -2195,3 +2195,11 @@ A warm campaign reached day 109500 with exact restoration and next-day continuat
 The planner now recognizes tools on eligible managed batches that can be set aside. The controller reuses an equipped line when a new line cannot afford its setup, even with spare capacity. Existing turnover preserves paid work; paused/manual player work and specialized trials remain protected. No supplies, knowledge or output are granted; save format unchanged.
 
 Validation: 25 planner/turnover tests pass, including the paid-work regression. Thirty ordinary days from the actual year-300 checkpoint produced 13 additional Prepared Fibers, 3 Spun Yarn and 17 pikes; exact save restoration and next-day continuation pass. See `technology-review/pacing/first300-installed-tool-recovery.json`. This closes the demonstrated input deadlock; low building condition and the remaining campaign endpoints are still under review.
+
+## September 22 — surveyed replacement sources for exhausted common materials
+
+The warm year-300 campaign had exhausted clay across all 39 settlements; domestic shipments could not supply absent reserves. Ordinary exploration previously excluded this recovery path and dedicated prospecting listed only rare ores/fuels.
+
+Returned exploration now checks depleted common sources (clay, flint, limestone and fine sand); dedicated resource prospecting also includes these materials. Reports use suitable route terrain, and owned-world discoveries resolve against the same location-keyed finite geology used by settlement surveys. Already surveyed/exhausted occurrences are not duplicated. Surveying adds no stock, access, tools or hauling capacity. Founding/surveying another society's cell now preserves its existing shared reserve instead of resetting it. Existing save fields remain compatible.
+
+Validation: 29 focused scout/shared-geology checks pass (report_150), including unsuitable ground, finite replacement clay, no stock grant, no duplicate return and no refill by another society. Nineteen existing owned-civilization checks also pass (report_149), covering save/restore and shared resources. These checks establish the recovery mechanism, not proof that the old year-300 campaign has already restored its buildings. Remaining campaign validation and military-versus-maintenance allocation are still pending.

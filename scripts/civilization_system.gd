@@ -1200,7 +1200,7 @@ func scout_target_options()->Array[Dictionary]:
 		"id":"recruit_people","kind":"recruit_nomads","civ_id":"","label":"SEEK NOMADIC TRIBES",
 		"description":"Search for scarce, unaffiliated wandering bands. Their numbers are finite, encounters are uncertain, and they disappear as the world becomes urban.","position":{}
 	}]
-	if bool(prospecting_status().available):options.append({"id":"rare_resources","kind":"prospect_resources","civ_id":"","label":"PROSPECT FOR RARE RESOURCES","description":"Send a geological survey along uncharted ground to locate real, scarce mineral or fuel occurrences such as gold, coal, and petroleum.","position":{}})
+	if bool(prospecting_status().available):options.append({"id":"rare_resources","kind":"prospect_resources","civ_id":"","label":"SURVEY MATERIAL SOURCES","description":"Send a geological survey along uncharted ground to locate finite material, mineral or fuel sources, including clay, stoneworking materials and ores.","position":{}})
 	for encounter_variant in contact_encounters_snapshot():
 		var encounter:Dictionary=encounter_variant
 		var position:Dictionary=encounter.get("position",{})
@@ -2772,15 +2772,29 @@ func nomadic_recruitment_status()->Dictionary:
 	return {"available":not urbanized and not exhausted,"urbanized":urbanized,"remaining_known":remaining,"known_bands":nomad_sightings.size(),"limit":NOMAD_SIGHTING_LIMIT,"message":message}
 
 
+const COMMON_PROSPECT_RESOURCES:=["Clay","Flint","Limestone","Fine Sand"]
+
+func depleted_common_resources()->Array[String]:
+	var result:Array[String]=[]
+	for resource:String in COMMON_PROSPECT_RESOURCES:
+		if float(WorldSimulation.state.resource_stockpiles.get(resource,0))>=2.0:continue
+		var exhausted:=false;var remaining:=false
+		for deposit:Dictionary in WorldSimulation.state.resource_deposits:
+			if String(deposit.get("resource",""))!=resource:continue
+			exhausted=true
+			if float(deposit.get("remaining",0))>0.001:remaining=true;break
+		if exhausted and not remaining and WorldSimulation.resources.recognition_ready(resource):result.append(resource)
+	return result
+
 func prospecting_status()->Dictionary:
 	var production_tier:=WorldSimulation.progression.domain_tier("production")
 	var knowledge_tier:=WorldSimulation.progression.domain_tier("knowledge")
 	var recognized:Array[String]=[]
-	for resource_name in ["Gold Ore","Crude Oil","Silver Ore","Coal","Iron Ore","Tin Ore","Lead Ore","Graphite","Phosphate Rock","Uranium Ore"]:
+	for resource_name in COMMON_PROSPECT_RESOURCES+["Gold Ore","Crude Oil","Silver Ore","Coal","Iron Ore","Tin Ore","Lead Ore","Graphite","Phosphate Rock","Uranium Ore"]:
 		if WorldSimulation.resources.recognition_ready(resource_name):recognized.append(resource_name)
 	var available:=not recognized.is_empty()
 	var message:="Scouting can now organize geological surveys for recognized mineral and fuel signs. A return report fixes a real occurrence on the map; it delivers no stockpile."
-	if not available:message="Rare-resource prospecting develops when researchers establish methods for recognizing mineral or fuel occurrences. Until then, scouts collect broad field observations."
+	if not available:message="Resource prospecting develops when researchers establish methods for recognizing mineral or fuel occurrences. Until then, scouts collect broad field observations."
 	return {"available":available,"production_tier":production_tier,"knowledge_tier":knowledge_tier,"recognized":recognized,"message":message}
 
 
@@ -2895,11 +2909,13 @@ func _resolve_nomad_sighting(mission:Dictionary,route:Array,day:int,recruits:int
 
 
 func _resolve_prospecting(mission:Dictionary,route:Array,day:int)->String:
-	if String(mission.get("target_kind",""))!="prospect_resources":return ""
+	var common:=depleted_common_resources()
+	var exploring:=String(mission.get("target_kind",""))=="explore"
+	if String(mission.get("target_kind",""))!="prospect_resources" and not (exploring and not common.is_empty()):return ""
 	var status:=prospecting_status()
 	if not bool(status.available):return String(status.message)
 	if not ground_survey_authority.is_valid() or route.size()<3:return "The survey party returned without a ground record precise enough to fix an occurrence."
-	var candidates:Array[String]=["Gold Ore","Crude Oil","Silver Ore","Coal","Iron Ore","Tin Ore","Lead Ore","Graphite","Phosphate Rock","Uranium Ore"]
+	var candidates:Array[String]=common if exploring else prospecting_status().recognized
 	var best_resource:="";var best_position:=Vector2.ZERO;var best_profile:Dictionary={};var best_potential:=.38
 	for route_index in range(maxi(1,route.size()/3),route.size()-1):
 		var waypoint:Dictionary=route[route_index]
@@ -2913,10 +2929,11 @@ func _resolve_prospecting(mission:Dictionary,route:Array,day:int)->String:
 			if not WorldSimulation.resources.recognition_ready(resource_name):continue
 			var potential:=float(potentials.get(resource_name,0.0))
 			if potential>best_potential:
+				if WorldSimulation.enabled and preload("res://scripts/civilization_resources.gd").survey_occurrence(resource_name,position,false).is_empty():continue
 				best_potential=potential;best_resource=resource_name;best_position=position;best_profile=profile
-	if best_resource.is_empty():return "The prospectors recorded the route's geology, but found no recognized rare-resource occurrence strong enough to survey."
+	if best_resource.is_empty():return "The prospectors recorded the route's geology, but found no recognized material occurrence strong enough to survey."
 	var deposit:Dictionary=WorldSimulation.resources.register_expedition_occurrence(best_resource,best_position,best_profile)
-	if deposit.is_empty():return "The strongest mineral signs on this route matched an occurrence already recorded, so the party added detail rather than a duplicate deposit."
+	if deposit.is_empty():return "The survey recorded no new workable occurrence on this route. Previously surveyed or exhausted sources were not duplicated."
 	var origin_data:Dictionary=mission.get("origin_position",{})
 	var origin:=Vector2(float(origin_data.get("x",player_world_origin.x)),float(origin_data.get("z",player_world_origin.y)))
 	var card:=preload("res://scripts/expedition_findings.gd").deposit_card(deposit,roundi(origin.distance_to(best_position)))

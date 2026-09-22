@@ -93,8 +93,22 @@ static func _ensure_geology_cell(grid:Vector2i)->void:
 		deposit["world_key"]=key
 		if WorldSimulation.world._position_is_revealed(point) and resource in WorldSimulation.resources.FOUNDING_SURFACE_RESOURCES:
 			WorldSimulation.resources._seed_founding_surface_recognition(deposit)
-		WorldSimulation.geography_stock[key]={"remaining":amount,"initial_amount":amount,"last_day":int(state.elapsed_days)}
+		if not WorldSimulation.geography_stock.has(key):WorldSimulation.geography_stock[key]={"remaining":amount,"initial_amount":amount,"last_day":int(state.elapsed_days)}
+		deposit.remaining=WorldSimulation.geography_stock[key].remaining
 		state.resource_deposits.append(deposit)
+
+static func survey_occurrence(resource:String,position:Vector2,record_survey:bool=true)->Dictionary:
+	if not WorldSimulation.resources.recognition_ready(resource):return {}
+	var grid:=Vector2i(floori(position.x/16.0),floori(position.y/16.0))
+	_ensure_geology_cell(grid)
+	var key:="%d:%d:%s" % [grid.x,grid.y,resource]
+	for deposit:Dictionary in WorldSimulation.state.resource_deposits:
+		if String(deposit.get("world_key",""))!=key:continue
+		available(deposit)
+		if float(deposit.remaining)<=0 or String(deposit.stage) in ["surveyed","accessible","developed"]:return {}
+		if record_survey:deposit.stage="surveyed";deposit.clues=1.0;deposit.survey=1.0
+		return deposit
+	return {}
 
 static func _has_world_key(key:String)->bool:
 	if key=="":return false
