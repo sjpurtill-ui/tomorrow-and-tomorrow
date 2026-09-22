@@ -158,6 +158,7 @@ func run()->void:
 		terrain._configure_shape();terrain._configure_noise();terrain._prepare_river_course()
 		simulation.water_provider=Callable(terrain,"_surface_water_site_near")
 		simulation.context_provider=Callable(terrain,"_civilization_geography")
+		simulation.surface_material_provider=Callable(terrain,"_civilization_surface_materials")
 		simulation.route_provider=Callable(terrain,"_analyze_convoy_route")
 		start_point=terrain._civilization_start(load("res://scripts/civilization_start.gd").candidate(seed_value,starting_seat) if starting_seat>=0 else origin_hint)
 	var actor:Dictionary={}

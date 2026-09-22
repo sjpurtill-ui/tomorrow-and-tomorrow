@@ -1,0 +1,31 @@
+{
+  "scope": "harness parity with the existing game terrain provider; no new game rule",
+  "days": [
+    63875,
+    63905
+  ],
+  "before_seconds": 41.08,
+  "after_seconds": 16.338,
+  "entire_world_equal": true,
+  "save_restore_equal": true,
+  "next_day_equal": true,
+  "full_world_followup": {
+    "resumed_from_day": 31755,
+    "completed_days": 31756,
+    "errors": [],
+    "save_check": {
+      "ok": true
+    },
+    "human_save_check": {
+      "ok": true
+    },
+    "target_reached": true
+  },
+  "full_world_restore_equal": true,
+  "full_world_next_day_equal": true,
+  "limitations": [
+    "single timed pair under concurrent audit load",
+    "not a rendered performance benchmark",
+    "not a 300-year endpoint"
+  ]
+}

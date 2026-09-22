@@ -29,6 +29,7 @@ func run()->void:
 	CivilizationSystem.ground_survey_authority=Callable(terrain,"_survey_ground_at")
 	WorldSimulation.water_provider=Callable(terrain,"_surface_water_site_near")
 	WorldSimulation.context_provider=Callable(terrain,"_civilization_geography")
+	WorldSimulation.surface_material_provider=Callable(terrain,"_civilization_surface_materials")
 	WorldSimulation.start_provider=Callable(terrain,"_civilization_start")
 	WorldSimulation.route_provider=Callable(terrain,"_analyze_convoy_route")
 	var player_start:Vector2=terrain._civilization_start(preload("res://scripts/civilization_start.gd").candidate(GameState.world_seed,0))
@@ -66,7 +67,7 @@ func run()->void:
 			if saved.has("error"):errors.append(saved.error);break
 			print("CHECKPOINT DAY ",day)
 		if day%30==0:await get_tree().process_frame
-	errors=CivilizationSystem.validate_state()
+	errors.append_array(CivilizationSystem.validate_state())
 	var save_check:Dictionary=WorldSimulation.check_payload(bytes_to_var(var_to_bytes(WorldSimulation.export_state())))
 	if save_check.has("error"):errors.append(save_check.error)
 	var human_payload:Dictionary={}
