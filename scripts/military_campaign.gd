@@ -3837,8 +3837,10 @@ func _process_equipment_production_day()->void:
 	var ordered:Array=equipment_queue.filter(func(job:Dictionary)->bool:return bool(job.get("persistent",false)))
 	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.allocation)>float(b.allocation) if not is_equal_approx(float(a.allocation),float(b.allocation)) else int(a.id)<int(b.id))
 	for job:Dictionary in ordered:
+		var work:=crafting*float(job.allocation)/maxf(.05,weight_total)*float(job.efficiency)
+		if PersistentProduction.eligible(self,job):work=preload("res://scripts/managed_weapon_repair.gd").advance(self,job,work)
 		var before:Dictionary=workshop.output_stocks(job)
-		PersistentProduction.advance(self,job,crafting*float(job.allocation)/maxf(.05,weight_total)*float(job.efficiency))
+		PersistentProduction.advance(self,job,work)
 		workshop.record(job,before)
 	for index in range(equipment_queue.size()-1,-1,-1):
 		var job:Dictionary=equipment_queue[index]

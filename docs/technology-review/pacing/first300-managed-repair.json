@@ -1,0 +1,47 @@
+{
+  "base": "cc636e9",
+  "scope": "30 ordinary days from existing year-300 military campaign; recovery evidence, not a fresh full-system campaign.",
+  "before": {
+    "day": 109530,
+    "food_intake": 1.0,
+    "waiting_recruits": 3,
+    "equipped": {
+      "improvised": 2073
+    }
+  },
+  "after": {
+    "day": 109560,
+    "food_intake": 1.0,
+    "waiting_recruits": 1,
+    "equipped": {
+      "improvised": 2064
+    }
+  },
+  "repairs": {
+    "improvised": 22
+  },
+  "new_manufacture_on_retained_lines": {
+    "improvised": 2,
+    "pike": 0,
+    "bow": 0,
+    "fitted_post_beam_sets": 0
+  },
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "tests": {
+    "unique_cases": 47,
+    "failures": 0,
+    "note": "22 intake/armor/repair tests and 29 persistent-production/field-repair/repair tests, with 4 overlapping repair cases."
+  },
+  "limitation": "Timber supply still cannot cover equipment wear; equipped count declined 2073 to 2064 despite 22 repairs and 2 newly made improvised weapons."
+}

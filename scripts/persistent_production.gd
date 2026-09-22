@@ -154,6 +154,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 		var retention:=.65 if String(job.job_type)==String(definition.job_type) else .35
 		job.efficiency=maxf(.10,float(job.efficiency)*retention)
 		Exposure.clear(job)
+		preload("res://scripts/managed_weapon_repair.gd").clear(host,job)
 		Abrasive.clear(job)
 		Machine.clear(job)
 		Formed.clear(job)
@@ -195,6 +196,7 @@ static func state(host: Node, job: Dictionary) -> String:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(String(job.item))
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
+	if preload("res://scripts/managed_weapon_repair.gd").available(host,job):return "Repairing equipment"
 	if Industry.product(String(job.item)).has("abrasive_candidate") and not Abrasive.capacity():return "Abrasive lot register full"
 	if Industry.product(String(job.item)).has("specimen_source") and not Samples.has_capacity():return "Sample register full"
 	var inspection:Dictionary=Industry.product(String(job.item))
@@ -248,7 +250,7 @@ static func state(host: Node, job: Dictionary) -> String:
 	return "Working"
 
 static func eligible(host: Node, job: Dictionary) -> bool:
-	return state(host,job) in ["Working","Batch"]
+	return state(host,job) in ["Working","Batch","Repairing equipment"]
 
 static func workforce() -> Dictionary:
 	var workers:=WorldSimulation.state.effective_workers("Crafting")
@@ -371,7 +373,13 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	result["state"]=state(host,job);result["stock"]=stock(host,job);result["share"]=share
 	result["licensed"]=preload("res://scripts/research_licenses.gd").uses_license(String(job.item))
 	result["daily_work"]=rate*share*float(job.efficiency)*(.65 if result.licensed else 1.0)
-	if result.state=="Working" and float(result.daily_work)<=0:
+	var repairing:bool=result.state=="Repairing equipment"
+	if repairing:
+		result.work_per_item=float(job.work_per_item)*preload("res://scripts/managed_weapon_repair.gd").WORK_FACTOR
+		result.required_days=result.work_per_item
+		var pending:Dictionary=job.get("repair_pending",{})
+		result.progress_days=maxf(0,float(pending.get("progress",0))-int(pending.get("completed",0))*float(result.work_per_item))
+	if result.state in ["Working","Repairing equipment"] and float(result.daily_work)<=0:
 		var staff:=workforce()
 		if host.production_labor_share<=0:result.state="No workshop crafting share"
 		elif float(staff.workers)<=0:result.state="No available craftspeople"
@@ -380,10 +388,10 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	if String(job.job_type)=="civilian":result["co_products"]=Industry.product(String(job.item)).get("co_products",{}).duplicate()
 	var exposure_spec:=Industry.product(String(job.item))
 	if exposure_spec.has("exposure_days"):result.daily_work=minf(float(result.daily_work),1.0)
-	result["output_per_day"]=float(result.daily_work)/float(job.work_per_item)
+	result["output_per_day"]=float(result.daily_work)/float(result.work_per_item)
 	result["inputs_per_day"]={}
-	for resource in job.materials: result.inputs_per_day[resource]=float(job.materials[resource])*float(result.output_per_day)
-	result["forecast_output_per_day"]=float(result.output_per_day) if result.state=="Working" else 0.0
+	for resource in job.materials: result.inputs_per_day[resource]=float(job.materials[resource])*float(result.output_per_day)*(preload("res://scripts/managed_weapon_repair.gd").MATERIAL_FACTOR if repairing else 1.0)
+	result["forecast_output_per_day"]=float(result.output_per_day) if result.state in ["Working","Repairing equipment"] else 0.0
 	if exposure_spec.has("exposure_days"):
 		for resource:String in result.inputs_per_day:result.inputs_per_day[resource]=0.0
 		result["exposure_days_completed"]=float(job.progress_days)
@@ -478,4 +486,6 @@ static func validate_saved(payload: Dictionary) -> String:
 	return Formed.validate_links(payload.get("equipment_queue",[]))
 
 static func close(job:Dictionary)->bool:
-	return Formed.clear(job)
+	if not Formed.clear(job):return false
+	preload("res://scripts/managed_weapon_repair.gd").clear(WorldSimulation.military,job)
+	return true
