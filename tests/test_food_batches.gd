@@ -66,7 +66,8 @@ func test_flatbread_does_not_require_leavening_and_baking_needs_fuel()->void:
 		assert_bool("dough_leavening" in WorldSimulation.state.known_discoveries).is_false()
 		WorldSimulation.state.resource_stockpiles.Timber=0.0;var result:=report()
 		assert_float(B.process_lot("controlled_baking",lot,1,result,1)).is_equal(0.0)
-		WorldSimulation.state.resource_stockpiles.Timber=1.0;var before:=energy()
+		var reserves:Dictionary=WorldSimulation.resources._gathering_startup_reserves()
+		WorldSimulation.state.resource_stockpiles.Timber=float(reserves.get("Timber",0.0))+1.0;var before:=energy()
 		B.process_lot("controlled_baking",lot,1,result,1)
 		assert_float(B.available_total()).is_equal_approx(9.5,.000001)
 		assert_float(energy()+float(result.loss)).is_equal_approx(before,.000001)
@@ -383,5 +384,23 @@ func test_fractional_parboiling_fuel_cannot_leave_negative_stock()->void:
 		B.pay_drying("grain_parboiling",.0077/.015,report,1.0)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Timber)).is_equal(0.0)
 		assert_float(float(report.inputs.Timber)).is_equal_approx(.0077,.000000001)
+	)
+
+
+func test_parboiling_preserves_materials_needed_for_known_crafts()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("grain_parboiling")
+		WorldSimulation.state.known_discoveries.append("timber_post_beam_connections")
+		var reserve:=float(WorldSimulation.resources._gathering_startup_reserves().Timber)
+		WorldSimulation.state.resource_stockpiles.Timber=reserve+.04
+		var report:={"inputs":{},"workers":0.0,"methods":{}}
+		var amount:=B.supplied("grain_parboiling",100,100,report)
+		assert_float(amount).is_greater(0.0)
+		B.charge("grain_parboiling",amount,report)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.Timber)).is_equal_approx(reserve,.000001)
+		WorldSimulation.state.resource_stockpiles.Timber=reserve+.015
+		amount=B.dry_capacity("grain_parboiling",100,100,report,1.0)
+		B.pay_drying("grain_parboiling",amount,report,1.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.Timber)).is_equal_approx(reserve,.000001)
 	)
 

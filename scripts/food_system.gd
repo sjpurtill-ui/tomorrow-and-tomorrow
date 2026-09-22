@@ -390,7 +390,7 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 		for food_type in ["Fresh meat","Fish"]:
 			var amount:=minf(float(WorldSimulation.state.food_stocks.get(food_type,0.0)),capacity*0.5*clampf(WorldSimulation.discovery.adoption("smoking"),0.0,1.0)*smoking_coverage)
 			# Smoking must maintain an actual wood fire; knowledge alone supplies no heat.
-			amount=minf(amount,maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)))/0.04)
+			amount=minf(amount,preload("res://scripts/food_preparation.gd").available_input("Timber")/0.04)
 			var fuel:=amount*0.04
 			if fuel>0.0:
 				WorldSimulation.state.resource_stockpiles.Timber=maxf(0,float(WorldSimulation.state.resource_stockpiles.Timber)-fuel)

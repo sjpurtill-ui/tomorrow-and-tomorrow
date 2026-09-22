@@ -39,7 +39,7 @@ static func capacity(id:String,workers:float)->float:
 static func supplied(id:String,requested:float,workers:float,report:Dictionary)->float:
 	var amount:=minf(minf(maxf(0,requested),capacity(id,workers)),maxf(0,capacity(id,10000)-float(report.methods.get(id,0))))
 	for item:String in K.METHODS[id].inputs:
-		amount=minf(amount,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/float(K.METHODS[id].inputs[item]))
+		amount=minf(amount,preload("res://scripts/food_preparation.gd").available_input(item)/float(K.METHODS[id].inputs[item]))
 	return amount
 static func charge(id:String,amount:float,report:Dictionary)->float:
 	if amount<=0:return 0.0
@@ -248,7 +248,7 @@ static func solar_factor(environment:Dictionary,day:int)->float:
 static func dry_capacity(id:String,requested:float,workers:float,report:Dictionary,weather:float)->float:
 	var factor:=weather if id=="indirect_solar_food_drying" else 1.0
 	var amount:=minf(maxf(0,requested),minf(capacity(id,workers)*factor,maxf(0,capacity(id,10000)*factor-float(report.methods.get(id,0)))))
-	if id=="grain_parboiling":amount=minf(amount,maxf(0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0)))/.015)
+	if id=="grain_parboiling":amount=minf(amount,preload("res://scripts/food_preparation.gd").available_input("Timber")/.015)
 	return amount
 static func pay_drying(id:String,amount:float,report:Dictionary,weather:float)->float:
 	if amount<=.000001:return 0.0
