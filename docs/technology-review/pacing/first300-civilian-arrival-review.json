@@ -1,0 +1,33 @@
+{
+  "start_day": 67890,
+  "end_day": 67920,
+  "target_reached": true,
+  "cause": "At day 67891, 0.50891 delivered Timber made building_runoff_channels affordable; the monthly review predicate was false.",
+  "change": "Review civilian investment after arrivals between monthly reviews when no unpaused civilian line exists. Existing lines retain monthly broader investment review. Hunger, war, paid tooling and manual-order guards remain.",
+  "new_output": {
+    "bow": 3.0,
+    "improvised": 40.0,
+    "Building Runoff Channels": 6.0
+  },
+  "civilian_output_in_meal_only_comparison": 0,
+  "food_intake": 1.0,
+  "population": 10689,
+  "comparison_population": 10689,
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "tests": "29 passed, GdUnit report 142",
+  "limitations": [
+    "30-day recovery check at a real stalled cold campaign checkpoint, not a completed 300-year assessment.",
+    "Long campaigns already running retain their loaded older code until deliberately resumed."
+  ]
+}

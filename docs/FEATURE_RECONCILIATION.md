@@ -2166,3 +2166,10 @@ A one-day trace of the stalled cold campaign showed household food processing co
 The 30-day pilot resumed 21 bows and 17 simple levy weapons, with full current food intake and exact save/next-day continuation. Civilian output did not increase: that allocation problem remains open. See `technology-review/pacing/first300-meal-fuel-recovery.json` for the pilot's scope and its small final-rule difference. City-reserve reduction and disabling the kiln had not restored civilian output and were rejected; neither experiment is part of this change.
 
 Validation: 22 food-preparation and whole-campaign save tests pass (GdUnit report 141), including both new reserve regressions.
+
+
+## Civilian orders at delivery time — 2026-09-21
+
+In the cold day-67891 trace, a drainage-component order became affordable after materials arrived, but the AI skipped it because its monthly strategy review was not due. Societies with no unpaused civilian line now review civilian investment after arrivals between monthly reviews. Existing civilian lines keep the broader monthly review; hunger, war, manual-order and paid-tooling guards remain intact.
+
+29 planner, workshop-turnover and whole-campaign save tests pass (report 142). The same stalled checkpoint produced six drainage components over 30 days; the meal-fuel fix alone produced none. Both runs kept full current food intake and exact save/next-day continuation. This proves a short recovery, not the final 300-year gate. Evidence: `technology-review/pacing/first300-civilian-arrival-review.json`.

@@ -143,6 +143,16 @@ static func expansion_site_value(context:Dictionary,plan:Dictionary)->float:
 static func production_food_blocked(plan:Dictionary)->bool:
 	return bool(plan.get("food_shortage",plan.get("hungry",false)))
 
+static func civilian_arrival_review_due(id:String,day:int)->bool:
+	if review_due(id,day):return true
+	# An empty civilian workshop must be able to use today's delivered inputs
+	# before recurring consumers spend them. Existing lines keep their targets;
+	# broader investment and retooling decisions remain on the monthly review.
+	for job:Dictionary in WorldSimulation.military.equipment_queue:
+		if String(job.get("job_type",""))=="civilian" and not bool(job.get("paused",false)):
+			return false
+	return true
+
 static func civilian_orders(id:String,plan:Dictionary)->void:
 	if production_food_blocked(plan) or bool(plan.get("at_war",false)):return
 	var recommendation:=preload("res://scripts/civilian_investment_planner.gd").recommendation()

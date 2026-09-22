@@ -42,7 +42,7 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	# Review new investment against today's delivered inputs, before recurring
 	# consumption makes every setup appear permanently unaffordable.
 	var controller:=preload("res://scripts/civilization_controller.gd")
-	if String(WorldSimulation.actors.get(WorldSimulation.actor_id,{}).get("controller",""))=="ai" and controller.review_due(WorldSimulation.actor_id,day):
+	if String(WorldSimulation.actors.get(WorldSimulation.actor_id,{}).get("controller",""))=="ai" and controller.civilian_arrival_review_due(WorldSimulation.actor_id,day):
 		controller.civilian_orders(WorldSimulation.actor_id,controller.current_plan(WorldSimulation.actor_id))
 	elif WorldSimulation.actor_id=="player":
 		WorldSimulation.military.workshop.review_arrivals()

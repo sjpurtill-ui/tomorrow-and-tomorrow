@@ -259,3 +259,15 @@ func test_laundry_requests_real_soap_and_uses_completed_output()->void:
 		assert_float(float(state.resource_stockpiles["Laundry Soap"])).is_equal_approx(.8,.000001)
 		assert_float(float(clothing.coverage(10,int(state.elapsed_days)).issued)).is_equal(0.0)
 	)
+
+func test_arrivals_can_start_paid_civilian_work_between_monthly_reviews()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		prepare()
+		var day:=1
+		while C.review_due("paper_ruler",day):day+=1
+		if C.civilian_arrival_review_due("paper_ruler",day):C.civilian_orders("paper_ruler",{})
+		assert_int(WorldSimulation.military.equipment_queue.size()).is_equal(1)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.Timber)).is_equal(16.0)
+		assert_bool(C.civilian_arrival_review_due("paper_ruler",day)).is_false()
+	)
+
