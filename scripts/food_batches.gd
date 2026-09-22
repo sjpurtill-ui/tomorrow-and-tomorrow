@@ -96,7 +96,11 @@ static func process_lot(id:String,lot:Dictionary,workers:float,report:Dictionary
 		amount=minf(amount,maxf(0,WorldSimulation.food._stock_total()-float(WorldSimulation.food._calculate_demand(false).total)*7)*.1)
 	if mode=="wash":amount=minf(amount,float(lot.amount)*.25)
 	if mode=="culture":amount=minf(amount,maxf(0,float(WorldSimulation.food._calculate_demand(false).total)*.02-starter_available(day)))
-	if amount<=.000001:return 0.0
+	# Do not withdraw a batch whose smallest output would be rejected by add_lot.
+	# Tiny remainders can survive consumption and otherwise lose their inputs
+	# before an empty output is treated as a real lot.
+	var smallest_yield:=float({"form":.995,"wash":.25,"culture":.9,"leaven":.97,"bake":.95}.get(mode,.998 if mode in ASSAYS and mode!="trace" else 1.0))
+	if amount*smallest_yield<=.000001:return 0.0
 	var replaces:=amount>=float(lot.amount)-.000001
 	var slots:int=LIMIT-data().lots.size()+(1 if replaces else 0)
 	if slots<(2 if mode=="wash" else 1):return 0.0

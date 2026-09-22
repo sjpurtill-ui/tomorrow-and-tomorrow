@@ -353,3 +353,25 @@ func test_wet_conditioning_binary_save_continues_without_free_completion()->void
 		WorldSimulation.state.elapsed_days=3;B.advance(100,100,false);assert_float(B.available_total()).is_greater(0.0)
 		assert_bool(B.valid(B.data())).override_failure_message(str(B.data())).is_true()
 	)
+
+func test_tiny_processing_outputs_do_not_withdraw_or_charge_the_source()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare()
+		for mode:String in ["form","wash","culture","leaven","bake","humidity"]:
+			B.data().lots.clear()
+			var id:=""
+			for candidate:String in K.METHODS:
+				if K.METHODS[candidate].mode==mode:id=candidate;break
+			equip(id)
+			var kind:String="bread" if mode=="humidity" else ("dough" if mode in ["leaven","bake"] else "meal")
+			var lot:=B.add_lot(kind,.000001001,0)
+			var before:=lot.duplicate(true)
+			var stocks:=WorldSimulation.state.resource_stockpiles.duplicate(true)
+			var result:=report()
+			assert_float(B.process_lot(id,lot,1.0,result,1)).is_equal(0.0)
+			assert_dict(lot).is_equal(before)
+			assert_dict(WorldSimulation.state.resource_stockpiles).is_equal(stocks)
+			assert_int(B.data().lots.size()).is_equal(1)
+			assert_float(float(result.loss)).is_equal(0.0)
+	)
+

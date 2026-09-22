@@ -2180,3 +2180,10 @@ In the cold day-67891 trace, a drainage-component order became affordable after 
 The woodland recovery campaign learned iron ammonia catalysts around year 194 and industrial catalyst design around year 196. The catalyst inquiry required ironworking, experimental controls and distillation but no source of either reaction gas. It now also requires the existing pressure-vessel and nitrogen-separation foundations, plus either modeled hydrogen-production route. This closes the demonstrated early ammonia route into industrial catalyst design without a calendar lock. Already learned discoveries remain in saves; no operating production or resource stocks are granted.
 
 All 14 crop-nutrition tests pass (report 143), including live inquiry checks for missing nitrogen, hydrogen or pressure control and both valid hydrogen alternatives. The full 884-discovery/670-route graph has no errors or blocked manufacturing paths. Evidence: `technology-review/pacing/first300-ammonia-foundations.json`. Ongoing endurance runs retain their earlier catalog histories and are not fresh proof of the corrected gate.
+
+
+## Sub-minimum food-processing output — 2026-09-22
+
+The cold endurance campaign reported two script errors near year 243 when baking accessed `observations` on an empty output. A source amount just above the minimum batch size can yield bread below that minimum. `add_lot` then declines the output after the source has already been withdrawn. Food processing now checks its smallest output before withdrawal, starter consumption, fuel use or labor charges. This covers baking, dough forming, starch/residue separation, cultures, leavening and assays. Tiny remainders stay in their source lot for ordinary consumption or decay; there is no resource grant or save-format change.
+
+All 31 food-batch tests pass (report 144), including six tiny-output paths that preserve source food and supplies, plus existing conservation, processing and binary-save continuation checks. The prior cold run's error-bearing segment remains evidence of the defect, not a clean validation result. Campaign checkpoints are retained for continued validation with this fix.
