@@ -5,8 +5,9 @@ var history_filter:=""
 var history:RefCounted
 
 func meta()->Dictionary:
-	return {"eyebrow":"BUILDINGS & INFRASTRUCTURE","title":"Construction","serif":true,"subtabs":["PROJECTS","COMPLETED","SETTLEMENTS","HISTORY"]}
+	return {"eyebrow":"BUILDINGS & INFRASTRUCTURE","title":"Construction","serif":true,"subtabs":["PROJECTS","COMPLETED","SETTLEMENTS","HISTORY","UNDERTAKINGS"]}
 func tab(sub:int)->Dictionary:
+	if sub==4:return preload("res://scripts/hud/content/dock_content_undertakings.gd").new(terrain,hud).tab(0)
 	if sub==2:return _settlements_tab()
 	if sub==3:return _history_tab()
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _local_tab(sub)))

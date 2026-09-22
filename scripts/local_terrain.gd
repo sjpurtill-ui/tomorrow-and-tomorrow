@@ -4331,6 +4331,7 @@ func _refresh_settlement_network(force:=false)->void:
 	add_child(settlement_border_root)
 	settlement_network_marker_root=Node3D.new()
 	settlement_network_marker_root.name="SettlementNetworkMarkers"
+	preload("res://scripts/undertaking_map_visual.gd").render(GameState.player_settlements,settlement_network_marker_root,_close_surface_height_at)
 	add_child(settlement_network_marker_root)
 	if not is_instance_valid(settlement_network_fabric_root):
 		settlement_network_fabric_root=Node3D.new()

@@ -197,6 +197,7 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	var clothing=preload("res://scripts/household_clothing.gd")
 	if not preload("res://scripts/fire_practice.gd").valid(state.get("fire_practice",preload("res://scripts/fire_practice.gd").empty_state())):return {"error":"Invalid maintained fire records."}
 	var opening=preload("res://scripts/opening_craft_practice.gd")
+	if not preload("res://scripts/undertaking_system.gd").valid(state.get("player_settlements",[])):return {"error":"Invalid undertaking records."}
 	if not opening.valid(state.get("opening_craft_practice",opening.empty_state())) or not opening.valid_settlements(state.get("player_settlements",[])):return {"error":"Invalid opening craft records."}
 	var opportunities=preload("res://scripts/opening_opportunities.gd")
 	if not opportunities.valid(state.get("opening_opportunities",opportunities.empty_state())):return {"error":"Invalid opening opportunity records."}

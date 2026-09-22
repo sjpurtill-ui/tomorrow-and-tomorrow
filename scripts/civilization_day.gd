@@ -68,6 +68,7 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	WorldSimulation.settlements.process_city_trade()
 	stamp=record_timing(timings,"city_trade",stamp)
 	WorldSimulation.settlements.process_local_month(daily_context)
+	preload("res://scripts/undertaking_system.gd").advance_all(day)
 	stamp=record_timing(timings,"settlement_morphology",stamp)
 	var progression_events:=WorldSimulation.progression.process_day(day)
 	stamp=record_timing(timings,"progression",stamp)

@@ -81,8 +81,8 @@ static func _current_settlement_project() -> Dictionary:
 			"Lean-to Shelters": score+=(1.0-clampf(float(WorldSimulation.state.housing_capacity)/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0))*4.0+1.1
 			"Storage Pits": score+=(1.0-clampf(float(WorldSimulation.state.simulation_metrics.get("food_days",30.0))/45.0,0.0,1.0))*3.4+float(WorldSimulation.state.population_allocations.get("Logistics",0))/10.0
 			"Public Stores": score+=float(WorldSimulation.state.population_allocations.get("Logistics",0))/8.0+float(WorldSimulation.state.population_allocations.get("Administration",0))/6.0
-			"Open Work Area": score+=float(WorldSimulation.state.population_allocations.get("Crafting",0))/5.0+float(WorldSimulation.state.population_allocations.get("Construction",0))/12.0
-			"Framed Hall": score+=float(WorldSimulation.state.population_allocations.get("Construction",0))/8.0+float(WorldSimulation.state.population_allocations.get("Crafting",0))/10.0
+			"Open Work Area": score+=float(WorldSimulation.state.population_allocations.get("Crafting",0))/5.0+float(WorldSimulation.state.effective_workers("Construction"))/12.0
+			"Framed Hall": score+=float(WorldSimulation.state.effective_workers("Construction"))/8.0+float(WorldSimulation.state.population_allocations.get("Crafting",0))/10.0
 			"Gathering Yard": score+=float(WorldSimulation.state.population_allocations.get("Extraction",0))/4.0+float(WorldSimulation.resources.visible_deposits().size())*0.5
 		if score>best_score:
 			best_score=score
@@ -93,13 +93,13 @@ static func process_day()->Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:return events
 	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed and WorldSimulation.state.population_total>int(WorldSimulation.state.housing_capacity*.80):
-		WorldSimulation.state.housing_progress+=float(WorldSimulation.state.population_allocations.get("Construction",0))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))
+		WorldSimulation.state.housing_progress+=float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))
 		if WorldSimulation.state.housing_progress>=28:
 			WorldSimulation.state.housing_progress-=28
 			WorldSimulation.state.housing_capacity+=maxi(24,roundi(WorldSimulation.state.population_total*.12))
 	var project:=_current_settlement_project()
 	if project.is_empty():return events
-	var builders:=float(WorldSimulation.state.population_allocations.get("Construction",0))
+	var builders:=float(WorldSimulation.state.effective_workers("Construction"))
 	var carriers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
 	var work:=(builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate"))
