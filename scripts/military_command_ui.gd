@@ -232,7 +232,7 @@ func _build_interface()->void:
 	produce_count=_counter(production_row,1,1_000_000_000,100)
 	produce_count.tooltip_text="Stockpile target for a persistent line, or quantity for a one-time batch. Continuous mode ignores this number."
 	queue_production_button=_action_button(production_row,"START PRODUCTION",_queue_production)
-	_action_button(production_row,"REPAIR DAMAGED EQUIPMENT",_queue_repair)
+	var upkeep_note:=Label.new();upkeep_note.text="Equipment repairs are handled by workshop staff.";production_row.add_child(upkeep_note)
 	var production_panel:=preload("res://scripts/production_lines_panel.gd").new()
 	production_panel.product_choice=equipment_choice
 	supply_box.add_child(production_panel)

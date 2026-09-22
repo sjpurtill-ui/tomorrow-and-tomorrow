@@ -319,9 +319,9 @@ func _supply_blocks(army:Dictionary,capabilities:Dictionary)->Array:
 	if required>0:blocks.append({"type":"tiles","heading":"HOME FORCE EQUIPMENT","items":[{"label":"ISSUED / REQUIRED","value":"%d / %d" % [equipped,required],"note":"%d missing sets" % maxi(0,required-equipped),"note_color":Tokens.AMBER if equipped<required else Tokens.GREEN}]})
 	var repairs:Array=[]
 	for item in damaged:
-		if int(damaged[item])>0:repairs.append({"name":String(item).replace("_"," ").capitalize(),"value":str(damaged[item]),"sub":"Damaged · unavailable until repaired","accent":Tokens.AMBER})
+		if int(damaged[item])>0:repairs.append({"name":String(item).replace("_"," ").capitalize(),"value":str(damaged[item]),"detail":preload("res://scripts/routine_military_upkeep.gd").status(MilitaryCampaign,String(item)),"accent":Tokens.AMBER})
 	if not repairs.is_empty():blocks.append({"type":"rows","heading":"REPAIR NEEDS","items":repairs})
-	blocks.append({"type":"actions","items":[{"label":"OPEN MILITARY PRODUCTION","sub":"Equipment, ammunition, transport and repair orders","on_press":jump("production",2)}]})
+	blocks.append({"type":"actions","items":[{"label":"OPEN MILITARY PRODUCTION","sub":"Equipment supply and staff-managed upkeep","on_press":jump("production",2)}]})
 
 	return blocks
 

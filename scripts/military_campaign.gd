@@ -3827,6 +3827,7 @@ func _rejoin_recovered_population(_pool_name:String,_count:int)->void:
 
 
 func _process_equipment_production_day()->void:
+	preload("res://scripts/routine_military_upkeep.gd").prepare(self)
 	var repair_work:=preload("res://scripts/field_repair.gd").prepare(self)
 	if equipment_queue.is_empty(): return
 	var crafting:=_production_rate()
