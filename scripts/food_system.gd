@@ -146,6 +146,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"cultivation_nutrient_inputs":nutrient_report.get("inputs",{}).duplicate(),
 		"cultivation_nutrient_bonus":float(nutrient_report.get("bonus",0)),
 		"food_days":food_days,
+		"food_total_stock":total,
 		"food_production":production_total,
 		"food_consumption":demand,
 		"food_eaten":eaten,

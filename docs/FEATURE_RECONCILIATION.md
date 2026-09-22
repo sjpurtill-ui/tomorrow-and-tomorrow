@@ -2275,3 +2275,6 @@ Existing building settlement/history checks also pass: 3/3, report_180. Total sc
 
 ### Completed landmark naming — 2026-09-22
 Completed undertakings can be named in their Buildings page; unfinished projects retain working titles. Names persist in the existing saved record, replace the map label, and survive later ruin. Completed failures may also be named. Input is limited to 60 printable characters with surrounding whitespace removed; blank/control-character names are rejected. The detail page now states the actual condition-scaled local work contribution. Seven undertaking tests pass, report_181. Civilization-wide attraction, diplomatic reputation and legacy victory rewards remain design proposals, not implemented effects.
+
+### Food headline total correction — 2026-09-22
+Food reports now explicitly expose combined edible stocks. The top bar uses that total, with legacy food-days times daily demand as fallback, instead of treating processed food batches as the entire reserve. Seven KPI tests pass (report_182), including positive reserves with zero batches and genuine zero stocks.

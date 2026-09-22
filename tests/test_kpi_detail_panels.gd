@@ -64,3 +64,12 @@ func test_totals_are_independent_of_selection_and_show_both_cities()->void:
 	assert_str(detail.rows[-1].value).contains("SHORTFALL")
 	assert_float(float(GameState.simulation_metrics.food_days)).is_equal(10.0)
 
+func test_food_batch_subset_cannot_zero_out_total_reserves()->void:
+	GameState.simulation_metrics={"food_days":133.1,"food_consumption":42.0,"food_batch_stock":0.0,"food_eaten":42.0}
+	var model=preload("res://scripts/hud/civilization_kpi_model.gd")
+	assert_float(float(model.snapshot().food_days)).is_equal_approx(133.1,.000001)
+	GameState.simulation_metrics.food_total_stock=420.0
+	assert_float(float(model.snapshot().food_days)).is_equal_approx(10.0,.000001)
+	GameState.simulation_metrics.food_total_stock=0.0
+	assert_float(float(model.snapshot().food_days)).is_equal(0.0)
+
