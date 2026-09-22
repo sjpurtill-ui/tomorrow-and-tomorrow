@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "runtime_catalog": "7f840e61bcae49d0b180fe7559ebdf70a831de0a",
+  "method": "Read actual checkpoint discovery events in chronological order, beginning with the ten inherited founding practices. Check each recorded origin requirement against previously learned practices. Separately check all current authored learning routes with the shared requirement predicate. Do not treat the default local route as the only permitted path.",
+  "limitations": [
+    "Recovery campaigns span earlier fixes; the fresh campaign checkpoint covers only 71 years.",
+    "This check proves prerequisite availability, not historical environmental signal strength, research cost, adoption, or actual manufacturing capability.",
+    "The 300-year endpoint remains pending."
+  ],
+  "recorded_discoveries_checked": 640,
+  "cases": [
+    {
+      "day": 67525,
+      "historical_missing_under_current_catalog": [],
+      "initial_count": 10,
+      "known": 150,
+      "missing_now": [],
+      "missing_origin_records": [],
+      "name": "playable300-military-current-supplies-retrofit",
+      "recorded_route_errors": [],
+      "recorded_routes_checked": 140
+    },
+    {
+      "day": 62050,
+      "historical_missing_under_current_catalog": [],
+      "initial_count": 10,
+      "known": 163,
+      "missing_now": [],
+      "missing_origin_records": [],
+      "name": "current300-woodland-succession-fast-supplies-retrofit",
+      "recorded_route_errors": [],
+      "recorded_routes_checked": 153
+    },
+    {
+      "day": 56575,
+      "historical_missing_under_current_catalog": [],
+      "initial_count": 10,
+      "known": 145,
+      "missing_now": [],
+      "missing_origin_records": [],
+      "name": "current300-cool-v3-succession-fast-supplies-retrofit",
+      "recorded_route_errors": [],
+      "recorded_routes_checked": 135
+    },
+    {
+      "day": 68255,
+      "historical_missing_under_current_catalog": [],
+      "initial_count": 10,
+      "known": 174,
+      "missing_now": [],
+      "missing_origin_records": [],
+      "name": "current300-warm-succession-fast-supplies-retrofit",
+      "recorded_route_errors": [],
+      "recorded_routes_checked": 164
+    },
+    {
+      "day": 25915,
+      "historical_missing_under_current_catalog": [],
+      "initial_count": 10,
+      "known": 58,
+      "missing_now": [],
+      "missing_origin_records": [],
+      "name": "fresh300-makers",
+      "recorded_route_errors": [],
+      "recorded_routes_checked": 48
+    }
+  ]
+}
