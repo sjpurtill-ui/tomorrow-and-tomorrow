@@ -42,3 +42,35 @@ func test_fine_zoom_is_slow_and_cannot_bank_an_unbounded_burst()->void:
 	assert_float(terrain.zoom_target_size).is_equal_approx(5.0/1.12,.00001)
 	for input in 100:terrain._queue_camera_zoom(Vector2.ZERO,-1.0)
 	assert_float(terrain.zoom_target_size).is_greater_equal(5.0/1.6)
+
+func test_resume_opens_at_saved_settlement_instead_of_new_seeded_start()->void:
+	var terrain:=fixture()
+	var committed:=GameState.settlement_site_committed
+	var home:=GameState.settlement_founded_at
+	GameState.settlement_site_committed=true
+	GameState.settlement_founded_at=Vector3(123.0,7.0,-456.0)
+	var opening:Vector3=terrain._opening_world_position()
+	GameState.settlement_site_committed=committed
+	GameState.settlement_founded_at=home
+	assert_vector(opening).is_equal(Vector3(123.0,.002,-456.0))
+
+func test_resume_unfounded_caravan_keeps_saved_travel_position()->void:
+	var terrain:=fixture()
+	var committed:=GameState.settlement_site_committed
+	var day:=GameState.elapsed_days
+	var origin:=CivilizationSystem.player_world_origin
+	GameState.settlement_site_committed=false
+	GameState.elapsed_days=9.0
+	CivilizationSystem.player_world_origin=Vector2(-321.0,654.0)
+	var opening:Vector3=terrain._opening_world_position()
+	GameState.settlement_site_committed=committed
+	GameState.elapsed_days=day
+	CivilizationSystem.player_world_origin=origin
+	assert_vector(opening).is_equal(Vector3(-321.0,.002,654.0))
+
+func test_initial_camera_opens_at_settlement_inspection_distance()->void:
+	var terrain:Node3D=auto_free(CameraTerrain.new())
+	add_child(terrain)
+	terrain._build_environment()
+	assert_float(terrain.camera.size).is_equal_approx(terrain._distance_camera_size(0),.0001)
+	assert_float(terrain.aerial_altitude_feet()).is_equal_approx(10000.0,1.0)

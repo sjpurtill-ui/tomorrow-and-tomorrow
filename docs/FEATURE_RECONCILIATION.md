@@ -2150,3 +2150,10 @@ The actual year-20 checkpoint replayed through day 9125 on the corrected scout-r
 ## 2026-09-21 — Hydrogen-flame research requires hydrogen knowledge
 
 An older warm campaign learned hydrogen-flame glassworking with only glass-tube drawing and distillation. The research gate now also requires either water electrolysis or chlor-alkali cells, preserving both modeled hydrogen supply routes. Actual manufacturing continues to consume hydrogen and paid tooling. The regression failed before the correction; all 19 glassworking/crop-nutrition tests now pass, including live learning-path eligibility and both alternatives. The complete live graph remains structurally valid, with 752 products and 28 plants reachable under the audit's stated assumptions. Older learned knowledge is preserved; historical foundation evidence is labeled with its pre-correction catalog. Fresh final-build endurance validation remains required.
+
+
+## Saved campaign map opening — 2026-09-21
+
+The terrain scene was recalculating the seed's current starting candidate every time it loaded, even when the campaign already had a founded settlement. That could move the local origin and opening camera away from saved settlement geography. The scene now opens at the saved founding site (or a resumed unfounded caravan's recorded position). Only new campaigns choose a seeded start. The opening camera uses the existing 10,000-foot preset immediately rather than a 190-km vertical footprint.
+
+Six camera tests pass (GdUnit report 136), covering saved settled and traveling origins, opening distance, cumulative zoom and the four distance presets. A read-only scene-load probe of the player's day-29027 quicksave placed the saved city at the screen center with zero horizontal camera displacement and approximately 10,007 feet of clearance (the marker's small terrain offset explains the difference from the nominal preset). No save data is rewritten. This is camera projection validation, not a claim of rendered visual approval. The running player session must reload after integration; it is not terminated by this fix.

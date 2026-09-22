@@ -459,7 +459,7 @@ func _ready() -> void:
 	MilitaryCampaign.recovery.surface_assessor=Callable(self,"_settlement_surface_assessment")
 	if not CivilizationSystem.scout_report_returned.is_connected(_on_scout_report_returned):
 		CivilizationSystem.scout_report_returned.connect(_on_scout_report_returned)
-	world_start_position = _find_camp_position()
+	world_start_position = _opening_world_position()
 	# province_terrain is retained for legacy reports, but in the seamless world it
 	# now describes the actual founding ground instead of declaring every planet to
 	# be Plains. Simulation systems consume the richer environment profile directly.
@@ -1690,11 +1690,16 @@ func _build_environment() -> void:
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_PERSPECTIVE if SEAMLESS_WORLD else Camera3D.PROJECTION_ORTHOGONAL
 	camera.fov = 35.0
-	camera.size = 190.0 if SEAMLESS_WORLD else 108.0
+	camera.size = _distance_camera_size(0) if SEAMLESS_WORLD else 108.0
 	camera.near = 0.05
 	camera.far = 100000.0
 	camera.current = true
 	add_child(camera)
+	if SEAMLESS_WORLD:
+		set_camera_distance_level(0)
+		camera.size=zoom_target_size
+		zoom_target_size=-1.0
+		zoom_preset_active=false
 	_update_camera()
 
 func _build_terrain() -> void:
@@ -11482,6 +11487,18 @@ func _create_camp_banner(parent: Node3D) -> void:
 	flag_material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	flag.material_override = flag_material
 	parent.add_child(flag)
+
+func _opening_world_position() -> Vector3:
+	# Seeded placement is only for a new campaign. A resumed settlement may
+	# predate placement changes or have been founded after a caravan journey.
+	if GameState.settlement_site_committed:
+		var home:=GameState.settlement_founded_at
+		return Vector3(home.x,_height_at(home.x,home.z)+.002,home.z)
+	if GameState.elapsed_days>0.0:
+		var origin:=CivilizationSystem.player_world_origin
+		return Vector3(origin.x,_height_at(origin.x,origin.y)+.002,origin.y)
+	return _find_camp_position()
+
 
 func _find_camp_position() -> Vector3:
 	if SEAMLESS_WORLD:
