@@ -462,7 +462,7 @@ func _restore_state(payload:Dictionary)->Dictionary:
 	if not failures.is_empty():return {"error":"; ".join(failures)}
 	enabled=bool(payload.enabled)
 	# Older saves omitted the human observer view. Rebuild it before rivals act.
-	if enabled and human_projection.is_empty():refresh_projections()
+	if enabled and not payload.has("human_projection"):refresh_projections()
 	return {"ok":true}
 
 func advance_day(day:int,daily_context:Dictionary,construction:Callable=Callable())->Dictionary:

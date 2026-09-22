@@ -2085,3 +2085,10 @@ Validation: 65/65 scholar, society-exchange and paid-research checks passed; the
 ### First 300 years: avoid rebuilding fixed construction rules for every plot
 
 Construction prerequisite checks reuse the fixed authored definitions, while testing current knowledge on every call. No society eligibility, stock, adoption or building state is cached. This removes repeated catalog construction in maintenance planning across settlements. The same real year-157 checkpoint with 32 settlements advanced 30 ordinary days in 16.607 seconds before and 13.834 seconds after (16.7% reduction under concurrent audit load); mean city-trade time fell from 153.26 to 77.72 ms/day. The complete exported world states are exactly equal, and both save/next-day checks pass. All 20 building delivery, acquisition, specimen, partnership and operations tests pass. No save change or rendered performance claim. Evidence: pacing/first300-fabric-definition-performance.json.
+
+
+### First 300 years: preserve explicit empty observer views and compare 75-year choices
+
+Owned-world import now rebuilds the human observer view only for legacy payloads that omit it. An explicitly empty saved view stays empty, preserving isolated campaigns exactly. The legacy rebuilding behavior is still tested. Four save-continuation checks pass; both unchanged matched year-75 endpoints now restore and advance the next ordinary day with exact equality.
+
+Fresh same-seed, same-terrain runs on 9d1b91d differ only in ordinary Makers/Military ambition. Makers produced 77 fitted post/beam sets, 38 splice sets and 476 spears; Military produced 64, 28 and 308 respectively, plus 137 bows, 107 arrows and 80 pikes. Military fielded 17 archers and eight pikemen alongside spearmen. Both reached 75 years, maintained full current food intake and knew 61 practices with different identities. This establishes a meaningful choice effect, not a 300-year completion claim. Evidence: pacing/first300-matched-decisions-75.json.

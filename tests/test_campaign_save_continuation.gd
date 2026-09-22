@@ -44,3 +44,16 @@ func test_legacy_human_view_rebuild()->void:
 		for civ:Dictionary in actor.systems.CivilizationSystem.civilizations:
 			if civ.id=="human":found=true
 		assert_bool(found).is_true()
+
+func test_explicit_empty_observer_view_survives_owned_import()->void:
+	WorldSimulation.clear()
+	GameState.reset_for_new_world(9241)
+	WorldSimulation.create_actor("isolated",9241,Vector2.ZERO)
+	WorldSimulation.enabled=true
+	WorldSimulation.scoped("isolated",func()->void:DAY.advance(1,DAY.context(Vector2.ZERO)))
+	var saved:=WorldSimulation.export_state()
+	assert_dict(saved.human_projection).is_empty()
+	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
+	assert_dict(WorldSimulation.human_projection).is_empty()
+	var restored:=WorldSimulation.export_state()
+	assert_bool(restored==saved).override_failure_message(str(preload("res://tools/verify_campaign_save.gd").details(saved,restored))).is_true()
