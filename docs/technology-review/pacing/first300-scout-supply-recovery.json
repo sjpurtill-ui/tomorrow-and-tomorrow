@@ -1,0 +1,32 @@
+{
+  "runtime": "b861e18 with corrected audit lifecycle",
+  "from_day": 109865,
+  "through_day": 109955,
+  "scouting": {
+    "active_parties": 5,
+    "last_day": 109955,
+    "returned_reports": 8,
+    "status": "80 scouts departed from FIRST SETTLEMENT to chart unvisited ground. Expected back in 90 days; staff handle the next departure."
+  },
+  "deposits_before": 88,
+  "deposits_after": 101,
+  "output_delta": {
+    "Building Runoff Channels": 75.0,
+    "Prepared Fibers": 411.0,
+    "Spun Yarn": 406.0,
+    "bow": 85.0
+  },
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "limitation": "Earlier isolated runs did not advance CivilizationSystem/scouting; they prove economic endurance only. Full-world harness already advances it. This 90-day resumed check proves scout activity and renewed drainage supply, not restored building condition or fresh 300-year scouting progression."
+}

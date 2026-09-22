@@ -34,6 +34,7 @@ func snapshot(day:int)->Dictionary:
 	var state:Node=simulation.state
 	var result:={"day":day,"year":float(day)/365.0,"population":state.population_total,"known":state.known_discoveries.size(),"knowledge_workers":state.population_allocations.get("Knowledge",0),"active_inquiries":state.active_investigations.size(),"food_security":state.food_security,"food_intake_ratio":state.simulation_metrics.get("food_intake_ratio",1),"food_eaten":state.simulation_metrics.get("food_eaten",0),"food_demand_breakdown":state.simulation_metrics.get("food_demand_breakdown",{}).duplicate(true),"army_provisions_required":state.simulation_metrics.get("army_provisions_required",0),"army_provisions_delivered":state.simulation_metrics.get("army_provisions_delivered",0),"army_provision_delivery_ratio":state.simulation_metrics.get("army_provision_delivery_ratio",1),"food_consumption":state.simulation_metrics.get("food_consumption",0),"food_days":state.simulation_metrics.get("food_days",0),"settled":state.settlement_site_committed,"completed_buildings":state.settlement_completed.size(),"settlement_count":state.player_settlements.size(),"settlement_plots":state.settlement_plots.size(),"plot_history_records":state.settlement_plot_history.size(),"resource_deposits":state.resource_deposits.size(),"material_stocks":{"Timber":state.resource_stockpiles.get("Timber",0),"Stone":state.resource_stockpiles.get("Stone",0),"Clay":state.resource_stockpiles.get("Clay",0),"Fiber Plants":state.resource_stockpiles.get("Fiber Plants",0)}}
 	result["production"]=load("res://tools/pacing_production_evidence.gd").capture()
+	result["scouting"]={"active_parties":simulation.world.scout_missions.size(),"returned_reports":simulation.world.scout_reports.size(),"status":simulation.world.scouting_staff.data.get("status",""),"last_day":simulation.world.last_processed_day}
 	return result
 func timing_interval(day:int)->Dictionary:
 	if not profile_enabled or day<=previous_timing_day:return {}
@@ -99,7 +100,8 @@ func replay_day(day:int)->void:
 		controller.choose_orders("pacing_reference")
 		var origin:Vector2=simulation.world.player_world_origin
 		if simulation.state.settlement_site_committed:origin=Vector2(simulation.state.settlement_founded_at.x,simulation.state.settlement_founded_at.z)
-		daily.advance(day,daily.context(origin,simulation.state.convoy_traveling)))
+		daily.advance(day,daily.context(origin,simulation.state.convoy_traveling))
+		simulation.world.advance_to_day(day))
 
 func verify_continuation(day:int)->Dictionary:
 	var before:Dictionary=bytes_to_var(var_to_bytes(simulation.export_state()))
@@ -194,6 +196,7 @@ func run()->void:
 			var context:Dictionary=daily.context(origin,simulation.state.convoy_traveling)
 			stamp=daily.record_timing(timings,"context",stamp)
 			var result:Dictionary=daily.advance(day,context,Callable(),timings,secondary_timings)
+			simulation.world.advance_to_day(day)
 			for event:Dictionary in result.discoveries:discoveries.append({"id":event.id,"day":day,"year":float(day)/365.0})
 			if day==1 or day%365==0:snapshots.append(snapshot(day))
 			return simulation.state.population_total<=1

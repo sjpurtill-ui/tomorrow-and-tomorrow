@@ -76,3 +76,9 @@ A subsequent catalog correction closes an ammonia-catalyst shortcut found in the
 Finish the fresh current-build 300-year campaign and the ongoing warm, woodland, cold, military and full-world campaigns. Confirm final target days, actual output and fielded capabilities, government succession, state validity, and exact save/next-day continuation. The normal twelve-opponent run has passed its 25-year contact, production and save checks. Record any remaining limitations explicitly before marking the first 300 years ready.
 
 Historical intermediate observations are retained in the [development archive](FIRST_300_YEARS_PACING_ARCHIVE.md).
+
+### Scope correction for isolated campaign evidence
+
+The isolated history harness omitted the civilization/scouting lifecycle until the September 22 correction. Existing isolated checkpoints validate economy and production across their recorded years, but not a complete 300-year scouting history. Do not describe even a day-zero isolated start as fresh final-build full-system validation. Continue saved campaigns with the corrected lifecycle; do not discard their economic evidence or restart them from zero. Full-world runs already advance the complete lifecycle.
+
+A corrected 90-day replay from the warm year-301 checkpoint returned eight expeditions and resumed 75 drainage components without supplies being granted. Exact save/next-day continuation passed. The [recovery evidence](technology-review/pacing/first300-scout-supply-recovery.json) distinguishes this result from the still-pending full campaign checks.
