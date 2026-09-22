@@ -2337,3 +2337,8 @@ Levy, spearman and archer now resolve to separate paper-style action scenes befo
 
 Validation in canonical checkout: 14 focused tests passed (report 756), with no errors/failures/orphans. Private GPU military probe passed at normal and 1024×640 layouts; inspected the contained figures and summary contrast. Original images and exact prompts are retained. This is three unit types, not completion of the full military catalogue.
 
+## September 22 — matching early research subjects
+
+Connected the existing paper illustrations for oral_epics, tallies, cordage and clay_shaping to those exact discoveries before year 300. Individual focal points keep the work visible below the source images' blank paper space. Hidden discoveries still resolve to no artwork; later-era paths and gameplay effects remain intact. No new bitmap generation or assets were needed.
+
+Validation: 7 focused early-art tests passed, zero errors/failures/orphans (report 757), including subject identity, unique paths, reveal state and the year-300 transition. The existing subject-art expectations were updated for the deliberate early mappings.

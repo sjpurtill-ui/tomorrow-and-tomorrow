@@ -5,6 +5,7 @@ const COLORS:={"demography":Color("cf9c78"),"nutrition":Color("adbb77"),"health"
 const Painting=preload("res://scripts/hud/subject_painting.gd")
 const ART_MANIFEST="res://assets/ui/research/subject-art-manifest.json"
 const CACHE_LIMIT:=64
+const EARLY_SUBJECTS:={"oral_epics":Vector2(.5,.67),"tallies":Vector2(.55,.72),"cordage":Vector2(.68,.71),"clay_shaping":Vector2(.65,.73)}
 static var assignments:Dictionary={}
 static var textures:Dictionary={}
 static func manifest()->Dictionary:
@@ -30,8 +31,12 @@ static func texture_at(path:String)->Texture2D:
 	textures[path]=load(path);return textures[path]
 static func subject_art_key(item:Dictionary)->String:
 	if not bool(item.get("exposed",true)):return ""
+	var id:=String(item.get("id",""))
+	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % id
 	return String(manifest().get(String(item.get("id","")),{}).get("path",""))
 static func focus_for(item:Dictionary)->Vector2:
+	var id:=String(item.get("id",""))
+	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return EARLY_SUBJECTS[id]
 	var point:Array=manifest().get(String(item.get("id","")),{}).get("focus",[.5,.5])
 	return Vector2(float(point[0]),float(point[1]))
 static func for_discovery(item:Dictionary)->Texture2D:

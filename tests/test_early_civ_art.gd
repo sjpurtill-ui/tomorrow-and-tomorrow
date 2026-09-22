@@ -67,3 +67,19 @@ func test_early_unit_art_is_specific_and_later_units_keep_their_assets()->void:
 	GameState.elapsed_days=300*365
 	assert_str(military.illustration_path("levy")).is_equal(String(military.manifest().levy.path))
 	GameState.elapsed_days=saved
+
+func test_early_research_keeps_subject_identity_visibility_and_later_mapping()->void:
+	var research=preload("res://scripts/hud/research_visuals.gd")
+	var saved:=GameState.elapsed_days;GameState.elapsed_days=71*365
+	var paths:Dictionary={}
+	for id:String in research.EARLY_SUBJECTS:
+		var item:={"id":id,"exposed":true}
+		var path:String=research.subject_art_key(item)
+		assert_bool(ResourceLoader.exists(path)).is_true()
+		assert_bool(paths.has(path)).is_false();paths[path]=true
+		assert_bool(research.focus_for(item).y>.6).is_true()
+		item.exposed=false
+		assert_str(research.subject_art_key(item)).is_empty()
+	GameState.elapsed_days=300*365
+	assert_str(research.subject_art_key({"id":"oral_epics"})).is_equal(String(research.manifest().oral_epics.path))
+	GameState.elapsed_days=saved
