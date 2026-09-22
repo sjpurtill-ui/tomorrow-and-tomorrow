@@ -861,53 +861,22 @@ func _refresh_time()->void:
 	time_pill.reset_size()
 	_layout()
 
-var _overall_population:=0
-var _overall_vitals:Dictionary={}
 var distance_selector:OptionButton
 
 func _refresh_kpis()->void:
-	_overall_population=GameState.population_total
-	_overall_vitals=GameState.rolling_vital_balance(365)
-	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: SettlementModel.with_local_population(_refresh_local_kpis))
-
-func _refresh_local_kpis()->void:
-	var metrics:Dictionary=GameState.simulation_metrics
-	var water:Dictionary=GameState.water_metrics
-	var population:=GameState.population_total
-	var survival:=Indicators.health()
-	var expectancy:=float(survival.life_expectancy)
-	var infant_mortality:=float(survival.infant_mortality_per_1000)
-	var economy:=Indicators.economy()
-	var science:=Indicators.science()
-	var food_days:=float(metrics.get("food_days",0.0))
-	var food_balance:=float(metrics.get("food_balance",0.0))
-	var vital_balance:Dictionary=_overall_vitals
-	var births:=int(vital_balance.get("births",0))
-	var deaths:=int(vital_balance.get("deaths",0))
-	var vital_net:=int(vital_balance.get("net",births-deaths))
-	var able:=int(terrain._able_population())
-	var assigned:=0
-	for role in GameState.population_allocations:
-		assigned+=int(GameState.population_allocations[role])
-	var idle:=maxi(0,able-assigned)
-	var water_days:=float(water.get("days",0.0))
-	var water_intake:=roundi(float(water.get("intake_ratio",1.0))*100.0)
-	var signature:="%d|%.1f|%.1f|%.1f|%.1f|%.1f|%d|%d|%d|%.1f|%d" % [population,expectancy,infant_mortality,float(science.capacity),float(economy.gdp),food_balance,births,deaths,idle,water_days,water_intake]
-	signature+="|%d|%s" % [_overall_population,GameState.selected_player_settlement_id]
-	if signature==_kpi_signature: return
+	var t:Dictionary=preload("res://scripts/hud/civilization_kpi_model.gd").snapshot()
+	var signature:=str(hash(t))
+	if signature==_kpi_signature:return
 	_kpi_signature=signature
-	var selected:Dictionary=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
-	var city_name:=String(selected.get("name","Selected city"))
-	_update_kpi("population","%d overall" % _overall_population,"%d · %s" % [population,city_name.left(18)],Tokens.MUTED,"Overall population: %d. Selected city — %s: %d.\nOverall trailing 12 months: %d births − %d deaths = %+d natural change. Click for people and labor." % [_overall_population,city_name,population,births,deaths,vital_net])
-	var projected:=float(metrics.get("food_projected_days",food_days))
-	if food_balance<0.0:
-		_update_kpi("food","%.1f d" % food_days,"▼ %dd" % roundi(projected),Tokens.RED,"Food shortage: projected reserve %d days. Net %.1f/day." % [roundi(projected),food_balance])
-	else:
-		_update_kpi("food","%.1f d" % food_days,"▲",Tokens.GREEN,"Days of adult-equivalent rations in store. Net %+.1f/day." % food_balance)
-	_update_kpi("water","%.1f d" % water_days,"NEED %d%%" % water_intake,Tokens.GREEN if water_intake>=100 else Tokens.RED,"%.1f reserve days remain after today's use. NEED %d%% is the share of today's drinking requirement that was actually met; it is not storage fullness." % [water_days,water_intake])
-	_update_kpi("health","%.1f yr" % expectancy,"IMR %.0f‰" % infant_mortality,Tokens.RED if infant_mortality>=50.0 else Tokens.AMBER if infant_mortality>=20.0 else Tokens.GREEN,"Life expectancy at birth under current conditions. Infant mortality is projected deaths during the first month per 1,000 live births.")
-	_update_kpi("science","%.1f" % float(science.capacity),"%d%% edu" % roundi(float(science.education)*100.0),Tokens.GOLD,"Science capacity: %.1f researcher-equivalent minds currently doing science × %d%% average education." % [float(science.minds),roundi(float(science.education)*100.0)])
-	_update_kpi("gdp","%.1f" % float(economy.gdp),"%.2f / person" % float(economy.gdp_per_capita),Tokens.BLUE,"Selected city real GDP: %.1f output-equivalent units per day. This is effective assigned worker-days × %.0f%% labor productivity; %.0f workers are assigned and %d are idle." % [float(economy.gdp),float(economy.productivity)*100.0,float(economy.assigned_workers),idle])
+	_update_kpi("population",str(t.population),"%d cities" % t.cities.size(),Tokens.MUTED,"Civilization population and city breakdown")
+	for id:String in ["food","water"]:
+		var shortage:=int(t[id+"_shortages"])
+		var pending:bool=int(t[id+"_reports"])<t.cities.size()
+		var days:=float(t[id+"_days"])
+		_update_kpi(id,"%.1f d" % days if days>=0 else "—","%d short" % shortage if shortage>0 else ("partial" if pending else "civ total"),Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
+	_update_kpi("health","%.1f yr" % t.life,"IMR %.0f‰" % t.infant,Tokens.MUTED,"Population-weighted health across all cities")
+	_update_kpi("science","%.1f" % t.science,"%.0f%% edu" % (float(t.education)*100),Tokens.GOLD,"Combined research capacity; population-weighted education")
+	_update_kpi("gdp","%.1f" % t.output,"%.2f / person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
 	kpi_strip.reset_size()
 	_layout()
 
