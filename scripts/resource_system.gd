@@ -231,15 +231,19 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	return WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]: return _process_local_day(context))
 
 func _process_local_day(context: Dictionary) -> Array[Dictionary]:
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	initialize()
 	if WorldSimulation.enabled:
 		var origin:Vector3=context.get("origin",WorldSimulation.state.settlement_founded_at)
 		preload("res://scripts/civilization_resources.gd").initialize(Vector2(origin.x,origin.z))
 	var events: Array[Dictionary] = []
+	stamp=trace.mark("resource_initialize",stamp)
 	var method_factors:Dictionary=preload("res://scripts/geoscience_knowledge.gd").factors()
 	# Filled only if this city still has an eligible recognition/survey task.
 	# Family practice changes during the pass and remains evaluated per deposit.
 	var survey_inputs:Dictionary={}
+	var access_inputs:Dictionary={}
 	for deposit in WorldSimulation.state.resource_deposits:
 		_ensure_deposit_fields(deposit)
 		var resource_name: String = deposit.resource
@@ -264,16 +268,20 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 				_gain_practice(resource_name,"survey",0.18)
 				events.append(_event("Deposit Surveyed", "The extent and conditions of the %s occurrence are now understood." % resource_name, deposit.id))
 		elif deposit.stage == "surveyed":
-			deposit.access = _calculate_access(deposit, definition, context)
+			if access_inputs.is_empty():access_inputs=_access_work_inputs()
+			deposit.access = _calculate_access(deposit, definition, context, access_inputs)
 			deposit.blockers = _access_blockers(deposit,definition,context)
 			if deposit.access<1.0 and deposit.blockers.is_empty():
 				deposit.blockers.append(_access_practice_blocker(definition))
 			if deposit.access >= 1.0 and deposit.blockers.is_empty():
 				deposit.stage = "accessible"
 				events.append(_event("Resource Accessible", "%s can now support organized extraction." % resource_name, deposit.id))
+	stamp=trace.mark("resource_deposits",stamp)
 	var flow_events:=_process_material_flow(context)
 	events.append_array(flow_events)
+	stamp=trace.mark("resource_material_flow",stamp)
 	events.append_array(_process_water_flow(context))
+	trace.mark("resource_water",stamp)
 	for event in events:
 		WorldSimulation.state.resource_events.push_front(event)
 	if WorldSimulation.state.resource_events.size()>120: WorldSimulation.state.resource_events.resize(120)
@@ -416,19 +424,24 @@ func water_access_snapshot(context:Dictionary={})->Dictionary:
 		"bounded":true
 	}
 
-func _calculate_access(deposit: Dictionary, definition: Dictionary, context: Dictionary) -> float:
+func _access_work_inputs()->Dictionary:
+	# Invariant during one local resource pass; never retained across city scopes.
+	return {"logistics":WorldSimulation.state.effective_workers("Logistics")/5.0,"construction":WorldSimulation.state.effective_workers("Construction")/8.0,"knowledge":1.0+WorldSimulation.discovery.effect("route_speed")+WorldSimulation.discovery.effect("mine_safety")*.5}
+
+func _calculate_access(deposit: Dictionary, definition: Dictionary, context: Dictionary,work:Dictionary={}) -> float:
 	if String(deposit.get("resource",""))=="Freshwater":
 		# Carrying from exposed surface water needs assigned hands, not years of
 		# roadbuilding or advanced hydrological practice.
 		return 1.0 if int(WorldSimulation.state.population_allocations.get("Extraction",0))>0 and int(WorldSimulation.state.population_allocations.get("Logistics",0))>0 else 0.0
-	var logistics := WorldSimulation.state.effective_workers("Logistics") / 5.0
-	var construction := WorldSimulation.state.effective_workers("Construction") / 8.0
+	if work.is_empty():work=_access_work_inputs()
+	var logistics:float=work.logistics
+	var construction:float=work.construction
 	var tools := float(context.get("tools", 0.25))
 	var knowledge := 0.0
 	for requirement in definition.processing:
 		if requirement in WorldSimulation.state.known_discoveries:
 			knowledge += 0.3*WorldSimulation.discovery.adoption(String(requirement))
-	var access_knowledge:=1.0+WorldSimulation.discovery.effect("route_speed")+WorldSimulation.discovery.effect("mine_safety")*0.5
+	var access_knowledge:float=work.knowledge
 	deposit.route = minf(1.0, deposit.route + 0.002 * construction * logistics*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*access_knowledge)
 	return deposit.route * 0.45 + tools * 0.25 + knowledge + 0.15+minf(0.18,_practice(resource_name_from(deposit),"survey")*0.04)
 
@@ -580,8 +593,11 @@ func _surface_front_key(resource:String,field:Dictionary)->String:
 	return "surface:%d:%d:%s" % [tile.x,tile.y,resource]
 
 func _process_material_flow(context:Dictionary)->Array[Dictionary]:
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	_ensure_woodland_supply(context)
 	_ensure_surface_material_supplies(context)
+	stamp=trace.mark("flow_fronts",stamp)
 	var events:Array[Dictionary]=[]
 	var material_deposits:Array[Dictionary]=[]
 	var origin:Vector3=context.get("origin",WorldSimulation.state.settlement_founded_at)
@@ -593,10 +609,12 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		if not _is_material_resource(String(deposit.resource)): continue
 		deposit.distance_km=Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
 		material_deposits.append(deposit)
+	stamp=trace.mark("flow_available",stamp)
 	var extractors:=WorldSimulation.state.effective_workers("Extraction")
 	var carriers:=WorldSimulation.state.effective_workers("Logistics")
 	var labor_eff:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var storage_priorities:=_storage_gathering_priorities()
+	stamp=trace.mark("flow_workers_and_storage",stamp)
 	var total_weight:=0.0
 	for deposit in material_deposits:
 		total_weight+=_extraction_priority(deposit,storage_priorities) if float(deposit.remaining)>0.0 else 0.0
@@ -631,6 +649,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		elif bool(catalog[String(deposit.resource)].renewable):
 			deposit.remaining=float(deposit.remaining)+minf(extracted*0.35,2.0)
 	# Deliver shipments whose real travel time has elapsed.
+	stamp=trace.mark("flow_extraction",stamp)
 	var delivered_total:=0.0
 	for deposit in material_deposits:
 		var still_moving:Array=[]
@@ -646,6 +665,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		deposit.shipments=still_moving
 	# Carriers are distributed by waiting bulk and priority.  Distance lowers daily
 	# throughput and separately creates a visible time-in-transit delay.
+	stamp=trace.mark("flow_deliveries",stamp)
 	var haul_weight:=0.0
 	storage_priorities=_storage_gathering_priorities()
 	for deposit in material_deposits:
@@ -666,7 +686,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			deposit.travel_days=maxi(1,ceili(float(deposit.distance_km)/speed_km_day))
 			deposit.shipments.append({"quantity":dispatched,"departure_day":int(WorldSimulation.state.elapsed_days),"arrival_day":int(WorldSimulation.state.elapsed_days)+int(deposit.travel_days)})
 		_update_deposit_bottleneck(deposit,carriers,events)
+	stamp=trace.mark("flow_hauling",stamp)
 	var loss_report:=_apply_material_storage_losses(events)
+	stamp=trace.mark("flow_storage_loss",stamp)
 	var lost_total:=float(loss_report.total)
 	var at_source:=0.0
 	var in_transit:=0.0
@@ -685,6 +707,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	WorldSimulation.state.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"losses_by_resource":loss_report.by_resource,"storage_used_by_type":loss_report.used_by_type,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":WorldSimulation.state.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":workable_occurrences,"active_shipments":active_shipments,"bounded":true}
 	WorldSimulation.state.material_history.append({"day":int(WorldSimulation.state.elapsed_days),"extracted":extracted_total,"delivered":delivered_total,"lost":lost_total,"at_source":at_source,"in_transit":in_transit,"stored":stored_bulk})
 	if WorldSimulation.state.material_history.size()>370: WorldSimulation.state.material_history.pop_front()
+	stamp=trace.mark("flow_summary",stamp)
 	return events
 
 func _ensure_deposit_fields(deposit:Dictionary)->void:

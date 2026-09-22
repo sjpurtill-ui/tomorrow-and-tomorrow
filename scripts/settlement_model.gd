@@ -942,6 +942,9 @@ func settlement_network_snapshot(include_local_state:bool=false)->Dictionary:
 		if not include_local_state:
 			record.erase("local_resources")
 			record.erase("population_state")
+			# The owning city keeps its detailed food/industry report. Atlas callers
+			# read city_resource_snapshot explicitly, not this redundant private copy.
+			record.erase("resource_metrics")
 		records.append(record.duplicate(true))
 	var public_settlements:Array[Dictionary]=[]
 	for index in records.size():

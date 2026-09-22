@@ -1,3 +1,9 @@
+## September 22 — year-71 performance audit and bounded reductions
+
+Base `26bb67e`, worker `codex/first-300-playable`. Small compact town fabric keeps a stable camera-independent detail choice; per-build surface samples are reused exactly; resource access inputs are hoisted within a city pass; public map snapshots omit redundant private metrics; ordinary food forecasts use an equivalent fixed numeric kernel. Optional profiles separate frames, actor days and local phases.
+
+Fourteen focused tests pass, with the forecast check expanded to forty scenarios. Eight-day fixed year-71 replay matches full saved state excluding save timestamp. Final pair: 13.984 → 13.531 CPU seconds for eight days (~3.2% reduction); three days/second remains unachieved. No save-schema change or player restart. See `docs/performance/YEAR71_AUDIT.md` for timing variability, remaining synchronous-day bottleneck, map reconstruction spikes and unverified long-game/GPU behavior. Private fixtures and generated imports are excluded.
+
 ## September 21 — Military logistics and Government navigation
 
 People is labeled Government. Watch & Field is titled Military and its Supply

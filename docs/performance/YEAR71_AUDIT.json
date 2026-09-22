@@ -1,0 +1,270 @@
+{
+  "base_commit": "26bb67e",
+  "fixture_day": 25836.0151642708,
+  "player_population": 408,
+  "player_cities": 5,
+  "opponents": 12,
+  "total_cities": 68,
+  "total_deposits": 3478,
+  "inventory": [
+    {
+      "actor": "civ_01",
+      "chart_records": 96,
+      "cities": 8,
+      "deposits": 371,
+      "known_discoveries": 92,
+      "officials_including_history": 83,
+      "plots_primary": 24,
+      "scout_missions": 0
+    },
+    {
+      "actor": "civ_02",
+      "chart_records": 97,
+      "cities": 2,
+      "deposits": 68,
+      "known_discoveries": 48,
+      "officials_including_history": 27,
+      "plots_primary": 27,
+      "scout_missions": 0
+    },
+    {
+      "actor": "civ_03",
+      "chart_records": 194,
+      "cities": 3,
+      "deposits": 192,
+      "known_discoveries": 56,
+      "officials_including_history": 46,
+      "plots_primary": 27,
+      "scout_missions": 1
+    },
+    {
+      "actor": "civ_04",
+      "chart_records": 105,
+      "cities": 8,
+      "deposits": 342,
+      "known_discoveries": 94,
+      "officials_including_history": 84,
+      "plots_primary": 23,
+      "scout_missions": 0
+    },
+    {
+      "actor": "civ_05",
+      "chart_records": 61,
+      "cities": 8,
+      "deposits": 328,
+      "known_discoveries": 102,
+      "officials_including_history": 69,
+      "plots_primary": 38,
+      "scout_missions": 5
+    },
+    {
+      "actor": "civ_06",
+      "chart_records": 150,
+      "cities": 5,
+      "deposits": 277,
+      "known_discoveries": 78,
+      "officials_including_history": 64,
+      "plots_primary": 23,
+      "scout_missions": 1
+    },
+    {
+      "actor": "civ_07",
+      "chart_records": 152,
+      "cities": 6,
+      "deposits": 283,
+      "known_discoveries": 99,
+      "officials_including_history": 68,
+      "plots_primary": 23,
+      "scout_missions": 0
+    },
+    {
+      "actor": "civ_08",
+      "chart_records": 118,
+      "cities": 1,
+      "deposits": 58,
+      "known_discoveries": 73,
+      "officials_including_history": 27,
+      "plots_primary": 39,
+      "scout_missions": 0
+    },
+    {
+      "actor": "civ_09",
+      "chart_records": 125,
+      "cities": 7,
+      "deposits": 369,
+      "known_discoveries": 93,
+      "officials_including_history": 71,
+      "plots_primary": 23,
+      "scout_missions": 2
+    },
+    {
+      "actor": "civ_10",
+      "chart_records": 158,
+      "cities": 4,
+      "deposits": 202,
+      "known_discoveries": 85,
+      "officials_including_history": 52,
+      "plots_primary": 23,
+      "scout_missions": 0
+    },
+    {
+      "actor": "civ_11",
+      "chart_records": 159,
+      "cities": 5,
+      "deposits": 164,
+      "known_discoveries": 75,
+      "officials_including_history": 65,
+      "plots_primary": 23,
+      "scout_missions": 0
+    },
+    {
+      "actor": "civ_12",
+      "chart_records": 93,
+      "cities": 6,
+      "deposits": 394,
+      "known_discoveries": 74,
+      "officials_including_history": 70,
+      "plots_primary": 22,
+      "scout_missions": 0
+    },
+    {
+      "actor": "player",
+      "chart_records": 87,
+      "cities": 5,
+      "deposits": 430,
+      "known_discoveries": 73,
+      "officials_including_history": 70,
+      "plots_primary": 23,
+      "scout_missions": 1
+    }
+  ],
+  "cpu_seconds_8_days": {
+    "before": 13.984375,
+    "after": 13.53125
+  },
+  "wall_ms_8_days": {
+    "before": [
+      2521.772,
+      1650.462,
+      1561.391,
+      1624.159,
+      1595.107,
+      1574.81,
+      2018.645,
+      1619.353
+    ],
+    "after": [
+      2394.558,
+      1570.43,
+      1591.755,
+      1577.889,
+      1557.58,
+      1540.417,
+      1831.568,
+      1553.339
+    ]
+  },
+  "full_saved_state_mismatches": [],
+  "map_cpu_probe": {
+    "frames_ms": [
+      38.456,
+      6.844,
+      7.462,
+      6.782,
+      7.024,
+      7.336,
+      45.301,
+      5.83,
+      5.546,
+      4.585,
+      5.603,
+      5.883,
+      37.144,
+      4.175,
+      4.187,
+      5.541,
+      5.465,
+      4.34,
+      37.081,
+      4.141,
+      3.669,
+      4.796,
+      4.792,
+      4.795,
+      28.472,
+      4.611,
+      4.795,
+      4.722,
+      4.709,
+      4.164,
+      34.738,
+      3.935,
+      3.655,
+      4.162,
+      4.268,
+      4.198
+    ],
+    "phases": {
+      "frame_camera": {
+        "calls": 36,
+        "microseconds": 576
+      },
+      "frame_hud": {
+        "calls": 36,
+        "microseconds": 580
+      },
+      "frame_map_snapshots": {
+        "calls": 36,
+        "microseconds": 190903
+      },
+      "frame_masks_and_vegetation": {
+        "calls": 36,
+        "microseconds": 17454
+      },
+      "frame_terrain_and_lod": {
+        "calls": 36,
+        "microseconds": 163299
+      }
+    }
+  },
+  "forecast_kernel_40_cases_usec": {
+    "original": 6896,
+    "optimized": 4358
+  },
+  "fabric_builds": {
+    "before": [
+      {
+        "lod": 0,
+        "ms": 456.75,
+        "nodes": 18
+      },
+      {
+        "lod": 1,
+        "ms": 378.356,
+        "nodes": 18
+      },
+      {
+        "lod": 2,
+        "ms": 629.579,
+        "nodes": 12
+      }
+    ],
+    "after": [
+      {
+        "lod": 0,
+        "ms": 574.466,
+        "nodes": 18
+      },
+      {
+        "lod": 1,
+        "ms": 430.579,
+        "nodes": 18
+      },
+      {
+        "lod": 2,
+        "ms": 414.375,
+        "nodes": 12
+      }
+    ]
+  }
+}

@@ -156,26 +156,36 @@ func start_world()->void:
 	refresh_projections()
 	refresh_views()
 
-func advance_rivals(target_day:int)->void:
+func advance_rivals(target_day:int,timings:Dictionary={})->void:
 	if not enabled or advancing or target_day<=last_day:return
 	advancing=true
 	while last_day<target_day:
 		last_day+=1
+		var stamp:=Time.get_ticks_usec() if not timings.is_empty() else 0
 		refresh_views()
+		stamp=preload("res://scripts/civilization_day.gd").record_timing(timings,"rival_views",stamp)
 		var ids:=actors.keys();ids.sort()
 		for id:String in ids:
 			if int(actors[id].last_day)>=last_day:continue
 			scoped(id,func()->void:
+				var detail:Dictionary={} if timings.is_empty() else timings.get_or_add(id,{"enabled":true,"phases":{"enabled":true},"secondary":{"enabled":true}})
+				var step:=Time.get_ticks_usec() if not detail.is_empty() else 0
 				state.elapsed_days=last_day
 				preload("res://scripts/civilization_controller.gd").choose_orders(id)
+				step=preload("res://scripts/civilization_day.gd").record_timing(detail,"controller",step)
 				var origin:Vector2=world.player_world_origin
 				if state.settlement_site_committed:origin=Vector2(state.settlement_founded_at.x,state.settlement_founded_at.z)
 				var daily:=preload("res://scripts/civilization_day.gd").context(origin,state.convoy_traveling)
-				preload("res://scripts/civilization_day.gd").advance(last_day,daily)
+				step=preload("res://scripts/civilization_day.gd").record_timing(detail,"context",step)
+				preload("res://scripts/civilization_day.gd").advance(last_day,daily,Callable(),detail.get("phases",{}),detail.get("secondary",{}))
+				step=preload("res://scripts/civilization_day.gd").record_timing(detail,"daily",step)
 				world.advance_to_day(last_day)
+				preload("res://scripts/civilization_day.gd").record_timing(detail,"world",step)
 			)
 			actors[id].last_day=last_day
+		stamp=preload("res://scripts/civilization_day.gd").record_timing(timings,"rival_days",stamp)
 		refresh_projections()
+		preload("res://scripts/civilization_day.gd").record_timing(timings,"rival_projections",stamp)
 	advancing=false
 
 func refresh_projections()->void:
@@ -478,15 +488,25 @@ func _restore_state(payload:Dictionary)->Dictionary:
 	if enabled and not payload.has("human_projection"):refresh_projections()
 	return {"ok":true}
 
-func advance_day(day:int,daily_context:Dictionary,construction:Callable=Callable())->Dictionary:
-	advance_rivals(day)
-	var result:Dictionary=scoped("player",func()->Dictionary:return preload("res://scripts/civilization_day.gd").advance(day,daily_context,construction))
+func advance_day(day:int,daily_context:Dictionary,construction:Callable=Callable(),timings:Dictionary={})->Dictionary:
+	var clock=preload("res://scripts/civilization_day.gd")
+	var stamp:=Time.get_ticks_usec() if not timings.is_empty() else 0
+	advance_rivals(day,timings)
+	stamp=clock.record_timing(timings,"rivals",stamp)
+	var phases:Dictionary={} if timings.is_empty() else timings.get_or_add("player_phases",{"enabled":true})
+	var result:Dictionary=scoped("player",func()->Dictionary:return clock.advance(day,daily_context,construction,phases))
+	stamp=clock.record_timing(timings,"player_day",stamp)
 	CivilizationSystem.advance_to_day(day)
+	stamp=clock.record_timing(timings,"player_world",stamp)
 	refresh_projections()
+	stamp=clock.record_timing(timings,"projections",stamp)
 	refresh_views()
+	stamp=clock.record_timing(timings,"views",stamp)
 	preload("res://scripts/civilization_joint_contact.gd").advance(day)
+	stamp=clock.record_timing(timings,"joint_contact",stamp)
 	preload("res://scripts/civilization_exchange.gd").settle(day)
 	preload("res://scripts/civilization_exchange.gd").occupation(day)
+	clock.record_timing(timings,"exchange",stamp)
 	return result
 
 func _localize_controllers(civ:Dictionary,observer:String)->void:

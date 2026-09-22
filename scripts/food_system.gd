@@ -55,6 +55,8 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 	return WorldSimulation.settlements.with_local_population(func()->Dictionary: return _process_local_day(context,labor_efficiency,ecology))
 
 func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: float) -> Dictionary:
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	initialize()
 	var initial_stock:=_stock_total()
 	var traveling:=bool(context.get("traveling",WorldSimulation.state.convoy_traveling))
@@ -82,6 +84,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	if not traveling and "habitat_observation_records" in WorldSimulation.state.known_discoveries:
 		var retained:=Botany.retain_seed(WorldSimulation.state.field_botany,float(nutrient_report.get("cultivated_harvest",0)),Botany.site_key(),int(WorldSimulation.state.elapsed_days))
 		WorldSimulation.state.food_stocks["Dry staples"]=maxf(0,float(WorldSimulation.state.food_stocks.get("Dry staples",0))-retained)
+	stamp=trace.mark("food_harvest",stamp)
 	var meal_plan:=preload("res://scripts/food_preparation.gd").plan(logistics,float(demand_breakdown.total),traveling)
 	var grain:=Grain.advance(float(nutrient_report.get("cultivated_harvest",0)),maxf(0,logistics-float(meal_plan.workers)),float(demand_breakdown.total),traveling)
 	WorldSimulation.state.food_stocks["Dry staples"]=maxf(0,float(WorldSimulation.state.food_stocks.get("Dry staples",0))-float(grain.routed))
@@ -92,6 +95,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var canned:Dictionary=preload("res://scripts/canning_preservation.gd").preserve(float(demand_breakdown.total),traveling)
 	for food_type:String in canned:preserved[food_type]=float(preserved.get(food_type,0.0))+float(canned[food_type])
 	var spoilage:=_spoil(traveling)
+	stamp=trace.mark("food_processing",stamp)
 	var demand:=float(demand_breakdown.total)
 	var army_original:=float(demand_breakdown.get("army_field",0.0))
 	var credited:Dictionary=military_campaign.draw_delivered_field_rations(army_original) if military_campaign!=null else {"total":0.0,"by_army":{}}
@@ -131,10 +135,12 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var effective_daily_loss:=maxf(0.01,demand-production_total+spoilage_total)
 	var projected_days:=9999.0 if net>=0.0 else total/effective_daily_loss
 	var food_days:=total/maxf(0.01,demand)
+	stamp=trace.mark("food_consumption",stamp)
 	var sources:=_source_report(harvest,workers,traveling)
 	var milestones:Dictionary={}
 	var forecast_90:=_forecast(90,harvest,demand_breakdown,traveling,provision_delivery_ratio,milestones,nutrient_report)
 	var forecast_30:Dictionary=milestones[30]
+	stamp=trace.mark("food_forecast",stamp)
 	var weather_factor:=_weather_yield_factor(_environment_mix(),WorldSimulation.state.elapsed_days)
 	var working_total:=0.0
 	for role:String in WorldSimulation.state.POPULATION_ROLES:working_total+=maxf(0.0,WorldSimulation.state.effective_workers(role))
@@ -193,6 +199,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	})
 	if WorldSimulation.state.food_history.size()>370: WorldSimulation.state.food_history.pop_front()
 	_sync_total()
+	stamp=trace.mark("food_report",stamp)
 	return result
 
 func _calculate_demand(traveling: bool) -> Dictionary:
@@ -595,37 +602,90 @@ func _forecast(horizon: int,current_harvest: Dictionary,demand_breakdown: Dictio
 	return milestones.get(horizon,{})
 
 func _forecast_ordinary(horizon:int,projected_stocks:Dictionary,harvest:Dictionary,seasons:Dictionary,weather:Dictionary,environment:Dictionary,climate_days:Dictionary,current_day:float,non_climate:float,ration_factor:float,inaccessible_army_rations:float,storage_multiplier:float,preservation:Dictionary,milestones:Dictionary)->Dictionary:
-	# Keep the same daily arithmetic and consumption order, using local numeric
-	# arrays instead of repeatedly resolving string-keyed stock dictionaries.
-	var amounts:Array[float]=[];var yields:Array[float]=[];var season:Array[float]=[];var weather_now:Array[float]=[];var spoil:Array[float]=[];var preserve:Array[float]=[]
-	for food_type:String in FOOD_TYPES:
-		amounts.append(float(projected_stocks.get(food_type,0.0)))
-		spoil.append(float(SPOILAGE[food_type]));preserve.append(float(preservation[food_type]))
-		if food_type!="Preserved food":
-			yields.append(float(harvest.get(food_type,0.0)));season.append(float(seasons[food_type]));weather_now.append(float(weather[food_type]))
+	# Fixed five-food kernel: preserve operation order without dynamic array writes.
+	var a0:float=projected_stocks.get("Fresh plants",0.0)
+	var s0:float=SPOILAGE["Fresh plants"]
+	var p0:float=preservation["Fresh plants"]
+	var y0:float=harvest.get("Fresh plants",0.0)
+	var c0:float=seasons["Fresh plants"]
+	var w0:float=weather["Fresh plants"]
+	var a1:float=projected_stocks.get("Fresh meat",0.0)
+	var s1:float=SPOILAGE["Fresh meat"]
+	var p1:float=preservation["Fresh meat"]
+	var y1:float=harvest.get("Fresh meat",0.0)
+	var c1:float=seasons["Fresh meat"]
+	var w1:float=weather["Fresh meat"]
+	var a2:float=projected_stocks.get("Fish",0.0)
+	var s2:float=SPOILAGE["Fish"]
+	var p2:float=preservation["Fish"]
+	var y2:float=harvest.get("Fish",0.0)
+	var c2:float=seasons["Fish"]
+	var w2:float=weather["Fish"]
+	var a3:float=projected_stocks.get("Dry staples",0.0)
+	var s3:float=SPOILAGE["Dry staples"]
+	var p3:float=preservation["Dry staples"]
+	var y3:float=harvest.get("Dry staples",0.0)
+	var c3:float=seasons["Dry staples"]
+	var w3:float=weather["Dry staples"]
+	var a4:float=projected_stocks.get("Preserved food",0.0)
+	var s4:float=SPOILAGE["Preserved food"]
+	var p4:float=preservation["Preserved food"]
 	var first_shortage:=-1;var total_produced:=0.0;var total_required:=0.0;var total_spoiled:=0.0
 	for offset:int in range(1,horizon+1):
 		var future_day:=current_day+float(offset)
 		var climate:=_forecast_climate(environment,future_day,climate_days)
-		for i:int in 4:
-			var factors:Array=climate[FOOD_TYPES[i]]
-			var produced:=yields[i]*float(factors[0])/season[i]*float(factors[1])/weather_now[i]
-			amounts[i]+=produced;total_produced+=produced
+		var factors:Array
+		var produced:float
+		factors=climate["Fresh plants"]
+		produced=y0*float(factors[0])/c0*float(factors[1])/w0
+		a0+=produced;total_produced+=produced
+		factors=climate["Fresh meat"]
+		produced=y1*float(factors[0])/c1*float(factors[1])/w1
+		a1+=produced;total_produced+=produced
+		factors=climate["Fish"]
+		produced=y2*float(factors[0])/c2*float(factors[1])/w2
+		a2+=produced;total_produced+=produced
+		factors=climate["Dry staples"]
+		produced=y3*float(factors[0])/c3*float(factors[1])/w3
+		a3+=produced;total_produced+=produced
 		var season_wave:=sin(fmod(future_day,365.0)/365.0*TAU)
 		var future_climate:=non_climate*maxf(0.0,-season_wave)*0.06
 		var required:=maxf(0.0,(non_climate+future_climate)*ration_factor-inaccessible_army_rations)
 		total_required+=required
-		for i:int in 5:
-			var loss:=amounts[i]*spoil[i]*storage_multiplier*preserve[i]
-			amounts[i]=maxf(0.0,amounts[i]-loss);total_spoiled+=loss
+		var loss:float
+		loss=a0*s0*storage_multiplier*p0
+		a0=maxf(0.0,a0-loss);total_spoiled+=loss
+		loss=a1*s1*storage_multiplier*p1
+		a1=maxf(0.0,a1-loss);total_spoiled+=loss
+		loss=a2*s2*storage_multiplier*p2
+		a2=maxf(0.0,a2-loss);total_spoiled+=loss
+		loss=a3*s3*storage_multiplier*p3
+		a3=maxf(0.0,a3-loss);total_spoiled+=loss
+		loss=a4*s4*storage_multiplier*p4
+		a4=maxf(0.0,a4-loss);total_spoiled+=loss
 		var remaining:=required
-		for i:int in [2,1,0,3,4]:
-			var eaten:=minf(remaining,amounts[i])
-			amounts[i]-=eaten;remaining-=eaten
-			if remaining<=.001:break
+		var eaten:float
+		eaten=minf(remaining,a2)
+		a2-=eaten;remaining-=eaten
+		if remaining>.001:
+			eaten=minf(remaining,a1)
+			a1-=eaten;remaining-=eaten
+		if remaining>.001:
+			eaten=minf(remaining,a0)
+			a0-=eaten;remaining-=eaten
+		if remaining>.001:
+			eaten=minf(remaining,a3)
+			a3-=eaten;remaining-=eaten
+		if remaining>.001:
+			eaten=minf(remaining,a4)
+			a4-=eaten;remaining-=eaten
 		if required-remaining<required*.98 and first_shortage<0:first_shortage=offset
 		if offset==30 or offset==horizon:
-			for i:int in 5:projected_stocks[FOOD_TYPES[i]]=amounts[i]
+			projected_stocks["Fresh plants"]=a0
+			projected_stocks["Fresh meat"]=a1
+			projected_stocks["Fish"]=a2
+			projected_stocks["Dry staples"]=a3
+			projected_stocks["Preserved food"]=a4
 			milestones[offset]=_forecast_summary(offset,projected_stocks,current_day,non_climate,ration_factor,inaccessible_army_rations,first_shortage,total_produced,total_required,total_spoiled)
 	return milestones.get(horizon,{})
 

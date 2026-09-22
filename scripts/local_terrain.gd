@@ -961,17 +961,22 @@ func _configure_preview_province() -> void:
 	GameState.province_mask = mask
 
 func _process(delta: float) -> void:
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	_advance_physical_army_fronts(delta)
 	_advance_close_terrain_job()
 	_refresh_discovery_mask()
 	_refresh_woodland_visuals()
 	_refresh_seasonal_visuals()
+	stamp=trace.mark("frame_masks_and_vegetation",stamp)
 	_process_camera_navigation(delta)
 	_process_smooth_camera(delta)
 	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0,_camera_in_motion())
+	stamp=trace.mark("frame_camera",stamp)
 	_update_world_streaming()
 	_advance_terrain_patch()
 	_update_scale_lod()
+	stamp=trace.mark("frame_terrain_and_lod",stamp)
 	_update_convoy_marker_animation()
 	# These rebuild report dictionaries, sort marker snapshots and inspect
 	# settlement morphology. Ten updates/second keep them responsive without
@@ -986,12 +991,14 @@ func _process(delta: float) -> void:
 		_refresh_player_scout_route_markers()
 		_refresh_settlement_network()
 		_refresh_settlement_convoy_marker()
+	stamp=trace.mark("frame_map_snapshots",stamp)
 	if travel_council_notice and travel_council_notice.visible and Time.get_ticks_msec()>travel_council_notice_until_msec:
 		travel_council_notice.visible=false
 	if event_report_button and event_report_button.visible and Time.get_ticks_msec()>event_report_visible_until_msec:
 		event_report_button.visible=false
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
+	stamp=trace.mark("frame_hud",stamp)
 	if GameState.founding_focus!="" and PeopleDirection.needs_century_choice():
 		if game_speed>0.0: _set_game_speed(0.0)
 		if not is_instance_valid(PeopleDirection.panel): PeopleDirection.open_direction()
@@ -7622,7 +7629,19 @@ func _secondary_settlement_label_limit()->int:
 		3: return 8
 		_: return 3
 
+func _retain_small_settlement_fabric()->bool:
+	# Small towns fit in one bounded batch; camera motion cannot change them.
+	# Large/dispersed settlements retain the existing culling and LOD budgets.
+	if GameState.settlement_plots.is_empty() or GameState.settlement_plots.size()>96 or GameState.settlement_routes.size()>128:return false
+	for plot:Dictionary in GameState.settlement_plots:
+		if Vector2(plot.get("centroid",Vector2.ZERO)).length_squared()>1.0:return false
+	for route:Dictionary in GameState.settlement_routes:
+		for point:Vector2 in route.get("points",PackedVector2Array()):
+			if point.length_squared()>4.0:return false
+	return true
+
 func _settlement_morphology_lod() -> int:
+	if _retain_small_settlement_fabric():return 1
 	if camera == null:
 		return 1
 	# Camera3D stores `size` as a 32-bit value, so an authored 2.40 can arrive a
@@ -9564,19 +9583,20 @@ func _organic_town_enabled() -> bool:
 func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
 	if plots.is_empty():
 		return
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
 	var organic_plan: Dictionary = {"buildings": [], "replaced": {}}
 	var organic_town := _organic_town_enabled()
 	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
 		# Build against the full saved fabric, never a camera-culled subset.
 		var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
 		if state != organic_town_cached_state:
-			organic_town_cached_plan = EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, func(point: Vector2) -> bool: return _settlement_stage_land_at(point + Vector2(center.x, center.z)))
+			organic_town_cached_plan = EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, samples.land_at)
 			EarlySettlementVisual.remember_layout(organic_town_cached_plan,GameState.settlement_plots)
 			organic_town_cached_state = var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
 		organic_plan = organic_town_cached_plan
-		EarlySettlementVisual.render(organic_plan, center, _close_surface_height_at, parent)
+		EarlySettlementVisual.render(organic_plan, center, samples.height_at, parent)
 	if organic_town:
-		EarlySettlementGround.render(organic_plan, GameState.settlement_plots, GameState.settlement_routes, center, _close_surface_height_at, func(point: Vector2) -> bool: return _settlement_stage_land_at(point + Vector2(center.x, center.z)), parent)
+		EarlySettlementGround.render(organic_plan, GameState.settlement_plots, GameState.settlement_routes, center, samples.height_at, samples.land_at, parent)
 		# Keep genuine cultivated fields and later unsupported forms, but never
 		# paint the household/service parcel polygons over the new working ground.
 		plots = plots.filter(func(plot: Dictionary) -> bool: return not EarlySettlementGround.handles(plot))
