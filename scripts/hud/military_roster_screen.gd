@@ -258,18 +258,23 @@ func _build_body()->void:
 	scroll.set_deferred("scroll_vertical",saved_scroll)
 
 func _hero(rows:Array[Dictionary])->void:
+	var early_paper:=service=="army" and Art.Early.active()
 	var hero:=PanelContainer.new();hero.custom_minimum_size.y=76;hero.clip_contents=true
 	hero.add_theme_stylebox_override("panel",_skin(Color("17272d"),Color("354951"),0));body.add_child(hero)
+	if early_paper:
+		hero.custom_minimum_size.y=128
+		hero.add_theme_stylebox_override("panel",_skin(Color("eee8da"),Color("b4a78f"),0))
 	var image:=TextureRect.new();image.texture=Art.artwork(service);image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE;hero.add_child(image)
+	if early_paper:image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	var margin:=MarginContainer.new()
 	for edge:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,12)
 	hero.add_child(margin)
 	var summary:=HBoxContainer.new();summary.add_theme_constant_override("separation",22);margin.add_child(summary)
 	for definition:Array in [["formations",{"army":"FORCE GROUPS","navy":"TASK FORCES","air":"AIR WINGS"}[service]],["strength",{"army":"LISTED SOLDIERS","navy":"VESSELS","air":"AIRCRAFT"}[service]],["attention","NEED ATTENTION"]]:
 		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);summary.add_child(box)
-		hero_values[definition[0]]=_label(box,"0",24)
-		_label(box,definition[1],10,Color("c3ced1"))
+		hero_values[definition[0]]=_label(box,"0",24,Color("292d29") if early_paper else TEXT)
+		_label(box,definition[1],10,Color("4d574e") if early_paper else Color("c3ced1"))
 	var space:=Control.new();space.size_flags_horizontal=Control.SIZE_EXPAND_FILL;summary.add_child(space)
 	policy_shortcut=_button(summary,"",func():training_view=true;_build_body());policy_shortcut.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	_update_hero(rows)
@@ -281,6 +286,7 @@ func _update_hero(rows:Array[Dictionary])->void:
 	hero_values.formations.text=str(rows.size());hero_values.strength.text=str(strength)+( "+" if unknown else "")
 	hero_values.strength.tooltip_text="Includes dated field reports; unreported strength is not guessed."
 	hero_values.attention.text=str(attention);hero_values.attention.add_theme_color_override("font_color",WARNING if attention else GOOD)
+	if service=="army" and Art.Early.active():hero_values.attention.add_theme_color_override("font_color",Color("874522") if attention else Color("3f6041"))
 	policy_shortcut.text="Training · %s ›" % MilitaryCampaign.training_staff.policy(service).label
 
 func _training_level(drill:float)->String:
@@ -317,6 +323,7 @@ func _unit_card(data:Dictionary)->void:
 	var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",_skin(Color("182b32"),Art.COLORS[service] if selected else Color("2b444d"),7));body.add_child(card)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 	var art:=PanelContainer.new();art.custom_minimum_size=Vector2(68,82);art.clip_contents=true
+	if Art.Early.active() and Art.EARLY_UNITS.has(String(data.get("type_id",""))) and not bool(data.get("unknown",false)):art.custom_minimum_size=Vector2(112,84)
 	art.add_theme_stylebox_override("panel",_skin(Color("0e1d25"),Color("344c55"),0));row.add_child(art)
 	var portrait:Control=portraits.portrait(String(data.get("type_id","")),service,bool(data.get("unknown",false)));art.add_child(portrait)
 	var names:=VBoxContainer.new();names.custom_minimum_size.x=118;names.size_flags_horizontal=Control.SIZE_EXPAND_FILL

@@ -2,6 +2,8 @@ extends Node
 ## Painted UI artwork only. Roster portraits never render the world unit meshes.
 const COLORS:={"army":Color("d9b772"),"navy":Color("76bbce"),"air":Color("a9bbec")}
 const Painting=preload("res://scripts/hud/subject_painting.gd")
+const Early=preload("res://scripts/hud/early_civ_art.gd")
+const EARLY_UNITS:={"levy":"res://assets/ui/military/paper/levy-v1.png","spearman":"res://assets/ui/military/paper/spearman-v1.png","archer":"res://assets/ui/military/paper/archer-v1.png"}
 static var symbols:Dictionary={}
 const ART_MANIFEST="res://assets/ui/military/subject-art-manifest.json"
 static var assignments:Dictionary={}
@@ -10,6 +12,7 @@ static func manifest()->Dictionary:
 	return assignments
 
 static func artwork(service:String)->Texture2D:
+	if service=="army" and Early.active():return Early.source(EARLY_UNITS.levy)
 	return load("res://assets/ui/military/%s-roster-v1.png" % service)
 
 static func symbol(kind:String,color:Color,pixels:int=64)->Texture2D:
@@ -38,6 +41,7 @@ static func symbol(kind:String,color:Color,pixels:int=64)->Texture2D:
 	symbols[cache_key]=ImageTexture.create_from_image(image);return symbols[cache_key]
 
 static func illustration_path(type_id:String)->String:
+	if Early.active() and EARLY_UNITS.has(type_id):return EARLY_UNITS[type_id]
 	return String(manifest().get(type_id,{}).get("path",""))
 
 static func role_symbol(type_id:String,service:String)->String:
@@ -62,6 +66,7 @@ func portrait(type_id:String,service:String,unknown:bool=false)->Control:
 	var focal:Array=assignment.get("focus",[.5,.5])
 	image.focus=Vector2(float(focal[0]),float(focal[1]))
 	image.contain=bool(assignment.get("contain",false))
+	if Early.active() and EARLY_UNITS.has(type_id):image.contain=true
 	if not path.is_empty() and ResourceLoader.exists(path):
 		image.texture=load(path)
 		image.tooltip_text="Painted role illustration. Actual personnel, equipment and training are listed alongside."

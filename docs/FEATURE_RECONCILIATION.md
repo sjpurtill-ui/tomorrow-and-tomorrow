@@ -2331,3 +2331,9 @@ Connected paper artwork to settlement buildings, materials, workshop products, g
 
 Validation: 9 focused tests passed, zero errors/failures/orphans (report 201). Private GPU capture loaded the year-71 fixture and rendered the actual settlement/government/culture screens at 1500×1000 and 1024×700, with no script errors; the player's running game and ordinary saves were untouched. The capture exposed duplicate cabinet assignments, subsequently corrected with saved cast allocation and a regression test. Four visual families and four principal figures per family are initial coverage, not unique art for all civilizations or officials. See assets/ui/early-paper/README.md for bindings and provenance. Appearance fields are additive save data; gameplay balance and simulation pacing are unchanged.
 
+## September 22 — early military action scenes
+
+Levy, spearman and archer now resolve to separate paper-style action scenes before year 300. Their frames show the whole scene; the army summary uses legible dark text over paper. Unknown reports still show no unit painting and later-era mappings are retained. Actual counts, equipment, training, recruitment and supply logic are unchanged.
+
+Validation in canonical checkout: 14 focused tests passed (report 756), with no errors/failures/orphans. Private GPU military probe passed at normal and 1024×640 layouts; inspected the contained figures and summary contrast. Original images and exact prompts are retained. This is three unit types, not completion of the full military catalogue.
+

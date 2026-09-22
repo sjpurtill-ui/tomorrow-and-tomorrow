@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "images": [
+    {
+      "file": "levy-v1.png",
+      "source": "exec-8d814d82-d0a7-4ebe-8918-c0f7e004f719.png",
+      "prompt": "Create a game illustration of an early village LEVY, a genuinely new scene. The reference is STYLE ONLY: flat dry gouache on ivory paper, charcoal silhouettes, restrained ochre, rough quiet edges. Do not copy its people, poses or composition. Landscape 4:3. Three lean ordinary adult villagers at a rough field-edge assembly: the main adult in side view is tightening a cloth binding around a simple wooden spear haft, another walks in carrying a plain wooden club, a third listens with folded arms. Practical patched undyed short wrap garments with an invented asymmetric fastening; no recognizable named earthly ethnic costume, no uniform armor, no shields, no bronze spectacle. People 7.5 heads tall with normal long legs, varied faces and hair, unsmiling practical attention, never a beauty advertisement. The scene explains civilians mobilizing from work, not a glamorous professional army. Full bodies contained inside central 75% of frame, hands and objects correct. Strong clear group silhouette readable when reduced to a small game roster thumbnail. Modest background earth and cut crop stalks, opaque ivory paper. No lettering, borders, collage, caption, badge or invented UI. Original invented human culture, not fantasy beings. Keep focal activity near center at 50% width and 40% height. This is to replace the actual game's levy unit illustration."
+    },
+    {
+      "file": "spearman-v1.png",
+      "source": "exec-2c43a3e4-2404-40fb-8795-58ac72b58ca4.png",
+      "prompt": "Game unit illustration: SPEARMEN at the earliest village-to-town stage. New independently composed scene, no reuse of reference characters. Use the supplied image only for its spare flat gouache, charcoal-and-ochre palette and opaque ivory paper texture. Landscape 4:3. An oblique view along three adults practicing a simple staggered spear rank on uneven dry ground. Foreground older lean man has cropped salt-gray hair and an angular broken-nose face, plain worn gray knee-length wrap, braced normal long legs, both hands correctly holding ONE wooden spear with a small stone point. A second wiry adult behind him is adjusting foot placement while listening, third farther away holds a spear upright. A small simple bark shield lies on the ground, no metal armor, no helmets, no classical Greek/Roman equipment, no fantasy embellishment. Human adult anatomy about 7.5 head-heights with long legs and small heads; no short-legged toy proportions. They are awkwardly learning discipline, not heroic posing, and they must not resemble the levy cast. The foreground person is shown in three-quarter back view turning toward a colleague so this is a scene of action, not a portrait. Warm earth, charcoal gray and dusty ochre with open ivory paper around edges. Strong legible shapes, little background detail. All bodies and spear tips fit within frame. No text, no UI, no badges, no panel borders. Primary activity centered. Appropriate for an actual spear formation card."
+    }
+  ]
+}
