@@ -38,7 +38,7 @@ static func possibilities(city:Dictionary)->Array:
 			if r.id==d.id:exists=true
 		if not exists:result.append(d)
 	return result
-static func start(city_id:String,id:String)->Dictionary:
+static func start(city_id:String,id:String,site_height:Callable=Callable(),site_land:Callable=Callable())->Dictionary:
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if city.is_empty() or String(city.get("occupied_by","")) not in ["","player"]:return {"error":"No controlled settlement selected."}
 	return WorldSimulation.settlements.with_city_resources(city_id,func()->Dictionary:
@@ -49,16 +49,24 @@ static func start(city_id:String,id:String)->Dictionary:
 			for d:Dictionary in possibilities(city):
 				if d.id==id:eligible=true
 			if not eligible:return {"error":"This opportunity is not available here."}
+			var height:Callable=site_height if site_height.is_valid() else PlanetEnvironment.world_height_at
+			var land:Callable=site_land if site_land.is_valid() else PlanetEnvironment.is_land
+			var site:=preload("res://scripts/undertaking_sites.gd").choose(city,WorldSimulation.state.settlement_plots,WorldSimulation.state.world_seed,height,land)
+			if site.is_empty():return {"error":"No clear, gentle land is available near this settlement for a landmark."}
 			if not city.has("undertakings"):city.undertakings=[]
 			city.undertakings.append({"id":id,"status":"building","policy":"careful","progress":0.0,"quality":0.0,"condition":1.0,"strain":0,"stalled_days":0,"operating_days":0,"last_day":int(WorldSimulation.state.elapsed_days),"started":int(WorldSimulation.state.elapsed_days),"reason":"Foundations authorized; staff organize the work.","legacy":"An ambition, not yet an achievement"})
+			city.undertakings[-1].site=site
+			record_event(city.undertakings[-1],int(WorldSimulation.state.elapsed_days),"Foundations authorized")
 			WorldSimulation.state.settlement_network_revision+=1
-			return {"ok":true}))
+			return {"ok":true,"message":"A clear site is reserved. Local crews will begin the undertaking."}))
 static func direct(city_id:String,id:String,order:String)->void:
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if String(city.get("occupied_by","")) not in ["","player"]:return
 	for r:Dictionary in city.get("undertakings",[]):
 		if r.id!=id or r.status not in ["building","stalled"]:continue
-		if order=="abandon":r.status="abandoned";r.reason="Support withdrawn; unfinished remains endure.";r.legacy="An unfinished promise"
+		if order=="abandon":
+			r.status="abandoned";r.reason="Support withdrawn; unfinished remains endure.";r.legacy="An unfinished promise"
+			record_event(r,int(WorldSimulation.state.elapsed_days),"Support withdrawn")
 		elif order in ["careful","press"]:r.policy=order
 	WorldSimulation.state.settlement_network_revision+=1
 static func advance_all(day:int)->void:
@@ -73,6 +81,7 @@ static func advance_record(state:Node,r:Dictionary,day:int)->void:
 	if day<=int(r.last_day):return
 	# The calendar calls once per day. Loading never awards skipped work.
 	r.last_day=day
+	r.last_work=0.0
 	var d:=Catalog.get_definition(String(r.id))
 	var m:Dictionary=state.simulation_metrics
 	var need:=minf(float(m.get("food_intake_ratio",1)),float(state.water_metrics.get("intake_ratio",1)))
@@ -86,7 +95,9 @@ static func advance_record(state:Node,r:Dictionary,day:int)->void:
 			r.condition=minf(1,float(r.condition)+.0002);r.operating_days+=1
 		else:r.condition=maxf(0,float(r.condition)-.0005)
 		r.reason="Staff maintain the site." if maintained else "Maintenance faltering: labor, provisions or materials are missing."
-		if r.condition<=.15:r.status="ruined";r.legacy="A lost achievement"
+		if r.condition<=.15:
+			r.status="ruined";r.legacy="A lost achievement"
+			record_event(r,day,"Lost to neglect")
 		elif int(r.operating_days)>=3650:r.legacy="Enduring achievement" if int(r.strain)<180 else "Enduring, but remembered for its human cost"
 		return
 	var allocated:=float(state.population_allocations.get("Construction",0))
@@ -108,16 +119,20 @@ static func advance_record(state:Node,r:Dictionary,day:int)->void:
 	r.reason=reason
 	if work<=.00001:
 		r.status="stalled";r.stalled_days+=1
-		if int(r.stalled_days)>=365*5:r.status="abandoned";r.legacy="A promise the settlement could not sustain"
+		if int(r.stalled_days)>=365*5:
+			r.status="abandoned";r.legacy="A promise the settlement could not sustain"
+			record_event(r,day,"Abandoned after five years without progress")
 		return
 	r.status="building";r.stalled_days=0
 	for material:String in d.cost:state.resource_stockpiles[material]-=float(d.cost[material])*work/float(d.work)
 	r.quality+=work*quality;r.progress+=work
+	r.last_work=work
 	if float(r.progress)+.00001>=float(d.work):
 		r.condition=clampf(float(r.quality)/float(d.work),.1,1)
 		r.status="functioning" if r.condition>=.5 else "ruined"
 		r.legacy="Useful, not yet renowned" if r.status=="functioning" else "An embarrassing failure: the finished work could not serve its purpose"
 		if r.status=="functioning" and int(r.strain)>=180:r.legacy="An achievement built through hardship"
+		record_event(r,day,"Completed and functioning" if r.status=="functioning" else "Completed, but failed to function")
 		state.settlement_network_revision+=1
 static func valid(cities:Array)->bool:
 	for city in cities:
@@ -127,6 +142,11 @@ static func valid(cities:Array)->bool:
 			if not r is Dictionary or not r.get("id","") is String:return false
 			if Catalog.get_definition(r.id).is_empty() or r.id in seen:return false
 			if r.has("custom_name") and (not r.custom_name is String or not valid_name(r.custom_name)):return false
+			if r.has("site") and not preload("res://scripts/undertaking_sites.gd").valid(r.site):return false
+			if r.has("last_work") and (not (r.last_work is float or r.last_work is int) or not is_finite(float(r.last_work)) or float(r.last_work)<0):return false
+			if not r.get("events",[]) is Array or r.get("events",[]).size()>12:return false
+			for event in r.get("events",[]):
+				if not event is Dictionary or not event.get("day") is int or event.day<0 or not event.get("text") is String:return false
 			seen.append(r.id)
 			var definition:=Catalog.get_definition(r.id)
 			if r.get("status","") not in ["building","stalled","functioning","abandoned","ruined"] or r.get("policy","") not in ["careful","press"]:return false
@@ -141,6 +161,11 @@ static func valid(cities:Array)->bool:
 
 static func display_name(record:Dictionary)->String:
 	return String(record.get("custom_name",Catalog.get_definition(String(record.id)).get("title","Undertaking")))
+
+static func record_event(record:Dictionary,day:int,message:String)->void:
+	if not record.has("events"):record.events=[]
+	record.events.push_front({"day":day,"text":message})
+	if record.events.size()>12:record.events.resize(12)
 static func rename(city_id:String,id:String,title:String)->Dictionary:
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if city.is_empty() or String(city.get("occupied_by","")) not in ["","player"]:return {"error":"Choose a settlement you control."}

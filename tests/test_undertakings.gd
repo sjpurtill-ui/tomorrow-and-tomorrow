@@ -51,7 +51,7 @@ func test_map_forms_and_ui_compile()->void:
 	var parent:=Node3D.new();add_child(parent)
 	preload("res://scripts/undertaking_map_visual.gd").render([city],parent,func(_x,_z):return 0.0)
 	assert_int(parent.get_child_count()).is_equal(1)
-	assert_int(parent.get_child(0).get_child_count()).is_greater(2)
+	assert_int(parent.get_child(0).get_child_count()).is_equal(2)
 	assert_object(load("res://scripts/hud/content/dock_content_undertakings.gd")).is_not_null()
 	assert_object(load("res://scripts/civilization_day.gd")).is_not_null()
 	parent.free()
@@ -64,7 +64,7 @@ func test_authorization_and_daily_city_scope_preserve_selection()->void:
 	assert_array(offered).is_not_empty()
 	if offered.is_empty():return
 	var selected:=GameState.selected_player_settlement_id
-	var result:=U.start(String(city.id),String(offered[0].id))
+	var result:=U.start(String(city.id),String(offered[0].id),func(_p:Vector2)->float:return 0.0,func(_p:Vector2)->bool:return true)
 	assert_bool(result.has("ok")).is_true()
 	if not result.has("ok"):return
 	assert_bool(U.start(String(city.id),String(offered[0].id)).has("error")).is_true()

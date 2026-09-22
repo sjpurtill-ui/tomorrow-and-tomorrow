@@ -236,6 +236,8 @@ var settlement_border_root:Node3D
 var settlement_network_marker_root:Node3D
 var settlement_network_fabric_root:Node3D
 var rendered_settlement_network_signature:=""
+var undertaking_visual_root:Node3D
+var undertaking_visual_signature:String=""
 var sampled_settlement_territory_signature:=""
 var settlement_convoy_marker:Node3D
 var settlement_convoy_icon:Node3D
@@ -4298,7 +4300,17 @@ func _refresh_settlement_footprint(force := false) -> void:
 	# Resource accessibility is logistical data, not evidence of a built road.
 	# Recorded settlement routes above own the visible path network.
 
+func _refresh_undertaking_visuals(force:bool=false)->void:
+	var visual=preload("res://scripts/undertaking_map_visual.gd")
+	var signature:String=visual.signature(GameState.player_settlements)
+	if not force and is_instance_valid(undertaking_visual_root) and signature==undertaking_visual_signature:return
+	undertaking_visual_signature=signature
+	if is_instance_valid(undertaking_visual_root):undertaking_visual_root.queue_free()
+	undertaking_visual_root=Node3D.new();undertaking_visual_root.name="GreatUndertakings";add_child(undertaking_visual_root)
+	visual.render(GameState.player_settlements,undertaking_visual_root,_close_surface_height_at)
+
 func _refresh_settlement_network(force:=false)->void:
+	_refresh_undertaking_visuals(force)
 	if "Hearth Circle" not in GameState.settlement_completed:
 		if settlement_border_root: settlement_border_root.visible=false
 		if settlement_network_marker_root: settlement_network_marker_root.visible=false
@@ -4332,7 +4344,6 @@ func _refresh_settlement_network(force:=false)->void:
 	add_child(settlement_border_root)
 	settlement_network_marker_root=Node3D.new()
 	settlement_network_marker_root.name="SettlementNetworkMarkers"
-	preload("res://scripts/undertaking_map_visual.gd").render(GameState.player_settlements,settlement_network_marker_root,_close_surface_height_at)
 	add_child(settlement_network_marker_root)
 	if not is_instance_valid(settlement_network_fabric_root):
 		settlement_network_fabric_root=Node3D.new()
