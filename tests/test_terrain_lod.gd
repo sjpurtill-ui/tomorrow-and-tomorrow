@@ -59,11 +59,11 @@ func test_continental_preview_and_cache_have_explicit_memory_and_density_limits(
 func test_regional_preview_improves_before_final_detail_is_ready()->void:
 	var terrain:=fixture();var point:=Vector2(200,30);var span:=LOD.bucket(290)
 	var resolutions:Array[int]=[]
-	for stage in 3:
+	for stage in 2:
 		terrain._rebuild_regional_terrain_patch(point,span)
 		finish_job(terrain);resolutions.append(terrain.regional_patch_resolution)
-		assert_int(terrain.terrain_patch_cache.size()).is_equal(1 if stage==2 else 0)
-	assert_array(resolutions).is_equal([33,129,385])
+		assert_int(terrain.terrain_patch_cache.size()).is_equal(1 if stage==1 else 0)
+	assert_array(resolutions).is_equal([129,385])
 func test_continental_request_refines_and_cached_return_does_not_rebuild()->void:
 	var terrain:=fixture();var camera:=Camera3D.new();terrain.add_child(camera);terrain.camera=camera;camera.size=2000
 	terrain._update_world_streaming()
@@ -136,3 +136,66 @@ func test_continental_coast_matches_physical_land_more_closely()->void:
 	print("LOD_COAST samples=",shore_samples," wrong_old=",old_wrong," wrong_new=",new_wrong)
 	assert_int(shore_samples).is_greater(100)
 	assert_int(new_wrong).is_less(int(old_wrong*.70))
+
+func test_zoom_does_not_replace_finished_ground_or_water_with_preview()->void:
+	var terrain:=fixture()
+	var span:=LOD.bucket(10)
+	for stage in 2:
+		terrain._rebuild_regional_terrain_patch(Vector2.ZERO,span)
+		finish_job(terrain)
+	var ground:MeshInstance3D=terrain.regional_terrain_patch
+	var water_heights:Texture2D=terrain.river_terrain_height_texture
+	terrain._rebuild_regional_terrain_patch(Vector2.ZERO,span*1.5)
+	assert_int(terrain.terrain_patch_job.resolution).is_equal(LOD.resolution_for(span*1.5))
+	terrain._advance_terrain_patch()
+	assert_object(terrain.regional_terrain_patch).is_same(ground)
+	assert_object(terrain.river_terrain_height_texture).is_same(water_heights)
+	finish_job(terrain)
+	assert_int(terrain.regional_patch_resolution).is_equal(LOD.resolution_for(span*1.5))
+	assert_int(terrain.rendered_regional_heights.size()).is_equal(terrain.regional_patch_resolution*terrain.regional_patch_resolution)
+
+func test_small_anchor_drifts_do_not_cancel_inflight_patch()->void:
+	var terrain:=fixture()
+	var span:=LOD.bucket(20)
+	terrain._rebuild_regional_terrain_patch(Vector2.ZERO,span)
+	var job:RefCounted=terrain.terrain_patch_job
+	for index in 120:
+		terrain._rebuild_regional_terrain_patch(Vector2(span*.07*float(index)/119,0),span)
+	assert_object(terrain.terrain_patch_job).is_same(job)
+	assert_int(terrain.terrain_patch_cancellations).is_equal(0)
+	terrain._rebuild_regional_terrain_patch(Vector2(span,0),span)
+	assert_int(terrain.terrain_patch_cancellations).is_equal(1)
+
+func test_animated_zoom_requests_one_destination_span()->void:
+	var terrain:=fixture()
+	var camera:=Camera3D.new()
+	terrain.add_child(camera);terrain.camera=camera
+	terrain.zoom_target_size=20
+	camera.size=4
+	terrain._update_world_streaming()
+	var job:RefCounted=terrain.terrain_patch_job
+	for index in 60:
+		camera.size=4+16*float(index)/59
+		terrain._update_world_streaming()
+	assert_object(terrain.terrain_patch_job).is_same(job)
+	assert_int(terrain.terrain_patch_cancellations).is_equal(0)
+
+func test_close_patch_waits_until_zoomed_view_fits_inside_it()->void:
+	var terrain:=fixture()
+	var wide:=LOD.bucket(300)
+	for stage in 2:
+		terrain._rebuild_regional_terrain_patch(Vector2.ZERO,wide)
+		finish_job(terrain)
+	var original:MeshInstance3D=terrain.regional_terrain_patch
+	var camera:=Camera3D.new();terrain.add_child(camera);terrain.camera=camera
+	camera.projection=Camera3D.PROJECTION_ORTHOGONAL;camera.size=100
+	camera.position=Vector3(0,200,0);camera.look_at(Vector3.ZERO,Vector3.FORWARD)
+	terrain.zoom_target_size=2
+	var close_span:=LOD.bucket(8)
+	terrain._rebuild_regional_terrain_patch(Vector2.ZERO,close_span)
+	finish_job(terrain)
+	assert_object(terrain.regional_terrain_patch).is_same(original)
+	camera.size=2
+	terrain._rebuild_regional_terrain_patch(Vector2.ZERO,close_span)
+	assert_float(terrain.regional_patch_span).is_equal(close_span)
+	assert_object(terrain.terrain_patch_job).is_null()

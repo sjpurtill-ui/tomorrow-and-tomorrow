@@ -36,17 +36,17 @@ static func resolution_for(span:float)->int:
 
 static func preview_resolution(span:float)->int:
 	# A continental preview must never be coarser than the ~83 km global mesh.
-	# Close previews stay cheap; final meshes are installed atomically afterward.
-	var cells:=32
+	# A 129 grid avoids the extreme shoreline aliasing of the former 33 grid;
+	# established detail is kept during subsequent builds, rather than downgraded.
+	var cells:=128
 	while span/float(cells)>80.0 and cells<MAX_RESOLUTION-1:cells*=2
 	return mini(cells+1,resolution_for(span))
 
 static func next_resolution(span:float,installed:int=0)->int:
 	var first:=preview_resolution(span)
 	if installed<first:return first
-	# An intermediate grid makes new regional views useful promptly while the
-	# final mesh continues in small slices. Never downgrade an installed grid.
-	if installed<129:return mini(129,resolution_for(span))
+	# One coverage pass, then final detail. A 33-grid followed by 129 and final
+	# detail made the same lake disappear and reappear twice during navigation.
 	return resolution_for(span)
 
 static func retain(cache:Array[Dictionary],completed:Dictionary)->void:

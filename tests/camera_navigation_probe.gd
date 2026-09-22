@@ -51,7 +51,7 @@ func _ready()->void:
 	var obsolete:RefCounted=terrain.terrain_patch_job
 	terrain._rebuild_regional_terrain_patch(Vector2(terrain.camera_target.x+30,terrain.camera_target.z),40.0)
 	assert(terrain.terrain_patch_job!=obsolete,"Obsolete camera work must be canceled")
-	assert(terrain.terrain_patch_job.resolution==33,"Uncached views must receive coverage before fine detail")
+	assert(terrain.terrain_patch_job.resolution>=129,"Coverage must not regress to the shoreline-aliasing 33 grid")
 	terrain._update_scale_lod()
 	assert(terrain.province_terrain_mesh.visible,"World coverage must remain outside the streamed patch")
 	assert(terrain.terrain_patch_cache.size()<=4,"Finished terrain cache must remain bounded")

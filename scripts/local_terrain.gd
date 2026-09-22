@@ -961,7 +961,6 @@ func _configure_preview_province() -> void:
 	GameState.province_mask = mask
 
 func _process(delta: float) -> void:
-	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0)
 	_advance_physical_army_fronts(delta)
 	_advance_close_terrain_job()
 	_refresh_discovery_mask()
@@ -969,6 +968,7 @@ func _process(delta: float) -> void:
 	_refresh_seasonal_visuals()
 	_process_camera_navigation(delta)
 	_process_smooth_camera(delta)
+	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0,_camera_in_motion())
 	_update_world_streaming()
 	_advance_terrain_patch()
 	_update_scale_lod()
@@ -1003,7 +1003,7 @@ func _process(delta: float) -> void:
 		return
 	if game_speed <= 0.0:
 		return
-	advance_world_time(calendar_days)
+	if calendar_days>0.0:advance_world_time(calendar_days)
 
 func advance_world_time(days_advanced:float)->void:
 	# Stop at the calendar boundary; never simulate part of an unchosen century.
@@ -1749,6 +1749,13 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	span=TERRAIN_LOD.bucket(span)
 	var snapped:=TERRAIN_LOD.center_for(center,span)
 	var resolution:=TERRAIN_LOD.resolution_for(span)
+	# Hold a requested center inside its overscan margin. Pointer-anchored zoom
+	# moves the target every frame; snapping alone still repeatedly cancelled work.
+	if terrain_patch_job!=null and is_equal_approx(terrain_patch_job.span,span):
+		var drift:Vector2=(center-terrain_patch_job.center).abs()
+		if maxf(drift.x,drift.y)<=span/12.0:return
+	if regional_terrain_patch and is_equal_approx(regional_patch_span,span) and _regional_patch_covers_camera():
+		snapped=regional_patch_center
 	if terrain_patch_job!=null:
 		if terrain_patch_job.center==snapped and is_equal_approx(terrain_patch_job.span,span): return
 		# Latest view wins. Do not finish/upload a mesh for a camera already gone.
@@ -1763,19 +1770,19 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	# height/color authorities and is replaced by the final full-density mesh.
 	var same_patch:=regional_terrain_patch!=null and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span)
 	var next_resolution:=TERRAIN_LOD.next_resolution(span,regional_patch_resolution if same_patch else 0)
+	# Never replace established detailed ground/water with a coarse preview.
+	# Retain the old pair until the next full-detail pair is ready to swap.
+	if regional_terrain_patch!=null and regional_patch_resolution==TERRAIN_LOD.resolution_for(regional_patch_span):
+		next_resolution=resolution
 	var prior:=_overlapping_terrain_samples(snapped,span,next_resolution)
-	# A small pan within completed coverage must not replace detailed ground with
-	# a coarse preview. Keep that mesh visible while reusing its overlap to build
-	# the next full-detail patch; large moves still get the rapid coverage pass.
-	if not same_patch and regional_patch_resolution==resolution and regional_patch_span==span and _regional_patch_covers_camera():
-		var fine_prior:=_overlapping_terrain_samples(snapped,span,resolution)
-		if not fine_prior.is_empty() and int(fine_prior.resolution)==resolution:
-			var shift:Vector2=(snapped-Vector2(fine_prior.center)).abs()
-			if maxf(shift.x,shift.y)<=span*0.125:next_resolution=resolution;prior=fine_prior
 	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at,_terrain_seasonality_at,prior)
 
 func _regional_patch_covers_camera()->bool:
 	if camera==null or regional_terrain_patch==null:return false
+	return _patch_covers_camera(regional_patch_center,regional_patch_span)
+
+func _patch_covers_camera(center:Vector2,span:float)->bool:
+	if camera==null:return false
 	var size:=get_viewport().get_visible_rect().size
 	for corner:Vector2 in [Vector2.ZERO,Vector2(size.x,0),size,Vector2(0,size.y)]:
 		var direction:=camera.project_ray_normal(corner)
@@ -1783,7 +1790,7 @@ func _regional_patch_covers_camera()->bool:
 		var origin:=camera.project_ray_origin(corner)
 		var hit:=origin+direction*((camera_target.y-origin.y)/direction.y)
 		# Conservative margin for relief projecting beyond the target-height plane.
-		if absf(hit.x-regional_patch_center.x)>regional_patch_span*0.46 or absf(hit.z-regional_patch_center.y)>regional_patch_span*0.46:return false
+		if absf(hit.x-center.x)>span*0.46 or absf(hit.z-center.y)>span*0.46:return false
 	return true
 
 func _overlapping_terrain_samples(center:Vector2,span:float,resolution:int)->Dictionary:
@@ -1821,6 +1828,9 @@ func _advance_terrain_patch()->void:
 	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
 
 func _install_regional_patch(completed:Dictionary)->void:
+	# A cached close view can be ready before the zoom reaches it. Keep the
+	# wider terrain until the close patch covers the frame, avoiding a detail box.
+	if camera!=null and zoom_target_size>0.0 and regional_terrain_patch!=null and float(completed.span)<regional_patch_span and not _patch_covers_camera(completed.center,float(completed.span)):return
 	terrain_patch_sample_source=completed if completed.has("samples") else {}
 	var replacement:=MeshInstance3D.new()
 	replacement.name="RegionalTerrainLOD"
@@ -3661,7 +3671,10 @@ func _update_world_streaming() -> void:
 	# than camera.size alone suggests. Expand the streamed patch with tilt so the
 	# high-resolution terrain never ends inside the visible frame.
 	var view_size:=get_viewport().get_visible_rect().size
-	var desired_span:=TERRAIN_LOD.view_span(camera.size,view_size.x/maxf(1.0,view_size.y),camera_pitch)
+	# Build for the zoom destination, not every intermediate animation size.
+	# While zooming inward the existing wider terrain supplies coverage.
+	var requested_size:=zoom_target_size if zoom_target_size>0.0 else camera.size
+	var desired_span:=TERRAIN_LOD.view_span(requested_size,view_size.x/maxf(1.0,view_size.y),camera_pitch)
 	_rebuild_regional_terrain_patch(Vector2(camera_target.x,camera_target.z),desired_span)
 
 func _process_camera_navigation(delta: float) -> void:

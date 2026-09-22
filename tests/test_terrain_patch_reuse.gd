@@ -103,7 +103,7 @@ func test_live_refinement_prefers_overlapping_fine_cache_and_rejects_other_seed(
 	GameState.world_seed=271828
 	assert_dict(terrain._overlapping_terrain_samples(Vector2.ZERO,span,385)).is_empty()
 
-func test_covered_pan_keeps_fine_mesh_until_fine_replacement()->void:
+func test_covered_pan_keeps_fine_mesh_without_rebuilding()->void:
 	GameState.reset_for_new_world(873421)
 	var terrain:CheapTerrain=auto_free(CheapTerrain.new());add_child(terrain)
 	var camera:=Camera3D.new();terrain.add_child(camera);terrain.camera=camera
@@ -118,9 +118,8 @@ func test_covered_pan_keeps_fine_mesh_until_fine_replacement()->void:
 	camera.position.x+=span/12.0;terrain.camera_target.x+=span/12.0
 	assert_bool(terrain._regional_patch_covers_camera()).is_true()
 	terrain._rebuild_regional_terrain_patch(Vector2(span/12.0,0),span)
-	assert_int(terrain.terrain_patch_job.resolution).is_equal(385)
+	assert_object(terrain.terrain_patch_job).is_null()
 	terrain._advance_terrain_patch()
 	assert_object(terrain.regional_terrain_patch).is_same(original)
 	while terrain.terrain_patch_job!=null:terrain._advance_terrain_patch()
 	assert_int(terrain.regional_patch_resolution).is_equal(385)
-	assert_int(terrain.terrain_patch_last_reused_vertices).is_greater(130000)

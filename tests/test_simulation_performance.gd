@@ -198,3 +198,16 @@ func test_forecast_climate_cache_retains_all_supported_settlements_and_stays_bou
 		food._forecast_climate_cache.clear()
 		assert_dict(food._forecast(2,harvest,demand,false)).is_equal(warm)
 	)
+
+func test_navigation_yields_daily_work_without_catchup_debt()->void:
+	var clock=Clock.new()
+	clock.take_days(0,3.0)
+	clock.take_days(2000000,3.0)
+	assert_float(clock.pending_days).is_equal(5.0)
+	for frame in range(1,601):
+		assert_float(clock.take_days(2000000+frame*16667,3.0,true)).is_equal(0.0)
+	assert_float(clock.pending_days).is_equal(0.0)
+	var released:=2000000+600*16667
+	assert_float(clock.take_days(released,3.0)).is_equal(0.0)
+	assert_float(clock.take_days(released+100000,3.0)).is_equal_approx(.3,.000001)
+	assert_float(clock.pending_days).is_equal(0.0)

@@ -11,8 +11,14 @@ var pending_days:float=0.0
 func reset(now_usec:int=-1)->void:
 	last_usec=now_usec;pending_days=0.0;last_rate=0.0
 
-func take_days(now_usec:int,days_per_second:float)->float:
+func take_days(now_usec:int,days_per_second:float,interaction_active:bool=false)->float:
 	var rate:=maxf(0.0,days_per_second)
+	# Daily simulation is synchronous. Yield its work during direct navigation,
+	# and discard wall-time debt rather than freezing the first frame afterward.
+	# Simulation dates advance only when their full daily work can run.
+	if interaction_active:
+		last_usec=now_usec;last_rate=rate;pending_days=0.0
+		return 0.0
 	if last_usec<0 or rate!=last_rate:
 		last_usec=now_usec;last_rate=rate;pending_days=0.0
 		return 0.0
