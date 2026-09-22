@@ -21,6 +21,25 @@ func test_scheduler_preserves_manual_targets_and_pauses()->void:
 	MilitaryCampaign.workshop.delegate_lines()
 	assert_bool(bool(job.get("planner_managed",false))).is_false()
 	assert_bool(job.paused).is_true()
+
+func test_arrival_review_uses_paid_supplies_and_respects_disabled_management()->void:
+	GameState.population_allocations.Knowledge=20
+	GameState.known_discoveries.append("paper_making");GameState.discovery_adoption.paper_making=1.0
+	GameState.resource_stockpiles.merge({"Paper Pulp":5.0,"Freshwater":5.0,"Timber":0.0,"Fiber Plants":20.0},true)
+	preload("res://scripts/society_exchange.gd").data().collections["study"]={"returned_day":0,"study":0.0,"work":240.0}
+	GameState.simulation_metrics.food_days=30;GameState.simulation_metrics.food_intake_ratio=1.0
+	MilitaryCampaign.workshop.review_arrivals()
+	assert_array(MilitaryCampaign.equipment_queue).is_empty()
+	GameState.resource_stockpiles.Timber=4.0
+	MilitaryCampaign.workshop.set_enabled(false)
+	MilitaryCampaign.workshop.review_arrivals()
+	assert_array(MilitaryCampaign.equipment_queue).is_empty()
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(4.0)
+	MilitaryCampaign.workshop.set_enabled(true)
+	MilitaryCampaign.workshop.review_arrivals()
+	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(1)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(0.0)
+	assert_bool(MilitaryCampaign.equipment_queue[0].planner_managed).is_true()
 func test_scheduling_pays_normal_inputs_and_marks_only_its_line()->void:
 	var result:Dictionary=MilitaryCampaign.workshop.schedule({"item":"improvised","target":3})
 	assert_bool(result.changed).is_true()

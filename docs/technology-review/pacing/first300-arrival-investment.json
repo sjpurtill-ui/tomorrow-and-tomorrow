@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "base_commit": "9a63bce9a8de8346303d5ea91f2a768f53e47ec1",
+  "change": "Monthly AI civilian investment rechecks after actual resource delivery, before recurring consumption. Player delegated workshops receive the same delivery review through their existing scheduler.",
+  "start_day": 58765,
+  "end_day": 59130,
+  "baseline_output": {
+    "Fitted Post Beam Sets": 140.0,
+    "Fitted Timber Splice Sets": 56.0,
+    "arrows": 42.0,
+    "bow": 19.0,
+    "improvised": 78.0,
+    "lance": 134.0,
+    "spear": 3013.0
+  },
+  "candidate_output": {
+    "Building Runoff Channels": 53.0,
+    "Fitted Post Beam Sets": 140.0,
+    "Fitted Timber Splice Sets": 56.0,
+    "arrows": 42.0,
+    "bow": 19.0,
+    "improvised": 78.0,
+    "lance": 134.0,
+    "spear": 3011.0
+  },
+  "additional_output": {
+    "Building Runoff Channels": 53.0,
+    "spear": -2.0
+  },
+  "population_baseline": 5568,
+  "population_candidate": 5568,
+  "food_intake_baseline": 1.0,
+  "food_intake_candidate": 1.0,
+  "target_reached": true,
+  "restore_equal": true,
+  "next_day_equal": true,
+  "validation": "39 AI planning/owned-world/save checks passed; 46 player-workshop/save checks passed. The isolated one-year comparison directly exercises AI timing; player arrival setup is covered by paid-input and disabled-management tests.",
+  "limitations": [
+    "This restores one physically feasible civilian chain in scarce conditions, not every known recipe.",
+    "Full 300-year endpoints remain pending."
+  ]
+}

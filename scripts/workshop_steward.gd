@@ -41,6 +41,16 @@ func delegate_line(id:int)->Dictionary:
 		if int(job.get("target_stock",0))==0:job.target_stock=P.stock(host,job)+1
 		return {"ok":true,"message":"Line returned to leader management; unfinished work is preserved."}
 	return {"error":"Select an active production line."}
+func review_arrivals()->void:
+	if WorldSimulation.actor_id!="player" or not bool(data.enabled) or not WorldSimulation.state.settlement_site_committed:return
+	if WorldSimulation.government.officeholder("Quartermaster").is_empty() and WorldSimulation.government.officeholder("Steward").is_empty():return
+	var food:=preload("res://scripts/leader_personality.gd").food_constraints(WorldSimulation.state.simulation_metrics)
+	if preload("res://scripts/civilization_controller.gd").production_food_blocked(food):return
+	var civilian:=preload("res://scripts/civilian_investment_planner.gd").recommendation()
+	if civilian.is_empty():return
+	var result:=schedule(civilian)
+	if bool(result.get("changed",false)):data.status=String(result.get("message","Civilian work scheduled from delivered supplies."))
+
 func advance(day:int)->void:
 	if WorldSimulation.actor_id!="player" or int(data.last_day)==day:return
 	data.last_day=day

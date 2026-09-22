@@ -39,6 +39,13 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	var discoveries:=WorldSimulation.discovery.process_day(daily_context)
 	stamp=record_timing(timings,"discovery",stamp)
 	var resource_events:=WorldSimulation.resources.process_day(daily_context)
+	# Review new investment against today's delivered inputs, before recurring
+	# consumption makes every setup appear permanently unaffordable.
+	var controller:=preload("res://scripts/civilization_controller.gd")
+	if String(WorldSimulation.actors.get(WorldSimulation.actor_id,{}).get("controller",""))=="ai" and controller.review_due(WorldSimulation.actor_id,day):
+		controller.civilian_orders(WorldSimulation.actor_id,controller.current_plan(WorldSimulation.actor_id))
+	elif WorldSimulation.actor_id=="player":
+		WorldSimulation.military.workshop.review_arrivals()
 	stamp=record_timing(timings,"resources",stamp)
 	WorldSimulation.state.synchronize_population_allocations()
 	var events:Array[Dictionary]=WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.consequences.process_day(daily_context),true)
@@ -71,7 +78,6 @@ static func advance(day:int,daily_context:Dictionary,construction:Callable=Calla
 	stamp=record_timing(timings,"military_and_travel",stamp)
 	var arrival:=advance_convoy()
 	if WorldSimulation.actor_id=="player" and WorldSimulation.state.settlement_site_committed:
-		var controller:=preload("res://scripts/civilization_controller.gd")
 		if controller.review_due("player",day):
 			WorldSimulation.direction.ensure();WorldSimulation.direction._ensure_cultural_memory();WorldSimulation.direction.apply_inclinations(day)
 			var drive:=preload("res://scripts/cultural_inheritance.gd").weight(WorldSimulation.direction.cultural_memory,"ambition","expansion",day)

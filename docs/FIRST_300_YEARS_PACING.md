@@ -67,7 +67,7 @@ The [evidence guide](technology-review/PACING_PRODUCTION_EVIDENCE.md) explains i
 
 ## Remaining release checks
 
-Cold civilian production remains an open issue: a controlled year-161-to-162 High timber priority decision produced 175 additional spears and 11 lances, but no additional civilian workshop goods. Population and current food intake were unchanged, and the trial passed exact save/next-day continuation. Investigate civilian setup starvation and competing material use before sign-off; [comparison](technology-review/pacing/first300-cold-timber-decision.json).
+Cold civilian production remains an open issue: a controlled year-161-to-162 High timber priority decision produced 175 additional spears and 11 lances, but no additional civilian workshop goods. Population and current food intake were unchanged, and the trial passed exact save/next-day continuation. A subsequent delivery-timing fix restored 53 drainage components over the same year, with two fewer spears, unchanged population and full food intake; exact save continuation passed. The fix is recorded in [arrival investment evidence](technology-review/pacing/first300-arrival-investment.json). Continue checking later output and wider chains before sign-off; [comparison](technology-review/pacing/first300-cold-timber-decision.json).
 
 Finish the fresh current-build 300-year campaign and the ongoing warm, woodland, cold, military and full-world campaigns. Confirm final target days, actual output and fielded capabilities, government succession, state validity, and exact save/next-day continuation. Review the normal twelve-opponent run for contact and exchange opportunities. Record any remaining limitations explicitly before marking the first 300 years ready.
 

@@ -2130,3 +2130,7 @@ An actual default-count year-14 checkpoint showed civ_01 reporting the human hom
 ## 2026-09-21 — Cold material-priority decision comparison
 
 Actual cold year-161 checkpoint replayed one year with the normal UI High timber priority value. Compared with the unchanged annual checkpoint: 175 additional spears, 11 additional lances, zero additional civilian goods; identical population and full food intake. Exact restore and next-day continuation pass. This exposes a remaining civilian startup bottleneck rather than completing the release gate. Recorded in the current pacing assessment. Separately, fresh corrected default-count year 1 has no false human contacts while civ_03 and civ_12 establish physical contact.
+
+## 2026-09-21 — Review civilian investment when supplies arrive
+
+AI monthly investment now rechecks after actual material arrivals, before recurring food and military spending; delegated player workshops use their existing paid scheduler at the same point. Disabled management and manual orders retain their existing protections. No materials, labor or knowledge are granted; no food requirement is reduced. Cold year 161–162 produces 53 drainage components that the baseline never starts, with two fewer spears, identical population/full food intake, and exact save/next-day continuation. 39 AI planning/owned-world/save checks and 46 player workshop/save checks pass. Save format is unchanged. Full endurance endpoints remain pending; updated runs must record this runtime transition.
