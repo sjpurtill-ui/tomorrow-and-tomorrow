@@ -1,0 +1,562 @@
+{
+  "runtime_commit": "85d7472e0390195c7ed255c9daf8d20dee8aa2f4",
+  "seed": 9241,
+  "scope": "Actual player plus twelve opponents, 25-year endpoint; headless terrain sampling. This is not 300-year evidence.",
+  "provenance": "Fresh corrected-location start; preserved campaign across delivery-timing and staffing fixes. Final validation replays days 7300\u20139125 on 85d7472 from the actual year-20 checkpoint, then compares exact whole-save restoration and next-day continuation.",
+  "completed_days": 9125,
+  "target_reached": true,
+  "state_errors": [],
+  "waterless_starts": 0,
+  "save_check": {
+    "ok": true
+  },
+  "human_save_check": {
+    "ok": true
+  },
+  "restored_equal": true,
+  "continuation_equal": true,
+  "actors": [
+    {
+      "id": "player",
+      "population": 163,
+      "cities": 2,
+      "discoveries": 38,
+      "food_days": 127.624193425021,
+      "recorded_output": {
+        "Cordage Bundles": 502.345841694308,
+        "Drying Mats": 381.067993233289,
+        "Fitted Post Beam Sets": 16.0,
+        "Fitted Timber Splice Sets": 28.0,
+        "Flaked Stone Tools": 202.805916104181,
+        "Hafted Tool Sets": 124.73586309309,
+        "Joined Timber Components": 65.2730164102197,
+        "Unfired Clay Vessels": 495.936905565214,
+        "Woven Containers": 100.770088825524,
+        "improvised": 27.0
+      },
+      "government": {
+        "active_roster": 13,
+        "central_officeholders": 2,
+        "officeholders": 4,
+        "recorded_people": 20,
+        "settlement_leaders": 2,
+        "stage": 1,
+        "unappointed_candidates": 9
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 3
+      }
+    },
+    {
+      "id": "civ_01",
+      "population": 209,
+      "cities": 3,
+      "discoveries": 42,
+      "food_days": 143.445188277427,
+      "recorded_output": {
+        "Fitted Post Beam Sets": 11.0,
+        "Fitted Timber Splice Sets": 30.0,
+        "improvised": 26.0,
+        "spear": 58.0
+      },
+      "government": {
+        "active_roster": 20,
+        "central_officeholders": 3,
+        "officeholders": 5,
+        "recorded_people": 27,
+        "settlement_leaders": 3,
+        "stage": 2,
+        "unappointed_candidates": 15
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 3,
+        "spear": 13
+      }
+    },
+    {
+      "id": "civ_02",
+      "population": 186,
+      "cities": 3,
+      "discoveries": 36,
+      "food_days": 137.184750130388,
+      "recorded_output": {
+        "Clay Record Tablets": 4.0,
+        "improvised": 20.0,
+        "javelin": 41.0
+      },
+      "government": {
+        "active_roster": 20,
+        "central_officeholders": 3,
+        "officeholders": 6,
+        "recorded_people": 28,
+        "settlement_leaders": 3,
+        "stage": 2,
+        "unappointed_candidates": 14
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 5,
+        "javelin": 10
+      }
+    },
+    {
+      "id": "civ_03",
+      "population": 156,
+      "cities": 2,
+      "discoveries": 37,
+      "food_days": 133.796443511029,
+      "recorded_output": {
+        "Fitted Post Beam Sets": 2.0,
+        "Fitted Timber Splice Sets": 25.0,
+        "improvised": 20.0,
+        "spear": 29.0
+      },
+      "government": {
+        "active_roster": 13,
+        "central_officeholders": 2,
+        "officeholders": 4,
+        "recorded_people": 20,
+        "settlement_leaders": 2,
+        "stage": 1,
+        "unappointed_candidates": 9
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 5,
+        "spear": 8
+      }
+    },
+    {
+      "id": "civ_04",
+      "population": 164,
+      "cities": 2,
+      "discoveries": 28,
+      "food_days": 29.5499693559122,
+      "recorded_output": {
+        "improvised": 47.0
+      },
+      "government": {
+        "active_roster": 13,
+        "central_officeholders": 2,
+        "officeholders": 3,
+        "recorded_people": 16,
+        "settlement_leaders": 2,
+        "stage": 1,
+        "unappointed_candidates": 10
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 12
+      }
+    },
+    {
+      "id": "civ_05",
+      "population": 152,
+      "cities": 1,
+      "discoveries": 30,
+      "food_days": 8.52254149357459,
+      "recorded_output": {
+        "Fitted Timber Splice Sets": 10.0,
+        "improvised": 20.0,
+        "spear": 23.0
+      },
+      "government": {
+        "active_roster": 6,
+        "central_officeholders": 1,
+        "officeholders": 1,
+        "recorded_people": 8,
+        "settlement_leaders": 1,
+        "stage": 0,
+        "unappointed_candidates": 5
+      },
+      "production_food_blocked": true,
+      "equipped": {
+        "improvised": 5,
+        "spear": 6
+      }
+    },
+    {
+      "id": "civ_06",
+      "population": 173,
+      "cities": 3,
+      "discoveries": 28,
+      "food_days": 115.841332081727,
+      "recorded_output": {
+        "arrows": 13.0,
+        "bow": 19.0,
+        "improvised": 19.0,
+        "javelin": 28.0
+      },
+      "government": {
+        "active_roster": 20,
+        "central_officeholders": 3,
+        "officeholders": 5,
+        "recorded_people": 26,
+        "settlement_leaders": 3,
+        "stage": 2,
+        "unappointed_candidates": 15
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "bow": 2,
+        "improvised": 5,
+        "javelin": 9
+      }
+    },
+    {
+      "id": "civ_07",
+      "population": 186,
+      "cities": 3,
+      "discoveries": 42,
+      "food_days": 27.7626258131039,
+      "recorded_output": {
+        "arrows": 16.0,
+        "bow": 5.0,
+        "improvised": 23.0,
+        "spear": 27.0
+      },
+      "government": {
+        "active_roster": 20,
+        "central_officeholders": 3,
+        "officeholders": 5,
+        "recorded_people": 26,
+        "settlement_leaders": 3,
+        "stage": 2,
+        "unappointed_candidates": 15
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "bow": 2,
+        "improvised": 6,
+        "spear": 6
+      }
+    },
+    {
+      "id": "civ_08",
+      "population": 158,
+      "cities": 1,
+      "discoveries": 31,
+      "food_days": 13.384333303676,
+      "recorded_output": {
+        "javelin": 8.0
+      },
+      "government": {
+        "active_roster": 6,
+        "central_officeholders": 1,
+        "officeholders": 1,
+        "recorded_people": 8,
+        "settlement_leaders": 1,
+        "stage": 0,
+        "unappointed_candidates": 5
+      },
+      "production_food_blocked": true,
+      "equipped": {}
+    },
+    {
+      "id": "civ_09",
+      "population": 188,
+      "cities": 3,
+      "discoveries": 36,
+      "food_days": 260.150780494586,
+      "recorded_output": {
+        "improvised": 18.0,
+        "javelin": 28.0
+      },
+      "government": {
+        "active_roster": 20,
+        "central_officeholders": 3,
+        "officeholders": 6,
+        "recorded_people": 28,
+        "settlement_leaders": 3,
+        "stage": 2,
+        "unappointed_candidates": 14
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 5,
+        "javelin": 7
+      }
+    },
+    {
+      "id": "civ_10",
+      "population": 180,
+      "cities": 2,
+      "discoveries": 34,
+      "food_days": 42.6601605266854,
+      "recorded_output": {
+        "Fitted Post Beam Sets": 4.0,
+        "Fitted Timber Splice Sets": 25.0,
+        "improvised": 20.0,
+        "javelin": 26.0,
+        "sling": 18.0
+      },
+      "government": {
+        "active_roster": 13,
+        "central_officeholders": 2,
+        "officeholders": 3,
+        "recorded_people": 15,
+        "settlement_leaders": 2,
+        "stage": 1,
+        "unappointed_candidates": 10
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 5,
+        "javelin": 8,
+        "sling": 2
+      }
+    },
+    {
+      "id": "civ_11",
+      "population": 143,
+      "cities": 2,
+      "discoveries": 33,
+      "food_days": 135.181672045307,
+      "recorded_output": {
+        "Fitted Post Beam Sets": 4.0,
+        "Fitted Timber Splice Sets": 28.0,
+        "improvised": 26.0,
+        "spear": 14.0
+      },
+      "government": {
+        "active_roster": 13,
+        "central_officeholders": 2,
+        "officeholders": 3,
+        "recorded_people": 19,
+        "settlement_leaders": 2,
+        "stage": 1,
+        "unappointed_candidates": 10
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 6,
+        "spear": 5
+      }
+    },
+    {
+      "id": "civ_12",
+      "population": 201,
+      "cities": 3,
+      "discoveries": 46,
+      "food_days": 268.038869798058,
+      "recorded_output": {
+        "improvised": 33.0,
+        "sling": 11.0,
+        "spear": 13.0
+      },
+      "government": {
+        "active_roster": 20,
+        "central_officeholders": 3,
+        "officeholders": 6,
+        "recorded_people": 28,
+        "settlement_leaders": 3,
+        "stage": 2,
+        "unappointed_candidates": 14
+      },
+      "production_food_blocked": false,
+      "equipped": {
+        "improvised": 7,
+        "spear": 4
+      }
+    }
+  ],
+  "opponent_food_intake": {
+    "civ_01": 1.0,
+    "civ_02": 1.0,
+    "civ_03": 1.0,
+    "civ_04": 1.0,
+    "civ_05": 1.0,
+    "civ_06": 1.0,
+    "civ_07": 1.0,
+    "civ_08": 1.0,
+    "civ_09": 1.0,
+    "civ_10": 1.0,
+    "civ_11": 1.0,
+    "civ_12": 1.0
+  },
+  "player_contacts": [
+    {
+      "id": "civ_01",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_02",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_03",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_04",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_05",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_06",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_07",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_08",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_09",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_10",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_11",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    },
+    {
+      "id": "civ_12",
+      "contact_level": 0,
+      "rival_contact_level": 0
+    }
+  ],
+  "foreign_contacts": [
+    {
+      "id": "civ_01",
+      "contacts": {
+        "civ_03": {
+          "contact_level": 2,
+          "met_day": 3211,
+          "treaty": "none"
+        },
+        "civ_11": {
+          "contact_level": 2,
+          "met_day": 3628,
+          "treaty": "trade"
+        },
+        "civ_12": {
+          "contact_level": 2,
+          "met_day": 8422,
+          "treaty": "none"
+        }
+      }
+    },
+    {
+      "id": "civ_02",
+      "contacts": {}
+    },
+    {
+      "id": "civ_03",
+      "contacts": {
+        "civ_01": {
+          "contact_level": 2,
+          "met_day": 8108,
+          "treaty": "none"
+        },
+        "civ_11": {
+          "contact_level": 1,
+          "met_day": -1,
+          "treaty": "none"
+        },
+        "civ_12": {
+          "contact_level": 2,
+          "met_day": 216,
+          "treaty": "trade"
+        }
+      }
+    },
+    {
+      "id": "civ_04",
+      "contacts": {}
+    },
+    {
+      "id": "civ_05",
+      "contacts": {}
+    },
+    {
+      "id": "civ_06",
+      "contacts": {}
+    },
+    {
+      "id": "civ_07",
+      "contacts": {}
+    },
+    {
+      "id": "civ_08",
+      "contacts": {}
+    },
+    {
+      "id": "civ_09",
+      "contacts": {}
+    },
+    {
+      "id": "civ_10",
+      "contacts": {}
+    },
+    {
+      "id": "civ_11",
+      "contacts": {
+        "civ_01": {
+          "contact_level": 2,
+          "met_day": 4481,
+          "treaty": "trade"
+        },
+        "civ_03": {
+          "contact_level": 1,
+          "met_day": -1,
+          "treaty": "none"
+        },
+        "civ_12": {
+          "contact_level": 1,
+          "met_day": -1,
+          "treaty": "none"
+        }
+      }
+    },
+    {
+      "id": "civ_12",
+      "contacts": {
+        "civ_01": {
+          "contact_level": 2,
+          "met_day": 8460,
+          "treaty": "none"
+        },
+        "civ_03": {
+          "contact_level": 2,
+          "met_day": 185,
+          "treaty": "trade"
+        },
+        "civ_11": {
+          "contact_level": 2,
+          "met_day": 4606,
+          "treaty": "none"
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Headless actual world; no visual verification",
+    "No forced contact or wars",
+    "Binary payload validation covers player and opponents; rendered load journey is separate",
+    "Different simulated histories after a cache fix are not an exact paired balance comparison.",
+    "Visual inspection remains with the user."
+  ]
+}
