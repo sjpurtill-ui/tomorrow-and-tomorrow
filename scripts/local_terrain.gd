@@ -11952,6 +11952,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.section_requested.connect(_on_hud_section_requested)
 	hud.menu_requested.connect(_open_world_menu)
 	hud.escape_pressed.connect(_on_hud_escape)
+	hud.register_provider("overview",preload("res://scripts/hud/content/dock_content_overview.gd").new(self,hud))
 	hud.register_provider("settlement",preload("res://scripts/hud/content/dock_content_settlement.gd").new(self,hud))
 	hud.register_provider("construction",preload("res://scripts/hud/content/dock_content_construction.gd").new(self,hud))
 	hud.register_provider("production",preload("res://scripts/hud/content/dock_content_production.gd").new(self,hud))

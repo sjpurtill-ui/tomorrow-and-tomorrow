@@ -13,7 +13,7 @@ signal menu_requested
 signal escape_pressed
 
 const SECTIONS:Array[Dictionary]=[
-	{"id":"settlement","label":"Overview","icon":0,"tooltip":"Settlement overview · F1"},
+	{"id":"overview","label":"Overview","icon":0,"tooltip":"Civilization overview · F1"},
 	{"id":"government","label":"Government","icon":1,"tooltip":"Government and officeholders · F3"},
 	{"id":"economy","label":"Food","icon":2,"sub":0,"tooltip":"Food and water · F2"},
 	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"tooltip":"Material stores and supply"},
@@ -125,7 +125,7 @@ func _layout()->void:
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if active_section in ["production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
+		dock.set_deferred("size",Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if active_section in ["overview","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
 	if detail_dock:
 		detail_dock.position=Vector2(Tokens.DOCK_X,64)
 		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
@@ -143,7 +143,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if panel==dock and active_section in ["production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y)
+		panel.size=Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if panel==dock and active_section in ["overview","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 
@@ -261,7 +261,7 @@ func set_active_section(id:String)->void:
 	active_section=id
 	for section_id in rail_buttons:
 		var button:Button=rail_buttons[section_id]
-		var target:=String(section_id);var active:bool=target==id
+		var target:=String(section_id);var active:bool=target==id or (target=="overview" and id=="settlement")
 		if id=="economy":active=target==["economy","materials","wealth"][clampi(dock.sub if dock else 0,0,2)]
 		button.add_theme_stylebox_override("normal",_approved_rail_style(active))
 		button.add_theme_stylebox_override("hover",_approved_rail_style(active,true))
@@ -379,7 +379,7 @@ func _style_speed_controls(selected:int)->void:
 # --- KPI strip --------------------------------------------------------------
 
 const KPI_DEFS:Array[Dictionary]=[
-	{"id":"population","label":"POPULATION","width":140.0,"accent":Tokens.GREEN,"section":"settlement","sub":0},
+	{"id":"population","label":"POPULATION","width":140.0,"accent":Tokens.GREEN,"section":"overview","sub":0},
 	{"id":"food","label":"FOOD","width":112.0,"accent":Tokens.AMBER,"section":"economy","sub":0},
 	{"id":"water","label":"WATER","width":112.0,"accent":Tokens.TEAL,"section":"economy","sub":0},
 	{"id":"health","label":"HEALTH","width":152.0,"accent":Tokens.TEAL,"section":"health","sub":0},
@@ -793,7 +793,7 @@ func _unhandled_key_input(event:InputEvent)->void:
 	if key.keycode in [KEY_F5,KEY_F6] and key.shift_pressed:
 		MilitaryCampaign.joint_operations.open_service("navy" if key.keycode==KEY_F5 else "air")
 		get_viewport().set_input_as_handled();return
-	var keys:={KEY_F1:"settlement",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F8:"military",KEY_F7:"construction",KEY_F9:"production"}
+	var keys:={KEY_F1:"overview",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F8:"military",KEY_F7:"construction",KEY_F9:"production"}
 	if keys.has(key.keycode):
 		toggle_section(String(keys[key.keycode]))
 		get_viewport().set_input_as_handled()

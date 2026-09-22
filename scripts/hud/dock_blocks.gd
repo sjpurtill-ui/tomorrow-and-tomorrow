@@ -287,7 +287,8 @@ static func _render_bars(parent:VBoxContainer,block:Dictionary)->void:
 
 static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 	var grid:=GridContainer.new()
-	grid.columns=2
+	grid.columns=clampi(int(block.get("columns",2)),1,3)
+	if grid.columns==3:grid.resized.connect(func()->void:grid.columns=2 if grid.size.x<780 else 3)
 	grid.add_theme_constant_override("h_separation",8)
 	grid.add_theme_constant_override("v_separation",8)
 	parent.add_child(grid)
@@ -304,7 +305,9 @@ static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 		column.add_child(Tokens.make_label(String(item.get("label","")),9,Tokens.MUTED,0.1))
 		column.add_child(Tokens.make_label(String(item.get("value","")),18,Tokens.INK))
 		if String(item.get("note",""))!="":
-			column.add_child(Tokens.make_label(String(item.note),11,item.get("note_color",Tokens.MUTED)))
+			var note:=Tokens.make_label(String(item.note),11,item.get("note_color",Tokens.MUTED))
+			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			column.add_child(note)
 
 
 static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
