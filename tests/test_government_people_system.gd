@@ -822,3 +822,50 @@ func test_deceased_roster_does_not_exhaust_future_government_successors()->void:
 	var count:=government.people.size()
 	government.initialize()
 	assert_int(government.people.size()).is_equal(count)
+
+
+func test_transferring_a_local_leader_clears_the_former_post_and_fills_it_on_reconciliation()->void:
+	var first_id:=String(GameState.player_settlements[0].id)
+	var second:Dictionary=GameState.player_settlements[0].duplicate(true)
+	second.id="transfer_destination"
+	second.leader_person_id=0
+	GameState.player_settlements.append(second)
+	GovernmentPeopleSystem.initialize()
+	var moved_id:=int(GovernmentPeopleSystem.settlement_leader(first_id).person_id)
+	assert_bool(bool(GovernmentPeopleSystem.assign_settlement_leader(String(second.id),moved_id).ok)).is_true()
+	assert_int(int(GameState.player_settlements[0].leader_person_id)).is_equal(0)
+	GovernmentPeopleSystem.initialize()
+	var successor:=GovernmentPeopleSystem.settlement_leader(first_id)
+	assert_bool(successor.is_empty()).is_false()
+	assert_int(int(successor.person_id)).is_not_equal(moved_id)
+	assert_int(int(GovernmentPeopleSystem.settlement_leader(String(second.id)).person_id)).is_equal(moved_id)
+
+
+func test_reconciliation_repairs_a_stale_duplicate_local_leader_reference()->void:
+	var original_id:=String(GameState.player_settlements[0].id)
+	var original_leader:=int(GameState.player_settlements[0].leader_person_id)
+	var second:Dictionary=GameState.player_settlements[0].duplicate(true)
+	second.id="stale_duplicate"
+	GameState.player_settlements.append(second)
+	GovernmentPeopleSystem.initialize()
+	assert_int(int(GovernmentPeopleSystem.settlement_leader(original_id).person_id)).is_equal(original_leader)
+	assert_int(int(GovernmentPeopleSystem.settlement_leader(String(second.id)).person_id)).is_not_equal(original_leader)
+
+
+func test_large_settlement_network_has_unique_local_leaders_and_a_bounded_successor_pool()->void:
+	GameState.ensure_population_total(20000)
+	var template:Dictionary=GameState.player_settlements[0].duplicate(true)
+	for index in range(1,SettlementModel.MAX_PLAYER_SETTLEMENTS):
+		var city:Dictionary=template.duplicate(true)
+		city.id="staffing_%d" % index
+		city.leader_person_id=0
+		GameState.player_settlements.append(city)
+	GovernmentPeopleSystem.initialize()
+	var seen:Dictionary={}
+	for city:Dictionary in GameState.player_settlements:
+		var id:=int(city.get("leader_person_id",0))
+		assert_int(id).is_greater(0)
+		assert_bool(seen.has(id)).is_false()
+		seen[id]=true
+	assert_int(GovernmentPeopleSystem.living_people().size()).is_less_equal(GovernmentPeopleSystem.MAX_GOVERNMENT_PEOPLE)
+	assert_int(GovernmentPeopleSystem.living_people().size()).is_greater(SettlementModel.MAX_PLAYER_SETTLEMENTS)

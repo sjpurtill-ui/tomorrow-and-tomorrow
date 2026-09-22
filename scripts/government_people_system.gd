@@ -6,7 +6,9 @@ extends Node
 ## continue to matter.
 
 const ValuesModel:=preload("res://scripts/societal_values_model.gd")
-const MAX_GOVERNMENT_PEOPLE:=96
+const NORMAL_GOVERNMENT_POOL:=96
+# Covers the bounded 256-settlement network, central offices and successors.
+const MAX_GOVERNMENT_PEOPLE:=288
 const MAX_PERSON_MEMORIES:=20
 const MONTH_DAYS:=30
 
@@ -316,7 +318,10 @@ func _desired_pool_size()->int:
 	# A hearth-sized polity should contain a handful of recognizable public
 	# figures, not a miniature modern bureaucracy. The cast grows only when
 	# places and specialist offices create real work for it.
-	return clampi(3+government_stage*4+WorldSimulation.state.player_settlements.size()*2+active_offices().size(),6,MAX_GOVERNMENT_PEOPLE)
+	var settlements:=WorldSimulation.state.player_settlements.size()
+	var offices:=active_offices().size()
+	var ordinary:=clampi(3+government_stage*4+settlements*2+offices,6,NORMAL_GOVERNMENT_POOL)
+	return mini(MAX_GOVERNMENT_PEOPLE,maxi(ordinary,settlements+offices+4))
 
 
 func _ensure_pool()->void:
@@ -324,7 +329,7 @@ func _ensure_pool()->void:
 	var living_count:=0
 	for person in people:
 		if String(person.get("status","active"))=="active":living_count+=1
-	# The cap bounds serving people, not the historical record. Dead officials
+	# The cap bounds the active roster, not the historical record. Dead officials
 	# retain their identity and history without blocking later generations.
 	while living_count<target:
 		people.append(_generate_person(next_person_id))
@@ -647,7 +652,7 @@ func candidates_for_office(office_key:String,settlement_id:String="",limit:int=6
 	for person_variant in people:
 		var person:Dictionary=person_variant
 		if String(person.get("status",""))!="active": continue
-		if settlement_id!="" and String(person.get("home_settlement_id",""))!=settlement_id and String(person.get("local_leader_of",""))!="": continue
+		if settlement_id!="" and String(person.get("local_leader_of","")) not in ["",settlement_id]: continue
 		var copy:=person.duplicate(true)
 		copy["age"]=age_years(person)
 		copy["office_fit"]=_office_fit(person,office_key)
@@ -818,6 +823,11 @@ func assign_settlement_leader(settlement_id:String,person_id:int)->Dictionary:
 		var steward_id:=int((WorldSimulation.state.leadership_positions.get("Steward",{}) as Dictionary).get("person_id",0))
 		if steward_id>0 and person_id!=steward_id:
 			return {"ok":false,"reason":"The founding council and its only settlement are still one office. Replace the founding leader instead."}
+	# A person can lead only one settlement. Reconciliation fills the vacated
+	# post through the ordinary successor pool, retaining all personal history.
+	for index in WorldSimulation.state.player_settlements.size():
+		if index!=settlement_index and int(WorldSimulation.state.player_settlements[index].get("leader_person_id",0))==person_id:
+			WorldSimulation.state.player_settlements[index]["leader_person_id"]=0
 	for other_index in people.size():
 		if String(people[other_index].get("local_leader_of",""))==settlement_id: people[other_index]["local_leader_of"]=""
 	people[person_index]["local_leader_of"]=settlement_id
@@ -929,7 +939,7 @@ func _ensure_local_leaders(events:Array[Dictionary]=[])->void:
 		var settlement:Dictionary=WorldSimulation.state.player_settlements[settlement_index]
 		var settlement_id:=String(settlement.get("id",""))
 		var current:=_person_record(int(settlement.get("leader_person_id",0)))
-		if not current.is_empty() and String(current.get("status",""))=="active":
+		if not current.is_empty() and String(current.get("status",""))=="active" and String(current.get("local_leader_of",""))==settlement_id:
 			settlement["leader_title"]=settlement_leader_title()
 			WorldSimulation.state.player_settlements[settlement_index]=settlement
 			continue
@@ -946,7 +956,6 @@ func _ensure_local_leaders(events:Array[Dictionary]=[])->void:
 					events.append({"day":int(WorldSimulation.state.elapsed_days),"title":"Founding Leader Recognized","description":"%s now carries both the founding council and the local leadership of %s." % [String((founding_result.get("leader",{}) as Dictionary).get("name","The founding leader")),String(settlement.get("name","the settlement"))],"domain":"institutions","severity":"notice"})
 				continue
 		var candidates:=candidates_for_office("SettlementLeader",settlement_id,1)
-		if candidates.is_empty(): candidates=candidates_for_office("SettlementLeader","",1)
 		if candidates.is_empty(): continue
 		var result:=assign_settlement_leader(settlement_id,int(candidates[0].person_id))
 		if bool(result.get("ok",false)):
