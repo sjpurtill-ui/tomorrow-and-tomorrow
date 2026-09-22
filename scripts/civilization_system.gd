@@ -1319,7 +1319,9 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 		var quote_seed:=last_world_seed^duration_days*8191^String(target.id).hash()^next_scout_mission_id*2654435761
 		if wandering:
 			var walker:=preload("res://scripts/scout_frontier.gd").new(self,one_way_range*.55,float(quote_seed%6283)/1000.0,origin)
-			var key:="staff:%s:%s:%s:%s:%s" % [quote_seed,fog_revision,scout_missions.size(),origin,_scout_water_crossing_allowance_km()]
+			# Range changes with logistics, knowledge and mounted adoption. A
+			# warm cache must choose the same route as a restored empty cache.
+			var key:="staff:"+var_to_str([quote_seed,fog_revision,scout_missions.size(),origin,_scout_water_crossing_allowance_km(),one_way_range])
 			if open_scout_plan_cache.has(key):route_plan=open_scout_plan_cache[key].duplicate(true)
 			else:
 				# Roving parties search outward over connected ground. Do not run

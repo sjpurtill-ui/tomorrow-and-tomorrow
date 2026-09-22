@@ -317,3 +317,14 @@ func test_scouting_status_and_reception_shortages_fit_narrow_panel()->void:
 		assert_bool(sheet.reception.size.x<=sheet.panel.size.x).is_true()
 		assert_str(sheet.review.text).contains("next game day")
 		viewport.queue_free();await await_idle_frame()
+
+
+func test_staff_route_cache_uses_current_logistics_range()->void:
+	GameState.simulation_metrics["logistics"]=0.0
+	var early:Dictionary=system.scout_mission_quote(90,"open_world","",6,true)
+	assert_bool(bool(early.get("can_dispatch",false))).is_true()
+	GameState.simulation_metrics["logistics"]=1.0
+	var cached:Dictionary=system.scout_mission_quote(90,"open_world","",6,true)
+	system.open_scout_plan_cache.clear()
+	var rebuilt:Dictionary=system.scout_mission_quote(90,"open_world","",6,true)
+	assert_bool(cached.route_plan==rebuilt.route_plan).override_failure_message("A saved/reloaded route must match a quote after logistics changes.").is_true()
