@@ -1,0 +1,20 @@
+{
+  "days": [
+    63875,
+    63905
+  ],
+  "population": 120,
+  "checkpoint_population": 8604,
+  "settlements": 33,
+  "before_seconds": 16.338,
+  "after_seconds": 12.599,
+  "whole_world_equal": true,
+  "save_restore_equal": true,
+  "next_day_equal": true,
+  "construction_tests_passed": 20,
+  "method": "Same real military year-175 checkpoint and 30 ordinary days; local eligibility reuse and one repair bill per payment. No cross-day or cross-society eligibility cache.",
+  "limitations": [
+    "single timing pair under concurrent load",
+    "no rendered performance claim"
+  ]
+}

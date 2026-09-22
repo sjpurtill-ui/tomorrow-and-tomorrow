@@ -258,23 +258,29 @@ static func affordable_repair(plot:Dictionary,work:float,stock:Dictionary)->floa
  return maxf(0,supported)
 
 static func pay_repair(plot:Dictionary,work:float,stock:Dictionary)->void:
- for item:String in repair_bill(plot,work):stock[item]=maxf(0,float(stock.get(item,0))-float(repair_bill(plot,work)[item]))
+ var bill:=repair_bill(plot,work)
+ for item:String in bill:stock[item]=maxf(0,float(stock.get(item,0))-float(bill[item]))
 
 static func choose_retrofit(plots:Array,stock:Dictionary,known:Array,adoption:Dictionary)->Dictionary:
  var pending:=0
  for plot:Dictionary in plots:
   if not plot.get("fabric_job",{}).is_empty():pending+=1
  if pending>=2:return {}
+ # These inputs cannot change while choosing one retrofit. Check them once,
+ # retaining authored method order so equal-score choices stay identical.
+ var available_methods:Array[String]=[]
+ for method:String in COMPONENTS:
+  if method not in known or float(adoption.get(method,0))<.25:continue
+  if float(stock.get(COMPONENTS[method],0))<1 or not foundations_met(method,known):continue
+  available_methods.append(method)
  var best:Dictionary={}
  var best_score:float=-INF
  for plot:Dictionary in plots:
   if not plot.get("fabric_job",{}).is_empty() or String(plot.get("status","")) not in ["active","stressed","damaged"]:continue
   var condition:float=float(plot.get("condition",0))
   if condition<.35:continue # Stabilize a failing building before incremental retrofits.
-  for method:String in COMPONENTS:
-   if plot.get("fabric_components",{}).has(method) or method not in known:continue
-   if not compatible(plot,method) or not foundations_met(method,known) or float(adoption.get(method,0))<.25:continue
-   if float(stock.get(COMPONENTS[method],0))<1:continue
+  for method:String in available_methods:
+   if plot.get("fabric_components",{}).has(method) or not compatible(plot,method):continue
    var previous:Dictionary=plot.get("fabric_failed",{}).get(method,{})
    if not previous.is_empty() and condition<=float(previous.job.assembly.support_condition)+.05:continue
    var weather:bool=method in ["building_drainage_coordination","roof_flashing_interfaces","rainscreen_wall_assemblies","building_capillary_breaks"]

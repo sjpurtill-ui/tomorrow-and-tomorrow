@@ -2104,3 +2104,8 @@ The actual cold year-131 checkpoint advanced the same 365 ordinary days before a
 ### First 300 years: use the game terrain provider in endurance harnesses
 
 Both headless harnesses now bind the same stable surface-material provider already used by the game. This enables the existing safe catchment-search cache rather than repeatedly generating full geography reports. An actual military year-175 checkpoint advanced 30 ordinary days in 41.080 seconds before and 16.338 seconds after; the entire exported world states were exactly equal. Save restoration and next-day continuation passed in both. A player-plus-three-opponent checkpoint at year 87 also advanced and passed complete save/next-day equality with no state errors. These are harness parity and timing checks, not a new game rule or rendered performance claim. The full-world probe also retains an earlier checkpoint failure rather than clearing it during final validation. Evidence: pacing/first300-terrain-provider-parity.json.
+
+
+### First 300 years: reuse eligibility within one building-upgrade decision
+
+Choosing one retrofit now checks its unchanged knowledge, adoption and component availability once before comparing plots, retaining authored method order and existing tie behavior. Repair payment computes its unchanged bill once. No eligibility persists across calls. The same 33-settlement military checkpoint advanced 30 ordinary days in 16.338 seconds before and 12.599 after; whole exported world states are exactly equal. All 20 construction checks and exact save/next-day checks pass. This is a single headless timing pair, not a frame-rate claim. Evidence: pacing/first300-retrofit-selection-performance.json.
