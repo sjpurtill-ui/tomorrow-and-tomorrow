@@ -73,3 +73,17 @@ func test_authorization_and_daily_city_scope_preserve_selection()->void:
 	assert_str(GameState.selected_player_settlement_id).is_equal(selected)
 	assert_bool(U.valid(GameState.player_settlements)).is_true()
 
+func test_naming_requires_completion_and_survives_ruin_and_serialization()->void:
+	var r:=record()
+	assert_bool(U.rename(String(city.id),String(r.id),"The Hearth of Dawn").has("error")).is_true()
+	r.progress=4000;r.quality=3600;r.status="functioning"
+	assert_bool(U.rename(String(city.id),String(r.id),"  The Hearth of Dawn  ").has("ok")).is_true()
+	assert_str(U.display_name(r)).is_equal("The Hearth of Dawn")
+	r.status="ruined"
+	var saved:Array=bytes_to_var(var_to_bytes([city]))
+	assert_bool(U.valid(saved)).is_true()
+	assert_str(U.display_name(saved[0].undertakings[0])).is_equal("The Hearth of Dawn")
+	assert_bool(U.rename(String(city.id),String(r.id),"\n\t").has("error")).is_true()
+	assert_bool(U.rename(String(city.id),String(r.id),"a".repeat(61)).has("error")).is_true()
+	assert_str(U.display_name(r)).is_equal("The Hearth of Dawn")
+

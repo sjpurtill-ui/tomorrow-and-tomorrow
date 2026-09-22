@@ -29,6 +29,6 @@ static func render(cities:Array,parent:Node3D,height:Callable)->void:
 				if ruin:size.y*=.25+.12*(i%3)
 				var mesh:=MeshInstance3D.new();var box:=BoxMesh.new();box.size=size;mesh.mesh=box;mesh.position=p+Vector3(0,size.y/2,0)
 				var material:=StandardMaterial3D.new();material.albedo_color=Color("607344") if shape=="orchard" and not ruin else color;material.roughness=1;mesh.material_override=material;root.add_child(mesh)
-			var label:=Label3D.new();label.text=String(d.title)+"\n"+String(r.status).capitalize();label.font_size=32;label.pixel_size=.00008
+			var label:=Label3D.new();label.text=preload("res://scripts/undertaking_system.gd").display_name(r)+"\n"+String(r.status).capitalize();label.font_size=32;label.pixel_size=.00008
 			label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.no_depth_test=false;label.position.y=.025;label.modulate=Color("f3e4bc");label.outline_modulate=Color("242c29");label.outline_size=8
 			label.visibility_range_end=8;root.add_child(label)

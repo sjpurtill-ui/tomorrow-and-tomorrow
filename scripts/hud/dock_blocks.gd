@@ -681,6 +681,8 @@ static func _render_order(parent:VBoxContainer,block:Dictionary)->void:
 	var field:=LineEdit.new()
 	field.name="SovereignOrderInput"
 	field.placeholder_text=String(block.get("placeholder","Issue a sovereign order…"))
+	field.text=String(block.get("value",""))
+	field.max_length=int(block.get("max_length",0))
 	field.custom_minimum_size=Vector2(0,38)
 	field.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	field.add_theme_font_size_override("font_size",12)
@@ -691,7 +693,7 @@ static func _render_order(parent:VBoxContainer,block:Dictionary)->void:
 	row.add_child(field)
 	var issue:=Button.new()
 	issue.name="SovereignOrderIssue"
-	issue.text="ISSUE"
+	issue.text=String(block.get("button_label","ISSUE"))
 	issue.custom_minimum_size=Vector2(0,38)
 	issue.add_theme_font_size_override("font_size",11)
 	issue.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)

@@ -122,6 +122,7 @@ static func valid(cities:Array)->bool:
 		for r in city.get("undertakings",[]):
 			if not r is Dictionary or not r.get("id","") is String:return false
 			if Catalog.get_definition(r.id).is_empty() or r.id in seen:return false
+			if r.has("custom_name") and (not r.custom_name is String or not valid_name(r.custom_name)):return false
 			seen.append(r.id)
 			var definition:=Catalog.get_definition(r.id)
 			if r.get("status","") not in ["building","stalled","functioning","abandoned","ruined"] or r.get("policy","") not in ["careful","press"]:return false
@@ -133,3 +134,22 @@ static func valid(cities:Array)->bool:
 
 
 
+static func display_name(record:Dictionary)->String:
+	return String(record.get("custom_name",Catalog.get_definition(String(record.id)).get("title","Undertaking")))
+static func rename(city_id:String,id:String,title:String)->Dictionary:
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
+	if city.is_empty() or String(city.get("occupied_by","")) not in ["","player"]:return {"error":"Choose a settlement you control."}
+	title=title.strip_edges()
+	if not valid_name(title):return {"error":"Use a name of 1–60 characters on a single line."}
+	for record:Dictionary in city.get("undertakings",[]):
+		if record.id!=id:continue
+		if float(record.progress)+.00001<float(Catalog.get_definition(id).work):return {"error":"You can name this undertaking when construction finishes."}
+		record.custom_name=title
+		WorldSimulation.state.settlement_network_revision+=1
+		return {"ok":true,"message":"Named "+title+"."}
+	return {"error":"That undertaking is no longer recorded here."}
+static func valid_name(title:String)->bool:
+	if title.is_empty() or title.length()>60 or title!=title.strip_edges():return false
+	for index in title.length():
+		if title.unicode_at(index)<32 or title.unicode_at(index)==127:return false
+	return true
