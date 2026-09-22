@@ -1,0 +1,182 @@
+{
+  "completed_days": 365,
+  "target_days": 365,
+  "target_reached": true,
+  "waterless": 0,
+  "errors": [],
+  "save_check": {
+    "ok": true
+  },
+  "human_save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_differences": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "legacy_campaign": false,
+      "message": "World restored \u00e2\u20ac\u201d day 365, population 120.",
+      "ok": true
+    },
+    "loaded": {
+      "legacy_campaign": false,
+      "message": "World restored \u00e2\u20ac\u201d day 365, population 120.",
+      "ok": true
+    },
+    "restore_detail": [],
+    "restore_differences": [],
+    "restored_equal": true
+  },
+  "average_day_ms": 223.405479452055,
+  "limitations": [
+    "Headless actual world; no visual verification",
+    "No forced contact or wars",
+    "Binary payload validation covers player and opponents; rendered load journey is separate"
+  ],
+  "runtime_commit": "744b547953f170bf329520325bf72874036a19ca",
+  "actors": [
+    {
+      "id": "player",
+      "population": 120,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 83.1103383655773,
+      "recorded_output": {
+        "Cordage Bundles": 18.2352499115174,
+        "Drying Mats": 13.802306814575,
+        "Flaked Stone Tools": 7.76681199537061,
+        "Hafted Tool Sets": 4.70995114604489,
+        "improvised": 3.0
+      }
+    },
+    {
+      "id": "civ_01",
+      "population": 119,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 30.3728035904405,
+      "recorded_output": {
+        "improvised": 6.0,
+        "spear": 15.0
+      }
+    },
+    {
+      "id": "civ_02",
+      "population": 119,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 48.8268426648995,
+      "recorded_output": {
+        "javelin": 10.0
+      }
+    },
+    {
+      "id": "civ_03",
+      "population": 120,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 55.2652334545886,
+      "recorded_output": {
+        "improvised": 6.0,
+        "spear": 17.0
+      }
+    },
+    {
+      "id": "civ_04",
+      "population": 120,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 16.6220072388293,
+      "recorded_output": {
+        "improvised": 20.0
+      }
+    },
+    {
+      "id": "civ_05",
+      "population": 120,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 12.6403050191606,
+      "recorded_output": {
+        "improvised": 6.0,
+        "spear": 16.0
+      }
+    },
+    {
+      "id": "civ_06",
+      "population": 118,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 39.3898017635881,
+      "recorded_output": {
+        "javelin": 9.0
+      }
+    },
+    {
+      "id": "civ_07",
+      "population": 122,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 18.1290036221599,
+      "recorded_output": {
+        "improvised": 4.0,
+        "spear": 15.0
+      }
+    },
+    {
+      "id": "civ_08",
+      "population": 120,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 10.5210244652181,
+      "recorded_output": {
+        "javelin": 8.0
+      }
+    },
+    {
+      "id": "civ_09",
+      "population": 120,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 58.7443089626861,
+      "recorded_output": {
+        "improvised": 4.0,
+        "javelin": 7.0
+      }
+    },
+    {
+      "id": "civ_10",
+      "population": 119,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 23.69860714071,
+      "recorded_output": {
+        "improvised": 6.0,
+        "javelin": 17.0
+      }
+    },
+    {
+      "id": "civ_11",
+      "population": 120,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 37.9239764468617,
+      "recorded_output": {
+        "improvised": 6.0,
+        "spear": 13.0
+      }
+    },
+    {
+      "id": "civ_12",
+      "population": 126,
+      "cities": 1,
+      "discoveries": 10,
+      "food_days": 69.7262164762565,
+      "recorded_output": {
+        "improvised": 5.0,
+        "spear": 11.0
+      }
+    }
+  ]
+}
