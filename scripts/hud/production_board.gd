@@ -47,6 +47,11 @@ func _rebuild()->void:
 		_line(line);count+=1
 	if count==0:add_child(_label("No blocked lines." if mode==2 else "No production lines assigned. Your workshop manager reviews demand each day.",12,T.MUTED))
 func _icon(item:String,kind:String,resource:String="")->Control:
+	if preload("res://scripts/hud/early_civ_art.gd").active() and item in ["spear","woven_cloth","bow","transport_cart"]:
+		var art:=preload("res://scripts/hud/production_art.gd")
+		var picture:=art.picture(art.product(item),56,44)
+		picture.tooltip_text=P.product_name(item)+" · "+kind
+		return picture
 	var icon:=preload("res://scripts/hud/product_glyph.gd").new()
 	icon.item=item;icon.resource=resource
 	icon.tooltip_text=P.product_name(item)+" · "+kind

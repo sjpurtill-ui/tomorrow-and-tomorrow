@@ -1,11 +1,13 @@
 extends RefCounted
 const PATH:="res://assets/ui/materials/material-atlas.png"
+const EARLY_PATH:="res://assets/ui/early-paper/materials-v1.png"
 static var atlas:Texture2D
 static func texture(index:int)->Texture2D:
-	if atlas==null:
-		if ResourceLoader.exists(PATH):atlas=load(PATH) as Texture2D
+	var chosen:=EARLY_PATH if preload("res://scripts/hud/early_civ_art.gd").active() else PATH
+	if atlas==null or atlas.resource_path!=chosen:
+		if ResourceLoader.exists(chosen):atlas=load(chosen) as Texture2D
 		else:
-			var image:=Image.load_from_file(PATH)
+			var image:=Image.load_from_file(chosen)
 			if image==null:return null
 			atlas=ImageTexture.create_from_image(image)
 	var result:=AtlasTexture.new();result.atlas=atlas

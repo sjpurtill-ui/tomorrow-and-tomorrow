@@ -565,9 +565,37 @@ func _person_record(person_id:int)->Dictionary:
 func person_snapshot(person_id:int)->Dictionary:
 	var person:=_person_record(person_id)
 	if person.is_empty():return {}
+	if not person.has("early_art_index"):_assign_early_art_indices()
 	var snapshot:=person.duplicate(true)
 	snapshot["age"]=age_years(person)
+	# Carry ownership out of scoped opponent queries so presentation cannot
+	# accidentally choose the player's appearance after the scope closes.
+	snapshot["appearance_civ_id"]=WorldSimulation.actor_id
+	snapshot["appearance_world_seed"]=GameState.world_seed
 	return snapshot
+
+func _assign_early_art_indices()->void:
+	# Saved appearance belongs to a person, never to their current office.
+	# Prioritize the visible cabinet when upgrading an existing save. Reuse is
+	# unavoidable beyond the four illustrated people; balance it across the cast.
+	var ordered:Array[Dictionary]=[]
+	var added:Dictionary={}
+	for office in active_offices():
+		var holder:Dictionary=WorldSimulation.state.leadership_positions.get(String(office.key),{})
+		var record:=_person_record(int(holder.get("person_id",0)))
+		if not record.is_empty() and not added.has(int(record.person_id)):
+			ordered.append(record);added[int(record.person_id)]=true
+	for record in people:
+		if not added.has(int(record.person_id)):ordered.append(record)
+	var usage:=[0,0,0,0]
+	for record in ordered:
+		if record.has("early_art_index"):usage[posmod(int(record.early_art_index),4)]+=1
+	for record in ordered:
+		if record.has("early_art_index"):continue
+		var slot:=0
+		for candidate in range(1,4):
+			if usage[candidate]<usage[slot]:slot=candidate
+		record["early_art_index"]=slot;usage[slot]+=1
 
 
 func adjust_person_relationship(person_id:int,trust_delta:float=0.0,respect_delta:float=0.0,resentment_delta:float=0.0)->Dictionary:

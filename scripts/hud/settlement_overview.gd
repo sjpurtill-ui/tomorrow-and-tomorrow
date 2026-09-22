@@ -7,7 +7,7 @@ func setup(block:Dictionary)->void:
 	data=block;name="SettlementOverview";add_theme_constant_override("separation",16)
 	var leader:Dictionary=data.leader
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",20);add_child(head)
-	if not leader.is_empty():head.add_child(Portrait.picture(leader,112,140))
+	if not leader.is_empty():head.add_child(Portrait.picture(leader,156,156))
 	var story:=VBoxContainer.new();story.size_flags_horizontal=Control.SIZE_EXPAND_FILL;story.add_theme_constant_override("separation",6);head.add_child(story)
 	story.add_child(T.make_label("LOCAL LEADERSHIP",11,T.GOLD))
 	story.add_child(_serif(String(leader.get("name","Awaiting a leader")),26))
@@ -27,7 +27,7 @@ func setup(block:Dictionary)->void:
 		var panel:=VBoxContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cards.add_child(panel)
 		if bool(item.get("show_art",true)):
 			var art:TextureRect=Food.picture(int(item.art),0,112) if item.kind=="food" else Buildings.picture(int(item.art),0,112)
-			if item.kind!="food":
+			if item.kind!="food" and not Portrait.Early.active():
 				var source:=art.texture as AtlasTexture
 				var crop:=source.region;crop.position.y+=crop.size.y*.20;crop.size.y*=.70;source.region=crop
 			art.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.add_child(art)

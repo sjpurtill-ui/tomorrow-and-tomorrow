@@ -32,13 +32,14 @@ func _add_office(item:Dictionary)->void:
 	card.add_theme_stylebox_override("panel",style);add_child(card)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 	var medallion:=Control.new();medallion.custom_minimum_size=Vector2(64,64);medallion.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(medallion)
+	if not vacant and preload("res://scripts/hud/early_civ_art.gd").active():medallion.custom_minimum_size=Vector2(100,100)
 	if vacant:
 		var empty:=Glyph.new();empty.name="EmptySeat";empty.setup("vacant",Tokens.MUTED);empty.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);medallion.add_child(empty)
 	else:
 		var portrait:=preload("res://scripts/hud/person_portrait.gd").picture(item,0,0)
 		portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);medallion.add_child(portrait)
 	if not vacant:
-		var seal:=Glyph.new();seal.name="OfficeSeal";seal.setup(String(item.get("office_key","office")),accent);seal.custom_minimum_size=Vector2.ZERO;seal.position=Vector2(43,43);seal.size=Vector2(26,26)
+		var seal:=Glyph.new();seal.name="OfficeSeal";seal.setup(String(item.get("office_key","office")),accent);seal.custom_minimum_size=Vector2.ZERO;seal.position=medallion.custom_minimum_size-Vector2(21,21);seal.size=Vector2(26,26)
 		var seal_back:=Panel.new();seal_back.position=seal.position;seal_back.size=seal.size;seal_back.add_theme_stylebox_override("panel",Tokens.flat(Tokens.ROW_BG,Color.TRANSPARENT,0,13));seal_back.mouse_filter=Control.MOUSE_FILTER_IGNORE;medallion.add_child(seal_back);medallion.add_child(seal)
 	var identity:=VBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.alignment=BoxContainer.ALIGNMENT_CENTER;identity.add_theme_constant_override("separation",5);row.add_child(identity)
 	identity.add_child(Tokens.make_label(String(item.get("office_title","OFFICE")).to_upper(),9,Tokens.MUTED if vacant else accent,0.08))

@@ -12,6 +12,15 @@ static func manifest()->Dictionary:
 	return assignments
 static func art(domain:String)->Texture2D:
 	# Field art is used only for a field overview, never as a discovery fallback.
+	if preload("res://scripts/hud/early_civ_art.gd").active():
+		if domain=="demography":return preload("res://scripts/hud/construction_art.gd").texture(7)
+		var topics:={"nutrition":"seed_selection","health":"clean_water","labor":"joinery","knowledge":"tallies","production":"clay_shaping","infrastructure":"clean_water","logistics":"supply_groups","ecology":"seasonal_patterns","institutions":"customary_law","security":"watch_rotation","culture":"oral_epics"}
+		if topics.has(domain):
+			var source:=texture_at("res://assets/ui/research/paper/%s.png" % topics[domain])
+			if source:
+				var framed:=AtlasTexture.new();framed.atlas=source
+				framed.region=Rect2(0,source.get_height()*.38,source.get_width(),source.get_height()*.60)
+				return framed
 	return texture_at("res://assets/ui/research/%s-v1.png" % domain)
 static func texture_at(path:String)->Texture2D:
 	if path.is_empty() or not ResourceLoader.exists(path):return null

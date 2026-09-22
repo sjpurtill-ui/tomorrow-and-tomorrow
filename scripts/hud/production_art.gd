@@ -1,9 +1,11 @@
 extends RefCounted
 const PATH:="res://assets/ui/production/workshop-atlas.png"
+const EARLY_PATH:="res://assets/ui/early-paper/workshops-v1.png"
 static var atlas:Texture2D
 static func texture(index:int)->Texture2D:
-	if atlas==null:
-		atlas=load(PATH) as Texture2D
+	var chosen:=EARLY_PATH if preload("res://scripts/hud/early_civ_art.gd").active() else PATH
+	if atlas==null or atlas.resource_path!=chosen:
+		atlas=load(chosen) as Texture2D
 	var result:=AtlasTexture.new();result.atlas=atlas
 	var cell:=Vector2(atlas.get_width()/4.0,atlas.get_height()/3.0)
 	result.region=Rect2(Vector2(index%4,index/4)*cell,cell)

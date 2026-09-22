@@ -7,6 +7,10 @@ func setup(block:Dictionary)->void:
 	data=block;name="CulturePanel";add_theme_constant_override("separation",18)
 	var opening:=HBoxContainer.new();opening.add_theme_constant_override("separation",22);add_child(opening)
 	var image:=TextureRect.new();image.texture=Visuals.art("culture");image.custom_minimum_size=Vector2(230,190);image.size_flags_horizontal=Control.SIZE_EXPAND_FILL;image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;opening.add_child(image)
+	if Portrait.Early.active():
+		image.texture=Portrait.Early.civic_scene(data.get("lived_values",{}))
+		image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		image.tooltip_text="Illustration of current lived values; not a recorded event or a trait of ancestry."
 	var identity:=VBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.size_flags_stretch_ratio=1.15;identity.add_theme_constant_override("separation",9);opening.add_child(identity)
 	identity.add_child(T.make_label("THE SOCIETY WE ARE BECOMING",11,T.GOLD))
 	identity.add_child(_serif(String(data.identity.name).capitalize(),28))
