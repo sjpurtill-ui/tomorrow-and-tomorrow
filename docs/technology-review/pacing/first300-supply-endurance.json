@@ -1,0 +1,35 @@
+{
+  "runtime": "75f9fdb",
+  "scope": "365 ordinary days continuing the existing year-300 military save, from day 109590 to 109955.",
+  "target_reached": true,
+  "original_save_check": {
+    "error": "Invalid civilization stock balance."
+  },
+  "original_continuation": {
+    "error": "Invalid civilization stock balance."
+  },
+  "equipped_before": 2592,
+  "equipped_after": 2192,
+  "output_delta": {
+    "Building Runoff Channels": 69.0
+  },
+  "food_intake": 1.0,
+  "population": 295599,
+  "finding": "Initial redistribution did not establish sustainable military supply; no additional recorded military workshop output, while drainage components increased by 69. Original save validation rejected a negative near-zero Timber residue.",
+  "roundoff_recovery": {
+    "base": "75f9fdb plus fuel-roundoff correction",
+    "day": 109956,
+    "save_check": {
+      "ok": true
+    },
+    "continuation": {
+      "continuation_detail": [],
+      "continuation_equal": true,
+      "final_restore": {
+        "ok": true
+      },
+      "restore_detail": [],
+      "restored_equal": true
+    }
+  }
+}

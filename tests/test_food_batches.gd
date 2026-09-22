@@ -375,3 +375,13 @@ func test_tiny_processing_outputs_do_not_withdraw_or_charge_the_source()->void:
 			assert_float(float(result.loss)).is_equal(0.0)
 	)
 
+func test_fractional_parboiling_fuel_cannot_leave_negative_stock()->void:
+	WorldSimulation.scoped("batches",func()->void:
+		prepare();equip("grain_parboiling")
+		WorldSimulation.state.resource_stockpiles.Timber=.0077
+		var report:={"inputs":{},"workers":0.0,"methods":{}}
+		B.pay_drying("grain_parboiling",.0077/.015,report,1.0)
+		assert_float(float(WorldSimulation.state.resource_stockpiles.Timber)).is_equal(0.0)
+		assert_float(float(report.inputs.Timber)).is_equal_approx(.0077,.000000001)
+	)
+

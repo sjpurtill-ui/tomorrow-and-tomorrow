@@ -375,3 +375,14 @@ func test_new_orders_after_restore_do_not_mutate_the_saved_snapshot()->void:
 	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
 	assert_array(WorldSimulation.actors.alpha.orders).is_equal(original.actors.alpha.orders)
 
+func test_save_normalizes_only_roundoff_without_mutating_input()->void:
+	var saved:=WorldSimulation.export_state()
+	saved.actors.alpha.state.GameState.resource_stockpiles.Timber=-1e-18
+	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
+	assert_float(float(WorldSimulation.actors.alpha.systems.GameState.resource_stockpiles.Timber)).is_equal(0.0)
+	assert_bool(float(saved.actors.alpha.state.GameState.resource_stockpiles.Timber)<0.0).is_true()
+	saved.actors.alpha.state.GameState.resource_stockpiles.Timber=-.001
+	assert_bool(WorldSimulation.import_state(saved).has("error")).is_true()
+	saved.actors.alpha.state.GameState.resource_stockpiles.Timber=NAN
+	assert_bool(WorldSimulation.import_state(saved).has("error")).is_true()
+

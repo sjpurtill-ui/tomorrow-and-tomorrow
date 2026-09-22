@@ -255,7 +255,7 @@ static func pay_drying(id:String,amount:float,report:Dictionary,weather:float)->
 	var factor:=weather if id=="indirect_solar_food_drying" else 1.0
 	var work:=amount/(float(K.METHODS[id].rate)*WorldSimulation.discovery.adoption(id)*factor)
 	if id=="grain_parboiling":
-		var fuel:=amount*.015;WorldSimulation.state.resource_stockpiles.Timber-=fuel
+		var fuel:=amount*.015;WorldSimulation.state.resource_stockpiles.Timber=maxf(0,float(WorldSimulation.state.resource_stockpiles.Timber)-fuel)
 		report.inputs["Timber"]=float(report.inputs.get("Timber",0))+fuel
 	report.workers+=work;report.methods[id]=float(report.methods.get(id,0))+amount
 	return work

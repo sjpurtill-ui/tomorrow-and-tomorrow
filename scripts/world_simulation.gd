@@ -425,7 +425,7 @@ func validate_payload(payload:Dictionary)->String:
 		if not (population is float or population is int) or not is_finite(float(population)) or float(population)<0:return "Invalid civilization population."
 		if not owned.get("resource_stockpiles") is Dictionary:return "Invalid civilization stores."
 		for amount in owned.resource_stockpiles.values():
-			if not (amount is float or amount is int) or not is_finite(float(amount)) or float(amount)<0:return "Invalid civilization stock balance."
+			if not (amount is float or amount is int) or not is_finite(float(amount)) or float(amount)<-0.000000001:return "Invalid civilization stock balance."
 	return ""
 
 func _restore_state(payload:Dictionary)->Dictionary:
@@ -448,6 +448,11 @@ func _restore_state(payload:Dictionary)->Dictionary:
 			for name in OWNED_SYSTEMS:
 				var instance:=system(name)
 				var fields:Dictionary=saved.state[name].duplicate(true)
+				if name=="GameState":
+					# Older fuel withdrawals can leave sub-nanounit floating residue.
+					# Validation above still rejects actual overdrafts and nonfinite stock.
+					for item:String in fields.resource_stockpiles:
+						if float(fields.resource_stockpiles[item])<0:fields.resource_stockpiles[item]=0.0
 				if name in CURATED:
 					var restored:Dictionary=instance.import_state(fields)
 					if restored.has("error"):failures.append("Civilization %s: %s" % [id,restored.error])

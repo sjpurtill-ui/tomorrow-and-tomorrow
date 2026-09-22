@@ -393,7 +393,7 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 			amount=minf(amount,maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)))/0.04)
 			var fuel:=amount*0.04
 			if fuel>0.0:
-				WorldSimulation.state.resource_stockpiles.Timber-=fuel
+				WorldSimulation.state.resource_stockpiles.Timber=maxf(0,float(WorldSimulation.state.resource_stockpiles.Timber)-fuel)
 				inputs["Timber"]=float(inputs.get("Timber",0.0))+fuel
 			WorldSimulation.state.food_stocks[food_type]-=amount
 			WorldSimulation.state.food_stocks["Preserved food"]+=amount*0.82

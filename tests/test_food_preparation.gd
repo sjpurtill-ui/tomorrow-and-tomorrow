@@ -221,3 +221,12 @@ func test_meals_use_only_fuel_above_craft_reserve()->void:
 	assert_float(float(result.rations)).is_equal_approx(1.0,.00001)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(reserve,.00001)
 
+func test_fractional_smoking_fuel_cannot_leave_negative_stock()->void:
+	GameState.known_discoveries.assign(["smoking"]);GameState.discovery_adoption.smoking=1.0
+	GameState.resource_stockpiles.Timber=.0013
+	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":10.0,"Fish":10.0,"Dry staples":0.0,"Preserved food":0.0}
+	var inputs:Dictionary={}
+	FoodSystem._preserve(100,0,false,inputs)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(0.0)
+	assert_float(float(inputs.Timber)).is_equal_approx(.0013,.000000001)
+
