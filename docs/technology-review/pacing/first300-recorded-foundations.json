@@ -5,7 +5,8 @@
   "limitations": [
     "Recovery campaigns span earlier fixes; the fresh campaign checkpoint covers only 71 years.",
     "This check proves prerequisite availability, not historical environmental signal strength, research cost, adoption, or actual manufacturing capability.",
-    "The 300-year endpoint remains pending."
+    "The 300-year endpoint remains pending.",
+    "Subsequent catalog correction: hydrogen_flame_glassworking now requires water_electrolysis or chloralkali_cells. Older retained discoveries, including the warm checkpoint, are historical evidence under runtime_catalog above, not proof of the corrected current requirements."
   ],
   "recorded_discoveries_checked": 640,
   "cases": [

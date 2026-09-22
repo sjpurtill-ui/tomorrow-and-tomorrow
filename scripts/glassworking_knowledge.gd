@@ -188,7 +188,7 @@ static func entries()->Array[Dictionary]:
       "glass_tube_drawing",
       "chemical_distillation"
     ],
-    "requires_any": [],
+    "requires_any": [["water_electrolysis", "chloralkali_cells"]],
     "learning_routes": [
       {
         "id": "local",
