@@ -1,0 +1,206 @@
+{
+  "runtime": "f5cdab4",
+  "day": 109560,
+  "scope": "Read-only trace of actual year-300 military recovery save with original seed 91420 and real terrain provider.",
+  "capital": {
+    "position": "(1655.074, 0.0, -515.893)",
+    "woodland_density": 0.00725413373744723,
+    "next_accessible_timber_front": {},
+    "deposit_count_before": 104,
+    "deposit_count_after": 104
+  },
+  "nearby_stores": [
+    {
+      "settlement": "Willowwick",
+      "population": 22805.6510224627,
+      "timber": 69.884,
+      "current_export_reserve": 3420.847653369405,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Stonemarch",
+      "population": 14003.1052951557,
+      "timber": 76.652,
+      "current_export_reserve": 2100.4657942733547,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Willowrest",
+      "population": 10730.921759377,
+      "timber": 80.0,
+      "current_export_reserve": 1609.63826390655,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Highford",
+      "population": 6730.94489290944,
+      "timber": 78.956,
+      "current_export_reserve": 1009.6417339364159,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Longbank",
+      "population": 10022.7950337423,
+      "timber": 80.0,
+      "current_export_reserve": 1503.419255061345,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Elmridge",
+      "population": 6768.18872792446,
+      "timber": 80.0,
+      "current_export_reserve": 1015.228309188669,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Greenbridge",
+      "population": 8049.5328498431,
+      "timber": 80.0,
+      "current_export_reserve": 1207.4299274764649,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Riverholm",
+      "population": 7118.38744709037,
+      "timber": 77.696,
+      "current_export_reserve": 1067.7581170635556,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Longvale",
+      "population": 5424.13753161965,
+      "timber": 76.6,
+      "current_export_reserve": 813.6206297429475,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Flintford",
+      "population": 4766.45245003651,
+      "timber": 77.696,
+      "current_export_reserve": 714.9678675054764,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Valeford",
+      "population": 2254.61537455444,
+      "timber": 78.74,
+      "current_export_reserve": 338.192306183166,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Flinthaven",
+      "population": 2181.97557608119,
+      "timber": 80.0,
+      "current_export_reserve": 327.2963364121785,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Alderfield",
+      "population": 1626.63692966977,
+      "timber": 80.0,
+      "current_export_reserve": 243.99553945046551,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Greenbank",
+      "population": 1076.44619573411,
+      "timber": 161.466929360117,
+      "current_export_reserve": 161.4669293601165,
+      "last_resource_day": 109560
+    },
+    {
+      "settlement": "Ashlanding",
+      "population": 1124.49170912575,
+      "timber": 80.0,
+      "current_export_reserve": 168.6737563688625,
+      "last_resource_day": 109560
+    }
+  ],
+  "timber_in_transit": [
+    {
+      "arrival_day": 109561.0,
+      "day": 109556,
+      "departure_day": 109556.0,
+      "destination_id": "settlement_001",
+      "destination_name": "FIRST SETTLEMENT",
+      "id": 358040,
+      "quantity": 0.296640292448672,
+      "reason": "Local leaders arranged a delivery to cover a Timber shortage.",
+      "resource": "Timber",
+      "source_id": "settlement_035",
+      "source_name": "Greenbank",
+      "status": "in_transit",
+      "travel_days": 5.0
+    },
+    {
+      "arrival_day": 109562.0,
+      "day": 109557,
+      "departure_day": 109557.0,
+      "destination_id": "settlement_001",
+      "destination_name": "FIRST SETTLEMENT",
+      "id": 358042,
+      "quantity": 0.197969287084135,
+      "reason": "Local leaders arranged a delivery to cover a Timber shortage.",
+      "resource": "Timber",
+      "source_id": "settlement_035",
+      "source_name": "Greenbank",
+      "status": "in_transit",
+      "travel_days": 5.0
+    },
+    {
+      "arrival_day": 109563.0,
+      "day": 109558,
+      "departure_day": 109558.0,
+      "destination_id": "settlement_001",
+      "destination_name": "FIRST SETTLEMENT",
+      "id": 358044,
+      "quantity": 0.130197130569314,
+      "reason": "Local leaders arranged a delivery to cover a Timber shortage.",
+      "resource": "Timber",
+      "source_id": "settlement_035",
+      "source_name": "Greenbank",
+      "status": "in_transit",
+      "travel_days": 5.0
+    },
+    {
+      "arrival_day": 109564.0,
+      "day": 109559,
+      "departure_day": 109559.0,
+      "destination_id": "settlement_001",
+      "destination_name": "FIRST SETTLEMENT",
+      "id": 358046,
+      "quantity": 0.118320471640146,
+      "reason": "Local leaders arranged a delivery to cover a Timber shortage.",
+      "resource": "Timber",
+      "source_id": "settlement_035",
+      "source_name": "Greenbank",
+      "status": "in_transit",
+      "travel_days": 5.0
+    },
+    {
+      "arrival_day": 109565.0,
+      "day": 109560,
+      "departure_day": 109560.0,
+      "destination_id": "settlement_001",
+      "destination_name": "FIRST SETTLEMENT",
+      "id": 358048,
+      "quantity": 0.121933885684285,
+      "reason": "Local leaders arranged a delivery to cover a Timber shortage.",
+      "resource": "Timber",
+      "source_id": "settlement_035",
+      "source_name": "Greenbank",
+      "status": "in_transit",
+      "travel_days": 5.0
+    }
+  ],
+  "trade_capacity": {
+    "capacity_per_worker": 38.7544424163112,
+    "logistics": 0.772152190317634,
+    "range_km": 123.378262838116,
+    "ready": true,
+    "reason": "Leaders need 30% logistics and 20% institutions to organize regular intercity deliveries.",
+    "speed_km_per_day": 15.0092175225411
+  },
+  "finding": "Capital has no additional qualifying woodland within current search range. Nearby towns hold timber below population-based export reserves; only the small Greenbank settlement sends its surplus. Rates should not be increased to conceal this geographic constraint.",
+  "next_check": "Derive donor protection from actual local construction, workshop commitments and storage needs before changing export reserve policy. No reserve change validated or delivered."
+}
