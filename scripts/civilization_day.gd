@@ -67,7 +67,7 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			var id:=WorldSimulation.actor_id
 			var parts:Array=[]
 			if String(WorldSimulation.actors.get(id,{}).get("controller",""))=="ai" and controller.civilian_arrival_review_due(id,day):
-				for part:Array in controller.civilian_order_steps(id,func()->Dictionary:return controller.current_plan(id)):parts.append(S.step(String(part[0]),timings,part[1]))
+				parts=S.from_parts(controller.civilian_order_steps(id,func()->Dictionary:return controller.current_plan(id)),timings)
 			elif id=="player":
 				WorldSimulation.military.workshop.review_arrivals()
 			return parts

@@ -579,14 +579,7 @@ func _initialize_relations(seed_value:int)->void:
 func advance_to_day(target_day:int)->void:
 	initialize()
 	if WorldSimulation.enabled:
-		last_processed_day=maxi(last_processed_day,target_day)
-		city_intelligence.sample_missions(target_day)
-		Exchange.sample_missions(self,target_day)
-		_complete_due_scout_missions(target_day)
-		scouting_staff.advance(target_day)
-		_process_diplomatic_mission(target_day)
-		_process_local_observation(target_day)
-		WorldSimulation.diplomacy.advance(target_day)
+		preload("res://scripts/day_job.gd").run_parts(owned_day_steps(target_day))
 		return
 	target_day=maxi(0,target_day)
 	if target_day<last_processed_day:
@@ -607,6 +600,21 @@ func advance_to_day(target_day:int)->void:
 	_process_diplomatic_mission(target_day)
 	_process_local_observation(target_day)
 	WorldSimulation.diplomacy.advance(target_day)
+
+
+## An owned world's daily civilization work as ordered [label, callable] parts.
+func owned_day_steps(target_day:int)->Array:
+	return [
+		["world_intelligence",func()->void:
+			last_processed_day=maxi(last_processed_day,target_day)
+			city_intelligence.sample_missions(target_day)],
+		["world_exchange",func()->void:Exchange.sample_missions(self,target_day)],
+		["world_scouts",func()->void:_complete_due_scout_missions(target_day)],
+	]+scouting_staff.advance_steps(target_day)+[
+		["world_diplomatic_mission",func()->void:_process_diplomatic_mission(target_day)],
+		["world_observation",func()->void:_process_local_observation(target_day)],
+		["world_diplomacy",func()->void:WorldSimulation.diplomacy.advance(target_day)],
+	]
 
 
 func _process_strategic_turn(day:int)->void:

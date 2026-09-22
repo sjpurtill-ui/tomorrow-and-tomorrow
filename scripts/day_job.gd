@@ -16,6 +16,24 @@ var result:Dictionary={}
 static func step(label:String,timings:Dictionary,call:Callable)->Dictionary:
 	return {"label":label,"call":call,"timings":timings}
 
+## Converts [label, callable] parts to steps. A part may return an Array of
+## further parts, which run immediately after it.
+static func from_parts(parts:Array,timings:Dictionary={})->Array:
+	var result:Array=[]
+	for part:Array in parts:
+		var call:Callable=part[1]
+		result.append(step(String(part[0]),timings,func()->Variant:
+			var more:Variant=call.call()
+			return from_parts(more,timings) if more is Array else null
+		))
+	return result
+
+## Runs [label, callable] parts synchronously in the same order as from_parts.
+static func run_parts(parts:Array)->void:
+	for part:Array in parts:
+		var more:Variant=(part[1] as Callable).call()
+		if more is Array:run_parts(more)
+
 func add_group(owner:String,steps:Array,run:Dictionary={},done:Callable=Callable())->void:
 	groups.append({"owner":owner,"steps":steps,"run":run,"done":done})
 

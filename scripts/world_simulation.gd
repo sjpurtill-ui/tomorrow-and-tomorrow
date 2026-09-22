@@ -189,16 +189,17 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 					run.skip=true;run.halt=true
 					return null
 				state.elapsed_days=day
-				var orders:Array=[]
-				for part:Array in preload("res://scripts/civilization_controller.gd").order_steps(id):orders.append(S.step(String(part[0]),detail,part[1]))
-				return orders
+				return DayJob.from_parts(preload("res://scripts/civilization_controller.gd").order_steps(id),detail)
 			),S.step("context",detail,func()->Array:
 				var origin:Vector2=world.player_world_origin
 				if state.settlement_site_committed:origin=Vector2(state.settlement_founded_at.x,state.settlement_founded_at.z)
 				var daily:=preload("res://scripts/civilization_day.gd").context(origin,state.convoy_traveling)
 				var phases:=preload("res://scripts/civilization_day.gd").plan(day,daily,Callable(),detail.get("secondary",{}))
 				return preload("res://scripts/civilization_day.gd").steps(phases,detail.get("phases",{}))
-			),S.step("world",detail,func()->void:world.advance_to_day(day))],run,func()->void:
+			),S.step("world",detail,func()->Array:
+				world.initialize()
+				return DayJob.from_parts(world.owned_day_steps(day),detail)
+			)],run,func()->void:
 				if not bool(run.get("skip",false)):actors[id].last_day=day
 			)
 		job.add_group("player",[S.step("rival_projections",timings,func()->Array:return _projection_steps(timings,"rival_projections"))],{},func()->void:
@@ -553,7 +554,13 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 	var run:=clock.plan(day,daily_context,construction)
 	job.add_group("player",clock.steps(run,phases),run)
 	job.add_group("player",[
-		S.step("player_world",timings,func()->void:CivilizationSystem.advance_to_day(day)),
+		S.step("player_world",timings,func()->Array:
+			CivilizationSystem.initialize()
+			if not enabled:
+				CivilizationSystem.advance_to_day(day)
+				return []
+			return DayJob.from_parts(CivilizationSystem.owned_day_steps(day),timings)
+	),
 		S.step("projections",timings,func()->Array:return _projection_steps(timings,"projections")),
 		S.step("views",timings,func()->Array:return _view_steps(timings,"views")),
 		S.step("joint_contact",timings,func()->void:preload("res://scripts/civilization_joint_contact.gd").advance(day)),
