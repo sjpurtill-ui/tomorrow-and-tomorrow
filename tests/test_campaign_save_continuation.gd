@@ -28,6 +28,31 @@ func test_explicit_empty_army_templates_survive_import()->void:
 	assert_bool(MilitaryCampaign.import_state(saved).get("ok",false)).is_true()
 	assert_array(MilitaryCampaign.army_templates).is_empty()
 
+func test_rivals_locate_human_at_actual_origin_and_follow_relocation()->void:
+	WorldSimulation.clear()
+	GameState.reset_for_new_world(9241)
+	GameState.opponent_count=2
+	CivilizationSystem.reset_for_new_world()
+	CivilizationSystem.register_player_origin(Vector2(-10000,2500))
+	WorldSimulation.start_world()
+	for origin:Vector2 in [Vector2(-10000,2500),Vector2(-8000,1800)]:
+		CivilizationSystem.register_player_origin(origin)
+		WorldSimulation.refresh_projections()
+		WorldSimulation.refresh_views()
+		for actor:Dictionary in WorldSimulation.actors.values():
+			var observer:Node=actor.systems.CivilizationSystem
+			var found:=false
+			for civ:Dictionary in observer.civilizations:
+				if civ.id!="human":continue
+				found=true
+				var actual:Vector2=observer._civilization_world_position(civ)
+				assert_float(actual.distance_to(origin)).is_less(.01)
+				var route:Array=[{"x":actor.origin.x,"z":actor.origin.y},{"x":actor.origin.x+10,"z":actor.origin.y}]
+				assert_float(float(observer._closest_route_encounter(route,actual).distance)).is_greater(58.0)
+				var arriving:Array=[{"x":origin.x-10,"z":origin.y},{"x":origin.x+10,"z":origin.y}]
+				assert_float(float(observer._closest_route_encounter(arriving,actual).distance)).is_less(.01)
+			assert_bool(found).is_true()
+
 func test_legacy_human_view_rebuild()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(9241)

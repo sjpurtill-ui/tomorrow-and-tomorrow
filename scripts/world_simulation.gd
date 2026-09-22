@@ -187,6 +187,8 @@ func refresh_projections()->void:
 				region.id="human_"+String(region.id);region.controller="human";region.original_controller="human"
 		human_projection.name=GameState.settlement_name
 		human_projection.world_position=CivilizationSystem.player_world_origin
+		# Contact and route queries read normalized position, not world_position.
+		human_projection.position=Vector2(CivilizationSystem.player_world_origin.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,CivilizationSystem.player_world_origin.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
 		scoped("player",func()->void:project(human_projection))
 	for index in CivilizationSystem.civilizations.size():
 		var civ:Dictionary=CivilizationSystem.civilizations[index]
