@@ -4429,6 +4429,8 @@ func _refresh_settlement_network(force:=false)->void:
 	var halo_segment_count:=0
 	var ownership_triangle_count:=0
 	var visible_secondary_settlements:Array[Dictionary]=[]
+	# One exact height sample set serves fills and both border ribbons.
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_height_at,func(_point:Vector2)->bool:return true)
 	for settlement in network.settlements:
 		if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): visible_secondary_settlements.append(settlement)
 		if not _settlement_boundary_in_current_view(settlement): continue
@@ -4442,11 +4444,11 @@ func _refresh_settlement_network(force:=false)->void:
 		var ownership_color:Color=color
 		# Store base opacity in geometry; the camera fade is updated live in material.
 		ownership_color.a=float(visual_profile.fill_alpha)*(1.0 if bool(settlement.get("primary",false)) else 0.72)
-		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032)
+		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032,samples)
 		var halo_color:=Color("#121817")
 		halo_color.a=0.32 if bool(settlement.get("primary",false)) else 0.24
-		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,boundary,core_width*2.8,halo_color,0.0045)
-		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,color,0.0065)
+		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,boundary,core_width*2.8,halo_color,0.0045,samples)
+		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,color,0.0065,samples)
 	_create_secondary_settlement_markers(visible_secondary_settlements)
 	_create_secondary_settlement_footprints(visible_secondary_settlements,force)
 	if ownership_triangle_count>0:
@@ -5157,7 +5159,8 @@ func _append_settlement_field_mosaic(surface:SurfaceTool,center:Vector3,field_of
 	return appended
 
 
-func _append_settlement_system_ribbon(surface:SurfaceTool,center:Vector3,points:PackedVector2Array,half_width:float,color:Color,lift:float,subdivision_budget:=48,damage_ratio:=0.0,damage_seed:=0)->int:
+## `samples` optionally shares exact terrain height/land results within one build.
+func _append_settlement_system_ribbon(surface:SurfaceTool,center:Vector3,points:PackedVector2Array,half_width:float,color:Color,lift:float,subdivision_budget:=48,damage_ratio:=0.0,damage_seed:=0,samples:RefCounted=null)->int:
 	if points.size()<2: return 0
 	var appended:=0
 	var total_length:=0.0
@@ -5177,13 +5180,15 @@ func _append_settlement_system_ribbon(surface:SurfaceTool,center:Vector3,points:
 			if direction.length_squared()<0.0000001: continue
 			var side:=Vector2(-direction.y,direction.x).normalized()*half_width
 			var world_middle:=Vector2(center.x,center.z)+(start+finish)*0.5
-			if not _settlement_stage_land_at(world_middle) or not _settlement_stage_land_at(world_middle+side) or not _settlement_stage_land_at(world_middle-side): continue
+			if samples:
+				if not samples.land_at(world_middle) or not samples.land_at(world_middle+side) or not samples.land_at(world_middle-side): continue
+			elif not _settlement_stage_land_at(world_middle) or not _settlement_stage_land_at(world_middle+side) or not _settlement_stage_land_at(world_middle-side): continue
 			var corners:=[start-side,finish-side,finish+side,start+side]
 			var uvs:=[Vector2(0.0,0.0),Vector2(1.0,0.0),Vector2(1.0,1.0),Vector2(0.0,1.0)]
 			for corner_index in [0,1,2,0,2,3]:
 				var local_point:Vector2=corners[corner_index]
 				var world_point:=Vector3(center.x+local_point.x,0.0,center.z+local_point.y)
-				world_point.y=_close_surface_height_at(world_point.x,world_point.z)+lift
+				world_point.y=(samples.height_at(world_point.x,world_point.z) if samples else _close_surface_height_at(world_point.x,world_point.z))+lift
 				surface.set_color(color)
 				surface.set_uv(_atlas_uv(Vector2i(3,2),uvs[corner_index]))
 				surface.set_uv2(Vector2(fposmod(direction.angle(),TAU)/TAU,0.37))
@@ -7467,7 +7472,7 @@ func _update_settlement_claim_opacity()->void:
 	if material==null: return
 	material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
 
-func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Array,color:Color,lift:=0.0032)->int:
+func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Array,color:Color,lift:=0.0032,samples:RefCounted=null)->int:
 	if boundary.size()<3: return 0
 	var center:=Vector2.ZERO
 	for point in boundary: center+=point
@@ -7475,10 +7480,10 @@ func _append_settlement_claim_fill(surface:SurfaceTool,boundary:PackedVector2Arr
 	for index in boundary.size():
 		for point in [center,boundary[index],boundary[(index+1)%boundary.size()]]:
 			surface.set_color(color)
-			surface.add_vertex(Vector3(point.x,_height_at(point.x,point.y)+lift,point.y))
+			surface.add_vertex(Vector3(point.x,(samples.height_at(point.x,point.y) if samples else _height_at(point.x,point.y))+lift,point.y))
 	return boundary.size()
 
-func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVector2Array,half_width:float,color:Color,lift:=0.006)->int:
+func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVector2Array,half_width:float,color:Color,lift:=0.006,samples:RefCounted=null)->int:
 	if boundary.size()<3: return 0
 	for index in boundary.size():
 		var a:=boundary[index]
@@ -7500,7 +7505,7 @@ func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVecto
 			for corner_index in [0,1,2,0,2,3]:
 				var point:Vector2=corners[corner_index]
 				surface.set_color(color)
-				surface.add_vertex(Vector3(point.x,_height_at(point.x,point.y)+lift,point.y))
+				surface.add_vertex(Vector3(point.x,(samples.height_at(point.x,point.y) if samples else _height_at(point.x,point.y))+lift,point.y))
 	return boundary.size()
 
 func _create_secondary_settlement_markers(settlements:Array[Dictionary])->void:
@@ -13751,11 +13756,12 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var amber:=Color("#e6bd58"); amber.a=0.92
 	var backing_surface:=SurfaceTool.new(); backing_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var backing_color:=Color(0.015,0.022,0.024,0.78)
-	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_width*1.9,backing_color,clearance,42)
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,_settlement_stage_land_at)
+	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_width*1.9,backing_color,clearance,42,0.0,0,samples)
 	var backing:=MeshInstance3D.new(); backing.name="ScoutCorridorBacking"; backing.mesh=backing_surface.commit()
 	var backing_material:=StandardMaterial3D.new(); backing_material.vertex_color_use_as_albedo=true; backing_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; backing_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; backing_material.no_depth_test=true; backing_material.render_priority=3; backing.material_override=backing_material; root.add_child(backing)
 	var path_surface:=SurfaceTool.new(); path_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_width*0.62,amber,clearance*1.1,42)
+	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_width*0.62,amber,clearance*1.1,42,0.0,0,samples)
 	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=path_surface.commit()
 	var path_material:=StandardMaterial3D.new(); path_material.vertex_color_use_as_albedo=true; path_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; path_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; path_material.no_depth_test=true; path_material.render_priority=4; path.material_override=path_material; root.add_child(path)
 	# A few forward-pointing pennants make the order legible even when the route
