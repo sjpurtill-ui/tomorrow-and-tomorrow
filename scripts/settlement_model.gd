@@ -58,6 +58,9 @@ const CITY_RESOURCE_DEFAULTS:={
 }
 const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_conceptions","lifetime_pregnancy_losses","lifetime_stillbirths","lifetime_maternal_deaths","lifetime_neonatal_deaths","observed_death_age_sum"]
 var _claim_shape_cache:Dictionary={}
+# Nation-wide inputs shared by every record within one network snapshot call.
+# An Object, so saves never capture it; empty outside a snapshot.
+var _network_common:=RefCounted.new()
 var _local_population_scope:=false
 var _national_population_in_scope:=0.0
 var _national_civilian_workforce_fraction:=1.0
@@ -779,11 +782,13 @@ func _territory_access_axes(record:Dictionary)->Array[Dictionary]:
 
 func _territory_drivers(record:Dictionary,population:float)->Dictionary:
 	var context:Dictionary=record.get("territory_context",{})
-	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
-	var working:=0.0
-	for role in ["Food","Survey","Extraction","Construction","Logistics"]:
-		working+=maxf(0.0,WorldSimulation.state.effective_workers(role))
-	var derived_work:=clampf(working/maxf(1.0,able*0.68),0.0,1.0)
+	var derived_work:float=_network_value("derived_work",func()->float:
+		var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
+		var working:=0.0
+		for role in ["Food","Survey","Extraction","Construction","Logistics"]:
+			working+=maxf(0.0,WorldSimulation.state.effective_workers(role))
+		return clampf(working/maxf(1.0,able*0.68),0.0,1.0)
+	)
 	var route_condition:=0.0
 	var active_routes:=0
 	if bool(record.get("primary",false)):
@@ -793,19 +798,22 @@ func _territory_drivers(record:Dictionary,population:float)->Dictionary:
 			active_routes+=1
 			route_condition+=clampf(float(route.get("condition",0.0)),0.0,1.0)
 	if active_routes>0: route_condition/=float(active_routes)
-	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))+WorldSimulation.discovery.effect("route_speed")*0.25,0.0,1.0)
+	var logistics:float=_network_value("territory_logistics",func()->float:return clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))+WorldSimulation.discovery.effect("route_speed")*0.25,0.0,1.0))
 	var derived_travel:=clampf(float(active_routes)/48.0+route_condition*0.38+logistics*0.42,0.0,1.0)
 	var water:=0.72 if bool(record.get("primary",false)) and bool(WorldSimulation.state.water_metrics.get("source_accessible",false)) else 0.08
-	for deposit_variant in WorldSimulation.state.resource_deposits:
-		var deposit:Dictionary=deposit_variant
-		if String(deposit.get("resource",""))=="Freshwater" and String(deposit.get("stage","")) in ["surveyed","accessible","worked","developed"]:
-			water=maxf(water,0.74)
+	var known_freshwater:bool=_network_value("known_freshwater",func()->bool:
+		for deposit_variant in WorldSimulation.state.resource_deposits:
+			var deposit:Dictionary=deposit_variant
+			if String(deposit.get("resource",""))=="Freshwater" and String(deposit.get("stage","")) in ["surveyed","accessible","worked","developed"]:return true
+		return false
+	)
+	if known_freshwater:water=maxf(water,0.74)
 	var age_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(record.get("founded_day",0)))
-	var terrain:=clampf(float(context.get("terrain_permeability",_province_terrain_permeability())),0.0,1.0)
+	var terrain:=clampf(float(context["terrain_permeability"]) if context.has("terrain_permeability") else float(_network_value("province_permeability",func()->float:return _province_terrain_permeability())),0.0,1.0)
 	var work:=maxf(derived_work,clampf(float(context.get("work_access",0.0)),0.0,1.0))
 	var travel:=maxf(derived_travel,clampf(float(context.get("travel_access",0.0)),0.0,1.0))
 	water=maxf(water,clampf(float(context.get("water_access",0.0)),0.0,1.0))
-	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25))+WorldSimulation.discovery.effect("state_capacity"),0.0,1.0)
+	var institutions:float=_network_value("institutions",func()->float:return clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25))+WorldSimulation.discovery.effect("state_capacity"),0.0,1.0))
 	var delegated:Dictionary=record.get("delegated_effects",{})
 	work=clampf(work+float(delegated.get("work",0.0)),0.0,1.0)
 	travel=clampf(travel+float(delegated.get("travel",0.0)),0.0,1.0)
@@ -856,17 +864,20 @@ func _settlement_classification(record:Dictionary,population:float)->String:
 
 func _base_claim_radius_km(record:Dictionary,population:float,territory:Dictionary={})->float:
 	if territory.is_empty():territory=_territory_drivers(record,population)
-	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
-	var survey_share:=clampf(WorldSimulation.state.effective_workers("Survey")/maxf(1.0,able*0.10),0.0,1.0)
-	var administration_share:=clampf(WorldSimulation.state.effective_workers("Administration")/maxf(1.0,able*0.08),0.0,1.0)
 	var logistics:=float(territory.logistics)
-	var state_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25))+WorldSimulation.discovery.effect("state_capacity"),0.0,1.0)
-	var defense_factor:=0.0
-	var military:=_autoload_node("MilitaryCampaign")
-	if military and military.has_method("settlement_defense_snapshot"):
-		var defense:Dictionary=military.settlement_defense_snapshot()
-		defense_factor=clampf(float(defense.get("stage",0))/5.0*float(defense.get("integrity",1.0)),0.0,1.0)
-	var reach:=0.62+survey_share*0.16+administration_share*0.18+logistics*0.16+state_capacity*0.11+defense_factor*0.08
+	var shares:Array=_network_value("claim_shares",func()->Array:
+		var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
+		var survey_share:=clampf(WorldSimulation.state.effective_workers("Survey")/maxf(1.0,able*0.10),0.0,1.0)
+		var administration_share:=clampf(WorldSimulation.state.effective_workers("Administration")/maxf(1.0,able*0.08),0.0,1.0)
+		var state_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25))+WorldSimulation.discovery.effect("state_capacity"),0.0,1.0)
+		var defense_factor:=0.0
+		var military:=_autoload_node("MilitaryCampaign")
+		if military and military.has_method("settlement_defense_snapshot"):
+			var defense:Dictionary=military.settlement_defense_snapshot()
+			defense_factor=clampf(float(defense.get("stage",0))/5.0*float(defense.get("integrity",1.0)),0.0,1.0)
+		return [survey_share,administration_share,state_capacity,defense_factor]
+	)
+	var reach:=0.62+float(shares[0])*0.16+float(shares[1])*0.18+logistics*0.16+float(shares[2])*0.11+float(shares[3])*0.08
 	reach+=float(territory.work)*0.09+float(territory.travel)*0.09+float(territory.water)*0.05
 	reach*=0.82+float(territory.terrain)*0.18
 	var age_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(record.get("founded_day",0)))
@@ -931,7 +942,22 @@ func _claim_boundary(record:Dictionary,radius:float,drivers:Dictionary={})->Pack
 	_claim_shape_cache[id]={"seed":seed,"axes":axes.duplicate(true),"directions":directions,"variations":variations}
 	return boundary
 
+## Returns a nation-wide value once per network snapshot; outside a snapshot
+## it is computed on every call, exactly as before.
+func _network_value(key:String,compute:Callable)->Variant:
+	if not _network_common.has_meta("values"):return compute.call()
+	var values:Dictionary=_network_common.get_meta("values")
+	if not values.has(key):values[key]=compute.call()
+	return values[key]
+
 func settlement_network_snapshot(include_local_state:bool=false)->Dictionary:
+	var owns_memo:=not _network_common.has_meta("values")
+	if owns_memo:_network_common.set_meta("values",{})
+	var snapshot:=_settlement_network_snapshot(include_local_state)
+	if owns_memo:_network_common.remove_meta("values")
+	return snapshot
+
+func _settlement_network_snapshot(include_local_state:bool)->Dictionary:
 	_ensure_primary_settlement_record()
 	var records:Array[Dictionary]=[]
 	for settlement in WorldSimulation.state.player_settlements:
