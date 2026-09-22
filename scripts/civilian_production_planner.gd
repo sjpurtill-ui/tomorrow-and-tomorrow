@@ -54,7 +54,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		for item:String in I.PRODUCTS:
 			if String(I.PRODUCTS[item].output)==resource:candidates.append(item)
 	var installed:Dictionary={}
-	if existing.is_empty() and WorldSimulation.military.equipment_queue.size()>=WorldSimulation.military.production_line_capacity():
+	if existing.is_empty():
 		var reusable:=finished_line(resource)
 		for job:Dictionary in WorldSimulation.military.equipment_queue:
 			if int(job.id)==reusable:installed=P.installed_tooling(job);break
@@ -62,6 +62,18 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 	for item:String in candidates:
 		var recipe:=P.recipe(WorldSimulation.military,item)
 		if recipe.has("error"):continue
+		var candidate_tools:=installed
+		# A blocked paid batch can be set aside by managed turnover. Its tools
+		# remain installed; requiring a second set can deadlock the input chain.
+		if existing.is_empty() and installed.is_empty():
+			var turnover=preload("res://scripts/ai_workshop_turnover.gd")
+			if turnover.authorized(WorldSimulation.actor_id,WorldSimulation.military,WorldSimulation.actor_id=="player"):
+				for job:Dictionary in WorldSimulation.military.equipment_queue:
+					if not bool(job.get("persistent",false)) or bool(job.get("paused",false)):continue
+					if WorldSimulation.actor_id=="player" and not bool(job.get("planner_managed",false)):continue
+					if not turnover.can_suspend(WorldSimulation.military,job):continue
+					var tools:=P.installed_tooling(job)
+					if P.startup_blockers(WorldSimulation.military,item,tools).is_empty():candidate_tools=tools;break
 		if not plan_power and float(I.PRODUCTS[item].get("power",0.0))>0.0 and preload("res://scripts/technology_operations.gd").service("electricity")<=0.0:continue
 		var services_ready:=true
 		for service_name:String in I.PRODUCTS[item].get("services",{}):
@@ -73,7 +85,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		var ready:=true
 		for input:String in recipe.materials:
 			if usable_input(item,input)<float(recipe.materials[input]):ready=false;break
-		if existing.is_empty():ready=P.startup_blockers(WorldSimulation.military,item,installed).is_empty()
+		if existing.is_empty():ready=P.startup_blockers(WorldSimulation.military,item,candidate_tools).is_empty()
 		elif existing.has("abrasive_pending"):ready=P.state(WorldSimulation.military,existing)=="Working"
 		if ready:
 			var direct_work:=float(recipe.work_per_item)*batches
@@ -82,7 +94,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 		var needed:Dictionary={}
 		for input:String in recipe.materials:needed[input]=float(recipe.materials[input])*batches
 		if existing.is_empty():
-			for input:String in P.missing_tooling(recipe.tooling,installed):needed[input]=float(needed.get(input,0.0))+maxf(0,float(recipe.tooling[input])-float(installed.get(input,0)))
+			for input:String in P.missing_tooling(recipe.tooling,candidate_tools):needed[input]=float(needed.get(input,0.0))+maxf(0,float(recipe.tooling[input])-float(candidate_tools.get(input,0)))
 		var first:Dictionary={};var possible:=true
 		var work:=float(recipe.work_per_item)*batches
 		for input:String in needed:
@@ -96,7 +108,7 @@ static func supply(resource:String,target:int,path:Dictionary,plan_power:bool=fa
 			if first.is_empty():first=upstream
 		if not possible:continue
 		if first.is_empty():
-			if existing.is_empty() and not P.startup_blockers(WorldSimulation.military,item,installed).is_empty():continue
+			if existing.is_empty() and not P.startup_blockers(WorldSimulation.military,item,candidate_tools).is_empty():continue
 			first={"item":item,"target":target}
 		if work<best_work:best=first.duplicate();best["work"]=work;best_work=work
 	return best

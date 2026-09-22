@@ -168,7 +168,7 @@ static func production_order(id:String,recommendation:Dictionary)->void:
 	for job:Dictionary in campaign.equipment_queue:
 		if String(job.get("item",""))==item:
 			exists=true;managed=bool(job.get("planner_managed",false));break
-	if not exists and campaign.equipment_queue.size()>=campaign.production_line_capacity():
+	if not exists and (campaign.equipment_queue.size()>=campaign.production_line_capacity() or not campaign.PersistentProduction.startup_blockers(campaign,item,{}).is_empty()):
 		var reusable:=preload("res://scripts/civilian_production_planner.gd").finished_line(String(preload("res://scripts/civilian_industry.gd").product(item).get("output","")))
 		if reusable<0:reusable=preload("res://scripts/armor_equipment.gd").reusable_line(campaign,item)
 		if reusable<0:reusable=finished_ai_line(id,campaign)

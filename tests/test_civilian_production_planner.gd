@@ -271,3 +271,31 @@ func test_arrivals_can_start_paid_civilian_work_between_monthly_reviews()->void:
 		assert_bool(C.civilian_arrival_review_due("paper_ruler",day)).is_false()
 	)
 
+func test_paid_blocked_batch_reuses_tools_for_upstream_supply()->void:
+	WorldSimulation.scoped("paper_ruler",func()->void:
+		clothing_setup()
+		var state=WorldSimulation.state
+		var host=WorldSimulation.military
+		var production=preload("res://scripts/persistent_production.gd")
+		var turnover=preload("res://scripts/ai_workshop_turnover.gd")
+		state.resource_stockpiles["Prepared Fibers"]=1.5
+		assert_bool(host.start_production_line("spun_yarn",10).get("ok",false)).is_true()
+		var job:Dictionary=host.equipment_queue.back()
+		job.planner_managed=true
+		job.installed_tooling={"Clay":3.0,"Timber":4.0,"Fiber Plants":1.0}
+		production.advance(host,job,float(job.work_per_item)*1.5)
+		var paid:=float(job.progress_days)
+		state.resource_stockpiles.Clay=0.0;state.resource_stockpiles.Timber=0.0
+		assert_int(host.production_line_capacity()).is_equal(1)
+		var order:=F.supply("Prepared Fibers",2,{})
+		assert_str(String(order.get("item",""))).is_equal("retted_fibers")
+		C.production_order("paper_ruler",order)
+		turnover.advance("paper_ruler",host)
+		assert_str(String(job.item)).is_equal("retted_fibers")
+		assert_float(float(job.suspended_batches.spun_yarn.progress_days)).is_equal(paid)
+		production.advance(host,job,100.0)
+		assert_float(float(state.resource_stockpiles["Prepared Fibers"])).is_greater_equal(2.0)
+		assert_float(float(state.resource_stockpiles.Timber)).is_equal(0.0)
+		assert_float(float(state.resource_stockpiles.Clay)).is_equal(0.0)
+	)
+

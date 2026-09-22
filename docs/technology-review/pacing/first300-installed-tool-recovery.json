@@ -1,0 +1,25 @@
+{
+  "base_commit": "984b962",
+  "scenario": "Actual warm year-300 saved campaign; thirty ordinary days after installed-tool reuse fix",
+  "from_day": 109500,
+  "through_day": 109530,
+  "output_delta": {
+    "Prepared Fibers": 13.0,
+    "Spun Yarn": 3.0,
+    "pike": 17.0
+  },
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "tests": "25 planner and managed-turnover tests passed, report_146",
+  "limitations": "Short recovery validates this deadlock correction, not building-maintenance recovery or fresh final-build 300-year pacing."
+}

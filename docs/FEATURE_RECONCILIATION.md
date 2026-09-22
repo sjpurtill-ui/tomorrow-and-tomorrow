@@ -2187,3 +2187,11 @@ All 14 crop-nutrition tests pass (report 143), including live inquiry checks for
 The cold endurance campaign reported two script errors near year 243 when baking accessed `observations` on an empty output. A source amount just above the minimum batch size can yield bread below that minimum. `add_lot` then declines the output after the source has already been withdrawn. Food processing now checks its smallest output before withdrawal, starter consumption, fuel use or labor charges. This covers baking, dough forming, starch/residue separation, cultures, leavening and assays. Tiny remainders stay in their source lot for ordinary consumption or decay; there is no resource grant or save-format change.
 
 All 31 food-batch tests pass (report 144), including six tiny-output paths that preserve source food and supplies, plus existing conservation, processing and binary-save continuation checks. The prior cold run's error-bearing segment remains evidence of the defect, not a clean validation result. Campaign checkpoints are retained for continued validation with this fix.
+
+## September 22 — reuse installed tools when a paid input chain stalls
+
+A warm campaign reached day 109500 with exact restoration and next-day continuation, but its civilian yarn workshop had stalled despite raw fiber and water. The planner counted installed tools only on finished lines at full capacity. A partially paid yarn batch, and later an unused line slot, therefore made it demand new timber/clay tools that were already installed.
+
+The planner now recognizes tools on eligible managed batches that can be set aside. The controller reuses an equipped line when a new line cannot afford its setup, even with spare capacity. Existing turnover preserves paid work; paused/manual player work and specialized trials remain protected. No supplies, knowledge or output are granted; save format unchanged.
+
+Validation: 25 planner/turnover tests pass, including the paid-work regression. Thirty ordinary days from the actual year-300 checkpoint produced 13 additional Prepared Fibers, 3 Spun Yarn and 17 pikes; exact save restoration and next-day continuation pass. See `technology-review/pacing/first300-installed-tool-recovery.json`. This closes the demonstrated input deadlock; low building condition and the remaining campaign endpoints are still under review.
