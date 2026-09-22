@@ -1,0 +1,35 @@
+{
+  "runtime": "9f532faa476e69004ec9ef6d4f63d1cfab66dd9f",
+  "start_day": 58765,
+  "end_day": 59130,
+  "decision": "Timber priority changed from Normal (1.0) to High (2.0), matching material screen; no material grants or other changed orders.",
+  "baseline_runtime": "be3a3ad (isolated actor; subsequent human projection fix has no foreign contact here)",
+  "baseline_output": {
+    "Fitted Post Beam Sets": 140.0,
+    "Fitted Timber Splice Sets": 56.0,
+    "arrows": 42.0,
+    "bow": 19.0,
+    "improvised": 78.0,
+    "lance": 134.0,
+    "spear": 3013.0
+  },
+  "high_timber_output": {
+    "Fitted Post Beam Sets": 140.0,
+    "Fitted Timber Splice Sets": 56.0,
+    "arrows": 42.0,
+    "bow": 19.0,
+    "improvised": 78.0,
+    "lance": 145.0,
+    "spear": 3188.0
+  },
+  "additional_output": {
+    "lance": 11.0,
+    "spear": 175.0
+  },
+  "population_both": 5568,
+  "food_intake_both": 1.0,
+  "restore_equal": true,
+  "next_day_equal": true,
+  "target_reached": true,
+  "finding": "High gathering priority improves military output but does not restore civilian workshop output. Cold civilian startup starvation remains under investigation; this is not readiness evidence."
+}
