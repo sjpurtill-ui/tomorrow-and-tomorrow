@@ -290,14 +290,18 @@ static func entries()->Array[Dictionary]:
     "requires": [
       "bloomery_smelting",
       "experimental_controls",
-      "chemical_distillation"
+      "chemical_distillation",
+      "pressure_vessels",
+      "cryogenic_air_separation"
     ],
     "requires_all": [
       "bloomery_smelting",
       "experimental_controls",
-      "chemical_distillation"
+      "chemical_distillation",
+      "pressure_vessels",
+      "cryogenic_air_separation"
     ],
-    "requires_any": [],
+    "requires_any": [["water_electrolysis", "chloralkali_cells"]],
     "learning_routes": [
       {
         "id": "local",

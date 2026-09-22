@@ -2173,3 +2173,10 @@ Validation: 22 food-preparation and whole-campaign save tests pass (GdUnit repor
 In the cold day-67891 trace, a drainage-component order became affordable after materials arrived, but the AI skipped it because its monthly strategy review was not due. Societies with no unpaused civilian line now review civilian investment after arrivals between monthly reviews. Existing civilian lines keep the broader monthly review; hunger, war, manual-order and paid-tooling guards remain intact.
 
 29 planner, workshop-turnover and whole-campaign save tests pass (report 142). The same stalled checkpoint produced six drainage components over 30 days; the meal-fuel fix alone produced none. Both runs kept full current food intake and exact save/next-day continuation. This proves a short recovery, not the final 300-year gate. Evidence: `technology-review/pacing/first300-civilian-arrival-review.json`.
+
+
+## Ammonia catalyst research foundations — 2026-09-21
+
+The woodland recovery campaign learned iron ammonia catalysts around year 194 and industrial catalyst design around year 196. The catalyst inquiry required ironworking, experimental controls and distillation but no source of either reaction gas. It now also requires the existing pressure-vessel and nitrogen-separation foundations, plus either modeled hydrogen-production route. This closes the demonstrated early ammonia route into industrial catalyst design without a calendar lock. Already learned discoveries remain in saves; no operating production or resource stocks are granted.
+
+All 14 crop-nutrition tests pass (report 143), including live inquiry checks for missing nitrogen, hydrogen or pressure control and both valid hydrogen alternatives. The full 884-discovery/670-route graph has no errors or blocked manufacturing paths. Evidence: `technology-review/pacing/first300-ammonia-foundations.json`. Ongoing endurance runs retain their earlier catalog histories and are not fresh proof of the corrected gate.

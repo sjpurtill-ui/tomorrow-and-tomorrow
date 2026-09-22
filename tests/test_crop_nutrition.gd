@@ -197,3 +197,25 @@ func test_legacy_owned_state_without_nutrient_reserves_restores_empty()->void:
 	saved.actors.grower.state.GameState.erase("cultivation_nutrients")
 	assert_bool(WorldSimulation.import_state(saved).has("error")).is_false()
 	WorldSimulation.scoped("grower",func()->void:assert_dict(WorldSimulation.state.cultivation_nutrients).is_equal(N.empty_state()))
+
+func test_ammonia_catalyst_inquiry_requires_reaction_gases_and_pressure_control()->void:
+	WorldSimulation.scoped("grower",func()->void:
+		var entry:Dictionary=WorldSimulation.discovery.catalog_by_id["iron_ammonia_catalysts"]
+		var pathways=preload("res://scripts/knowledge_pathways.gd")
+		var known:Array=["bloomery_smelting","experimental_controls","chemical_distillation"]
+		assert_bool(pathways.chosen(entry,-1,known).is_empty()).is_true()
+		known.append("pressure_vessels")
+		known.append("cryogenic_air_separation")
+		assert_bool(pathways.chosen(entry,-1,known).is_empty()).is_true()
+		for source:String in ["water_electrolysis","chloralkali_cells"]:
+			known.append(source)
+			assert_bool(pathways.chosen(entry,-1,known).is_empty()).is_false()
+			known.erase("cryogenic_air_separation")
+			assert_bool(pathways.chosen(entry,-1,known).is_empty()).is_true()
+			known.append("cryogenic_air_separation")
+			known.erase("pressure_vessels")
+			assert_bool(pathways.chosen(entry,-1,known).is_empty()).is_true()
+			known.append("pressure_vessels")
+			known.erase(source)
+	)
+

@@ -71,6 +71,8 @@ Cold civilian production has a verified short recovery, but sustained output rem
 
 Six distinct long campaigns were resumed from retained checkpoints on `a8b95ef`, including warm, woodland, cold, military, a player-plus-three-opponent world, and the seed-91420 Makers start. Two older duplicate Makers baselines were retired with their checkpoints preserved. These are recovery runs across revisions: a fresh uninterrupted final-build 300-year result is still unproven. Do not restart those recovery runs from day zero or count retired baselines as completed endpoints.
 
+A subsequent catalog correction closes an ammonia-catalyst shortcut found in the woodland history: catalyst inquiry now needs the modeled nitrogen/hydrogen and pressure-control foundations. Fourteen focused checks and the complete dependency graph pass; retained older discoveries and currently running campaigns do not establish fresh pacing under this correction. See [the catalyst foundation evidence](technology-review/pacing/first300-ammonia-foundations.json).
+
 Finish the fresh current-build 300-year campaign and the ongoing warm, woodland, cold, military and full-world campaigns. Confirm final target days, actual output and fielded capabilities, government succession, state validity, and exact save/next-day continuation. The normal twelve-opponent run has passed its 25-year contact, production and save checks. Record any remaining limitations explicitly before marking the first 300 years ready.
 
 Historical intermediate observations are retained in the [development archive](FIRST_300_YEARS_PACING_ARCHIVE.md).

@@ -1,0 +1,24 @@
+{
+  "base_runtime": "911855c",
+  "observation": {
+    "scenario": "woodland recovery",
+    "iron_ammonia_catalysts_year": 193.6,
+    "industrial_catalyst_design_year": 195.5
+  },
+  "correction": "Iron ammonia catalyst inquiry now requires pressure vessels, the modeled nitrogen separation foundation, and either water electrolysis or chloralkali hydrogen production, in addition to its existing iron and experimental foundations.",
+  "validation": {
+    "crop_nutrition_tests": 14,
+    "failures": 0,
+    "report": 143,
+    "live_discoveries": 884,
+    "authored_routes": 670,
+    "graph_errors": [],
+    "blocked_products": {},
+    "blocked_plants": {}
+  },
+  "limitations": [
+    "Existing learned discoveries are retained; no save migration removes knowledge.",
+    "Six running endurance campaigns started before this catalog correction. Their already learned catalyst discoveries do not validate the corrected gate.",
+    "No calendar lock was introduced. Graph reachability and a missing dependency fix do not prove realistic 300-year research pacing."
+  ]
+}
