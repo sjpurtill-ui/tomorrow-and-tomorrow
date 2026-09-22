@@ -1,0 +1,40 @@
+{
+  "runtime": "b2da9cbe1361fbdbdd04503216f4ee7ee45b67ae",
+  "source": "Existing warm real-geography campaign after corrected scouting lifecycle",
+  "from_day": 109955,
+  "final_day": 110320,
+  "target_reached": true,
+  "stop_reason": "target reached",
+  "equipped_before": 2303,
+  "equipped_after": 4547,
+  "workplace_condition_before": 0.0612498716843365,
+  "workplace_condition_after": 0.237742252081045,
+  "recorded_output_and_repair_deltas": {
+    "Building Runoff Channels": 41.0,
+    "Prepared Fibers": 66.0,
+    "Spun Yarn": 58.0,
+    "bow": 749.0,
+    "improvised": 397.0,
+    "pike": 977.0,
+    "spear": 763.0,
+    "trebuchet": 170.0
+  },
+  "food_intake_ratio": 1.0,
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "limitations": [
+    "One year of recovery from an existing campaign; not a fresh uninterrupted final-build 300-year run.",
+    "Equipment receipts include repairs and manufacture.",
+    "Workplace condition improved but remains poor; full building restoration is not demonstrated."
+  ]
+}
