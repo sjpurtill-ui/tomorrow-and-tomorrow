@@ -368,9 +368,9 @@ const LANDSCAPE_VISUALS:=preload("res://scripts/landscape_resource_visuals.gd")
 var woodland_visual_areas:=PackedVector4Array()
 var woodland_visual_key:=""
 var woodland_harvest_detail:MultiMeshInstance3D
-var vegetation_fog_materials:Array[WeakRef]=[]
+var vegetation_fog_materials=preload("res://scripts/fog_material_registry.gd").new()
 var woodland_visual_materials:Array[WeakRef]=[]
-var terrain_fog_materials:Array[ShaderMaterial]=[]
+var terrain_fog_materials=preload("res://scripts/fog_material_registry.gd").new()
 var rendered_fog_revision:=-1
 var foreign_formation_markers:Dictionary={}
 var contact_encounter_markers:Dictionary={}
@@ -1893,22 +1893,11 @@ func _paint_discovery_segment(image:Image,start:Vector2,finish:Vector2,radius_km
 
 
 func _refresh_discovery_mask(force:bool=false)->void:
-	# Read the cheap live header before copying accumulated exploration trails.
-	# Convoy origin still updates every frame, even when no new area is revealed.
 	var revision:=CivilizationSystem.fog_revision
-	var current_origin:Dictionary={"x":CivilizationSystem.player_world_origin.x,"z":CivilizationSystem.player_world_origin.y}
-	var living_vegetation:Array[WeakRef]=[]
-	for reference:WeakRef in vegetation_fog_materials:
-		var material:=reference.get_ref() as ShaderMaterial
-		if material==null:continue
-		living_vegetation.append(reference)
-		material.set_shader_parameter("discovery_mask",discovery_mask_texture)
-		material.set_shader_parameter("fog_current_origin",Vector2(float(current_origin.get("x",0)),float(current_origin.get("z",0))))
-	vegetation_fog_materials=living_vegetation
-	for material in terrain_fog_materials:
-		if material==null or not is_instance_valid(material): continue
-		material.set_shader_parameter("fog_current_origin",Vector2(float(current_origin.get("x",0.0)),float(current_origin.get("z",0.0))))
-	if not force and revision==rendered_fog_revision: return
+	var origin:Vector2=CivilizationSystem.player_world_origin
+	terrain_fog_materials.update(discovery_mask_texture,origin,force)
+	vegetation_fog_materials.update(discovery_mask_texture,origin,force)
+	if not force and revision==rendered_fog_revision:return
 	var snapshot:Dictionary=CivilizationSystem.fog_snapshot()
 	var width:=1024
 	var height:=512
@@ -1929,21 +1918,12 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	else:
 		discovery_mask_texture.update(image)
 	rendered_fog_revision=revision
-	var valid_materials:Array[ShaderMaterial]=[]
-	for material in terrain_fog_materials:
-		if material==null or not is_instance_valid(material): continue
-		material.set_shader_parameter("discovery_mask",discovery_mask_texture)
-		material.set_shader_parameter("fog_current_origin",Vector2(float(current_origin.get("x",0.0)),float(current_origin.get("z",0.0))))
-		valid_materials.append(material)
-	terrain_fog_materials=valid_materials
+	terrain_fog_materials.update(discovery_mask_texture,origin)
+	vegetation_fog_materials.update(discovery_mask_texture,origin)
 
 
 func _fog_shader_parameters(material:ShaderMaterial)->void:
-	material.set_shader_parameter("discovery_mask",discovery_mask_texture)
-	material.set_shader_parameter("fog_world_size",Vector2(world_width,world_depth))
-	material.set_shader_parameter("fog_current_origin",CivilizationSystem.player_world_origin)
-	terrain_fog_materials.append(material)
-
+	terrain_fog_materials.register(material,discovery_mask_texture,Vector2(world_width,world_depth),CivilizationSystem.player_world_origin)
 
 func _world_position_is_revealed(position:Vector3)->bool:
 	return CivilizationSystem._position_is_revealed(Vector2(position.x,position.z))
@@ -4172,10 +4152,7 @@ void fragment() {
 	material.set_shader_parameter("atlas_variant",atlas_variant)
 	var canopy_texture:=load("res://assets/textures/vegetation_canopy_atlas.png")
 	if canopy_texture: material.set_shader_parameter("canopy_atlas",canopy_texture)
-	material.set_shader_parameter("discovery_mask",discovery_mask_texture)
-	material.set_shader_parameter("fog_world_size",Vector2(world_width,world_depth))
-	material.set_shader_parameter("fog_current_origin",CivilizationSystem.player_world_origin)
-	vegetation_fog_materials.append(weakref(material))
+	vegetation_fog_materials.register(material,discovery_mask_texture,Vector2(world_width,world_depth),CivilizationSystem.player_world_origin)
 	return material
 
 func _create_irregular_canopy_mesh(radius:float,height:float)->ArrayMesh:
@@ -12452,7 +12429,7 @@ func _toggle_resource_view()->void:
 func _set_resource_view_enabled(enabled:bool)->void:
 	resource_view_enabled=enabled
 	if enabled: rendered_resource_overlay_zoom_key=""
-	for material in terrain_fog_materials:
+	for material in terrain_fog_materials.live_materials():
 		if material.get_shader_parameter("land_resources")!=null:
 			material.set_shader_parameter("land_resources",1.0 if enabled else 0.0)
 	for river_overlay in river_overlays:
@@ -12750,9 +12727,10 @@ func _create_resource_overlay_batch(stage:String,clusters:Array,zoom:float)->Mul
 	return batch
 func _refresh_contact_encounter_markers()->void:
 	var confirmed:Array[Dictionary]=[]
-	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",false):
+	var view_center:=Vector2(camera.global_position.x,camera.global_position.z) if camera!=null else Vector2.ZERO
+	var view_radius:float=camera.size*1.5+100.0 if camera!=null else INF
+	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",false,view_center,view_radius):
 		var location:Dictionary=city.position
-		if camera!=null and Vector2(camera.global_position.x,camera.global_position.z).distance_to(Vector2(float(location.x),float(location.z)))>camera.size*1.5+100.0: continue
 		confirmed.append({"detailed":camera!=null and camera.size<=2.0,"city_id":city.city_id,"civ_id":city.civ_id,"name":city.name,"x":float(location.x),"z":float(location.z),"report":city})
 	if camera!=null:
 		confirmed.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return Vector2(a.x,a.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z))<Vector2(b.x,b.z).distance_squared_to(Vector2(camera.global_position.x,camera.global_position.z)))

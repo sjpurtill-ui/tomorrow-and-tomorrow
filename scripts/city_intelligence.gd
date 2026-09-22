@@ -175,13 +175,17 @@ func known(observer:String,city_id:String,day:int=-1)->Dictionary:
 		field["age_days"]=age; field["stale"]=age>180
 	return result
 
-func known_cities(observer:String="player",civ_id:String="",age_estimates:bool=true)->Array[Dictionary]:
+func known_cities(observer:String="player",civ_id:String="",age_estimates:bool=true,center:Vector2=Vector2.INF,radius:float=INF)->Array[Dictionary]:
 	# Geometry depicts the last observation. Its size must not grow merely because
 	# uncertainty widens with time; ordinary reports still use aged estimates.
 	var result:Array[Dictionary]=[]
 	var book:Dictionary=records.get(observer,{})
 	for id:String in book:
 		var value:Dictionary=book[id]
+		# Map callers reject distant records before copying their report histories.
+		if is_finite(radius):
+			var location:Dictionary=value.get("position",{})
+			if Vector2(float(location.get("x",0)),float(location.get("z",0))).distance_squared_to(center)>radius*radius:continue
 		if civ_id=="" or value.civ_id==civ_id or value.controller==civ_id:
 			result.append(known(observer,id) if age_estimates else value.duplicate(true))
 	return result
