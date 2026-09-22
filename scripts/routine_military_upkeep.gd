@@ -36,6 +36,7 @@ static func status(host:Node,item:String)->String:
 	for job:Dictionary in host.equipment_queue:
 		if String(job.get("item",""))==item and (String(job.get("job_type",""))=="repair" or job.has("repair_pending")):return "Staff repairs underway"
 	if not Knowledge.understood(host,item):return "Staff waiting for repair knowledge"
+	if host.equipment_queue.size()>=host.production_line_capacity():return "Staff waiting for workshop capacity; repairs remain on the upkeep list"
 	var quote:Dictionary=host.equipment_repair_quote(item,1)
 	if quote.has("error"):return "Staff waiting · "+String(quote.error)
 	return "Staff will schedule repairs automatically"

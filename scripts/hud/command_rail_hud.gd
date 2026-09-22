@@ -21,7 +21,7 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"construction","label":"Buildings","icon":5,"tooltip":"Construction and infrastructure · F7"},
 	{"id":"production","label":"Production","icon":6,"tooltip":"Civilian and military production · F9"},
 	{"id":"civ","label":"Culture","icon":7,"tooltip":"Society and civic dialogue · F4"},
-	{"id":"military","label":"Security","icon":8,"tooltip":"Military forces and supply · F8"},
+	{"id":"military","label":"Military","icon":8,"tooltip":"Military command · F8"},
 	{"id":"inquiry","label":"Research","tooltip":"Inquiry and discoveries · F5"},
 	{"id":"world","label":"World","tooltip":"Scouting and contacts · F6"},
 ]
@@ -717,7 +717,7 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	if not providers.has(section): return
 	if is_instance_valid(MilitaryCampaign.roster_screen):MilitaryCampaign.roster_screen.queue_free()
 	if is_instance_valid(MilitaryCampaign.joint_operations.screen):MilitaryCampaign.joint_operations.screen.queue_free()
-	if expanded and providers[section].has_method("open_expanded_tab") and providers[section].open_expanded_tab(sub):
+	if (expanded or section=="military") and providers[section].has_method("open_expanded_tab") and providers[section].open_expanded_tab(sub):
 		close_dock();return
 	var was_open:=dock.visible
 	detail_history.clear()

@@ -102,7 +102,7 @@ var settlement_defense:Dictionary={}
 
 
 var roster_screen:CanvasLayer
-func open_roster(service:String="army",training:bool=false)->void:
+func open_roster(service:String="army",training:bool=false,page:String="")->void:
 	if is_instance_valid(roster_screen):roster_screen.queue_free()
 	if is_instance_valid(joint_operations.screen):joint_operations.screen.queue_free()
 	var scene:=get_tree().current_scene
@@ -110,6 +110,7 @@ func open_roster(service:String="army",training:bool=false)->void:
 		scene.hud.close_detail();scene.hud.close_dock()
 	roster_screen=load("res://scripts/hud/military_roster_screen.gd").new()
 	roster_screen.service=service;roster_screen.training_view=training
+	roster_screen.page=page if not page.is_empty() else ("training" if training else "forces")
 	get_tree().root.add_child(roster_screen)
 
 

@@ -1,10 +1,7 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## MILITARY section: Formations / Army Builds / Supply.
-## Army builds work like division templates: compose a build from unlocked
-## unit types, train it as one order, deploy it as a field army, then command
-## the army on the map (left-click select, right-click march, then click an
-## observed enemy to intercept). Deep war decisions (fronts, threats,
-## engagements, aftermath) open in War Planning.
+## Compatibility adapter for military shortcuts and older detail providers.
+## Military navigation opens the shared command screen; manufacturing is owned
+## by Production. Map objectives remain a contextual command interaction.
 
 var template_page:=0
 var equipment_page:=0
@@ -30,8 +27,8 @@ func meta()->Dictionary:
 	}
 
 func open_expanded_tab(sub:int)->bool:
-	if GeneralCampaign.active or sub not in [0,2]:return false
-	MilitaryCampaign.open_roster("army",sub==2)
+	if GeneralCampaign.active:return false
+	MilitaryCampaign.open_roster("army",sub==2,["forces","recruitment","training","support"][clampi(sub,0,3)])
 	return true
 
 func tab(sub:int)->Dictionary:

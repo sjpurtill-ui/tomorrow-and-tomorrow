@@ -33,6 +33,10 @@ var layout_size:=Vector2.ZERO
 var roster_button:Button
 var training_button:Button
 var inspection_labels:Dictionary={}
+var page:String="forces"
+var page_buttons:Dictionary={}
+var support_labels:Dictionary={}
+var editor_id:int=-1
 
 func _ready()->void:
 	layer=87;portraits=Art.new();add_child(portraits)
@@ -49,11 +53,11 @@ func _ready()->void:
 		button.toggle_mode=true;service_buttons[domain]=button
 	close_button=_button(header,"×",queue_free);close_button.custom_minimum_size=Vector2(40,38);close_button.tooltip_text="Close · Escape or click the map"
 	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav)
-	roster_button=_button(nav,"Forces",func():training_view=false;selected_row={};_build_body());roster_button.toggle_mode=true
-	training_button=_button(nav,"Training strategy",func():training_view=true;selected_row={};_build_body());training_button.toggle_mode=true
-	management_button=_button(nav,"Recruit & equip",func():_management(1))
-	_button(nav,"Supply",func():_management(3))
-	var map_button:=_button(nav,"Command on map ↗",func():queue_free();MilitaryCampaign.joint_operations.open_hierarchy(service))
+	for entry:Array in [["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"]]:
+		var key:=String(entry[0]);var button:=_button(nav,String(entry[1]),func():_show_page(key))
+		button.toggle_mode=true;page_buttons[key]=button
+	roster_button=page_buttons.forces;training_button=page_buttons.training;management_button=page_buttons.recruitment
+	var map_button:=_button(nav,"Command on map ↗",_map_command)
 	map_button.tooltip_text="Give objectives to this service on the world map. Leaders execute them."
 	scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
 	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",8);scroll.add_child(body)
@@ -77,22 +81,122 @@ func _layout()->void:
 		panel.size.y=clampf(content_height+2,300,maxf(300,view.y-100))
 	if is_instance_valid(policy_grid):policy_grid.columns=4 if panel.size.x>=920 else 2
 
-func _management(sub:int)->void:
-	if service!="army":queue_free();MilitaryCampaign.joint_operations.open_service(service);return
+func _production()->void:
 	var scene:=get_tree().current_scene
-	if scene!=null and "hud" in scene and scene.hud:scene.hud.open_dock("military",sub,false)
-	queue_free()
+	if scene!=null and "hud" in scene and scene.hud:scene.hud.open_dock("production",2)
+
+func _recruitment()->void:
+	if service!="army":
+		_wrapped(body,"Review crews and service organization through command. Manufacturing belongs in Production.")
+		_button(body,"Service command",_map_command)
+		_button(body,"Military production ↗",_production)
+		return
+	if editor_id>=0:_template_editor();return
+	var board:=preload("res://scripts/hud/recruit_deploy_board.gd").new()
+	body.add_child(board)
+	board.setup({"edit_template":func(id:int):editor_id=id;_build_body()})
+
+func _template_editor()->void:
+	var template:Dictionary={}
+	for candidate:Dictionary in MilitaryCampaign.army_template_snapshot().templates:
+		if int(candidate.template_id)==editor_id:template=candidate;break
+	_button(body,"← Recruitment queue",func():editor_id=-1;_build_body())
+	if template.is_empty():_wrapped(body,"This template no longer exists.");return
+	_label(body,String(template.name),21)
+	_wrapped(body,"A formation design sets the soldiers and equipment to recruit. Changing it does not create troops.")
+	for entry:Dictionary in template.entries:
+		var unit:=String(entry.unit);var weapon:=String(entry.weapon)
+		var row:=HBoxContainer.new();body.add_child(row)
+		var name_label:=_label(row,"%s · %s" % [unit.replace("_"," ").capitalize(),MilitaryCampaign.PersistentProduction.product_name(weapon)])
+		name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		_label(row,str(entry.count))
+		for amount:int in [-10,-1,1,10]:
+			var change:=amount
+			_button(row,"%+d" % change,func():MilitaryCampaign.adjust_template_entry(editor_id,unit,weapon,change);_build_body())
+	_label(body,"ADD TO THIS FORMATION",12,Art.COLORS[service])
+	var choices:=HFlowContainer.new();body.add_child(choices)
+	var available:Dictionary=MilitaryCampaign.military_capabilities().get("unit_equipment",{})
+	for unit:String in available:
+		for weapon:String in available[unit]:
+			var kind:=unit;var equipment:=weapon
+			_button(choices,"+10 %s · %s" % [unit.replace("_"," ").capitalize(),MilitaryCampaign.PersistentProduction.product_name(weapon)],func():MilitaryCampaign.adjust_template_entry(editor_id,kind,equipment,10);_build_body())
+	_button(body,"Delete this design",func():MilitaryCampaign.delete_army_template(editor_id);editor_id=-1;_build_body())
+
+func _support_data()->Array:
+	if service!="army":
+		var items:Array=[]
+		for force:Dictionary in _rows():
+			items.append({"id":String(force.id),"label":String(force.name).to_upper(),"value":"%.0f%% condition" % (float(force.get("condition",0))*100),"note":String(force.get("equipment_note",""))+" · "+String(force.get("activity",""))})
+		if items.is_empty():items.append({"id":"empty","label":"SERVICE READINESS","value":"No forces in service","note":"Force condition and crew readiness will appear here."})
+		return items
+	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot()
+	var damaged:=0;var spare:=0;var equipped:=0;var required:=0
+	for count in army.get("damaged_equipment",{}).values():damaged+=int(count)
+	for count in army.get("military_inventory",{}).values():spare+=int(count)
+	for formation:Dictionary in army.get("formations",[]):
+		equipped+=int(formation.get("equipment",0));required+=int(formation.get("equipment_required",0))
+	var deployed:=MilitaryCampaign.field_army_active_personnel()>0
+	var repairs:Array[String]=[]
+	var upkeep=preload("res://scripts/routine_military_upkeep.gd")
+	var repair_items:Array=army.get("damaged_equipment",{}).keys()
+	for job:Dictionary in MilitaryCampaign.equipment_queue:
+		if (job.get("job_type","")=="repair" or job.has("repair_pending")) and job.get("item","") not in repair_items:repair_items.append(job.item)
+	for item:String in repair_items:
+		var underway:int=upkeep.pending(MilitaryCampaign,item);damaged+=underway
+		if int(army.get("damaged_equipment",{}).get(item,0))+underway>0:repairs.append("%s: %s" % [MilitaryCampaign.PersistentProduction.product_name(item),upkeep.status(MilitaryCampaign,item)])
+	return [
+		{"id":"food","label":"DAILY RATIONS","value":"%.1f" % float(army.get("provisions_required_today",0)),"note":"Military provisions required each day"},
+		{"id":"delivery","label":"FIELD SUPPLY","value":"%.0f%%" % (MilitaryCampaign.field_provision_delivery_ratio()*100) if deployed else "No field army","note":"Share of field ration requirements delivered"},
+		{"id":"gear","label":"HOME FORCE EQUIPMENT","value":"%d / %d" % [equipped,required],"note":"%d missing sets · %d spare sets" % [maxi(0,required-equipped),spare]},
+		{"id":"repair","label":"STAFF-MANAGED REPAIRS","value":str(damaged),"note":"No damaged equipment waiting" if repairs.is_empty() else "\n".join(repairs)}]
+
+func _support()->void:
+	_label(body,"READINESS & SUPPLY · "+{"army":"ARMY","navy":"NAVY","air":"AIR FORCE"}[service],18)
+	_wrapped(body,"Staff issue equipment and arrange repairs. Shortages and delays appear here; manufacturing stays in Production.")
+	for item:Dictionary in _support_data():
+		var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",_skin(Color("17272d"),Color("354951"),14));body.add_child(card)
+		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",5);card.add_child(column)
+		_label(column,String(item.label),11,MUTED)
+		support_labels[item.id]={"value":_label(column,String(item.value),23),"note":_wrapped(column,String(item.note))}
+	_button(body,"Military production ↗",_production)
+
+func _update_support()->void:
+	var items:=_support_data()
+	if items.size()!=support_labels.size():_build_body();return
+	for item:Dictionary in items:
+		if not support_labels.has(item.id):_build_body();return
+		support_labels[item.id].value.text=String(item.value)
+		support_labels[item.id].note.text=String(item.note)
+
+func _management(sub:int)->void:
+	_show_page("support" if sub==3 else "recruitment")
+
+func _show_page(value:String)->void:
+	page=value;training_view=page=="training";selected_row={};editor_id=-1
+	scroll.scroll_vertical=0;_build_body()
+
+func _map_command()->void:
+	MilitaryCampaign.joint_operations.open_hierarchy(service)
+	var command=MilitaryCampaign.joint_operations.screen
+	if not is_instance_valid(command):return
+	panel.hide()
+	command.tree_exited.connect(func():
+		if not is_queued_for_deletion():panel.show();_build_body())
 
 func _input(event:InputEvent)->void:
+	if not panel.visible:return
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
 		get_viewport().set_input_as_handled();queue_free()
 	elif event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and not panel.get_global_rect().has_point(event.position):
 		get_viewport().set_input_as_handled();queue_free()
 
 func _process(delta:float)->void:
+	if not panel.visible:return
 	_layout();timer+=delta
 	if timer<.5:return
 	timer=0
+	if page=="support":_update_support();return
+	if page=="recruitment":return # The embedded recruitment board owns live updates.
 	if training_view:_update_policy();return
 	var rows:=_rows();_update_hero(rows)
 	var visible:=_filtered(rows)
@@ -117,20 +221,23 @@ func _bar(parent:Node,color:Color,mode:String="segments")->ProgressBar:
 	var bar:ProgressBar=Gauge.new();bar.ink=color;bar.mode=mode;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(bar);return bar
 func _clear()->void:
 	for child in body.get_children():body.remove_child(child);child.queue_free()
-	bindings.clear();policy_buttons.clear();policy_cards.clear();service_indicators.clear();hero_values.clear();summary_costs.clear();inspection_labels.clear();policy_grid=null
+	bindings.clear();policy_buttons.clear();policy_cards.clear();service_indicators.clear();hero_values.clear();summary_costs.clear();inspection_labels.clear();support_labels.clear();policy_grid=null
 
 func _build_body()->void:
 	var saved_scroll:=scroll.scroll_vertical
-	_clear();heading.text={"army":"ARMY","navy":"FLEET","air":"AIR FORCE"}[service]
-	management_button.text={"army":"Recruit & equip","navy":"Ports & ships","air":"Bases & aircraft"}[service]
+	_clear();heading.text="MILITARY · "+{"army":"ARMY","navy":"FLEET","air":"AIR FORCE"}[service]
+	management_button.text={"army":"Recruit & deploy","navy":"Fleet preparation","air":"Air preparation"}[service]
 	for domain in service_buttons:
 		service_buttons[domain].set_pressed_no_signal(domain==service)
 		service_buttons[domain].add_theme_color_override("font_pressed_color",Art.COLORS[domain])
 		service_buttons[domain].add_theme_stylebox_override("pressed",_skin(Color("293936"),Art.COLORS[domain],9))
-	for button:Button in [roster_button,training_button]:
+	for button:Button in page_buttons.values():
 		button.add_theme_color_override("font_pressed_color",Art.COLORS[service])
 		button.add_theme_stylebox_override("pressed",_skin(Color("293936"),Art.COLORS[service],9))
-	roster_button.set_pressed_no_signal(not training_view);training_button.set_pressed_no_signal(training_view)
+	if training_view:page="training"
+	for key:String in page_buttons:page_buttons[key].set_pressed_no_signal(page==key)
+	if page=="recruitment":_recruitment();return
+	if page=="support":_support();return
 	var rows:=_rows();_hero(rows)
 	if training_view:_policy();scroll.set_deferred("scroll_vertical",saved_scroll);return
 	var filters:=HBoxContainer.new();filters.add_theme_constant_override("separation",6);body.add_child(filters)
@@ -325,7 +432,7 @@ func _inspection()->void:
 	var buttons:=HFlowContainer.new();layout.add_child(buttons)
 	if service=="army":_button(buttons,"Recruit & deploy",func():_management(1))
 	_button(buttons,"Adjust training commitment",func():training_view=true;selected_row={};_build_body())
-	_button(buttons,"Command on map ↗",func():queue_free();MilitaryCampaign.joint_operations.open_hierarchy(service))
+	_button(buttons,"Command on map ↗",_map_command)
 	_update_inspection()
 func _update_inspection()->void:
 	if inspection_labels.is_empty() or selected_row.is_empty():return
