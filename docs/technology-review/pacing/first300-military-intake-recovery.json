@@ -1,0 +1,82 @@
+{
+  "scope": "Thirty ordinary days from the existing year-300 military-priority checkpoint; not a fresh final-build 300-year campaign. Earlier isolated history omitted scouting.",
+  "base": "f693269",
+  "before": {
+    "day": 109500,
+    "population": 284734,
+    "waiting_recruits": 10046,
+    "home_troops": 17907,
+    "training_personnel": 1225,
+    "equipped": {
+      "improvised": 2103
+    },
+    "recorded_output": {
+      "Building Runoff Channels": 244.0,
+      "Fitted Post Beam Sets": 200.0,
+      "Fitted Timber Splice Sets": 100.0,
+      "Prepared Fibers": 62.0,
+      "Rope Coils": 6.0,
+      "Spun Yarn": 60.0,
+      "Thatch Panels": 8.0,
+      "arrows": 3441.0,
+      "bow": 4517.0,
+      "improvised": 61752.0,
+      "pike": 12363.0,
+      "spear": 6233.0
+    },
+    "food_intake_ratio": 1.0,
+    "scouting": {}
+  },
+  "after": {
+    "day": 109530,
+    "population": 285442,
+    "waiting_recruits": 3,
+    "home_troops": 17907,
+    "training_personnel": 1200,
+    "equipped": {
+      "improvised": 2073
+    },
+    "recorded_output": {
+      "Building Runoff Channels": 244.0,
+      "Fitted Post Beam Sets": 200.0,
+      "Fitted Timber Splice Sets": 100.0,
+      "Prepared Fibers": 62.0,
+      "Rope Coils": 6.0,
+      "Spun Yarn": 60.0,
+      "Thatch Panels": 8.0,
+      "arrows": 3441.0,
+      "bow": 4517.0,
+      "improvised": 61757.0,
+      "pike": 12363.0,
+      "spear": 6233.0
+    },
+    "food_intake_ratio": 1.0,
+    "scouting": {
+      "active_parties": 4,
+      "last_day": 109530,
+      "returned_reports": 1,
+      "status": "80 scouts departed from FIRST SETTLEMENT to chart unvisited ground. Expected back in 90 days; staff handle the next departure."
+    }
+  },
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "tests": {
+    "cases": 56,
+    "failures": 0,
+    "errors": 0
+  },
+  "limitations": [
+    "Serving army remains severely under-equipped; existing trainees retain their progress.",
+    "This proves removal of the waiting recruit backlog and bounded new automatic intake, not sustained replacement supply."
+  ]
+}

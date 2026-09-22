@@ -4129,8 +4129,10 @@ func _ensure_automatic_basic_training()->void:
 	if shortage<=0: return
 	var training_room:=maxi(0,training_capacity()-_queued_trainees())
 	var mobilization_room:=maxi(0,recruitment_capacity()-_mobilized_count())
-	var accepted:=mini(shortage,mini(training_room,mobilization_room))
+	var accepted:=mini(shortage,mini(training_room,mobilization_room+aggregate_recruits))
+	accepted=mini(accepted,preload("res://scripts/military_intake_supply.gd").places(self,"levy","improvised"))
 	if accepted<=0: return
+	aggregate_recruits-=mini(aggregate_recruits,accepted)
 	var order_id:=next_training_order_id
 	next_training_order_id+=1
 	training_queue.append({"id":order_id,"mode":"new","automated_basic":true,"unit":"levy","weapon":"improvised","count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"required_days":maxf(3.0,float(UnitCatalog.training_days("levy"))),"injury_accumulator":0.0})

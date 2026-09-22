@@ -83,10 +83,21 @@ func advance(day:int)->void:
 		if bool(result.get("changed",false)):return
 func army_demands()->Array[Dictionary]:
 	var totals:Dictionary={}
+	# Supply initial instruction before staff take more people out of civilian work.
+	var explicit_recruitment:=false
 	for template:Dictionary in host.army_templates:
 		if not bool(template.get("recruitment_requested",false)):continue
+		explicit_recruitment=true
 		var quote:Dictionary=host.template_training_quote(int(template.template_id))
 		for item:String in quote.get("equipment",{}):totals[item]=int(totals.get(item,0))+int(quote.equipment[item])
+	for order:Dictionary in host.training_queue:
+		if order.has("deployment_line") or order.has("build_batch"):continue
+		var item:=String(order.get("weapon","improvised"))
+		var needed:=maxi(0,host._equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))-int(order.get("reserved_equipment",0)))
+		totals[item]=int(totals.get(item,0))+needed
+	if not explicit_recruitment:
+		var watch_gap:=maxi(0,host._home_garrison_target()-int(host.home_army.get("troops",0))-host._automatic_basic_trainees())
+		totals.improvised=int(totals.get("improvised",0))+mini(watch_gap,maxi(0,host.training_capacity()-host._queued_trainees()))
 	# Serving troops need replacement and initial equipment even when no new
 	# recruitment template has been requested. Demand is only their missing gear;
 	# already issued equipment and stored inventory must not be manufactured twice.

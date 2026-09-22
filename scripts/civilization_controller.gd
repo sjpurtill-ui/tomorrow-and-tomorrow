@@ -205,8 +205,6 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	var capacity:=campaign.recruitment_capacity()
 	var target:=mini(roundi(float(capacity)*float(plan.capacity_share)),roundi(WorldSimulation.state.population_exact*float(plan.recruit_share)))
 	if bool(plan.hungry) and not bool(plan.at_war):target=campaign._mobilized_count()
-	var vacancies:=maxi(0,target-campaign._mobilized_count())
-	if vacancies>0:WorldSimulation.submit(id,{"kind":"recruit","count":vacancies})
 	var chosen:="";var weapon:="";var score:=-1.0
 	for unit:String in campaign.UnitCatalog.ARCHETYPES:
 		var definition:Dictionary=campaign.UnitCatalog.ARCHETYPES[unit]
@@ -214,7 +212,14 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 		if item.is_empty():continue
 		var value:=STRATEGY.unit_score(definition,plan)
 		if value>score:chosen=unit;weapon=item;score=value
+	var intake:=preload("res://scripts/military_intake_supply.gd").places(campaign,chosen,weapon)
+	var vacancies:=mini(maxi(0,target-campaign._mobilized_count()),maxi(0,intake-campaign.aggregate_recruits))
+	if String(plan.training)!="suspended" and vacancies>0:WorldSimulation.submit(id,{"kind":"recruit","count":vacancies})
 	land_training_orders(id,chosen,weapon,target,plan)
+	# Release an inherited waiting backlog; keep only one feasible intake in reserve.
+	# This count cannot stand down a serving formation.
+	var surplus:=maxi(0,campaign.aggregate_recruits-intake)
+	if surplus>0:WorldSimulation.submit(id,{"kind":"demobilize","count":surplus})
 	if campaign.field_armies.is_empty() and int(campaign.home_army.get("troops",0))>=4:
 		WorldSimulation.submit(id,{"kind":"deploy","count":maxi(4,roundi(float(campaign.home_army.troops)*float(plan.deploy_share)))})
 	var reinforcement:=preload("res://scripts/home_army_reinforcement.gd").recommendation(campaign)
@@ -258,6 +263,8 @@ static func land_training_orders(id:String,chosen:String,weapon:String,target:in
 	if not support.is_empty():
 		chosen=String(support.unit);weapon=String(support.weapon);count=int(support.count);equipment_target=maxi(4,count)
 	production_order(id,{"item":weapon,"target":equipment_target})
+	count=mini(count,preload("res://scripts/military_intake_supply.gd").places(campaign,chosen,weapon))
+	if String(plan.get("training",""))=="suspended":return
 	if count>0:WorldSimulation.submit(id,{"kind":"train","unit":chosen,"weapon":weapon,"count":count})
 
 static func can_supply_equipment(campaign:Node,item:String)->bool:

@@ -347,6 +347,7 @@ func test_defense_allocation_immediately_mans_watch_and_automates_basic_training
 	assert_int(int(defense.garrison_personnel)).is_equal(16)
 	assert_int(int(defense.garrison_trained)).is_equal(0)
 	assert_int(int(defense.garrison_militia)).is_equal(16)
+	MilitaryCampaign.military_inventory.improvised=16
 	MilitaryCampaign._ensure_automatic_basic_training()
 	assert_int(MilitaryCampaign._automatic_basic_trainees()).is_greater(0)
 	assert_bool(bool(MilitaryCampaign.training_queue[0].get("automated_basic",false))).is_true()

@@ -85,6 +85,7 @@ func test_controller_issues_distinct_paid_orders_and_preserves_player_state()->v
 			WorldSimulation.submit(id,{"kind":"ambition","id":plan.ambition})
 			WorldSimulation.submit(id,{"kind":"found"})
 			var before:=WorldSimulation.state.population_exact
+			for item:String in WorldSimulation.military.military_inventory:WorldSimulation.military.military_inventory[item]=20
 			var inventory:=WorldSimulation.military.military_inventory.duplicate(true)
 			Controller.research_orders(id,plan)
 			Controller.military_orders(id,plan)

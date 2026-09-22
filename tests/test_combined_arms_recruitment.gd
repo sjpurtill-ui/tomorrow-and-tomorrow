@@ -8,6 +8,7 @@ func setup()->Dictionary:
 	var state=WorldSimulation.state;var host=WorldSimulation.military
 	state.settlement_site_committed=true;state.convoy_traveling=false;state.population_allocations.Crafting=10
 	state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
+	state.population_allocations.Defense=100
 	for id:String in ["bow_craft","skirmisher_infantry_screens"]:
 		state.known_discoveries.append(id);state.discovery_adoption[id]=1.0
 	host.home_army=host.simulator.create_formation_force("Home",[{"unit":"spearman","weapon":"spear","count":60,"equipment":60,"training":1.0}])

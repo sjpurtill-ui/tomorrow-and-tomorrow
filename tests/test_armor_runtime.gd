@@ -222,6 +222,7 @@ func test_automatic_armor_chain_reuses_one_free_workshop_and_replenishes_after_i
 			for day:int in 12:
 				var weapon:=A.selection(host,"spearman",p)
 				C.land_training_orders("armor","spearman",weapon,4,p)
+				preload("res://scripts/ai_workshop_turnover.gd").advance("armor",host)
 				for job:Dictionary in host.equipment_queue:
 					if not bool(job.paused):P.advance(host,job,20)
 				if int(host.military_inventory.plate_spear)>=4:break
