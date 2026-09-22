@@ -4295,7 +4295,8 @@ func _refresh_settlement_footprint(force := false) -> void:
 	# systems also need a bounded, stage-specific silhouette that remains legible
 	# after billions of residents have collapsed into aggregate simulation records.
 	_create_settlement_stage_landscape(center,expansion_profile,GameState.settlement_plots,morphology_lod,settlement_land_use_root,defense_snapshot)
-	_create_known_resource_routes(center, settlement_land_use_root)
+	# Resource accessibility is logistical data, not evidence of a built road.
+	# Recorded settlement routes above own the visible path network.
 
 func _refresh_settlement_network(force:=false)->void:
 	if "Hearth Circle" not in GameState.settlement_completed:
@@ -10203,14 +10204,6 @@ func _create_ring_route(center: Vector3, radius: float, width: float, color: Col
 	material.cull_mode=BaseMaterial3D.CULL_DISABLED
 	ring.material_override=material
 	parent.add_child(ring)
-
-func _create_known_resource_routes(center: Vector3, parent: Node3D) -> void:
-	for deposit in ResourceSystem.visible_deposits():
-		if float(deposit.get("route",0.0)) < 0.08 and String(deposit.stage) != "accessible" and String(deposit.stage) != "developed":
-			continue
-		var destination: Vector3 = deposit.position
-		var width := 0.00045 if String(deposit.stage) == "surveyed" else 0.0010
-		_create_land_route(center,destination,width,Color(0.43,0.37,0.27,0.38),parent)
 
 func _create_land_route(start: Vector3, finish: Vector3, width: float, color: Color, parent: Node3D) -> void:
 	var surface := SurfaceTool.new()

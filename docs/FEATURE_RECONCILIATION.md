@@ -2284,3 +2284,6 @@ The command bar now refreshes its date and civilization totals every 0.75 second
 
 ### Practical wonder rewards and victory (2026-09-22)
 Undertakings now provide local storage, preservation, crafting/research effectiveness, household attraction and traveler-carried diplomatic reputation. Three diverse landmarks with twenty years of maintained operation and accounts reaching two foreign societies earn a persistent Enduring Civilization victory. Buildings and World expose the requirements. Optional save fields validated; 12 targeted wonder tests pass (report 184). See docs/UNDERTAKING_REWARDS.md for exact effects and remaining extensions.
+
+### Remove resource-deposit road spokes (2026-09-22)
+Removed the renderer that inferred a dirt road from every visible accessible/developed deposit. Each inferred road allocated its own mesh and material with 79 ribbon segments (474 vertices); the visual cost grew with known resource sites. Recorded settlement routes still render, and extraction/logistics state is unchanged. Source call-site verification confirms no remaining synthetic-resource-road generator. Visual-only removal; no save migration.
