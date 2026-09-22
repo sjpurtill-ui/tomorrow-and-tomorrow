@@ -441,7 +441,9 @@ func _restore_state(payload:Dictionary)->Dictionary:
 	for id:String in payload.actors:
 		var saved:Dictionary=payload.actors[id]
 		create_actor(id,_seed,saved.origin)
-		for key in ["controller","last_day","sequence","orders"]:actors[id][key]=saved[key]
+		for key in ["controller","last_day","sequence"]:actors[id][key]=saved[key]
+		# New orders must not mutate the caller's reusable save snapshot.
+		actors[id].orders=saved.orders.duplicate(true)
 		scoped(id,func()->void:
 			for name in OWNED_SYSTEMS:
 				var instance:=system(name)

@@ -364,3 +364,14 @@ func test_occupation_changes_real_city_and_detaches_real_holding_troops()->void:
 		assert_int(WorldSimulation.state.population_total).is_equal(120)
 		assert_bool(WorldSimulation.military.recovery.home_unavailable()).is_true()
 	)
+func test_new_orders_after_restore_do_not_mutate_the_saved_snapshot()->void:
+	WorldSimulation.submit("alpha",{"kind":"scouting_policy","share":.02,"focus":"exploration"})
+	var saved:=WorldSimulation.export_state()
+	var original:Dictionary=bytes_to_var(var_to_bytes(saved))
+	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
+	WorldSimulation.submit("alpha",{"kind":"scouting_policy","share":.05,"focus":"prospecting"})
+	assert_dict(saved).is_equal(original)
+	assert_int(WorldSimulation.actors.alpha.orders.size()).is_equal(original.actors.alpha.orders.size()+1)
+	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
+	assert_array(WorldSimulation.actors.alpha.orders).is_equal(original.actors.alpha.orders)
+
