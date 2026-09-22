@@ -1,0 +1,70 @@
+{
+  "status": "one ordinary year from the same cold year-131 checkpoint",
+  "days": [
+    47815,
+    48180
+  ],
+  "method": "Same population, deposits, stocks, orders and random state; no calendar skipping or grants. New allocation reduces unused overflowing materials, preserving basic inputs, explicit priorities, operating inputs, samples and startup stock for known crafts.",
+  "checks": {
+    "focused_tests_passed": 31,
+    "restore_equal": true,
+    "next_day_equal": true,
+    "valid_save": {
+      "ok": true
+    }
+  },
+  "before": {
+    "population": 2523,
+    "cities": 22,
+    "material_stocks": {
+      "Clay": 104.281967345487,
+      "Fiber Plants": 220.127197413461,
+      "Stone": 376.016585517571,
+      "Timber": 0.0
+    },
+    "year_output": {
+      "spear": 6.0
+    },
+    "cumulative_output": {
+      "Fitted Post Beam Sets": 140.0,
+      "Fitted Timber Splice Sets": 56.0,
+      "arrows": 42.0,
+      "bow": 10.0,
+      "improvised": 74.0,
+      "lance": 113.0,
+      "spear": 1875.0
+    },
+    "government": {
+      "historical_people": 179,
+      "serving_people": 68,
+      "stage": 4
+    }
+  },
+  "after": {
+    "population": 2523,
+    "cities": 22,
+    "material_stocks": {
+      "Clay": 110.890463171748,
+      "Fiber Plants": 223.993596233271,
+      "Stone": 391.716877078707,
+      "Timber": 0.0
+    },
+    "year_output": {
+      "spear": 44.0
+    },
+    "cumulative_output": {
+      "Fitted Post Beam Sets": 140.0,
+      "Fitted Timber Splice Sets": 56.0,
+      "arrows": 42.0,
+      "bow": 10.0,
+      "improvised": 74.0,
+      "lance": 113.0,
+      "spear": 1913.0
+    },
+    "government": {
+      "historical_people": 179,
+      "serving_people": 68,
+      "stage": 4
+    }
+  }
+}

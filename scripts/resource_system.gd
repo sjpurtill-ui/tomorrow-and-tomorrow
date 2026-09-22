@@ -594,12 +594,13 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var extractors:=WorldSimulation.state.effective_workers("Extraction")
 	var carriers:=WorldSimulation.state.effective_workers("Logistics")
 	var labor_eff:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
+	var storage_priorities:=_storage_gathering_priorities()
 	var total_weight:=0.0
 	for deposit in material_deposits:
-		total_weight+=_extraction_priority(deposit) if float(deposit.remaining)>0.0 else 0.0
+		total_weight+=_extraction_priority(deposit,storage_priorities) if float(deposit.remaining)>0.0 else 0.0
 	var extracted_total:=0.0
 	for deposit in material_deposits:
-		var share:=_extraction_priority(deposit)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
+		var share:=_extraction_priority(deposit,storage_priorities)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
 		var assigned:=extractors*share
 		deposit.workers=roundi(assigned)
 		var profile:=_material_profile(String(deposit.resource))
@@ -644,12 +645,13 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	# Carriers are distributed by waiting bulk and priority.  Distance lowers daily
 	# throughput and separately creates a visible time-in-transit delay.
 	var haul_weight:=0.0
+	storage_priorities=_storage_gathering_priorities()
 	for deposit in material_deposits:
-		haul_weight+=float(deposit.stock_at_source)*_deposit_priority(deposit)
+		haul_weight+=float(deposit.stock_at_source)*_deposit_priority(deposit,storage_priorities)
 	for deposit in material_deposits:
 		var waiting:=float(deposit.stock_at_source)
 		if waiting<=0.0001: continue
-		var share:=waiting*_deposit_priority(deposit)/maxf(0.001,haul_weight)
+		var share:=waiting*_deposit_priority(deposit,storage_priorities)/maxf(0.001,haul_weight)
 		var assigned_carriers:=carriers*share
 		var profile:=_material_profile(String(deposit.resource))
 		var route_factor:=0.34+float(deposit.route)*0.66+WorldSimulation.discovery.effect("route_speed")
@@ -750,7 +752,59 @@ func deposit_exhausted(deposit:Dictionary)->bool:
 	if not deposit.has("remaining"):return false
 	return float(deposit.get("remaining",0.0))<=0.001 and float(deposit.get("stock_at_source",0.0))<=0.001 and in_transit_for(deposit)<=0.001
 
-func _deposit_priority(deposit:Dictionary)->float:
+static var gathering_recipe_reserves:Dictionary={}
+
+func _gathering_startup_reserves()->Dictionary:
+	# Fixed recipe metadata only. Eligibility is read from this society each time.
+	if gathering_recipe_reserves.is_empty():
+		for recipe:Dictionary in preload("res://scripts/civilian_industry.gd").PRODUCTS.values():
+			var gate:=String(recipe.get("gate",""))
+			if not gathering_recipe_reserves.has(gate):gathering_recipe_reserves[gate]={}
+			var amounts:Dictionary=recipe.get("materials",{}).duplicate()
+			for resource_name:String in recipe.get("tooling",{}):amounts[resource_name]=float(amounts.get(resource_name,0))+float(recipe.tooling[resource_name])
+			for resource_name:String in amounts:
+				gathering_recipe_reserves[gate][resource_name]=maxf(float(gathering_recipe_reserves[gate].get(resource_name,0)),float(amounts[resource_name])*2.0)
+	var result:Dictionary={}
+	for gate:String in WorldSimulation.state.known_discoveries:
+		for resource_name:String in gathering_recipe_reserves.get(gate,{}):
+			result[resource_name]=maxf(float(result.get(resource_name,0)),float(gathering_recipe_reserves[gate][resource_name]))
+	return result
+
+func _storage_gathering_priorities()->Dictionary:
+	# Preserve samples and useful inputs, but do not keep filling an overflowing
+	# store with unused ores while the same workers could gather scarce timber.
+	# This is a local, transient allocation: neither stocks nor labor are created.
+	var needed:Dictionary={}
+	for resource_name:String in ["Timber","Stone","Clay","Fiber Plants","Flint","Salt","Medicinal Plants"]:
+		needed[resource_name]=true
+	var campaign:=WorldSimulation.military
+	for job:Dictionary in campaign.equipment_queue:
+		if bool(job.get("paused",false)):continue
+		if bool(job.get("persistent",false)) and int(job.get("target_stock",0))>0 and float(job.get("progress_days",0))<=0.0:
+			if preload("res://scripts/persistent_production.gd").stock(campaign,job)>=int(job.target_stock):continue
+		for resource_name:String in job.get("materials",{}):needed[resource_name]=true
+	for id:String in WorldSimulation.state.technology_operations.get("plants",{}):
+		var record:Dictionary=WorldSimulation.state.technology_operations.plants[id]
+		if int(record.get("installed",0))<=0 or not bool(record.get("enabled",true)):continue
+		for resource_name:String in preload("res://scripts/technology_operations.gd").PLANTS.get(id,{}).get("inputs",{}):needed[resource_name]=true
+	var capacities:=_storage_capacities()
+	var startup_reserves:=_gathering_startup_reserves()
+	var used:Dictionary={}
+	for resource_name:String in WorldSimulation.state.resource_stockpiles:
+		if resource_name=="Food" or not _is_material_resource(resource_name):continue
+		var profile:=_material_profile(resource_name)
+		used[profile.store]=float(used.get(profile.store,0))+maxf(0,float(WorldSimulation.state.resource_stockpiles[resource_name]))*float(profile.bulk)
+	var result:Dictionary={}
+	for resource_name:String in WorldSimulation.state.resource_stockpiles:
+		if needed.has(resource_name) or float(WorldSimulation.state.resource_priorities.get(resource_name,1.0))>1.0:continue
+		# A known craft can accumulate setup plus a first batch before a line
+		# exists. The margin also covers ordinary daily losses and transport.
+		if float(WorldSimulation.state.resource_stockpiles[resource_name])<=maxf(1.0,float(startup_reserves.get(resource_name,0))):continue
+		var store:=String(_material_profile(resource_name).store)
+		if float(used.get(store,0))>float(capacities.get(store,0)):result[resource_name]=0.05
+	return result
+
+func _deposit_priority(deposit:Dictionary,storage_priorities:Dictionary={})->float:
 	var resource_name:=String(deposit.resource)
 	var named:=float(WorldSimulation.state.resource_priorities.get(resource_name,1.0))
 	if resource_name=="Stone":
@@ -763,12 +817,12 @@ func _deposit_priority(deposit:Dictionary)->float:
 	# overflowing materials while essential timber had no stock at all.
 	var working_stock:=maxf(20.0,WorldSimulation.state.population_exact*.08)
 	var scarcity:=2.0/(1.0+maxf(0.0,stored)/working_stock)
-	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.distance_km)/45.0))
+	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.distance_km)/45.0))*float(storage_priorities.get(resource_name,1.0))
 
-func _extraction_priority(deposit:Dictionary)->float:
+func _extraction_priority(deposit:Dictionary,storage_priorities:Dictionary={})->float:
 	var reserve:=float(deposit.get("remaining",0.0))
 	var working_reserve:=maxf(1.0,float(deposit.get("initial_amount",1.0))*0.05)
-	return _deposit_priority(deposit)*clampf(reserve/working_reserve,0.0,1.0)
+	return _deposit_priority(deposit,storage_priorities)*clampf(reserve/working_reserve,0.0,1.0)
 
 func _storage_capacities()->Dictionary:
 	var pop:=WorldSimulation.state.population_exact

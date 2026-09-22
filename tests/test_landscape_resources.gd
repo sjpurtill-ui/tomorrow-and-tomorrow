@@ -2,6 +2,7 @@ extends GdUnitTestSuite
 const Terrain:=preload("res://scripts/local_terrain.gd")
 func before_test()->void:
 	GameState.reset_for_new_world(864209)
+	MilitaryCampaign.reset_for_new_world()
 	ResourceSystem.reset_for_new_world()
 	ResourceSystem.initialize()
 	GameState.resource_deposits=[]
@@ -210,3 +211,59 @@ func test_fractional_work_is_not_reported_as_no_extractors()->void:
 	var events:Array[Dictionary]=[]
 	ResourceSystem._update_deposit_bottleneck(deposit,1.0,events)
 	assert_str(String(deposit.bottleneck)).is_equal("Flowing")
+
+func test_overflowing_unused_ores_release_finite_workers_for_timber()->void:
+	GameState.resource_stockpiles={"Timber":0.0,"Copper Ore":10.0,"Iron Ore":10.0}
+	GameState.founding_manifest={}
+	GameState.population_allocations.Extraction=10
+	GameState.population_allocations.Logistics=10
+	var timber:=ResourceSystem._deposit("Timber",Vector3.ZERO,.7,1000.0,0)
+	var copper:=ResourceSystem._deposit("Copper Ore",Vector3.ZERO,.7,1000.0,1)
+	for deposit:Dictionary in [timber,copper]:
+		deposit.stage="accessible";deposit.access=1.0;deposit.route=1.0
+	GameState.resource_deposits=[timber,copper]
+	ResourceSystem._process_material_flow({"settled":false,"origin":Vector3.ZERO,"tools":1.0})
+	assert_float(float(timber.daily_yield)).is_greater(float(copper.daily_yield)*20.0)
+	assert_float(float(copper.daily_yield)).is_greater(0.0)
+	# Ordinary renewable occurrences recover 35% of the actual cut at source.
+	assert_float(float(timber.remaining)+float(timber.lifetime_extracted)*.65).is_equal_approx(1000.0,.000001)
+	assert_float(float(copper.remaining)+float(copper.lifetime_extracted)).is_equal_approx(1000.0,.000001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(0.0) # Still must haul it home.
+	assert_float(float(GameState.material_metrics.extraction_workers)).is_less_equal(10.0)
+
+func test_gathering_preserves_samples_explicit_priorities_and_needed_inputs()->void:
+	GameState.founding_manifest={}
+	GameState.resource_stockpiles={"Copper Ore":10.0,"Iron Ore":.5,"Coal":10.0}
+	assert_float(float(ResourceSystem._storage_gathering_priorities().get("Copper Ore",1))).is_equal(.05)
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Iron Ore")).is_false()
+	GameState.resource_priorities["Copper Ore"]=2.0
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_false()
+	GameState.resource_priorities.clear()
+	MilitaryCampaign.equipment_queue=[{"job_type":"civilian","item":"refined_copper","materials":{"Copper Ore":2.0,"Timber":2.0},"persistent":true,"target_stock":5,"progress_days":0.0,"paused":false}]
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_false()
+	MilitaryCampaign.equipment_queue[0].paused=true
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
+	MilitaryCampaign.equipment_queue[0].paused=false
+	GameState.resource_stockpiles["Refined Copper"]=5.0
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
+	GameState.technology_operations={"plants":{"steam_generator":{"installed":1,"enabled":true}}}
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Coal")).is_false()
+	GameState.technology_operations.plants.steam_generator.enabled=false
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Coal")).is_true()
+
+func test_free_storage_keeps_unused_materials_available_for_future_choices()->void:
+	GameState.resource_stockpiles={"Copper Ore":10.0}
+	GameState.founding_manifest={"secure_storage_bulk":100.0}
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_false()
+
+func test_known_craft_can_accumulate_startup_inputs_before_a_line_exists()->void:
+	GameState.resource_stockpiles={"Copper Ore":3.0}
+	GameState.founding_manifest={}
+	GameState.known_discoveries=[]
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
+	GameState.known_discoveries=["copper_smelting"]
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_false()
+	GameState.resource_stockpiles["Copper Ore"]=10.0
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
+	GameState.known_discoveries=[]
+	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
