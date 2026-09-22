@@ -48,7 +48,7 @@ Both endpoints passed exact restoration and next-day continuation after the expl
 
 Other completed checks:
 
-- Research chronology: 640 recorded discoveries across five actual campaign histories had their recorded foundations available when learned. All also have a satisfied current authored route. This covers checkpoints through years 71–187, not the final 300-year endpoint; [evidence and limitations](technology-review/pacing/first300-recorded-foundations.json).
+- Research chronology: 640 recorded discoveries across five actual campaign histories had their recorded foundations available when learned. All also have a satisfied current authored route. This covers checkpoints through years 71â€“187, not the final 300-year endpoint; [evidence and limitations](technology-review/pacing/first300-recorded-foundations.json).
 
 - Default player-plus-twelve-opponent opening: one year, no reported state errors, viable water access, valid saves and exact whole-game continuation. A longer default-count run is underway.
 - Actual player-plus-three-opponent campaign: year-87 checkpoint restored and advanced with exact whole-game equality. The long run continues.

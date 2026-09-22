@@ -2118,3 +2118,7 @@ All 69 civic implementation, administration, answers/alerts, culture-effect, sco
 ## 2026-09-21 — Correct government evidence labels
 
 The pacing report previously called every active named government roster member a serving person, including candidates without a post. Separate distinct officeholders, central posts, settlement leaders and unappointed candidates; retain a distinct count of all recorded people. Schema 16 documents the meaning of older snapshot keys. A direct read of the cold year-155 checkpoint confirms 90 active records means 36 distinct officeholders and 54 candidates across 33 settlements. This changes reporting only; saves, population, labor and succession behavior are unchanged. Validation: pacing production evidence suite, including dual-role and inactive-person counts.
+
+## 2026-09-21 — Validate recorded research foundations
+
+Five actual campaign checkpoints verify 640 chronological discovery origins against knowledge already learned, beginning with ten inherited practices. Zero missing origin records or unmet recorded foundations; current alternative routes also satisfy all learned discoveries. The initial scratch audit incorrectly treated local-route requirements as universal. River craft and clean-water practice used valid alternatives. No gameplay restriction was added. Evidence excludes historical signal strength, physical manufacturing and unfinished 300-year endpoints.
