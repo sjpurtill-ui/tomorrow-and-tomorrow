@@ -84,6 +84,20 @@ func test_trade_is_gated_and_deliveries_are_conserved_and_delayed()->void:
 	assert_float(float(SettlementModel.city_resource_snapshot("dawngate").stores.Timber)).is_equal_approx(shipped,0.00001)
 	assert_array(GameState.city_trade_shipments).is_empty()
 
+func test_large_town_can_export_timber_while_retaining_local_construction_buffer()->void:
+	GameState.population_exact=2000.0;GameState.population_total=2000
+	for city:Dictionary in GameState.player_settlements:city.erase("population_state")
+	GameState.resource_stockpiles.Timber=80.0
+	GameState.society_capacities.logistics=.8;GameState.society_capacities.institutions=.8
+	GameState.elapsed_days=1.0
+	SettlementModel.process_city_trade()
+	var shipped:=0.0
+	for shipment:Dictionary in GameState.city_trade_shipments:
+		if shipment.resource=="Timber":shipped+=float(shipment.quantity)
+	assert_float(shipped).is_greater(0.0)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_greater_equal(20.0)
+	assert_float(float(GameState.resource_stockpiles.Timber)+shipped).is_equal_approx(80.0,.000001)
+
 func test_transport_progression_improves_reach_and_capacity()->void:
 	GameState.society_capacities["logistics"]=0.3
 	var early:=SettlementModel.city_trade_capacity()

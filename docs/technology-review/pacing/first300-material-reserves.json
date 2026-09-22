@@ -1,0 +1,66 @@
+{
+  "base": "2d40e27",
+  "scope": "30 ordinary days from existing year-300 military save. Geography and all material costs unchanged. Not a fresh campaign or sustained supply proof.",
+  "before": {
+    "day": 109560,
+    "food_intake": 1.0,
+    "waiting_recruits": 1,
+    "equipped": {
+      "improvised": 2064
+    },
+    "recorded_workshop_output": {
+      "Building Runoff Channels": 244.0,
+      "Fitted Post Beam Sets": 200.0,
+      "Fitted Timber Splice Sets": 100.0,
+      "Prepared Fibers": 62.0,
+      "Rope Coils": 6.0,
+      "Spun Yarn": 60.0,
+      "Thatch Panels": 8.0,
+      "arrows": 3441.0,
+      "bow": 4517.0,
+      "improvised": 61781.0,
+      "pike": 12363.0,
+      "spear": 6233.0
+    }
+  },
+  "after": {
+    "day": 109590,
+    "food_intake": 1.0,
+    "waiting_recruits": 0,
+    "equipped": {
+      "improvised": 2592
+    },
+    "recorded_workshop_output": {
+      "Building Runoff Channels": 265.0,
+      "Fitted Post Beam Sets": 200.0,
+      "Fitted Timber Splice Sets": 100.0,
+      "Prepared Fibers": 62.0,
+      "Rope Coils": 6.0,
+      "Spun Yarn": 60.0,
+      "Thatch Panels": 8.0,
+      "arrows": 3441.0,
+      "bow": 4517.0,
+      "improvised": 62342.0,
+      "pike": 12363.0,
+      "spear": 6233.0
+    }
+  },
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "tests": {
+    "cases": 17,
+    "failures": 0,
+    "details": "15 city-resource tests passed in report_157; 2 reserve tests passed in report_158 after fixing a typed-array fixture assignment."
+  },
+  "limitation": "Longer continuation needed to distinguish ongoing supply from redistribution of initial stockpiles. Recorded workshop output includes separately tagged repairs."
+}

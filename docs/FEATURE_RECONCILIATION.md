@@ -2233,3 +2233,9 @@ Validation: 47 unique focused tests across repair, persistent production, specia
 ### Remaining timber constraint: geography and export reserves (2026-09-22)
 
 Read-only trace of day 109560 on f5cdab4 with the original real terrain seed confirms no additional qualifying timber front near the capital (local cover 0.00725). Nearby towns hold roughly 70–80 timber but their population-based export reserves require hundreds to thousands; Greenbank alone is above its reserve and sends a small flow. This is distinct from the repaired intake/repair bugs. Evidence: `technology-review/pacing/first300-timber-trade-diagnosis.json`. The next policy check must protect real local building/workshop needs while permitting useful intercity supply. No reserve or regrowth rate change has been validated.
+
+### Local material commitments replace population-scaled export hoarding (2026-09-22)
+
+Non-food intercity export reserves now retain a 20-unit local buffer or the greater identified local bill: eligible unfinished civic construction, the unpaid portion plus next batch of active workshop lines, and 30 days of installed industrial inputs. Primary workshops/plants do not reserve inputs in unrelated secondary towns. Existing water/clothing targets, 45-day food reserves, known routes, carrier capacity and delivery delays remain enforced. No free resources, regrowth changes or save migration.
+
+Seventeen focused city-resource/reserve tests passed. The actual military recovery save advanced from day 109560 to 109590: equipped weapons rose 2,064 to 2,592; civilian output gained 21 drainage components; food intake remained 100%; state validation, exact restore and next-day replay passed. Evidence: `technology-review/pacing/first300-material-reserves.json`. A longer continuation is still required to establish sustainable recovery beyond redistribution of existing stocks.

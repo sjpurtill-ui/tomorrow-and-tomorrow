@@ -356,11 +356,13 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	var capacity:=city_trade_capacity()
 	if not bool(capacity.ready) or WorldSimulation.state.player_settlements.size()<2: return
 	var water_targets:Dictionary={}
+	var material_reserves:Dictionary={}
 	var conduit_supply:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate()
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if not String(city.get("occupied_by","")).is_empty():continue
 		water_targets[String(city.id)]=with_city_resources(String(city.id),func()->Dictionary:
 			return with_local_population(func()->Dictionary:
+				material_reserves[String(city.id)]=preload("res://scripts/local_material_reserves.gd").calculate()
 				var needs:=preload("res://scripts/water_conveyance_investment.gd").targets(conduit_supply)
 				var dock_needs:=preload("res://scripts/naval_dock_investment.gd").targets()
 				for item:String in dock_needs:needs[item]=float(needs.get(item,0))+float(dock_needs[item])
@@ -428,7 +430,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				var distance:=source_position.distance_to(destination_position)
 				if distance>float(capacity.range_km) or distance>=nearest: continue
 				var source_population:=float(local_populations[String(source.id)])
-				var reserve:=source_population*45.0 if resource_name=="Food" else maxf(20.0,source_population*0.15)
+				var reserve:=source_population*45.0 if resource_name=="Food" else maxf(20.0,float(material_reserves.get(String(source.id),{}).get(resource_name,0)))
 				if resource_name not in CITY_TRADE_GOODS:reserve=0.0
 				reserve=maxf(reserve,float(water_targets.get(String(source.id),{}).get(resource_name,0)))
 				var spare:=float(local_stores[String(source.id)].get(resource_name,0.0))-reserve
