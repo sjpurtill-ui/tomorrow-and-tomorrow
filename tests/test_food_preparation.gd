@@ -199,3 +199,25 @@ func test_inspector_receives_operating_conditions_and_grouped_alternatives()->vo
 		assert_str(item.operating_summary).contains("Logistics")
 		assert_array(item.requires_any).is_equal([["clay_shaping","basketry"]])
 	assert_bool(found).is_true()
+
+func test_optional_meals_preserve_known_craft_startup_timber()->void:
+	GameState.known_discoveries.append("timber_post_beam_connections")
+	GameState.population_allocations.Crafting=10
+	GameState.resource_stockpiles.Timber=.5
+	var plan:=Meals.plan(10,20,false)
+	assert_float(float(plan.capacity)).is_equal(0.0)
+	var result:=Meals.prepare({"method":"hearth_roasting_control","capacity":20.0,"workers":1.0,"inputs":{"Timber":.03}},{"Fresh meat":20.0})
+	assert_float(float(result.rations)).is_equal(0.0)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(.5)
+
+func test_meals_use_only_fuel_above_craft_reserve()->void:
+	GameState.known_discoveries.append("timber_post_beam_connections")
+	GameState.population_allocations.Crafting=10
+	var reserve:=float(ResourceSystem._gathering_startup_reserves().get("Timber",0.0))
+	assert_float(reserve).is_greater(0.0)
+	GameState.resource_stockpiles.Timber=reserve+.03
+	var plan:=Meals.plan(10,20,false)
+	var result:=Meals.prepare(plan,{"Fresh meat":20.0})
+	assert_float(float(result.rations)).is_equal_approx(1.0,.00001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(reserve,.00001)
+

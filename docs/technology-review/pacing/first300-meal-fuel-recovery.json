@@ -1,0 +1,30 @@
+{
+  "status": "short recovery evidence; civilian workshop stall remains unresolved",
+  "start_day": 67890,
+  "end_day": 67920,
+  "target_reached": true,
+  "output_increase": {
+    "bow": 21.0,
+    "improvised": 17.0
+  },
+  "food_intake": 1.0,
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "cause": "Before change, a one-day phase trace showed 0.5089 Timber after resource delivery and zero after household consequences. Saved food metrics attribute 0.4672 Timber to earth-oven preparation for a 0.001324 diet quality bonus.",
+  "rule": "Optional meal preparation respects existing gathering startup reserves for known crafts. Actual food intake and preservation remain separate.",
+  "limitations": [
+    "30 days at one recovered cold seat; not a full 300-year proof",
+    "The pilot restricted the reserve to days with assigned makers/builders; final implementation retains it between assignments as well.",
+    "No additional civilian goods in this pilot. Military output resumed; further allocation investigation required."
+  ]
+}

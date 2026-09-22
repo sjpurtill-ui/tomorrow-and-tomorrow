@@ -2157,3 +2157,12 @@ An older warm campaign learned hydrogen-flame glassworking with only glass-tube 
 The terrain scene was recalculating the seed's current starting candidate every time it loaded, even when the campaign already had a founded settlement. That could move the local origin and opening camera away from saved settlement geography. The scene now opens at the saved founding site (or a resumed unfounded caravan's recorded position). Only new campaigns choose a seeded start. The opening camera uses the existing 10,000-foot preset immediately rather than a 190-km vertical footprint.
 
 Six camera tests pass (GdUnit report 136), covering saved settled and traveling origins, opening distance, cumulative zoom and the four distance presets. A read-only scene-load probe of the player's day-29027 quicksave placed the saved city at the screen center with zero horizontal camera displacement and approximately 10,007 feet of clearance (the marker's small terrain offset explains the difference from the nominal preset). No save data is rewritten. This is camera projection validation, not a claim of rendered visual approval. The running player session must reload after integration; it is not terminated by this fix.
+
+
+## Optional meal fuel and workshop startup reserves — 2026-09-21
+
+A one-day trace of the stalled cold campaign showed household food processing consuming every delivered Timber unit before construction and workshops. Its earth-oven cooking bought only a 0.001324 diet quality bonus with the remaining 0.4672 Timber. Optional meal preparation now respects the gathering system's existing reserve for known craft inputs, including when supplies change between planning and cooking. It still pays for every prepared ration. Meal intake, preservation, fire maintenance, and their separate material costs are unchanged.
+
+The 30-day pilot resumed 21 bows and 17 simple levy weapons, with full current food intake and exact save/next-day continuation. Civilian output did not increase: that allocation problem remains open. See `technology-review/pacing/first300-meal-fuel-recovery.json` for the pilot's scope and its small final-rule difference. City-reserve reduction and disabling the kiln had not restored civilian output and were rejected; neither experiment is part of this change.
+
+Validation: 22 food-preparation and whole-campaign save tests pass (GdUnit report 141), including both new reserve regressions.

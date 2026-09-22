@@ -113,6 +113,15 @@ const ENTRIES=[
 # Select the most productive supplied method. Reserve time before preservation;
 # execute only against meals eaten and remaining supplies, so interrupted supply
 # cannot create free preparation. Unused reserved time is conservative idle time.
+static func available_input(resource:String)->float:
+	var state=WorldSimulation.state
+	var stock:=maxf(0.0,float(state.resource_stockpiles.get(resource,0.0)))
+	if resource!="Timber":return stock
+	# Meal quality is optional. Keep the same starter materials that gathering
+	# already targets for known crafts, including between work assignments.
+	var reserves:Dictionary=WorldSimulation.resources._gathering_startup_reserves()
+	return maxf(0.0,stock-float(reserves.get("Timber",0.0)))
+
 static func plan(logistics:float, demand:float, traveling:bool)->Dictionary:
 	var state=WorldSimulation.state
 	var best:Dictionary={"method":"","capacity":0.0,"workers":0.0,"inputs":{},"rate":0.0}
@@ -131,7 +140,7 @@ static func plan(logistics:float, demand:float, traveling:bool)->Dictionary:
 			elif "basketry" in state.known_discoveries:inputs["Fiber Plants"]=0.002
 			else:continue
 		var capacity:=minf(food,minf(demand,logistics*STAFF_SHARE*rate))
-		for resource:String in inputs:capacity=minf(capacity,maxf(0.0,float(state.resource_stockpiles.get(resource,0.0)))/float(inputs[resource]))
+		for resource:String in inputs:capacity=minf(capacity,available_input(resource)/float(inputs[resource]))
 		if capacity>float(best.capacity):best={"method":id,"capacity":capacity,"workers":capacity/rate,"inputs":inputs,"rate":rate}
 	return best
 
@@ -146,7 +155,7 @@ static func prepare(plan:Dictionary, consumed:Dictionary)->Dictionary:
 	var amount:=minf(fresh,maxf(0.0,float(plan.get("capacity",0.0))))
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	var inputs:Dictionary=plan.get("inputs",{})
-	for resource:String in inputs:amount=minf(amount,maxf(0.0,float(stocks.get(resource,0.0)))/float(inputs[resource]))
+	for resource:String in inputs:amount=minf(amount,available_input(resource)/float(inputs[resource]))
 	if amount<=0:return result
 	for resource:String in inputs:
 		var spent:=amount*float(inputs[resource])
