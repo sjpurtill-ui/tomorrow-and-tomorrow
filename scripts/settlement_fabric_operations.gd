@@ -74,18 +74,23 @@ static func needs_work(plot:Dictionary)->bool:
  var job:Variant=plot.get("fabric_job",{})
  return valid_job(job) and not job.is_empty() and String(job.state) in ["assembling","testing"] and String(plot.get("status","")) in ["active","stressed","damaged"]
 
+# Only authored definitions are shared. Eligibility still reads each caller's
+# current knowledge, so discoveries, ownership and imports cannot go stale.
+static var foundation_rules:Dictionary={}
 static func foundations_met(method:String,known:Array)->bool:
- for entry:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
-  if String(entry.id)!=method:continue
-  for parent:String in entry.requires_all:
-   if parent not in known:return false
-  for group:Array in entry.requires_any:
-   var found:=false
-   for parent:String in group:
-    if parent in known:found=true
-   if not found:return false
-  return true
- return false
+ if foundation_rules.is_empty():
+  for entry:Dictionary in preload("res://scripts/settlement_fabric_knowledge.gd").entries():
+   foundation_rules[String(entry.id)]={"all":entry.requires_all,"any":entry.requires_any}
+ if not foundation_rules.has(method):return false
+ var rule:Dictionary=foundation_rules[method]
+ for parent:String in rule.all:
+  if parent not in known:return false
+ for group:Array in rule.any:
+  var found:=false
+  for parent:String in group:
+   if parent in known:found=true
+  if not found:return false
+ return true
 
 static func compatible(plot:Dictionary,method:String)->bool:
  if not COMPONENTS.has(method):return false

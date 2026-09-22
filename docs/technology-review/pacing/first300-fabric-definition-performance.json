@@ -1,0 +1,184 @@
+{
+  "scenario": "Warm year-157 checkpoint, 32 settlements with staffed government",
+  "base_commit": "514fa9e",
+  "exact_complete_world_state_equal": true,
+  "runs": {
+    "fabric-baseline": {
+      "days": 30,
+      "wall_seconds": 16.607,
+      "target_reached": true,
+      "save_check": {
+        "ok": true
+      },
+      "continuation": {
+        "continuation_detail": [],
+        "continuation_equal": true,
+        "final_restore": {
+          "ok": true
+        },
+        "restore_detail": [],
+        "restored_equal": true
+      },
+      "timings": {
+        "city_trade": {
+          "calls": 30,
+          "microseconds": 4597802
+        },
+        "civics": {
+          "calls": 30,
+          "microseconds": 30675
+        },
+        "consequences": {
+          "calls": 30,
+          "microseconds": 147609
+        },
+        "construction": {
+          "calls": 30,
+          "microseconds": 4657
+        },
+        "context": {
+          "calls": 30,
+          "microseconds": 3887
+        },
+        "controller": {
+          "calls": 30,
+          "microseconds": 716543
+        },
+        "convoy": {
+          "calls": 30,
+          "microseconds": 211
+        },
+        "discovery": {
+          "calls": 30,
+          "microseconds": 181269
+        },
+        "economy": {
+          "calls": 30,
+          "microseconds": 38792
+        },
+        "enabled": true,
+        "government": {
+          "calls": 30,
+          "microseconds": 490424
+        },
+        "military_and_travel": {
+          "calls": 30,
+          "microseconds": 684025
+        },
+        "operations": {
+          "calls": 30,
+          "microseconds": 34633
+        },
+        "progression": {
+          "calls": 30,
+          "microseconds": 74956
+        },
+        "resources": {
+          "calls": 30,
+          "microseconds": 224472
+        },
+        "secondary_settlements": {
+          "calls": 30,
+          "microseconds": 9215051
+        },
+        "settlement_morphology": {
+          "calls": 30,
+          "microseconds": 18494
+        }
+      }
+    },
+    "fabric-candidate": {
+      "days": 30,
+      "wall_seconds": 13.834,
+      "target_reached": true,
+      "save_check": {
+        "ok": true
+      },
+      "continuation": {
+        "continuation_detail": [],
+        "continuation_equal": true,
+        "final_restore": {
+          "ok": true
+        },
+        "restore_detail": [],
+        "restored_equal": true
+      },
+      "timings": {
+        "city_trade": {
+          "calls": 30,
+          "microseconds": 2331656
+        },
+        "civics": {
+          "calls": 30,
+          "microseconds": 28713
+        },
+        "consequences": {
+          "calls": 30,
+          "microseconds": 136418
+        },
+        "construction": {
+          "calls": 30,
+          "microseconds": 4275
+        },
+        "context": {
+          "calls": 30,
+          "microseconds": 3158
+        },
+        "controller": {
+          "calls": 30,
+          "microseconds": 717702
+        },
+        "convoy": {
+          "calls": 30,
+          "microseconds": 205
+        },
+        "discovery": {
+          "calls": 30,
+          "microseconds": 165385
+        },
+        "economy": {
+          "calls": 30,
+          "microseconds": 36593
+        },
+        "enabled": true,
+        "government": {
+          "calls": 30,
+          "microseconds": 441212
+        },
+        "military_and_travel": {
+          "calls": 30,
+          "microseconds": 655073
+        },
+        "operations": {
+          "calls": 30,
+          "microseconds": 32834
+        },
+        "progression": {
+          "calls": 30,
+          "microseconds": 66293
+        },
+        "resources": {
+          "calls": 30,
+          "microseconds": 180384
+        },
+        "secondary_settlements": {
+          "calls": 30,
+          "microseconds": 8858502
+        },
+        "settlement_morphology": {
+          "calls": 30,
+          "microseconds": 15715
+        }
+      }
+    }
+  },
+  "tests": {
+    "passed": 20,
+    "failed": 0
+  },
+  "limitations": [
+    "Single headless 30-day pair under concurrent audit load",
+    "Does not measure rendered frame rate",
+    "Only fixed authored prerequisite definitions are reused; knowledge eligibility remains live"
+  ]
+}

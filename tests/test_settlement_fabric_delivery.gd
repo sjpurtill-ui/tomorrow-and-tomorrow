@@ -49,3 +49,13 @@ func test_secondary_demand_orders_and_transports_components_without_free_stock()
 			assert_dict(choice).is_not_empty()
 			assert_bool(model.start_fabric_retrofit(int(choice.plot_id),String(choice.method)).get("ok",false)).is_true())
 		assert_dict(state.resource_stockpiles).is_equal(capital))
+
+func test_shared_method_definitions_do_not_cache_a_societys_eligibility()->void:
+	var known:Array=["seasonal_patterns"]
+	assert_bool(Fabric.foundations_met("building_shading_design",known)).is_false()
+	known.append("geometric_survey")
+	assert_bool(Fabric.foundations_met("building_shading_design",known)).is_true()
+	assert_bool(Fabric.foundations_met("building_shading_design",[])).is_false()
+	known.erase("seasonal_patterns")
+	assert_bool(Fabric.foundations_met("building_shading_design",known)).is_false()
+	assert_bool(Fabric.foundations_met("unknown_method",known)).is_false()
