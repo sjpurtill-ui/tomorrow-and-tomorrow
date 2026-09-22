@@ -408,6 +408,9 @@ var display_preferences:Node
 var quit_dialog:ConfirmationDialog
 var map_snapshot_elapsed:=0.1
 var map_snapshot_refreshes:=0
+# Settlement network rebuilds run on the same 10 Hz cadence, half a period
+# later, so its border meshes and the marker refreshes never share a frame.
+var map_network_elapsed:=0.05
 var rendered_resource_overlay_signature:=""
 var civilization_geography_cache:Dictionary={}
 var civilization_surface_cache:Dictionary={}
@@ -998,6 +1001,9 @@ func _process(delta: float) -> void:
 		_refresh_foreign_formation_markers()
 		_refresh_player_field_army_markers()
 		_refresh_player_scout_route_markers()
+	map_network_elapsed+=maxf(0.0,delta)
+	if map_network_elapsed>=0.1:
+		map_network_elapsed=fmod(map_network_elapsed,0.1)
 		_refresh_settlement_network()
 		_refresh_settlement_convoy_marker()
 	stamp=trace.mark("frame_map_snapshots",stamp)
