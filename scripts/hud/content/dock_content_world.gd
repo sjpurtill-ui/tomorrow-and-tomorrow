@@ -7,9 +7,9 @@ const DetailCivReport:=preload("res://scripts/hud/content/dock_detail_civ_report
 
 func meta()->Dictionary:
 	return {
-		"eyebrow":"WORLD STRATEGY · WHAT YOU CAN VERIFY",
+		"eyebrow":"WORLD · CONTACTS & EXPLORATION",
 		"title":"The Known World",
-		"subtabs":["CONTACTS","SCOUTING","STANDING"],
+		"subtabs":["WORLD OVERVIEW","EXPEDITIONS","STANDING"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -36,46 +36,7 @@ func tab(sub:int)->Dictionary:
 	match sub:
 		1: return {"kpis":[kpis[2]],"brief":{"title":"Scouts are away" if bool(exploration.get("active",false)) else "Read what returned, then choose your next expedition","why":"Return dates are estimates. An overdue party is still on the road until a report or loss is confirmed." if bool(exploration.get("active",false)) else "Recent returns below open the findings. Every retained report remains in the Expedition Archive."},"blocks":_scouting_blocks(exploration)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_standing_blocks(knowledge,competition)}
-	return {"kpis":[kpis[0],kpis[2]],"brief":brief,"blocks":_contacts_blocks()}
-
-func _contacts_blocks()->Array:
-	var encounters:Array=CivilizationSystem.contact_encounters_snapshot()
-	var items:Array=[]
-	for encounter_variant in encounters:
-		var encounter:Dictionary=encounter_variant
-		var civ_id:=String(encounter.get("civ_id",""))
-		items.append({
-			"name":String(encounter.get("name","Unknown polity")),
-			"sub":"met year %d, day %d · %s%s" % [int(encounter.get("day",0))/365+1,int(encounter.get("day",0))%365+1,String(encounter.get("source_description",""))," · home located" if bool(encounter.get("home_location_known",false)) else ""],
-			"value":"REPORT","value_color":Tokens.GOLD,
-			"accent":Tokens.AMBER,
-			"on_click":func()->void: hud.open_detail(DetailCivReport.new(terrain,hud,civ_id)),
-			"tip":"Open the full known record for this polity",
-		})
-	var blocks:Array=[{"type":"text","heading":"WHAT IS KNOWN","text":"Rumors are unverified leads. Encounters record where people were met. A located settlement supplies a destination for diplomacy; an encounter alone does not."}]
-	if items.is_empty():
-		blocks.append({"type":"text","heading":"KNOWN CONTACTS","text":"No polity has been confirmed. An encounter site is not a diplomatic destination until scouts locate a settlement."})
-	else:
-		blocks.append({"type":"rows","heading":"KNOWN CONTACTS","note":"click for the full record","items":items})
-	var lead_count:=CivilizationSystem.rumor_network.list_leads("player",int(GameState.elapsed_days)).size()
-	blocks.append({"type":"actions","heading":"ACCOUNTS BEYOND THE HORIZON","items":[{"label":"MAP OF RUMORS","sub":"%d mapped leads · where accounts were heard and where people may be" % lead_count,"on_press":func()->void: CivilizationSystem.rumor_network.open_map(terrain)}]})
-	if not CivilizationSystem.rumored_civilizations_snapshot().is_empty():
-		blocks.append({"type":"text","text":"Older hearsay has no recorded map coordinates. Its saved names and directions remain in expedition reports; no location is invented."})
-	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
-	var known_destinations:=0
-	for encounter_variant in encounters:
-		if bool((encounter_variant as Dictionary).get("home_location_known",false)): known_destinations+=1
-	var diplomat_presentation:Dictionary=terrain._diplomat_action_presentation(diplomatic_status,known_destinations)
-	blocks.append({"type":"actions","items":[
-		{"label":"SEND DIPLOMAT","sub":"physical delegation · confirm before departure","primary":known_destinations>0,
-		"disabled":bool(diplomat_presentation.disabled),
-		"on_press":func()->void: terrain._open_diplomat_dispatch_panel(),
-		"tip":String(diplomat_presentation.tooltip)},
-		{"label":"SEND SCOUTS","sub":"chart ground · investigate encounters",
-		"on_press":func()->void: terrain._open_scout_dispatch_panel(),
-		"tip":"Open the scout dispatch review"},
-	]})
-	return blocks
+	return {"blocks":_world_board(exploration)}
 
 func _scouting_blocks(exploration:Dictionary)->Array:
 	var blocks:Array=[]
@@ -86,7 +47,7 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 		party_items.append({
 			"name":String(party.get("target_label","Scout party away")),
 			"sub":"%d people · OVERDUE %d day%s" % [int(party.get("personnel",0)),overdue,"" if overdue==1 else "s"] if overdue>0 else "%d people · %d days remaining" % [int(party.get("personnel",0)),int(party.get("days_remaining",0))],
-			"value":"Overdue" if overdue>0 else "Due ~day %d"%int(party.get("return_day",0)),"value_color":Tokens.AMBER if overdue>0 else Tokens.TEAL,
+			"value":"Overdue" if overdue>0 else preload("res://scripts/scout_archive.gd").calendar_date(int(party.get("return_day",0))),"value_color":Tokens.AMBER if overdue>0 else Tokens.TEAL,
 			"accent":Tokens.AMBER if overdue>0 else Tokens.TEAL,
 			"tip":"The road decides the true return day; an overdue party is not yet a lost one." if overdue>0 else String(party.get("turnback_reason","Observations remain aboard the party until it returns.")),
 		})
@@ -94,7 +55,7 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 		var latest:Dictionary=exploration.get("latest_report",{})
 		var latest_sub:="no party is away"
 		if not latest.is_empty():
-			latest_sub="last report day %d" % int(latest.get("day",0))
+			latest_sub="Last return · " + preload("res://scripts/scout_archive.gd").calendar_date(int(latest.get("day",0)))
 		party_items.append({"name":"No party away","sub":latest_sub,"value":"","tip":String(exploration.get("message",""))})
 	blocks.append({"type":"rows","heading":"PARTIES","note":"%d of %d away" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1))],"items":party_items})
 	var archive_model:=preload("res://scripts/scout_archive.gd")
@@ -104,7 +65,7 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 	newest.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.priority)>int(b.priority))
 	for item:Dictionary in newest.slice(0,3):
 		var saved_report:Dictionary=item.report
-		highlights.append({"name":String(item.title),"sub":"Day %d · %s · %s" % [item.day,item.party,item.place],"value":String(item.review),"accent":Tokens.RED if int(item.losses)>0 else Tokens.TEAL,"on_click":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report,archive_provider.new(terrain,hud)))})
+		highlights.append({"name":String(item.title),"sub":"%s · %s · %s" % [archive_model.calendar_date(int(item.day)),item.party,item.place],"value":String(item.review),"accent":Tokens.RED if int(item.losses)>0 else Tokens.TEAL,"on_click":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report,archive_provider.new(terrain,hud)))})
 	blocks.append({"type":"actions","items":[{"label":"EXPEDITION ARCHIVE","sub":"Search, filter and read %d retained reports" % CivilizationSystem.scout_reports.size(),"on_press":func()->void: hud.open_detail(archive_provider.new(terrain,hud))}]})
 	if not highlights.is_empty(): blocks.append({"type":"rows","heading":"RECENT RETURNS","note":"highlights from the latest eight","items":highlights})
 	blocks.append({"type":"actions","items":[{"label":"PLAN EXPEDITION","sub":"Review target, duration, people and provisions","primary":true,"on_press":func()->void:terrain._open_scout_dispatch_panel()}]})
@@ -134,3 +95,39 @@ func signature()->Array:
 	for party_variant in (exploration.get("parties",[]) as Array):
 		overdue_total+=int((party_variant as Dictionary).get("overdue_days",0))
 	return [CivilizationSystem.rumor_network.revision,int(GameState.elapsed_days),CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0)),preload("res://scripts/scout_archive.gd").revision(CivilizationSystem.scout_reports)]
+
+func _world_board(exploration:Dictionary)->Array:
+	var archive=preload("res://scripts/scout_archive.gd")
+	var archive_provider=preload("res://scripts/hud/content/dock_detail_scout_archive.gd")
+	var encounters:Array=CivilizationSystem.contact_encounters_snapshot()
+	var destinations:=0
+	var contacts:Array=[]
+	for encounter:Dictionary in encounters:
+		var id:=String(encounter.get("civ_id",""))
+		var located:=bool(encounter.get("home_location_known",false))
+		if located:destinations+=1
+		contacts.append({"tag":"DIPLOMATIC DESTINATION" if located else "ENCOUNTER · HOME NOT LOCATED","title":String(encounter.get("name","Unknown polity")),"detail":"%s · %s" % [archive.calendar_date(int(encounter.get("day",0))),String(encounter.get("source_description","Returned encounter"))],"action":"View known record","on_press":func()->void:hud.open_detail(DetailCivReport.new(terrain,hud,id))})
+	if contacts.is_empty():
+		contacts.append({"tag":"CONTACTS","title":"Who lives beyond our borders?","detail":"No foreign society confirmed yet. Scout reports below show what your expeditions have brought home.","action":"Choose a scouting destination","on_press":func()->void:terrain._open_scout_dispatch_panel()})
+	var leads:=CivilizationSystem.rumor_network.list_leads("player",int(GameState.elapsed_days)).size()
+	contacts.append({"tag":"UNVERIFIED LEADS","title":"%d rumors mapped" % leads,"detail":"Follow a lead to investigate possible neighbors." if leads>0 else "No mapped leads yet. New accounts may arrive through exploration.","action":"Open rumor map","on_press":func()->void:CivilizationSystem.rumor_network.open_map(terrain)})
+	var operations:Array=[]
+	for party:Dictionary in exploration.get("parties",[]):
+		var overdue:=int(party.get("overdue_days",0))
+		operations.append({"tag":"OVERDUE · NOT CONFIRMED LOST" if overdue>0 else "EXPEDITION UNDERWAY","title":String(party.get("target_label","Exploring")),"detail":"%d scouts · %s" % [int(party.get("personnel",0)),"%d days overdue" % overdue if overdue>0 else "about %d days until return" % int(party.get("days_remaining",0))]})
+	if operations.is_empty():operations.append({"tag":"EXPEDITIONS","title":"Scouts are home","detail":"%d expedition slots available. Choose where to explore next." % int(exploration.get("capacity",1))})
+	var findings:Array=[]
+	for item:Dictionary in archive.select(CivilizationSystem.scout_reports,"",0,false).slice(0,4):
+		var report:Dictionary=item.report
+		findings.append({"tag":"%s · %s" % [archive.calendar_date(int(item.day)),String(item.kind)],"title":String(item.title),"detail":String(item.place),"action":"Read findings" + (" · unread" if String(item.review)=="UNREAD" else ""),"on_press":func()->void:hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,report,archive_provider.new(terrain,hud)))})
+	if findings.is_empty():findings.append({"tag":"AWAITING FIRST RETURN","title":"The world is still unwritten","detail":"Returned scouts bring route charts, resources and encounters here."})
+	var presentation:Dictionary=terrain._diplomat_action_presentation(CivilizationSystem.diplomatic_mission_status(),destinations)
+	return [{"type":"tiles","columns":3,"items":[
+		{"label":"KNOWN SOCIETIES","value":str(encounters.size()),"note":"%d located diplomatic destinations" % destinations},
+		{"label":"SCOUT PARTIES AWAY","value":"%d / %d" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1))],"note":"Reports arrive when scouts return"},
+		{"label":"RETURNED REPORTS","value":str(int(exploration.get("report_count",0))),"note":"Open recent findings or the full archive"}]},
+		{"type":"world_board","title":"Beyond our borders","subtitle":"Contacts, expeditions and the discoveries carried home.","actions":[
+		{"label":"Plan expedition","on_press":func()->void:terrain._open_scout_dispatch_panel()},
+		{"label":"All expedition reports","on_press":func()->void:hud.open_detail(archive_provider.new(terrain,hud))},
+		{"label":"Send diplomat" if destinations>0 else "Diplomacy · locate a settlement first","disabled":bool(presentation.disabled),"tip":String(presentation.tooltip),"on_press":func()->void:terrain._open_diplomat_dispatch_panel()}],
+		"sections":[{"title":"SOCIETIES & LEADS","items":contacts},{"title":"EXPEDITIONS & RECENT RETURNS","items":operations+findings}]}]
