@@ -1,6 +1,14 @@
 extends GdUnitTestSuite
 const Data=preload("res://scripts/hud/kpi_detail_data.gd")
 const Chip=preload("res://scripts/hud/kpi_detail_chip.gd")
+class HeaderTerrain extends Node:
+	var game_speed:float=1.0
+	func site_temperature_c(_day:float=-1.0)->float:return 20.0
+class LiveHeader extends "res://scripts/hud/command_rail_hud.gd":
+	func _ready()->void:
+		_build_time_pill()
+		_build_kpi_strip()
+	func _layout()->void:pass
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(4242)
@@ -72,4 +80,29 @@ func test_food_batch_subset_cannot_zero_out_total_reserves()->void:
 	assert_float(float(model.snapshot().food_days)).is_equal_approx(10.0,.000001)
 	GameState.simulation_metrics.food_total_stock=0.0
 	assert_float(float(model.snapshot().food_days)).is_equal(0.0)
+
+func test_header_refreshes_without_legacy_interface_or_navigation()->void:
+	var terrain=auto_free(HeaderTerrain.new())
+	var header=auto_free(LiveHeader.new())
+	header.terrain=terrain
+	add_child(header)
+	header.set_process(false)
+	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0}
+	GameState.water_metrics={"days":5.0,"required_today":10.0,"stored":50.0}
+	GameState.elapsed_days=1.0
+	header._process(.75)
+	assert_str(header.kpi_chips.food.value.text).is_equal("12.0 d")
+	assert_str(header.kpi_chips.water.value.text).is_equal("5.0 d")
+	assert_str(header.time_text.text).contains("Day 2")
+	GameState.simulation_metrics.food_days=9.0
+	GameState.water_metrics.days=3.0
+	GameState.water_metrics.stored=30.0
+	GameState.elapsed_days=2.0
+	header._process(.25)
+	assert_str(header.kpi_chips.food.value.text).is_equal("12.0 d")
+	header._process(.5)
+	assert_str(header.kpi_chips.food.value.text).is_equal("9.0 d")
+	assert_str(header.kpi_chips.water.value.text).is_equal("3.0 d")
+	assert_str(header.time_text.text).contains("Day 3")
+
 

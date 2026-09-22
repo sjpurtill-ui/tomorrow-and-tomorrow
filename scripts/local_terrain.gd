@@ -18721,10 +18721,10 @@ func _population_attention_brief(profile:Dictionary,conditions:Dictionary)->Dict
 	return {"status":"POPULATION COMMITMENTS ARE SUSTAINABLE","why":"%.1f%% remain in direct productive roles and no dominant demographic pressure is visible." % (productive_share*100.0),"next":"No immediate change is required; watch health, shelter, dependents, and people away."}
 
 func _update_time_interface() -> void:
-	if interface_layer == null:
-		return
 	if hud:
 		hud.refresh()
+	if interface_layer == null:
+		return
 	if date_label:
 		var absolute_hour:=int(floor(GameState.elapsed_days*24.0))
 		var absolute_day:=absolute_hour/24

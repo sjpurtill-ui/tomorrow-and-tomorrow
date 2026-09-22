@@ -73,6 +73,21 @@ var _kpi_signature:String=""
 var _badge_signature:String=""
 var _time_signature:String=""
 var _toolbar_signature:String=""
+var _information_refresh_elapsed:float=0.0
+const INFORMATION_REFRESH_SECONDS:float=0.75
+
+func _process(delta:float)->void:
+	_information_refresh_elapsed+=maxf(delta,0.0)
+	if _information_refresh_elapsed<INFORMATION_REFRESH_SECONDS:return
+	_information_refresh_elapsed=fmod(_information_refresh_elapsed,INFORMATION_REFRESH_SECONDS)
+	refresh_information_bar()
+
+func refresh_information_bar()->void:
+	# The command bar owns its updates, including while a report is open.
+	# Legacy interface controls and dock interaction must not gate live totals.
+	if not is_instance_valid(terrain):return
+	_refresh_time()
+	_refresh_kpis()
 
 func _ready()->void:
 	name="CommandRailHud"

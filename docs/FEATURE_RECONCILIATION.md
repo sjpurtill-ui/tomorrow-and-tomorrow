@@ -2278,3 +2278,6 @@ Completed undertakings can be named in their Buildings page; unfinished projects
 
 ### Food headline total correction — 2026-09-22
 Food reports now explicitly expose combined edible stocks. The top bar uses that total, with legacy food-days times daily demand as fallback, instead of treating processed food batches as the entire reserve. Seven KPI tests pass (report_182), including positive reserves with zero batches and genuine zero stocks.
+
+### Live information bar (2026-09-22)
+The command bar now refreshes its date and civilization totals every 0.75 seconds independently of legacy interface controls or report navigation. The terrain callback also updates the current HUD before checking for legacy controls. Eight KPI tests pass, including changing visible food/water/date labels without navigation and the total-food regression. Save format unchanged.
