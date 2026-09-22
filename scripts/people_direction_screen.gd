@@ -214,7 +214,9 @@ func _traditions_page()->void:
 		var index:=maxi(0,PeopleDirection.AMBITIONS.keys().find(String(event.choice)))
 		var art:=_art(tile,index%8,70);art.tooltip_text=CARD_TITLES[index]
 		_label(tile,"Y%d · %s"%[int(event.day)/365+1,String(PeopleDirection.AMBITIONS[event.choice].name)],12)
-	if commitments.is_empty():_label(timeline,"Your first choice begins the story.",14)
+	if commitments.is_empty():
+		timeline_scroll.hide()
+		_label(history,"Your first choice begins the story.",14)
 	if state.ambition!="" and state.resolved<state.VISIONS.size() and day>=state.next_vision_day:
 		var vision:Dictionary=state.VISIONS[state.resolved]
 		var row:=_box(traditions);_label(row,vision.title,20)
