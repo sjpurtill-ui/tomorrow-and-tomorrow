@@ -34,7 +34,7 @@ func after_test()->void:
 
 func prepare()->void:
 	GameState.elapsed_days=100000
-	GameState.known_discoveries.assign(["experimental_controls","public_schools"])
+	GameState.known_discoveries.assign(["experimental_controls","public_schools","clay_testing"])
 	GameState.resource_stockpiles.Stone=1000.0
 	CivilizationSystem.civilizations[0].merge({"population":200,"production":.5,"logistics":.5,"food_days":30,"military_population":10},true)
 	E.owner_state("neighbor").population_allocations.Knowledge=20
@@ -49,7 +49,9 @@ func test_visit_reserves_source_staff_and_teaches_only_after_delivery()->void:
 	var provider:=E.owner_state("neighbor")
 	provider.elapsed_days=100000
 	var original:float=provider.effective_workers("Knowledge")
-	assert_bool(Scholars.dispatch("neighbor","clay_shaping","Stone").get("ok",false)).is_true()
+	var dispatched:=Scholars.dispatch("neighbor","clay_shaping","Stone")
+	assert_bool(dispatched.get("ok",false)).override_failure_message(str(dispatched)).is_true()
+	if not dispatched.get("ok",false):return
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
 	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day))
 	assert_bool(mission.research_refused).is_false()
@@ -68,7 +70,9 @@ func test_refused_visit_refunds_payment_and_board_once()->void:
 	prepare()
 	var original_stone:float=GameState.resource_stockpiles.Stone
 	var original_food:float=GameState.resource_stockpiles.Food
-	assert_bool(Scholars.dispatch("neighbor","clay_shaping","Stone").get("ok",false)).is_true()
+	var dispatched:=Scholars.dispatch("neighbor","clay_shaping","Stone")
+	assert_bool(dispatched.get("ok",false)).override_failure_message(str(dispatched)).is_true()
+	if not dispatched.get("ok",false):return
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
 	E.owner_state("neighbor").population_allocations.Knowledge=1
 	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day))
@@ -80,7 +84,9 @@ func test_refused_visit_refunds_payment_and_board_once()->void:
 
 func test_visit_survives_serialization_and_rejects_bad_chronology()->void:
 	prepare()
-	assert_bool(Scholars.dispatch("neighbor","clay_shaping","Stone").get("ok",false)).is_true()
+	var dispatched:=Scholars.dispatch("neighbor","clay_shaping","Stone")
+	assert_bool(dispatched.get("ok",false)).override_failure_message(str(dispatched)).is_true()
+	if not dispatched.get("ok",false):return
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
 	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
 	var state:Dictionary=JSON.parse_string(JSON.stringify(E.data()))
@@ -93,7 +99,9 @@ func test_visit_survives_serialization_and_rejects_bad_chronology()->void:
 
 func test_teaching_requires_host_staff_and_peace()->void:
 	prepare()
-	assert_bool(Scholars.dispatch("neighbor","clay_shaping","Stone").get("ok",false)).is_true()
+	var dispatched:=Scholars.dispatch("neighbor","clay_shaping","Stone")
+	assert_bool(dispatched.get("ok",false)).override_failure_message(str(dispatched)).is_true()
+	if not dispatched.get("ok",false):return
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
 	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
 	CivilizationSystem.civilizations[0].player_relation.at_war=true
@@ -104,7 +112,7 @@ func test_teaching_requires_host_staff_and_peace()->void:
 
 func test_early_gate_and_quote_do_not_read_hidden_supplier_knowledge()->void:
 	prepare()
-	GameState.known_discoveries.assign(["apprentice_contracts"])
+	GameState.known_discoveries.assign(["apprentice_contracts","clay_testing"])
 	var terms:=Scholars.quote("neighbor","clay_shaping","Stone")
 	assert_bool(terms.has("error")).is_false()
 	E.owner_state("neighbor").known_discoveries.clear()
@@ -113,7 +121,7 @@ func test_early_gate_and_quote_do_not_read_hidden_supplier_knowledge()->void:
 
 func test_actual_panel_dispatches_scholar_invitation()->void:
 	prepare()
-	GameState.known_discoveries.assign(["apprentice_contracts"])
+	GameState.known_discoveries.assign(["apprentice_contracts","clay_testing"])
 	var panel:VBoxContainer=auto_free(preload("res://scripts/hud/research_purchase_panel.gd").new())
 	panel.subject="clay_shaping";add_child(panel)
 	panel.resources.select(4);panel.refresh();panel.send.pressed.emit()
@@ -124,7 +132,9 @@ func test_real_embassy_settles_payment_once_and_reserves_no_new_population()->vo
 	var provider:=E.owner_state("neighbor")
 	var population:float=provider.population_exact
 	var stock:float=provider.resource_stockpiles.get("Stone",0)
-	assert_bool(Scholars.dispatch("neighbor","clay_shaping","Stone").get("ok",false)).is_true()
+	var dispatched:=Scholars.dispatch("neighbor","clay_shaping","Stone")
+	assert_bool(dispatched.get("ok",false)).override_failure_message(str(dispatched)).is_true()
+	if not dispatched.get("ok",false):return
 	var mission:=CivilizationSystem.diplomatic_mission.duplicate(true)
 	CivilizationSystem._process_diplomatic_mission(int(mission.arrival_day))
 	CivilizationSystem._process_diplomatic_mission(int(mission.return_day))

@@ -1,5 +1,5 @@
 extends RefCounted
-## Read-only evidence of current stocks/lines/plants, never a lifetime output ledger.
+## Read-only campaign evidence, including recorded workshop output and current capacity.
 const I=preload("res://scripts/civilian_industry.gd")
 const P=preload("res://scripts/persistent_production.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
@@ -31,7 +31,7 @@ static func capture(detailed:bool=false)->Dictionary:
 		var available:=Ops.service(service)
 		if available>0:services[service]=available
 	var military:Dictionary={}
-	for item:String in ["improvised","spear","bow","lance","mounted_bow","siege_kit"]:
+	for item:String in campaign.EQUIPMENT_KNOWLEDGE:
 		var ammunition:=String(campaign._ammunition_type_for(item))
 		military[item]={"recipe_known":not P.recipe(campaign,item).has("error"),"stored":int(campaign.military_inventory.get(item,0)),"equipped":0,"ammunition_carried":0,"ammunition_required":0,"ammunition_stored":int(campaign.military_consumables.get(ammunition,0))}
 	for force:Dictionary in [campaign.home_army]+campaign.field_armies+campaign.occupation_forces:
@@ -49,6 +49,8 @@ static func capture(detailed:bool=false)->Dictionary:
 		var resource:=String(receipt.resource)
 		recorded[resource]=float(recorded.get(resource,0))+float(receipt.quantity)
 	var result:={"lines":lines,"workforce":P.workforce(),"production_labor_share":campaign.production_labor_share,"recorded_output":recorded,"military_capabilities":military,"household_stocks":household,"available_civilian_recipes":methods.size(),"civilian_lines":lines.size(),"manufactured_stock_kinds":stocks.size(),"installed_units":installed,"units_under_construction":building,"remaining_daily_services":services,"operations_ledger_current":current}
+	var government:=WorldSimulation.government
+	result["government"]={"historical_people":government.people.size(),"serving_people":government.people.filter(func(person:Dictionary)->bool:return person.get("status","active")=="active").size(),"stage":government.government_stage}
 	var food:=preload("res://scripts/leader_personality.gd").food_constraints(state.simulation_metrics)
 	result["food_shortage"]=food.food_shortage
 	result["delivery_shortage"]=food.delivery_shortage

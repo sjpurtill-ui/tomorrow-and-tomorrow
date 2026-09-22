@@ -43,7 +43,10 @@ func test_return_is_required_and_repeated_reading_never_repeats_rewards()->void:
 	assert_str(trip.carried_collections[0].kind).is_equal("artifact")
 	assert_float(float(E.owner_state("neighbor").resource_stockpiles.Clay)).is_equal(stock-1)
 	assert_dict(E.data().collections).is_empty();assert_dict(P.evidence("clay_shaping")).is_empty()
-	assert_int(E.returned(trip,40).size()).is_equal(1)
+	var returned:=E.returned(trip,40)
+	assert_int(returned.filter(func(record:Dictionary)->bool:return record.has("collection_id")).size()).is_equal(1)
+	assert_int(returned.size()).is_equal(1+trip.get("shared_practices",[]).size())
+	assert_int(E.data().collections.size()).is_equal(1)
 	assert_array(E.returned(trip,41)).is_empty()
 	assert_dict(P.evidence("clay_shaping")).is_empty()
 	for day in range(41,100):E.advance(day)
@@ -262,7 +265,9 @@ func test_physical_envoy_contact_brings_practices_home_only_on_return()->void:
 	E.envoy_arrived(CivilizationSystem,trip,10)
 	assert_int(trip.carried_collections.size()).is_equal(1)
 	assert_dict(E.data().collections).is_empty()
-	assert_int(E.returned(trip,20).size()).is_equal(1)
+	var returned:=E.returned(trip,20)
+	assert_int(returned.filter(func(record:Dictionary)->bool:return record.has("collection_id")).size()).is_equal(1)
+	assert_int(returned.size()).is_equal(1+trip.get("shared_practices",[]).size())
 	assert_array(E.returned(trip,21)).is_empty()
 	assert_bool(E.valid_mission(trip)).is_true()
 
@@ -297,6 +302,7 @@ func test_malformed_evidence_and_carried_records_are_rejected()->void:
 	assert_bool(E.valid_mission(trip)).is_false()
 
 func test_ground_samples_require_actual_unexplored_ground_and_do_not_reward_retracing()->void:
+	GameState.known_discoveries.append("clay_testing")
 	CivilizationSystem.ground_survey_authority=func(_point:Vector2)->Dictionary:return {"biome":"grassland","label":"Exposed clay bank","resource_potentials":{"Clay":.8}}
 	var trip:=mission();var point:=Vector2(7000,7000)
 	E.sample_ground(CivilizationSystem,trip,point,10)

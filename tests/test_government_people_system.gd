@@ -795,3 +795,30 @@ func test_first_year_priorities_respond_to_survival_before_establishment()->void
 	GameState.simulation_metrics.food_intake_ratio=1.0
 	GameState.simulation_metrics.housing_ratio=0.8
 	assert_str(GovernmentPeopleSystem._focus_decision_for_settlement(city).id).is_equal("shelter")
+
+
+func test_deceased_roster_does_not_exhaust_future_government_successors()->void:
+	var government:=GovernmentPeopleSystem
+	var settlement_id:=String(GameState.player_settlements[0].id)
+	var population_before:=GameState.population_total
+	var archived:Array[Dictionary]=[]
+	# A real history can exceed the live-cast limit across generations.
+	while government.people.size()<government.MAX_GOVERNMENT_PEOPLE:
+		government.people.append(government._generate_person(government.next_person_id))
+		government.next_person_id+=1
+	for person:Dictionary in government.people:
+		person.status="deceased"
+		person.died_day=30
+		person.office_key=""
+		person.local_leader_of=""
+		archived.append(person.duplicate(true))
+	government.initialize()
+	assert_int(government.living_people().size()).is_equal(government._desired_pool_size())
+	assert_bool(government.officeholder("Steward").is_empty()).is_false()
+	assert_bool(government.settlement_leader(settlement_id).is_empty()).is_false()
+	assert_int(GameState.population_total).is_equal(population_before)
+	for record:Dictionary in archived:
+		assert_dict(government._person_record(int(record.person_id))).is_equal(record)
+	var count:=government.people.size()
+	government.initialize()
+	assert_int(government.people.size()).is_equal(count)

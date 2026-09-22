@@ -324,7 +324,9 @@ func _ensure_pool()->void:
 	var living_count:=0
 	for person in people:
 		if String(person.get("status","active"))=="active":living_count+=1
-	while living_count<target and people.size()<MAX_GOVERNMENT_PEOPLE:
+	# The cap bounds serving people, not the historical record. Dead officials
+	# retain their identity and history without blocking later generations.
+	while living_count<target:
 		people.append(_generate_person(next_person_id))
 		living_count+=1
 		next_person_id+=1

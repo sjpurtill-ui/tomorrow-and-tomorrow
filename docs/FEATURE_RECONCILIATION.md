@@ -2071,3 +2071,12 @@ Validation: all 60 workshop, turnover and power-investment checks passed, includ
 ### First 300 years: default twelve-opponent opening
 
 The real-terrain default setting (player plus 12 opponents, seed 9241) completed 365 ordinary days with no waterless generated starts or reported simulation errors. Player and owned payload checks passed; whole-game restoration and next-day continuation were exactly equal. Mean headless day cost was 223.4 ms under concurrent audit load. This is a first-year default-configuration check, not a claim of default-count 300-year or rendered performance verification. Compact evidence: pacing/first300-default12-opening.json.
+
+
+### First 300 years: maintain government succession across generations
+
+The 96-person government limit now applies to serving officials rather than all historical records. Deceased officials retain their IDs, biographies and references, while new candidates and normal succession fill vacancies without creating population. Actual warm and woodland checkpoints had reached 96 records and zero serving officials; a short warm year-157 recovery restored 88 serving officials for its 32 settlements. Exact save restoration and next-day continuation passed. Evidence: pacing/first300-succession-recovery.json. No save-format migration or player restart.
+
+Endurance reports now include serving and historical official counts and all equipment categories, including pikes previously omitted from the summary. Contact-test fixtures now include the current clay-testing foundation, distinguish incoming collection rewards from outward practice sharing, and retain accumulated culture across a century boundary. They also reflect the existing 14 ambitions and automatic appointment of established specialist offices; these are test corrections, not changes to those game rules.
+
+Validation: 65/65 scholar, society-exchange and paid-research checks passed; the final focused government, century-choice, save-continuation and evidence run passed 52/52. Existing general-campaign, diplomatic-journey and commitment runs passed 31/31. The long campaigns still require their 300-year endpoint checks.

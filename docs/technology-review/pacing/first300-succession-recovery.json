@@ -1,0 +1,34 @@
+{
+  "scenario": "Real warm makers checkpoint with 96 historical officials and no serving officials",
+  "before": {
+    "day": 57305,
+    "historical_people": 96,
+    "serving_people": 0
+  },
+  "after": {
+    "day": 57419,
+    "government": {
+      "historical_people": 184,
+      "serving_people": 88,
+      "stage": 4
+    },
+    "population": 4634
+  },
+  "save_check": {
+    "ok": true
+  },
+  "continuation": {
+    "continuation_detail": [],
+    "continuation_equal": true,
+    "final_restore": {
+      "ok": true
+    },
+    "restore_detail": [],
+    "restored_equal": true
+  },
+  "limitations": [
+    "Short recovery, not a 300-year endpoint",
+    "No population or material grant; ordinary candidate generation and appointment",
+    "The source is a mixed-version endurance campaign"
+  ]
+}

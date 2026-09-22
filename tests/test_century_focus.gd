@@ -17,7 +17,8 @@ func test_player_choice_is_required_at_exact_century_and_can_be_renewed()->void:
 	GameState.elapsed_days=36500
 	assert_bool(PeopleDirection.needs_century_choice()).is_true()
 	assert_str(PeopleDirection.ambition).is_equal("military")
-	assert_float(PeopleDirection.research_multiplier("security")).is_equal(1.0)
+	# The new choice is due, but the previous century remains cultural memory.
+	assert_float(PeopleDirection.research_multiplier("security")).is_equal(1.25)
 	assert_bool(PeopleDirection.choose("military").get("ok",false)).is_true()
 	assert_int(PeopleDirection.chosen_century).is_equal(1)
 	assert_bool(PeopleDirection.needs_century_choice()).is_false()
@@ -58,8 +59,8 @@ func test_invalid_century_is_rejected_without_mutation()->void:
 	assert_int(PeopleDirection.chosen_century).is_equal(0)
 	assert_str(PeopleDirection.ambition).is_equal("horizons")
 
-func test_eight_real_focuses_have_existing_value_axes()->void:
-	assert_int(PeopleDirection.AMBITIONS.size()).is_equal(8)
+func test_authored_focuses_have_existing_value_axes()->void:
+	assert_int(PeopleDirection.AMBITIONS.size()).is_equal(14)
 	for focus in PeopleDirection.AMBITIONS.values():
 		assert_bool(focus.axis in PeopleDirection.VALUES.VALUE_ORDER).is_true()
 		assert_int(focus.domains.size()).is_equal(2)
@@ -111,7 +112,7 @@ func test_advice_roster_expands_with_real_government_offices()->void:
 	SettlementModel.ensure_founded()
 	GovernmentPeopleSystem.initialize()
 	var advice:=PeopleDirection.advisor_recommendations()
-	assert_int(advice.size()).is_equal(1) # Vacant specialist offices do not invent advisors.
+	assert_int(advice.size()).is_equal(5) # Established offices receive real automatic appointments.
 	for office in GovernmentPeopleSystem.active_offices():
 		if String(office.key)=="Steward": continue
 		var candidates:=GovernmentPeopleSystem.candidates_for_office(String(office.key),"",96).filter(func(person:Dictionary)->bool: return String(person.get("office_key",""))=="")

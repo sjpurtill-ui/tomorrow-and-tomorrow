@@ -34,7 +34,7 @@ func after_test()->void:
 
 func prepare()->void:
 	GameState.elapsed_days=100000
-	GameState.known_discoveries.assign(["experimental_controls","public_schools"])
+	GameState.known_discoveries.assign(["experimental_controls","public_schools","clay_testing"])
 	GameState.resource_stockpiles.Stone=1000.0
 	CivilizationSystem.civilizations[0].merge({"population":200,"production":.5,"logistics":.5,"food_days":30,"military_population":10},true)
 	E.owner_state("neighbor").population_allocations.Knowledge=20
@@ -201,7 +201,7 @@ func test_ai_waits_after_previous_research_trip_and_ignores_already_strong_study
 	assert_dict(Planner.recommendation()).is_empty()
 func test_ai_apprenticeship_uses_paid_scholar_before_formal_purchase()->void:
 	prepare();examined_report()
-	GameState.known_discoveries.assign(["apprentice_contracts"])
+	GameState.known_discoveries.assign(["apprentice_contracts","clay_testing"])
 	assert_bool(Purchase.available()).is_false()
 	var order:=Planner.recommendation()
 	assert_str(order.kind).is_equal("research_scholar")
@@ -214,7 +214,7 @@ func test_ai_apprenticeship_uses_paid_scholar_before_formal_purchase()->void:
 	assert_float(FoodSystem.total_stored()).is_equal_approx(food_before-float(quote.provisions)-float(quote.scholar_provisions),.000001)
 	assert_bool("clay_shaping" in GameState.known_discoveries).is_false()
 func test_ai_scholar_requires_board_staff_and_an_unoccupied_visit_slot()->void:
-	prepare();examined_report();GameState.known_discoveries.assign(["apprentice_contracts"])
+	prepare();examined_report();GameState.known_discoveries.assign(["apprentice_contracts","clay_testing"])
 	GameState.population_allocations.Knowledge=0
 	assert_dict(Planner.recommendation()).is_empty()
 	GameState.population_allocations.Knowledge=30
