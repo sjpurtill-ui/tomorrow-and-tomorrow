@@ -73,3 +73,31 @@ Proposed acceptance budgets: ordinary map CPU under 8 ms, no recurring callback 
 Copy an explicitly chosen save to ignored `artifacts/year71_fixture.save`. Run `res://tests/year71_performance_probe.tscn` headless with `--year71-profile`; `--after` compares the complete saved outcome with the baseline. `--detail` runs only two days with deeper counters. `--map-profile` runs a paused headless frame-callback probe. Ordinary player save slots are never written. Windows process CPU comes from two hidden, noninteractive process-time reads around simulation; other platforms do not supply that measurement.
 
 The before/after reports are ignored local artifacts; compact timing data and inventory are in `YEAR71_AUDIT.json`. No private saves, images or generated import files belong in the commit. Graphical follow-up probes must use the private-desktop launcher, never the user's live game.
+
+## Follow-up: scheduled world days (codex/day-jobs)
+
+Remaining-work item 1 is partly addressed. A world day is now an ordered queue of
+steps (`scripts/day_job.gd`): rival views, each rival's 15 phases plus one step per
+secondary town, the human owner's phases, then per-civilization projections,
+per-observer views, contact and exchange. The terrain frame loop runs 8 ms of steps per
+frame (14 ms at 1+ day/s, 4 ms while the camera moves). Calendar time accrues up to the next
+boundary while a day computes. The day's HUD/advisor/history commit runs once when the last
+step finishes. `WorldSimulation.advance_day` runs the same steps synchronously.
+Saves and loads call `flush_day()` first, so no partial day is ever saved and the
+save format is unchanged. Validating another save preserves the day in progress.
+
+Year-71 fixture, eight days, one step per call: saved state identical to the
+synchronous baseline. 2,776 steps: median 2.0 ms, p95 11.3 ms, p99 21.2 ms, max
+162 ms (a one-off rival `resources` step). 57 steps exceed 16 ms, 10 exceed 33 ms.
+
+Real terrain frames at speed 5, four days: synchronous 24 frames in 5.2 s with
+day frames of 1.1–1.6 s; scheduled 295 frames in 6.2 s, median 18.9 ms, p95 31 ms, max
+130 ms, maximum while panning 39 ms. Throughput fell from about 0.77 to 0.65 days/s
+because simulation now shares frames with rendering; total daily CPU is unchanged.
+
+Limits: steps are atomic, so the slowest phases (rival `resources`, `controller`,
+`world`, `progression`, `military_and_travel`) still reach 25–160 ms. Player commands
+issued between steps take effect from the next phase rather than being queued to a
+day boundary. Rival projections refresh civilization by civilization over a few
+frames. `scheduled_world_days_enabled=false` on the terrain restores the old
+whole-day frame. Probe: `--year71-profile --stepped` and `--frame-profile [--synchronous]`.

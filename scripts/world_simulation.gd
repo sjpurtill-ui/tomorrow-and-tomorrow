@@ -3,6 +3,8 @@ extends Node
 ## swapped: existing rules run against independent instances of the same scripts.
 ## Scopes must never await; UI and network callbacks run in the human scope.
 
+const DayJob=preload("res://scripts/day_job.gd")
+
 var actor_id := "player"
 var _active:Dictionary={}
 var actors:Dictionary={}
@@ -12,6 +14,10 @@ var geography_stock:Dictionary={}
 var relation_baselines:Dictionary={}
 var enabled:=false
 var advancing:=false
+# The world day being run in bounded steps, if any. Never saved: saves and
+# loads finish it first (flush_day), so the save format is unchanged.
+var _day_job:DayJob=null
+var _day_number:=-1
 var last_day:=-1
 var water_provider:Callable
 var start_provider:Callable
@@ -94,6 +100,8 @@ func clear()->void:
 	relation_baselines.clear()
 	enabled=false
 	last_day=-1
+	_day_job=null
+	advancing=false
 
 func create_actor(id:String,seed_value:int,origin:Vector2=Vector2.ZERO)->Dictionary:
 	assert(id!="player" and not actors.has(id))
@@ -157,54 +165,73 @@ func start_world()->void:
 	refresh_views()
 
 func advance_rivals(target_day:int,timings:Dictionary={})->void:
+	assert(_day_job==null,"A scheduled world day is still in progress")
+	var job:=DayJob.new()
+	_plan_rivals(job,target_day,timings)
+	job.run_all()
+
+## Rival catch-up, one group per owner per day, in the synchronous order.
+func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 	if not enabled or advancing or target_day<=last_day:return
+	var S=preload("res://scripts/day_job.gd")
 	advancing=true
-	while last_day<target_day:
-		last_day+=1
-		var stamp:=Time.get_ticks_usec() if not timings.is_empty() else 0
-		refresh_views()
-		stamp=preload("res://scripts/civilization_day.gd").record_timing(timings,"rival_views",stamp)
+	for day in range(last_day+1,target_day+1):
+		job.add_group("player",[S.step("rival_views",timings,func()->Array:
+			last_day=day
+			return _view_steps(timings,"rival_views")
+		)])
 		var ids:=actors.keys();ids.sort()
 		for id:String in ids:
-			if int(actors[id].last_day)>=last_day:continue
-			scoped(id,func()->void:
-				var detail:Dictionary={} if timings.is_empty() else timings.get_or_add(id,{"enabled":true,"phases":{"enabled":true},"secondary":{"enabled":true}})
-				var step:=Time.get_ticks_usec() if not detail.is_empty() else 0
-				state.elapsed_days=last_day
+			var detail:Dictionary={} if timings.is_empty() else timings.get_or_add(id,{"enabled":true,"phases":{"enabled":true},"secondary":{"enabled":true}})
+			var run:Dictionary={"day":day}
+			job.add_group(id,[S.step("controller",detail,func()->Variant:
+				if int(actors[id].last_day)>=day:
+					run.skip=true;run.halt=true
+					return null
+				state.elapsed_days=day
 				preload("res://scripts/civilization_controller.gd").choose_orders(id)
-				step=preload("res://scripts/civilization_day.gd").record_timing(detail,"controller",step)
+				return null
+			),S.step("context",detail,func()->Array:
 				var origin:Vector2=world.player_world_origin
 				if state.settlement_site_committed:origin=Vector2(state.settlement_founded_at.x,state.settlement_founded_at.z)
 				var daily:=preload("res://scripts/civilization_day.gd").context(origin,state.convoy_traveling)
-				step=preload("res://scripts/civilization_day.gd").record_timing(detail,"context",step)
-				preload("res://scripts/civilization_day.gd").advance(last_day,daily,Callable(),detail.get("phases",{}),detail.get("secondary",{}))
-				step=preload("res://scripts/civilization_day.gd").record_timing(detail,"daily",step)
-				world.advance_to_day(last_day)
-				preload("res://scripts/civilization_day.gd").record_timing(detail,"world",step)
+				var phases:=preload("res://scripts/civilization_day.gd").plan(day,daily,Callable(),detail.get("secondary",{}))
+				return preload("res://scripts/civilization_day.gd").steps(phases,detail.get("phases",{}))
+			),S.step("world",detail,func()->void:world.advance_to_day(day))],run,func()->void:
+				if not bool(run.get("skip",false)):actors[id].last_day=day
 			)
-			actors[id].last_day=last_day
-		stamp=preload("res://scripts/civilization_day.gd").record_timing(timings,"rival_days",stamp)
-		refresh_projections()
-		preload("res://scripts/civilization_day.gd").record_timing(timings,"rival_projections",stamp)
-	advancing=false
+		job.add_group("player",[S.step("rival_projections",timings,func()->Array:return _projection_steps(timings,"rival_projections"))],{},func()->void:
+			if day==target_day:advancing=false
+		)
 
 func refresh_projections()->void:
+	for next:Dictionary in _projection_steps():next.call.call()
+
+## Per-owner read-model steps. Each civilization's projection is written whole.
+func _projection_steps(timings:Dictionary={},label:String="projections")->Array:
+	var S=preload("res://scripts/day_job.gd")
+	var result:Array=[]
 	if not CivilizationSystem.civilizations.is_empty():
-		if human_projection.is_empty():
-			human_projection=CivilizationSystem.civilizations[0].duplicate(true)
-			human_projection.id="human"
-			for region in human_projection.strategic_regions:
-				region.id="human_"+String(region.id);region.controller="human";region.original_controller="human"
-		human_projection.name=GameState.settlement_name
-		human_projection.world_position=CivilizationSystem.player_world_origin
-		# Contact and route queries read normalized position, not world_position.
-		human_projection.position=Vector2(CivilizationSystem.player_world_origin.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,CivilizationSystem.player_world_origin.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
-		scoped("player",func()->void:project(human_projection))
+		result.append(S.step(label,timings,func()->void:
+			if human_projection.is_empty():
+				human_projection=CivilizationSystem.civilizations[0].duplicate(true)
+				human_projection.id="human"
+				for region in human_projection.strategic_regions:
+					region.id="human_"+String(region.id);region.controller="human";region.original_controller="human"
+			human_projection.name=GameState.settlement_name
+			human_projection.world_position=CivilizationSystem.player_world_origin
+			# Contact and route queries read normalized position, not world_position.
+			human_projection.position=Vector2(CivilizationSystem.player_world_origin.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,CivilizationSystem.player_world_origin.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+			scoped("player",func()->void:project(human_projection))
+		))
 	for index in CivilizationSystem.civilizations.size():
 		var civ:Dictionary=CivilizationSystem.civilizations[index]
 		var id:=String(civ.id)
 		if not actors.has(id):continue
-		scoped(id,func()->void:project(civ))
+		result.append(S.step(label,timings,func()->void:
+			if actors.has(id):scoped(id,func()->void:project(civ))
+		))
+	return result
 
 func project(civ:Dictionary)->void:
 	# This is a read model for the existing atlas, diplomacy, and contact system.
@@ -287,30 +314,45 @@ func project(civ:Dictionary)->void:
 	civ.strategic_regions=regions
 
 func refresh_views()->void:
-	preload("res://scripts/civilization_relations.gd").synchronize()
-	var troops:=preload("res://scripts/civilization_combat.gd").troop_catalog()
-	for id:String in actors:
-		var observer:Node=actors[id].systems.CivilizationSystem
-		var old_relations:Dictionary={}
-		var previous_views:Dictionary={}
-		for previous:Dictionary in observer.civilizations:
-			old_relations[String(previous.id)]=previous.player_relation
-			previous_views[String(previous.id)]=previous
-		observer.civilizations.clear()
-		for civ:Dictionary in CivilizationSystem.civilizations:
-			if String(civ.id)==id:continue
-			var visible:=_updated_observer_view(civ,previous_views.get(String(civ.id),{}))
-			visible.player_relation=observer._relation_with_strategy_defaults(old_relations.get(String(civ.id),(civ.relations as Dictionary).get(id,{})),visible)
-			_localize_controllers(visible,id)
-			observer.civilizations.append(visible)
-		if not human_projection.is_empty():
-			var human:=_updated_observer_view(human_projection,previous_views.get("human",{}))
-			human.player_relation=observer._relation_with_strategy_defaults(old_relations.get("human",{}),human)
-			_localize_controllers(human,id)
-			observer.civilizations.append(human)
-		observer.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views(id,troops))
-	CivilizationSystem.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views("player",troops))
+	for next:Dictionary in _view_steps():next.call.call()
 
+## Relations first, then one private foreign view per observer, then the human's.
+func _view_steps(timings:Dictionary={},label:String="views")->Array:
+	var S=preload("res://scripts/day_job.gd")
+	var shared:Dictionary={}
+	var result:Array=[S.step(label,timings,func()->void:
+		preload("res://scripts/civilization_relations.gd").synchronize()
+		shared.troops=preload("res://scripts/civilization_combat.gd").troop_catalog()
+	)]
+	for id:String in actors:
+		result.append(S.step(label,timings,func()->void:
+			if actors.has(id):_refresh_observer_view(id,shared.troops)
+		))
+	result.append(S.step(label,timings,func()->void:
+		CivilizationSystem.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views("player",shared.troops))
+	))
+	return result
+
+func _refresh_observer_view(id:String,troops:Variant)->void:
+	var observer:Node=actors[id].systems.CivilizationSystem
+	var old_relations:Dictionary={}
+	var previous_views:Dictionary={}
+	for previous:Dictionary in observer.civilizations:
+		old_relations[String(previous.id)]=previous.player_relation
+		previous_views[String(previous.id)]=previous
+	observer.civilizations.clear()
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		if String(civ.id)==id:continue
+		var visible:=_updated_observer_view(civ,previous_views.get(String(civ.id),{}))
+		visible.player_relation=observer._relation_with_strategy_defaults(old_relations.get(String(civ.id),(civ.relations as Dictionary).get(id,{})),visible)
+		_localize_controllers(visible,id)
+		observer.civilizations.append(visible)
+	if not human_projection.is_empty():
+		var human:=_updated_observer_view(human_projection,previous_views.get("human",{}))
+		human.player_relation=observer._relation_with_strategy_defaults(old_relations.get("human",{}),human)
+		_localize_controllers(human,id)
+		observer.civilizations.append(human)
+	observer.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views(id,troops))
 
 func _updated_observer_view(source:Dictionary,previous:Dictionary)->Dictionary:
 	var view:Dictionary={}
@@ -488,26 +530,68 @@ func _restore_state(payload:Dictionary)->Dictionary:
 	if enabled and not payload.has("human_projection"):refresh_projections()
 	return {"ok":true}
 
+## Synchronous day: the same scheduled steps, run to completion. A day already
+## in progress is finished first so days always commit in calendar order.
 func advance_day(day:int,daily_context:Dictionary,construction:Callable=Callable(),timings:Dictionary={})->Dictionary:
-	var clock=preload("res://scripts/civilization_day.gd")
-	var stamp:=Time.get_ticks_usec() if not timings.is_empty() else 0
-	advance_rivals(day,timings)
-	stamp=clock.record_timing(timings,"rivals",stamp)
+	flush_day()
+	begin_day(day,daily_context,construction,Callable(),timings)
+	var job:=_day_job
+	flush_day()
+	return job.result
+
+## Queues one world day: rival catch-up, the human owner's phases, then the
+## shared read models, contact and exchange. Nothing is applied out of order;
+## `on_complete(result)` runs in the human scope when the last step finishes.
+func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable(),on_complete:Callable=Callable(),timings:Dictionary={})->void:
+	assert(_day_job==null,"A scheduled world day is still in progress")
+	var S=DayJob
+	var job:=DayJob.new()
+	_plan_rivals(job,day,timings)
 	var phases:Dictionary={} if timings.is_empty() else timings.get_or_add("player_phases",{"enabled":true})
-	var result:Dictionary=scoped("player",func()->Dictionary:return clock.advance(day,daily_context,construction,phases))
-	stamp=clock.record_timing(timings,"player_day",stamp)
-	CivilizationSystem.advance_to_day(day)
-	stamp=clock.record_timing(timings,"player_world",stamp)
-	refresh_projections()
-	stamp=clock.record_timing(timings,"projections",stamp)
-	refresh_views()
-	stamp=clock.record_timing(timings,"views",stamp)
-	preload("res://scripts/civilization_joint_contact.gd").advance(day)
-	stamp=clock.record_timing(timings,"joint_contact",stamp)
-	preload("res://scripts/civilization_exchange.gd").settle(day)
-	preload("res://scripts/civilization_exchange.gd").occupation(day)
-	clock.record_timing(timings,"exchange",stamp)
-	return result
+	var clock=preload("res://scripts/civilization_day.gd")
+	var run:=clock.plan(day,daily_context,construction)
+	job.add_group("player",clock.steps(run,phases),run)
+	job.add_group("player",[
+		S.step("player_world",timings,func()->void:CivilizationSystem.advance_to_day(day)),
+		S.step("projections",timings,func()->Array:return _projection_steps(timings,"projections")),
+		S.step("views",timings,func()->Array:return _view_steps(timings,"views")),
+		S.step("joint_contact",timings,func()->void:preload("res://scripts/civilization_joint_contact.gd").advance(day)),
+		S.step("exchange",timings,func()->void:
+			preload("res://scripts/civilization_exchange.gd").settle(day)
+			preload("res://scripts/civilization_exchange.gd").occupation(day)
+	),
+	],{},func()->void:
+		job.result=run.result
+		if _day_job==job:_day_job=null
+		if on_complete.is_valid():on_complete.call(run.result)
+	)
+	_day_job=job
+	_day_number=day
+
+func day_in_progress()->bool:
+	return _day_job!=null
+
+func day_in_progress_number()->int:
+	return _day_number if _day_job!=null else -1
+
+## Runs scheduled steps for about `budget_usec` (always at least one step).
+## Returns true when no day remains in progress.
+func pump_day(budget_usec:int)->bool:
+	if _day_job==null:return true
+	var job:=_day_job
+	job.run_for(budget_usec)
+	return _day_job==null
+
+## Finishes the day in progress before saves, loads and synchronous callers.
+func flush_day()->void:
+	while _day_job!=null:
+		var job:=_day_job
+		job.run_all()
+		if _day_job==job:_day_job=null
+
+func day_job_stats()->Dictionary:
+	if _day_job==null:return {}
+	return {"day":_day_number,"steps_run":_day_job.steps_run,"longest_step_usec":_day_job.longest_step_usec,"groups_left":_day_job.groups.size()}
 
 func _localize_controllers(civ:Dictionary,observer:String)->void:
 	for region:Dictionary in civ.get("strategic_regions",[]):
@@ -523,13 +607,15 @@ func _stage_restore(payload:Dictionary,validate_only:bool)->Dictionary:
 	var error:=validate_payload(payload)
 	if error!="":return {"error":error}
 	if payload.is_empty():return {"ok":true,"legacy":true}
-	var previous:={"actors":actors,"human":human_projection,"enabled":enabled,"seed":_seed,"day":last_day,"geography":geography_stock,"relations":relation_baselines,"markets":market_orders}
+	var previous:={"actors":actors,"human":human_projection,"enabled":enabled,"seed":_seed,"day":last_day,"geography":geography_stock,"relations":relation_baselines,"markets":market_orders,"job":_day_job,"advancing":advancing}
 	actors={};human_projection={};geography_stock={};relation_baselines={};market_orders={};enabled=false
 	var result:=_restore_state(payload)
 	if validate_only or result.has("error"):
 		clear()
 		actors=previous.actors;human_projection=previous.human;geography_stock=previous.geography;relation_baselines=previous.relations;market_orders=previous.markets
 		enabled=previous.enabled;_seed=previous.seed;last_day=previous.day
+		# Validating another save must not cancel the current world's day.
+		_day_job=previous.job;advancing=previous.advancing
 	else:
 		for actor in previous.actors.values():
 			for instance in actor.systems.values():instance.free()

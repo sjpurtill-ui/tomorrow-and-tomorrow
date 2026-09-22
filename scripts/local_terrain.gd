@@ -50,6 +50,10 @@ const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
 const TRIBUTARY_SETTLEMENT_CLEARANCE_KM := 0.10
 const SPEED_HOURS_PER_REAL_SECOND := {1:0.5,2:2.0,3:8.0,4:24.0,5:72.0}
+# Per-frame microseconds for a world day in progress (see _day_step_budget_usec).
+const DAY_STEP_BUDGET_USEC := 8000
+const DAY_STEP_BUDGET_FAST_USEC := 14000
+const DAY_STEP_BUDGET_NAVIGATING_USEC := 4000
 const SETTLEMENT_DETAIL_SCALE := 0.002
 const SETTLEMENT_FABRIC_MAX_ZOOM := 28.0
 const SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM := 2.4
@@ -340,6 +344,11 @@ var travel_days_total := 0.0
 var travel_days_elapsed := 0.0
 var game_speed := 0.0
 var simulation_clock:=preload("res://scripts/simulation_clock.gd").new()
+# Calendar target and frame advance of the day running in bounded steps.
+var scheduled_world_elapsed:=0.0
+var scheduled_world_days:=0.0
+# False restores whole days inside one frame (diagnostics and fallback).
+var scheduled_world_days_enabled:=true
 var world_menu_panel: Control
 var world_seed_input: LineEdit
 var world_seed_status: Label
@@ -999,6 +1008,11 @@ func _process(delta: float) -> void:
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
 	stamp=trace.mark("frame_hud",stamp)
+	# A started day always finishes, even if paused, before the century choice
+	# or campaign logic reads its results. Its work is spread across frames.
+	if WorldSimulation.day_in_progress():
+		WorldSimulation.pump_day(_day_step_budget_usec())
+		stamp=trace.mark("frame_world_day",stamp)
 	if GameState.founding_focus!="" and PeopleDirection.needs_century_choice():
 		if game_speed>0.0: _set_game_speed(0.0)
 		if not is_instance_valid(PeopleDirection.panel): PeopleDirection.open_direction()
@@ -1010,9 +1024,58 @@ func _process(delta: float) -> void:
 		return
 	if game_speed <= 0.0:
 		return
-	if calendar_days>0.0:advance_world_time(calendar_days)
+	if calendar_days>0.0:_schedule_world_time(calendar_days)
+
+## Frame budget for the day in progress. Steps are atomic, so one step can
+## exceed it; the budget bounds how many run back to back.
+func _day_step_budget_usec()->int:
+	if _camera_in_motion():return DAY_STEP_BUDGET_NAVIGATING_USEC
+	return DAY_STEP_BUDGET_FAST_USEC if _speed_hours_per_second()>=24.0 else DAY_STEP_BUDGET_USEC
+
+## The frame-loop calendar. Owned worlds run each day as bounded steps across
+## frames; legacy worlds and campaign intervals keep the synchronous path.
+func _schedule_world_time(days_advanced:float)->void:
+	if not scheduled_world_days_enabled or not WorldSimulation.enabled or GeneralCampaign.active:
+		advance_world_time(days_advanced)
+		return
+	var century:=float(PeopleDirection.next_century_day())
+	if WorldSimulation.day_in_progress():
+		# Calendar time accrues while the day computes, up to the next boundary,
+		# so computing and waiting overlap. The shown date holds at the day start.
+		var running:=WorldSimulation.day_in_progress_number()
+		var accrued:=minf(scheduled_world_elapsed+days_advanced,minf(float(running+1),century))
+		scheduled_world_days+=accrued-scheduled_world_elapsed
+		scheduled_world_elapsed=accrued
+		return
+	GameState.elapsed_days=minf(GameState.elapsed_days+days_advanced,century)
+	scheduled_world_elapsed=GameState.elapsed_days
+	if last_discovery_day>=int(floor(scheduled_world_elapsed)) or game_speed<=0.0:
+		_after_world_time(days_advanced)
+		return
+	var day:=last_discovery_day+1
+	scheduled_world_days=days_advanced
+	GameState.elapsed_days=float(day)
+	GameState.convoy_traveling=bool(GameState.founding_journey.get("active",false))
+	var daily_context:=_discovery_context()
+	for city in GameState.player_settlements:
+		if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
+	WorldSimulation.begin_day(day,daily_context,_process_local_settlement_day,_finish_scheduled_day.bind(day))
+	WorldSimulation.pump_day(_day_step_budget_usec())
+
+func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
+	last_discovery_day=day
+	_commit_world_day(day_result)
+	# An attention pause during the day stops the calendar at that day.
+	GameState.elapsed_days=scheduled_world_elapsed if game_speed>0.0 else float(day)
+	_after_world_time(scheduled_world_days if game_speed>0.0 else 0.0)
+
+## The simulated date, including a day whose steps are still running.
+func _simulated_day()->int:
+	return WorldSimulation.day_in_progress_number() if WorldSimulation.day_in_progress() else last_discovery_day
 
 func advance_world_time(days_advanced:float)->void:
+	# Synchronous callers (campaign intervals, tests) first commit any day in progress.
+	WorldSimulation.flush_day()
 	# Stop at the calendar boundary; never simulate part of an unchosen century.
 	GameState.elapsed_days = minf(GameState.elapsed_days+days_advanced,float(PeopleDirection.next_century_day()))
 	var requested_world_day:=GameState.elapsed_days
@@ -1030,38 +1093,46 @@ func advance_world_time(days_advanced:float)->void:
 		for city in GameState.player_settlements:
 			if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
 		var day_result:=WorldSimulation.advance_day(last_discovery_day,daily_context,_process_local_settlement_day) if WorldSimulation.enabled else preload("res://scripts/civilization_day.gd").advance(last_discovery_day,daily_context,_process_local_settlement_day)
-		var discoveries:Array[Dictionary]=day_result.discoveries
-		if not discoveries.is_empty():preload("res://scripts/hud/research_announcements.gd").announce(self,hud,discoveries)
-		var resource_events:Array[Dictionary]=day_result.resources
-		var simulation_events:Array[Dictionary]=day_result.events
-		var progression_events:Array[Dictionary]=day_result.progression
-		if not (day_result.get("arrival",{}) as Dictionary).is_empty():_show_convoy_arrival(day_result.arrival)
-		if not discoveries.is_empty() or not resource_events.is_empty():footprint_population=-1
-		AdvisorSystem.refresh_pronouncement_statuses()
-		_refresh_population_allocations()
-		_refresh_event_report()
-		for consequence in simulation_events:
-			if String(consequence.get("severity","")) in ["danger","critical","warning"]:
-				AdvisorSystem.generate_consequence_item(consequence)
-		for resource_event in resource_events:
-			if String(resource_event.get("title","")) in ["Resource Flow Constrained","Material Losses","Resource Accessible"]:
-				AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
-		preload("res://scripts/strategic_history.gd").sample()
-		_refresh_discovered_resource_overlays()
-		_refresh_settlement_footprint()
-		if not progression_events.is_empty() and travel_status_label:
-			travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
-		elif not discoveries.is_empty() and travel_status_label:
-			travel_status_label.text = "DISCOVERY: %s" % discoveries[0].name.to_upper()
-		elif not resource_events.is_empty() and travel_status_label:
-			travel_status_label.text = "%s: %s" % [resource_events[0].title.to_upper(), resource_events[0].description]
-		elif not simulation_events.is_empty() and travel_status_label:
-			travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
-		_evaluate_travel_survival()
+		_commit_world_day(day_result)
 	if last_discovery_day<current_discovery_day:
 		days_advanced=maxf(0.0,days_advanced-(requested_world_day-float(last_discovery_day)))
 		requested_world_day=float(last_discovery_day)
 	GameState.elapsed_days=requested_world_day
+	_after_world_time(days_advanced)
+
+## Presents one committed simulation day: reports, advisors, overlays.
+func _commit_world_day(day_result:Dictionary)->void:
+	var discoveries:Array[Dictionary]=day_result.discoveries
+	if not discoveries.is_empty():preload("res://scripts/hud/research_announcements.gd").announce(self,hud,discoveries)
+	var resource_events:Array[Dictionary]=day_result.resources
+	var simulation_events:Array[Dictionary]=day_result.events
+	var progression_events:Array[Dictionary]=day_result.progression
+	if not (day_result.get("arrival",{}) as Dictionary).is_empty():_show_convoy_arrival(day_result.arrival)
+	if not discoveries.is_empty() or not resource_events.is_empty():footprint_population=-1
+	AdvisorSystem.refresh_pronouncement_statuses()
+	_refresh_population_allocations()
+	_refresh_event_report()
+	for consequence in simulation_events:
+		if String(consequence.get("severity","")) in ["danger","critical","warning"]:
+			AdvisorSystem.generate_consequence_item(consequence)
+	for resource_event in resource_events:
+		if String(resource_event.get("title","")) in ["Resource Flow Constrained","Material Losses","Resource Accessible"]:
+			AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
+	preload("res://scripts/strategic_history.gd").sample()
+	_refresh_discovered_resource_overlays()
+	_refresh_settlement_footprint()
+	if not progression_events.is_empty() and travel_status_label:
+		travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
+	elif not discoveries.is_empty() and travel_status_label:
+		travel_status_label.text = "DISCOVERY: %s" % discoveries[0].name.to_upper()
+	elif not resource_events.is_empty() and travel_status_label:
+		travel_status_label.text = "%s: %s" % [resource_events[0].title.to_upper(), resource_events[0].description]
+	elif not simulation_events.is_empty() and travel_status_label:
+		travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
+	_evaluate_travel_survival()
+
+## Calendar-time presentation after whole days are committed.
+func _after_world_time(days_advanced:float)->void:
 	if not GameState.founding_journey.is_empty():
 		var journey:=GameState.founding_journey
 		travel_days_elapsed=float(journey.elapsed)
@@ -12022,7 +12093,7 @@ func _pause_for_military_attention(event_id:String,title:String,body:String,trun
 	game_speed=0.0
 	# Stop a fast-forward batch at this day, not after several hidden battles.
 	# Restored notifications have no running batch: preserve the saved fraction.
-	if truncate_batch:GameState.elapsed_days=minf(GameState.elapsed_days,float(last_discovery_day))
+	if truncate_batch:GameState.elapsed_days=minf(GameState.elapsed_days,float(_simulated_day()))
 	_update_time_interface()
 	_show_military_attention.call_deferred(title,body)
 
