@@ -1282,6 +1282,9 @@ func _mortality_condition_factor(housing_ratio:float=-1.0)->float:
 	return health_factor*food_factor*shelter_factor
 
 # _baseline_mortality_hazard_at_age for ages 0-109, for the 110-year projection.
+# Mean of _baseline_mortality_hazard_at_age over each POPULATION_COHORT_AGE_RANGES
+# band, computed once by the original age-ordered loop (static: never saved).
+static var _average_hazard_by_cohort:Dictionary={}
 const BASELINE_HAZARD_BY_AGE:Array[float]=[0.090,0.025,0.025,0.025,0.025,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380]
 
 func _baseline_mortality_hazard_at_age(age:int)->float:
@@ -1303,13 +1306,16 @@ func current_natural_mortality_rate(housing_ratio:float=-1.0)->float:
 	var deaths_per_year:=0.0
 	# Average the same life-table hazards used by projected life expectancy over
 	# each fixed age band. This stays O(1) at every population scale.
+	if _average_hazard_by_cohort.is_empty():
+		for key in POPULATION_AGE_COHORTS:
+			var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
+			var hazard_sum:=0.0
+			var years:=maxi(1,roundi(age_range.y-age_range.x))
+			for age in range(roundi(age_range.x),roundi(age_range.y)):
+				hazard_sum+=_baseline_mortality_hazard_at_age(age)
+			_average_hazard_by_cohort[key]=hazard_sum/float(years)
 	for key in POPULATION_AGE_COHORTS:
-		var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
-		var hazard_sum:=0.0
-		var years:=maxi(1,roundi(age_range.y-age_range.x))
-		for age in range(roundi(age_range.x),roundi(age_range.y)):
-			hazard_sum+=_baseline_mortality_hazard_at_age(age)
-		var average_hazard:=hazard_sum/float(years)
+		var average_hazard:float=_average_hazard_by_cohort[key]
 		deaths_per_year+=float(population_cohorts.get(key,0.0))*clampf(average_hazard*condition_factor,0.0001,0.98)
 	return deaths_per_year/maxf(1.0,population_exact)
 
