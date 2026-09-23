@@ -2413,3 +2413,7 @@ Rillmark adds four new character-action compositions. First assignments now rota
 ### Eight early character families
 
 Flintmere and Morrowfen add eight distinct action compositions with separate authored facial traits, hair and garment construction. The shared first-assignment sequence covers player plus seven rivals before repetition; existing saved identities remain fixed. Thirteen focused checks pass across all eight source atlases and saved government/diplomatic identity rules. No simulation traits, game RNG or later-era art change. This is still short of exclusive imagery for the default player-plus-twelve world.
+
+### Ten early character families
+
+Thornbank and Sunhollow add eight reviewed action illustrations with varied ordinary faces, adult proportions and working postures. Thirteen focused checks pass across all ten atlases and the nonrepeating initial assignment span. Existing saved families, civic behavior and simulation RNG are unchanged. The library now covers player plus nine rivals before repeating; further coverage remains.

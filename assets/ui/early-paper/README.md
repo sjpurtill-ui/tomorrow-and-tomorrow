@@ -27,3 +27,5 @@ Character library expansion: ashplain-scenes-v1.png adds a fifth family with fou
 Rillmark adds a sixth authored family with four distinct inspection/explanation scenes; see rillmark-prompt.json. For newly assigned worlds, the player and first five canonical rival IDs use all six families before repetition. The family choice is deterministic and independent of simulation RNG. Saved appearances retain priority. This improves distribution; it does not claim six families can cover every rival uniquely.
 
 Flintmere and Morrowfen extend the library to eight families, each with four independently composed action scenes and its own prompt/provenance file. The nonrepeating first-assignment span grows to the player plus seven rivals; established saved families are unchanged. Atlases retain 1536 caps and mipmaps, and the shared source cache remains bounded at eight textures.
+
+Thornbank and Sunhollow extend the library to ten families and add eight action compositions. Native source IDs and exact prompts are recorded in their named prompt JSON files. New first assignments cover the player plus nine rivals before repetition; saved family assignments remain unchanged.
