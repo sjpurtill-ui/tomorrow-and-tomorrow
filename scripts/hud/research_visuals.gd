@@ -9,7 +9,11 @@ const EARLY_SUBJECTS:={
 	"oral_epics":Vector2(.5,.67),"tallies":Vector2(.55,.72),"cordage":Vector2(.68,.71),"clay_shaping":Vector2(.65,.73),
 	"seasonal_patterns":Vector2(.40,.64),"seed_selection":Vector2(.55,.73),"clean_water":Vector2(.55,.67),"food_drying":Vector2(.60,.78),
 	"controlled_flaking":Vector2(.53,.73),"pit_firing":Vector2(.68,.75),"joinery":Vector2(.52,.76),"basketry":Vector2(.65,.72),
-	"plain_weaving":Vector2(.65,.70),"drop_spindles":Vector2(.67,.71),"customary_law":Vector2(.52,.76),"watch_rotation":Vector2(.68,.70)}
+	"plain_weaving":Vector2(.65,.70),"drop_spindles":Vector2(.67,.71),"customary_law":Vector2(.52,.76),"watch_rotation":Vector2(.68,.70),
+	"acorn_leaching":Vector2(.65,.73),"edible_resource_recognition":Vector2(.65,.73),"hide_tanning":Vector2(.50,.70),"charcoal":Vector2(.58,.74),
+	"drainage":Vector2(.58,.73),"public_stores":Vector2(.60,.68),"labor_rotations":Vector2(.52,.74),"festival_calendar":Vector2(.65,.80),
+	"supply_groups":Vector2(.35,.74),"rammed_earth_construction":Vector2(.60,.66),"adobe_wall_construction":Vector2(.60,.70),"mineral_pigment_preparation":Vector2(.67,.70)}
+const EARLY_SUBJECT_FILES:={"hide_tanning":"hide-tanning-v2"}
 static var assignments:Dictionary={}
 static var textures:Dictionary={}
 static func manifest()->Dictionary:
@@ -36,7 +40,7 @@ static func texture_at(path:String)->Texture2D:
 static func subject_art_key(item:Dictionary)->String:
 	if not bool(item.get("exposed",true)):return ""
 	var id:=String(item.get("id",""))
-	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % id
+	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % EARLY_SUBJECT_FILES.get(id,id)
 	return String(manifest().get(String(item.get("id","")),{}).get("path",""))
 static func focus_for(item:Dictionary)->Vector2:
 	var id:=String(item.get("id",""))
