@@ -1,6 +1,7 @@
 extends RefCounted
 const Dock=preload("res://scripts/naval_dock_service.gd")
-const Supply=preload("res://scripts/civilian_production_planner.gd")
+## Access upkeep reserve: timber and a rope coil as raw materials and goods.
+static var UPKEEP:=preload("res://scripts/goods_bills.gd").flatten({"Timber":10.0,"Rope Coils":1.0})
 
 static func local_city()->String:
 	var state=WorldSimulation.state
@@ -29,7 +30,7 @@ static func targets()->Dictionary:
 		if not port.has("dock_service"):
 			if WorldSimulation.state.effective_workers("Construction",true)<4:continue
 			bill=Dock.BILL
-		elif not Dock.building(port):bill={"Timber":10.0,"Rope Coils":1.0}
+		elif not Dock.building(port):bill=UPKEEP
 		for item:String in bill:needs[item]=float(needs.get(item,0))+float(bill[item])
 	return needs
 
@@ -38,22 +39,15 @@ static func install_supplied()->void:
 	for port:Dictionary in eligible_ports():
 		if not port.has("dock_service"):WorldSimulation.military.joint_operations.build_dock(int(port.id))
 
+## Builds supplied docks in every accessible city. Dock bills are raw
+## materials and Civilian Goods moved by city trade (settlement_model reads
+## targets()); no production order is placed, so this always returns {}.
 static func recommendation()->Dictionary:
 	var state=WorldSimulation.state
 	if not state.resource_settlement_id.is_empty():return {}
 	install_supplied()
-	var needs:=targets()
 	for city:Dictionary in state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
-		var local:Dictionary=WorldSimulation.settlements.with_city_resources(String(city.id),func()->Dictionary:
-			return WorldSimulation.settlements.with_local_population(func()->Dictionary:
-				install_supplied()
-				var result:=targets()
-				for item:String in result:result[item]=maxf(0,float(result[item])-float(state.resource_stockpiles.get(item,0))-WorldSimulation.settlements._city_incoming(String(city.id),item))
-				return result))
-		for item:String in local:needs[item]=float(needs.get(item,0))+float(local[item])
-	for item:String in needs:
-		if float(state.resource_stockpiles.get(item,0))>=float(needs[item]):continue
-		var order:=Supply.supply(item,ceili(float(needs[item])),{})
-		if not order.is_empty():return order
+		WorldSimulation.settlements.with_city_resources(String(city.id),func()->void:
+			WorldSimulation.settlements.with_local_population(func()->void:install_supplied()))
 	return {}

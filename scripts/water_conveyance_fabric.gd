@@ -1,10 +1,21 @@
 extends RefCounted
 ## Installation bills, independent of the provider of finished pipe sections.
 const Route=preload("res://scripts/water_conveyance_route.gd")
+const Stock=preload("res://scripts/bill_stock.gd")
 const MATERIALS={
 	"ceramic":{"item":"Fired Clay Conduits","gate":"clay_pipe_socket_jointing","leakage":0.12,"decay":0.0006},
 	"timber":{"item":"Wooden Conduits","gate":"joinery","leakage":0.18,"decay":0.0012}
 }
+## Sections, mortar, fit gauges, bedding and rod sets are paid as the raw
+## materials and Civilian Goods of their former recipes; the names are units.
+static var MORTAR:=Stock.unit("Building Mortar")
+static var FIT_GAUGES:=Stock.unit("Conduit Fit Gauges")
+static var BEDDING:=Stock.unit("Conduit Bedding")
+static var RODDING:=Stock.unit("Conduit Rodding Sets")
+
+## Raw materials and Civilian Goods for one conduit section or repair unit.
+static func section_unit(material:String)->Dictionary:
+	return Stock.unit(String(MATERIALS[material].item)) if MATERIALS.has(material) else {}
 
 static func quote(route:Dictionary,material:String,known:Array,stock:Dictionary)->Dictionary:
 	if not MATERIALS.has(material):return {"error":"Choose a supported conduit material."}
@@ -20,17 +31,20 @@ static func quote(route:Dictionary,material:String,known:Array,stock:Dictionary)
 		var a:Vector3=route.samples[index];var b:Vector3=route.samples[index+1]
 		length+=Vector2(a.x,a.z).distance_to(Vector2(b.x,b.z))
 	var units:=maxi(1,ceili(length*10.0))
-	var bill:Dictionary={String(spec.item):float(units),"Clay":float(units)*0.2}
+	var bill:=Stock.scaled(section_unit(material),float(units))
 	var leakage:=float(spec.leakage)
 	var decay:=float(spec.decay)
 	var work_required:=float(units)*4.0
 	var applied:Array[String]=[String(spec.gate),"gravity_conduit_grade_control"]
-	if material=="ceramic" and "lime_mortar" in known and float(stock.get("Building Mortar",0))>=units*.1:
-		bill.erase("Clay");bill["Building Mortar"]=units*.1;leakage*=.8;applied.append("lime_mortar")
-	if "ceramic_pipe_fit_gauges" in known and material=="ceramic" and float(stock.get("Conduit Fit Gauges",0))>=.1:
-		bill["Conduit Fit Gauges"]=.1;leakage*=.8;applied.append("ceramic_pipe_fit_gauges")
-	if "rigid_pipe_bedding" in known and float(stock.get("Conduit Bedding",0))>=units*.2:
-		bill["Conduit Bedding"]=units*.2;decay*=.7;applied.append("rigid_pipe_bedding")
+	# Optional practices apply when their own materials are on hand, checked
+	# separately as before; the final bill check covers the combined total.
+	if material=="ceramic" and "lime_mortar" in known and Stock.affordable(stock,MORTAR)>=units*.1:
+		Stock.add_scaled(bill,MORTAR,units*.1);leakage*=.8;applied.append("lime_mortar")
+	else:bill["Clay"]=float(bill.get("Clay",0.0))+float(units)*0.2
+	if "ceramic_pipe_fit_gauges" in known and material=="ceramic" and Stock.affordable(stock,FIT_GAUGES)>=.1:
+		Stock.add_scaled(bill,FIT_GAUGES,.1);leakage*=.8;applied.append("ceramic_pipe_fit_gauges")
+	if "rigid_pipe_bedding" in known and Stock.affordable(stock,BEDDING)>=units*.2:
+		Stock.add_scaled(bill,BEDDING,units*.2);decay*=.7;applied.append("rigid_pipe_bedding")
 	# Supported case: a rigid line on paid bedding, assessed during construction.
 	# Extra crew work covers checking support and correcting bedding placement;
 	# this does not certify arbitrary overburden, traffic loads, or pressure.

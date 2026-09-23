@@ -11,6 +11,8 @@ const METHODS:={
 	"medical_resupply_packing":{"name":"Medical Resupply Packing","requires":["field_aid_stations","material_accounting"],"observation":"Standard care bundles make shortages visible before a receiving station exhausts its dressings and supplies.","capacity":0.15},
 	"convalescent_duty_reviews":{"name":"Convalescent Duty Reviews","requires":["triage_registers","work_rest_limits"],"observation":"Recovery records distinguish people ready for duty from those who still need care or different work.","capacity":0.15}
 }
+## Dressings for one case (.02 woven dressings) as raw materials and Civilian Goods.
+static var DRESSING:=preload("res://scripts/goods_bills.gd").flatten({"Woven Dressings":.02})
 static func entries()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	for id:String in METHODS:
@@ -32,22 +34,22 @@ static func quote(force:Dictionary,supply:float)->Dictionary:
 	var provisioned:=clampf(supply,0,1)
 	var stock:Dictionary=WorldSimulation.state.resource_stockpiles
 	var fiber:=maxf(0,float(stock.get("Fiber Plants",0)))/.1
-	var dressings:=maxf(0,float(stock.get("Woven Dressings",0)))/.02
+	var dressings:=preload("res://scripts/bill_stock.gd").affordable(stock,DRESSING)
 	var medicine:=maxf(0,float(stock.get("Medicinal Plants",0)))/.05
 	var cases:=minf(minf(float(wounded),care_capacity)*provisioned,minf(fiber+dressings,medicine))
 	var reason:="Care capacity is available"
 	if wounded<=0:reason="No recoverable wounded are waiting"
 	elif care_capacity<=0:reason="No trained, equipped medical detachment is available"
 	elif provisioned<=0:reason="The force has no supporting provisions"
-	elif fiber+dressings<=0:reason="No Fiber Plants or Woven Dressings are available for care supplies"
+	elif fiber+dressings<=0:reason="No Fiber Plants or Civilian Goods are available for dressings"
 	elif medicine<=0:reason="No Medicinal Plants are available for care supplies"
 	elif cases<minf(float(wounded),care_capacity)*provisioned:reason="Remaining care supplies limit service"
 	elif provisioned<1:reason="Partial provisions limit service"
 	var dressed_cases:=minf(cases,dressings)
 	var inputs:Dictionary={}
 	if cases>0:inputs["Medicinal Plants"]=cases*.05
-	if dressed_cases>0:inputs["Woven Dressings"]=dressed_cases*.02
-	if cases>dressed_cases:inputs["Fiber Plants"]=(cases-dressed_cases)*.1
+	if dressed_cases>0:preload("res://scripts/bill_stock.gd").add_scaled(inputs,DRESSING,dressed_cases)
+	if cases>dressed_cases:inputs["Fiber Plants"]=float(inputs.get("Fiber Plants",0))+(cases-dressed_cases)*.1
 	return {"capacity":care_capacity,"recoverable_wounded":wounded,"cases":cases,"recovery":cases*.08,"reason":reason,"inputs":inputs}
 static func provide(force:Dictionary,supply:float)->Dictionary:
 	var result:=quote(force,supply)

@@ -1,7 +1,13 @@
 extends RefCounted
 ## Physical dock construction and finite repair access. The JointOperations
 ## owner must validate port ownership and provide that port's actual inventory.
-const BILL={"Launch Cradles":4.0,"Timber":200.0,"Stone":200.0,"Rope Coils":8.0,"Rigging Blocks":8.0}
+const Stock=preload("res://scripts/bill_stock.gd")
+## Former named-part bill; docks built before Civilian Goods recorded it.
+const BILL_SOURCE={"Launch Cradles":4.0,"Timber":200.0,"Stone":200.0,"Rope Coils":8.0,"Rigging Blocks":8.0}
+## Cradles, rope and blocks paid as raw materials and Civilian Goods.
+static var BILL:=preload("res://scripts/goods_bills.gd").flatten(BILL_SOURCE).duplicate()
+## One rope coil's worth of access upkeep.
+static var ROPE:=Stock.unit("Rope Coils")
 const REQUIRED_WORK:=240.0
 const DAILY_ACCESS:=20.0
 ## Relative handling loads, not engineering displacement certificates.
@@ -54,7 +60,9 @@ static func access_quote(base:Dictionary,force:Dictionary,day:int,requested:floa
 	if load<=0:return {"error":"Installed lift access does not support this formation's hulls."}
 	var work:=minf(maxf(0,requested),remaining_access(base,day))
 	if work<=0:return {"error":"No completed dock access remains today."}
-	return {"ok":true,"work":work,"hull_load":load,"cost":{"Timber":work*.2,"Rope Coils":work*.01}}
+	var cost:=Stock.scaled(ROPE,work*.01)
+	cost["Timber"]=float(cost.get("Timber",0.0))+work*.2
+	return {"ok":true,"work":work,"hull_load":load,"cost":cost}
 
 static func pay_access(base:Dictionary,force:Dictionary,stock:Dictionary,day:int,requested:float)->Dictionary:
 	# Always quote again against current usage; no caller can reuse a stale bill.
@@ -105,10 +113,15 @@ static func valid_dock(value:Variant)->bool:
 		if not number(value.get(key),0 if key=="started_day" else -1,100000000,true):return false
 	if not number(value.get("access_used"),0,DAILY_ACCESS):return false
 	var paid:Variant=value.get("paid_materials")
-	if not paid is Dictionary or paid.size()!=BILL.size():return false
-	for item:String in BILL:
-		if not number(paid.get(item),.001,100000):return false
-	return true
+	if not paid is Dictionary:return false
+	# Accept the flattened bill and the named-part bill of older docks.
+	for bill:Dictionary in [BILL,BILL_SOURCE]:
+		if paid.size()!=bill.size():continue
+		var matched:=true
+		for item:String in bill:
+			if not number(paid.get(item),.001,100000):matched=false;break
+		if matched:return true
+	return false
 
 static func valid_force_fields(force:Dictionary)->bool:
 	if force.has("dock_service_day") and not number(force.dock_service_day,0,100000000,true):return false

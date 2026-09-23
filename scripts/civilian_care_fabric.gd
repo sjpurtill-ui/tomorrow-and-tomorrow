@@ -9,6 +9,10 @@ const CARE_WORK:=0.5
 const RECORD_CLAY:=0.005
 const CARE_WATER:=0.25
 const CARE_CLOTH:=0.02
+## Supplies for one supported case: water plus the raw materials and Civilian
+## Goods of CARE_CLOTH woven cloth. Reports still count cloth-equivalents.
+static var CLOTH_UNIT:=preload("res://scripts/goods_bills.gd").flatten({"Woven Cloth":CARE_CLOTH})
+static var CARE_UNIT:=preload("res://scripts/bill_stock.gd").add_scaled({"Freshwater":CARE_WATER},CLOTH_UNIT,1.0)
 
 static func empty_state()->Dictionary:
 	return {"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}}
@@ -77,11 +81,10 @@ static func serve(data:Dictionary,stock:Dictionary,workers:float,methods:Diction
 				if pulse:report.pulse_assessed+=observed
 		var treated:=0.0
 		if bool(methods.get("nursing",false)) and int(episode.observation_day)==day:
-			treated=minf(float(episode.observed),minf(work/CARE_WORK,minf(available(stock,"Freshwater")/CARE_WATER,available(stock,"Woven Cloth")/CARE_CLOTH)))
+			treated=minf(float(episode.observed),minf(work/CARE_WORK,preload("res://scripts/bill_stock.gd").affordable(stock,CARE_UNIT)))
 			if treated>.000001:
 				work-=treated*CARE_WORK
-				stock.Freshwater=available(stock,"Freshwater")-treated*CARE_WATER
-				stock["Woven Cloth"]=available(stock,"Woven Cloth")-treated*CARE_CLOTH
+				preload("res://scripts/bill_stock.gd").pay(stock,preload("res://scripts/bill_stock.gd").scaled(CARE_UNIT,treated))
 				var prior_fraction:=minf(treated,float(episode.cared))/maxf(.000001,remaining) if int(episode.care_day)==day-1 else 0.0
 				episode.continuity=minf(1.0,float(episode.continuity)*prior_fraction+treated/maxf(.000001,remaining)*.25)
 				episode.cared=treated;episode.care_day=day
