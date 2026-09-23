@@ -58,6 +58,8 @@ const CITY_RESOURCE_DEFAULTS:={
 }
 const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_conceptions","lifetime_pregnancy_losses","lifetime_stillbirths","lifetime_maternal_deaths","lifetime_neonatal_deaths","observed_death_age_sum"]
 var _claim_shape_cache:Dictionary={}
+# CITY_RESOURCE_DEFAULTS keys as StringNames for the per-scope field swap.
+static var _city_resource_fields:Array[StringName]=[]
 # Nation-wide inputs shared by every record within one network snapshot call.
 # An Object, so saves never capture it; empty outside a snapshot.
 var _network_common:=RefCounted.new()
@@ -235,13 +237,19 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	var record:=settlement_record(settlement_id)
 	if record.is_empty() or bool(record.get("primary",false)): return operation.call()
 	_ensure_city_resources(record)
-	var saved:Dictionary={}
-	for field in CITY_RESOURCE_DEFAULTS:
-		saved[field]=state.get(field)
-		var value:Variant=record.local_resources[field]
+	if _city_resource_fields.is_empty():
+		for field in CITY_RESOURCE_DEFAULTS:_city_resource_fields.append(StringName(field))
+	var local:Dictionary=record.local_resources
+	var saved:Array=[]
+	saved.resize(_city_resource_fields.size())
+	for index in _city_resource_fields.size():
+		var field:StringName=_city_resource_fields[index]
+		var current:Variant=state.get(field)
+		saved[index]=current
+		var value:Variant=local[field]
 		# Preserve typed Array fields when assigning serialized/default state.
-		if saved[field] is Array:
-			var template:Array=saved[field]
+		if current is Array:
+			var template:Array=current
 			var incoming:Array=value
 			if template.is_same_typed(incoming):
 				state.set(field,incoming)
@@ -253,9 +261,10 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	var previous_id:=state.resource_settlement_id
 	state.resource_settlement_id=settlement_id
 	var result:Variant=operation.call()
-	for field in CITY_RESOURCE_DEFAULTS:
-		record.local_resources[field]=state.get(field)
-		state.set(field,saved[field])
+	for index in _city_resource_fields.size():
+		var field:StringName=_city_resource_fields[index]
+		local[field]=state.get(field)
+		state.set(field,saved[index])
 	state.resource_settlement_id=previous_id
 	return result
 
