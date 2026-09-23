@@ -2,19 +2,34 @@ extends RefCounted
 ## Paid infrastructure and rolling-stock state. The owner provides the actual
 ## local stock and labor; this helper has no authority over cities or workers.
 const Route=preload("res://scripts/rail_route_survey.gd")
+const Stock=preload("res://scripts/bill_stock.gd")
 const MAX_LINES:=16
 const MAX_WAGONS:=8
 const GAUGES:={900:{"wagon":"900 mm Rail Wagons","load":160.0},1435:{"wagon":"1435 mm Rail Wagons","load":240.0}}
 const CONSTRUCTION_WORK_PER_KM:=20.0
 const HAUL_SPEED_KM_PER_DAY:=24.0
+## Track panels, brakes and wagons are no longer made on separate lines; their
+## former recipes are paid as raw materials plus Civilian Goods.
+static var TRACK_PANEL:=Stock.unit("Timber Rail Panels")
+static var BRAKE_SET:=Stock.unit("Rail Brake Sets")
+## Per-kilometre running upkeep of a loaded trip.
+static var TRIP_UPKEEP:=preload("res://scripts/goods_bills.gd").flatten({"Timber":.1,"Wrought Iron":.01})
 
 static func empty_state()->Dictionary:
 	return {"lines":[],"next_id":1,"last_day":-1}
 
-static func installation_bill(route:Dictionary,gauge:int,wagons:int)->Dictionary:
+## The former bill naming track panels, templates, ballast, wagons and brakes.
+## Lines installed before Civilian Goods recorded this as paid materials.
+static func legacy_installation_bill(route:Dictionary,gauge:int,wagons:int)->Dictionary:
 	if not Route.valid(route) or not GAUGES.has(gauge) or wagons<1 or wagons>MAX_WAGONS:return {}
 	var distance:=float(route.length_km)
 	return {"Timber Rail Panels":ceil(distance*8.0),"Rail Gauge Templates":1.0,"Track Ballast":ceil(distance*40.0),"Timber":ceil(distance*12.0),String(GAUGES[gauge].wagon):float(wagons),"Rail Brake Sets":float(wagons)}
+
+## Raw materials and Civilian Goods for the track and rolling stock. Wagon
+## count and load stay numbers on the line; only the purchase is flattened.
+static func installation_bill(route:Dictionary,gauge:int,wagons:int)->Dictionary:
+	var legacy:=legacy_installation_bill(route,gauge,wagons)
+	return preload("res://scripts/goods_bills.gd").flatten(legacy).duplicate() if not legacy.is_empty() else {}
 
 static func can_pay(stock:Dictionary,bill:Dictionary)->bool:
 	for item:String in bill:
@@ -57,7 +72,7 @@ static func trip_quote(line:Dictionary,requested:float,available_workers:float,d
 	available=minf(available,maxf(0,available_workers-crew)*return_days/.005)
 	if available<=.01:return {}
 	var distance:=float(line.route.length_km)
-	return {"ok":true,"quantity":available,"travel_days":travel_days,"return_day":day+return_days,"crew_workers":crew+available*.005/return_days,"worker_days":crew*return_days+available*.005,"cost":{"Timber":distance*.1,"Wrought Iron":distance*.01}}
+	return {"ok":true,"quantity":available,"travel_days":travel_days,"return_day":day+return_days,"crew_workers":crew+available*.005/return_days,"worker_days":crew*return_days+available*.005,"cost":Stock.scaled(TRIP_UPKEEP,distance)}
 
 static func commit_trip(line:Dictionary,plan:Dictionary,shipment_id:int,source:String,day:int,stock:Dictionary)->bool:
 	# Recheck occupancy and payment at commitment. Cargo is issued separately by
@@ -74,7 +89,9 @@ static func maintain(line:Dictionary,stock:Dictionary,work:float,day:int)->float
 	var need:=maxf(1.0-float(line.condition),1.0-float(line.wagon_condition))
 	var restored:=minf(need,work*.01)
 	if restored<=0:return 0.0
-	var bill:={"Timber Rail Panels":restored*maxf(1,float(line.route.length_km)),"Rail Brake Sets":restored*float(line.wagons),"Timber":restored*2.0}
+	var bill:=Stock.scaled(TRACK_PANEL,restored*maxf(1,float(line.route.length_km)))
+	Stock.add_scaled(bill,BRAKE_SET,restored*float(line.wagons))
+	bill["Timber"]=float(bill.get("Timber",0.0))+restored*2.0
 	if not can_pay(stock,bill):return 0.0
 	pay(stock,bill)
 	line.condition=minf(1,float(line.condition)+restored);line.wagon_condition=minf(1,float(line.wagon_condition)+restored)

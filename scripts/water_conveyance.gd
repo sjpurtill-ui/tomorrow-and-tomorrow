@@ -84,10 +84,12 @@ static func maintain(line_id:int,work:float,clear_obstruction:bool=false)->float
 		var field:="obstruction" if clear_obstruction else "condition"
 		var need:=float(line.obstruction) if clear_obstruction else 1.0-float(line.condition)
 		var amount:=minf(need,work*.01)
-		var item:="Conduit Rodding Sets" if clear_obstruction else String(Fabric.MATERIALS[line.material].item)
-		var stock:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))
-		amount=minf(amount,stock/2.0)
-		WorldSimulation.state.resource_stockpiles[item]=stock-amount*2.0
+		# Two repair units per unit of restored condition or cleared obstruction,
+		# each paid as the raw materials and Civilian Goods of a section or rod set.
+		var unit:=Fabric.RODDING if clear_obstruction else Fabric.section_unit(String(line.material))
+		amount=minf(amount,Fabric.Stock.affordable(WorldSimulation.state.resource_stockpiles,unit)/2.0)
+		if amount<=0:return 0.0
+		Fabric.Stock.pay(WorldSimulation.state.resource_stockpiles,Fabric.Stock.scaled(unit,amount*2.0))
 		line[field]=float(line[field])-amount if clear_obstruction else float(line[field])+amount
 		return amount/.01
 	return 0.0

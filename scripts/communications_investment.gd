@@ -3,7 +3,6 @@ extends RefCounted
 const Ops=preload("res://scripts/technology_operations.gd")
 const E=preload("res://scripts/society_exchange.gd")
 const Analysis=preload("res://scripts/communications_analysis.gd")
-const Supply=preload("res://scripts/civilian_production_planner.gd")
 const Power=preload("res://scripts/power_investment_planner.gd")
 const TYPES=["optical_signal_bench","electrical_signal_bench","radio_signal_bench","digital_signal_bench"]
 static func recommendation()->Dictionary:
@@ -42,20 +41,23 @@ static func recommendation()->Dictionary:
 		if not known:continue
 		var needs:Dictionary=spec.cost.duplicate()
 		for resource:String in spec.inputs:needs[resource]=float(needs.get(resource,0))+float(spec.inputs[resource])*(int(record.get("installed",0))+1)*30.0
-		var first:Dictionary={};var feasible:=true
-		for resource:String in needs:
-			if float(state.resource_stockpiles.get(resource,0))>=float(needs[resource]):continue
-			var part:=Supply.supply(resource,ceili(float(needs[resource])),{})
-			if part.is_empty():feasible=false;break
-			if first.is_empty():first=part
-		if not feasible:continue
+		# Bills are raw materials and Civilian Goods (technology_operations
+		# flattens them); no line makes them to order, so wait for stock.
+		if not shortfall(needs).is_empty():continue
 		if float(spec.power)>0 and not Power.can_supply(float(spec.power)*condition):
 			var generation:=Power.recommendation(float(spec.power)*condition)
 			if upstream.is_empty() and not generation.is_empty():upstream=generation
 			continue
-		if first.is_empty() and not Ops.quote(id).has("error"):return {"kind":"plant_install","plant":id,"count":1}
-		if upstream.is_empty():upstream=first
+		if not Ops.quote(id).has("error"):return {"kind":"plant_install","plant":id,"count":1}
 	return upstream
+
+## Raw materials and Civilian Goods `needs` asks for beyond local stock.
+static func shortfall(needs:Dictionary)->Dictionary:
+	var result:Dictionary={}
+	for resource:String in needs:
+		var missing:=float(needs[resource])-float(WorldSimulation.state.resource_stockpiles.get(resource,0))
+		if missing>0:result[resource]=missing
+	return result
 
 static func radio_recommendation()->Dictionary:
 	var state=WorldSimulation.state
@@ -79,12 +81,7 @@ static func radio_recommendation()->Dictionary:
 	if condition<=0:return {}
 	var needs:Dictionary=spec.cost.duplicate()
 	for resource:String in spec.inputs:needs[resource]=float(needs.get(resource,0))+float(spec.inputs[resource])*30.0
-	var first:Dictionary={}
-	for resource:String in needs:
-		if float(state.resource_stockpiles.get(resource,0))>=float(needs[resource]):continue
-		var part:=Supply.supply(resource,ceili(float(needs[resource])),{})
-		if part.is_empty():return {}
-		if first.is_empty():first=part
+	if not shortfall(needs).is_empty():return {}
 	if not Power.can_supply(float(spec.power)*condition):return Power.recommendation(float(spec.power)*condition)
-	if first.is_empty() and not Ops.quote("research_radio_station").has("error"):return {"kind":"plant_install","plant":"research_radio_station","count":1}
-	return first
+	if not Ops.quote("research_radio_station").has("error"):return {"kind":"plant_install","plant":"research_radio_station","count":1}
+	return {}

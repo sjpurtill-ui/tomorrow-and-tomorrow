@@ -23,11 +23,23 @@ static func calculate()->Dictionary:
 			if int(job.get("target_stock",0))>0 and host.PersistentProduction.stock(host,job)>=int(job.target_stock):continue
 			var remaining:=maxf(0,1.0-float(job.get("progress_days",0))/maxf(.001,float(job.work_per_item)))
 			for item:String in job.get("materials",{}):result[item]=float(result.get(item,0))+float(job.materials[item])*(1.0+remaining)
-	if not state.resource_settlement_id.is_empty():return result
+	if not state.resource_settlement_id.is_empty():return _flattened(result)
 	var operations=preload("res://scripts/technology_operations.gd")
 	for id:String in state.technology_operations.get("plants",{}):
 		var plant:Dictionary=state.technology_operations.plants[id]
 		if not bool(plant.get("enabled",true)):continue
 		for item:String in operations.PLANTS.get(id,{}).get("inputs",{}):
 			result[item]=float(result.get(item,0))+maxi(0,int(plant.get("installed",0)))*float(operations.PLANTS[id].inputs[item])*30.0
-	return result
+	return _flattened(result)
+
+## Reserves as raw materials and Civilian Goods, so city trade can move them;
+## project and line bills may still name former manufactured parts.
+static func _flattened(result:Dictionary)->Dictionary:
+	var bills=preload("res://scripts/goods_bills.gd")
+	var named:=false
+	for item:String in result:
+		if bills.manufactured(item):named=true;break
+	if not named:return result
+	var flat:Dictionary={}
+	for item:String in result:preload("res://scripts/bill_stock.gd").add_scaled(flat,bills.flatten({item:1.0}),float(result[item]))
+	return flat
