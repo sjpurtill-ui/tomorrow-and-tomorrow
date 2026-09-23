@@ -59,3 +59,31 @@ static func calm()->bool:
 		var metrics:Dictionary=city.get("resource_metrics",{})
 		if float(metrics.get("food_days",0.0))<MIN_FOOD_DAYS or float(metrics.get("water_intake_ratio",0.0))<.98:return false
 	return true
+
+## Owner steps a calm secondary town may sit out before covering them at once.
+const TOWN_STRIDE:=2
+## A town with less stored food than this many days runs every owner step.
+const TOWN_MIN_FOOD_DAYS:=25.0
+## Longest interval a secondary town covers in one pass.
+const TOWN_MAX_SPAN:=10
+
+## Days a secondary town covers today, or 0 when it sits out this owner step.
+## Runs in the owner's scope. Towns stagger by id so they do not all run on the
+## same step; a hungry, thirsty, threatened or selected town runs every step.
+static func town_span(city:Dictionary)->int:
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var last:=int(city.get("last_resource_day",-1))
+	if last<0 or last>=day:return 1
+	var gap:=day-last
+	if gap>=TOWN_MAX_SPAN or not _town_calm(city):return gap
+	var step:=maxi(1,int(WorldSimulation.span))
+	var stride:=TOWN_STRIDE if WorldSimulation.actor_id!="player" else TOWN_STRIDE+1
+	if posmod(day/step+posmod(hash("town:"+String(city.get("id",""))),stride),stride)!=0:return 0
+	return gap
+
+static func _town_calm(city:Dictionary)->bool:
+	if WorldSimulation.actor_id=="player" and String(city.get("id",""))==String(WorldSimulation.state.selected_player_settlement_id):return false
+	var military=WorldSimulation.military
+	if not military.active_engagement.is_empty() or not military.active_threat.is_empty() or not military.active_siege.is_empty():return false
+	var metrics:Dictionary=city.get("resource_metrics",{})
+	return float(metrics.get("food_days",0.0))>=TOWN_MIN_FOOD_DAYS and float(metrics.get("water_intake_ratio",0.0))>=.98
