@@ -293,7 +293,8 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		return _record_secondary_timing(timings,"morphology",stamp)
 	)
 	_record_secondary_timing(timings,"scope_exit",last_stamp)
-	WorldSimulation.state.settlement_network_revision+=1
+	# A town's ordinary day changes no territory, marker or network structure;
+	# bumping the network revision here rebuilt the whole map network daily.
 	record["last_resource_day"]=int(WorldSimulation.state.elapsed_days)
 
 func _record_secondary_timing(timings:Dictionary,phase:String,start:int)->int:

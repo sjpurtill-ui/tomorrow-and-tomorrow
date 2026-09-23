@@ -1000,13 +1000,18 @@ func _process(delta: float) -> void:
 		map_snapshot_elapsed=fmod(map_snapshot_elapsed,0.1)
 		map_snapshot_refreshes+=1
 		_refresh_contact_encounter_markers()
+		stamp=trace.mark("frame_map_contacts",stamp)
 		_refresh_foreign_formation_markers()
+		stamp=trace.mark("frame_map_formations",stamp)
 		_refresh_player_field_army_markers()
+		stamp=trace.mark("frame_map_field_armies",stamp)
 		_refresh_player_scout_route_markers()
+		stamp=trace.mark("frame_map_scout_routes",stamp)
 	map_network_elapsed+=maxf(0.0,delta)
 	if map_network_elapsed>=0.1:
 		map_network_elapsed=fmod(map_network_elapsed,0.1)
 		_refresh_settlement_network()
+		stamp=trace.mark("frame_map_settlement_network",stamp)
 		_refresh_settlement_convoy_marker()
 	stamp=trace.mark("frame_map_snapshots",stamp)
 	if travel_council_notice and travel_council_notice.visible and Time.get_ticks_msec()>travel_council_notice_until_msec:
