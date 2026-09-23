@@ -18,6 +18,9 @@ var advancing:=false
 # loads finish it first (flush_day), so the save format is unchanged.
 var _day_job:DayJob=null
 var _day_number:=-1
+## Day whose closing views are still current. Rival catch-up skips its opening
+## refresh when nothing has changed since then.
+var _views_day:=-1
 # Autoload system references for the human scope, in _bind_scope order.
 var _player_binding:Array=[]
 var last_day:=-1
@@ -123,6 +126,7 @@ func clear()->void:
 	relation_baselines.clear()
 	enabled=false
 	last_day=-1
+	_views_day=-1
 	_day_job=null
 	advancing=false
 
@@ -201,6 +205,8 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 	for day in range(last_day+1,target_day+1):
 		job.add_group("player",[S.step("rival_views",timings,func()->Array:
 			last_day=day
+			# Yesterday's closing views are unchanged unless an order intervened.
+			if _views_day==day-1:return []
 			return _view_steps(timings,"rival_views")
 		)])
 		var ids:=actors.keys();ids.sort()
@@ -394,6 +400,7 @@ func _updated_observer_view(source:Dictionary,previous:Dictionary)->Dictionary:
 
 func submit(id:String,order:Dictionary)->Dictionary:
 	if id!="player" and not actors.has(id):return {"error":"Unknown civilization."}
+	_views_day=-1
 	return scoped(id,func()->Dictionary:
 		var result:=preload("res://scripts/civilization_orders.gd").execute(order)
 		if id!="player":
@@ -585,7 +592,11 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 			return DayJob.from_parts(CivilizationSystem.owned_day_steps(day),timings)
 	),
 		S.step("projections",timings,func()->Array:return _projection_steps(timings,"projections")),
-		S.step("views",timings,func()->Array:return _view_steps(timings,"views")),
+		S.step("views",timings,func()->Array:
+			var steps:=_view_steps(timings,"views")
+			steps.append(S.step("views",timings,func()->void:_views_day=day))
+			return steps
+	),
 		S.step("joint_contact",timings,func()->void:preload("res://scripts/civilization_joint_contact.gd").advance(day)),
 		S.step("exchange",timings,func()->void:
 			preload("res://scripts/civilization_exchange.gd").settle(day)
@@ -638,6 +649,7 @@ func _stage_restore(payload:Dictionary,validate_only:bool)->Dictionary:
 	var error:=validate_payload(payload)
 	if error!="":return {"error":error}
 	if payload.is_empty():return {"ok":true,"legacy":true}
+	_views_day=-1
 	var previous:={"actors":actors,"human":human_projection,"enabled":enabled,"seed":_seed,"day":last_day,"geography":geography_stock,"relations":relation_baselines,"markets":market_orders,"job":_day_job,"advancing":advancing}
 	actors={};human_projection={};geography_stock={};relation_baselines={};market_orders={};enabled=false
 	var result:=_restore_state(payload)
