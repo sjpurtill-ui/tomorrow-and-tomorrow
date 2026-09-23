@@ -1,11 +1,12 @@
 extends RefCounted
-## License dependent lines or supplied study, fertilizer and operating inputs.
+## License dependent lines or supplied fertilizer and operating inputs. Study
+## media are Civilian Goods drawn under adopted record techniques, so they no
+## longer create demand for a paper or printing license.
 ## Leads are examined returned evidence or the civilization's own contracts.
 const L=preload("res://scripts/research_licenses.gd")
 const E=preload("res://scripts/society_exchange.gd")
 const I=preload("res://scripts/civilian_industry.gd")
 const Supply=preload("res://scripts/civilian_production_planner.gd")
-const Paper=preload("res://scripts/paper_study.gd")
 static func recommendation(plan:Dictionary={})->Dictionary:
 	var state=WorldSimulation.state;var world=WorldSimulation.world
 	if bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)) or not world.diplomatic_mission.is_empty():return {}
@@ -52,18 +53,6 @@ static func demanded_subjects(leads:Array[Dictionary])->Dictionary:
 		if supplied(recipe,false):wanted[recipe.gate]=3.0
 	wanted.merge(fertilizer_subjects(leads),false)
 	wanted.merge(operating_subjects(leads),false)
-	if state.effective_workers("Knowledge")<=0 or not Supply.study_recommendation().is_empty():return wanted
-	var remaining:=0.0
-	for item:Dictionary in E.data().collections.values():
-		if int(item.get("returned_day",0))<=int(state.elapsed_days):remaining+=maxf(0,1-float(item.get("study",0)))*float(item.get("work",0))
-	remaining-=maxf(0,float(state.resource_stockpiles.get("Printed Sheets",0)))*(1.0+Paper.PRINTED_BONUS)/Paper.PAPER_PER_WORK
-	remaining-=maxf(0,float(state.resource_stockpiles.get("Paper",0)))*(1.0+Paper.BONUS)/Paper.PAPER_PER_WORK
-	if remaining<=0:return wanted
-	for recipe:Dictionary in I.PRODUCTS.values():
-		if String(recipe.output) not in ["Paper","Printed Sheets"] or L.independent(String(recipe.gate)):continue
-		if not supplied(recipe,true):continue
-		if float(recipe.get("power",0))>0 and preload("res://scripts/technology_operations.gd").service("electricity")<=0:continue
-		if not wanted.has(recipe.gate):wanted[recipe.gate]=1.0
 	return wanted
 
 static func fertilizer_subjects(leads:Array[Dictionary])->Dictionary:

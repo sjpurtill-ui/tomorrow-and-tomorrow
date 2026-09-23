@@ -1,7 +1,7 @@
 extends RefCounted
 ## Invest against a month of returned physical specimen work, never hidden leads.
 const Ops=preload("res://scripts/technology_operations.gd")
-const Supply=preload("res://scripts/civilian_production_planner.gd")
+const Goods=preload("res://scripts/civilian_goods.gd")
 const E=preload("res://scripts/society_exchange.gd")
 static func recommendation()->Dictionary:
 	var state=WorldSimulation.state
@@ -29,14 +29,24 @@ static func recommendation()->Dictionary:
 	if installed>=Ops.LIMIT or installed*float(spec.services.specimen_observation)*condition>=ordinary*.25:return {}
 	# Leave enough assigned labor for commissioning as well as existing operators.
 	if state.effective_workers("Crafting")+Ops.reserved_workers(state)<operators+2.0:return {}
-	var slides:=ceili(float(spec.inputs["Specimen Slides"])*(installed+1)*30.0)
-	if float(state.resource_stockpiles.get("Specimen Slides",0))<slides:
-		return Supply.supply("Specimen Slides",slides,{})
-	if not Ops.quote("microscopy_bench").has("error"):return {"kind":"plant_install","plant":"microscopy_bench","count":1}
-	var first:Dictionary={}
+	# Slides and the microscope are drawn as raw materials and Civilian Goods,
+	# which Crafting makes without orders; a shortfall means waiting, not a line.
+	if not shortfall().is_empty() or Ops.quote("microscopy_bench").has("error"):return {}
+	return {"kind":"plant_install","plant":"microscopy_bench","count":1}
+
+## Raw materials and goods still missing for one more microscopy bench: a month
+## of slide inputs for every bench, then the installation cost.
+static func shortfall()->Dictionary:
+	var state=WorldSimulation.state
+	var spec:Dictionary=Ops.PLANTS.microscopy_bench
+	var installed:=int(Ops.data().plants.get("microscopy_bench",{}).get("installed",0))
+	var result:Dictionary={}
+	for resource:String in spec.inputs:
+		# Goods are made continuously; only the raw part needs a month in hand.
+		if resource==Goods.GOODS:continue
+		var missing:=float(spec.inputs[resource])*(installed+1)*30.0-float(state.resource_stockpiles.get(resource,0))
+		if missing>0:result[resource]=missing
 	for resource:String in spec.cost:
-		if float(state.resource_stockpiles.get(resource,0))>=float(spec.cost[resource]):continue
-		var part:=Supply.supply(resource,ceili(float(spec.cost[resource])),{})
-		if part.is_empty():return {}
-		if first.is_empty():first=part
-	return first
+		var missing:=float(spec.cost[resource])-float(state.resource_stockpiles.get(resource,0))
+		if missing>0:result[resource]=float(result.get(resource,0))+missing
+	return result

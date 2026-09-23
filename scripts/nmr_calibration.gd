@@ -3,14 +3,17 @@ extends RefCounted
 ## units, not magnet construction specifications or empirical chemical shifts.
 const WORK=8.0
 const VALID_DAYS=7
+## One set of methanol reference solutions, drawn as raw materials and goods.
+static var REFERENCE:=preload("res://scripts/goods_bills.gd").flatten({"NMR Methanol References":1.0})
 static func data()->Dictionary:
 	return WorldSimulation.state.technology_operations.get("nmr_calibration",{})
 static func start()->bool:
 	var ops=load("res://scripts/technology_operations.gd")
 	if ops.service("nmr_unqualified_time")<=0 or data().get("status")=="calibrating" or usable():return false
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
-	if float(stocks.get("NMR Methanol References",0))<1:return false
-	stocks["NMR Methanol References"]=float(stocks["NMR Methanol References"])-1
+	for item:String in REFERENCE:
+		if float(stocks.get(item,0))<float(REFERENCE[item]):return false
+	for item:String in REFERENCE:stocks[item]=float(stocks[item])-float(REFERENCE[item])
 	WorldSimulation.state.technology_operations.nmr_calibration={"status":"calibrating","work":0.0,"started_day":floori(WorldSimulation.state.elapsed_days),"last_day":floori(WorldSimulation.state.elapsed_days),"day_work":0.0}
 	return true
 static func advance()->void:

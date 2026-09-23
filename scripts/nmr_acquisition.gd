@@ -10,6 +10,7 @@ static func dependency_routes()->Dictionary:
 		var source:Dictionary=load("res://scripts/civilian_industry.gd").product(recipe)
 		var materials:Dictionary={String(source.output):1.0,"NMR Methanol References":1.0,"Paper":.1,"Freshwater":.7 if peg else .2}
 		if not peg:materials["Toluene"]=.5
+		materials=load("res://scripts/goods_bills.gd").flatten(materials).duplicate()
 		routes["analysis_"+recipe]={"gate":"nuclear_magnetic_resonance_spectroscopy","requires":["polymer_solution_processing"],"output":"Size-Characterized PEG Batches" if peg else ("Tacticity-Characterized PP Batches" if pp else "Sequence-Characterized Copolymer Specimens"),"materials":materials,"tooling":{},"days":14.0 if peg or pp else 12.0,"power":0.0,"services":{"nmr_unqualified_time":14.0 if peg or pp else 12.0},"conditional":true}
 	return routes
 static func record(sample_id:String)->Dictionary:
@@ -25,14 +26,16 @@ static func start(sample_id:String)->Dictionary:
 	if sample.source_store!=WorldSimulation.state.resource_settlement_id:return {"error":"Sample is held in a different store."}
 	var ops=load("res://scripts/technology_operations.gd")
 	if ops.service("nmr_unqualified_time")<=0:return {"error":"No operating NMR bench time is available."}
-	var spec:Dictionary=load("res://scripts/civilian_industry.gd").product(sample.recipe)
-	var costs:Dictionary={String(spec.output):1.0,"Paper":.1,"Freshwater":.2}
+	# The retained specimen was paid when it was prepared; the run itself uses
+	# sample paper and solvents, drawn as raw materials and Civilian Goods.
+	var costs:Dictionary={"Paper":.1,"Freshwater":.2}
 	var calibration=load("res://scripts/nmr_calibration.gd")
 	var conditioned:bool=calibration.usable() and WorldSimulation.discovery.adoption("polymer_solution_processing")>=.1
 	if sample.recipe in ["traceable_peg_batch","traceable_pp_batch"] and not conditioned:return {"error":"Quantitative polymer acquisition requires the calibrated solution method."}
 	if conditioned:
 		if sample.recipe=="traceable_peg_batch":costs["Freshwater"]+=.5
 		else:costs["Toluene"]=.5
+	costs=load("res://scripts/goods_bills.gd").flatten(costs)
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	for item:String in costs:
 		if float(stocks.get(item,0))<float(costs[item]):return {"error":"Missing "+item+" for acquisition."}
@@ -131,6 +134,9 @@ static func advance_pending()->void:
 	var pending:=false
 	for sample:Dictionary in records.values():
 		if sample.status in ["unmeasured","acquiring"] and supported(sample) and sample.source_store==WorldSimulation.state.resource_settlement_id:pending=true
+	if not pending and load("res://scripts/technology_operations.gd").service("nmr_unqualified_time")>0:
+		pending=prepare_next()
+		records=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
 	if pending:calibration.start()
 	calibration.advance()
 	for sample_id:String in records:
@@ -139,6 +145,16 @@ static func advance_pending()->void:
 		advance(sample_id,required_work(records[sample_id]))
 	if not records.is_empty():load("res://scripts/polymer_samples.gd").retire_completed()
 
+## Prepares the next specimen an operating bench still needs, from raw
+## materials and Civilian Goods: the copolymer sequence assay first, then the
+## quantitative PP and PEG assays once the calibrated solution method is adopted.
+static func prepare_next()->bool:
+	var samples=load("res://scripts/polymer_samples.gd")
+	var solution:bool=WorldSimulation.discovery.adoption("polymer_solution_processing")>=.1
+	for recipe:String in ["sealed_copolymer_specimens","traceable_pp_batch","traceable_peg_batch"]:
+		if recipe!="sealed_copolymer_specimens" and not solution:continue
+		if samples.prepare(recipe):return true
+	return false
 static func report(sample_id:String)->Dictionary:
 	var sample:=record(sample_id)
 	if sample.is_empty():return {"status":"unavailable","message":"Sample is unavailable."}
@@ -157,7 +173,7 @@ static func report(sample_id:String)->Dictionary:
 	return {"status":"measured_unqualified","message":"Unqualified: "+String(interpretation.get("reason","Reference qualification remains required.")),"interpretation":interpretation}
 static func report_text()->String:
 	var records:Dictionary=WorldSimulation.state.technology_operations.get("polymer_samples",{}).get("records",{})
-	if records.is_empty():return "No prepared specimens. Prepare a sealed specimen through workshop production."
+	if records.is_empty():return "No prepared specimens. The operating bench prepares one from Civilian Goods and raw materials once its polymer methods are adopted."
 	var lines:PackedStringArray=[]
 	var ids:Array=[]
 	for id:String in records:
