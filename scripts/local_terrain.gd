@@ -3,8 +3,9 @@ extends Node3D
 const OrganicTownVisual := preload("res://scripts/organic_town_visual.gd")
 const EarlySettlementVisual := preload("res://scripts/early_settlement_visual.gd")
 const EarlySettlementGround = preload("res://scripts/early_settlement_ground.gd")
-var organic_town_cached_state := PackedByteArray()
-var organic_town_cached_plan: Dictionary = {}
+## Early-town layouts by town centre: [saved-fabric bytes, plan]. Each town
+## keeps its own, so redrawing one town never discards another's layout.
+var organic_town_plans: Dictionary = {}
 
 
 const ArmyFrontVisualScript := preload("res://scripts/army_front_visual.gd")
@@ -413,6 +414,8 @@ var quit_dialog:ConfirmationDialog
 var map_snapshot_elapsed:=0.1
 var scale_lod_elapsed:=0.1
 var time_interface_day:=-2
+## A dock section to open at the next frame's HUD pass.
+var pending_hud_section:=""
 var time_interface_between_days:=false
 var time_interface_msec:=0
 var scale_lod_view:=Vector4.INF
@@ -1037,6 +1040,11 @@ func _process(delta: float) -> void:
 		event_report_button.visible=false
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
+	if not pending_hud_section.is_empty():
+		var section:=pending_hud_section
+		pending_hud_section=""
+		if hud:_on_hud_section_requested(section,0)
+		stamp=trace.mark("found_hud",stamp)
 	stamp=trace.mark("frame_hud",stamp)
 	# A started day always finishes, even if paused, before the century choice
 	# or campaign logic reads its results. Its work is spread across frames.
@@ -4356,6 +4364,10 @@ func _refresh_settlement_footprint(force := false) -> void:
 	var view_signature:="%s:%s:%d" % [_settlement_morphology_view_signature(morphology_lod),_settlement_defense_visual_signature(defense_snapshot),roundi(stage_progress*8.0)]
 	var morphology_visual_signature:=_settlement_morphology_visual_signature()
 	if not force and rendered_morphology_visual_signature==morphology_visual_signature and rendered_settlement_lod == morphology_lod and rendered_architecture_signature==architecture_signature and rendered_settlement_view_signature==view_signature:
+		return
+	# A changed layout is computed now and drawn at the next refresh (the next
+	# day at the latest), so the two never share a frame.
+	if not force and settlement_land_use_root!=null and _prime_organic_town_plan(center):
 		return
 	rendered_morphology_revision = GameState.morphology_revision
 	rendered_morphology_visual_signature=morphology_visual_signature
@@ -7694,7 +7706,8 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 	SettlementModel._ensure_city_resources(record)
 	var point:Vector2=record.position
 	var center:=Vector3(point.x,0,point.y)
-	var rebuilt:=true
+	# Lambdas capture locals by value, so outcomes travel in a dictionary.
+	var outcome:={"rebuilt":true,"primed":false}
 	# A city ledger changes daily. Its buildings only need new meshes when
 	# their actual appearance or the camera's detail requirements change.
 	var trace=preload("res://scripts/performance_trace.gd")
@@ -7707,7 +7720,12 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 		for child in parent.get_children():
 			if String(child.get_meta("city_id",""))==String(record.id):fabric=child;break
 		if not force and fabric!=null and String(fabric.get_meta("visual_signature",""))==signature:
-			rebuilt=false
+			outcome.rebuilt=false
+			return
+		# The layout and the meshes land in separate map ticks; any old drawing
+		# stays up meanwhile.
+		if _prime_organic_town_plan(center):
+			outcome.primed=true
 			return
 		if fabric!=null:parent.remove_child(fabric);fabric.queue_free()
 		fabric=Node3D.new();fabric.name="CityDesign_"+String(record.id)
@@ -7720,7 +7738,8 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 		_create_persistent_settlement_routes(center,GameState.settlement_routes,fabric)
 		trace.mark("city_design_routes",stamp)
 	)
-	return rebuilt
+	if outcome.primed:pending_city_designs.push_front([settlement,force])
+	return bool(outcome.rebuilt)
 
 func _create_secondary_settlement_footprints(settlements:Array[Dictionary],force:=false)->void:
 	var parent:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
@@ -9716,6 +9735,28 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 func _organic_town_enabled() -> bool:
 	return EarlySettlementVisual.enabled(GameState.settlement_plots)
 
+## The early-town layout for the current city, built against the full saved
+## fabric (never a camera-culled subset). Returns {} on a miss when not computing.
+func _organic_town_plan(center: Vector3, land: Callable, compute := true) -> Dictionary:
+	var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
+	var entry: Array = organic_town_plans.get(center, [])
+	if not entry.is_empty() and entry[0] == state: return entry[1]
+	if not compute: return {}
+	var plan := EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, land)
+	EarlySettlementVisual.remember_layout(plan, GameState.settlement_plots)
+	if organic_town_plans.size() >= 64: organic_town_plans.clear()
+	organic_town_plans[center] = [var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes]), plan]
+	return plan
+
+## Computes a missing early-town layout on its own, so the redraw that uses it
+## can land in a later frame. True when it did the work.
+func _prime_organic_town_plan(center: Vector3) -> bool:
+	if not EarlySettlementVisual.has_kit(GameState.settlement_plots): return false
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
+	if not _organic_town_plan(center, samples.land_at, false).is_empty(): return false
+	_organic_town_plan(center, samples.land_at)
+	return true
+
 func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
 	if plots.is_empty():
 		return
@@ -9725,13 +9766,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 	var ptrace=preload("res://scripts/performance_trace.gd")
 	var pstamp:int=ptrace.start()
 	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
-		# Build against the full saved fabric, never a camera-culled subset.
-		var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
-		if state != organic_town_cached_state:
-			organic_town_cached_plan = EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, samples.land_at)
-			EarlySettlementVisual.remember_layout(organic_town_cached_plan,GameState.settlement_plots)
-			organic_town_cached_state = var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
-		organic_plan = organic_town_cached_plan
+		organic_plan = _organic_town_plan(center, samples.land_at)
 		pstamp=ptrace.mark("plot_fabric_layout",pstamp)
 		EarlySettlementVisual.render(organic_plan, center, samples.height_at, parent)
 		pstamp=ptrace.mark("plot_fabric_kit_render",pstamp)
@@ -11324,8 +11359,9 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 		_set_camera_target(Vector3(destination.x,_height_at(destination.x,destination.y),destination.y))
 		stamp=trace.mark("found_camera",stamp)
-		if hud: _on_hud_section_requested("settlement",0)
-		stamp=trace.mark("found_hud",stamp)
+		# The dock opens next frame so the network rebuild and dock layout for a
+		# founding never share one frame.
+		pending_hud_section="settlement"
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
