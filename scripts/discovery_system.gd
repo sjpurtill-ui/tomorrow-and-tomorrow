@@ -1092,14 +1092,20 @@ func food_storage_multiplier(food_type:String,traveling:bool)->float:
 	return maxf(.3,result)
 
 
+# Holder object (never captured by saves) for food_storage_multipliers.
+var _storage_multiplier_cache:=RefCounted.new()
+
 func food_storage_multipliers(food_types:Array,traveling:bool)->Dictionary:
 	var result:Dictionary={}
 	for food_type:String in food_types:result[food_type]=1.0
 	if traveling or not WorldSimulation.state.settlement_site_committed:return result
 	if WorldSimulation.state.effective_workers("Logistics")+WorldSimulation.state.effective_workers("Crafting")<1:return result
-	# One pass over established knowledge serves all food categories. Results
-	# remain local to this call, so adoption, staffing and settlement changes
-	# take effect immediately without cache invalidation or stale forecasts.
+	# One pass over established knowledge serves all food categories. The pass
+	# depends only on the requested types, known discoveries and adoption, so it
+	# is reused while their content hashes match; staffing is checked above
+	# on every call, and any adoption change produces a new key.
+	var key:=[food_types.hash(),catalog.size(),WorldSimulation.state.known_discoveries.hash(),WorldSimulation.state.discovery_adoption.hash()]
+	if _storage_multiplier_cache.get_meta("key",null)==key:return (_storage_multiplier_cache.get_meta("value") as Dictionary).duplicate()
 	for id:String in WorldSimulation.state.known_discoveries:
 		var profile:Dictionary=catalog_by_id.get(id,{}).get("preservation_profile",{})
 		if profile.is_empty():continue
@@ -1109,6 +1115,7 @@ func food_storage_multipliers(food_types:Array,traveling:bool)->Dictionary:
 			var reduction:=clampf(float(profile[food_type]),0,.5)
 			result[food_type]=float(result[food_type])*(1.0-reduction*level)
 	for food_type in result:result[food_type]=maxf(.3,float(result[food_type]))
+	_storage_multiplier_cache.set_meta("key",key);_storage_multiplier_cache.set_meta("value",result.duplicate())
 	return result
 
 
