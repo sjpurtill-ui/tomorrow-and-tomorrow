@@ -1,4 +1,5 @@
 extends RefCounted
+const Craft=preload("res://scripts/opening_craft_practice.gd")
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 
@@ -203,7 +204,8 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		var discovery:Dictionary=definitions_by_id.get(id,{})
 		if discovery.is_empty(): continue
 		var adoption_level:=clampf(float(WorldSimulation.state.discovery_adoption.get(id,0.025)),0.0,1.0)
-		adoption_level*=preload("res://scripts/opening_craft_practice.gd").factor(String(id))
+		# factor() is exactly 1.0 for ids that are neither special nor products.
+		if Craft.FACTOR_SPECIAL.has(id) or Craft.PRODUCTS.has(id):adoption_level*=Craft.factor(String(id))
 		for effect_name in (discovery.get("effects",{}) as Dictionary):
 			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+float(discovery.effects[effect_name])*adoption_level
 	for effect_name in effect_totals:

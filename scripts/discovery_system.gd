@@ -806,7 +806,7 @@ func reset_society_clock()->void:
 	society_model.last_processed_day=-1
 
 func discovery_definition(discovery_id:String)->Dictionary:
-	initialize()
+	if not initialized:initialize()
 	return catalog_by_id.get(discovery_id,{})
 
 func research_leadership(direction:String)->Dictionary:
