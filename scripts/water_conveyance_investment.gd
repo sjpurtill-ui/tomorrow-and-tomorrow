@@ -14,7 +14,7 @@ static func candidates()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	var state=WorldSimulation.state
 	if state.convoy_traveling or not state.settlement_site_committed or state.effective_workers("Construction")<4:return result
-	if "gravity_conduit_grade_control" not in Water.adopted():return result
+	if not Water.is_adopted("gravity_conduit_grade_control"):return result
 	if float(state.water_metrics.get("intake_ratio",1))>=.98 and float(state.water_metrics.get("source_distance_km",0))<.5:return result
 	var context:=local_context()
 	var height_at:Callable=context.get("terrain_height_at",Callable())
@@ -32,7 +32,7 @@ static func targets(deliverable:Dictionary={})->Dictionary:
 		if line.status!="active":continue
 		var item:=String(preload("res://scripts/water_conveyance_fabric.gd").MATERIALS[line.material].item)
 		demand[item]=float(demand.get(item,0))+1.0
-		if "sewer_rodding_service" in Water.adopted():demand["Conduit Rodding Sets"]=1.0
+		if Water.is_adopted("sewer_rodding_service"):demand["Conduit Rodding Sets"]=1.0
 	# A line under construction already owns its supplies; do not stock another
 	# complete route simply because delivered service has not started yet.
 	if not Water.data().lines.is_empty():return demand
