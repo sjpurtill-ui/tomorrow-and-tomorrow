@@ -2437,3 +2437,7 @@ Line Infantry now uses an early paper shield-wall training scene before year 300
 ### Material comparison research art
 
 Timber Grading and Clay Testing replace legacy realistic imagery with paper illustrations before year 300. Both discoveries occur in the recorded early pacing runs. The scenes show sound/crooked/rotten timber and distinct clay test outcomes rather than generic crafting. Thirteen focused tests pass; isolated GPU previews check the actual research painter at 490x280 and 260x112. Narrow timber framing prioritizes the wood samples. Forty explicit early research overrides are now installed; later-era mappings remain intact.
+
+### Fiber selection and hafting research artwork
+
+Fiber Grading and Hafted Tools now show their specific material tests and binding work in the early paper style. Both are observed early discoveries. Actual research widgets were reviewed at 490x280 and 260x112; thirteen focused checks passed with no failures or orphans. Forty-two explicit early research overrides are installed, with the existing year-300 gate, visibility rules and bounded texture cache unchanged.

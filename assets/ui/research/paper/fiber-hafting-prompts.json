@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "fiber_grading.png",
+      "source": "exec-b7f6135e-4c82-468c-ade1-40118ecfaf2c.png",
+      "prompt": "Landscape 4:3 research artwork FIBER GRADING. Reference aesthetic only: flat dry gouache, charcoal and ochre with muted sage, warm opaque ivory paper, restrained grain, irregular vignette edges, no photographic realism. Oblique overhead close study of raw plant fibers being tested and sorted, not rope-making or weaving. Three clearly separated bundles on a simple pale wooden board: long pale bark ribbons, fine flexible grass fibers, stiff dark coarse stems. Two weathered ordinary human hands pull one thin strand taut horizontally to test strength; broken short fibers lie in a small reject pile. Objects and hands all occupy the central horizontal band with plentiful ivory above and below for wide research-card cropping. Natural practical hands, no extra digits. No finished rope, loom, basket, modern scissors, ruler, labels, metal implements or modern workbench. Minimal background, graphic material differences obvious at thumbnail size. No text, border, UI or decorative emblems."
+    },
+    {
+      "file": "hafted_tools.png",
+      "source": "exec-76cebf5e-d142-48e8-ba60-fd96ecfa770b.png",
+      "prompt": "Landscape 4:3 illustration HAFTED TOOLS for dawn-of-history research in a civilization game. Reference is STYLE ONLY: flat dry matte gouache, charcoal, ochre, muted sage, opaque ivory paper, restrained grain, broken vignette edges, no photo realism. Close three-quarter overhead view of an artisan actually binding a small chipped stone adze head into a forked wooden handle with plant cord. The stone cutting edge projects perpendicular to the short bent haft, clearly usable to scrape wood; rough resin at the junction. One hand stabilizes the handle and stone, the other pulls the free binding cord tight around the joint. The junction is the focal point. A second unhafted stone and a small resin lump sit nearby on a worn log, no clutter. Human hands correctly jointed, ordinary weathered skin. Garment edge plain early woven fiber. No spear, weapon pose, metal blade, modern tool, decorated ceremonial axe, writing or diagrams. Composition compact within middle horizontal 50 percent of image, leave ivory margins to survive wide UI crops. No text, borders or UI. Make the technology visually intelligible rather than heroic."
+    }
+  ]
+}
