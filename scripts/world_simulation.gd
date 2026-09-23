@@ -18,6 +18,8 @@ var advancing:=false
 # loads finish it first (flush_day), so the save format is unchanged.
 var _day_job:DayJob=null
 var _day_number:=-1
+# Autoload system references for the human scope, in _bind_scope order.
+var _player_binding:Array=[]
 var last_day:=-1
 var water_provider:Callable
 var start_provider:Callable
@@ -59,6 +61,8 @@ func system(system_name:String)->Node:
 
 func scoped(id:String,operation:Callable)->Variant:
 	assert(id=="player" or actors.has(id),"Unknown civilization owner")
+	# Already in this owner's scope: nothing to switch or restore.
+	if id==actor_id and (id=="player")==_active.is_empty():return operation.call()
 	var previous:=_active
 	var previous_id:=actor_id
 	actor_id=id
@@ -72,28 +76,41 @@ func scoped(id:String,operation:Callable)->Variant:
 
 ## The scoped system fields are plain variables rebound on every scope change;
 ## hot simulation code reads them hundreds of thousands of times per day.
+## Each owner's system references are gathered once into an array, in the
+## order below; actor instances are only created by create_actor.
 func _bind_scope()->void:
-	state=_active.get("GameState",GameState)
-	discovery=_active.get("DiscoverySystem",DiscoverySystem)
-	progression=_active.get("ProgressionSystem",ProgressionSystem)
-	resources=_active.get("ResourceSystem",ResourceSystem)
-	economy=_active.get("EconomySystem",EconomySystem)
-	settlements=_active.get("SettlementModel",SettlementModel)
-	government=_active.get("GovernmentPeopleSystem",GovernmentPeopleSystem)
-	figures=_active.get("HistoricalFigures",HistoricalFigures)
-	direction=_active.get("PeopleDirection",PeopleDirection)
-	communities=_active.get("CommunityNetwork",CommunityNetwork)
-	diplomacy=_active.get("ForeignDiplomacy",ForeignDiplomacy)
-	dialogue=_active.get("ForeignDialogue",ForeignDialogue)
-	facts=_active.get("WorldFacts",WorldFacts)
-	advisors=_active.get("AdvisorSystem",AdvisorSystem)
-	food=_active.get("FoodSystem",FoodSystem)
-	consequences=_active.get("ConsequenceEngine",ConsequenceEngine)
-	civics=_active.get("CivicImplementationSystem",CivicImplementationSystem)
-	world=_active.get("CivilizationSystem",CivilizationSystem)
-	military=_active.get("MilitaryCampaign",MilitaryCampaign)
-	campaign=_active.get("GeneralCampaign",GeneralCampaign)
-	general_dialogue=_active.get("GeneralDialogue",GeneralDialogue)
+	var b:Array
+	if _active.is_empty():
+		if _player_binding.is_empty():_player_binding=_build_binding({})
+		b=_player_binding
+	else:
+		var actor:Dictionary=actors[actor_id]
+		if not actor.has("binding"):actor["binding"]=_build_binding(_active)
+		b=actor.binding
+	state=b[0]
+	discovery=b[1]
+	progression=b[2]
+	resources=b[3]
+	economy=b[4]
+	settlements=b[5]
+	government=b[6]
+	figures=b[7]
+	direction=b[8]
+	communities=b[9]
+	diplomacy=b[10]
+	dialogue=b[11]
+	facts=b[12]
+	advisors=b[13]
+	food=b[14]
+	consequences=b[15]
+	civics=b[16]
+	world=b[17]
+	military=b[18]
+	campaign=b[19]
+	general_dialogue=b[20]
+
+func _build_binding(active:Dictionary)->Array:
+	return [active.get("GameState",GameState),active.get("DiscoverySystem",DiscoverySystem),active.get("ProgressionSystem",ProgressionSystem),active.get("ResourceSystem",ResourceSystem),active.get("EconomySystem",EconomySystem),active.get("SettlementModel",SettlementModel),active.get("GovernmentPeopleSystem",GovernmentPeopleSystem),active.get("HistoricalFigures",HistoricalFigures),active.get("PeopleDirection",PeopleDirection),active.get("CommunityNetwork",CommunityNetwork),active.get("ForeignDiplomacy",ForeignDiplomacy),active.get("ForeignDialogue",ForeignDialogue),active.get("WorldFacts",WorldFacts),active.get("AdvisorSystem",AdvisorSystem),active.get("FoodSystem",FoodSystem),active.get("ConsequenceEngine",ConsequenceEngine),active.get("CivicImplementationSystem",CivicImplementationSystem),active.get("CivilizationSystem",CivilizationSystem),active.get("MilitaryCampaign",MilitaryCampaign),active.get("GeneralCampaign",GeneralCampaign),active.get("GeneralDialogue",GeneralDialogue)]
 
 func clear()->void:
 	assert(_active.is_empty())
