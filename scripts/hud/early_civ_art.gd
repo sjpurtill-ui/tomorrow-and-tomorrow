@@ -3,7 +3,7 @@ extends RefCounted
 const ROOT:="res://assets/ui/early-paper/"
 const Appearance:=preload("res://scripts/character_appearance.gd")
 const PROFILES:=Appearance.FAMILIES
-const PATHS:=[ROOT+"kilnfold-scenes-v1.png",ROOT+"reedwake-scenes-v1.png",ROOT+"windseam-scenes-v1.png","res://assets/portraits/paper/stoneweft-actions-v4.png",ROOT+"ashplain-scenes-v1.png"]
+const PATHS:=[ROOT+"kilnfold-scenes-v1.png",ROOT+"reedwake-scenes-v1.png",ROOT+"windseam-scenes-v1.png","res://assets/portraits/paper/stoneweft-actions-v4.png",ROOT+"ashplain-scenes-v1.png",ROOT+"rillmark-scenes-v1.png"]
 static var sheets:Dictionary={}
 static func active()->bool:
 	return GameState.elapsed_days<300.0*365.0

@@ -2405,3 +2405,7 @@ Repair companies and medical detachments now have specific paper role illustrati
 ### Fifth early visual family and shared identity lookup
 
 Ashplain adds four new action compositions and a distinct authored human appearance/clothing tradition. Government and known diplomatic leaders use one family catalogue; existing government records or diplomatic assignments win over a new library-size hash. No civic behavior is inferred from ancestry. Twelve focused checks pass, covering all five atlas regions, government/diplomatic identity preservation, saved roles, JSON, and early/later gates. The new family applies to first-time assignments/new worlds; established appearances remain fixed. Five families remain insufficient for exclusive artwork across every rival civilization.
+
+### Sixth early family and nonrepeating initial distribution
+
+Rillmark adds four new character-action compositions. First assignments now rotate through the authored families by canonical civilization slot with a world-seed offset; the player plus first five rivals do not collide. Existing saved family names remain authoritative. Thirteen focused checks pass, including three seed cases with distinct first-six assignments, government/diplomacy preservation and all atlas boundaries. The library still repeats after six civilizations and is not a complete exclusive ancestry set for maximum-count worlds.

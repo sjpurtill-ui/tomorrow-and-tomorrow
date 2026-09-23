@@ -1,6 +1,14 @@
 extends GdUnitTestSuite
 const Art:=preload("res://scripts/hud/early_civ_art.gd")
 const Person:=preload("res://scripts/hud/person_portrait.gd")
+func test_new_world_uses_available_families_before_repeating()->void:
+	var identity=preload("res://scripts/character_appearance.gd")
+	for seed_value in [0,82,-718]:
+		var seen:Dictionary={}
+		for index in identity.FAMILIES.size():
+			var owner:="player" if index==0 else "civ_%02d"%index
+			var family:String=identity.initial_family(seed_value,owner)
+			assert_bool(seen.has(family)).is_false();seen[family]=true
 func test_expanding_library_keeps_existing_government_and_diplomatic_family()->void:
 	var identity=preload("res://scripts/character_appearance.gd")
 	var records:Array=[{"early_art_profile":"reedwake"}]
