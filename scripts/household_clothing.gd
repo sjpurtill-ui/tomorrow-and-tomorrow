@@ -176,6 +176,8 @@ static func operate(id:String,workers:float,population:float,day:int,report:Dict
 	if mode=="test":test_cycles(workers,population,day,report);return
 	var washing:=mode in ["wash","machine_wash"]
 	if mode in CREATION_MODES:
+		# quota() is zero for undiscovered methods, so creation changes nothing.
+		if id not in WorldSimulation.state.known_discoveries:return
 		var spent_before:=float(report.workers)
 		if mode in ["leather","quilt"]:
 			var patches:={"Flexible Leather":.08,"Spun Yarn":.03} if mode=="leather" else QUILT_REPAIR_INPUTS
