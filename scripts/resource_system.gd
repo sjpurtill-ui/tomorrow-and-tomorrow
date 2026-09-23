@@ -811,6 +811,10 @@ func _gathering_startup_reserves()->Dictionary:
 			if not gathering_recipe_reserves.has(gate):gathering_recipe_reserves[gate]={}
 			var amounts:Dictionary=recipe.get("materials",{}).duplicate()
 			for resource_name:String in recipe.get("tooling",{}):amounts[resource_name]=float(amounts.get(resource_name,0))+float(recipe.tooling[resource_name])
+			# Former recipes steer gathering toward the raw materials they need;
+			# their manufactured parts are now raw materials plus Civilian Goods.
+			amounts=preload("res://scripts/goods_bills.gd").flatten(amounts).duplicate()
+			amounts.erase("Civilian Goods")
 			for resource_name:String in amounts:
 				gathering_recipe_reserves[gate][resource_name]=maxf(float(gathering_recipe_reserves[gate].get(resource_name,0)),float(amounts[resource_name])*2.0)
 	# Depends only on the known-discovery list; reuse it while that list's

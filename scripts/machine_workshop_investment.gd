@@ -32,6 +32,15 @@ static func recommendation()->Dictionary:
 	if not hammer.is_empty():return hammer
 	var state=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
+	# Cheap gates first: no known, adopted workshop type means no investment,
+	# without building the production snapshot that sizes supplied work.
+	var any_known:=false
+	for id:String in TYPES:
+		var spec:Dictionary=Ops.PLANTS[id];var ready:=true
+		for gate:String in [spec.gate]+spec.requires:
+			if gate not in state.known_discoveries or WorldSimulation.discovery.adoption(gate)<.25:ready=false;break
+		if ready:any_known=true;break
+	if not any_known:return {}
 	if WorldSimulation.military.production_labor_share<=0 or supplied_work_days()<30.0:return {}
 	var condition:=clampf(float(state.population_health)*float(state.simulation_metrics.get("labor_efficiency",.72)),0,1)
 	if condition<=0:return {}
