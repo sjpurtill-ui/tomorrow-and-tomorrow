@@ -244,6 +244,8 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 	# Family practice changes during the pass and remains evaluated per deposit.
 	var survey_inputs:Dictionary={}
 	var access_inputs:Dictionary={}
+	# Known discoveries do not change inside this pass.
+	var recognizable:Dictionary={}
 	for deposit in WorldSimulation.state.resource_deposits:
 		_ensure_deposit_fields(deposit)
 		var resource_name: String = deposit.resource
@@ -251,7 +253,8 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 			continue
 		var definition: Dictionary = catalog[resource_name]
 		if deposit.stage == "unknown":
-			if not recognition_ready(resource_name):continue
+			if not recognizable.has(resource_name):recognizable[resource_name]=recognition_ready(resource_name)
+			if not recognizable[resource_name]:continue
 			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
 			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("recognition",1.0))
 			deposit.clues += definition.base * (0.5 + survey_effort + float(survey_inputs.nature) + float(survey_inputs.material)) * _family_literacy(resource_name) * rng.randf_range(0.5, 1.5)
@@ -710,10 +713,11 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	stamp=trace.mark("flow_summary",stamp)
 	return events
 
+const DEPOSIT_FIELD_DEFAULTS:={"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Not yet accessible","last_reported_bottleneck":""}
+
 func _ensure_deposit_fields(deposit:Dictionary)->void:
-	var defaults={"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Not yet accessible","last_reported_bottleneck":""}
-	for key in defaults:
-		if not deposit.has(key): deposit[key]=defaults[key].duplicate() if defaults[key] is Array else defaults[key]
+	for key in DEPOSIT_FIELD_DEFAULTS:
+		if not deposit.has(key): deposit[key]=DEPOSIT_FIELD_DEFAULTS[key].duplicate() if DEPOSIT_FIELD_DEFAULTS[key] is Array else DEPOSIT_FIELD_DEFAULTS[key]
 
 func _is_material_resource(resource_name:String)->bool:
 	# Household craft stocks represent maintained tools/containers in use. Their
