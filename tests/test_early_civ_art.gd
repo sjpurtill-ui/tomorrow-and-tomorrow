@@ -1,6 +1,17 @@
 extends GdUnitTestSuite
 const Art:=preload("res://scripts/hud/early_civ_art.gd")
 const Person:=preload("res://scripts/hud/person_portrait.gd")
+func test_expanding_library_keeps_existing_government_and_diplomatic_family()->void:
+	var identity=preload("res://scripts/character_appearance.gd")
+	var records:Array=[{"early_art_profile":"reedwake"}]
+	assert_str(identity.family_for(982,"unused_appearance_fixture",records)).is_equal("reedwake")
+	var saved:Dictionary=ForeignDiplomacy.leaders.duplicate(true)
+	ForeignDiplomacy.leaders["unused_appearance_fixture"]={"early_art_profile":"windseam"}
+	assert_str(identity.family_for(999,"unused_appearance_fixture")).is_equal("windseam")
+	var visitor:={"name":"Illustrated envoy"}
+	Art.bind_foreign_identity(visitor,"unused_appearance_fixture",999)
+	assert_str(visitor.early_art_profile).is_equal("windseam")
+	ForeignDiplomacy.leaders=saved
 func test_all_fourteen_directions_have_distinct_early_scenes()->void:
 	var saved:=GameState.elapsed_days;GameState.elapsed_days=0
 	var seen:Dictionary={}

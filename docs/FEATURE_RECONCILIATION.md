@@ -2401,3 +2401,7 @@ Two new paper scenes bind specifically to wound_cleaning and herbal_classificati
 ### Early military support artwork
 
 Repair companies and medical detachments now have specific paper role illustrations in the first 300 years. The crew scenes depict spear/shield maintenance and a carried wooden litter. They join six existing early unit illustrations; no recruitment, repair, medical or production mechanics change. Native images were reviewed for work actions and whole-body framing; imports are capped at 1024 with mipmaps. Nineteen focused early-art and military-roster checks pass, including imported paths and existing later-era behavior.
+
+### Fifth early visual family and shared identity lookup
+
+Ashplain adds four new action compositions and a distinct authored human appearance/clothing tradition. Government and known diplomatic leaders use one family catalogue; existing government records or diplomatic assignments win over a new library-size hash. No civic behavior is inferred from ancestry. Twelve focused checks pass, covering all five atlas regions, government/diplomatic identity preservation, saved roles, JSON, and early/later gates. The new family applies to first-time assignments/new worlds; established appearances remain fixed. Five families remain insufficient for exclusive artwork across every rival civilization.

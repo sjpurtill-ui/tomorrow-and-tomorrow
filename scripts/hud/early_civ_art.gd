@@ -1,8 +1,9 @@
 extends RefCounted
 ## Presentation only. No RNG use, gameplay modifiers, or per-frame image work.
 const ROOT:="res://assets/ui/early-paper/"
-const PROFILES:=["kilnfold","reedwake","windseam","stoneweft"]
-const PATHS:=[ROOT+"kilnfold-scenes-v1.png",ROOT+"reedwake-scenes-v1.png",ROOT+"windseam-scenes-v1.png","res://assets/portraits/paper/stoneweft-actions-v4.png"]
+const Appearance:=preload("res://scripts/character_appearance.gd")
+const PROFILES:=Appearance.FAMILIES
+const PATHS:=[ROOT+"kilnfold-scenes-v1.png",ROOT+"reedwake-scenes-v1.png",ROOT+"windseam-scenes-v1.png","res://assets/portraits/paper/stoneweft-actions-v4.png",ROOT+"ashplain-scenes-v1.png"]
 static var sheets:Dictionary={}
 static func active()->bool:
 	return GameState.elapsed_days<300.0*365.0
@@ -12,13 +13,13 @@ static func bind_foreign_identity(person:Dictionary,civ_id:String,seed_value:int
 	# Called only for a known leader record. These additive fields survive saves.
 	person["appearance_civ_id"]=civ_id
 	person["appearance_world_seed"]=seed_value
-	if not person.has("early_art_profile"):person["early_art_profile"]=PROFILES[profile(person)]
+	if not person.has("early_art_profile"):person["early_art_profile"]=Appearance.family_for(seed_value,civ_id)
 	if not person.has("early_art_index"):person["early_art_index"]=posmod((civ_id+":"+String(person.get("name",""))).hash(),4)
 static func profile(person:Dictionary)->int:
 	var saved:=PROFILES.find(String(person.get("early_art_profile","")))
 	if saved>=0:return saved
 	var seed_value:=int(person.get("appearance_world_seed",GameState.world_seed))
-	return posmod((str(seed_value)+":"+owner(person)+":visual_ancestry").hash(),PROFILES.size())
+	return PROFILES.find(Appearance.initial_family(seed_value,owner(person)))
 static func source(path:String)->Texture2D:
 	if not sheets.has(path):
 		if sheets.size()>=8:sheets.erase(sheets.keys()[0])

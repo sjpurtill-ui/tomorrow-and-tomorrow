@@ -580,11 +580,7 @@ func _assign_early_art_indices()->void:
 	# unavoidable beyond the four illustrated people; balance it across the cast.
 	# Keep the authored family name in save data. Growing the future art library
 	# must not change an established person's appearance through modulo changes.
-	var families:=["kilnfold","reedwake","windseam","stoneweft"]
-	var family:String=families[posmod((str(GameState.world_seed)+":"+WorldSimulation.actor_id+":visual_ancestry").hash(),families.size())]
-	for record in people:
-		if families.has(String(record.get("early_art_profile",""))):
-			family=String(record.early_art_profile);break
+	var family:String=preload("res://scripts/character_appearance.gd").family_for(GameState.world_seed,WorldSimulation.actor_id,people)
 	var ordered:Array[Dictionary]=[]
 	var added:Dictionary={}
 	for office in active_offices():
