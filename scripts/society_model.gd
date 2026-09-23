@@ -195,19 +195,35 @@ func _societal_value_context(context:Dictionary)->Dictionary:
 		"war_pressure":war_pressure,"inequality":inequality,"adaptability":clampf(float(context.get("adaptability",0.52)),0.0,1.0)
 	}
 
+## Per-discovery effect names, values and whether its adoption is scaled by a
+## technique factor; rebuilt with the definitions.
+var _effect_rows:Dictionary={}
+
 func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	if definitions_by_id.size()!=_catalog.size():
 		definitions_by_id.clear()
 		for definition:Dictionary in _catalog:definitions_by_id[String(definition.get("id",""))]=definition
+		_effect_rows.clear()
 	effect_totals.clear()
+	var adoption:Dictionary=WorldSimulation.state.discovery_adoption
 	for id in WorldSimulation.state.known_discoveries:
-		var discovery:Dictionary=definitions_by_id.get(id,{})
-		if discovery.is_empty(): continue
-		var adoption_level:=clampf(float(WorldSimulation.state.discovery_adoption.get(id,0.025)),0.0,1.0)
+		var row:Array=_effect_rows.get(id,[])
+		if row.is_empty():
+			var discovery:Dictionary=definitions_by_id.get(id,{})
+			if discovery.is_empty(): continue
+			var effects:Dictionary=discovery.get("effects",{})
+			var values:=PackedFloat64Array()
+			for effect_name in effects:values.append(float(effects[effect_name]))
+			row=[effects.keys(),values,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)]
+			_effect_rows[id]=row
+		var adoption_level:=clampf(float(adoption.get(id,0.025)),0.0,1.0)
 		# factor() is exactly 1.0 for ids that are neither special nor techniques.
-		if Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id):adoption_level*=Goods.factor(String(id))
-		for effect_name in (discovery.get("effects",{}) as Dictionary):
-			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+float(discovery.effects[effect_name])*adoption_level
+		if row[2]:adoption_level*=Goods.factor(String(id))
+		var names:Array=row[0]
+		var values:PackedFloat64Array=row[1]
+		for i in names.size():
+			var effect_name=names[i]
+			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+values[i]*adoption_level
 	for effect_name in effect_totals:
 		var limit:Vector2=EFFECT_LIMITS.get(String(effect_name),Vector2(-0.50,0.80))
 		effect_totals[effect_name]=clampf(float(effect_totals[effect_name]),limit.x,limit.y)

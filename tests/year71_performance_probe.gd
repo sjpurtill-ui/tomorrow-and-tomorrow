@@ -185,6 +185,9 @@ func frame_profile()->void:
 		for key:String in trace.totals:
 			phases[key]=snappedf(float(trace.totals[key].microseconds)/1000.0,.1)
 		print("FRAME_TRACE_MS ",JSON.stringify(phases))
+		var calls:Dictionary={}
+		for key:String in trace.totals:calls[key]=int(trace.totals[key].calls)
+		print("FRAME_TRACE_CALLS ",JSON.stringify(calls))
 		print("SLOW_STEPS ",JSON.stringify(preload("res://scripts/day_job.gd").slow_steps))
 	print("FRAME_PROFILE_DONE ",JSON.stringify(report))
 	terrain.queue_free();WorldSimulation.clear();await get_tree().process_frame;get_tree().quit(0 if report.days>=target_days else 1)
