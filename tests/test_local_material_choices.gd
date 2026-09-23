@@ -14,30 +14,31 @@ func test_every_starter_work_can_use_delivered_clay_and_fiber_without_timber()->
 		assert_bool(cost.is_empty()).is_false()
 		assert_float(float(cost.get("Timber",0))).is_equal(0.0)
 
-func test_builders_conserve_scarce_timber_when_clay_is_abundant()->void:
+func test_drawn_homes_follow_the_city_era_not_its_stocks()->void:
+	# Buildings are drawn: the city's construction era picks the material and
+	# nothing is paid from stores.
 	GameState.resource_stockpiles["Timber"]=2.0
+	GameState.city_form={"tier":2.5,"condition":1.0}
 	var recipe:=SettlementModel._available_household_recipe()
 	assert_str(recipe.family).is_equal("earth")
-	assert_bool(recipe.mix.has("Timber")).is_false()
 	assert_dict(GameState.resource_stockpiles).contains_key_value("Timber",2.0)
-	GameState.resource_stockpiles={"Timber":100.0,"Fiber Plants":100.0,"Clay":3.2}
+	GameState.city_form={"tier":0.5,"condition":1.0}
 	assert_str(SettlementModel._available_household_recipe().family).is_equal("organic")
 
-func test_earthen_building_knowledge_and_delivered_materials_are_required()->void:
+func test_earthen_homes_need_clay_knowledge_but_not_stores()->void:
+	GameState.city_form={"tier":2.5,"condition":1.0}
 	GameState.known_discoveries=[]
-	assert_bool(SettlementModel._available_household_recipe().is_empty()).is_true()
+	assert_str(SettlementModel._available_household_recipe().family).is_equal("organic")
 	GameState.known_discoveries=["clay_shaping"]
 	GameState.resource_stockpiles["Fiber Plants"]=0.0
-	assert_bool(SettlementModel._available_household_recipe().is_empty()).is_true()
+	assert_str(SettlementModel._available_household_recipe().family).is_equal("earth")
 
-func test_courts_workshops_and_stores_have_feasible_earthen_variants()->void:
+func test_courts_workshops_and_stores_have_earthen_variants()->void:
+	GameState.city_form={"tier":2.5,"condition":1.0}
 	for use:String in ["workshop","storage","market","hospitality","civic"]:
 		var recipe:=SettlementModel._available_functional_recipe(use)
 		assert_bool(recipe.is_empty()).is_false()
 		assert_str(recipe.family).is_equal("earth")
-		assert_bool(recipe.cost.has("Timber")).is_false()
-	# Processing still requires real fuel; clay cannot be burned in its place.
-	assert_bool(SettlementModel._available_functional_recipe("dirty_industry").is_empty()).is_true()
 
 func test_completed_clay_shelters_pay_once_and_keep_earthen_visuals()->void:
 	GameState.resource_stockpiles["Fiber Plants"]=20.0
@@ -66,15 +67,17 @@ func test_stone_policy_cannot_select_an_unaffordable_recipe()->void:
 	var choice:=Materials.choose(recipes,{"Clay":10,"Stone":0},[],100)
 	assert_str(choice.family).is_equal("earth")
 
-func test_city_supply_context_selects_its_own_materials()->void:
+func test_each_city_draws_in_its_own_era()->void:
 	GameState.initialize_population_model();GameState.ensure_population_total(1000)
 	GameState.settlement_completed=["Hearth Circle"]
 	SettlementModel.ensure_founded()
 	GameState.player_settlements.append({"id":"other","name":"Claybank","position":Vector2(10,10),"primary":false,"population_share":.2,"founded_day":20})
 	var city:=SettlementModel.settlement_record("other")
 	SettlementModel._ensure_city_resources(city)
-	city.local_resources.resource_stockpiles={"Timber":100.0,"Fiber Plants":100.0,"Clay":0.0}
-	SettlementModel.with_city_resources("other",func()->void:assert_str(SettlementModel._available_household_recipe().family).is_equal("organic"))
+	GameState.city_form={"tier":2.5,"condition":1.0}
+	SettlementModel.with_city_resources("other",func()->void:
+		GameState.city_form={"tier":0.5,"condition":1.0}
+		assert_str(SettlementModel._available_household_recipe().family).is_equal("organic"))
 	assert_str(SettlementModel._available_household_recipe().family).is_equal("earth")
 
 func test_framed_hall_requires_actual_civilian_goods()->void:

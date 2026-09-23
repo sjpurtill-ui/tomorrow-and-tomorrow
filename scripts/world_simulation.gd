@@ -225,7 +225,7 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 					run.skip=true;run.halt=true
 					return null
 				var gap:=maxi(1,day-int(actors[id].last_day))
-				if gap<_span_limit_for(id) and _span_waits(id,day):
+				if _span_waits(id,day,gap):
 					run.skip=true;run.halt=true
 					return null
 				actors[id]["span"]=gap;span=gap
@@ -252,10 +252,13 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 
 ## A calm rival waits for its own phase day, covering the gap in one step.
 ## Monthly reviews keep their exact day. Runs in the rival's scope.
-func _span_waits(id:String,day:int)->bool:
+func _span_waits(id:String,day:int,gap:int)->bool:
 	# The id goes last: String.hash multiplies by 33, so a fixed suffix would
 	# give every owner the same phase modulo 3.
 	var limit:=_span_limit_for(id)
+	# A step never covers more than a share of the food any town has stored.
+	actors[id]["food_span"]=DaySpan.food_span()
+	if gap>=mini(limit,int(actors[id].food_span)):return false
 	if posmod(day+posmod(hash("span:"+id),limit),limit)==0:return false
 	if preload("res://scripts/civilization_controller.gd").review_due(id,day):return false
 	return DaySpan.calm()
@@ -277,7 +280,7 @@ func _advances_on(id:String,day:int)->bool:
 	var actor:Dictionary=actors[id]
 	if int(actor.get("last_gap",1))==1:return true
 	var limit:=_span_limit_for(id)
-	if day-int(actor.last_day)>=limit:return true
+	if day-int(actor.last_day)>=mini(limit,int(actor.get("food_span",limit))):return true
 	if posmod(day+posmod(hash("span:"+id),limit),limit)==0:return true
 	return preload("res://scripts/civilization_controller.gd").review_due(id,day)
 

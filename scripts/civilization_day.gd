@@ -114,8 +114,13 @@ static func _city_steps(build:Callable,secondary_timings:Dictionary,timings:Dict
 	var result:Array=[]
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
+		var town_span:=SPAN.town_span(city)
+		if town_span<=0:continue
 		result.append(S.step(label,timings,func()->void:
+			var owner_span:int=WorldSimulation.span
+			WorldSimulation.span=town_span
 			WorldSimulation.settlements.process_city_resources(String(city.id),context(city.position),build,secondary_timings)
+			WorldSimulation.span=owner_span
 		))
 	return result
 

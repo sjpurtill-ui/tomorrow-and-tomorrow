@@ -3,8 +3,9 @@ extends Node3D
 const OrganicTownVisual := preload("res://scripts/organic_town_visual.gd")
 const EarlySettlementVisual := preload("res://scripts/early_settlement_visual.gd")
 const EarlySettlementGround = preload("res://scripts/early_settlement_ground.gd")
-var organic_town_cached_state := PackedByteArray()
-var organic_town_cached_plan: Dictionary = {}
+## Early-town layouts by town centre: [saved-fabric bytes, plan]. Each town
+## keeps its own, so redrawing one town never discards another's layout.
+var organic_town_plans: Dictionary = {}
 
 
 const ArmyFrontVisualScript := preload("res://scripts/army_front_visual.gd")
@@ -347,6 +348,9 @@ var game_speed := 0.0
 var simulation_clock:=preload("res://scripts/simulation_clock.gd").new()
 # Calendar target and frame advance of the day running in bounded steps.
 var scheduled_world_elapsed:=0.0
+## Calendar time that arrived while a day was still computing, beyond its end.
+var calendar_bank_days:=0.0
+const CALENDAR_BANK_DAYS:=1.0
 var scheduled_world_days:=0.0
 # False restores whole days inside one frame (diagnostics and fallback).
 var scheduled_world_days_enabled:=true
@@ -408,6 +412,13 @@ var district_condition_visual_override:=-1
 var display_preferences:Node
 var quit_dialog:ConfirmationDialog
 var map_snapshot_elapsed:=0.1
+var scale_lod_elapsed:=0.1
+var time_interface_day:=-2
+## A dock section to open at the next frame's HUD pass.
+var pending_hud_section:=""
+var time_interface_between_days:=false
+var time_interface_msec:=0
+var scale_lod_view:=Vector4.INF
 var map_snapshot_refreshes:=0
 # Settlement network rebuilds run on the same 10 Hz cadence, half a period
 # later, so its border meshes and the marker refreshes never share a frame.
@@ -990,7 +1001,14 @@ func _process(delta: float) -> void:
 	stamp=trace.mark("frame_world_streaming",stamp)
 	_advance_terrain_patch()
 	stamp=trace.mark("frame_terrain_patch",stamp)
-	_update_scale_lod()
+	# Scale visibility follows the camera every frame it moves; otherwise only
+	# state changes matter, which ten checks a second keep up with.
+	scale_lod_elapsed+=maxf(0.0,delta)
+	var lod_origin:Vector3=(camera.global_position if camera.is_inside_tree() else camera.position) if camera else Vector3.ZERO
+	var lod_view:=Vector4(camera.size if camera else 0.0,lod_origin.x,lod_origin.y,lod_origin.z)
+	if lod_view!=scale_lod_view or scale_lod_elapsed>=0.1:
+		scale_lod_elapsed=0.0;scale_lod_view=lod_view
+		_update_scale_lod()
 	stamp=trace.mark("frame_scale_lod",stamp)
 	_update_convoy_marker_animation()
 	# These rebuild report dictionaries, sort marker snapshots and inspect
@@ -1022,6 +1040,11 @@ func _process(delta: float) -> void:
 		event_report_button.visible=false
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
+	if not pending_hud_section.is_empty():
+		var section:=pending_hud_section
+		pending_hud_section=""
+		if hud:_on_hud_section_requested(section,0)
+		stamp=trace.mark("found_hud",stamp)
 	stamp=trace.mark("frame_hud",stamp)
 	# A started day always finishes, even if paused, before the century choice
 	# or campaign logic reads its results. Its work is spread across frames.
@@ -1057,17 +1080,21 @@ func _schedule_world_time(days_advanced:float)->void:
 		return
 	var century:=float(PeopleDirection.next_century_day())
 	if WorldSimulation.day_in_progress():
-		# Calendar time accrues while the day computes, up to the next boundary,
-		# so computing and waiting overlap. The shown date holds at the day start.
+		# Calendar time accrues while the day computes, so computing and waiting
+		# overlap. Up to CALENDAR_BANK_DAYS past the next boundary is kept, so a
+		# quick day can make up a slow one. The shown date holds at the day start.
 		var running:=WorldSimulation.day_in_progress_number()
-		var accrued:=minf(scheduled_world_elapsed+days_advanced,minf(float(running+1),century))
+		var accrued:=minf(scheduled_world_elapsed+days_advanced,minf(float(running+1)+CALENDAR_BANK_DAYS,century))
 		scheduled_world_days+=accrued-scheduled_world_elapsed
 		scheduled_world_elapsed=accrued
 		return
-	GameState.elapsed_days=minf(GameState.elapsed_days+days_advanced,century)
+	GameState.elapsed_days=minf(GameState.elapsed_days+days_advanced+calendar_bank_days,century)
+	calendar_bank_days=0.0
 	scheduled_world_elapsed=GameState.elapsed_days
 	if last_discovery_day>=int(floor(scheduled_world_elapsed)) or game_speed<=0.0:
+		var after_stamp:int=preload("res://scripts/performance_trace.gd").start()
 		_after_world_time(days_advanced)
+		preload("res://scripts/performance_trace.gd").mark("schedule_idle_after",after_stamp)
 		return
 	var day:=last_discovery_day+1
 	scheduled_world_days=days_advanced
@@ -1076,8 +1103,11 @@ func _schedule_world_time(days_advanced:float)->void:
 	var daily_context:=_discovery_context()
 	for city in GameState.player_settlements:
 		if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
+	var begin_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	WorldSimulation.begin_day(day,daily_context,_process_local_settlement_day,_finish_scheduled_day.bind(day))
+	begin_stamp=preload("res://scripts/performance_trace.gd").mark("schedule_begin_day",begin_stamp)
 	WorldSimulation.pump_day(_day_step_budget_usec())
+	preload("res://scripts/performance_trace.gd").mark("schedule_first_pump",begin_stamp)
 
 func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
 	var trace=preload("res://scripts/performance_trace.gd")
@@ -1086,7 +1116,9 @@ func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
 	_commit_world_day(day_result)
 	stamp=trace.mark("day_commit",stamp)
 	# An attention pause during the day stops the calendar at that day.
-	GameState.elapsed_days=scheduled_world_elapsed if game_speed>0.0 else float(day)
+	# The shown date never passes the computed day; banked time waits apart.
+	GameState.elapsed_days=minf(scheduled_world_elapsed,float(day+1)) if game_speed>0.0 else float(day)
+	calendar_bank_days=maxf(0.0,scheduled_world_elapsed-float(day+1)) if game_speed>0.0 else 0.0
 	_after_world_time(scheduled_world_days if game_speed>0.0 else 0.0)
 	trace.mark("day_after_world_time",stamp)
 
@@ -1182,7 +1214,9 @@ func _after_world_time(days_advanced:float)->void:
 			if project.name == "Communal Hearth":
 				hearth_established = true
 			_update_building_buttons()
+	time_interface_between_days=true
 	_update_time_interface()
+	time_interface_between_days=false
 
 
 # Informational reports remain open while the simulation runs. Their visible
@@ -4330,6 +4364,10 @@ func _refresh_settlement_footprint(force := false) -> void:
 	var view_signature:="%s:%s:%d" % [_settlement_morphology_view_signature(morphology_lod),_settlement_defense_visual_signature(defense_snapshot),roundi(stage_progress*8.0)]
 	var morphology_visual_signature:=_settlement_morphology_visual_signature()
 	if not force and rendered_morphology_visual_signature==morphology_visual_signature and rendered_settlement_lod == morphology_lod and rendered_architecture_signature==architecture_signature and rendered_settlement_view_signature==view_signature:
+		return
+	# A changed layout is computed now and drawn at the next refresh (the next
+	# day at the latest), so the two never share a frame.
+	if not force and settlement_land_use_root!=null and _prime_organic_town_plan(center):
 		return
 	rendered_morphology_revision = GameState.morphology_revision
 	rendered_morphology_visual_signature=morphology_visual_signature
@@ -7668,27 +7706,40 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 	SettlementModel._ensure_city_resources(record)
 	var point:Vector2=record.position
 	var center:=Vector3(point.x,0,point.y)
-	var rebuilt:=true
+	# Lambdas capture locals by value, so outcomes travel in a dictionary.
+	var outcome:={"rebuilt":true,"primed":false}
 	# A city ledger changes daily. Its buildings only need new meshes when
 	# their actual appearance or the camera's detail requirements change.
+	var trace=preload("res://scripts/performance_trace.gd")
 	SettlementModel.with_city_resources(String(record.id),func()->void:
+		var stamp:int=trace.start()
 		var lod:=_settlement_morphology_lod()
 		var signature:=str([center,lod,_settlement_morphology_view_signature(lod),_settlement_morphology_visual_signature(),_settlement_architecture_signature(_settlement_architecture_profile())])
+		stamp=trace.mark("city_design_signature",stamp)
 		var fabric:Node3D=null
 		for child in parent.get_children():
 			if String(child.get_meta("city_id",""))==String(record.id):fabric=child;break
 		if not force and fabric!=null and String(fabric.get_meta("visual_signature",""))==signature:
-			rebuilt=false
+			outcome.rebuilt=false
+			return
+		# The layout and the meshes land in separate map ticks; any old drawing
+		# stays up meanwhile.
+		if _prime_organic_town_plan(center):
+			outcome.primed=true
 			return
 		if fabric!=null:parent.remove_child(fabric);fabric.queue_free()
 		fabric=Node3D.new();fabric.name="CityDesign_"+String(record.id)
 		fabric.set_meta("city_id",String(record.id));fabric.set_meta("visual_signature",signature)
 		parent.add_child(fabric)
 		var plots:Array[Dictionary]=SettlementModel.plots_for_lod(lod)
+		stamp=trace.mark("city_design_plots_for_lod",stamp)
 		_create_plot_fabric(center,plots,lod,fabric)
+		stamp=trace.mark("city_design_plot_fabric",stamp)
 		_create_persistent_settlement_routes(center,GameState.settlement_routes,fabric)
+		trace.mark("city_design_routes",stamp)
 	)
-	return rebuilt
+	if outcome.primed:pending_city_designs.push_front([settlement,force])
+	return bool(outcome.rebuilt)
 
 func _create_secondary_settlement_footprints(settlements:Array[Dictionary],force:=false)->void:
 	var parent:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
@@ -9684,23 +9735,44 @@ func _append_field_rows(surface: SurfaceTool, plot: Dictionary, center: Vector3)
 func _organic_town_enabled() -> bool:
 	return EarlySettlementVisual.enabled(GameState.settlement_plots)
 
+## The early-town layout for the current city, built against the full saved
+## fabric (never a camera-culled subset). Returns {} on a miss when not computing.
+func _organic_town_plan(center: Vector3, land: Callable, compute := true) -> Dictionary:
+	var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
+	var entry: Array = organic_town_plans.get(center, [])
+	if not entry.is_empty() and entry[0] == state: return entry[1]
+	if not compute: return {}
+	var plan := EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, land)
+	EarlySettlementVisual.remember_layout(plan, GameState.settlement_plots)
+	if organic_town_plans.size() >= 64: organic_town_plans.clear()
+	organic_town_plans[center] = [var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes]), plan]
+	return plan
+
+## Computes a missing early-town layout on its own, so the redraw that uses it
+## can land in a later frame. True when it did the work.
+func _prime_organic_town_plan(center: Vector3) -> bool:
+	if not EarlySettlementVisual.has_kit(GameState.settlement_plots): return false
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
+	if not _organic_town_plan(center, samples.land_at, false).is_empty(): return false
+	_organic_town_plan(center, samples.land_at)
+	return true
+
 func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
 	if plots.is_empty():
 		return
 	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
 	var organic_plan: Dictionary = {"buildings": [], "replaced": {}}
 	var organic_town := _organic_town_enabled()
+	var ptrace=preload("res://scripts/performance_trace.gd")
+	var pstamp:int=ptrace.start()
 	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
-		# Build against the full saved fabric, never a camera-culled subset.
-		var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
-		if state != organic_town_cached_state:
-			organic_town_cached_plan = EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, samples.land_at)
-			EarlySettlementVisual.remember_layout(organic_town_cached_plan,GameState.settlement_plots)
-			organic_town_cached_state = var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
-		organic_plan = organic_town_cached_plan
+		organic_plan = _organic_town_plan(center, samples.land_at)
+		pstamp=ptrace.mark("plot_fabric_layout",pstamp)
 		EarlySettlementVisual.render(organic_plan, center, samples.height_at, parent)
+		pstamp=ptrace.mark("plot_fabric_kit_render",pstamp)
 	if organic_town:
 		EarlySettlementGround.render(organic_plan, GameState.settlement_plots, GameState.settlement_routes, center, samples.height_at, samples.land_at, parent)
+		pstamp=ptrace.mark("plot_fabric_ground_render",pstamp)
 		# Keep genuine cultivated fields and later unsupported forms, but never
 		# paint the household/service parcel polygons over the new working ground.
 		plots = plots.filter(func(plot: Dictionary) -> bool: return not EarlySettlementGround.handles(plot))
@@ -9841,6 +9913,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			scar_count += 1
 	if density_count>0:
 		_commit_settlement_surface(density_surface,"PersistentSettlementDensity",parent,true)
+	pstamp=ptrace.mark("plot_fabric_plot_loop",pstamp)
 	_commit_settlement_surface(ground_surface, "PersistentPlotGround", parent, true)
 	if field_ground_count>0:
 		_commit_settlement_surface(field_ground_surface,"PersistentFieldGround",parent,true)
@@ -10013,15 +10086,43 @@ func _nearest_tributary_distance_at(position:Vector2)->float:
 		return INF
 	if world_tributary_courses.is_empty():
 		world_tributary_courses=_seeded_world_tributaries()
+	if not is_same(tributary_chunk_source,world_tributary_courses):_index_tributary_chunks()
+	# Chunks farther away than the nearest segment found so far cannot hold a
+	# closer one, so skipping them leaves the minimum exactly unchanged.
 	var nearest:=INF
-	for tributary_variant in world_tributary_courses:
-		var tributary:Array=tributary_variant
-		for point_index in tributary.size()-1:
+	for chunk:Array in tributary_chunks:
+		var bounds:Rect2=chunk[0]
+		var gap:=Vector2(maxf(0.0,maxf(bounds.position.x-position.x,position.x-bounds.end.x)),maxf(0.0,maxf(bounds.position.y-position.y,position.y-bounds.end.y)))
+		if gap.length()>=nearest:continue
+		var tributary:Array=world_tributary_courses[int(chunk[1])]
+		for point_index in range(int(chunk[2]),int(chunk[3])):
 			var start:Vector3=tributary[point_index]
 			var finish:Vector3=tributary[point_index+1]
 			var closest:=Geometry2D.get_closest_point_to_segment(position,Vector2(start.x,start.z),Vector2(finish.x,finish.z))
 			nearest=minf(nearest,position.distance_to(closest))
 	return nearest
+
+## Tributary segments grouped in runs of TRIBUTARY_CHUNK_SEGMENTS with bounds:
+## [Rect2, tributary index, first point, last segment start + 1].
+var tributary_chunks:Array=[]
+var tributary_chunk_source:Array=[]
+const TRIBUTARY_CHUNK_SEGMENTS:=16
+
+func _index_tributary_chunks()->void:
+	tributary_chunk_source=world_tributary_courses
+	tributary_chunks.clear()
+	for tributary_index in world_tributary_courses.size():
+		var tributary:Array=world_tributary_courses[tributary_index]
+		var first:=0
+		while first<tributary.size()-1:
+			var last:=mini(first+TRIBUTARY_CHUNK_SEGMENTS,tributary.size()-1)
+			var start:Vector3=tributary[first]
+			var bounds:=Rect2(Vector2(start.x,start.z),Vector2.ZERO)
+			for point_index in range(first+1,last+1):
+				var point:Vector3=tributary[point_index]
+				bounds=bounds.expand(Vector2(point.x,point.z))
+			tributary_chunks.append([bounds,tributary_index,first,last])
+			first=last
 
 
 func _settlement_surface_assessment(destination:Vector3)->Dictionary:
@@ -11258,8 +11359,9 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 		_set_camera_target(Vector3(destination.x,_height_at(destination.x,destination.y),destination.y))
 		stamp=trace.mark("found_camera",stamp)
-		if hud: _on_hud_section_requested("settlement",0)
-		stamp=trace.mark("found_hud",stamp)
+		# The dock opens next frame so the network rebuild and dock layout for a
+		# founding never share one frame.
+		pending_hud_section="settlement"
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
@@ -18850,8 +18952,15 @@ func _population_attention_brief(profile:Dictionary,conditions:Dictionary)->Dict
 	return {"status":"POPULATION COMMITMENTS ARE SUSTAINABLE","why":"%.1f%% remain in direct productive roles and no dominant demographic pressure is visible." % (productive_share*100.0),"next":"No immediate change is required; watch health, shelter, dependents, and people away."}
 
 func _update_time_interface() -> void:
-	if hud:
-		hud.refresh()
+	# The clock reads every frame. Everything else reads simulation state that
+	# only changes when a day completes, so between days it refreshes at 10 Hz.
+	var now_msec:=Time.get_ticks_msec()
+	var sim_day:=last_discovery_day
+	var full:=not time_interface_between_days or sim_day!=time_interface_day or now_msec-time_interface_msec>=100
+	if full:
+		time_interface_day=sim_day;time_interface_msec=now_msec
+		if hud:
+			hud.refresh()
 	if interface_layer == null:
 		return
 	if date_label:
@@ -18861,6 +18970,8 @@ func _update_time_interface() -> void:
 		var day_of_year := absolute_day % 365 + 1
 		var hour_of_day:=absolute_hour%24
 		date_label.text = "Y%d  •  D%d  •  %02d:00" % [year, day_of_year,hour_of_day]
+	if not full:
+		return
 	if world_header_label:
 		var focus:=GameState.founding_focus_definition()
 		world_header_label.text=GameState.province_name.to_upper()
@@ -18956,6 +19067,7 @@ func _settlement_display_name() -> String:
 func _set_game_speed(speed: float) -> void:
 	if speed>0 and preload("res://scripts/hud/simulation_pause.gd").blocks(self):return
 	if GeneralCampaign.active and speed<=0:GeneralCampaign.pause_to_speak()
+	if speed<=0.0:calendar_bank_days=0.0
 	if GeneralCampaign.active and speed>0:
 		GeneralCampaign.resume()
 		return
