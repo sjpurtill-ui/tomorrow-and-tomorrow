@@ -53,9 +53,6 @@ const SPEED_HOURS_PER_REAL_SECOND := {1:0.5,2:2.0,3:8.0,4:24.0,5:72.0}
 # Per-frame microseconds for a world day in progress (see _day_step_budget_usec).
 const DAY_STEP_BUDGET_USEC := 8000
 const DAY_STEP_BUDGET_FAST_USEC := 14000
-# Top speed (72 game hours/s) trades frame rate for simulation throughput;
-# 24 ms measured faster than 30 ms on the year-71 fixture.
-const DAY_STEP_BUDGET_TOP_USEC := 24000
 const DAY_STEP_BUDGET_NAVIGATING_USEC := 4000
 const SETTLEMENT_DETAIL_SCALE := 0.002
 const SETTLEMENT_FABRIC_MAX_ZOOM := 28.0
@@ -1039,9 +1036,7 @@ func _process(delta: float) -> void:
 ## exceed it; the budget bounds how many run back to back.
 func _day_step_budget_usec()->int:
 	if _camera_in_motion():return DAY_STEP_BUDGET_NAVIGATING_USEC
-	var hours:=_speed_hours_per_second()
-	if hours>=72.0:return DAY_STEP_BUDGET_TOP_USEC
-	return DAY_STEP_BUDGET_FAST_USEC if hours>=24.0 else DAY_STEP_BUDGET_USEC
+	return DAY_STEP_BUDGET_FAST_USEC if _speed_hours_per_second()>=24.0 else DAY_STEP_BUDGET_USEC
 
 ## The frame-loop calendar. Owned worlds run each day as bounded steps across
 ## frames; legacy worlds and campaign intervals keep the synchronous path.
