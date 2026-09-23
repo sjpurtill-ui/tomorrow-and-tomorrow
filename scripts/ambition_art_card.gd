@@ -9,20 +9,24 @@ var footer:ColorRect
 var title_label:Label
 var sub_label:Label
 var outline:Panel
+var paper_art:=false
 
 func _ready()->void:
+	paper_art=preload("res://scripts/hud/early_civ_art.gd").active()
 	clip_contents=true
 	mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 	for state in ["normal","hover","pressed","focus","disabled"]:
-		var style:=StyleBoxFlat.new();style.bg_color=Color("112126")
+		var style:=StyleBoxFlat.new();style.bg_color=Color("eee7d8") if paper_art else Color("112126")
 		style.border_color=accent if state in ["hover","focus","pressed"] else Color("385052")
 		style.set_border_width_all(2 if state in ["hover","focus","pressed"] else 1)
 		add_theme_stylebox_override(state,style)
 	artwork=TextureRect.new();artwork.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;artwork.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	artwork.mouse_filter=Control.MOUSE_FILTER_IGNORE;artwork.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(artwork)
-	var path:="res://assets/ui/ambition_atlas_v1.png"
-	if ResourceLoader.exists(path):
-		var source:Texture2D=load(path);var atlas:=AtlasTexture.new();atlas.atlas=source;atlas.region=Rect2(Vector2(art_index%4,art_index/4)*source.get_size()/Vector2(4,2),source.get_size()/Vector2(4,2));artwork.texture=atlas
+	artwork.texture=preload("res://scripts/hud/ambition_art.gd").texture(art_index)
+	artwork.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	if paper_art:
+		artwork.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		artwork.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	footer=ColorRect.new();footer.color=Color(.025,.055,.064,.9);footer.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(footer)
 	title_label=Label.new();title_label.text=caption;title_label.add_theme_color_override("font_color",Color("fff3d6"));title_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(title_label)
 	sub_label=Label.new();sub_label.text=subtitle;sub_label.add_theme_color_override("font_color",Color("c8d4cf"));sub_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(sub_label)
@@ -34,6 +38,7 @@ func _fit()->void:
 	if not is_instance_valid(footer):return
 	var compact:=size.y<180
 	footer.position=Vector2(0,size.y-(57 if compact else 70));footer.size=Vector2(size.x,70)
+	if paper_art:artwork.size=Vector2(size.x,maxf(0,footer.position.y))
 	title_label.position=footer.position+Vector2(12,5);title_label.size=Vector2(size.x-24,27);title_label.add_theme_font_size_override("font_size",16 if size.x<210 else 21)
 	sub_label.position=footer.position+Vector2(12,32);sub_label.size=Vector2(size.x-24,21);sub_label.add_theme_font_size_override("font_size",11 if size.x<210 else 13)
 	queue_redraw()

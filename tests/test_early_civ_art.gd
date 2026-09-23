@@ -1,6 +1,19 @@
 extends GdUnitTestSuite
 const Art:=preload("res://scripts/hud/early_civ_art.gd")
 const Person:=preload("res://scripts/hud/person_portrait.gd")
+func test_all_fourteen_directions_have_distinct_early_scenes()->void:
+	var saved:=GameState.elapsed_days;GameState.elapsed_days=0
+	var seen:Dictionary={}
+	for index in 14:
+		var texture:=preload("res://scripts/hud/ambition_art.gd").texture(index) as AtlasTexture
+		var key:=str(texture.atlas.resource_path)+str(texture.region)
+		assert_bool(seen.has(key)).is_false();seen[key]=true
+		assert_bool(texture.region.end.x<=texture.atlas.get_width()).is_true()
+		assert_bool(texture.region.end.y<=texture.atlas.get_height()).is_true()
+	GameState.elapsed_days=300*365
+	var later:=preload("res://scripts/hud/ambition_art.gd").texture(13) as AtlasTexture
+	assert_str(later.atlas.resource_path).is_equal("res://assets/ui/ambition_atlas_v1.png")
+	GameState.elapsed_days=saved
 func test_foreign_leader_keeps_own_identity_through_save_and_temperament_changes()->void:
 	var person:={"name":"Arven", "temperament":"Practical organizer"}
 	Art.bind_foreign_identity(person,"rival_9",82)

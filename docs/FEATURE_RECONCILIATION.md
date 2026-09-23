@@ -2381,3 +2381,7 @@ Twelve additional exact research IDs now select reviewed paper illustrations dur
 ### Early foreign-leader record artwork
 
 Known foreign leaders now receive a contained action illustration beside their record during the first 300 years. Civilization owner, visual family, and cast slot are stored additively in the existing leader dictionary; temperament does not choose ancestry or recast the person. Unknown contacts remain gated by the existing diplomatic query. Ten focused early-art tests pass, including JSON identity persistence; an isolated synthetic diplomatic screen passes at 1440×900 and 1024×700. No real diplomatic message was sent. Four families remain a shared-library limitation.
+
+### Fourteen first-300-year direction illustrations
+
+The founding/century direction cards and national-character history now share fourteen distinct paper scenes. The six later choices no longer wrap around to unrelated first-eight art during years 0–299. New atlases depict exploration, building, council, inquiry, strength, abundance, care, exchange, founding, extraction, exclusion, dynasty, coercion, and controlled speech. Cards contain the whole scene above the caption and use larger early-era artwork; disabled confirmation text has readable contrast. Eleven focused tests pass; isolated screens at 1440×1000 and 1024×700 confirm images stay clear of captions. Effects, saves, and post-300 imagery are unchanged. Two mipmapped atlases, capped at 1536, reuse the bounded cache.

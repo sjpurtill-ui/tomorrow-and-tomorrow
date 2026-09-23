@@ -51,7 +51,8 @@ func _ready()->void:
 	var index:=0
 	for id:String in PeopleDirection.AMBITIONS:
 		var card:=preload("res://scripts/ambition_art_card.gd").new()
-		card.custom_minimum_size.y=175;card.art_index=index%8;card.caption=CARD_TITLES[index];card.subtitle=CARD_TAGS[index];card.accent=Color(CARD_COLORS[index]);card.size_flags_horizontal=SIZE_EXPAND_FILL;card.size_flags_vertical=SIZE_EXPAND_FILL
+		card.custom_minimum_size.y=175;card.art_index=index;card.caption=CARD_TITLES[index];card.subtitle=CARD_TAGS[index];card.accent=Color(CARD_COLORS[index]);card.size_flags_horizontal=SIZE_EXPAND_FILL;card.size_flags_vertical=SIZE_EXPAND_FILL
+		if preload("res://scripts/hud/early_civ_art.gd").active():card.custom_minimum_size.y=260
 		card.set_meta("ambition",id);card.tooltip_text=String(PeopleDirection.AMBITIONS[id].vision)
 		card.pressed.connect(func():selected_focus=id;reviewing=true;_refresh())
 		grid.add_child(card);ambition_buttons.append(card);focus_cards.append(card);index+=1
@@ -63,6 +64,7 @@ func _ready()->void:
 		if not result.has("error"):queue_free())
 	confirm.name="ConfirmFocus";confirm.custom_minimum_size.y=43
 	var commit_style:=StyleBoxFlat.new();commit_style.bg_color=Color("c7a55f");commit_style.set_corner_radius_all(3);confirm.add_theme_stylebox_override("normal",commit_style);confirm.add_theme_color_override("font_color",Color("112126"));confirm.add_theme_font_size_override("font_size",16)
+	confirm.add_theme_color_override("font_disabled_color",Color("586052"))
 	council=VBoxContainer.new();body.add_child(council);pages.append(council)
 	var traditions_scroll:=ScrollContainer.new();traditions_scroll.size_flags_vertical=SIZE_EXPAND_FILL;body.add_child(traditions_scroll);pages.append(traditions_scroll)
 	traditions=VBoxContainer.new();traditions.size_flags_horizontal=SIZE_EXPAND_FILL;traditions_scroll.add_child(traditions)
@@ -146,8 +148,9 @@ const VALUE_COLORS:=[Color("8b9b76"),Color("ba945b"),Color("688b91"),Color("ac75
 func _art(parent:Node,index:int,height:float)->TextureRect:
 	var rect:=TextureRect.new();rect.custom_minimum_size.y=height;rect.size_flags_horizontal=SIZE_EXPAND_FILL
 	rect.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;rect.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	var source:Texture2D=load("res://assets/ui/ambition_atlas_v1.png")
-	var atlas:=AtlasTexture.new();atlas.atlas=source;atlas.region=Rect2(Vector2(index%4,index/4)*source.get_size()/Vector2(4,2),source.get_size()/Vector2(4,2));rect.texture=atlas
+	rect.texture=preload("res://scripts/hud/ambition_art.gd").texture(index)
+	if preload("res://scripts/hud/early_civ_art.gd").active():rect.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	parent.add_child(rect);return rect
 
 func _box(parent:Node)->VBoxContainer:
@@ -166,7 +169,7 @@ func _traditions_page()->void:
 	var portrait:=_box(spread);portrait.get_parent().size_flags_stretch_ratio=.85
 	var focus:=String(state.ambition)
 	var focus_index:=maxi(0,PeopleDirection.AMBITIONS.keys().find(focus))
-	_art(portrait,focus_index%8,265)
+	_art(portrait,focus_index,265)
 	_label(portrait,"OUR PRESENT COURSE",12).add_theme_color_override("font_color",Color("8c764d"))
 	_label(portrait,CARD_TITLES[focus_index] if focus!="" else "An unwritten story",26)
 	_label(portrait,"Shaped by every generation",14)
@@ -212,7 +215,7 @@ func _traditions_page()->void:
 	for event:Dictionary in commitments:
 		var tile:=VBoxContainer.new();tile.custom_minimum_size.x=145;timeline.add_child(tile)
 		var index:=maxi(0,PeopleDirection.AMBITIONS.keys().find(String(event.choice)))
-		var art:=_art(tile,index%8,70);art.tooltip_text=CARD_TITLES[index]
+		var art:=_art(tile,index,70);art.tooltip_text=CARD_TITLES[index]
 		_label(tile,"Y%d · %s"%[int(event.day)/365+1,String(PeopleDirection.AMBITIONS[event.choice].name)],12)
 	if commitments.is_empty():
 		timeline_scroll.hide()
