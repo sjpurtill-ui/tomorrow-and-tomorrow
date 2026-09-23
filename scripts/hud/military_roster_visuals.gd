@@ -4,6 +4,7 @@ const COLORS:={"army":Color("d9b772"),"navy":Color("76bbce"),"air":Color("a9bbec
 const Painting=preload("res://scripts/hud/subject_painting.gd")
 const Early=preload("res://scripts/hud/early_civ_art.gd")
 const EARLY_UNITS:={
+	"line_infantry":"res://assets/ui/military/paper/line-infantry-v1.png",
 	"levy":"res://assets/ui/military/paper/levy-v1.png",
 	"spearman":"res://assets/ui/military/paper/spearman-v1.png",
 	"archer":"res://assets/ui/military/paper/archer-v1.png",

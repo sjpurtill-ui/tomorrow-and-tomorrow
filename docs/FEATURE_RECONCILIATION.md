@@ -2429,3 +2429,7 @@ Hollowreed completes thirteen authored human visual families with four principal
 ### World contact artwork follows discovered identity
 
 Early World overview contact cards now reuse the known diplomatic leader image and name. The existing contact-level gate must return a known leader before artwork is attached; rumors and unconfirmed encounters remain unillustrated. An isolated 1024x700 GPU fixture verifies exactly one portrait for one known contact plus an unknown lead, without touching player saves. Later-era cards retain their prior presentation. No new textures or simulation loops were added.
+
+### Early shield-wall unit illustration
+
+Line Infantry now uses an early paper shield-wall training scene before year 300, replacing its later-looking legacy illustration in that interval. Shield-wall knowledge is present in the recorded 75-year same-site pacing comparison; this is tied to an existing unit and research gate, not a new unlock. Nine early unit types now have paper overrides. Both focused suites pass: 21 tests, zero errors, failures or orphans. Native generated source and exact prompt are retained; mipmapped import capped at 1024. No unit balance or pacing changed.
