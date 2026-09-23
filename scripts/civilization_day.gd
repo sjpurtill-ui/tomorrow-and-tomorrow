@@ -81,7 +81,7 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
 			run.result.events.append_array(WorldSimulation.civics.process_day(day))
 	),
-		S.step("economy",timings,func()->void:run.result.events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return SPAN.each_day(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context))))),
+		S.step("economy",timings,func()->void:run.result.events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context)))),
 		S.step("government",timings,func()->void:run.result.events.append_array(WorldSimulation.government.process_day(day))),
 		S.step("construction",timings,func()->void:WorldSimulation.settlements.with_local_population(run.build)),
 		S.step("secondary_plan",timings,func()->Array:return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")),
