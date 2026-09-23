@@ -2465,3 +2465,7 @@ War Bow Craft and Hafted Weapons now show their specific inspection and craft wo
 ### Early frame and kiln research art
 
 Framed Construction and Kiln Control now have specific paper illustrations for their early research cards. Imported resources resolve; thirteen focused tests pass without errors, failures or orphans. Fifty-four explicit early research overrides are installed.
+
+### Early shield-wall and field-defense imagery
+
+Shield Wall and Field Fortifications now use paper illustrations showing formation drill and a defensible temporary camp. Imported resources resolve; thirteen focused tests pass with no failures or orphans. Fifty-six early research subjects have explicit paper overrides.
