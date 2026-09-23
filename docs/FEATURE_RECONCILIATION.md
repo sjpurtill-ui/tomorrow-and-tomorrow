@@ -2409,3 +2409,7 @@ Ashplain adds four new action compositions and a distinct authored human appeara
 ### Sixth early family and nonrepeating initial distribution
 
 Rillmark adds four new character-action compositions. First assignments now rotate through the authored families by canonical civilization slot with a world-seed offset; the player plus first five rivals do not collide. Existing saved family names remain authoritative. Thirteen focused checks pass, including three seed cases with distinct first-six assignments, government/diplomacy preservation and all atlas boundaries. The library still repeats after six civilizations and is not a complete exclusive ancestry set for maximum-count worlds.
+
+### Eight early character families
+
+Flintmere and Morrowfen add eight distinct action compositions with separate authored facial traits, hair and garment construction. The shared first-assignment sequence covers player plus seven rivals before repetition; existing saved identities remain fixed. Thirteen focused checks pass across all eight source atlases and saved government/diplomatic identity rules. No simulation traits, game RNG or later-era art change. This is still short of exclusive imagery for the default player-plus-twelve world.

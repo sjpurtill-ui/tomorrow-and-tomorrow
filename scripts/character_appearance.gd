@@ -1,6 +1,6 @@
 extends RefCounted
 ## Saved visual identity only; never participates in traits or simulation RNG.
-const FAMILIES:=["kilnfold","reedwake","windseam","stoneweft","ashplain","rillmark"]
+const FAMILIES:=["kilnfold","reedwake","windseam","stoneweft","ashplain","rillmark","flintmere","morrowfen"]
 static func initial_family(seed_value:int,owner:String)->String:
 	var slot:=0
 	if owner!="player":
