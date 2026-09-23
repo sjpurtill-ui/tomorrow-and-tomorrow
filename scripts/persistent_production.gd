@@ -166,17 +166,9 @@ static func workforce() -> Dictionary:
 	var labor:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72)),0.0,1.45)
 	var carrying:=WorldSimulation.state.effective_workers("Logistics")
 	var logistics:=clampf(.35+carrying/maxf(1.0,workers*.3)*.65,.35,1.0)
-	var weight:=0.0;var usable:=0.0
-	for plot in WorldSimulation.state.settlement_plots:
-		if String(plot.get("land_use","")) not in ["workshop","mixed_household"]: continue
-		var size:=maxf(1.0,float(plot.get("worker_capacity",1)))
-		weight+=size
-		if String(plot.get("status","active")) in ["ruin","vacant","reclaimed","under_construction"]: continue
-		var damage: Dictionary=plot.get("damage",{})
-		usable+=size*clampf(float(plot.get("condition",1)),0,1)*(1-clampf(float(damage.get("structural",0)),0,1))
 	# Mobile crafts are possible with carried tools; founded workplace damage
-	# reduces the real recorded productive fabric rather than a decorative score.
-	var facilities:=usable/weight if weight>0 else .5
+	# reduces the city's built workplace capacity rather than a decorative score.
+	var facilities:=float(WorldSimulation.settlements.city_capacities().get("workplace_condition",.5))
 	var powered_factor:=1.0+minf(.5,preload("res://scripts/technology_operations.gd").service("mechanical_work")/maxf(1.0,workers))
 	return {"powered_factor":powered_factor,"workers":workers,"health":health,"labor_efficiency":labor,"logistics":logistics,"workplace_condition":facilities,"condition_factor":health*labor*logistics*facilities*powered_factor}
 

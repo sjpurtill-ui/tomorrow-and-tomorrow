@@ -2953,7 +2953,30 @@ func rebuild_summary()->Dictionary:
 	var occupied_capacity:=0
 	var fabric_generation_total:=0.0
 	var era_counts:Dictionary={}
+	# City capacities read by the daily simulation (see city_capacities()).
+	var storage_bulk:={"dry":0.0,"covered":0.0,"sealed":0.0,"secure":0.0}
+	var workshop_function:=0.0;var storage_function:=0.0;var communal_functions:=0
+	var workplace_weight:=0.0;var workplace_usable:=0.0
 	for plot in WorldSimulation.state.settlement_plots:
+		var plot_status:=String(plot.get("status","active"));var plot_use:=String(plot.get("land_use",""))
+		if plot_status in ["active","stressed","damaged"] and plot_use in ["workshop","storage"]:
+			var staffing:=clampf(float(plot.get("worker_count",0))/maxf(1.0,float(plot.get("worker_capacity",1))),0.0,1.0)
+			var function:=staffing*clampf(float(plot.get("condition",0.0)),0.0,1.0)
+			if plot_use=="workshop":workshop_function+=function
+			else:
+				storage_function+=function
+				var usable:=float(plot.get("storage_capacity",0.0))*clampf(float(plot.get("condition",0.0)),0.10,1.0)*clampf(staffing,0.15,1.0)
+				var form:=String(plot.get("form",""))
+				if "earthen" in form or "pit" in form:storage_bulk.covered+=usable*0.62;storage_bulk.sealed+=usable*0.38
+				elif "stone" in form:storage_bulk.covered+=usable*0.72;storage_bulk.secure+=usable*0.28
+				else:storage_bulk.dry+=usable*0.58;storage_bulk.covered+=usable*0.42
+		if plot_use in ["communal","storage","water","civic","sacred"] and plot_status=="active":communal_functions+=1
+		if plot_use in ["workshop","mixed_household"]:
+			var size:=maxf(1.0,float(plot.get("worker_capacity",1)))
+			workplace_weight+=size
+			if plot_status not in ["ruin","vacant","reclaimed","under_construction"]:
+				var damage:Dictionary=plot.get("damage",{})
+				workplace_usable+=size*clampf(float(plot.get("condition",1)),0,1)*(1-clampf(float(damage.get("structural",0)),0,1))
 		var area:=float(plot.get("area_ha",0.0))
 		built_area+=area
 		condition_total+=float(plot.get("condition",0.0))
@@ -2995,6 +3018,8 @@ func rebuild_summary()->Dictionary:
 		"specialization":specialization,"exchange":exchange,"institutions":institutions,"connectivity":connectivity,"infrastructure":infrastructure,
 		"price_stability":clampf(1.0-absf(float(WorldSimulation.state.economy_metrics.get("inflation",0.0)))*8.0,0.0,1.0),"inequality":float(WorldSimulation.state.economy_metrics.get("inequality",0.0)),
 		"diversity":clampf(float(uses.size())/12.0,0.0,1.0),"mean_fabric_generation":mean_fabric_generation,"fabric_maturity":fabric_maturity,"morphology_eras":era_counts,"surfaced_route_share":surfaced_route_share,"food_import_share":food_import_share,"active_nuclei":_active_nuclei(),"district_count":maxi(1,_active_nuclei()),
+		"storage_bulk":storage_bulk,"workshop_function":clampf(workshop_function/3.0,0.0,1.0),"storage_function":clampf(storage_function/3.0,0.0,1.0),
+		"workplace_condition":workplace_usable/workplace_weight if workplace_weight>0 else .5,"communal_functions":communal_functions,"plot_count":count,
 		"usable_resident_capacity":occupied_capacity,"population_without_permanent_housing":maxi(0,population-occupied_capacity),"temporary_camp_population":temporary_camp_population,"temporary_shelter_capacity":temporary_shelter_capacity,"unsheltered_population":maxi(0,population-occupied_capacity-temporary_shelter_capacity),"limiting_factors":[]
 	}
 	var classification_result:=_classify(summary)
@@ -3009,9 +3034,7 @@ func _classify(summary:Dictionary)->Dictionary:
 	if float(summary.permanence)<0.35: return {"classification":"founding camp","confidence":0.90,"limits":["permanent household fabric has not yet stabilized"]}
 	if float(summary.permanence)<0.50:
 		return {"classification":"hamlet","confidence":0.78,"limits":["permanence remains below village level"]}
-	var communal_functions:=0
-	for plot in WorldSimulation.state.settlement_plots:
-		if String(plot.get("land_use","")) in ["communal","storage","water","civic","sacred"] and String(plot.get("status",""))=="active": communal_functions+=1
+	var communal_functions:=int(summary.get("communal_functions",0))
 	var resident_population:=int(summary.resident_population)
 	var city_functions:=float(summary.exchange)>=0.55 and float(summary.institutions)>=0.50 and float(summary.infrastructure)>=0.50 and float(summary.food_import_share)>=0.15 and int(summary.district_count)>=3 and float(summary.service_population)>=float(summary.resident_population)*1.5
 	if resident_population>=10000000 and city_functions and float(summary.connectivity)>=0.68 and float(summary.infrastructure)>=0.75 and float(summary.specialization)>=0.55 and int(summary.district_count)>=6:
@@ -3028,6 +3051,15 @@ func _classify(summary:Dictionary)->Dictionary:
 		return {"classification":"village","confidence":0.76,"limits":limits}
 	limits.append("shared permanent functions remain insufficient")
 	return {"classification":"hamlet","confidence":0.70,"limits":limits}
+
+## Built capacity of the current city: storage by kind, workshop and storage
+## function, workplace condition and communal functions. Refreshed monthly with
+## the settlement summary and after damage; the daily simulation reads these
+## instead of individual buildings.
+func city_capacities()->Dictionary:
+	var summary:Dictionary=WorldSimulation.state.settlement_morphology
+	if not summary.has("storage_bulk") and not WorldSimulation.state.settlement_plots.is_empty():summary=rebuild_summary()
+	return summary
 
 func classification()->String:
 	if WorldSimulation.state.settlement_morphology.is_empty(): rebuild_summary()

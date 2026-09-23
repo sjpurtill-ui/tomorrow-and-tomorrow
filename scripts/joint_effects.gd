@@ -63,7 +63,8 @@ func advance(day:int)->void:
 				WorldSimulation.settlements.with_city_resources(String(city.city_id),func():
 					for plot:Dictionary in WorldSimulation.state.settlement_plots:
 						if String(plot.get("land_use","")) in ["workshop","mixed_household","storehouse"]:plot.condition=maxf(.05,float(plot.get("condition",1))-damage)
-					WorldSimulation.state.morphology_revision+=1)
+					WorldSimulation.state.morphology_revision+=1
+					WorldSimulation.settlements.rebuild_summary())
 			else:
 				var location:Dictionary=WorldSimulation.world._region_location(String(city.city_id))
 				if location.is_empty():continue

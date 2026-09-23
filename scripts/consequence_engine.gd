@@ -683,18 +683,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var accessible_count := 0
 	for deposit in WorldSimulation.state.resource_deposits:
 		if String(deposit.get("stage","unknown")) in ["accessible","developed"]: accessible_count += 1
-	var workshop_function:=0.0
-	var storage_function:=0.0
-	for plot in WorldSimulation.state.settlement_plots:
-		if String(plot.get("status","")) not in ["active","stressed","damaged"]: continue
-		var use:=String(plot.get("land_use",""))
-		if use not in ["workshop","storage"]: continue
-		var staffing:=clampf(float(plot.get("worker_count",0))/maxf(1.0,float(plot.get("worker_capacity",1))),0.0,1.0)
-		var function:=staffing*clampf(float(plot.get("condition",0.0)),0.0,1.0)
-		if use=="workshop": workshop_function+=function
-		else: storage_function+=function
-	workshop_function=clampf(workshop_function/3.0,0.0,1.0)
-	storage_function=clampf(storage_function/3.0,0.0,1.0)
+	var capacities:Dictionary=WorldSimulation.settlements.city_capacities()
+	var workshop_function:=float(capacities.get("workshop_function",0.0))
+	var storage_function:=float(capacities.get("storage_function",0.0))
 	var craft_coverage := clampf(makers/maxf(1.0,population*0.05),0.0,1.25)
 	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+WorldSimulation.discovery.effect("tool_quality")*0.30+WorldSimulation.discovery.effect("craft_output")*0.22+WorldSimulation.progression.effect("tool_quality")*0.22+WorldSimulation.progression.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+WorldSimulation.state.founding_effect("material_target"),0.02,0.96)
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: material_target += 0.08
