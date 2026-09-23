@@ -2,6 +2,7 @@ extends Control
 var civ_id:=""
 var heading:Label
 var personal:Label
+var character_art:TextureRect
 var speech:RichTextLabel
 var access_note:Label
 var audience_button:Button
@@ -98,7 +99,18 @@ func _ready()->void:
 		var result:Dictionary=WorldSimulation.diplomacy.send(civ_id,selected_accord(),selected_tone(),generous.button_pressed)
 		message.text=String(result.get("error","Proposal sent. Envoys must return with an answer before an agreement takes effect."));refresh())
 	var record:=sections[2]
-	personal=label(record,17)
+	var identity_row:=HBoxContainer.new();identity_row.add_theme_constant_override("separation",18);record.add_child(identity_row)
+	var early_art=preload("res://scripts/hud/early_civ_art.gd")
+	var known_leader:=WorldSimulation.diplomacy.leader(civ_id)
+	if early_art.active() and not known_leader.is_empty():
+		early_art.bind_foreign_identity(known_leader,civ_id,GameState.world_seed)
+		var character_panel:=PanelContainer.new()
+		var paper:=StyleBoxFlat.new();paper.bg_color=Color("eee7d8");paper.set_content_margin_all(10)
+		character_panel.add_theme_stylebox_override("panel",paper);identity_row.add_child(character_panel)
+		character_panel.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+		character_art=preload("res://scripts/hud/person_portrait.gd").picture(known_leader,210,230)
+		character_panel.add_child(character_art)
+	personal=label(identity_row,17);personal.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var archive:=HBoxContainer.new();record.add_child(archive)
 	button(archive,"‹",func():page=maxi(0,page-1);refresh())
 	var caption:=label(archive,14);caption.text="WHAT THEY REMEMBER";caption.size_flags_horizontal=Control.SIZE_EXPAND_FILL

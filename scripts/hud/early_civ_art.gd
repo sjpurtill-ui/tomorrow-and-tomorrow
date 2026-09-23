@@ -8,6 +8,12 @@ static func active()->bool:
 	return GameState.elapsed_days<300.0*365.0
 static func owner(person:Dictionary)->String:
 	return String(person.get("appearance_civ_id",person.get("civilization_id","player")))
+static func bind_foreign_identity(person:Dictionary,civ_id:String,seed_value:int)->void:
+	# Called only for a known leader record. These additive fields survive saves.
+	person["appearance_civ_id"]=civ_id
+	person["appearance_world_seed"]=seed_value
+	if not person.has("early_art_profile"):person["early_art_profile"]=PROFILES[profile(person)]
+	if not person.has("early_art_index"):person["early_art_index"]=posmod((civ_id+":"+String(person.get("name",""))).hash(),4)
 static func profile(person:Dictionary)->int:
 	var saved:=PROFILES.find(String(person.get("early_art_profile","")))
 	if saved>=0:return saved

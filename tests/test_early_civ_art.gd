@@ -1,6 +1,17 @@
 extends GdUnitTestSuite
 const Art:=preload("res://scripts/hud/early_civ_art.gd")
 const Person:=preload("res://scripts/hud/person_portrait.gd")
+func test_foreign_leader_keeps_own_identity_through_save_and_temperament_changes()->void:
+	var person:={"name":"Arven", "temperament":"Practical organizer"}
+	Art.bind_foreign_identity(person,"rival_9",82)
+	var family:String=person.early_art_profile;var slot:int=person.early_art_index
+	var restored:Dictionary=JSON.parse_string(JSON.stringify(person))
+	restored.temperament="Proud guardian"
+	Art.bind_foreign_identity(restored,"rival_9",82)
+	assert_str(Art.owner(restored)).is_equal("rival_9")
+	assert_str(restored.early_art_profile).is_equal(family)
+	assert_int(int(restored.early_art_index)).is_equal(slot)
+	assert_bool(person.has("personality")).is_false()
 func test_owner_and_identity_survive_role_change_and_json()->void:
 	var person:={"person_id":17,"appearance_civ_id":"rival_7","appearance_world_seed":82,"title":"Builder"}
 	var copy:Dictionary=JSON.parse_string(JSON.stringify(person));copy.title="Steward"
