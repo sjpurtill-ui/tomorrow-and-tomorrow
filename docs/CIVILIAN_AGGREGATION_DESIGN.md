@@ -1,6 +1,6 @@
 # Civilian Goods and population-driven cities: design
 
-Status: **proposal for review**, not yet implemented. The branch is `codex/civilian-aggregation`, based on `codex/throughput` at d1fa4ed.
+Status: **approved**; implementation in progress. The branch is `codex/civilian-aggregation`, based on `codex/throughput` at d1fa4ed.
 
 ## Why
 
@@ -26,7 +26,7 @@ Decided with the user:
 
 ### What stays separate
 - **Raw materials:** Food, Freshwater, Timber, Stone, Clay, Fiber Plants, Salt, Medicinal Plants, the ores, Coal, Peat, Bitumen, Crude Oil, Sulfur, Nitrates, Coin, and the other extracted resources.
-- **Food processing:** batches, grain, canning, preparation and selected foods. Their granularity drives food outcomes and is out of scope here. They could be a later phase.
+- **Food:** handled separately in section 5. Food keeps its own two pools; processing becomes techniques.
 - **Military equipment:** weapons, armor, shields, ammunition, military consumables, Transport Carts, and ship parts.
   - Their recipes are **flattened**: each military item consumes raw materials, plus Civilian Goods for general fittings, plus labor, and is gated by the same discoveries.
   - The civilian intermediate chains that feed them today (Woven Cloth → Padded Armor, Wheel Pairs → Transport Carts, Rope Coils → ships) are removed.
