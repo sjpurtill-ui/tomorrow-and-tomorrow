@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "wound_cleaning.png",
+      "source": "exec-879f954e-de27-47ae-9d29-e5f5f9bb24e4.png",
+      "prompt": "A square research illustration of early WOUND CLEANING. Match supplied style reference strictly: spare flat matte gouache, CHARCOAL silhouettes, restrained ochre and muted sage, dry pigment grain, broken edges on opaque warm ivory paper, no cinematic lighting or photographic realism. Lower 60 percent: two ordinary lean adult humans in invented plain woven wraps sit beside a low earthen bench under a simple shade cloth. The seated patient rests one forearm over a shallow plain clay bowl while the caregiver gently pours water from a modest clay vessel over the forearm; a clean-looking folded woven strip rests on a flat stone nearby. A second spare bowl is set aside. Bodies and hands anatomically credible, quiet concentration expressed through gesture rather than detailed faces. No visible gore, blood, open injury, needles, metal implements, bottles, soap package, hospital, surgical procedure, magical healing or advanced architecture. The image is an illustration of tending a small wound, not a medical instruction diagram. Distinct silhouettes and a clear pour-to-bowl action, no crowded background. Upper 35 percent mostly blank warm ivory, scene centered near 65 percent height so a wide research-card crop retains both adults and their activity. No words, labels, border, UI, glowing symbols or heroic portraits."
+    },
+    {
+      "file": "herbal_classification.png",
+      "source": "exec-cadf812e-5f38-43da-8909-bfca1d6c426b.png",
+      "prompt": "A square research illustration of HERBAL CLASSIFICATION for an early civilization game. Strict supplied reference aesthetic: spare flat matte gouache, dry grain, charcoal silhouettes and muted sage/ochre on warm opaque ivory paper, not a realistic oil painting or photograph. An observant older adult with uneven short gray hair sits on a low stone at LEFT holding two DIFFERENT leaf sprigs side by side for comparison, looking closely at their shapes. A younger adult at RIGHT crouches sorting collected leaves, roots and seed pods into three separate small shallow woven trays laid on the ground; plainly different samples with no recognizable toxic species or named remedies. A carrying basket, a few scattered plant fragments, a barely indicated scrub bank. The activity is comparison, grouping and discussion, NOT potion-making, eating leaves, magic or administering medicine. Ordinary lean human adults, full natural limb proportions, imperfect practical clothing with original offset wraps and cord knots; no glamorous faces or portraits. Two different gestures, samples visible. No mortar, cauldron, smoke, books, writing, labels, bottles, modern equipment or ritual symbols. Scene occupies lower 60 percent and spans width with air at edges; upper 35 percent blank ivory. Main hands and leaves around 70 percent height, suitable for a wide research card. No border or UI. This exact image will bind to the game's herbal_classification discovery."
+    }
+  ]
+}

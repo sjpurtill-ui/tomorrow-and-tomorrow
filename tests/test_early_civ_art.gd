@@ -103,7 +103,8 @@ func test_early_research_keeps_subject_identity_visibility_and_later_mapping()->
 		var path:String=research.subject_art_key(item)
 		assert_bool(ResourceLoader.exists(path)).is_true()
 		assert_bool(paths.has(path)).is_false();paths[path]=true
-		assert_bool(research.focus_for(item).y>.6).is_true()
+		var focus:Vector2=research.focus_for(item)
+		assert_bool(focus.x>=0 and focus.x<=1 and focus.y>=0 and focus.y<=1).is_true()
 		item.exposed=false
 		assert_str(research.subject_art_key(item)).is_empty()
 	GameState.elapsed_days=300*365

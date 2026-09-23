@@ -14,7 +14,8 @@ const EARLY_SUBJECTS:={
 	"drainage":Vector2(.58,.73),"public_stores":Vector2(.60,.68),"labor_rotations":Vector2(.52,.74),"festival_calendar":Vector2(.65,.80),
 	"supply_groups":Vector2(.35,.74),"rammed_earth_construction":Vector2(.60,.66),"adobe_wall_construction":Vector2(.60,.70),"mineral_pigment_preparation":Vector2(.67,.70),
 	"smoking":Vector2(.58,.68),"well_siting":Vector2(.68,.72),"standard_measures":Vector2(.53,.70),"route_memory":Vector2(.42,.67),
-	"formation_drill":Vector2(.50,.77),"stone_sorting":Vector2(.64,.72),"apprentice_contracts":Vector2(.67,.74),"wayfinding_stars":Vector2(.68,.70)}
+	"formation_drill":Vector2(.50,.77),"stone_sorting":Vector2(.64,.72),"apprentice_contracts":Vector2(.67,.74),"wayfinding_stars":Vector2(.68,.70),
+	"wound_cleaning":Vector2(.50,.67),"herbal_classification":Vector2(.50,.53)}
 const EARLY_SUBJECT_FILES:={"hide_tanning":"hide-tanning-v2"}
 static var assignments:Dictionary={}
 static var textures:Dictionary={}

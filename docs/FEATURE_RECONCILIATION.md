@@ -2393,3 +2393,7 @@ The early Wealth panel replaces its medieval workshop-and-market crop with the s
 ### Early research coverage: 36 subjects
 
 Eight additional exact IDs use their reviewed existing paper artwork in years 0–299: smoking, well siting, shared measures, route memory, formation drill, stone sorting, apprenticeship, and stellar wayfinding. No new image assets were needed. Each image was reviewed against its subject and receives an individual crop focus. Existing disclosure gates, bounded texture cache, and later-era bindings are unchanged.
+
+### Early wound care and plant comparison
+
+Two new paper scenes bind specifically to wound_cleaning and herbal_classification for years 0–299, bringing the reviewed early override set to 38 subjects. Native sources and prompts are retained, textures are mipmapped and capped at 1024, and previous manifest art remains the later-era fallback. Eleven focused checks pass. Isolated 490×280 and 260×112 research-card crops were inspected and their focal points adjusted to keep the relevant gestures visible. No medical or research mechanics change.
