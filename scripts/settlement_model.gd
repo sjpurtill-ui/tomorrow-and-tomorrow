@@ -1064,8 +1064,9 @@ func known_land_assessment(position:Vector2)->Dictionary:
 	if civilization_system==null or not civilization_system.has_method("fog_snapshot"):
 		return {"known":false,"reason":"No returned map record is available to verify this destination."}
 	if civilization_system.has_method("initialize"): civilization_system.initialize()
-	var fog:Dictionary=civilization_system.fog_snapshot()
-	for area_variant in fog.get("areas",[]):
+	# Read the owner's charted areas in place; fog_snapshot() deep-copies every
+	# record (up to the reveal history limit) and this scan only reads them.
+	for area_variant in civilization_system.revealed_areas:
 		var area:Dictionary=area_variant
 		var radius:=maxf(0.0,float(area.get("radius",0.0)))
 		if bool(civilization_system.call("_revealed_record_contains",area,position,1.05)):
