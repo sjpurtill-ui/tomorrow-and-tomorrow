@@ -5,7 +5,11 @@ const COLORS:={"demography":Color("cf9c78"),"nutrition":Color("adbb77"),"health"
 const Painting=preload("res://scripts/hud/subject_painting.gd")
 const ART_MANIFEST="res://assets/ui/research/subject-art-manifest.json"
 const CACHE_LIMIT:=64
-const EARLY_SUBJECTS:={"oral_epics":Vector2(.5,.67),"tallies":Vector2(.55,.72),"cordage":Vector2(.68,.71),"clay_shaping":Vector2(.65,.73)}
+const EARLY_SUBJECTS:={
+	"oral_epics":Vector2(.5,.67),"tallies":Vector2(.55,.72),"cordage":Vector2(.68,.71),"clay_shaping":Vector2(.65,.73),
+	"seasonal_patterns":Vector2(.40,.64),"seed_selection":Vector2(.55,.73),"clean_water":Vector2(.55,.67),"food_drying":Vector2(.60,.78),
+	"controlled_flaking":Vector2(.53,.73),"pit_firing":Vector2(.68,.75),"joinery":Vector2(.52,.76),"basketry":Vector2(.65,.72),
+	"plain_weaving":Vector2(.65,.70),"drop_spindles":Vector2(.67,.71),"customary_law":Vector2(.52,.76),"watch_rotation":Vector2(.68,.70)}
 static var assignments:Dictionary={}
 static var textures:Dictionary={}
 static func manifest()->Dictionary:

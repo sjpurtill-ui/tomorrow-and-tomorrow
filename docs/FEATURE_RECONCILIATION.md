@@ -2368,3 +2368,8 @@ Added separate paper action scenes for slingers preparing ammunition and bow-equ
 War canoes now use a distinct four-person patrol scene, matching the catalogue crew size. The first-300-year navy summary uses this scene and the same readable paper framing as the early army. The image remains a role illustration; actual vessels, crews and training are read from game state. Later naval art and all naval rules are unchanged.
 
 Validation: 17 early-art and military-roster checks passed (report 762), zero errors/failures/orphans. Private GPU roster probe passed; inspected the naval summary and canoe card. Native artwork, source filename and prompt are retained in assets/ui/military/paper/canoe-prompt.json. Local in-game capture review: artifacts/early-art-in-game.html (captures are intentionally not committed).
+## September 22 — sixteen early research subjects
+
+Expanded the explicit early paper mappings with twelve reviewed, already-existing subject paintings: seasonal_patterns, seed_selection, clean_water, food_drying, controlled_flaking, pit_firing, joinery, basketry, plain_weaving, drop_spindles, customary_law and watch_rotation. Each maps only to its own discovery and has an activity-centered focal point. No new images were generated; no research costs, effects, gates or reveal rules changed. The late-period manifest remains unchanged.
+
+Validation: inspected all twelve source paintings together in a private render; 9 focused tests passed (report 763), including existence, unique subject paths, hidden-state behavior and later-era fallback. Sixteen early discovery mappings are now covered by this pass; this is not the entire research catalogue.
