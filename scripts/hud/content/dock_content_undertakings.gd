@@ -2,6 +2,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 const U=preload("res://scripts/undertaking_system.gd")
 const C=preload("res://scripts/undertaking_catalog.gd")
 const Rewards=preload("res://scripts/undertaking_rewards.gd")
+const Art=preload("res://scripts/hud/undertaking_art.gd")
 func tab(_sub:int)->Dictionary:
 	var id:=GameState.selected_player_settlement_id
 	return SettlementModel.with_city_resources(id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _local(id)))
@@ -10,6 +11,7 @@ func _local(id:String)->Dictionary:
 	var blocks:Array=[{"type":"text","heading":"GREAT UNDERTAKINGS · "+String(city.get("name","Found a settlement first")),"text":"Authorize an ambition. Your people must make it work. Materials, building labor, hardship and continued care determine what survives."}]
 	for r:Dictionary in city.get("undertakings",[]):
 		var d:=C.get_definition(String(r.id))
+		if Art.Early.active():blocks.append({"type":"image","texture":Art.texture(String(r.id)),"height":180,"heading":"DESIGN STUDY · "+String(r.status).to_upper(),"tip":"Illustration of the intended design. Actual progress, condition and legacy are shown below."})
 		blocks.append({"type":"text","heading":U.display_name(r).to_upper(),"text":String(r.status).capitalize()+" · "+String(r.reason)})
 		var building:bool=r.status in ["building","stalled"]
 		var quality:float=float(r.quality)/maxf(.00001,float(r.progress)) if building else float(r.condition)
@@ -30,7 +32,7 @@ func _local(id:String)->Dictionary:
 	for d:Dictionary in U.possibilities(city):
 		var bill:Array[String]=[]
 		for material:String in d.cost:bill.append("%d %s" % [int(d.cost[material]),material])
-		actions.append({"label":String(d.title),"sub":"%s · %.0f crew-days\n%s" % [", ".join(bill),float(d.work),Rewards.description(String(d.id))],"on_press":func():terrain._report_military_action(U.start(id,String(d.id),func(p:Vector2)->float:return terrain._close_surface_height_at(p.x,p.y),terrain._settlement_stage_land_at));hud.request_immediate_dock_refresh()})
+		actions.append({"label":String(d.title),"texture":Art.texture(String(d.id)),"tip":"Proposed design, not a completed landmark. Authorize this undertaking to begin work.","sub":"PROPOSED · %s · %.0f crew-days\n%s" % [", ".join(bill),float(d.work),Rewards.description(String(d.id))],"on_press":func():terrain._report_military_action(U.start(id,String(d.id),func(p:Vector2)->float:return terrain._close_surface_height_at(p.x,p.y),terrain._settlement_stage_land_at));hud.request_immediate_dock_refresh()})
 	if not actions.is_empty():blocks.append({"type":"actions","heading":"POSSIBILITIES HERE","items":actions})
 	else:blocks.append({"type":"text","text":"No new undertaking is available here yet. Local population, discoveries, environment and this world's opportunities determine what can be proposed during the first 300 years."})
 	blocks.append(Rewards.victory_block(GameState))

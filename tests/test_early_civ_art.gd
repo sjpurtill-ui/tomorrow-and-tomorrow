@@ -83,3 +83,20 @@ func test_early_research_keeps_subject_identity_visibility_and_later_mapping()->
 	GameState.elapsed_days=300*365
 	assert_str(research.subject_art_key({"id":"oral_epics"})).is_equal(String(research.manifest().oral_epics.path))
 	GameState.elapsed_days=saved
+
+func test_wonder_plates_match_catalogue_without_changing_it()->void:
+	var art=preload("res://scripts/hud/undertaking_art.gd")
+	var catalog=preload("res://scripts/undertaking_catalog.gd")
+	var saved:=GameState.elapsed_days;GameState.elapsed_days=71*365
+	var regions:Dictionary={}
+	assert_int(art.IDS.size()).is_equal(catalog.all().size())
+	for definition:Dictionary in catalog.all():
+		var plate:=art.texture(String(definition.id)) as AtlasTexture
+		assert_object(plate).is_not_null()
+		assert_bool(Rect2(Vector2.ZERO,plate.atlas.get_size()).grow(.1).encloses(plate.region)).is_true()
+		var key:=plate.atlas.resource_path+str(plate.region)
+		assert_bool(regions.has(key)).is_false();regions[key]=true
+	assert_object(art.texture("not_a_wonder")).is_null()
+	GameState.elapsed_days=300*365
+	assert_object(art.texture("ancestor_ring")).is_null()
+	GameState.elapsed_days=saved

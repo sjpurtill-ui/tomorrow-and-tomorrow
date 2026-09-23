@@ -447,6 +447,10 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		button.add_child(column)
 		column.minimum_size_changed.connect(func():button.custom_minimum_size.y=maxf(38,column.get_combined_minimum_size().y+8))
+		if item.get("texture") is Texture2D:
+			var plate:=TextureRect.new();plate.texture=item.texture;plate.custom_minimum_size.y=160
+			plate.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;plate.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			plate.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(plate)
 		var fg:=Tokens.DISABLED if disabled else (Tokens.GOLD_BRIGHT if primary else Tokens.BODY)
 		var label:=Tokens.make_label(String(item.get("label","")),11,fg,0.06)
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -651,14 +655,15 @@ static func _render_image(parent:VBoxContainer,block:Dictionary)->void:
 	## An illustration plate (expedition covers, portraits). Falls back to
 	## quiet text while the referenced image has not been produced yet.
 	var path:=String(block.get("path",""))
-	if path=="" or not ResourceLoader.exists(path):
+	var supplied:Texture2D=block.get("texture") as Texture2D
+	if supplied==null and (path=="" or not ResourceLoader.exists(path)):
 		if String(block.get("fallback",""))!="":
 			var fallback:=Tokens.make_label(String(block.fallback),11,Tokens.MUTED)
 			fallback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			parent.add_child(fallback)
 		return
 	var frame:=TextureRect.new()
-	frame.texture=load(path)
+	frame.texture=supplied if supplied else load(path)
 	frame.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	frame.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED if bool(block.get("cover",false)) else TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	frame.custom_minimum_size=Vector2(0,float(block.get("height",216)))
