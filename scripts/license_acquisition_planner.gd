@@ -51,8 +51,9 @@ static func demanded_subjects(leads:Array[Dictionary])->Dictionary:
 		if recipe.is_empty() or L.independent(String(recipe.gate)):continue
 		if int(job.get("target_stock",0))>0 and float(state.resource_stockpiles.get(recipe.output,0))>=int(job.target_stock):continue
 		if supplied(recipe,false):wanted[recipe.gate]=3.0
-	wanted.merge(fertilizer_subjects(leads),false)
-	wanted.merge(operating_subjects(leads),false)
+	# Fertilizer and plant operating inputs are no longer made on licensed
+	# workshop lines (they are raw materials and Civilian Goods), so licences
+	# for their former recipes buy nothing.
 	return wanted
 
 static func fertilizer_subjects(leads:Array[Dictionary])->Dictionary:

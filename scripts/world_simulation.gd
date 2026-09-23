@@ -225,7 +225,7 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 					run.skip=true;run.halt=true
 					return null
 				var gap:=maxi(1,day-int(actors[id].last_day))
-				if gap<span_limit and _span_waits(id,day):
+				if gap<_span_limit_for(id) and _span_waits(id,day):
 					run.skip=true;run.halt=true
 					return null
 				actors[id]["span"]=gap;span=gap
@@ -255,9 +255,20 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 func _span_waits(id:String,day:int)->bool:
 	# The id goes last: String.hash multiplies by 33, so a fixed suffix would
 	# give every owner the same phase modulo 3.
-	if posmod(day+posmod(hash("span:"+id),span_limit),span_limit)==0:return false
+	var limit:=_span_limit_for(id)
+	if posmod(day+posmod(hash("span:"+id),limit),limit)==0:return false
 	if preload("res://scripts/civilization_controller.gd").review_due(id,day):return false
 	return DaySpan.calm()
+
+## Longest step a calm rival may take: rivals the player has not yet met
+## (no contact) may take longer steps, since nothing of them is observed.
+func _span_limit_for(id:String)->int:
+	if span_limit<=1:return span_limit
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		if String(civ.get("id",""))!=id:continue
+		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=1:return span_limit
+		break
+	return maxi(span_limit,DaySpan.UNCONTACTED_SPAN)
 
 ## Whether a rival is expected to advance on `day`, from the same schedule
 ## `_span_waits` applies. A rival that stepped daily is assumed to continue.
@@ -265,8 +276,9 @@ func _advances_on(id:String,day:int)->bool:
 	if span_limit<=1:return true
 	var actor:Dictionary=actors[id]
 	if int(actor.get("last_gap",1))==1:return true
-	if day-int(actor.last_day)>=span_limit:return true
-	if posmod(day+posmod(hash("span:"+id),span_limit),span_limit)==0:return true
+	var limit:=_span_limit_for(id)
+	if day-int(actor.last_day)>=limit:return true
+	if posmod(day+posmod(hash("span:"+id),limit),limit)==0:return true
 	return preload("res://scripts/civilization_controller.gd").review_due(id,day)
 
 func refresh_projections()->void:

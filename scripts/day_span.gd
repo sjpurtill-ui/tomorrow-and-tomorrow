@@ -10,6 +10,8 @@ extends RefCounted
 
 ## Longest interval a calm rival may cover in one step.
 const MAX_SPAN:=3
+## Longest interval for a calm rival the player has not yet met.
+const UNCONTACTED_SPAN:=5
 ## A step never runs a town below this much stored food.
 const MIN_FOOD_DAYS:=15.0
 
