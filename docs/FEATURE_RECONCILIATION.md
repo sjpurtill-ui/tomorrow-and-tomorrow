@@ -2342,3 +2342,8 @@ Validation in canonical checkout: 14 focused tests passed (report 756), with no 
 Connected the existing paper illustrations for oral_epics, tallies, cordage and clay_shaping to those exact discoveries before year 300. Individual focal points keep the work visible below the source images' blank paper space. Hidden discoveries still resolve to no artwork; later-era paths and gameplay effects remain intact. No new bitmap generation or assets were needed.
 
 Validation: 7 focused early-art tests passed, zero errors/failures/orphans (report 757), including subject identity, unique paths, reveal state and the year-300 transition. The existing subject-art expectations were updated for the deliberate early mappings.
+## September 22 — scouting paper header
+
+The first-300-year scouting header now shows an original observation/travel scene in the paper aesthetic. Dark header ink is paired with the light background; the complete scene is contained instead of cropped through the figures. The established dark body palette and all scouting behavior remain unchanged. The existing capability condition still applies, and later framing remains available. Source and exact prompt are retained in assets/ui/early-paper/scouting-prompt.json.
+
+Validation: 8 scouting tests passed (report 758), zero errors/failures/orphans. Private GPU capture of the year-71 fixture completed at 1500×1000 and 1024×700 without script errors; inspected the smaller layout for framing and text contrast. Player session and ordinary saves were not touched.

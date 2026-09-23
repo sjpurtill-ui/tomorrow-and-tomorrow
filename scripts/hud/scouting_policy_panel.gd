@@ -88,20 +88,27 @@ func _ready() -> void:
 	texture.mouse_filter = MOUSE_FILTER_IGNORE; texture.modulate.a = .10 if ancient else .04; panel.add_child(texture)
 	var shell := _stack(panel, 0)
 	hero = Control.new(); hero.name = "ExpeditionArtwork"; hero.custom_minimum_size.y = 155; hero.clip_contents = true; shell.add_child(hero)
+	var paper_hero:=ancient and preload("res://scripts/hud/early_civ_art.gd").active()
+	if paper_hero:
+		var paper:=ColorRect.new();paper.color=Color("ece7dc");paper.mouse_filter=MOUSE_FILTER_IGNORE;hero.add_child(paper);paper.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	var image := TextureRect.new(); image.texture = Art.HERO if ancient else preload("res://assets/textures/expeditions/chronicle-mountains.png")
 	image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE; image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	if paper_hero:
+		image.texture=load("res://assets/ui/early-paper/scouting-v1.png")
+		image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	image.mouse_filter = MOUSE_FILTER_IGNORE; hero.add_child(image); image.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	var gradient := Gradient.new(); gradient.set_color(0, Color(.06,.05,.035,.68)); gradient.set_color(1, Color(.06,.05,.035,.02))
 	var wash := GradientTexture2D.new(); wash.gradient = gradient
 	var shade := TextureRect.new(); shade.texture = wash; shade.mouse_filter = MOUSE_FILTER_IGNORE
 	hero.add_child(shade); shade.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
+	shade.visible=not paper_hero
 	var heading := MarginContainer.new(); hero.add_child(heading); heading.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	for side: String in ["left","right","top","bottom"]: heading.add_theme_constant_override("margin_"+side, 20)
 	var top := HBoxContainer.new(); heading.add_child(top)
 	var words := _stack(top, 1); words.size_flags_vertical = SIZE_SHRINK_CENTER
-	label(words, "BEYOND OUR BORDERS", 10, Art.GOLD)
-	title = label(words, "Scouting", 35); title.add_theme_font_override("font", Art.TITLE)
-	label(words, "Choose the commitment.\nYour people find the way.", 13, Art.INK)
+	label(words, "BEYOND OUR BORDERS", 10, Color("73521e") if paper_hero else Art.GOLD)
+	title = label(words, "Scouting", 35,Color("292d29") if paper_hero else Art.INK); title.add_theme_font_override("font", Art.TITLE)
+	label(words, "Choose the commitment.\nYour people find the way.", 13, Color("3f483f") if paper_hero else Art.INK)
 	close_button = button(top, "×", func(): close_requested.emit()); close_button.name = "CloseScouting"
 	close_button.size_flags_horizontal = SIZE_SHRINK_END; close_button.size_flags_vertical = SIZE_SHRINK_BEGIN
 	close_button.custom_minimum_size = Vector2(36,36); close_button.tooltip_text = "Close · Escape or click the map"
