@@ -4,13 +4,76 @@ var selected_project:=""
 var history_filter:=""
 var history:RefCounted
 
+## Individual buildings are drawn from each city's population and construction
+## era; this dock shows what builders actually work on: the city's capacity and
+## condition, its civic works, its infrastructure and its landmarks.
 func meta()->Dictionary:
-	return {"eyebrow":"BUILDINGS & INFRASTRUCTURE","title":"Construction","serif":true,"subtabs":["PROJECTS","COMPLETED","SETTLEMENTS","HISTORY","UNDERTAKINGS"]}
+	return {"eyebrow":"CITIES & INFRASTRUCTURE","title":"Construction","serif":true,"subtabs":["CITY","CIVIC WORKS","INFRASTRUCTURE","LANDMARKS"]}
 func tab(sub:int)->Dictionary:
-	if sub==4:return preload("res://scripts/hud/content/dock_content_undertakings.gd").new(terrain,hud).tab(0)
-	if sub==2:return _settlements_tab()
-	if sub==3:return _history_tab()
-	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _local_tab(sub)))
+	if sub==3:return preload("res://scripts/hud/content/dock_content_undertakings.gd").new(terrain,hud).tab(0)
+	if sub==2:return _infrastructure_tab()
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab() if sub==0 else _civic_tab()))
+
+const ERAS:=["Founding","Foothold","Hamlet","Village","Local centre","Town","Mature town","Urban system","City","Historic city","Regional system","Industrial age","Metropolitan age"]
+
+## The selected city's built capacity, condition and the builders' material draw.
+func _city_tab()->Dictionary:
+	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	var form:Dictionary=SettlementModel.city_form()
+	var capacities:Dictionary=SettlementModel.city_capacities()
+	var tier:=clampi(floori(float(form.get("tier",0.0))),0,ERAS.size()-1)
+	var paid:=float(form.get("materials_paid",1.0))
+	var storage:Dictionary=capacities.get("storage_bulk",{})
+	var builders:=int(GameState.population_allocations.get("Construction",0))
+	var rows:Array=[
+		{"name":"Construction era","value":ERAS[tier],"sub":"Buildings are drawn in this era; it rises with builders, materials, age and knowledge","accent":Tokens.GOLD},
+		{"name":"Condition","value":"%d%%" % roundi(float(form.get("condition",1.0))*100.0),"sub":"Builders keep the city in repair; damage and neglect lower it","accent":Tokens.GREEN if float(form.get("condition",1.0))>=.7 else Tokens.AMBER},
+		{"name":"Building materials","value":"%d%% supplied" % roundi(paid*100.0),"sub":"Monthly timber, fibre, clay and stone for upkeep and renewal (stone and lime from masonry eras)","accent":Tokens.GREEN if paid>=.9 else Tokens.AMBER},
+		{"name":"Builders","value":str(builders),"sub":"Construction workers maintain the city and raise infrastructure","accent":Tokens.MUTED},
+		{"name":"Housing","value":"%d places" % int(GameState.housing_capacity),"sub":"%d residents" % int(GameState.population_total),"accent":Tokens.GREEN if int(GameState.housing_capacity)>=int(GameState.population_total) else Tokens.AMBER},
+		{"name":"Built storage","value":"%.0f" % (float(storage.get("dry",0))+float(storage.get("covered",0))+float(storage.get("sealed",0))+float(storage.get("secure",0))),"sub":"Dry %.0f · covered %.0f · sealed %.0f · secure %.0f" % [float(storage.get("dry",0)),float(storage.get("covered",0)),float(storage.get("sealed",0)),float(storage.get("secure",0))],"accent":Tokens.MUTED},
+		{"name":"Workshops and stores","value":"%d%% · %d%%" % [roundi(float(capacities.get("workshop_function",0))*100.0),roundi(float(capacities.get("storage_function",0))*100.0)],"sub":"How well the city's workshops and stores serve its crafts and logistics","accent":Tokens.MUTED},
+	]
+	return {"blocks":[{"type":"rows","heading":String(city.get("name","Founding camp")).to_upper(),"note":"The city's look follows its population and era","items":rows}]}
+
+## Civic works: the named early works, in progress and completed.
+func _civic_tab()->Dictionary:
+	var civic:=_local_tab(0)
+	var completed:Array=[]
+	for project:Dictionary in Construction._settlement_definitions():
+		if String(project.name) in GameState.settlement_completed:completed.append({"name":String(project.name),"value":"Complete","sub":String(project.get("effect","")),"accent":Tokens.GREEN})
+	if not completed.is_empty():civic.blocks.append({"type":"rows","heading":"COMPLETED CIVIC WORKS","items":completed})
+	return civic
+
+## Infrastructure in every city: water works, conduits, rail, docks and plants.
+func _infrastructure_tab()->Dictionary:
+	var blocks:Array=[]
+	for city:Dictionary in GameState.player_settlements:
+		var id:=String(city.get("id",""))
+		var rows:Array=SettlementModel.with_city_resources(id,func()->Array:return _infrastructure_rows(id))
+		if not rows.is_empty():blocks.append({"type":"rows","heading":String(city.get("name","Settlement")).to_upper(),"items":rows})
+	if blocks.is_empty():blocks.append({"type":"text","heading":"INFRASTRUCTURE","text":"No water works, conduits, rail lines, docks or plants yet. Builders raise them once their practices are adopted and materials arrive."})
+	return {"blocks":blocks}
+
+static func _infrastructure_rows(city_id:String)->Array:
+	var rows:Array=[]
+	var works=preload("res://scripts/water_waste_works.gd")
+	for work:Dictionary in works.data().get("works",[]):
+		rows.append({"name":String(works.SPECS.get(String(work.kind),{}).get("name",String(work.kind).capitalize())),"value":String(work.get("status","")).replace("_"," ").capitalize(),"sub":"Condition %d%%" % roundi(float(work.get("condition",1.0))*100.0),"accent":Tokens.TEAL})
+	for line:Dictionary in preload("res://scripts/water_conveyance.gd").data().get("lines",[]):
+		rows.append({"name":"Water conduit","value":String(line.get("status","")).replace("_"," ").capitalize(),"sub":"Condition %d%%" % roundi(float(line.get("condition",1.0))*100.0),"accent":Tokens.TEAL})
+	for line:Dictionary in preload("res://scripts/rail_freight.gd").data().get("lines",[]):
+		rows.append({"name":"Rail line","value":String(line.get("status","")).replace("_"," ").capitalize(),"sub":"%d wagons" % int(line.get("wagons",0)),"accent":Tokens.BLUE})
+	for base:Dictionary in MilitaryCampaign.joint_operations.state.get("bases",[]):
+		if String(base.get("city_id",""))==city_id:rows.append({"name":"Naval dock","value":"Condition %d%%" % roundi(float(base.get("condition",1.0))*100.0),"accent":Tokens.BLUE})
+	var ops=preload("res://scripts/technology_operations.gd")
+	if GameState.resource_settlement_id.is_empty():
+		for plant:String in ops.data().get("plants",{}):
+			var record:Dictionary=ops.data().plants[plant]
+			if int(record.get("installed",0))+int(record.get("building",0))<=0:continue
+			rows.append({"name":String(ops.PLANTS.get(plant,{}).get("name",plant.capitalize())),"value":"%d installed" % int(record.get("installed",0)),"sub":ops.status(plant),"accent":Tokens.GOLD})
+	return rows
+
 func _local_tab(sub:int)->Dictionary:
 	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
 	var priority:=String(city.get("construction_priority",""))

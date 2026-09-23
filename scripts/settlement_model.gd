@@ -555,6 +555,9 @@ func _primary_settlement_id()->String:
 
 
 func _record_plot_building_event(plot:Dictionary,event_name:String,day:int,materials:Dictionary={},counts_materials:=false,note:String="")->void:
+	# Individual buildings are drawing records, not construction; the building
+	# ledger keeps civic works, landmarks and infrastructure only.
+	if not bool(plot.get("record_in_ledger",false)):return
 	WorldSimulation.state.record_building_event({
 		"day":day,
 		"settlement_id":_primary_settlement_id(),
@@ -1427,48 +1430,30 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
 	var builders:=WorldSimulation.state.effective_workers("Construction")
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
-	if builders>0:
-		for plot:Dictionary in WorldSimulation.state.settlement_plots:
-			if String(plot.get("fabric_job",{}).get("state",""))=="awaiting_inspection":
-				preload("res://scripts/settlement_fabric_operations.gd").start_trial(plot,WorldSimulation.state.resource_stockpiles,month_day)
 
 	var water_sites:=0
 	for line:Dictionary in WorldSimulation.state.water_conveyance.lines:
 		if String(line.status)=="under_construction":water_sites+=1
 	var water_work_sites:=preload("res://scripts/water_waste_works.gd").construction_sites()
 	var rail_sites:=preload("res://scripts/rail_freight.gd").construction_sites()
-	var retrofit_sites:=0
-	for plot:Dictionary in WorldSimulation.state.settlement_plots:
-		if preload("res://scripts/settlement_fabric_operations.gd").needs_work(plot):retrofit_sites+=1
-	var builders_per_site:=builders/float(maxi(1,active_construction.size()+water_sites+water_work_sites+rail_sites+retrofit_sites))
+	# Buildings are drawing records, not construction sites; builders serve the
+	# city's capacity (see _advance_city_form) and its infrastructure works.
+	var builders_per_site:=builders/float(maxi(1,water_sites+water_work_sites+rail_sites))
 	preload("res://scripts/water_conveyance.gd").construction_work(builders_per_site*water_sites*labor_efficiency*0.10,month_day)
 	preload("res://scripts/water_waste_works.gd").construction_work(builders_per_site*water_work_sites*labor_efficiency*0.10,month_day)
 	preload("res://scripts/rail_freight.gd").construction_work(builders_per_site*rail_sites*labor_efficiency*.10,int(WorldSimulation.state.elapsed_days))
 	for plot in WorldSimulation.state.settlement_plots:
 		plot["last_update_day"]=month_day
-		if preload("res://scripts/settlement_fabric_operations.gd").needs_work(plot):
-			var used_work:float=preload("res://scripts/settlement_fabric_operations.gd").advance(plot,builders_per_site*labor_efficiency*.10,month_day)
-			if used_work>0:WorldSimulation.state.morphology_revision+=1
-		var fabric_result:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").resolve(plot,month_day)
-		if not fabric_result.is_empty():
-			WorldSimulation.state.morphology_revision+=1
-			WorldSimulation.state.settlement_plot_history.append({"day":month_day,"plot_id":int(plot.id),"event":"fabric_trial_resolved","method":fabric_result.method,"result":fabric_result.state})
+		# A new building appears drawn under construction for one month, then stands.
 		if String(plot.get("status",""))=="under_construction":
-			var previous_progress:=float(plot.get("construction_progress",0.0))
-			# Parallel projects divide the real monthly builder pool. A large population
-			# can build concurrently, but no site receives the whole workforce for free.
-			var directive_pace:=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("construction_rate"))
-			plot["construction_progress"]=preload("res://scripts/building_material_operations.gd").progress(plot,builders_per_site*labor_efficiency*directive_pace*0.10,month_day)
-			if not is_equal_approx(previous_progress,float(plot.construction_progress)):
-				WorldSimulation.state.morphology_revision+=1
-			if float(plot.construction_progress)>=1.0:
-				plot["status"]="active"
-				plot["condition"]=0.92
-				plot["repair_state"]="maintained"
-				WorldSimulation.state.settlement_plot_history.append({"day":month_day,"plot_id":int(plot.id),"event":"construction_completed","new_state":"active","cause":String(plot.get("growth_cause","household pressure"))})
-				_record_plot_building_event(plot,"completed",month_day,{},false,String(plot.get("growth_cause","Construction completed.")))
-				WorldSimulation.state.morphology_revision+=1
-				events.append({"type":"morphology","title":_completion_title(String(plot.get("land_use","residential_compound"))),"plot_id":int(plot.id)})
+			plot["construction_progress"]=1.0
+			plot["status"]="active"
+			plot["condition"]=0.92
+			plot["repair_state"]="maintained"
+			WorldSimulation.state.settlement_plot_history.append({"day":month_day,"plot_id":int(plot.id),"event":"construction_completed","new_state":"active","cause":String(plot.get("growth_cause","household pressure"))})
+			_record_plot_building_event(plot,"completed",month_day,{},false,String(plot.get("growth_cause","Construction completed.")))
+			WorldSimulation.state.morphology_revision+=1
+			events.append({"type":"morphology","title":_completion_title(String(plot.get("land_use","residential_compound"))),"plot_id":int(plot.id)})
 	_synchronize_early_works(month_day,events)
 	_evolve_inherited_fabric(month_day,events)
 	_update_plot_workforce(month_day,events)
@@ -1485,9 +1470,6 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	for action_index in available_household_starts:
 		if not _attempt_household_growth(month_day,events,context,action_index): break
 	_attempt_field_growth(month_day,events,context)
-	if builders>0:
-		var choice:Dictionary=preload("res://scripts/settlement_fabric_operations.gd").choose_retrofit(WorldSimulation.state.settlement_plots,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries,WorldSimulation.state.discovery_adoption)
-		if not choice.is_empty():start_fabric_retrofit(int(choice.plot_id),String(choice.method))
 	_bound_morphology_state()
 	_advance_city_form(month_day)
 	rebuild_summary()
@@ -1501,8 +1483,19 @@ func _advance_city_form(month_day:int)->void:
 	var builders:=WorldSimulation.state.effective_workers("Construction")
 	var population:=maxf(1.0,float(_primary_population()))
 	var building_share:=clampf(builders/maxf(1.0,population*0.05),0.0,1.0)
-	if supported>float(form.tier):form.tier=minf(supported,float(form.tier)+0.25*building_share)
-	form.condition=clampf(float(form.condition)+0.04*building_share-0.02,0.05,1.0)
+	# Upkeep and renewal draw a monthly basket of building materials sized by
+	# population and era; the share actually paid limits repair and progress.
+	var need:=population*0.02*(1.0+0.25*float(form.tier))*building_share
+	var basket:Dictionary={"Timber":.45,"Fiber Plants":.2,"Clay":.2,"Stone":.15} if float(form.tier)<3.0 else {"Stone":.45,"Timber":.3,"Clay":.15,"Limestone":.1}
+	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	var paid:=1.0
+	if need>0.0:
+		for item:String in basket:paid=minf(paid,maxf(0.0,float(stocks.get(item,0.0)))/(need*float(basket[item])))
+		paid=clampf(paid,0.0,1.0)
+		for item:String in basket:stocks[item]=maxf(0.0,float(stocks.get(item,0.0))-need*float(basket[item])*paid)
+	form["materials_paid"]=paid
+	if supported>float(form.tier) and paid>=0.5:form.tier=minf(supported,float(form.tier)+0.25*building_share*paid)
+	form.condition=clampf(float(form.condition)+0.04*building_share*paid-0.02,0.05,1.0)
 
 ## The current city's era and condition, seeded from its buildings when absent.
 func city_form()->Dictionary:
@@ -1541,16 +1534,8 @@ func _active_construction_count()->int:
 	return count
 
 func _monthly_construction_slots()->int:
-	var builders:=WorldSimulation.state.effective_workers("Construction")
-	if builders<4.0: return 0
-	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.12,1.45)
-	# One early household project occupies roughly six effective builder-months.
-	# Administrative/logistical maturity raises the safe coordination ceiling but
-	# does not conjure labor or materials.
-	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.12)),0.0,1.0)
-	var coordination_cap:=3+floori(logistics*9.0)
-	var directive_pace:=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("construction_rate"))
-	return clampi(maxi(1,floori(builders*efficiency*directive_pace/6.0)),1,coordination_cap)
+	# How many new buildings a month may draw follows population.
+	return clampi(1+floori(float(_primary_population())/300.0),1,12)
 
 func _update_plot_prosperity(day:int)->void:
 	var economy:=WorldSimulation.state.economy_metrics
@@ -1681,8 +1666,6 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 			best_score=score
 			best_center=candidate
 	if best_score<=-9000.0: return
-	for resource_name in cluster_cost:
-		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(cluster_cost[resource_name]))
 	var nucleus_id:=WorldSimulation.state.next_settlement_nucleus_id
 	WorldSimulation.state.next_settlement_nucleus_id+=1
 	var previous_nucleus_position:=Vector2.ZERO
@@ -2185,14 +2168,10 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		var temporary_ground:=String(plot.get("land_use",""))=="temporary_encampment"
 		var previous_condition:=float(plot.get("condition",1.0))
 		var exposure:=float(plot.get("hazard_exposure",0.1))
-		var decay:=(0.00065+exposure*0.00055+hardship*0.0012)*preload("res://scripts/building_material_operations.gd").decay_factor(plot)
-		if status=="vacant": decay+=0.0018
-		var useful_maintenance:=maintenance_per_plot
-		if not plot.get("building_materials",{}).is_empty():
-			useful_maintenance=minf(useful_maintenance,maxf(0.0,1.0-previous_condition+decay))
-		var maintenance:=preload("res://scripts/building_material_operations.gd").supplied_maintenance(plot,useful_maintenance) if status in ["active","stressed","damaged"] else 0.0
-		plot["condition"]=clampf(previous_condition-decay+maintenance,0.0,1.0)
-		plot["maintenance_debt"]=clampf(float(plot.get("maintenance_debt",0.0))+decay-maintenance,0.0,1.0)
+		# Drawn buildings show the city's condition; empty ones decay toward ruin.
+		var decay:=0.0018*(1.0+exposure) if status=="vacant" else 0.0
+		plot["condition"]=clampf(float(city_form().condition),0.0,1.0) if status!="vacant" else clampf(previous_condition-decay,0.0,1.0)
+		plot["maintenance_debt"]=0.0
 		if status=="vacant":
 			plot["reclamation"]=clampf(float(plot.get("reclamation",0.0))+0.012+float(plot.get("vacant_months",0))*0.00012,0.0,1.0)
 		elif status=="active": plot["reclamation"]=maxf(0.0,float(plot.get("reclamation",0.0))-0.03)
@@ -2488,7 +2467,19 @@ func _fabric_material_family_for(plot:Dictionary,target_tier:int)->String:
 		return "earth"
 	return current
 
-func _can_pay_fabric_cost(cost:Dictionary)->bool:
+## Buildings are drawing records; their materials are paid by the city's
+## capacity upkeep (_advance_city_form), so drawing costs nothing.
+func _can_pay_fabric_cost(_cost:Dictionary)->bool:
+	return true
+
+## A stock that lets any known building recipe be drawn.
+func _drawing_stock(recipes:Array)->Dictionary:
+	var stock:Dictionary={}
+	for recipe:Dictionary in recipes:
+		for item:String in recipe.get("cost",{}):stock[item]=1e12
+	return stock
+
+func _unused_can_pay_fabric_cost(cost:Dictionary)->bool:
 	for resource_name in cost:
 		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))<float(cost[resource_name]): return false
 	return true
@@ -2497,14 +2488,15 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 	# A quarterly bounded conversion keeps centuries affordable and ensures that an
 	# era remains a heterogeneous accretion of old and new fabric. Population never
 	# repaints the whole settlement in one frame.
-	if day%90!=0 or int(WorldSimulation.state.effective_workers("Construction"))<4: return
-	var target_tier:=_supported_fabric_tier(day)
+	if day%90!=0: return
+	# Drawn buildings follow the city's construction era, which builders and
+	# materials raise (_advance_city_form).
+	var target_tier:=floori(float(city_form().tier))
 	if target_tier<=0: return
 	var candidates:Array[Dictionary]=[]
 	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status","")) not in ["active","stressed"]: continue
 		if String(plot.get("land_use","")) in ["temporary_encampment","water","waste","pasture","vacant","ruin"]: continue
-		if not preload("res://scripts/settlement_fabric_operations.gd").supports_further_loading(plot):continue
 		var current_tier:=int(plot.get("fabric_generation",0))
 		if current_tier>=target_tier: continue
 		var next_tier:=current_tier+1
@@ -2527,11 +2519,8 @@ func _evolve_inherited_fabric(day:int,events:Array[Dictionary])->void:
 
 func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->void:
 	var chosen_plot:Dictionary=chosen.plot
-	if not preload("res://scripts/settlement_fabric_operations.gd").supports_further_loading(chosen_plot):return
 	var next_tier:int=chosen.next_tier
 	var cost:Dictionary=chosen.cost
-	for resource_name in cost:
-		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(cost[resource_name]))
 	var previous_form:=String(chosen_plot.get("form","inherited_plot"))
 	var use:=String(chosen_plot.get("land_use",""))
 	var target_family:=_fabric_material_family_for(chosen_plot,next_tier)
@@ -2631,11 +2620,11 @@ func _available_functional_recipe(land_use:String)->Dictionary:
 			alternative.cost["Fiber Plants"]=float(fiber_costs[land_use])
 			recipes.append(alternative)
 	recipes.append_array(preload("res://scripts/building_material_operations.gd").options(land_use))
-	return preload("res://scripts/construction_materials.gd").choose(recipes,stocks,WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
+	return preload("res://scripts/construction_materials.gd").choose(recipes,_drawing_stock(recipes),WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
-	if _has_active_construction() or int(WorldSimulation.state.effective_workers("Construction"))<4: return
+	if _has_active_construction(): return
 	var candidates:Array[Dictionary]=[]
 	if "Open Work Area" in WorldSimulation.state.settlement_completed:
 		var crafting:=int(WorldSimulation.state.population_allocations.get("Crafting",0))
@@ -2680,8 +2669,6 @@ func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Diction
 		if recipe.is_empty(): continue
 		var plot:=_create_functional_growth_plot(day,land_use,recipe,context)
 		if plot.is_empty(): continue
-		for resource_name in recipe.cost:
-			WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(recipe.cost[resource_name]))
 		_create_growth_route(plot,day)
 		WorldSimulation.state.settlement_plots.append(plot)
 		WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":String(plot.growth_cause)})
@@ -2806,13 +2793,12 @@ func _available_household_recipe()->Dictionary:
 		{"family":"stone","form":"dry_stone_household","requires":"stone_selection","cost":{"Stone":4.2,"Timber":0.8}}
 	]
 	recipes.append_array(preload("res://scripts/building_material_operations.gd").options())
-	return preload("res://scripts/construction_materials.gd").choose(recipes,WorldSimulation.state.resource_stockpiles,WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
+	return preload("res://scripts/construction_materials.gd").choose(recipes,_drawing_stock(recipes),WorldSimulation.state.known_discoveries,WorldSimulation.consequences.policy_effect("stone_priority"))
 
 func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictionary={},action_index:=0)->bool:
 	if not _can_add_plots(): return false
 	var capacity:=_resident_capacity_for_growth()
 	if _primary_population()<=roundi(float(capacity)*0.88): return false
-	if int(WorldSimulation.state.effective_workers("Construction"))<4: return false
 	var recipe:=_available_household_recipe()
 	if recipe.is_empty(): return false
 	# Some pressure becomes roofed infill inside a viable inherited compound;
@@ -2822,8 +2808,6 @@ func _attempt_household_growth(day:int,events:Array[Dictionary],context:Dictiona
 	if monthly_phase!=3 and _attempt_household_infill(day,recipe,events,action_index): return true
 	var plot:=_create_household_growth_plot(day,recipe,context)
 	if plot.is_empty(): return false
-	for resource_name in recipe.cost:
-		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-float(recipe.cost[resource_name]))
 	_create_growth_route(plot,day)
 	WorldSimulation.state.settlement_plots.append(plot)
 	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"construction_started","new_state":"under_construction","cause":"household crowding, available labor, and delivered materials"})
@@ -2853,13 +2837,8 @@ func _attempt_household_infill(day:int,recipe:Dictionary,events:Array[Dictionary
 			best_score=score
 			best_plot=plot
 	if best_plot.is_empty(): return false
+	# Drawn material provenance only; nothing is paid for a drawn building.
 	var cost_scale:=0.58+float(int(best_plot.get("infill_units",0)))*0.12
-	for resource_name in recipe.cost:
-		var required:=float(recipe.cost[resource_name])*cost_scale
-		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))<required: return false
-	for resource_name in recipe.cost:
-		var required:=float(recipe.cost[resource_name])*cost_scale
-		WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-required)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=hash("%d:infill:%d:%d:%d" % [WorldSimulation.state.world_seed,int(best_plot.id),day,action_index])
 	var capacity_gain:=rng.randi_range(3,6)
