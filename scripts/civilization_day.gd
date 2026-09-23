@@ -1,6 +1,7 @@
 extends RefCounted
 ## One ordered calendar step. Controllers choose orders; this code owns effects.
 const BUILD=preload("res://scripts/settlement_construction.gd")
+const SPAN=preload("res://scripts/day_span.gd")
 
 static func context(origin:Vector2,traveling:bool=false)->Dictionary:
 	var result:={"origin":Vector3(origin.x,0,origin.y),"settlement_origin":Vector3(origin.x,0,origin.y),"traveling":traveling,"settled":WorldSimulation.state.settlement_site_committed,"foraging":.78 if traveling else 1.0,"food":1.0,"exploration":.8 if traveling else .5,"travel":1.0 if traveling else .1,"fiber":.5,"fire":.6 if preload("res://scripts/fire_practice.gd").available() else .08,"administration":.5,"defense":.3,"tools":WorldSimulation.consequences.tools_factor(),"insight":WorldSimulation.consequences.discovery_multiplier()}
@@ -80,7 +81,7 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
 			run.result.events.append_array(WorldSimulation.civics.process_day(day))
 	),
-		S.step("economy",timings,func()->void:run.result.events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context)))),
+		S.step("economy",timings,func()->void:run.result.events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return SPAN.each_day(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context))))),
 		S.step("government",timings,func()->void:run.result.events.append_array(WorldSimulation.government.process_day(day))),
 		S.step("construction",timings,func()->void:WorldSimulation.settlements.with_local_population(run.build)),
 		S.step("secondary_plan",timings,func()->Array:return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")),
@@ -91,10 +92,13 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 	),
 		S.step("progression",timings,func()->void:run.result.progression=WorldSimulation.progression.process_day(day)),
 		S.step("military_and_travel",timings,func()->void:
-			if WorldSimulation.military.last_processed_day<day:
-				WorldSimulation.military.last_processed_day=day
-				WorldSimulation.military._process_military_day()
-			preload("res://scripts/civilization_travel.gd").advance(1.0)
+			SPAN.each_day(func()->void:
+				var current:=int(WorldSimulation.state.elapsed_days)
+				if WorldSimulation.military.last_processed_day<current:
+					WorldSimulation.military.last_processed_day=current
+					WorldSimulation.military._process_military_day()
+			)
+			preload("res://scripts/civilization_travel.gd").advance(float(WorldSimulation.span))
 	),
 		S.step("convoy",timings,func()->void:
 			run.result.arrival=advance_convoy()

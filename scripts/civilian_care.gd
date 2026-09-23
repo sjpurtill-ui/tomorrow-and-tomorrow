@@ -38,7 +38,7 @@ static func process_day(pressure:float)->Dictionary:
 		episode.observed=minf(float(episode.observed),float(episode.remaining))
 		episode.cared=minf(float(episode.cared),float(episode.remaining))
 	var burden:=clampf(pressure,0,1)
-	F.admit(data(),population,population*burden*.006,burden,day)
+	F.admit(data(),population,population*burden*.006*WorldSimulation.span,burden,day)
 	var supported:=available(state)
 	var roster:=staff() if supported else 0.0
 	var known:=methods(state) if supported else {}

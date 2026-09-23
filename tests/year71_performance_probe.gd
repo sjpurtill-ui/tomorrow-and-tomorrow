@@ -15,11 +15,17 @@ func run()->void:
 	if loaded.has("error"):print(loaded);get_tree().quit(1);return
 	for node in get_tree().root.get_children():node.set_process(false);node.set_physics_process(false)
 	GameState.civic_api_enabled=false
+	# Exact comparisons need strictly daily rivals; --span=N opts into day_span.gd.
+	WorldSimulation.span_limit=1
+	for arg in args:
+		if arg.begins_with("--span="):WorldSimulation.span_limit=maxi(1,int(arg.trim_prefix("--span=")))
 	for id in WorldSimulation.actors:WorldSimulation.actors[id].systems.GameState.civic_api_enabled=false
 	if "--map-profile" in OS.get_cmdline_user_args():
 		await map_profile();return
 	if "--frame-profile" in OS.get_cmdline_user_args():
 		await frame_profile();return
+	if "--census" in OS.get_cmdline_user_args():
+		census();get_tree().quit(0);return
 	var terrain:=Terrain.new();add_child(terrain)
 	terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise()
 	WorldSimulation.context_provider=terrain._civilization_geography
@@ -65,6 +71,7 @@ func run()->void:
 		print("PROFILE_DAY ",day+i+1," ",report.samples[-1].ms)
 		await get_tree().process_frame
 	report["simulation_cpu_seconds"]=cpu_seconds()-cpu_start
+	if "--outcomes" in args:report["outcomes"]=outcomes()
 	report["detail"]=preload("res://scripts/performance_trace.gd").totals
 	if mode=="stepped":summarize_steps(report)
 	var saved:=saves.save_game(mode)
@@ -175,3 +182,40 @@ func cpu_seconds()->float:
 	var command:="(Get-Process -Id %d).TotalProcessorTime.TotalSeconds.ToString([System.Globalization.CultureInfo]::InvariantCulture)" % OS.get_process_id()
 	var code:=OS.execute("powershell.exe",PackedStringArray(["-NoProfile","-NonInteractive","-WindowStyle","Hidden","-Command",command]),output)
 	return String(output[0]).strip_edges().to_float() if code==0 and not output.is_empty() else 0.0
+
+## Which rivals are calm enough for multi-day steps.
+func census()->void:
+	var known:Dictionary={}
+	for civ:Dictionary in CivilizationSystem.civilizations:known[String(civ.id)]={"contact":civ.get("contact",null),"discovered":civ.get("discovered",null),"known":civ.get("known",null),"relation":String(civ.get("player_relation",{}).get("status","")) if civ.get("player_relation") is Dictionary else str(civ.get("player_relation"))}
+	print("CIV_KEYS ",CivilizationSystem.civilizations[0].keys() if not CivilizationSystem.civilizations.is_empty() else [])
+	for id:String in WorldSimulation.actors:
+		WorldSimulation.scoped(id,func()->void:
+			var towns:Array=[]
+			for city:Dictionary in WorldSimulation.state.player_settlements:
+				if not bool(city.get("primary",false)):towns.append(snappedf(float(city.get("resource_metrics",{}).get("food_days",-1)),0.1))
+			var fx:=WorldSimulation.world.player_effects()
+			print("CENSUS ",id," wars=",fx.war_count," field=",WorldSimulation.military.field_armies.size()," engaged=",not WorldSimulation.military.active_engagement.is_empty()," travel=",WorldSimulation.state.convoy_traveling," convoy=",bool(WorldSimulation.state.settlement_convoy.get("active",false))," food_days=",snappedf(float(WorldSimulation.state.simulation_metrics.get("food_days",-1)),0.1)," towns=",towns," player_view=",known.get(id,{}))
+		)
+
+## Aggregate state per owner, for comparing multi-day rival steps with daily ones.
+func outcomes()->Dictionary:
+	var result:Dictionary={}
+	var ids:Array=WorldSimulation.actors.keys();ids.append("player")
+	for id:String in ids:
+		result[id]=WorldSimulation.scoped(id,func()->Dictionary:
+			var state:=WorldSimulation.state
+			var m:Dictionary=state.simulation_metrics
+			var stock:=0.0
+			for key in state.resource_stockpiles:
+				if String(key)!="Freshwater":stock+=maxf(0,float(state.resource_stockpiles[key]))
+			var food:=0.0
+			for key in state.food_stocks:food+=maxf(0,float(state.food_stocks[key]))
+			var town_pop:=0.0
+			for city:Dictionary in state.player_settlements:
+				if not bool(city.get("primary",false)):town_pop+=float(city.get("local_resources",{}).get("population_exact",0))
+			return {"day":int(state.elapsed_days),"population":state.population_exact,"food":food,"stock":stock,"health":state.population_health,"food_security":state.food_security,
+				"cohesion":float(m.get("cohesion",0)),"knowledge":float(m.get("knowledge",0)),"material":float(m.get("material_capacity",0)),"legitimacy":float(m.get("legitimacy",0)),
+				"discoveries":state.known_discoveries.size(),"cities":state.player_settlements.size(),"housing":state.housing_capacity,"treasury":float(state.public_treasury),
+				"troops":int(WorldSimulation.military.home_army.get("troops",0)),"projects":state.settlement_completed.size()}
+		)
+	return result

@@ -251,6 +251,8 @@ static func advance(workers:float,population:float,traveling:bool,hunted_rations
 			var share:=used/maxf(.000001,float(lot.amount))
 			var wear:=.008 if traveling else .004
 			if lot.kind=="leather":wear+=.004*clampf(float(WorldSimulation.food.current_environment_profile().get("precipitation",.5)),0,1)
+			# A multi-day step (day_span.gd) wears clothing for each covered day.
+			share*=WorldSimulation.span
 			lot.condition=maxf(0,float(lot.condition)-wear*share)
 			lot.soil=minf(1,float(lot.soil)+.025*share)
 			if FINISH_FABRICS.has(String(lot.get("fabric","plain"))):lot.finish_strength=maxf(0,float(lot.get("finish_strength",1))-(.003 if lot.fabric=="calendered" else .001)*share)

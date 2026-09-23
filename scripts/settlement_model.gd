@@ -284,7 +284,7 @@ func process_city_resources(settlement_id:String,context:Dictionary,daily_work:C
 		with_local_population(func()->void:WorldSimulation.consequences.process_day(context),true)
 		stamp=_record_secondary_timing(timings,"consequences",stamp)
 		with_local_population(func()->void:preload("res://scripts/opening_craft_practice.gd").advance())
-		with_local_population(func()->void:WorldSimulation.economy.process_day(context))
+		with_local_population(func()->void:preload("res://scripts/day_span.gd").each_day(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(context)))
 		stamp=_record_secondary_timing(timings,"economy",stamp)
 		record["resource_metrics"]=WorldSimulation.state.simulation_metrics.duplicate(true)
 		if daily_work.is_valid(): with_local_population(daily_work)
@@ -412,7 +412,8 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		var occupied:=preload("res://scripts/rail_freight.gd").reserved_workers(String(source.id))*float(capacity.capacity_per_worker)
 		for shipment in WorldSimulation.state.city_trade_shipments:
 			if shipment.get("transport_mode","")!="rail" and String(shipment.source_id)==String(source.id): occupied+=float(shipment.quantity)*float(shipment.travel_days)
-		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)
+		# A multi-day step (day_span.gd) dispatches `span` days of carrying.
+		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)*WorldSimulation.span
 	# One request per good per city; no citizen or merchant entities are created.
 	for destination in WorldSimulation.state.player_settlements:
 		if not String(destination.get("occupied_by","")).is_empty():continue

@@ -75,7 +75,9 @@ static func advance_all(day:int)->void:
 		if city.get("undertakings",[]).is_empty():continue
 		WorldSimulation.settlements.with_city_resources(String(city.id),func()->void:
 			WorldSimulation.settlements.with_local_population(func()->void:
-				for r:Dictionary in city.undertakings:advance_record(WorldSimulation.state,r,day)))
+				# A multi-day step (day_span.gd) keeps upkeep daily.
+				for covered in range(day-WorldSimulation.span+1,day+1):
+					for r:Dictionary in city.undertakings:advance_record(WorldSimulation.state,r,covered)))
 	Rewards.record_victory(WorldSimulation.state,day)
 static func advance_record(state:Node,r:Dictionary,day:int)->void:
 	if day<=int(r.last_day):return

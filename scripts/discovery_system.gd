@@ -231,8 +231,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var probability: float = discovery.chance / research_difficulty(discovery,WorldSimulation.state.world_seed) * attention * activity * material_evidence * leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
 		probability*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
 		var progress:=float(WorldSimulation.state.discovery_progress.get(discovery_id,0.0))
-		progress+=probability*rng.randf_range(0.72,1.28)
-		if rng.randf()<probability*0.10: progress+=rng.randf_range(0.025,0.085)
+		# A multi-day step (day_span.gd) covers `span` days of inquiry.
+		progress+=probability*rng.randf_range(0.72,1.28)*WorldSimulation.span
+		if rng.randf()<preload("res://scripts/day_span.gd").chance(probability*0.10): progress+=rng.randf_range(0.025,0.085)
 		WorldSimulation.state.discovery_progress[discovery_id]=clampf(progress,0.0,1.0)
 		if progress>=1.0:
 			Pathways.remember(discovery,current_day)
@@ -1105,7 +1106,7 @@ func food_storage_multipliers(food_types:Array,traveling:bool)->Dictionary:
 	# is reused while their content hashes match; staffing is checked above
 	# on every call, and any adoption change produces a new key.
 	var key:=[food_types.hash(),catalog.size(),WorldSimulation.state.known_discoveries.hash(),WorldSimulation.state.discovery_adoption.hash()]
-	if _storage_multiplier_cache.get_meta("key",null)==key:return (_storage_multiplier_cache.get_meta("value") as Dictionary).duplicate()
+	if _storage_multiplier_cache.has_meta("key") and _storage_multiplier_cache.get_meta("key")==key:return (_storage_multiplier_cache.get_meta("value") as Dictionary).duplicate()
 	for id:String in WorldSimulation.state.known_discoveries:
 		var profile:Dictionary=catalog_by_id.get(id,{}).get("preservation_profile",{})
 		if profile.is_empty():continue

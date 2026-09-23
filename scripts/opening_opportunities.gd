@@ -212,7 +212,7 @@ static func _finite_range(value:Variant,minimum:float,maximum:float)->bool:
 static func _add(state:Dictionary,id:String,amount:float)->void:
 	if amount<=0.0:return
 	var evidence:Dictionary=state.evidence
-	evidence[id]=minf(float(RULES[id].goal),float(evidence.get(id,0.0))+amount)
+	evidence[id]=minf(float(RULES[id].goal),float(evidence.get(id,0.0))+amount*WorldSimulation.span)
 	state.evidence=evidence
 
 static func _workers(role:String)->float:

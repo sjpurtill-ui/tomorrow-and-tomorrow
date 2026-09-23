@@ -93,8 +93,10 @@ static func process_day()->Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:return events
 	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed and WorldSimulation.state.population_total>int(WorldSimulation.state.housing_capacity*.80):
-		WorldSimulation.state.housing_progress+=float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))
-		if WorldSimulation.state.housing_progress>=28:
+		# A multi-day step (day_span.gd) covers `span` days of building.
+		WorldSimulation.state.housing_progress+=float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*WorldSimulation.span
+		for completed in WorldSimulation.span:
+			if WorldSimulation.state.housing_progress<28:break
 			WorldSimulation.state.housing_progress-=28
 			WorldSimulation.state.housing_capacity+=maxi(24,roundi(WorldSimulation.state.population_total*.12))
 	var project:=_current_settlement_project()
@@ -104,7 +106,7 @@ static func process_day()->Array[Dictionary]:
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
 	var work:=(builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate"))
 	var title:=String(project.name)
-	WorldSimulation.state.settlement_projects[title]=float(WorldSimulation.state.settlement_projects.get(title,0))+work
+	WorldSimulation.state.settlement_projects[title]=float(WorldSimulation.state.settlement_projects.get(title,0))+work*WorldSimulation.span
 	if float(WorldSimulation.state.settlement_projects[title])<float(project.days):return events
 	var materials:=_settlement_project_material_plan(project)
 	if materials.is_empty():return events

@@ -2,6 +2,7 @@ extends Node
 
 var rng := RandomNumberGenerator.new()
 var initialized := false
+const SPAN:=preload("res://scripts/day_span.gd")
 const SURFACE_FRONT_SPACING_KM:=3.0
 const MAX_SURFACE_FRONT_RING:=3
 const MAX_SURFACE_FRONTS_PER_RESOURCE:=24
@@ -260,7 +261,7 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 			if not recognizable[resource_name]:continue
 			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
 			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("recognition",1.0))
-			deposit.clues += definition.base * (0.5 + survey_effort + float(survey_inputs.nature) + float(survey_inputs.material)) * _memo_literacy(resource_name,literacy) * rng.randf_range(0.5, 1.5)
+			deposit.clues += definition.base * (0.5 + survey_effort + float(survey_inputs.nature) + float(survey_inputs.material)) * _memo_literacy(resource_name,literacy) * rng.randf_range(0.5, 1.5) * WorldSimulation.span
 			if deposit.clues >= 1.0:
 				deposit.stage = "recognized"
 				_gain_practice(resource_name,"recognition",0.12)
@@ -269,7 +270,7 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 		elif deposit.stage == "recognized":
 			if survey_inputs.is_empty():survey_inputs=_local_survey_inputs()
 			var survey_effort := float(survey_inputs.effort) * float(method_factors.get(resource_name,{}).get("survey",1.0))
-			deposit.survey += definition.base * 0.55 * survey_effort * float(survey_inputs.speed) * _memo_literacy(resource_name,literacy) * rng.randf_range(0.7,1.3)
+			deposit.survey += definition.base * 0.55 * survey_effort * float(survey_inputs.speed) * _memo_literacy(resource_name,literacy) * rng.randf_range(0.7,1.3) * WorldSimulation.span
 			if deposit.survey >= 1.0:
 				deposit.stage = "surveyed"
 				_gain_practice(resource_name,"survey",0.18)
@@ -631,6 +632,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var metal_effect:=WorldSimulation.discovery.effect("metal_yield")
 	var output_bonus:=1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield")
 	var tool_factor:=0.55+float(context.get("tools",0.25))*0.75
+	# A multi-day step (day_span.gd) extracts, regrows and hauls `span` days of
+	# work; reported "today" figures remain per day.
+	var span:=float(WorldSimulation.span)
 	var extracted_total:=0.0
 	for deposit in material_deposits:
 		var share:=_extraction_priority(deposit,storage_priorities)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
@@ -641,10 +645,10 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		if String(profile.family)=="metal": knowledge_multiplier+=metal_effect
 		var practice_multiplier:=1.0+minf(0.35,_practice(String(deposit.resource),"extraction")*0.035)
 		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus
-		var extracted:=preload("res://scripts/civilization_resources.gd").withdraw(deposit,float(deposit.daily_yield)) if WorldSimulation.enabled else minf(float(deposit.remaining),float(deposit.daily_yield))
+		var extracted:=preload("res://scripts/civilization_resources.gd").withdraw(deposit,float(deposit.daily_yield)*span) if WorldSimulation.enabled else minf(float(deposit.remaining),float(deposit.daily_yield)*span)
 		deposit.remaining=float(deposit.remaining)-extracted
 		deposit.stock_at_source=float(deposit.stock_at_source)+extracted
-		deposit.extracted_today=extracted
+		deposit.extracted_today=extracted/span
 		deposit.lifetime_extracted=float(deposit.lifetime_extracted)+extracted
 		extracted_total+=extracted
 		if extracted>0.0:
@@ -658,9 +662,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			# original carrying capacity of this local woodland.
 			var capacity:=float(deposit.initial_amount)
 			var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else 0.00003
-			deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*recovery)
+			deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*recovery*span)
 		elif bool(catalog[String(deposit.resource)].renewable):
-			deposit.remaining=float(deposit.remaining)+minf(extracted*0.35,2.0)
+			deposit.remaining=float(deposit.remaining)+minf(extracted*0.35,2.0*span)
 	# Deliver shipments whose real travel time has elapsed.
 	stamp=trace.mark("flow_extraction",stamp)
 	var delivered_total:=0.0
@@ -694,7 +698,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		var profile:=_material_profile(String(deposit.resource))
 		var route_factor:=0.34+float(deposit.route)*0.66+route_speed_effect
 		var distance_factor:=1.0+float(deposit.distance_km)/10.0
-		var haul_capacity:=assigned_carriers*5.0/maxf(0.2,float(profile.bulk))*route_factor*labor_eff*haul_effect/distance_factor
+		var haul_capacity:=assigned_carriers*5.0/maxf(0.2,float(profile.bulk))*route_factor*labor_eff*haul_effect/distance_factor*span
 		var dispatched:=minf(waiting,haul_capacity)
 		if dispatched>0.0:
 			deposit.stock_at_source=waiting-dispatched
@@ -720,7 +724,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	for deposit in material_deposits:
 		active_shipments+=(deposit.get("shipments",[]) as Array).size()
 		if not deposit_exhausted(deposit):workable_occurrences+=1
-	WorldSimulation.state.material_metrics={"extracted_today":extracted_total,"delivered_today":delivered_total,"lost_today":lost_total,"losses_by_resource":loss_report.by_resource,"storage_used_by_type":loss_report.used_by_type,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":WorldSimulation.state.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":workable_occurrences,"active_shipments":active_shipments,"bounded":true}
+	WorldSimulation.state.material_metrics={"extracted_today":extracted_total/span,"delivered_today":delivered_total/span,"lost_today":lost_total/span,"losses_by_resource":loss_report.by_resource,"storage_used_by_type":loss_report.used_by_type,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":WorldSimulation.state.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":workable_occurrences,"active_shipments":active_shipments,"bounded":true}
 	WorldSimulation.state.material_history.append({"day":int(WorldSimulation.state.elapsed_days),"extracted":extracted_total,"delivered":delivered_total,"lost":lost_total,"at_source":at_source,"in_transit":in_transit,"stored":stored_bulk})
 	if WorldSimulation.state.material_history.size()>370: WorldSimulation.state.material_history.pop_front()
 	stamp=trace.mark("flow_summary",stamp)
@@ -812,7 +816,7 @@ func _gathering_startup_reserves()->Dictionary:
 	# Depends only on the known-discovery list; reuse it while that list's
 	# content hash is unchanged. Callers only read the returned reserves.
 	var key:=WorldSimulation.state.known_discoveries.hash()
-	if _startup_reserve_cache.get_meta("key",null)==key:return _startup_reserve_cache.get_meta("value")
+	if _startup_reserve_cache.has_meta("key") and _startup_reserve_cache.get_meta("key")==key:return _startup_reserve_cache.get_meta("value")
 	var result:Dictionary={}
 	for gate:String in WorldSimulation.state.known_discoveries:
 		for resource_name:String in gathering_recipe_reserves.get(gate,{}):
@@ -925,13 +929,13 @@ func _apply_material_storage_losses(events:Array[Dictionary])->Dictionary:
 		var profile:=_material_profile(resource_name)
 		var store:=String(profile.store)
 		var bulk:=float(profile.bulk)
-		var decay:=amount*maxf(0.0,float(profile.loss)+WorldSimulation.discovery.effect("storage_loss"))
+		var decay:=amount*SPAN.rate(maxf(0.0,float(profile.loss)+WorldSimulation.discovery.effect("storage_loss")))
 		var available_bulk:=maxf(0.0,float(capacities[store])-float(used[store]))
 		var overflow_units:=maxf(0.0,amount-available_bulk/bulk)
 		# Exposed stone/flint is durable. An overfull yard adds handling loss,
 		# not the rapid spoilage used for organic or containment-dependent stock.
 		var exposure_rate:=0.0005 if String(profile.family)=="mineral" and store=="yard" else 0.035
-		var overflow_loss:=overflow_units*exposure_rate
+		var overflow_loss:=overflow_units*SPAN.rate(exposure_rate)
 		var loss:=minf(amount,decay+overflow_loss)
 		WorldSimulation.state.resource_stockpiles[resource_name]=amount-loss
 		used[store]=float(used[store])+maxf(0.0,amount-loss)*bulk

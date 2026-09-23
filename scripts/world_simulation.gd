@@ -3,6 +3,7 @@ extends Node
 ## swapped: existing rules run against independent instances of the same scripts.
 ## Scopes must never await; UI and network callbacks run in the human scope.
 
+const DaySpan=preload("res://scripts/day_span.gd")
 const DayJob=preload("res://scripts/day_job.gd")
 
 var actor_id := "player"
@@ -21,6 +22,10 @@ var _day_number:=-1
 ## Day whose closing views are still current. Rival catch-up skips its opening
 ## refresh when nothing has changed since then.
 var _views_day:=-1
+## Days the current owner's step covers; always 1 for the human civilization.
+## See day_span.gd. `span_limit` 1 restores strictly daily rivals.
+var span:=1
+var span_limit:=DaySpan.MAX_SPAN
 # Autoload system references for the human scope, in _bind_scope order.
 var _player_binding:Array=[]
 var last_day:=-1
@@ -86,10 +91,12 @@ func _bind_scope()->void:
 	if _active.is_empty():
 		if _player_binding.is_empty():_player_binding=_build_binding({})
 		b=_player_binding
+		span=1
 	else:
 		var actor:Dictionary=actors[actor_id]
 		if not actor.has("binding"):actor["binding"]=_build_binding(_active)
 		b=actor.binding
+		span=int(actor.get("span",1))
 	state=b[0]
 	discovery=b[1]
 	progression=b[2]
@@ -217,6 +224,11 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 				if int(actors[id].last_day)>=day:
 					run.skip=true;run.halt=true
 					return null
+				var gap:=maxi(1,day-int(actors[id].last_day))
+				if gap<span_limit and _span_waits(id,day):
+					run.skip=true;run.halt=true
+					return null
+				actors[id]["span"]=gap;span=gap
 				state.elapsed_days=day
 				return DayJob.from_parts(preload("res://scripts/civilization_controller.gd").order_steps(id),detail)
 			),S.step("context",detail,func()->Array:
@@ -230,10 +242,21 @@ func _plan_rivals(job:DayJob,target_day:int,timings:Dictionary)->void:
 				return DayJob.from_parts(world.owned_day_steps(day),detail)
 			)],run,func()->void:
 				if not bool(run.get("skip",false)):actors[id].last_day=day
+				actors[id]["span"]=1
+				if actor_id==id:span=1
 			)
 		job.add_group("player",[S.step("rival_projections",timings,func()->Array:return _projection_steps(timings,"rival_projections"))],{},func()->void:
 			if day==target_day:advancing=false
 		)
+
+## A calm rival waits for its own phase day, covering the gap in one step.
+## Monthly reviews keep their exact day. Runs in the rival's scope.
+func _span_waits(id:String,day:int)->bool:
+	# The id goes last: String.hash multiplies by 33, so a fixed suffix would
+	# give every owner the same phase modulo 3.
+	if posmod(day+posmod(hash("span:"+id),span_limit),span_limit)==0:return false
+	if preload("res://scripts/civilization_controller.gd").review_due(id,day):return false
+	return DaySpan.calm()
 
 func refresh_projections()->void:
 	for next:Dictionary in _projection_steps():next.call.call()
