@@ -2,8 +2,12 @@ extends RefCounted
 ## Preparation provenance, not a measurement or synthesis certificate. Records
 ## live in the existing per-civilization technology ledger and save owner.
 const Industry=preload("res://scripts/civilian_industry.gd")
+const Bills=preload("res://scripts/goods_bills.gd")
 const LIMIT=256
 const MAX_SERIAL=1000000000
+## Unreleased measurements of one preparation before its programme stops asking
+## for more specimens.
+const ATTEMPTS:=3
 static func data()->Dictionary:
 	var ledger:Dictionary=WorldSimulation.state.technology_operations
 	if not ledger.has("polymer_samples"):ledger.polymer_samples={"next_serial":1,"records":{}}
@@ -33,6 +37,45 @@ static func completed(item:String,quantity:int)->void:
 	if item=="traceable_pp_batch":ledger.records[str(serial)]["response_model"]={"kind":"synthetic_pp_triads_v1","seed":serial,"structure_basis":"retained_coordination_synthesis"}
 	if item=="sec_traceable_peg_batch":ledger.records[str(serial)]["response_model"]={"kind":"synthetic_peg_distribution_v1","seed":serial,"structure_basis":"retained_controlled_synthesis"}
 	if item=="traceable_peg_batch":ledger.records[str(serial)]["response_model"]={"kind":"synthetic_linear_peg_v1","seed":serial,"structure_basis":"retained_controlled_synthesis"}
+## Raw materials and Civilian Goods for one retained specimen of `recipe`. Its
+## former workshop tooling is laboratory goods already held by the bench.
+static func preparation_bill(recipe:String)->Dictionary:
+	return Bills.flatten(Industry.product(recipe).get("materials",{}))
+## Whether the preparation's discoveries are known and adopted locally.
+static func can_prepare(recipe:String)->bool:
+	var spec:=Industry.product(recipe)
+	if not spec.has("specimen_source") or not has_capacity():return false
+	var gates:Array=[String(spec.gate)]
+	if spec.get("requires") is Array:gates.append_array(spec.requires)
+	for gate:String in gates:
+		if gate not in WorldSimulation.state.known_discoveries or WorldSimulation.discovery.adoption(gate)<.10:return false
+	return true
+## Whether the bench still needs a specimen of `recipe` here: none is waiting or
+## in measurement, none has been released, and too few attempts have failed.
+static func wanted(recipe:String)->bool:
+	var attempts:=0
+	for record:Dictionary in data().records.values():
+		if record.recipe!=recipe or record.source_store!=WorldSimulation.state.resource_settlement_id:continue
+		if record.status in ["unmeasured","acquiring"] or bool(record.get("specimen_released",false)):return false
+		attempts+=1
+	return attempts<ATTEMPTS
+## The shortfall, as raw materials and goods, for one specimen of `recipe`.
+static func shortfall(recipe:String)->Dictionary:
+	var result:Dictionary={}
+	var bill:=preparation_bill(recipe)
+	for item:String in bill:
+		var missing:=float(bill[item])-float(WorldSimulation.state.resource_stockpiles.get(item,0))
+		if missing>0:result[item]=missing
+	return result
+## Prepare one retained specimen at the bench, paying its materials as raw
+## materials and Civilian Goods. Replaces the former workshop preparation line.
+static func prepare(recipe:String)->bool:
+	if not can_prepare(recipe) or not wanted(recipe) or not shortfall(recipe).is_empty():return false
+	var bill:=preparation_bill(recipe)
+	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	for item:String in bill:stocks[item]=float(stocks.get(item,0))-float(bill[item])
+	completed(recipe,1)
+	return true
 static func valid(value:Variant)->bool:
 	if not value is Dictionary or not value.has_all(["next_serial","records"]):return false
 	if not integer(value.next_serial,1,MAX_SERIAL) or not value.records is Dictionary or value.records.size()>LIMIT:return false

@@ -1,6 +1,14 @@
 extends RefCounted
 ## Paid per-line apparatus and observations; no independent labor or save owner.
+const Bills=preload("res://scripts/goods_bills.gd")
+## Filter cloth per unit of filtered machining work, as raw materials and goods.
+static var FILTER_CLOTH:=Bills.flatten({"Woven Cloth":.001})
+## Pays `cost`; apparatus sets and cloth are drawn as raw materials and
+## Civilian Goods, gated by the listed machine technologies being known.
 static func spend(job:Dictionary,stocks:Dictionary,cost:Dictionary)->bool:
+	return spend_raw(job,stocks,Bills.flatten(cost))
+## Pays a bill that is already raw materials and goods.
+static func spend_raw(job:Dictionary,stocks:Dictionary,cost:Dictionary)->bool:
 	for resource:String in cost:
 		if float(stocks.get(resource,0))<float(cost[resource]):return false
 	for resource:String in cost:
@@ -80,9 +88,12 @@ static func limit_work(job:Dictionary,work:float,spec:Dictionary={})->float:
 		var separation:=film_separation(load,speed,flow)
 		support.film_request={"load":load,"speed":speed,"flow":flow,"separation":separation,"minimum":.8}
 		if separation<.8:support.blocked="Bearing film cannot support this load at available speed and flow";return 0.0
+	# Cloth's own process water is drawn with the cutting and bearing water.
+	if installed.has("cutting_fluid_management"):water+=float(FILTER_CLOTH.get("Freshwater",0))
 	if water>0:work=minf(work,float(stocks.get("Freshwater",0))/water)
 	if installed.has("cutting_fluid_management"):
-		work=minf(work,float(stocks.get("Woven Cloth",0))/.001)
+		for resource:String in FILTER_CLOTH:
+			if resource!="Freshwater" and float(FILTER_CLOTH[resource])>0:work=minf(work,maxf(0,float(stocks.get(resource,0)))/float(FILTER_CLOTH[resource]))
 		work=minf(work,maxf(0,1.0-float(support.get("filter_load",0)))/.1)
 	if work<=0 and water>0:support.blocked="Restore bearing water or filtered cutting-water supplies"
 	return maxf(0,work)
@@ -94,10 +105,11 @@ static func consume(job:Dictionary,work:float)->void:
 	var cost:={}
 	if installed.has("fluid_film_bearings"):cost.Freshwater=.05*work
 	if installed.has("cutting_fluid_management"):
-		cost.Freshwater=float(cost.get("Freshwater",0))+.1*work;cost["Woven Cloth"]=.001*work
+		cost.Freshwater=float(cost.get("Freshwater",0))+.1*work
+		for resource:String in FILTER_CLOTH:cost[resource]=float(cost.get(resource,0))+float(FILTER_CLOTH[resource])*work
 		support.filter_load=minf(1,float(support.get("filter_load",0))+.1*work)
 		stocks["Spent Machining Water"]=float(stocks.get("Spent Machining Water",0))+.1*work
-	spend(job,stocks,cost)
+	spend_raw(job,stocks,cost)
 	if installed.has("fluid_film_bearings") and support.has("film_request"):
 		support.film_observation=support.film_request.duplicate(true)
 		support.film_observation.work=work;support.film_observation.water=.05*work

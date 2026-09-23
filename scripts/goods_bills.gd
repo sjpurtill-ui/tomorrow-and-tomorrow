@@ -26,12 +26,25 @@ static var _cache:Dictionary={}
 ## The recipe that made `item`, preferring the shortest one when several did.
 static func _recipe_for(item:String)->Dictionary:
 	if _by_output.is_empty():
+		# Byproducts first: co-products and rejected inspection pieces. A recipe
+		# that only recycles a byproduct (remelting rejected parts into Steel) is
+		# not how the item is made from raw materials, so it is used only when no
+		# other recipe exists.
+		for definition:Dictionary in Industry.PRODUCTS.values():
+			for co:String in definition.get("co_products",{}):_co_products[co]=true
+			if not String(definition.get("abrasive_reject","")).is_empty():_co_products[String(definition.abrasive_reject)]=true
+		var recycled:Dictionary={}
 		for id:String in Industry.PRODUCTS:
 			var definition:Dictionary=Industry.PRODUCTS[id]
 			var output:=String(definition.get("output",""))
 			if output.is_empty():continue
-			if not _by_output.has(output) or float(definition.get("days",0))<float(_by_output[output].get("days",0)):_by_output[output]=definition
-			for co:String in definition.get("co_products",{}):_co_products[co]=true
+			var recycles:=false
+			for part:String in definition.get("materials",{}):
+				if _co_products.has(part):recycles=true;break
+			if _by_output.has(output) and recycled.get(output,false)!=recycles:
+				if recycles:continue
+			elif _by_output.has(output) and float(definition.get("days",0))>=float(_by_output[output].get("days",0)):continue
+			_by_output[output]=definition;recycled[output]=recycles
 	return _by_output.get(item,{})
 
 ## Whether `item` is a manufactured civilian part that bills no longer name.

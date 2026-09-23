@@ -20,8 +20,11 @@ static func definition(item:String)->Dictionary:
  return product.duplicate(true)
 static func for_subject(subject:String)->Array[String]:
  var result:Array[String]=[]
+ # Former civilian products are folded into Civilian Goods and no longer held
+ # as separate batches; offer one only while an older named stock remains.
+ var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
  for item:String in Industry.PRODUCTS:
-  if Industry.PRODUCTS[item].gate==subject:result.append(item)
+  if Industry.PRODUCTS[item].gate==subject and float(stocks.get(String(Industry.PRODUCTS[item].output),0))>=1:result.append(item)
  for equipment:String in MILITARY:
   if MILITARY[equipment]==subject:result.append("military:"+equipment)
  return result

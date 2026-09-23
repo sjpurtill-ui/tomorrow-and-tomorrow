@@ -2,7 +2,10 @@ extends RefCounted
 ## Destructive sections remain attached to their original reserved workpiece.
 const Grain=preload("res://scripts/metallurgy_grain_measurement.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
-const COST={"Steel Tool Bits":.002,"Graded Alumina Abrasive":.01,"Steel Section Etchant":.005,"Woven Cloth":.002,"Freshwater":.05}
+## Section supplies as authored; COST draws them as raw materials and Civilian
+## Goods. Sections cut before the change recorded the authored supplies.
+const COST_SOURCE={"Steel Tool Bits":.002,"Graded Alumina Abrasive":.01,"Steel Section Etchant":.005,"Woven Cloth":.002,"Freshwater":.05}
+static var COST:=preload("res://scripts/goods_bills.gd").flatten(COST_SOURCE).duplicate()
 const AMOUNT:=.02
 const WORK:=.5
 static func available(spec:Dictionary)->bool:
@@ -81,7 +84,7 @@ static func valid(p:Dictionary,spec:Dictionary)->bool:
 	var s:Variant=p.section
 	if not s is Dictionary or not s.has_all(["source_job","ordinal","site","material","amount","supplies","work","energy","disposition"]):return false
 	if s.source_job!=p.source_job or s.ordinal!=p.ordinal or s.site!=p.site or s.material!=spec.get("section_material"):return false
-	if s.amount!=AMOUNT or s.supplies!=COST or float(p.reserved.get(s.material,0))<=AMOUNT:return false
+	if s.amount!=AMOUNT or (s.supplies!=COST and s.supplies!=COST_SOURCE) or float(p.reserved.get(s.material,0))<=AMOUNT:return false
 	if not Grain.finite(s.work,0,WORK) or not Grain.finite(s.energy,0,WORK*.4+.000001):return false
 	if absf(float(s.energy)-float(s.work)*.4)>.000001:return false
 	if s.disposition=="cut":return s.work<WORK and not s.has("frame") and not s.has("observation")
