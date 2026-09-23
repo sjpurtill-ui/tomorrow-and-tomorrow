@@ -55,7 +55,8 @@ func truth(city_id:String)->Dictionary:
 	var values:Dictionary={}
 	if place.civ_id=="player":
 		var city:=WorldSimulation.settlements.settlement_record(city_id)
-		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id)
+		# Deposits, water and food history are not read here.
+		var local:=WorldSimulation.settlements.city_resource_snapshot(city_id,false)
 		var metrics:Dictionary=local.get("metrics",{})
 		values={"population":float(local.get("population",0)),"production":float(metrics.get("material_capacity",0)),"logistics":float(metrics.get("logistics",0)),"supply":float(metrics.get("food_days",-1))}
 		values.merge(_civic_observation(city_id))

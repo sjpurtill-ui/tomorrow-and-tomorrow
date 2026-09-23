@@ -1136,7 +1136,7 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 	var founding_material_required:=maxf(10.0,float(founders)*0.135)
 	var material_plan:Dictionary=with_city_resources(String(origin.id),func()->Dictionary: return _founding_material_plan(founding_material_required))
 	var founding_materials:Dictionary=material_plan.materials
-	var food_available:=float(city_resource_snapshot(String(origin.id)).stores.get("Food",0.0))
+	var food_available:=float(city_resource_snapshot(String(origin.id),false).stores.get("Food",0.0))
 	var blockers:Array[String]=[]
 	if food_available<food_required: blockers.append("%.0f more travel rations" % (food_required-food_available))
 	if float(material_plan.missing_value)>0.001:
