@@ -2,6 +2,7 @@ extends GdUnitTestSuite
 const Care=preload("res://scripts/civilian_care.gd")
 const F=preload("res://scripts/civilian_care_fabric.gd")
 const S=preload("res://scripts/civilian_care_state.gd")
+const BillStock=preload("res://scripts/bill_stock.gd")
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(772241);ResourceSystem.reset_for_new_world();FoodSystem.reset_for_new_world();SettlementModel.reset_for_new_world();CivilizationSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world()
@@ -9,7 +10,10 @@ func before_test()->void:
 	GameState.settlement_site_committed=true;GameState.convoy_traveling=false;GameState.settlement_completed=["Hearth Circle"];SettlementModel.ensure_founded()
 	for id:String in Care.IDS.values():GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
 	GameState.population_allocations.Knowledge=12
-	GameState.resource_stockpiles={"Clay":100.0,"Freshwater":100.0,"Woven Cloth":100.0,"Food":10000.0}
+	GameState.resource_stockpiles=supplies(100.0,100.0,100.0);GameState.resource_stockpiles.Food=10000.0
+## Record clay, water and the raw materials and Civilian Goods of `cloth` woven cloth.
+func supplies(clay:float,water:float,cloth:float)->Dictionary:
+	return BillStock.add_scaled({"Clay":clay,"Freshwater":water},F.CLOTH_UNIT,cloth/F.CARE_CLOTH)
 func test_care_reserves_knowledge_before_and_after_service()->void:
 	assert_float(Care.staff()).is_equal(3.0)
 	var before:=GameState.effective_workers("Knowledge")
@@ -32,7 +36,10 @@ func test_paid_observation_and_care_are_once_daily()->void:
 	assert_float(float(report.observed)).is_greater(0)
 	assert_float(float(report.supported)).is_greater(0)
 	assert_float(float(GameState.resource_stockpiles.Clay)).is_equal_approx(float(stock.Clay)-float(report.record_clay_used),.000001)
-	assert_float(float(GameState.resource_stockpiles.Freshwater)).is_equal_approx(float(stock.Freshwater)-float(report.water_used),.000001)
+	assert_float(float(report.water_used)).is_equal_approx(float(report.supported)*F.CARE_WATER,.000001)
+	# Each supported case pays water plus the flattened cloth (which itself may name water).
+	for item:String in F.CARE_UNIT:
+		assert_float(float(GameState.resource_stockpiles[item])).is_equal_approx(float(stock[item])-float(report.supported)*float(F.CARE_UNIT[item]),.000001)
 	var after:=GameState.resource_stockpiles.duplicate()
 	assert_dict(Care.process_day(.8)).is_equal(report)
 	assert_dict(GameState.resource_stockpiles).is_equal(after)
@@ -142,7 +149,7 @@ func test_full_save_restores_human_and_actor_care_without_double_payment()->void
 		state.settlement_completed.assign(["Hearth Circle"]);WorldSimulation.settlements.ensure_founded()
 		state.population_allocations.Knowledge=8
 		for id:String in Care.IDS.values():state.known_discoveries.append(id);state.discovery_adoption[id]=1.0
-		state.resource_stockpiles={"Clay":10.0,"Freshwater":10.0,"Woven Cloth":10.0}
+		state.resource_stockpiles=supplies(10.0,10.0,10.0)
 		var report:=Care.process_day(.8)
 		assert_float(float(report.supported)).is_greater(0)
 		assert_float(float(report.staff_available)).is_equal(2.0))
@@ -171,7 +178,7 @@ func test_pulse_assessment_changes_next_round_priority()->void:
 	# Both severities occupy the same coarse category without pulse assessment.
 	assert_float(float(plain.episodes[0].assessed_severity)).is_equal(.5)
 	assert_float(float(plain.episodes[1].assessed_severity)).is_equal(.5)
-	F.serve(pulse,{"Clay":100.0,"Freshwater":100.0,"Woven Cloth":100.0},1.25,{"rounds":true,"pulse":true,"nursing":true},1)
+	F.serve(pulse,supplies(100.0,100.0,100.0),1.25,{"rounds":true,"pulse":true,"nursing":true},1)
 	assert_float(float(pulse.episodes[0].severity)).is_equal(.99)
 	assert_float(float(pulse.episodes[0].cared)).is_greater(float(pulse.episodes[1].cared))
 func test_daily_consequence_applies_only_paid_health_relief()->void:
@@ -183,7 +190,7 @@ func test_daily_consequence_applies_only_paid_health_relief()->void:
 			state.ensure_population_total(400);state.settlement_site_committed=true;state.convoy_traveling=false
 			state.settlement_completed.assign(["Hearth Circle"]);WorldSimulation.settlements.ensure_founded()
 			state.population_health=.5;state.population_allocations.Knowledge=12
-			state.resource_stockpiles={"Clay":100.0,"Freshwater":100.0,"Woven Cloth":100.0,"Food":10000.0}
+			state.resource_stockpiles=supplies(100.0,100.0,100.0);state.resource_stockpiles.Food=10000.0
 			state.water_metrics={"intake_ratio":1.0,"days":10.0}
 			for id:String in Care.IDS.values():state.known_discoveries.append(id);state.discovery_adoption[id]=1.0
 			Care.data().enabled=enabled
@@ -193,42 +200,27 @@ func test_daily_consequence_applies_only_paid_health_relief()->void:
 	assert_float(float(outcomes[1].supported)).is_greater(0.0)
 	assert_float(float(outcomes[1].health)).is_greater(float(outcomes[0].health))
 	assert_float(float(outcomes[1].health)-float(outcomes[0].health)).is_equal_approx(float(outcomes[1].relief)*.022,.00000001)
-func test_care_supply_planner_manufactures_cloth_with_actual_inputs()->void:
-	GameState.population_allocations.Crafting=40
-	GameState.resource_stockpiles["Woven Cloth"]=0.0
-	var industry=preload("res://scripts/civilian_industry.gd")
-	var spec:Dictionary=industry.PRODUCTS.shuttle_woven_cloth
-	GameState.known_discoveries.append(String(spec.gate));GameState.discovery_adoption[spec.gate]=1.0
-	for item:String in spec.materials:GameState.resource_stockpiles[item]=1000.0
-	for item:String in spec.tooling:GameState.resource_stockpiles[item]=1000.0
-	var yarn:=float(GameState.resource_stockpiles["Spun Yarn"])
-	var order:=preload("res://scripts/civilian_care_investment.gd").recommendation()
-	assert_str(String(order.get("item",""))).is_equal("shuttle_woven_cloth")
-	preload("res://scripts/civilization_controller.gd").production_order("player",order)
-	assert_array(MilitaryCampaign.equipment_queue).is_not_empty()
-	if MilitaryCampaign.equipment_queue.is_empty():return
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	preload("res://scripts/persistent_production.gd").advance(MilitaryCampaign,job,float(spec.days)*4)
-	assert_float(float(GameState.resource_stockpiles["Woven Cloth"])).is_greater(0.0)
-	assert_float(float(GameState.resource_stockpiles["Spun Yarn"])).is_less(yarn)
-
 func test_care_supplies_travel_to_secondary_city_before_use()->void:
 	GameState.player_settlements.append({"id":"care_city","name":"Care City","primary":false,"position":Vector2(10,0),"population_share":.25,"founded_day":0})
 	CivilizationSystem.register_player_origin(Vector2.ZERO);CivilizationSystem.record_player_travel(Vector2(10,0))
 	GameState.society_capacities.logistics=.8;GameState.society_capacities.institutions=.8
 	GameState.population_allocations.Logistics=100
 	SettlementModel.with_city_resources("care_city",func()->void:GameState.resource_stockpiles.Food=10000.0)
-	var before:=float(GameState.resource_stockpiles["Woven Cloth"])
+	# Care cloth travels as its raw materials and Civilian Goods.
+	var before:=GameState.resource_stockpiles.duplicate()
 	SettlementModel.process_city_trade()
-	var shipped:=0.0
+	var shipped:Dictionary={};var total:=0.0
 	for shipment:Dictionary in GameState.city_trade_shipments:
-		if String(shipment.destination_id)=="care_city" and String(shipment.resource)=="Woven Cloth":shipped+=float(shipment.quantity)
-	assert_float(shipped).is_greater(0)
-	assert_float(float(GameState.resource_stockpiles["Woven Cloth"])+shipped).is_equal_approx(before,.000001)
-	assert_float(float(SettlementModel.city_resource_snapshot("care_city").stores.get("Woven Cloth",0))).is_equal(0.0)
+		if String(shipment.destination_id)=="care_city" and F.CLOTH_UNIT.has(String(shipment.resource)):
+			shipped[shipment.resource]=float(shipped.get(shipment.resource,0.0))+float(shipment.quantity);total+=float(shipment.quantity)
+	assert_float(total).is_greater(0)
+	for item:String in shipped:
+		assert_float(float(GameState.resource_stockpiles[item])+float(shipped[item])).is_equal_approx(float(before[item]),.000001)
+		assert_float(float(SettlementModel.city_resource_snapshot("care_city").stores.get(item,0))).is_equal(0.0)
 	GameState.society_capacities.logistics=0;GameState.elapsed_days=20
 	SettlementModel.process_city_trade()
-	assert_float(float(SettlementModel.city_resource_snapshot("care_city").stores.get("Woven Cloth",0))).is_equal_approx(shipped,.000001)
+	for item:String in shipped:
+		assert_float(float(SettlementModel.city_resource_snapshot("care_city").stores.get(item,0))).is_equal_approx(float(shipped[item]),.000001)
 func test_selected_city_care_signature_and_duty_are_local()->void:
 	GameState.player_settlements.append({"id":"care_city","name":"Care City","primary":false,"position":Vector2(10,0),"population_share":.25,"founded_day":0})
 	GameState.selected_player_settlement_id="care_city"

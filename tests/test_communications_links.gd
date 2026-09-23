@@ -16,8 +16,8 @@ func before_test()->void:
 			state.elapsed_days=100
 			for gate:String in ["radio_telegraphy","agreed_signal_codes"]:
 				state.known_discoveries.append(gate);state.discovery_adoption[gate]=1.0
-			state.resource_stockpiles["Radio Telegraph Sets"]=1.0
-			state.resource_stockpiles["Timber"]=2.0;state.resource_stockpiles["Paper"]=10.0
+			stock_bill(state,Ops.PLANTS.research_radio_station.cost,1.0)
+			stock_bill(state,Ops.PLANTS.research_radio_station.inputs,200.0)
 			assert_bool(Ops.install("research_radio_station").get("ok",false)).is_true()
 			Ops.data().plants.solar_array={"installed":1,"building":0,"work":0.0,"enabled":true}
 			for day in range(90,101):state.elapsed_days=day;Ops.advance(day)
@@ -25,6 +25,9 @@ func before_test()->void:
 	WorldSimulation.scoped("receiver",func()->void:
 		WorldSimulation.world.civilizations.append({"id":"sender","name":"Sender","player_relation":{"at_war":false}}))
 func after_test()->void:WorldSimulation.clear()
+## Adds `bill` × `times` to the local stock (costs are raw materials and Civilian Goods).
+func stock_bill(state,bill:Dictionary,times:float)->void:
+	for item:String in bill:state.resource_stockpiles[item]=float(state.resource_stockpiles.get(item,0.0))+float(bill[item])*times
 func mission()->Dictionary:
 	var item:={"id":"purchase:sender:clay_shaping","kind":"knowledge","name":"Purchased clay study","source_id":"sender","source_name":"Sender","position":{"x":30.0,"z":0.0},"observed_day":100,"returned_day":100,"discovery_id":"clay_shaping","study":0.0,"work":120.0,"signals":["crafting"],"research_purchase":true}
 	return {"civ_id":"sender","research_subject":"clay_shaping","accepted":true,"research_refused":false,"arrival_day":100,"return_day":110,"target_kind":"known settlement","encountered_societies":["sender"],"origin_position":{"x":0.0,"z":0.0},"target_position":{"x":30.0,"z":0.0},"carried_collections":[item],"gift_resource":"Stone","gift_amount":10.0}
@@ -86,14 +89,18 @@ func test_rival_investment_requires_active_research_work_and_spends_hardware()->
 	WorldSimulation.scoped("receiver",func()->void:
 		var state=WorldSimulation.state
 		Ops.data().plants.erase("research_radio_station")
-		state.resource_stockpiles["Radio Telegraph Sets"]=1.0;state.resource_stockpiles["Timber"]=2.0
+		var spec:Dictionary=Ops.PLANTS.research_radio_station
+		for item:String in spec.cost:state.resource_stockpiles[item]=0.0
+		for item:String in spec.inputs:state.resource_stockpiles[item]=0.0
+		stock_bill(state,spec.cost,1.0);stock_bill(state,spec.inputs,30.0)
+		var before:Dictionary=state.resource_stockpiles.duplicate()
 		state.population_allocations.Knowledge=10
 		var planner=preload("res://scripts/communications_investment.gd")
 		assert_dict(planner.radio_recommendation()).is_empty()
 		WorldSimulation.world.diplomatic_mission=mission()
 		assert_str(planner.radio_recommendation().get("plant","")).is_equal("research_radio_station")
 		preload("res://scripts/civilization_controller.gd").civilian_orders("receiver",{})
-		assert_float(float(state.resource_stockpiles["Radio Telegraph Sets"])).is_equal(0.0)
+		for item:String in spec.cost:assert_float(float(state.resource_stockpiles[item])).is_equal_approx(float(before[item])-float(spec.cost[item]),.000001)
 		assert_int(int(Ops.data().plants.research_radio_station.building)).is_equal(1)
 		assert_dict(planner.radio_recommendation()).is_empty()
 	)

@@ -33,8 +33,9 @@ static func quote(force:Dictionary,supply:float)->Dictionary:
 	var care_capacity:=capacity(force)
 	var provisioned:=clampf(supply,0,1)
 	var stock:Dictionary=WorldSimulation.state.resource_stockpiles
-	var fiber:=maxf(0,float(stock.get("Fiber Plants",0)))/.1
 	var dressings:=preload("res://scripts/bill_stock.gd").affordable(stock,DRESSING)
+	# Loose fiber serves only what the affordable dressings do not already use.
+	var fiber:=maxf(0,float(stock.get("Fiber Plants",0))-dressings*float(DRESSING.get("Fiber Plants",0)))/.1
 	var medicine:=maxf(0,float(stock.get("Medicinal Plants",0)))/.05
 	var cases:=minf(minf(float(wounded),care_capacity)*provisioned,minf(fiber+dressings,medicine))
 	var reason:="Care capacity is available"

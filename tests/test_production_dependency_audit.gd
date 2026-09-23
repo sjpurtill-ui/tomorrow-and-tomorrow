@@ -105,13 +105,16 @@ func test_machine_acceptance_requires_inspection_supplies_and_reports_conditiona
 
 func test_household_fabric_is_manufactured_from_inputs_not_declared_a_raw_resource()->void:
 	var recipes:=Audit.household_recipes()
-	var raw:=["Timber","Stone","Flint","Fiber Plants","Clay","Freshwater"]
+	var goods=preload("res://scripts/civilian_goods.gd")
+	var raw:Array=goods.BASKET.keys()
+	assert_bool(goods.GOODS in raw).is_false()
 	var known:Array=[]
 	for item:Dictionary in recipes.values():known.append(item.gate)
 	var result:=Audit.audit(recipes,{},raw,known)
 	assert_array(result.errors).is_empty()
 	assert_dict(result.blocked_products).is_empty()
 	assert_int(int(result.reachable_products)).is_equal(recipes.size())
-	assert_float(float(recipes["household:joinery"].materials["Hafted Tool Sets"])).is_equal(.03)
+	assert_str(String(recipes["household:civilian_goods"].output)).is_equal(goods.GOODS)
+	assert_float(float(recipes["household:civilian_goods"].materials.Flint)).is_equal_approx(float(goods.BASKET.Flint)*float(goods.RAW_PER_UNIT),.000001)
 	raw.erase("Flint")
 	assert_array(Audit.audit(recipes,{},raw,known).errors).is_not_empty()

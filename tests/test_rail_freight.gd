@@ -3,6 +3,9 @@ const Rail=preload("res://scripts/rail_freight.gd")
 const F=preload("res://scripts/rail_freight_fabric.gd")
 const R=preload("res://scripts/rail_route_survey.gd")
 const S=preload("res://scripts/rail_freight_state.gd")
+const Bills=preload("res://scripts/goods_bills.gd")
+## Former named-part stock, now supplied as its raw materials and Civilian Goods.
+const LEGACY_STOCK:={"Track Ballast":1.0,"Timber Rail Panels":1.0,"Rail Gauge Templates":1.0,"900 mm Rail Wagons":1.0,"1435 mm Rail Wagons":1.0,"Rail Brake Sets":1.0,"Timber":1.0,"Wrought Iron":1.0,"Stone":1.0}
 var source_id:String
 var old_provider:Callable
 func before_test()->void:
@@ -13,7 +16,7 @@ func before_test()->void:
 	GameState.player_settlements.append({"id":"dawngate","name":"Dawngate","primary":false,"position":Vector2(10,0),"population_share":.25,"founded_day":0})
 	CivilizationSystem.register_player_origin(Vector2.ZERO);CivilizationSystem.record_player_travel(Vector2(10,0))
 	for id:String in Rail.REQUIRED+["aggregate_road_foundations"]:GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
-	for item:String in ["Track Ballast","Timber Rail Panels","Rail Gauge Templates","900 mm Rail Wagons","1435 mm Rail Wagons","Rail Brake Sets","Timber","Wrought Iron","Stone"]:GameState.resource_stockpiles[item]=10000.0
+	for item:String in Bills.flatten(LEGACY_STOCK):GameState.resource_stockpiles[item]=10000.0
 	GameState.population_allocations.Construction=40
 	old_provider=WorldSimulation.context_provider
 	WorldSimulation.context_provider=func(origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(origin),"terrain_height_at":func(_x:float,_z:float)->float:return .1,"buildable_land_at":func(_x:float,_z:float)->bool:return true,"river_distance_at":func(_x:float,_z:float)->float:return 10.0}
@@ -26,6 +29,17 @@ func installed(complete:bool=true)->Dictionary:
 	var line:=Rail.line_for(int(result.line_id))
 	if complete:F.construct(line,99999,0)
 	return line
+## A trip upkeep material that is not the Timber cargo.
+func upkeep_item()->String:
+	for item:String in F.TRIP_UPKEEP:
+		if item!="Timber":return item
+	return ""
+func paid(stock:Dictionary,bill:Dictionary)->Dictionary:
+	var result:=stock.duplicate()
+	for item:String in bill:result[item]=float(result.get(item,0))-float(bill[item])
+	return result
+func assert_stock(expected:Dictionary)->void:
+	for item:String in expected:assert_float(float(GameState.resource_stockpiles.get(item,0))).override_failure_message(item).is_equal_approx(float(expected[item]),.001)
 func supplies_for_trade()->void:
 	GameState.society_capacities.logistics=.8;GameState.society_capacities.institutions=.8
 	GameState.population_allocations.Logistics=8
@@ -47,15 +61,22 @@ func test_route_rejects_missing_evidence_steep_grade_and_between_sample_river()-
 	terrain=Rail.terrain_for(source_id);terrain.known_at=func(_x:float,_z:float)->bool:return false
 	assert_bool(R.survey([Vector3.ZERO,Vector3(1,0,0)],terrain).has("error")).is_true()
 func test_installation_is_paid_atomic_and_gauge_specific()->void:
-	GameState.resource_stockpiles["900 mm Rail Wagons"]=0.0
+	var cost:Dictionary=Rail.quote(source_id,"dawngate").cost
+	assert_dict(cost).is_not_equal(Rail.quote(source_id,"dawngate",1435).cost)
+	assert_float(float(cost.get("Civilian Goods",0))).is_greater(0.0)
+	GameState.resource_stockpiles["Civilian Goods"]=float(cost["Civilian Goods"])-.5
 	var before:=GameState.resource_stockpiles.duplicate()
 	assert_bool(Rail.install(source_id,"dawngate").has("error")).is_true()
 	assert_dict(GameState.resource_stockpiles).is_equal(before)
 	assert_bool(Rail.data().lines.is_empty()).is_true()
-	GameState.resource_stockpiles["900 mm Rail Wagons"]=2.0
+	GameState.resource_stockpiles["Civilian Goods"]=float(cost["Civilian Goods"])
+	before=GameState.resource_stockpiles.duplicate()
 	var line:=installed(false)
-	assert_float(float(GameState.resource_stockpiles["900 mm Rail Wagons"])).is_equal(0.0)
-	assert_float(float(GameState.resource_stockpiles["1435 mm Rail Wagons"])).is_equal(10000.0)
+	if line.is_empty():return
+	assert_float(float(GameState.resource_stockpiles["Civilian Goods"])).is_equal_approx(0.0,.0001)
+	assert_stock(paid(before,cost))
+	assert_bool(S.Stock.same(line.paid_materials,cost)).is_true()
+	assert_int(int(line.gauge_mm)).is_equal(900)
 	assert_bool(F.trip_quote(line,100,20,0).is_empty()).is_true()
 	assert_bool(Rail.install(source_id,"dawngate").has("error")).is_true()
 func test_shared_monthly_construction_does_not_duplicate_builders()->void:
@@ -87,14 +108,17 @@ func test_real_cargo_arrives_but_wagons_wait_for_return()->void:
 	assert_bool(line.trip.is_empty()).is_true()
 func test_trip_reserves_upkeep_from_the_same_cargo_stock()->void:
 	var line:=installed()
+	if line.is_empty():return
 	GameState.resource_stockpiles.Timber=5.0
+	var upkeep:=float(F.TRIP_UPKEEP.get("Timber",0))*float(line.route.length_km)
 	var receipt:=Rail.issue_dispatch(source_id,"dawngate","Timber",100,20,1)
-	assert_float(float(receipt.get("quantity",0))).is_equal_approx(4.0,.0001)
+	assert_float(float(receipt.get("quantity",0))).is_equal_approx(5.0-upkeep,.0001)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(0,.0001)
 	assert_bool(Rail.issue_dispatch("dawngate",source_id,"Timber",10,20,2).is_empty()).is_true()
-	assert_float(float(line.trip.quantity)).is_equal_approx(4,.0001)
+	assert_float(float(line.trip.quantity)).is_equal_approx(5.0-upkeep,.0001)
 func test_upkeep_shortage_does_not_remove_cargo_or_reserve_assets()->void:
-	var line:=installed();GameState.resource_stockpiles["Wrought Iron"]=0.0
+	var line:=installed();GameState.resource_stockpiles[upkeep_item()]=0.0
+	if line.is_empty():return
 	var stock:=GameState.resource_stockpiles.duplicate();var condition:=float(line.condition)
 	assert_bool(Rail.issue_dispatch(source_id,"dawngate","Timber",100,20,1).is_empty()).is_true()
 	assert_dict(GameState.resource_stockpiles).is_equal(stock)
@@ -110,11 +134,13 @@ func test_secondary_installation_uses_only_secondary_stores()->void:
 	Rail.city("dawngate").occupied_by="invader"
 	assert_bool(Rail.accessible(Rail.data().lines[0])).is_false()
 func test_maintenance_closes_line_and_requires_replacements()->void:
-	var line:=installed();line.condition=.5;line.wagon_condition=.5
+	var line:=installed()
+	if line.is_empty():return
+	line.condition=.5;line.wagon_condition=.5
 	var stock:=GameState.resource_stockpiles
-	stock["Rail Brake Sets"]=0.0
+	stock["Civilian Goods"]=0.0
 	assert_float(F.maintain(line,stock,30,0)).is_equal(0.0)
-	stock["Rail Brake Sets"]=10.0
+	stock["Civilian Goods"]=10000.0
 	assert_float(F.maintain(line,stock,30,0)).is_equal_approx(30,.0001)
 	assert_bool(F.trip_quote(line,100,20,0).is_empty()).is_true()
 	assert_bool(F.trip_quote(line,100,20,1).is_empty()).is_false()
@@ -135,10 +161,11 @@ func test_legacy_and_malformed_saved_state()->void:
 func test_actual_install_button_uses_paid_action()->void:
 	var panel=preload("res://scripts/hud/rail_freight_controls.gd").new()
 	get_tree().root.add_child(panel)
+	var cost:Dictionary=Rail.quote(source_id,"dawngate").cost;var before:=GameState.resource_stockpiles.duplicate()
 	assert_bool(panel.build.disabled).is_false()
 	panel.build.pressed.emit()
 	assert_int(Rail.data().lines.size()).is_equal(1)
-	assert_float(float(GameState.resource_stockpiles["900 mm Rail Wagons"])).is_equal(9998.0)
+	assert_stock(paid(before,cost))
 	panel.free()
 
 func test_occupation_holds_cargo_and_return_then_reverse_service_resumes()->void:
@@ -153,7 +180,8 @@ func test_occupation_holds_cargo_and_return_then_reverse_service_resumes()->void
 	GameState.elapsed_days=4;SettlementModel.process_city_trade()
 	assert_bool(line.trip.is_empty()).is_true()
 	assert_float(float(SettlementModel.city_resource_snapshot("dawngate").stores.Food)).is_equal_approx(quantity*exp(-.00035),.0001)
-	SettlementModel.with_city_resources("dawngate",func()->void:GameState.resource_stockpiles["Wrought Iron"]=100.0)
+	SettlementModel.with_city_resources("dawngate",func()->void:
+		for item:String in F.TRIP_UPKEEP:GameState.resource_stockpiles[item]=100.0)
 	assert_bool(Rail.issue_dispatch("dawngate",source_id,"Timber",30,20,999).is_empty()).is_false()
 	assert_str(String(line.trip.source_id)).is_equal("dawngate")
 
@@ -187,39 +215,19 @@ func test_full_save_restores_in_transit_cargo_and_paid_rolling_stock()->void:
 func test_supplied_investment_installs_only_once_without_inventing_materials()->void:
 	var planner=preload("res://scripts/rail_freight_investment.gd")
 	GameState.city_trade_history.append({"source_id":source_id,"destination_id":"dawngate"})
-	var stock:=GameState.resource_stockpiles.duplicate()
-	planner.recommendation()
+	var stock:=GameState.resource_stockpiles.duplicate();var cost:Dictionary=Rail.quote(source_id,"dawngate").cost
+	assert_dict(planner.recommendation()).is_empty()
 	assert_int(Rail.data().lines.size()).is_equal(1)
-	assert_float(float(GameState.resource_stockpiles["900 mm Rail Wagons"])).is_equal(float(stock["900 mm Rail Wagons"])-2)
+	assert_stock(paid(stock,cost))
 	var remaining:=GameState.resource_stockpiles.duplicate()
 	planner.recommendation()
 	assert_int(Rail.data().lines.size()).is_equal(1)
 	assert_dict(GameState.resource_stockpiles).is_equal(remaining)
 
-func test_autonomous_wagon_manufacture_precedes_installation()->void:
-	GameState.population_allocations.Crafting=40
-	GameState.city_trade_history.append({"source_id":source_id,"destination_id":"dawngate"})
-	GameState.resource_stockpiles["900 mm Rail Wagons"]=0.0
-	var industry=preload("res://scripts/civilian_industry.gd")
-	var spec:Dictionary=industry.PRODUCTS.rail_wagons_900
-	for material:String in spec.materials:GameState.resource_stockpiles[material]=1000.0
-	for material:String in spec.tooling:GameState.resource_stockpiles[material]=1000.0
-	var planner=preload("res://scripts/rail_freight_investment.gd")
-	var order:Dictionary=planner.recommendation()
-	assert_str(String(order.get("item",""))).is_equal("rail_wagons_900")
-	assert_int(Rail.data().lines.size()).is_equal(0)
-	preload("res://scripts/civilization_controller.gd").production_order("player",order)
-	assert_array(MilitaryCampaign.equipment_queue).is_not_empty()
-	if MilitaryCampaign.equipment_queue.is_empty():return
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	preload("res://scripts/persistent_production.gd").advance(MilitaryCampaign,job,float(spec.days)*4)
-	assert_float(float(GameState.resource_stockpiles["900 mm Rail Wagons"])).is_greater_equal(2.0)
-	planner.recommendation()
-	assert_int(Rail.data().lines.size()).is_equal(1)
-
 func test_owned_actor_paid_partial_construction_survives_full_save()->void:
 	WorldSimulation.clear();WorldSimulation.create_actor("rail_owner",9393)
 	var human_stock:=GameState.resource_stockpiles.duplicate()
+	var owned_paid:Dictionary={}
 	WorldSimulation.scoped("rail_owner",func()->void:
 		var state=WorldSimulation.state;var model=WorldSimulation.settlements
 		state.ensure_population_total(400);state.settlement_site_committed=true;state.convoy_traveling=false
@@ -233,6 +241,7 @@ func test_owned_actor_paid_partial_construction_survives_full_save()->void:
 		var result:=Rail.install(primary,"rail_end")
 		assert_bool(result.get("ok",false)).override_failure_message(str(result)).is_true()
 		if not result.has("line_id"):return
+		owned_paid.merge(paid(human_stock,Rail.line_for(int(result.line_id)).paid_materials))
 		F.construct(Rail.line_for(int(result.line_id)),20,0))
 	assert_dict(GameState.resource_stockpiles).is_equal(human_stock)
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
@@ -245,6 +254,6 @@ func test_owned_actor_paid_partial_construction_survives_full_save()->void:
 		assert_int(Rail.data().lines.size()).is_equal(1)
 		if Rail.data().lines.is_empty():return
 		assert_float(float(Rail.data().lines[0].work_done)).is_equal(20.0)
-		assert_float(float(WorldSimulation.state.resource_stockpiles["900 mm Rail Wagons"])).is_equal(9998.0))
+		assert_float(float(WorldSimulation.state.resource_stockpiles["Civilian Goods"])).is_equal_approx(float(owned_paid.get("Civilian Goods",-1)),.001))
 	WorldSimulation.clear()
 	GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)

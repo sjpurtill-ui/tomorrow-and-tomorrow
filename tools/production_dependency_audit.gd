@@ -8,13 +8,13 @@ static func missing(costs:Dictionary,available:Dictionary)->Array[String]:
 	for item:String in costs:
 		if float(costs[item])>0 and not available.has(item):result.append(item)
 	return result
+## Household crafts make one Civilian Goods stock from a raw basket. Crafting
+## needs no discovery; the earliest craft technique stands in as its gate.
 static func household_recipes()->Dictionary:
-	var craft:Script=load("res://scripts/opening_craft_practice.gd")
-	var result:Dictionary={}
-	for id:String in craft.RECIPES:
-		var recipe:Dictionary=craft.RECIPES[id]
-		result["household:"+id]={"output":craft.PRODUCTS[id],"gate":id,"materials":recipe.inputs.duplicate(),"days":1.0/float(recipe.rate),"household_practice":true}
-	return result
+	var goods:Script=load("res://scripts/civilian_goods.gd")
+	var materials:Dictionary={}
+	for item:String in goods.BASKET:materials[item]=float(goods.BASKET[item])*float(goods.RAW_PER_UNIT)
+	return {"household:civilian_goods":{"output":goods.GOODS,"gate":String(goods.TECHNIQUES[0]),"materials":materials,"days":1.0/float(goods.BASE_RATE),"household_practice":true}}
 static func operating_routes()->Dictionary:
 	var result:Dictionary=load("res://scripts/nmr_acquisition.gd").dependency_routes()
 	result.merge(load("res://scripts/sec_acquisition.gd").dependency_routes())

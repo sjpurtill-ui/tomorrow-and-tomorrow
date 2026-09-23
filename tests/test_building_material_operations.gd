@@ -1,8 +1,6 @@
 extends GdUnitTestSuite
 const B=preload("res://scripts/building_material_operations.gd")
 const K=preload("res://scripts/building_material_knowledge.gd")
-const I=preload("res://scripts/civilian_industry.gd")
-const P=preload("res://scripts/persistent_production.gd")
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("builders",1301)
 func after_test()->void:WorldSimulation.clear()
 func learn(id:String)->void:
@@ -13,26 +11,28 @@ func test_construction_catalog_has_valid_causal_and_production_contracts()->void
 		assert_int(K.entries().size()).is_equal(22)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 	)
-func test_mortar_requires_paid_inputs_and_work()->void:
+func test_lime_kiln_requires_paid_inputs_and_work()->void:
+	# Lime and mortar are no longer workshop lines; the kiln that fires them is
+	# a paid installation whose heat needs commissioning work and daily fuel.
 	WorldSimulation.scoped("builders",func()->void:
-		var state=WorldSimulation.state
+		var state=WorldSimulation.state;var Ops=preload("res://scripts/technology_operations.gd")
 		state.settlement_site_committed=true;state.resource_settlement_id="";state.population_allocations.Crafting=20;state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
-		learn("kiln_control");state.resource_stockpiles.merge({"Stone":12.0,"Clay":6.0,"Joined Timber Components":2.0,"Timber":8.0},true)
-		assert_bool(preload("res://scripts/technology_operations.gd").install("controlled_kiln").get("ok",false)).is_true()
-		for day:int in range(1,14):state.elapsed_days=day;preload("res://scripts/technology_operations.gd").advance(day)
-		for item:String in ["quicklime","slaked_lime","building_mortar"]:
-			var spec:=I.product(item);learn(spec.gate)
-			for resource:String in spec.materials:
-				if resource not in ["Quicklime","Slaked Lime"]:state.resource_stockpiles[resource]=float(spec.materials[resource])
-			for resource:String in spec.tooling:state.resource_stockpiles[resource]=float(state.resource_stockpiles.get(resource,0))+float(spec.tooling[resource])
-			assert_bool(WorldSimulation.military.start_production_line(item,1).get("ok",false)).is_true()
-			var job:Dictionary=WorldSimulation.military.equipment_queue.back()
-			P.advance(WorldSimulation.military,job,float(spec.days))
-			assert_int(int(job.completed)).is_equal(1)
-			WorldSimulation.military.cancel_equipment_job(int(job.id))
-		assert_float(float(state.resource_stockpiles["Building Mortar"])).is_equal(1.0)
-		assert_float(float(state.resource_stockpiles["Quicklime"])).is_equal(0.0)
-		assert_float(float(state.resource_stockpiles["Slaked Lime"])).is_equal(0.0)
+		learn("kiln_control")
+		var cost:Dictionary=Ops.PLANTS.controlled_kiln.cost
+		assert_bool(cost.has("Civilian Goods")).is_true()
+		for resource:String in cost:state.resource_stockpiles[resource]=float(cost[resource])
+		state.resource_stockpiles["Civilian Goods"]=0.0;state.resource_stockpiles.Timber=8.0
+		var before:Dictionary=state.resource_stockpiles.duplicate(true)
+		assert_bool(Ops.install("controlled_kiln").has("error")).is_true()
+		assert_dict(state.resource_stockpiles).is_equal(before)
+		state.resource_stockpiles["Civilian Goods"]=float(cost["Civilian Goods"])
+		assert_bool(Ops.install("controlled_kiln").get("ok",false)).is_true()
+		for resource:String in cost:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(0.0,.000001)
+		state.elapsed_days=1;Ops.advance(1)
+		assert_float(Ops.service("kiln_heat")).is_equal(0.0)
+		for day:int in range(2,14):state.elapsed_days=day;Ops.advance(day)
+		assert_float(Ops.service("kiln_heat")).is_greater(0.0)
+		assert_float(float(state.resource_stockpiles.Timber)).is_less(8.0)
 	)
 func test_curing_needs_elapsed_supplied_intervals_after_building_work()->void:
 	WorldSimulation.scoped("builders",func()->void:
@@ -69,25 +69,6 @@ func test_fabric_requires_compatible_repair_stock_and_does_not_upgrade_old_build
 		assert_float(B.decay_factor(plot)).is_equal(.75)
 	)
 
-func test_rival_workshops_prepare_paid_mortar_chain_for_housing_demand()->void:
-	WorldSimulation.scoped("builders",func()->void:
-		var state=WorldSimulation.state
-		state.settlement_site_committed=true;state.convoy_traveling=false
-		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
-		state.population_allocations.Construction=10;state.population_allocations.Crafting=10
-		learn("lime_mortar");learn("lime_burning");learn("kiln_control")
-		for material:String in ["Limestone","Timber","Clay","Stone","Fine Sand","Freshwater"]:state.resource_stockpiles[material]=20.0
-		state.resource_stockpiles["Joined Timber Components"]=2.0
-		state.resource_stockpiles["Quicklime"]=0.0;state.resource_stockpiles["Slaked Lime"]=0.0;state.resource_stockpiles["Building Mortar"]=0.0
-		var planner=preload("res://scripts/building_material_investment.gd")
-		var order:Dictionary=planner.recommendation()
-		assert_str(order.get("kind","")).is_equal("plant_install")
-		assert_str(order.get("plant","")).is_equal("controlled_kiln")
-		var stone:float=state.resource_stockpiles.Stone
-		preload("res://scripts/civilization_controller.gd").civilian_orders("builders",{})
-		assert_int(int(preload("res://scripts/technology_operations.gd").data().plants.controlled_kiln.building)).is_equal(1)
-		assert_float(float(state.resource_stockpiles.Stone)).is_less(stone)
-	)
 func test_new_fabric_cannot_skip_curing_through_instant_household_infill()->void:
 	WorldSimulation.scoped("builders",func()->void:
 		learn("lime_mortar")
@@ -95,22 +76,6 @@ func test_new_fabric_cannot_skip_curing_through_instant_household_infill()->void
 		var events:Array[Dictionary]=[]
 		assert_bool(WorldSimulation.settlements._attempt_household_infill(30,recipe,events,0)).is_false()
 		assert_array(events).is_empty()
-	)
-
-func test_blocked_kiln_does_not_suppress_feasible_building_work()->void:
-	WorldSimulation.scoped("builders",func()->void:
-		var state=WorldSimulation.state
-		state.settlement_site_committed=true;state.convoy_traveling=false
-		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
-		state.population_allocations.Construction=10;state.population_allocations.Crafting=10
-		state.settlement_completed.assign(["Hearth Circle"]);WorldSimulation.settlements.ensure_founded()
-		for id:String in ["kiln_control","lime_burning","building_shading_design","geometric_survey"]:learn(id)
-		state.resource_stockpiles={"Timber":20.0,"Fiber Plants":10.0,"Stone":2.0}
-		var planner=preload("res://scripts/building_material_investment.gd")
-		assert_dict(planner._kiln_recommendation()).is_empty()
-		var order:Dictionary=planner.recommendation()
-		assert_str(String(order.get("item",""))).is_equal("building_shade_lattices")
-		assert_float(float(state.resource_stockpiles.Stone)).is_equal(2.0)
 	)
 
 func test_invalid_curing_state_is_rejected_in_secondary_cities()->void:

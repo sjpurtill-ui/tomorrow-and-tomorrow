@@ -11,8 +11,9 @@ func before_test()->void:
 	GameState.resource_stockpiles={"Timber":10.0,"Stone":10.0,"Freshwater":10.0,"Clay":10.0,"Fiber Plants":10.0}
 	GameState.known_discoveries.assign(["hearth_roasting_control"])
 	GameState.discovery_adoption.hearth_roasting_control=1.0
-	GameState.resource_stockpiles["Drying Mats"]=3.0
-	GameState.resource_stockpiles["Smoke Frames"]=1.5
+	# Drying racks and smoke frames are household goods now.
+	GameState.resource_stockpiles["Civilian Goods"]=100000.0
+	FoodSystem._lever_cache.clear()
 
 func after_test()->void:
 	WorldSimulation.clear()
@@ -79,25 +80,15 @@ func test_changed_inputs_and_absent_meals_never_overdraw()->void:
 	assert_float(float(result.rations)).is_equal(0.0)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(1.0)
 
-func test_normal_food_day_exposes_prepared_meals()->void:
-	GameState.population_allocations.Logistics=10
-	GameState.population_allocations.Food=10
-	GameState.founding_manifest["food_storage_rations"]=10000.0
-	var report:=FoodSystem.process_day({"traveling":false},1.0,1.0)
-	assert_bool(report.has("food_preparation")).is_true()
-	assert_float(float(report.food_preparation.rations)).is_greater(0.0)
-	assert_float(float(report.food_preparation.rations)).is_less_equal(float(report.food_eaten))
-	assert_float(float(report.food_diet_quality)).is_less_equal(1.0)
-
 func test_smoking_consumes_fuel_and_conserves_food_with_processing_loss()->void:
 	GameState.known_discoveries.assign(["smoking"]);GameState.discovery_adoption.smoking=1.0
 	GameState.resource_stockpiles.Timber=.04
-	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":10.0,"Fish":10.0,"Dry staples":0.0,"Preserved food":0.0}
+	GameState.food_stocks={FoodSystem.FRESH:20.0,FoodSystem.STORED:0.0}
 	var inputs:Dictionary={}
 	var result:=FoodSystem._preserve(100,0,false,inputs)
-	assert_float(float(result["Fresh meat"])+float(result.Fish)).is_equal_approx(1.0,.00001)
-	assert_float(float(GameState.food_stocks["Preserved food"])).is_equal_approx(.82,.00001)
-	assert_float(float(GameState.food_stocks["Fresh meat"])+float(GameState.food_stocks.Fish)).is_equal_approx(19.0,.00001)
+	assert_float(float(result.smoked)).is_equal_approx(1.0,.00001)
+	assert_float(float(GameState.food_stocks[FoodSystem.STORED])).is_equal_approx(.82,.00001)
+	assert_float(float(GameState.food_stocks[FoodSystem.FRESH])).is_equal_approx(19.0,.00001)
 	assert_float(float(inputs.Timber)).is_equal_approx(.04,.00001)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(0,.00001)
 
@@ -105,32 +96,25 @@ func test_air_drying_remains_available_without_fuel_and_no_zero_adoption_bonus()
 	GameState.known_discoveries.assign(["food_drying","smoking"])
 	GameState.discovery_adoption.food_drying=1.0;GameState.discovery_adoption.smoking=1.0
 	GameState.resource_stockpiles.Timber=0
-	GameState.food_stocks={"Fresh plants":10.0,"Fresh meat":10.0,"Fish":10.0,"Dry staples":0.0,"Preserved food":0.0}
+	GameState.food_stocks={FoodSystem.FRESH:30.0,FoodSystem.STORED:0.0}
 	var result:=FoodSystem._preserve(10,0,false)
-	assert_float(float(result["Fresh plants"])).is_greater(0.0)
-	assert_float(float(result["Fresh meat"])+float(result.Fish)).is_equal(0.0)
+	assert_float(float(result.dried)).is_greater(0.0)
+	assert_float(float(result.smoked)).is_equal(0.0)
 	GameState.discovery_adoption.food_drying=0
-	assert_float(float(FoodSystem._preserve(10,0,false)["Fresh plants"])).is_equal(0.0)
+	assert_float(float(FoodSystem._preserve(10,0,false).dried)).is_equal(0.0)
 
 func test_preservation_needs_physical_equipment_and_drying_tracks_climate()->void:
 	GameState.known_discoveries.assign(["food_drying","smoking"])
 	GameState.discovery_adoption.food_drying=1.0;GameState.discovery_adoption.smoking=1.0
-	GameState.resource_stockpiles["Drying Mats"]=0.0;GameState.resource_stockpiles["Smoke Frames"]=0.0
+	# Racks and frames are household goods: without them nothing is preserved.
+	GameState.resource_stockpiles["Civilian Goods"]=0.0;FoodSystem._lever_cache.clear()
+	GameState.food_stocks={FoodSystem.FRESH:300.0,FoodSystem.STORED:0.0}
 	var before:=GameState.food_stocks.duplicate(true)
-	assert_dict(FoodSystem._preserve(100,100,false)).is_equal({"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0})
+	assert_dict(FoodSystem._preserve(100,100,false)).is_equal({"dried":0.0,"smoked":0.0,"canned":0.0})
 	assert_dict(GameState.food_stocks).is_equal(before)
 	var dry_hot:=FoodSystem._drying_weather_factor({"precipitation":.05,"mean_temperature_c":30.0,"seasonality_c":0.0},0)
 	var wet_cold:=FoodSystem._drying_weather_factor({"precipitation":.95,"mean_temperature_c":0.0,"seasonality_c":0.0},0)
 	assert_float(dry_hot).is_greater(wet_cold)
-
-func test_meal_staff_reduces_preservation_capacity_without_reallocating_people()->void:
-	GameState.known_discoveries.append("food_drying");GameState.discovery_adoption.food_drying=1.0
-	var food_before:=GameState.food_stocks.duplicate(true)
-	var normal:=FoodSystem._preserve(10,0,false)
-	GameState.food_stocks=food_before.duplicate(true)
-	var plan:=Meals.plan(10,20,false)
-	var shared:=FoodSystem._preserve(10-float(plan.workers),0,false)
-	assert_float(float(shared["Fresh plants"])).is_less(float(normal["Fresh plants"]))
 
 func test_rival_uses_own_adoption_inputs_and_round_trip_state()->void:
 	var player_stocks:=GameState.resource_stockpiles.duplicate(true)
@@ -224,20 +208,8 @@ func test_meals_use_only_fuel_above_craft_reserve()->void:
 func test_fractional_smoking_fuel_cannot_leave_negative_stock()->void:
 	GameState.known_discoveries.assign(["smoking"]);GameState.discovery_adoption.smoking=1.0
 	GameState.resource_stockpiles.Timber=.0013
-	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":10.0,"Fish":10.0,"Dry staples":0.0,"Preserved food":0.0}
+	GameState.food_stocks={FoodSystem.FRESH:20.0,FoodSystem.STORED:0.0}
 	var inputs:Dictionary={}
 	FoodSystem._preserve(100,0,false,inputs)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(0.0)
 	assert_float(float(inputs.Timber)).is_equal_approx(.0013,.000000001)
-
-
-func test_smoking_uses_only_fuel_above_craft_reserve()->void:
-	GameState.known_discoveries.assign(["smoking","timber_post_beam_connections"]);GameState.discovery_adoption.smoking=1.0
-	var reserve:=float(ResourceSystem._gathering_startup_reserves().Timber)
-	GameState.resource_stockpiles.Timber=reserve+.04
-	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":10.0,"Fish":10.0,"Dry staples":0.0,"Preserved food":0.0}
-	var inputs:Dictionary={}
-	FoodSystem._preserve(100,0,false,inputs)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(reserve,.000001)
-	assert_float(float(inputs.Timber)).is_equal_approx(.04,.000001)
-

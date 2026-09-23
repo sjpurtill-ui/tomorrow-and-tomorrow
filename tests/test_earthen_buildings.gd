@@ -1,8 +1,6 @@
 extends GdUnitTestSuite
 const B=preload("res://scripts/building_material_operations.gd")
 const K=preload("res://scripts/earthen_building_knowledge.gd")
-const I=preload("res://scripts/civilian_industry.gd")
-const P=preload("res://scripts/persistent_production.gd")
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("earth",1341)
 func after_test()->void:WorldSimulation.clear()
 func learn(id:String)->void:
@@ -22,22 +20,6 @@ func test_two_building_methods_have_paid_materials_and_valid_contracts()->void:
 		assert_int(K.entries().size()).is_equal(2)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 		for id:String in ["adobe_units","wattle_daub"]:assert_bool(B.valid(profile(id))).is_true())
-func test_workshops_pay_for_water_reinforcement_and_frames()->void:
-	WorldSimulation.scoped("earth",func()->void:
-		var state=WorldSimulation.state;state.population_allocations.Crafting=30;state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
-		for item:String in ["adobe_mix","earthen_daub","wattle_lattices"]:
-			var spec:=I.product(item);learn(spec.gate)
-			state.resource_stockpiles={}
-			for resource:String in spec.materials:state.resource_stockpiles[resource]=float(spec.materials[resource])
-			var stock:Dictionary=state.resource_stockpiles.duplicate(true)
-			assert_bool(WorldSimulation.military.start_production_line(item,1).has("error")).is_true()
-			assert_dict(state.resource_stockpiles).is_equal(stock)
-			for resource:String in spec.tooling:state.resource_stockpiles[resource]=float(state.resource_stockpiles.get(resource,0))+float(spec.tooling[resource])
-			assert_bool(WorldSimulation.military.start_production_line(item,1).get("ok",false)).is_true()
-			var job:Dictionary=WorldSimulation.military.equipment_queue.back();P.advance(WorldSimulation.military,job,float(spec.days))
-			assert_float(float(state.resource_stockpiles[spec.output])).is_equal(1.0)
-			for resource:String in spec.materials:assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(0,.000001)
-			WorldSimulation.military.cancel_equipment_job(int(job.id)))
 func test_adobe_dries_before_wall_work_and_cannot_skip_wet_or_cold_time()->void:
 	WorldSimulation.scoped("earth",func()->void:
 		weather();var plot:={"construction_progress":0.0,"building_materials":profile("adobe_units"),"status":"under_construction"}

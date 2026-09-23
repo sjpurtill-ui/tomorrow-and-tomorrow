@@ -1,12 +1,15 @@
 extends GdUnitTestSuite
 const K=preload("res://scripts/communications_knowledge.gd")
-const I=preload("res://scripts/civilian_industry.gd")
-const P=preload("res://scripts/persistent_production.gd")
 const R=preload("res://scripts/technology_requirements.gd")
 const A=preload("res://scripts/communications_analysis.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("communications",997)
 func after_test()->void:WorldSimulation.clear()
+## Adds a plant's flattened cost and `days` of its daily inputs to the local stock.
+func stock_plant(id:String,days:float)->void:
+	var spec:Dictionary=Ops.PLANTS[id];var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	for item:String in spec.cost:stocks[item]=float(stocks.get(item,0.0))+float(spec.cost[item])
+	for item:String in spec.inputs:stocks[item]=float(stocks.get(item,0.0))+float(spec.inputs[item])*days
 func learn(id:String)->void:
 	if id not in WorldSimulation.state.known_discoveries:WorldSimulation.state.known_discoveries.append(id)
 	WorldSimulation.state.discovery_adoption[id]=1.0
@@ -22,24 +25,6 @@ func test_catalog_and_amplifier_alternatives()->void:
 			assert_bool(R.evaluate(entry,common+["transistor_amplifiers"]).ready).is_true()
 			common.pop_back()
 			assert_bool(R.evaluate(entry,common+["triode_valves","transistor_amplifiers"]).ready).is_false()
-	)
-func test_valve_and_transistor_equipment_consume_paid_inputs()->void:
-	WorldSimulation.scoped("communications",func()->void:
-		var state=WorldSimulation.state
-		for item:String in ["valve_telephone_repeaters","transistor_radio_oscillators","transistor_frequency_mixers","valve_frequency_modulation"]:
-			var spec:=I.product(item);learn(spec.gate)
-			state.resource_stockpiles.clear()
-			for material:String in spec.materials:state.resource_stockpiles[material]=float(spec.materials[material])
-			for material:String in spec.tooling:state.resource_stockpiles[material]=float(state.resource_stockpiles.get(material,0))+float(spec.tooling[material])
-			assert_bool(WorldSimulation.military.start_production_line(item,1).get("ok",false)).is_true()
-			var job:Dictionary=WorldSimulation.military.equipment_queue.back()
-			P.advance(WorldSimulation.military,job,float(spec.days)*.5)
-			assert_float(float(state.resource_stockpiles.get(spec.output,0))).is_equal(0.0)
-			P.advance(WorldSimulation.military,job,float(spec.days))
-			assert_int(int(job.completed)).is_equal(1)
-			assert_float(float(state.resource_stockpiles.get(spec.output,0))).is_equal(1.0)
-			for material:String in spec.materials:assert_float(float(state.resource_stockpiles.get(material,0))).is_equal(0.0)
-			WorldSimulation.military.cancel_equipment_job(int(job.id))
 	)
 func test_signal_analysis_is_subject_specific_and_exhaustible()->void:
 	WorldSimulation.scoped("communications",func()->void:
@@ -66,8 +51,8 @@ func test_rival_builds_against_returned_demand_and_pays_for_equipment()->void:
 		state.population_allocations.Crafting=10;state.population_allocations.Knowledge=20
 		state.elapsed_days=100
 		learn("optical_telegraphy");learn("experimental_controls")
-		state.resource_stockpiles["Optical Telegraph Sets"]=1.0
-		state.resource_stockpiles["Timber"]=2.0;state.resource_stockpiles["Paper"]=2.0
+		stock_plant("optical_signal_bench",100.0)
+		var before:Dictionary=state.resource_stockpiles.duplicate()
 		var planner=preload("res://scripts/communications_investment.gd")
 		assert_dict(planner.recommendation()).is_empty()
 		var item:={"reverse_engineered":true,"discovery_id":"optical_telegraphy","specimen_item":"optical_telegraphy","returned_day":101,"study":0.0,"work":300.0}
@@ -77,7 +62,7 @@ func test_rival_builds_against_returned_demand_and_pays_for_equipment()->void:
 		assert_str(planner.recommendation().get("plant","")).is_equal("optical_signal_bench")
 		preload("res://scripts/civilization_controller.gd").civilian_orders("communications",{})
 		assert_int(int(Ops.data().plants.optical_signal_bench.building)).is_equal(1)
-		assert_float(float(state.resource_stockpiles["Optical Telegraph Sets"])).is_equal(0.0)
+		for paid:String in Ops.PLANTS.optical_signal_bench.cost:assert_float(float(state.resource_stockpiles[paid])).is_equal_approx(float(before[paid])-float(Ops.PLANTS.optical_signal_bench.cost[paid]),.000001)
 		assert_dict(planner.recommendation()).is_empty()
 		for day in range(101,110):state.elapsed_days=day;Ops.advance(day)
 		assert_float(Ops.service("analysis_optical")).is_equal(1.0)
@@ -105,13 +90,13 @@ func test_rival_does_not_buy_optical_bench_for_digital_demand()->void:
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
 		state.population_allocations.Crafting=10;state.population_allocations.Knowledge=20;state.elapsed_days=100
 		learn("optical_telegraphy");learn("experimental_controls")
-		state.resource_stockpiles["Optical Telegraph Sets"]=1.0;state.resource_stockpiles["Timber"]=2.0;state.resource_stockpiles["Paper"]=2.0
+		stock_plant("optical_signal_bench",100.0)
 		preload("res://scripts/society_exchange.gd").data().collections.sample={"reverse_engineered":true,"discovery_id":"packet_routers","specimen_item":"packet_routers","returned_day":100,"study":0.0,"work":300.0}
 		assert_dict(preload("res://scripts/communications_investment.gd").recommendation()).is_empty()
 		for id:String in ["electrical_telegraphy","electrical_measurement","telephone_circuits"]:learn(id)
 		Ops.data().plants.optical_signal_bench={"installed":1,"building":0,"work":0.0,"enabled":true}
 		Ops.data().plants.solar_array={"installed":1,"building":0,"work":0.0,"enabled":true}
-		state.resource_stockpiles["Electrical Telegraph Sets"]=1.0;state.resource_stockpiles["Telephone Sets"]=1.0
+		stock_plant("electrical_signal_bench",100.0)
 		var sample:Dictionary=preload("res://scripts/society_exchange.gd").data().collections.sample
 		sample.discovery_id="telephone_repeaters";sample.specimen_item="telephone_repeaters"
 		assert_str(preload("res://scripts/communications_investment.gd").recommendation().get("plant","")).is_equal("electrical_signal_bench")

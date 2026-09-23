@@ -1,7 +1,5 @@
 extends GdUnitTestSuite
 const Knowledge=preload("res://scripts/semiconductor_knowledge.gd")
-const Industry=preload("res://scripts/civilian_industry.gd")
-const Production=preload("res://scripts/persistent_production.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
 const P=preload("res://scripts/knowledge_pathways.gd")
 func before_test()->void:
@@ -19,8 +17,6 @@ func factory()->void:
 		GameState.known_discoveries.append(entry.id);GameState.discovery_adoption[entry.id]=1.0
 	GameState.resource_stockpiles.clear()
 	for resource:String in ["Fine Sand","Coal","Graphite","Salt","Freshwater","Phosphate Rock","Refined Copper","Timber","Stone","Clay"]:GameState.resource_stockpiles[resource]=1000.0
-	for item:String in ["silicon_feedstock","purified_silicon","silicon_boules","silicon_wafers","solar_cells","solar_modules"]:
-		for resource:String in Industry.product(item).tooling:GameState.resource_stockpiles[resource]=1000.0
 	GameState.technology_operations.plants.steam_generator={"installed":1,"building":0,"work":0.0,"enabled":true}
 func day()->void:
 	GameState.elapsed_days+=1;Ops.advance(GameState.elapsed_days)
@@ -44,24 +40,15 @@ func test_empirical_routes_reconverge_without_requiring_band_theory()->void:
 	assert_str(String(P.chosen(DiscoverySystem.discovery_definition("photovoltaic_conversion"),100000).id)).is_equal("empirical")
 	GameState.known_discoveries.erase("electrical_measurement")
 	assert_bool(P.ready(DiscoverySystem.discovery_definition("photovoltaic_conversion"),100000)).is_false()
-func test_manufactured_silicon_chain_supplies_a_real_commissioned_array()->void:
-	factory()
-	var job:Dictionary={}
-	for item:String in ["silicon_feedstock","purified_silicon","silicon_boules","silicon_wafers","solar_cells","solar_modules"]:
-		var target:=1 if item=="solar_modules" else 2
-		if job.is_empty():
-			assert_bool(MilitaryCampaign.start_production_line(item,target).get("ok",false)).is_true()
-			job=MilitaryCampaign.equipment_queue.back()
-		else:
-			assert_bool(MilitaryCampaign.retool_production_line(int(job.id),item).get("ok",false)).is_true()
-			MilitaryCampaign.configure_production_line(int(job.id),target,false)
-		for n in 40:
-			day();Production.advance(MilitaryCampaign,job,100)
-			if Production.stock(MilitaryCampaign,job)>=target:break
-		assert_int(Production.stock(MilitaryCampaign,job)).override_failure_message(item+" did not produce its downstream input").is_equal(target)
-	assert_float(float(GameState.resource_stockpiles["Solar Cells"])).is_equal(0.0)
+func pay_array()->void:
+	for item:String in Ops.PLANTS.solar_array.cost:GameState.resource_stockpiles[item]=float(GameState.resource_stockpiles.get(item,0))+float(Ops.PLANTS.solar_array.cost[item])
+func test_paid_array_commissions_from_raw_materials_and_goods()->void:
+	factory();pay_array()
+	var spec:Dictionary=Ops.PLANTS.solar_array
+	assert_bool(spec.cost.has("Photovoltaic Modules")).is_false()
+	var before:Dictionary=GameState.resource_stockpiles.duplicate(true)
 	assert_bool(Ops.install("solar_array").get("ok",false)).is_true()
-	assert_float(float(GameState.resource_stockpiles["Photovoltaic Modules"])).is_equal(0.0)
+	for item:String in spec.cost:assert_float(float(before[item])-float(GameState.resource_stockpiles[item])).is_equal_approx(float(spec.cost[item]),.000001)
 	assert_int(int(Ops.data().plants.solar_array.installed)).is_equal(0)
 	for n in 6:day()
 	assert_int(int(Ops.data().plants.solar_array.installed)).is_equal(1)
@@ -87,9 +74,9 @@ func test_solar_and_steam_share_only_unmet_demand()->void:
 	assert_float(Ops.service("cold_storage")).is_equal(400.0)
 	assert_float(absf(float(Ops.data().inputs.Coal)-.1)).is_less(.000001)
 func test_solar_requires_commissioning_and_actual_operators()->void:
-	factory();GameState.resource_stockpiles["Photovoltaic Modules"]=1.0
+	factory();pay_array()
 	assert_float(Ops.service("electricity")).is_equal(0.0)
-	Ops.install("solar_array");GameState.population_allocations.Crafting=0
+	assert_bool(Ops.install("solar_array").get("ok",false)).is_true();GameState.population_allocations.Crafting=0
 	for n in 7:day()
 	assert_int(int(Ops.data().plants.solar_array.installed)).is_equal(0)
 	assert_float(Ops.service("electricity")).is_equal(0.0)

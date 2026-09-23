@@ -32,23 +32,25 @@ func test_full_workshop_rechecks_capacity_before_reserving()->void:
 func test_ammunition_and_cart_quotes_reserve_only_on_order()->void:
 	for id:String in ["bow_craft","joinery"]:GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
 	GameState.resource_stockpiles["Fiber Plants"]=100.0;GameState.resource_stockpiles.Stone=100.0
-	GameState.resource_stockpiles["Cart Assembly Kits"]=2.0
+	# A cart is built from raw materials and Civilian Goods; stock exactly one
+	# more cart's worth on top of the ammunition supplies.
+	var cart:Dictionary=MilitaryCampaign._transport_recipe().materials
+	for resource:String in cart:GameState.resource_stockpiles[resource]=float(GameState.resource_stockpiles.get(resource,0))+float(cart[resource])
 	var before:=GameState.resource_stockpiles.duplicate(true)
 	assert_bool(MilitaryCampaign.consumable_production_quote("arrows",5).has("ok")).is_true()
 	assert_bool(MilitaryCampaign.transport_cart_quote(1).has("ok")).is_true()
+	assert_bool(MilitaryCampaign.transport_cart_quote(2).has("error")).is_true()
 	assert_dict(GameState.resource_stockpiles).is_equal(before)
 	var ammo:=MilitaryCampaign.queue_consumable_production("arrows",5)
 	assert_int(int(ammo.get("queued",0))).is_equal(5)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(99.6,.0001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(float(before.Timber)-.4,.0001)
 	MilitaryCampaign.cancel_equipment_job(int(ammo.id))
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(100,.0001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(float(before.Timber),.0001)
 	var carts:=MilitaryCampaign.queue_transport_cart_production(1)
 	assert_int(int(carts.get("queued",0))).is_equal(1)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(100,.0001)
-	assert_float(float(GameState.resource_stockpiles["Fiber Plants"])).is_equal(100.0)
-	assert_float(float(GameState.resource_stockpiles["Cart Assembly Kits"])).is_equal(1.0)
+	for resource:String in cart:assert_float(float(GameState.resource_stockpiles[resource])).is_equal_approx(float(before[resource])-float(cart[resource]),.0001)
 	MilitaryCampaign.cancel_equipment_job(int(carts.id))
-	assert_float(float(GameState.resource_stockpiles["Cart Assembly Kits"])).is_equal(2.0)
+	for resource:String in cart:assert_float(float(GameState.resource_stockpiles[resource])).is_equal_approx(float(before[resource]),.0001)
 func test_repair_preview_matches_available_damaged_items_and_returns_on_cancel()->void:
 	MilitaryCampaign.damaged_equipment.improvised=3
 	var quote:=MilitaryCampaign.equipment_repair_quote("improvised",5)

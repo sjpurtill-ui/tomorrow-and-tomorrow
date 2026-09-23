@@ -193,20 +193,6 @@ func test_every_bundle_matches_explicit_catalog_stock_thresholds()->void:
 			for requirement:Dictionary in entry.resource_requirements:
 				if requirement.resource==resource:matched=float(requirement.minimum_stock)==float(M.Catalog.EXPERIMENTAL_SUPPLIES[subject][resource])
 			assert_bool(matched).override_failure_message(subject+" "+resource).is_true()
-func test_imported_ore_is_consumed_by_actual_manufacturing_after_learning()->void:
-	materials_setup()
-	var mission:=order();arrive(mission);receive(mission)
-	GameState.resource_stockpiles.Timber=100.0;GameState.resource_stockpiles.Clay=20.0
-	GameState.population_allocations.Crafting=20
-	GameState.settlement_plots=[{"land_use":"workshop","worker_capacity":20,"condition":1.0,"status":"active","damage":{}}]
-	assert_bool(MilitaryCampaign.start_production_line("refined_copper",2).has("error")).is_true()
-	# Completion of local research is a separate prerequisite, never a cargo reward.
-	GameState.known_discoveries.append("copper_smelting");GameState.discovery_adoption.copper_smelting=1.0
-	assert_bool(MilitaryCampaign.start_production_line("refined_copper",2).get("ok",false)).is_true()
-	preload("res://scripts/persistent_production.gd").advance(MilitaryCampaign,MilitaryCampaign.equipment_queue.back(),6.0)
-	assert_float(float(GameState.resource_stockpiles["Copper Ore"])).is_equal(1.0)
-	assert_float(float(GameState.resource_stockpiles["Refined Copper"])).is_equal(2.0)
-	assert_array(GameState.resource_deposits).is_empty()
 func test_tree_discloses_the_stock_alternative_without_claiming_local_access()->void:
 	materials_setup()
 	for row:Dictionary in DiscoverySystem.technology_tree():

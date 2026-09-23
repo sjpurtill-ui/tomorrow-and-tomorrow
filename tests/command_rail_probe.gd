@@ -216,8 +216,8 @@ func _ready()->void:
 	_expect(not terrain.hud.dock.visible,"escape did not close the primary dock")
 	await get_tree().process_frame
 
-	# KPI strip inside viewport with all five chips.
-	for chip_name in ["KpiPopulation","KpiFood","KpiWater","KpiHealth","KpiLabor"]:
+	# KPI strip inside viewport with every indicator chip.
+	for chip_name in ["KpiPopulation","KpiFood","KpiWater","KpiGoods","KpiHealth","KpiScience","KpiGdp"]:
 		var chip:=hud.find_child(chip_name,true,false) as Control
 		_expect(chip!=null,"missing %s" % chip_name)
 		if chip:

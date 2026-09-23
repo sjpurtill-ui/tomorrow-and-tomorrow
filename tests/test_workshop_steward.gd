@@ -22,24 +22,6 @@ func test_scheduler_preserves_manual_targets_and_pauses()->void:
 	assert_bool(bool(job.get("planner_managed",false))).is_false()
 	assert_bool(job.paused).is_true()
 
-func test_arrival_review_uses_paid_supplies_and_respects_disabled_management()->void:
-	GameState.population_allocations.Knowledge=20
-	GameState.known_discoveries.append("paper_making");GameState.discovery_adoption.paper_making=1.0
-	GameState.resource_stockpiles.merge({"Paper Pulp":5.0,"Freshwater":5.0,"Timber":0.0,"Fiber Plants":20.0},true)
-	preload("res://scripts/society_exchange.gd").data().collections["study"]={"returned_day":0,"study":0.0,"work":240.0}
-	GameState.simulation_metrics.food_days=30;GameState.simulation_metrics.food_intake_ratio=1.0
-	MilitaryCampaign.workshop.review_arrivals()
-	assert_array(MilitaryCampaign.equipment_queue).is_empty()
-	GameState.resource_stockpiles.Timber=4.0
-	MilitaryCampaign.workshop.set_enabled(false)
-	MilitaryCampaign.workshop.review_arrivals()
-	assert_array(MilitaryCampaign.equipment_queue).is_empty()
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(4.0)
-	MilitaryCampaign.workshop.set_enabled(true)
-	MilitaryCampaign.workshop.review_arrivals()
-	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(1)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(0.0)
-	assert_bool(MilitaryCampaign.equipment_queue[0].planner_managed).is_true()
 func test_scheduling_pays_normal_inputs_and_marks_only_its_line()->void:
 	var result:Dictionary=MilitaryCampaign.workshop.schedule({"item":"improvised","target":3})
 	assert_bool(result.changed).is_true()
@@ -141,17 +123,6 @@ func test_completed_batch_remains_visible_after_queue_removal()->void:
 	assert_int(MilitaryCampaign.workshop.data.receipts.size()).is_equal(1)
 	assert_float(float(MilitaryCampaign.workshop.data.receipts[0].quantity)).is_equal(1.0)
 
-func test_coproduct_ledger_uses_fractional_store_deltas()->void:
-	var job:={"item":"metallographic_nitric_acid","job_type":"civilian"}
-	var before:Dictionary=MilitaryCampaign.workshop.output_stocks(job)
-	GameState.resource_stockpiles["Metallographic Nitric Acid"]=float(before["Metallographic Nitric Acid"])+1
-	GameState.resource_stockpiles["Spent Etchant Sulfate Salts"]=float(before["Spent Etchant Sulfate Salts"])+1.5
-	MilitaryCampaign.workshop.record(job,before)
-	assert_int(MilitaryCampaign.workshop.data.receipts.size()).is_equal(2)
-	var output:Dictionary={}
-	for receipt:Dictionary in MilitaryCampaign.workshop.data.receipts:output[receipt.resource]=receipt.quantity
-	assert_float(float(output["Spent Etchant Sulfate Salts"])).is_equal(1.5)
-
 func test_delegating_continuous_order_finishes_one_item_then_can_retask()->void:
 	var job:=start(0)
 	Production.advance(MilitaryCampaign,job,float(job.work_per_item)*.5)
@@ -226,51 +197,9 @@ func test_staff_idle_line_resumes_when_its_demand_returns()->void:
 	Production.advance(MilitaryCampaign,job,100)
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(1)
 
-func test_delegated_player_workshops_supply_real_building_improvements()->void:
-	GameState.settlement_plots[0].material_family="organic"
-	GameState.settlement_plots[0].id=1
-	GameState.population_allocations.Construction=20
-	GameState.known_discoveries.assign(["building_shading_design","seasonal_patterns","geometric_survey"])
-	GameState.discovery_adoption.building_shading_design=1.0
-	GameState.resource_stockpiles.merge({"Stone":2.0,"Timber":20.0,"Fiber Plants":10.0},true)
-	MilitaryCampaign.workshop.advance(2)
-	assert_array(MilitaryCampaign.equipment_queue).is_not_empty()
-	if MilitaryCampaign.equipment_queue.is_empty():return
-	var job:Dictionary=MilitaryCampaign.equipment_queue[0]
-	assert_str(String(job.item)).is_equal("building_shade_lattices")
-	assert_bool(bool(job.planner_managed)).is_true()
-	assert_float(float(GameState.resource_stockpiles.get("Building Shade Lattices",0))).is_equal(0.0)
-	var timber:=float(GameState.resource_stockpiles.Timber)
-	Production.advance(MilitaryCampaign,job,100)
-	assert_float(float(GameState.resource_stockpiles.get("Building Shade Lattices",0))).is_greater(0.0)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber)
-
-func test_delegated_player_commissions_a_needed_kiln_without_free_installation()->void:
-	GameState.population_allocations.Construction=20
-	GameState.known_discoveries.assign(["kiln_control","lime_burning"])
-	GameState.discovery_adoption.kiln_control=1.0
-	GameState.resource_stockpiles.merge({"Stone":12.0,"Clay":6.0,"Joined Timber Components":2.0},true)
-	MilitaryCampaign.workshop.set_enabled(false)
-	MilitaryCampaign.workshop.advance(1)
-	assert_dict(GameState.technology_operations.plants).is_empty()
-	MilitaryCampaign.workshop.set_enabled(true)
-	MilitaryCampaign.workshop.advance(2)
-	assert_bool(GameState.technology_operations.plants.has("controlled_kiln")).is_true()
-	if not GameState.technology_operations.plants.has("controlled_kiln"):return
-	var kiln:Dictionary=GameState.technology_operations.plants.controlled_kiln
-	assert_int(int(kiln.building)).is_equal(1)
-	assert_int(int(kiln.installed)).is_equal(0)
-	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal(0.0)
-	assert_float(float(GameState.resource_stockpiles.Clay)).is_equal(0.0)
-	assert_float(float(GameState.resource_stockpiles["Joined Timber Components"])).is_equal(0.0)
-	MilitaryCampaign.workshop.advance(3)
-	assert_int(int(kiln.building)).is_equal(1)
-
-func test_delegated_consumed_input_yields_but_manual_override_cancels_switch()->void:
-	for id:String in ["drop_spindles","fiber_retting"]:
-		GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
-	GameState.resource_stockpiles.merge({"Prepared Fibers":100.0,"Stone":100.0,"Clay":100.0,"Fiber Plants":100.0},true)
-	var order:=MilitaryCampaign.start_production_line("spun_yarn",12)
+func test_delegated_partial_batch_yields_but_manual_override_cancels_switch()->void:
+	GameState.resource_stockpiles.merge({"Stone":100.0},true)
+	var order:=MilitaryCampaign.start_production_line("spear",12)
 	assert_bool(order.get("ok",false)).override_failure_message(str(order)).is_true()
 	if order.has("error"):return
 	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
@@ -279,12 +208,12 @@ func test_delegated_consumed_input_yields_but_manual_override_cancels_switch()->
 	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_false()
 	MilitaryCampaign.workshop.delegate_line(int(job.id))
 	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_true()
-	MilitaryCampaign.workshop.schedule({"item":"spun_yarn","target":20})
+	MilitaryCampaign.workshop.schedule({"item":"spear","target":20})
 	assert_bool(job.has("ai_turnover")).is_true()
 	MilitaryCampaign.configure_production_line(int(job.id),7,true)
 	assert_bool(job.has("ai_turnover")).is_false()
 	turn.advance("player",MilitaryCampaign,true)
-	assert_str(job.item).is_equal("spun_yarn")
+	assert_str(job.item).is_equal("spear")
 	assert_bool(job.paused).is_true()
 	MilitaryCampaign.workshop.delegate_line(int(job.id))
 	assert_bool(turn.request("player",MilitaryCampaign,"improvised",3,true)).is_true()

@@ -127,9 +127,11 @@ func _layout()->void:
 		var compact_top:=view.x<1280
 		(kpi_chips.get("population",{}).get("chip") as Control).visible=not compact_top
 		(kpi_chips.get("water",{}).get("chip") as Control).visible=not compact_top
-		if kpi_separators.size()>=2:
+		(kpi_chips.get("goods",{}).get("chip") as Control).visible=not compact_top
+		if kpi_separators.size()>=3:
 			kpi_separators[0].visible=not compact_top
 			kpi_separators[1].visible=not compact_top
+			kpi_separators[2].visible=not compact_top
 		kpi_strip.reset_size()
 		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),6)
 	if queue_root:
