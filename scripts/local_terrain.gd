@@ -1012,6 +1012,7 @@ func _process(delta: float) -> void:
 	if map_network_elapsed>=0.1:
 		map_network_elapsed=fmod(map_network_elapsed,0.1)
 		_refresh_settlement_network()
+		if not pending_city_designs.is_empty():_advance_pending_city_designs()
 		stamp=trace.mark("frame_map_settlement_network",stamp)
 		_refresh_settlement_convoy_marker()
 	stamp=trace.mark("frame_map_snapshots",stamp)
@@ -7696,6 +7697,7 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 	SettlementModel._ensure_city_resources(record)
 	var point:Vector2=record.position
 	var center:=Vector3(point.x,0,point.y)
+	var rebuilt:=true
 	# A city ledger changes daily. Its buildings only need new meshes when
 	# their actual appearance or the camera's detail requirements change.
 	SettlementModel.with_city_resources(String(record.id),func()->void:
@@ -7704,7 +7706,9 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 		var fabric:Node3D=null
 		for child in parent.get_children():
 			if String(child.get_meta("city_id",""))==String(record.id):fabric=child;break
-		if not force and fabric!=null and String(fabric.get_meta("visual_signature",""))==signature:return
+		if not force and fabric!=null and String(fabric.get_meta("visual_signature",""))==signature:
+			rebuilt=false
+			return
 		if fabric!=null:parent.remove_child(fabric);fabric.queue_free()
 		fabric=Node3D.new();fabric.name="CityDesign_"+String(record.id)
 		fabric.set_meta("city_id",String(record.id));fabric.set_meta("visual_signature",signature)
@@ -7713,20 +7717,36 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 		_create_plot_fabric(center,plots,lod,fabric)
 		_create_persistent_settlement_routes(center,GameState.settlement_routes,fabric)
 	)
-	return true
+	return rebuilt
 
 func _create_secondary_settlement_footprints(settlements:Array[Dictionary],force:=false)->void:
 	var parent:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
 	if parent==null:return
 	var visible_ids:Dictionary={}
+	pending_city_designs.clear()
 	for settlement in settlements:
 		var profile:=_settlement_expansion_visual_profile(settlement)
 		if camera!=null and camera.size>_settlement_stage_landscape_max_zoom(profile):continue
 		visible_ids[String(settlement.id)]=true
-		_create_secondary_city_design(settlement,parent,force)
+		pending_city_designs.append([settlement,force])
+	# Towns whose buildings changed are redrawn one per map tick, so a monthly
+	# change to several towns never lands in a single frame.
+	_advance_pending_city_designs()
 	for child in parent.get_children():
 		if child.has_meta("city_id") and not visible_ids.has(String(child.get_meta("city_id",""))):
 			parent.remove_child(child);child.queue_free()
+
+## Secondary towns still to check or redraw; see _advance_pending_city_designs.
+var pending_city_designs:Array=[]
+
+## Redraws at most one changed town; towns whose drawing is current cost only
+## a signature check. Runs with each map network tick until the queue is empty.
+func _advance_pending_city_designs()->void:
+	var parent:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
+	if parent==null:pending_city_designs.clear();return
+	while not pending_city_designs.is_empty():
+		var entry:Array=pending_city_designs.pop_front()
+		if _create_secondary_city_design(entry[0],parent,bool(entry[1])):return
 
 func _secondary_settlement_label_limit()->int:
 	if camera==null: return 24
