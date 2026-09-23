@@ -2417,3 +2417,7 @@ Flintmere and Morrowfen add eight distinct action compositions with separate aut
 ### Ten early character families
 
 Thornbank and Sunhollow add eight reviewed action illustrations with varied ordinary faces, adult proportions and working postures. Thirteen focused checks pass across all ten atlases and the nonrepeating initial assignment span. Existing saved families, civic behavior and simulation RNG are unchanged. The library now covers player plus nine rivals before repeating; further coverage remains.
+
+### Twelve early families and previous-world guard
+
+Greyfold and corrected Ochrestep add eight action scenes. The initial distribution covers player plus eleven rivals; saved identities are unchanged. A seed guard prevents a leftover diplomatic appearance from another world entering first assignment. Thirteen focused checks pass, including same-world preservation, different-world fallback and all twelve image regions. Native generated images and the targeted cast correction prompt are retained.

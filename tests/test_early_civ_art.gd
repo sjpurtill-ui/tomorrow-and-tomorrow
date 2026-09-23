@@ -14,12 +14,15 @@ func test_expanding_library_keeps_existing_government_and_diplomatic_family()->v
 	var records:Array=[{"early_art_profile":"reedwake"}]
 	assert_str(identity.family_for(982,"unused_appearance_fixture",records)).is_equal("reedwake")
 	var saved:Dictionary=ForeignDiplomacy.leaders.duplicate(true)
+	var saved_seed:=ForeignDiplomacy.seed_value;ForeignDiplomacy.seed_value=998
 	ForeignDiplomacy.leaders["unused_appearance_fixture"]={"early_art_profile":"windseam"}
+	assert_str(identity.family_for(999,"unused_appearance_fixture")).is_equal(identity.initial_family(999,"unused_appearance_fixture"))
+	ForeignDiplomacy.seed_value=999
 	assert_str(identity.family_for(999,"unused_appearance_fixture")).is_equal("windseam")
 	var visitor:={"name":"Illustrated envoy"}
 	Art.bind_foreign_identity(visitor,"unused_appearance_fixture",999)
 	assert_str(visitor.early_art_profile).is_equal("windseam")
-	ForeignDiplomacy.leaders=saved
+	ForeignDiplomacy.leaders=saved;ForeignDiplomacy.seed_value=saved_seed
 func test_all_fourteen_directions_have_distinct_early_scenes()->void:
 	var saved:=GameState.elapsed_days;GameState.elapsed_days=0
 	var seen:Dictionary={}

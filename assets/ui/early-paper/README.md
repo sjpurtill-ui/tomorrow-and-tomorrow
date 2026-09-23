@@ -29,3 +29,5 @@ Rillmark adds a sixth authored family with four distinct inspection/explanation 
 Flintmere and Morrowfen extend the library to eight families, each with four independently composed action scenes and its own prompt/provenance file. The nonrepeating first-assignment span grows to the player plus seven rivals; established saved families are unchanged. Atlases retain 1536 caps and mipmaps, and the shared source cache remains bounded at eight textures.
 
 Thornbank and Sunhollow extend the library to ten families and add eight action compositions. Native source IDs and exact prompts are recorded in their named prompt JSON files. New first assignments cover the player plus nine rivals before repetition; saved family assignments remain unchanged.
+
+Greyfold and Ochrestep extend the library to twelve families. Ochrestep's first image repeated a similar figure; the committed native repair replaces the lower-left person with a distinct older individual, with both prompts retained. Cross-screen family reuse also checks the diplomatic world's seed so a stale previous-world record is not adopted during first assignment.
