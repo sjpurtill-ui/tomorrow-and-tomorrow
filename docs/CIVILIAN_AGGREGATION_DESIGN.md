@@ -150,7 +150,8 @@ Because the day itself changes, bit-identical comparison against old saves no lo
 
 Each phase is one coherent, tested and pushed checkpoint.
 
-1. **Civilian Goods core.** The stock, production, wear and coverage; techniques drive effects; food storage, drying and clothing read coverage. Household crafts and clothing lots are removed. Migration for stocks.
+1. **Civilian Goods core.** The stock, production, wear and coverage; techniques drive effects; food storage, drying and clothing read coverage; the overview indicator and trade value. Household crafts and clothing lots are removed. Migration for stocks.
+1b. **Food.** Analytic forecast, two pools, processing as techniques, cached harvest environment. Migration for food.
 2. **Civilian industry and planners.** Flatten military recipes. Remove the civilian lines, the civilian planner branch and the part-buying investment planners. Plants, water, rail and docks use Civilian Goods costs. Build the production-dock Civilian Goods panel.
 3. **City capacities.** Capacities, condition and fabric tier replace plots in the simulation, including damage and siege recovery. Remove the fabric operations and building-material planning. Migration for plots.
 4. **Population-driven visuals.** A generator for the player's cities and rivals' cities, continuous growth, landmark placement, lens and UI.
@@ -158,8 +159,25 @@ Each phase is one coherent, tested and pushed checkpoint.
 
 Integration hotspots (per AGENTS.md): `game_state.gd`, `save_system.gd`, `local_terrain.gd`, `discovery_system.gd` and `military_campaign.gd` all change. GovernmentPeopleSystem ownership of officials and labor is unchanged.
 
-## 5. Open questions
+## 5. Food
 
-1. **Goods feel.** Should a well-supplied city hold about 1× its target (a steady state), and should shortages show on the civilization overview as a "Civilian Goods" KPI? Proposed: yes to both.
-2. **Research lab goods** (NMR, SEC, microscopy supplies). Proposed: fold them into Civilian Goods cost, plus the instrument technique. The alternative is keeping those few chains granular as part of research.
-3. **Food processing.** Proposed: keep it granular for now, and review it after phase 5 using the new profile.
+Decided: all four simplifications. Food stays geographic and can still cause hunger and famine, but it drops most of its bookkeeping.
+
+- **Forecast.** Replace the 90-day day-by-day projection (`food_system._forecast`, `_forecast_ordinary`) with an analytic outlook. Seasonal average production minus consumption minus spoilage is integrated in weekly steps and refreshed weekly per city. It still reports the first shortage day and the 30- and 90-day milestones that warnings read.
+- **Two pools.** `Fresh food` spoils quickly and is eaten first. `Stored food` spoils slowly and is the reserve. Diet quality comes from the share of each harvest source feeding the city, plus preparation techniques, instead of from five separately consumed types. Food trade, obligations, rations and army provisions draw from these pools.
+- **Processing becomes techniques.** Grain processing, bread and parboil batches, canning, meal preparation, selected-food processing, seed and botany trials, crop nutrients and fire tending all become technique discoveries, phased in by adoption. They act through four levers:
+  - spoilage rate (fresh and stored);
+  - daily fresh→stored preservation throughput, limited by Logistics workers;
+  - diet quality;
+  - farm and gathering yield.
+
+  The lot ledgers are removed: `food_batches`, `grain_processing` stocks and batches, canning plant inputs, meal plans, botany trials, crop-nutrient trials and fire embers. Their discoveries, art and history remain.
+- **Harvest.** Gathering, hunting, fishing and cultivation stay separate. Each draws on terrain, water, season, weather and source health. Per-city environment factors (`_environment_mix`, access, coastal profile) are cached and refreshed monthly.
+- **Migration.** The five food types sum into the two pools (fresh plants, meat and fish become fresh; dry staples and preserved food become stored). Processing lots and grain stocks become stored food at their ration value.
+
+## 6. Decisions from review
+
+- The civilization overview shows a **Civilian Goods** indicator: coverage, stock and daily net.
+- **Civilian Goods is a trade good.** It has a market price in the economy and can be exported and imported, internally and externally.
+- **Research lab supplies** fold into Civilian Goods: study media (paper, record books), microscopy supplies, NMR, SEC and polymer specimens, and instrument parts. Research programmes cost Civilian Goods, and instrument discoveries unlock them.
+- **Food:** all four simplifications (section 5), done as phase 1b after the Civilian Goods core.
