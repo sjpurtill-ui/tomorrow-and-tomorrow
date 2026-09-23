@@ -7,12 +7,16 @@ func after_test()->void:
 	WorldSimulation.clear();GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
 func prepare()->void:
 	WorldSimulation.state.elapsed_days=0
-	WorldSimulation.state.resource_stockpiles["NMR Methanol References"]=1.0
+	for item:String in C.REFERENCE:WorldSimulation.state.resource_stockpiles[item]=float(C.REFERENCE[item])
 	Ops.data().last_day=0;Ops.data().services={"nmr_unqualified_time":10.0}
+func reference_left()->float:
+	var left:=0.0
+	for item:String in C.REFERENCE:left+=float(WorldSimulation.state.resource_stockpiles.get(item,0.0))
+	return left
 func test_reference_payment_and_daily_work_are_required_before_qualification()->void:
 	WorldSimulation.scoped("calibration",func()->void:
 		prepare();assert_bool(C.start()).is_true()
-		assert_float(float(WorldSimulation.state.resource_stockpiles["NMR Methanol References"])).is_equal(0.0)
+		assert_float(reference_left()).is_equal(0.0)
 		C.advance();C.advance()
 		assert_float(float(C.data().work)).is_equal(1.0)
 		assert_bool(C.usable()).is_false()
@@ -40,6 +44,6 @@ func test_partial_calibration_survives_save_and_outage_without_second_reference(
 	WorldSimulation.scoped("calibration",func()->void:
 		assert_bool(C.start()).is_false();C.advance()
 		assert_float(float(C.data().work)).is_equal(1.0)
-		assert_float(float(WorldSimulation.state.resource_stockpiles["NMR Methanol References"])).is_equal(0.0)
+		assert_float(reference_left()).is_equal(0.0)
 		WorldSimulation.state.elapsed_days=2;Ops.data().last_day=2;Ops.data().services.nmr_unqualified_time=1.0;C.advance()
 		assert_float(float(C.data().work)).is_equal(2.0))

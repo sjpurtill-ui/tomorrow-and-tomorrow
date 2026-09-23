@@ -266,11 +266,12 @@ static func valid(value:Variant)->bool:
 	for field:String in ["last_day","workers"]:
 		if not number(value[field]) or value[field]<(-1 if field=="last_day" else 0):return false
 	if float(value.last_day)!=floorf(float(value.last_day)) or float(value.workers)>PLANTS.size()*2.0*LIMIT:return false
+	var input_names:=_input_names()
 	for field:String in ["services","inputs"]:
-		if not value[field] is Dictionary or value[field].size()>(18 if field=="services" else 17):return false
+		if not value[field] is Dictionary or value[field].size()>(18 if field=="services" else input_names.size()):return false
 		for key:Variant in value[field]:
 			if field=="services" and key not in ["kiln_heat","electricity","cold_storage","hammer_work","mechanical_work","specimen_observation","food_preservation","signal_analysis","analysis_optical","analysis_electrical","analysis_radio","analysis_digital","radio_records","polymer_reactor_work","polymer_heat_removal","polymer_stirred_work","nmr_unqualified_time","sec_column_time"]:return false
-			if field=="inputs" and key not in ["Timber","Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils","Brazed Steel Fittings","Pressure Pipe Fittings","Foam Cold-Store Panels","Insulated Cable"]:return false
+			if field=="inputs" and not input_names.has(key):return false
 			if not key is String or not number(value[field][key]) or value[field][key]<0:return false
 	for name:String in {"kiln_heat":4000.0,"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0,"sec_column_time":1000.0}:
 		if float(value.services.get(name,0))>float({"kiln_heat":4000.0,"electricity":23000.0,"cold_storage":400000.0,"hammer_work":8.0,"mechanical_work":30000.0,"specimen_observation":2000.0,"food_preservation":10000.0,"signal_analysis":17000.0,"analysis_optical":1000.0,"analysis_electrical":3000.0,"analysis_radio":5000.0,"analysis_digital":8000.0,"radio_records":1000.0,"polymer_reactor_work":1000.0,"polymer_heat_removal":2200.0,"polymer_stirred_work":1000.0,"nmr_unqualified_time":1000.0,"sec_column_time":1000.0}[name])+.000001:return false
@@ -285,4 +286,14 @@ static func valid(value:Variant)->bool:
 		if id=="water_hammer" and not WaterDrive.valid(record.get("river_site")):return false
 		if record.installed!=floorf(record.installed) or record.building!=floorf(record.building) or record.installed+record.building>LIMIT or record.work>=float(PLANTS[id].work):return false
 	return true
+## Names a daily input ledger may hold: every flattened plant input, plus the
+## former part names that older saves recorded before bills were flattened.
+const LEGACY_INPUTS:=["Timber","Coal","Freshwater","Bitumen","Compressed Air","Specimen Slides","Food Can Sets","Paper","Message Tape","Rolling Bearings","Drive Chains","Drive Belts","Rope Coils","Brazed Steel Fittings","Pressure Pipe Fittings","Foam Cold-Store Panels","Insulated Cable"]
+static var _input_name_set:Dictionary={}
+static func _input_names()->Dictionary:
+	if _input_name_set.is_empty():
+		for name:String in LEGACY_INPUTS:_input_name_set[name]=true
+		for id:String in PLANTS:
+			for name:String in PLANTS[id].get("inputs",{}):_input_name_set[name]=true
+	return _input_name_set
 static func number(value:Variant)->bool:return (value is float or value is int) and is_finite(float(value))

@@ -70,26 +70,6 @@ func test_paid_contract_arrives_once_without_granting_knowledge()->void:
 	assert_int(int(L.records().glassmaking.expires_day)).is_equal(expires)
 	assert_bool("glassmaking" in GameState.known_discoveries).is_false()
 	assert_bool(E.valid(JSON.parse_string(JSON.stringify(E.data())))).is_true()
-func test_licensed_work_pays_inputs_at_reduced_rate_and_expiry_stops_it()->void:
-	prepare();license_trip()
-	assert_bool(MilitaryCampaign.start_production_line("glass_batch",10).get("ok",false)).is_true()
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	var sand:=float(GameState.resource_stockpiles["Fine Sand"])
-	Production.advance(MilitaryCampaign,job,3.0)
-	assert_int(int(job.completed)).is_equal(0)
-	assert_float(float(job.progress_days)).is_equal_approx(1.95,.000001)
-	assert_float(float(GameState.resource_stockpiles["Fine Sand"])).is_equal_approx(sand-1.3,.000001)
-	var view:=Production.snapshot(MilitaryCampaign,job,3.0,1.0)
-	assert_bool(view.licensed).is_true()
-	assert_float(float(view.forecast_output_per_day)).is_greater(0.0)
-	GameState.elapsed_days=int(L.records().glassmaking.expires_day)
-	var stocks:=GameState.resource_stockpiles.duplicate(true)
-	Production.advance(MilitaryCampaign,job,100.0)
-	assert_dict(GameState.resource_stockpiles).is_equal(stocks)
-	GameState.known_discoveries.append("glassmaking");GameState.discovery_adoption.glassmaking=1.0
-	Production.advance(MilitaryCampaign,job,1.05)
-	assert_int(int(job.completed)).is_equal(1)
-	assert_bool(Production.snapshot(MilitaryCampaign,job,3.0,1.0).licensed).is_false()
 func test_supplier_withdrawal_and_war_interrupt_without_erasing_goods()->void:
 	prepare();license_trip();GameState.resource_stockpiles.Glass=2.0
 	E.owner_state("neighbor").society_exchange.sharing_policy="guarded"
@@ -144,34 +124,6 @@ func test_normal_envoy_processing_pays_supplier_and_renewal_requires_new_trip()-
 	var expires:=int(L.records().glassmaking.expires_day)
 	license_trip()
 	assert_int(int(L.records().glassmaking.expires_day)).is_greater(expires)
-func test_licensed_power_demand_is_real_and_zero_power_blocks_consumption()->void:
-	prepare()
-	var supplier:=E.owner_state("neighbor");supplier.known_discoveries.append("chloralkali_cells");supplier.discovery_adoption.chloralkali_cells=1.0
-	E.data()["production_licenses"]={"chloralkali_cells":{"source":"neighbor","issued_day":100000,"expires_day":100365}}
-	var recipe:Dictionary=preload("res://scripts/civilian_industry.gd").product("chloralkali_batch")
-	for material:String in recipe.materials:GameState.resource_stockpiles[material]=20.0
-	for material:String in recipe.tooling:GameState.resource_stockpiles[material]=20.0
-	assert_bool(MilitaryCampaign.start_production_line("chloralkali_batch",1).get("ok",false)).is_true()
-	assert_float(preload("res://scripts/technology_operations.gd").workshop_power_demand()).is_equal(2.0)
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	var before:=GameState.resource_stockpiles.duplicate(true)
-	Production.advance(MilitaryCampaign,job,100.0)
-	assert_dict(GameState.resource_stockpiles).is_equal(before)
-	assert_int(int(job.completed)).is_equal(0)
-func test_saved_licensed_job_and_register_remain_separate_from_mastery()->void:
-	prepare();license_trip()
-	assert_bool(MilitaryCampaign.start_production_line("glass_batch",1).get("ok",false)).is_true()
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	Production.advance(MilitaryCampaign,job,1.0)
-	var saved_register:Dictionary=JSON.parse_string(JSON.stringify(E.data()))
-	var saved_job:Dictionary=JSON.parse_string(JSON.stringify(job))
-	assert_bool(E.valid(saved_register)).is_true()
-	assert_str(Production.validate_saved({"equipment_queue":[saved_job]})).is_empty()
-	GameState.society_exchange=saved_register
-	assert_bool(L.active("glassmaking")).is_true()
-	Production.advance(MilitaryCampaign,saved_job,4.0)
-	assert_int(int(saved_job.completed)).is_equal(1)
-	assert_bool("glassmaking" in GameState.known_discoveries).is_false()
 func test_research_support_panel_offers_license_with_real_quote()->void:
 	prepare()
 	var panel:=preload("res://scripts/hud/research_purchase_panel.gd").new()
@@ -206,24 +158,15 @@ func paper_license_need()->void:
 	var study:Dictionary=E.data().collections.paper_lead.duplicate(true)
 	study.id="unfinished";study.study=0.0;study.discovery_id="clay_shaping";study.work=240.0
 	E.data().collections.unfinished=study
-func test_ai_license_uses_examined_lead_without_hidden_supplier_knowledge()->void:
-	paper_license_need()
-	var order:=AI.recommendation()
-	assert_str(String(order.get("kind",""))).is_equal("research_license")
-	assert_str(String(order.get("subject",""))).is_equal("paper_making")
-	E.owner_state("neighbor").known_discoveries.erase("paper_making")
-	assert_dict(AI.recommendation()).is_equal(order)
-	E.data().collections.paper_lead.study=.5;assert_dict(AI.recommendation()).is_empty()
-	E.data().collections.paper_lead.study=1.0;E.data().collections.paper_lead.returned_day=100001
-	assert_dict(AI.recommendation()).is_empty()
 func test_ai_license_dispatch_pays_without_instant_contract_or_discovery()->void:
-	paper_license_need()
+	fertilizer_license_need()
 	var before:=float(GameState.resource_stockpiles.Stone)
 	assert_bool(preload("res://scripts/civilization_controller.gd").license_acquisition_orders("player",{})).is_true()
 	assert_str(String(CivilizationSystem.diplomatic_mission.get("research_mode",""))).is_equal("license")
+	assert_str(String(CivilizationSystem.diplomatic_mission.get("research_subject",""))).is_equal("mineral_nitrate_dressing")
 	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
-	assert_bool(L.active("paper_making")).is_false()
-	assert_bool(GameState.known_discoveries.has("paper_making")).is_false()
+	assert_bool(L.active("mineral_nitrate_dressing")).is_false()
+	assert_bool(GameState.known_discoveries.has("mineral_nitrate_dressing")).is_false()
 	assert_dict(AI.recommendation()).is_empty()
 func test_ai_license_requires_real_need_inputs_staff_and_reserves()->void:
 	paper_license_need()
@@ -236,18 +179,6 @@ func test_ai_license_requires_real_need_inputs_staff_and_reserves()->void:
 	assert_dict(AI.recommendation()).is_empty()
 	GameState.known_discoveries.erase("paper_making")
 	GameState.resource_stockpiles.Stone=100.0
-	assert_dict(AI.recommendation()).is_empty()
-func test_ai_renews_needed_line_from_own_contract_and_obeys_retry_window()->void:
-	prepare();license_trip();CivilizationSystem.diplomatic_mission={}
-	assert_bool(MilitaryCampaign.start_production_line("glass_batch",10).get("ok",false)).is_true()
-	assert_dict(AI.recommendation()).is_empty()
-	GameState.elapsed_days=int(L.records().glassmaking.expires_day)-90
-	assert_str(AI.recommendation().subject).is_equal("glassmaking")
-	CivilizationSystem.diplomatic_history.append({"civ_id":"neighbor","research_mode":"license","research_subject":"glassmaking","returned_day":int(GameState.elapsed_days)-10})
-	assert_dict(AI.recommendation()).is_empty()
-	GameState.elapsed_days+=30
-	assert_str(AI.recommendation().subject).is_equal("glassmaking")
-	MilitaryCampaign.equipment_queue[0].paused=true
 	assert_dict(AI.recommendation()).is_empty()
 func fertilizer_license_need()->void:
 	prepare()
@@ -268,13 +199,6 @@ func test_ai_fertilizer_licenses_use_examined_prospects_for_both_nutrients()->vo
 	assert_dict(AI.recommendation()).is_empty()
 	E.data().collections.phosphate_dressing.study=1.0;E.data().collections.phosphate_dressing.returned_day=100001
 	assert_dict(AI.recommendation()).is_empty()
-func test_ai_fertilizer_licenses_accept_domestic_complement_and_avoid_redundant_contracts()->void:
-	fertilizer_license_need()
-	E.data().collections.erase("phosphate_dressing")
-	GameState.known_discoveries.append("phosphate_dressing");GameState.discovery_adoption.phosphate_dressing=1.0
-	assert_str(String(AI.recommendation().subject)).is_equal("mineral_nitrate_dressing")
-	GameState.known_discoveries.append("mineral_nitrate_dressing");GameState.discovery_adoption.mineral_nitrate_dressing=1.0
-	assert_dict(AI.recommendation()).is_empty()
 func test_ai_fertilizer_license_refuses_missing_complement_or_absent_cultivation()->void:
 	fertilizer_license_need()
 	GameState.resource_stockpiles["Phosphate Rock"]=0.0
@@ -284,7 +208,7 @@ func test_ai_fertilizer_license_refuses_missing_complement_or_absent_cultivation
 	GameState.population_allocations.Food=0;assert_dict(AI.recommendation()).is_empty();GameState.population_allocations.Food=30
 	GameState.convoy_traveling=true;assert_dict(AI.recommendation()).is_empty();GameState.convoy_traveling=false
 	GameState.simulation_metrics.cultivation_base_harvest=0.0;assert_dict(AI.recommendation()).is_empty()
-func test_two_paid_fertilizer_licenses_enable_slow_manufacture_without_local_invention()->void:
+func test_two_paid_fertilizer_licenses_arrive_without_local_invention()->void:
 	fertilizer_license_need()
 	var before:=float(GameState.resource_stockpiles.Stone)
 	for expected:String in ["mineral_nitrate_dressing","phosphate_dressing"]:
@@ -298,18 +222,6 @@ func test_two_paid_fertilizer_licenses_enable_slow_manufacture_without_local_inv
 		assert_bool(GameState.known_discoveries.has(expected)).is_false()
 		CivilizationSystem.diplomatic_mission={}
 	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
-	var industry=preload("res://scripts/civilian_industry.gd")
-	for item:String in ["nitrate_fertilizer","ground_phosphate_fertilizer"]:
-		var recipe:Dictionary=industry.product(item)
-		assert_bool(MilitaryCampaign.start_production_line(item,1).get("ok",false)).is_true()
-		var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-		Production.advance(MilitaryCampaign,job,float(recipe.days))
-		assert_int(int(job.completed)).is_equal(0)
-		assert_float(float(job.progress_days)).is_equal_approx(float(recipe.days)*.65,.000001)
-		Production.advance(MilitaryCampaign,job,float(recipe.days)*.35/.65)
-		assert_int(int(job.completed)).is_equal(1)
-		MilitaryCampaign.cancel_equipment_job(int(job.id))
-	assert_float(float(preload("res://scripts/crop_nutrition.gd").cultivation(100,true).bonus)).is_equal(12.5)
 	assert_bool(GameState.known_discoveries.has("mineral_nitrate_dressing")).is_false()
 	assert_bool(GameState.known_discoveries.has("phosphate_dressing")).is_false()
 func operating_license_need()->void:
@@ -323,14 +235,6 @@ func operating_license_need()->void:
 	var id:="compressed_air_systems"
 	E.owner_state("neighbor").known_discoveries.append(id);E.owner_state("neighbor").discovery_adoption[id]=1.0
 	E.data().collections[id]={"id":id,"kind":"knowledge","name":"Examined compressor account","source_id":"neighbor","source_name":"Neighbor","position":{"x":30.0,"z":0.0},"observed_day":99990,"returned_day":100000,"discovery_id":id,"study":1.0,"work":90.0,"signals":["crafting"]}
-func test_operating_license_uses_examined_need_without_reading_hidden_provider_methods()->void:
-	operating_license_need()
-	var order:=AI.recommendation();assert_str(String(order.get("subject",""))).is_equal("compressed_air_systems")
-	E.owner_state("neighbor").known_discoveries.erase("compressed_air_systems")
-	assert_dict(AI.recommendation()).is_equal(order)
-	E.data().collections.compressed_air_systems.study=.5;assert_dict(AI.recommendation()).is_empty()
-	E.data().collections.compressed_air_systems.study=1.0;E.data().collections.compressed_air_systems.returned_day=100001
-	assert_dict(AI.recommendation()).is_empty()
 func test_operating_license_needs_power_tooling_active_machinery_and_no_domestic_route()->void:
 	operating_license_need()
 	const Ops=preload("res://scripts/technology_operations.gd")
@@ -340,95 +244,7 @@ func test_operating_license_needs_power_tooling_active_machinery_and_no_domestic
 	GameState.resource_stockpiles["Compressed Air"]=15.0;assert_dict(AI.recommendation()).is_empty();GameState.resource_stockpiles["Compressed Air"]=0.0
 	GameState.known_discoveries.append("compressed_air_systems");GameState.discovery_adoption.compressed_air_systems=1.0
 	assert_dict(AI.recommendation()).is_empty()
-func test_paid_compressor_license_runs_press_at_reduced_manufacturing_rate()->void:
-	operating_license_need()
-	const Ops=preload("res://scripts/technology_operations.gd")
-	const C=preload("res://scripts/civilization_controller.gd")
-	var before:=float(GameState.resource_stockpiles.Stone)
-	assert_bool(C.license_acquisition_orders("player",{})).is_true()
-	var mission:Dictionary=CivilizationSystem.diplomatic_mission
-	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
-	GameState.elapsed_days=int(mission.return_day);E.returned(mission,int(mission.return_day))
-	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
-	assert_bool(L.active("compressed_air_systems")).is_true()
-	assert_bool(GameState.known_discoveries.has("compressed_air_systems")).is_false()
-	C.civilian_orders("player",{})
-	assert_str(String(MilitaryCampaign.equipment_queue[0].item)).is_equal("compressed_air")
-	var job:Dictionary=MilitaryCampaign.equipment_queue[0]
-	GameState.elapsed_days+=1;Ops.advance(int(GameState.elapsed_days));Production.advance(MilitaryCampaign,job,1.0)
-	assert_float(float(job.progress_days)).is_equal_approx(.65,.000001)
-	for day in 4:
-		GameState.elapsed_days+=1;Ops.advance(int(GameState.elapsed_days));Production.advance(MilitaryCampaign,job,1.0)
-	assert_float(Ops.service("mechanical_work")).is_greater(0.0)
-	assert_bool(GameState.known_discoveries.has("compressed_air_systems")).is_false()
-
 func test_paused_operating_input_line_does_not_trigger_new_license()->void:
 	operating_license_need()
 	MilitaryCampaign.equipment_queue.append({"persistent":true,"paused":true,"item":"compressed_air"})
 	assert_dict(AI.recommendation()).is_empty()
-
-func test_paid_polymer_license_processes_imported_measured_feed_slowly_without_mastery()->void:
-	prepare()
-	var subject:="polymer_molecular_weight_control"
-	E.owner_state("neighbor").known_discoveries.append(subject)
-	E.owner_state("neighbor").discovery_adoption[subject]=1.0
-	var payment_before:=float(GameState.resource_stockpiles.Stone)
-	license_trip(subject)
-	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(payment_before)
-	assert_bool(L.active(subject)).is_true()
-	assert_bool(subject in GameState.known_discoveries).is_false()
-	var spec:Dictionary=preload("res://scripts/civilian_industry.gd").product("characterized_controlled_peg")
-	for item:String in spec.tooling:GameState.resource_stockpiles[item]=100.0
-	GameState.resource_stockpiles["Size-Characterized PEG Batches"]=2.0
-	GameState.resource_stockpiles["Freshwater"]=2.0
-	var ops=preload("res://scripts/technology_operations.gd")
-	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":10.0}
-	assert_bool(MilitaryCampaign.start_production_line("characterized_controlled_peg",2).get("ok",false)).is_true()
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	Production.advance(MilitaryCampaign,job,4.0)
-	assert_int(int(job.completed)).is_equal(0)
-	assert_float(float(job.progress_days)).is_equal_approx(2.6,.000001)
-	assert_float(float(GameState.resource_stockpiles["Size-Characterized PEG Batches"])).is_equal_approx(1.35,.000001)
-	Production.advance(MilitaryCampaign,job,4.0)
-	assert_int(int(job.completed)).is_equal(1)
-	assert_float(float(GameState.resource_stockpiles["Size-Qualified PEG"])).is_equal(1.0)
-	assert_bool(subject in GameState.known_discoveries).is_false()
-	assert_bool("ring_opening_polymerization" in GameState.known_discoveries).is_false()
-	GameState.elapsed_days=int(L.records()[subject].expires_day)
-	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":10.0}
-	var before:=GameState.resource_stockpiles.duplicate(true)
-	Production.advance(MilitaryCampaign,job,100.0)
-	assert_dict(GameState.resource_stockpiles).is_equal(before)
-	assert_int(int(job.completed)).is_equal(1)
-
-func test_paid_grinding_license_makes_traceable_parts_at_reduced_rate()->void:
-	prepare()
-	var subject:="cylindrical_grinding"
-	E.owner_state("neighbor").known_discoveries.append(subject)
-	E.owner_state("neighbor").discovery_adoption[subject]=1.0
-	var payment:=float(GameState.resource_stockpiles.Stone)
-	license_trip(subject)
-	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(payment)
-	assert_bool(L.active(subject)).is_true()
-	assert_bool(subject in GameState.known_discoveries).is_false()
-	# Externally supplied equipment/feed fixture; the license journey is real.
-	var spec:Dictionary=preload("res://scripts/civilian_industry.gd").product("cylindrical_ground_shaft_candidates")
-	for field:String in ["tooling","materials"]:
-		for item:String in spec[field]:GameState.resource_stockpiles[item]=100.0
-	var ops=preload("res://scripts/technology_operations.gd")
-	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":100.0}
-	assert_bool(MilitaryCampaign.start_production_line("cylindrical_ground_shaft_candidates",2).get("ok",false)).is_true()
-	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
-	Production.advance(MilitaryCampaign,job,3.0)
-	assert_int(int(job.completed)).is_equal(0)
-	assert_float(float(job.progress_days)).is_equal_approx(1.95,.000001)
-	Production.advance(MilitaryCampaign,job,3.0)
-	assert_int(int(job.completed)).is_equal(1)
-	assert_dict(preload("res://scripts/abrasive_inspection.gd").data().records).is_not_empty()
-	assert_bool(subject in GameState.known_discoveries).is_false()
-	GameState.elapsed_days=int(L.records()[subject].expires_day)
-	ops.data().last_day=int(GameState.elapsed_days);ops.data().services={"electricity":100.0}
-	var before:=GameState.resource_stockpiles.duplicate(true)
-	Production.advance(MilitaryCampaign,job,100.0)
-	assert_dict(GameState.resource_stockpiles).is_equal(before)
-	assert_int(int(job.completed)).is_equal(1)

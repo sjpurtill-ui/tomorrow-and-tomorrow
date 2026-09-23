@@ -166,9 +166,9 @@ func _ready()->void:
 	hud.open_detail(appointments)
 	await get_tree().process_frame
 	_expect(hud.detail_dock.visible,"appointment detail did not open")
-	_expect(terrain.leader_candidates.size()>0,"no candidate institutions were generated")
-	if terrain.leader_candidates.size()>0:
-		appointments._commission(String(terrain.leader_candidates[0].name))
+	_expect(appointments.candidates.size()>0,"no candidate people were generated")
+	if appointments.candidates.size()>0:
+		appointments._commission(int(appointments.candidates[0].get("person_id",0)))
 		_expect(GameState.leadership_positions.has("Steward"),"commissioning did not fill the Steward office")
 	hud.close_detail()
 	terrain._on_hud_section_requested("",0)
@@ -216,8 +216,8 @@ func _ready()->void:
 	_expect(not terrain.hud.dock.visible,"escape did not close the primary dock")
 	await get_tree().process_frame
 
-	# KPI strip inside viewport with all five chips.
-	for chip_name in ["KpiPopulation","KpiFood","KpiWater","KpiHealth","KpiLabor"]:
+	# KPI strip inside viewport with every indicator chip.
+	for chip_name in ["KpiPopulation","KpiFood","KpiWater","KpiGoods","KpiHealth","KpiScience","KpiGdp"]:
 		var chip:=hud.find_child(chip_name,true,false) as Control
 		_expect(chip!=null,"missing %s" % chip_name)
 		if chip:

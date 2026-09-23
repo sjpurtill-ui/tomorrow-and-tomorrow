@@ -1,6 +1,12 @@
 extends GdUnitTestSuite
 const S=preload("res://scripts/microscopy_samples.gd")
 const L=preload("res://scripts/microscopy_lab.gd")
+const Bills=preload("res://scripts/goods_bills.gd")
+## Lab supplies as the raw materials and Civilian Goods they are now drawn as.
+func goods(bill:Dictionary)->Dictionary:return Bills.flatten(bill).duplicate()
+func add(stocks:Dictionary,bill:Dictionary)->void:
+	var flat:=Bills.flatten(bill)
+	for item:String in flat:stocks[item]=float(stocks.get(item,0))+float(flat[item])
 func before_test()->void:
 	WorldSimulation.clear()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
@@ -18,7 +24,7 @@ func specimen(ledger:Dictionary,site:String)->void:
 		S.measure(ledger,sample,0,true,known)
 		S.grow(sample,1,.02,true);S.measure(ledger,sample,1,true,known)
 	ledger.work_bank=4.0
-	L.interpret(ledger,{"Printed Sheets":1.0},known,1)
+	L.interpret(ledger,goods({"Printed Sheets":1.0}),known,1)
 	ledger.last_day=1
 func test_save_city_and_rival_keep_recorded_evidence_separate()->void:
 	specimen(GameState.microscopy,"home")
@@ -72,8 +78,8 @@ func test_early_microbial_growth_stops_without_supplies_and_recovers()->void:
 	GameState.elapsed_days=1;L.advance(false)
 	assert_float(float(sample.media)).is_equal(0.0)
 	assert_array(sample.history).is_empty()
-	GameState.resource_stockpiles={"Freshwater":1.0,"Laboratory Glassware":1.0,"Clay":1.0}
-	GameState.food_stocks={"Dry staples":1.0}
+	GameState.resource_stockpiles=goods({"Freshwater":1.0,"Laboratory Glassware":1.0,"Clay":1.0})
+	GameState.food_stocks={"Stored food":1.0}
 	GameState.elapsed_days=2;L.advance(false)
 	assert_float(float(sample.media)).is_greater(0.0)
 	assert_int(sample.history.size()).is_equal(1)
@@ -82,9 +88,12 @@ func test_early_microbial_growth_stops_without_supplies_and_recovers()->void:
 	GameState.microscopy.tools.bench=false
 	GameState.elapsed_days=3;L.advance(false)
 	assert_int(sample.history.size()).is_equal(observations)
-	GameState.resource_stockpiles["Compound Microscopes"]=1.0
-	GameState.resource_stockpiles["Specimen Slides"]=1.0
-	GameState.resource_stockpiles["Laboratory Glassware"]=2.0
+	# The bench's microscope is assembled from goods once its discovery is known.
+	add(GameState.resource_stockpiles,{"Compound Microscopes":1.0,"Specimen Slides":1.0,"Laboratory Glassware":2.0})
 	GameState.elapsed_days=4;L.advance(false)
+	assert_int(sample.history.size()).is_equal(observations)
+	assert_bool(bool(GameState.microscopy.tools.bench)).is_false()
+	GameState.known_discoveries.append(L.BENCH_GATE)
+	GameState.elapsed_days=5;L.advance(false)
+	assert_bool(bool(GameState.microscopy.tools.bench)).is_true()
 	assert_int(sample.history.size()).is_equal(observations+1)
-	assert_float(float(GameState.resource_stockpiles["Compound Microscopes"])).is_equal(0.0)

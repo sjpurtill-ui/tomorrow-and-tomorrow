@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const Build=preload("res://scripts/settlement_construction.gd")
-const Craft=preload("res://scripts/opening_craft_practice.gd")
+const Craft=preload("res://scripts/civilian_goods.gd")
 const SettlementModelScript=preload("res://scripts/settlement_model.gd")
 
 var model:Node
@@ -19,7 +19,7 @@ func before_test()->void:
 	GameState.settlement_founded_at=Vector3.ZERO
 	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Open Work Area"]
 	GameState.population_allocations.merge({"Construction":100,"Logistics":10,"Crafting":10},true)
-	GameState.resource_stockpiles={"Joined Timber Components":10.0,"Timber":50.0,"Fiber Plants":40.0,"Clay":20.0,"Stone":30.0}
+	GameState.resource_stockpiles={"Civilian Goods":10.0,"Timber":50.0,"Fiber Plants":40.0,"Clay":20.0,"Stone":30.0}
 	GameState.known_discoveries=[]
 	GameState.discovery_adoption={}
 	model=auto_free(SettlementModelScript.new())
@@ -52,7 +52,7 @@ func _build_hall()->Dictionary:
 		if String(plot.get("form",""))=="timber_frame_hall":return plot
 	return {}
 
-func test_framed_hall_is_hidden_without_knowledge_staff_or_joined_components()->void:
+func test_framed_hall_is_hidden_without_knowledge_staff_or_civilian_goods()->void:
 	var definition:=_definition()
 	assert_dict(definition).is_not_empty()
 	assert_bool(Build._settlement_project_available(definition)).is_false()
@@ -60,7 +60,7 @@ func test_framed_hall_is_hidden_without_knowledge_staff_or_joined_components()->
 	GameState.population_allocations.Construction=0
 	assert_bool(Build._settlement_project_available(definition)).is_false()
 	GameState.population_allocations.Construction=100
-	GameState.resource_stockpiles["Joined Timber Components"]=0.0
+	GameState.resource_stockpiles["Civilian Goods"]=0.0
 	assert_bool(Build._settlement_project_available(definition)).is_false()
 
 func test_knowledge_alone_provides_no_framed_construction_effects()->void:
@@ -73,7 +73,7 @@ func test_knowledge_alone_provides_no_framed_construction_effects()->void:
 
 func test_project_consumes_materials_and_converts_existing_communal_ground()->void:
 	var timber_before:=float(GameState.resource_stockpiles.Timber)
-	var components_before:=float(GameState.resource_stockpiles["Joined Timber Components"])
+	var components_before:=float(GameState.resource_stockpiles["Civilian Goods"])
 	var communal_polygon:PackedVector2Array
 	for plot:Dictionary in GameState.settlement_plots:
 		if String(plot.get("form",""))=="open_hearth_yard":communal_polygon=(plot.polygon as PackedVector2Array).duplicate()
@@ -83,7 +83,7 @@ func test_project_consumes_materials_and_converts_existing_communal_ground()->vo
 	assert_str(String(hall.roof_plan)).is_equal("thatched_ridge")
 	assert_float(float(hall.roof_coverage)).is_greater_equal(0.58)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber_before)
-	assert_float(float(GameState.resource_stockpiles["Joined Timber Components"])).is_less(components_before)
+	assert_float(float(GameState.resource_stockpiles["Civilian Goods"])).is_less(components_before)
 	var paid_event:Dictionary={}
 	for event:Dictionary in GameState.building_ledger:
 		if String(event.get("kind",""))=="Framed Hall":paid_event=event

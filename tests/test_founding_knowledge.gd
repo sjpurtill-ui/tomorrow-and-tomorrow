@@ -18,10 +18,10 @@ func test_founders_know_practical_skills_but_not_farming_or_industry()->void:
 		assert_bool(id in GameState.known_discoveries).is_false()
 func test_finite_portable_supplies_are_not_replenished_by_initialize()->void:
 	ResourceSystem.initialize()
-	assert_float(float(GameState.resource_stockpiles.get("Hafted Tool Sets",0))).is_greater(0)
-	GameState.resource_stockpiles["Hafted Tool Sets"]=0.0
+	assert_float(float(GameState.resource_stockpiles.get("Civilian Goods",0))).is_greater(0)
+	GameState.resource_stockpiles["Civilian Goods"]=0.0
 	ResourceSystem.initialize()
-	assert_float(float(GameState.resource_stockpiles["Hafted Tool Sets"])).is_equal(0.0)
+	assert_float(float(GameState.resource_stockpiles["Civilian Goods"])).is_equal(0.0)
 func test_spear_order_is_available_and_consumes_real_materials()->void:
 	ResourceSystem.initialize()
 	GameState.population_allocations.Crafting=30;GameState.population_allocations.Logistics=30

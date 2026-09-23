@@ -474,7 +474,9 @@ func _drying_weather_factor(profile:Dictionary,day:float)->float:
 	var warmth:=clampf((temperature+5.0)/35.0,0.0,1.0)
 	return clampf(0.38+(1.0-precipitation)*0.52+warmth*0.25,0.25,1.15)
 
-func _spoil(traveling: bool,fresh_arrived:float=0.0) -> Dictionary:
+## Daily spoilage rates of the fresh and stored pools, as [fresh, stored].
+## Shared by the daily step and the forecast so both use the same practices.
+func _spoilage_rates(traveling:bool)->Array:
 	var stocks:Dictionary=WorldSimulation.state.food_stocks
 	var preservation:=WorldSimulation.discovery.food_storage_multipliers(["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"],traveling)
 	var fresh_preservation:=(float(preservation["Fresh plants"])+float(preservation["Fresh meat"])+float(preservation["Fish"]))/3.0
@@ -484,9 +486,15 @@ func _spoil(traveling: bool,fresh_arrived:float=0.0) -> Dictionary:
 	if not traveling:storage_multiplier*=1.0-preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"spoilage")
 	if traveling: storage_multiplier*=1.28
 	var cooling:=Operations.refrigeration_multiplier(Operations.service("cold_storage") if not traveling else 0.0,stocks)
-	var fresh:=float(stocks.get(FRESH,0.0));var stored:=float(stocks.get(STORED,0.0))
 	var fresh_rate:=float(SPOILAGE[FRESH])*storage_multiplier*fresh_preservation*cooling*(1.0-technique_lever("fresh_spoilage"))
 	var stored_rate:=float(SPOILAGE[STORED])*storage_multiplier*stored_preservation*(1.0-technique_lever("stored_spoilage"))
+	return [fresh_rate,stored_rate]
+
+func _spoil(traveling: bool,fresh_arrived:float=0.0) -> Dictionary:
+	var stocks:Dictionary=WorldSimulation.state.food_stocks
+	var rates:=_spoilage_rates(traveling)
+	var fresh_rate:=float(rates[0]);var stored_rate:=float(rates[1])
+	var fresh:=float(stocks.get(FRESH,0.0));var stored:=float(stocks.get(STORED,0.0))
 	# In a multi-day step (day_span.gd) stored food spoils for every covered day;
 	# each day's harvest is mostly eaten on arrival, so it keeps one day's exposure.
 	var arrived:=clampf(fresh_arrived,0.0,fresh)
@@ -596,8 +604,9 @@ func _forecast(harvest: Dictionary,demand_breakdown: Dictionary,provision_delive
 	var inaccessible_army_rations:=float(demand_breakdown.get("army_field",0.0))*(1.0-clampf(provision_delivery_ratio,0.0,1.0))
 	var stocks:Dictionary=WorldSimulation.state.food_stocks
 	var fresh:=float(stocks.get(FRESH,0.0));var stored:=float(stocks.get(STORED,0.0))
-	var fresh_daily:=1.0-pow(1.0-clampf(float(SPOILAGE[FRESH])*(1.0-technique_lever("fresh_spoilage")),0.0,1.0),7.0)
-	var stored_daily:=1.0-pow(1.0-clampf(float(SPOILAGE[STORED])*(1.0-technique_lever("stored_spoilage")),0.0,1.0),7.0)
+	var rates:=_spoilage_rates(bool(WorldSimulation.state.convoy_traveling))
+	var fresh_daily:=1.0-pow(1.0-clampf(float(rates[0]),0.0,1.0),7.0)
+	var stored_daily:=1.0-pow(1.0-clampf(float(rates[1]),0.0,1.0),7.0)
 	var first_shortage:=-1;var produced_total:=0.0;var required_total:=0.0;var spoiled_total:=0.0
 	var result:={"day":day}
 	for week in 13:

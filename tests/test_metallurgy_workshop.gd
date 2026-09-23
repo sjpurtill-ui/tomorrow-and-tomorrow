@@ -2,9 +2,6 @@ extends GdUnitTestSuite
 const M=preload("res://scripts/metallurgy_workshop.gd")
 const T=preload("res://scripts/metallurgy_thermal_cycle.gd")
 const Ops=preload("res://scripts/technology_operations.gd")
-const I=preload("res://scripts/civilian_industry.gd")
-const P=preload("res://scripts/persistent_production.gd")
-const Sections=preload("res://scripts/metallurgy_sections.gd")
 func before_test()->void:WorldSimulation.clear();WorldSimulation.create_actor("thermal_workshop",1217)
 func after_test()->void:WorldSimulation.clear()
 func spec()->Dictionary:
@@ -57,74 +54,6 @@ func test_unpaid_apparatus_blocks_reservation_and_retooling_does_not_refund()->v
 		assert_bool(line.has("metallurgy_pending")).is_false()
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Steel)).is_equal(0.0)
 	)
-func test_actual_normalizing_line_pays_section_and_supplies_a_shaft_consumer()->void:
-	WorldSimulation.scoped("thermal_workshop",func()->void:
-		var state=WorldSimulation.state
-		state.settlement_site_committed=true;state.convoy_traveling=false
-		state.population_allocations.Crafting=100;state.population_allocations.Logistics=100
-		var reference_recipe:=I.product("microscope_scale_slides")
-		state.known_discoveries.append(reference_recipe.gate);state.discovery_adoption[reference_recipe.gate]=1.0
-		for field:String in ["materials","tooling"]:
-			for resource:String in reference_recipe[field]:state.resource_stockpiles[resource]=10.0
-		state.resource_stockpiles[reference_recipe.output]=0.0
-		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":3000.0}
-		assert_bool(WorldSimulation.military.start_production_line("microscope_scale_slides",1).get("ok",false)).is_true()
-		var fabrication:Dictionary=WorldSimulation.military.equipment_queue.back()
-		var stock_before:Dictionary=state.resource_stockpiles.duplicate(true)
-		P.advance(WorldSimulation.military,fabrication,2)
-		assert_float(float(state.resource_stockpiles[reference_recipe.output])).is_equal(0.0)
-		P.advance(WorldSimulation.military,fabrication,2)
-		assert_float(float(state.resource_stockpiles[reference_recipe.output])).is_equal(1.0)
-		for resource:String in reference_recipe.materials:
-			assert_float(float(state.resource_stockpiles[resource])).is_equal_approx(float(stock_before[resource])-float(reference_recipe.materials[resource]),.000001)
-		WorldSimulation.military.equipment_queue.clear()
-		var recipe:=I.product("normalizing_steel_sections")
-		state.known_discoveries.append(recipe.gate);state.discovery_adoption[recipe.gate]=1.0
-		for resource:String in recipe.tooling:
-			if resource!=reference_recipe.output:state.resource_stockpiles[resource]=10.0
-		for resource:String in Sections.COST:state.resource_stockpiles[resource]=10.0
-		state.resource_stockpiles["Selected Medium-Carbon Steel"]=1.02
-		Ops.data().last_day=int(state.elapsed_days);Ops.data().services={"electricity":3000.0}
-		assert_bool(WorldSimulation.military.start_production_line("normalizing_steel_sections",1).get("ok",false)).is_true()
-		var line:Dictionary=WorldSimulation.military.equipment_queue.back()
-		assert_float(float(state.resource_stockpiles[reference_recipe.output])).is_equal(0.0)
-		assert_float(float(line.tooling[reference_recipe.output])).is_equal(1.0)
-		P.advance(WorldSimulation.military,line,1)
-		assert_float(float(state.resource_stockpiles["Selected Medium-Carbon Steel"])).is_equal(0.0)
-		assert_float(Ops.workshop_power_demand()).is_greater(0.0)
-		P.advance(WorldSimulation.military,line,6)
-		assert_float(float(state.resource_stockpiles.get(recipe.output,0))).is_equal(0.0)
-		var held:Dictionary=line.metallurgy_pending.duplicate(true)
-		var supplies:Dictionary=state.resource_stockpiles.duplicate(true)
-		assert_str(P.state(WorldSimulation.military,line)).contains("grain-size measurement")
-		P.advance(WorldSimulation.military,line,1)
-		assert_dict(line.metallurgy_pending).is_equal(held)
-		assert_dict(state.resource_stockpiles).is_equal(supplies)
-		state.known_discoveries.append("metal_grain_size_measurement")
-		state.discovery_adoption["metal_grain_size_measurement"]=.05
-		assert_bool(Sections.available(recipe)).is_false()
-		state.discovery_adoption["metal_grain_size_measurement"]=1.0
-		P.advance(WorldSimulation.military,line,.25)
-		var etchant:=float(state.resource_stockpiles["Steel Section Etchant"])
-		var restored:Dictionary=bytes_to_var(var_to_bytes(line))
-		assert_str(P.validate_saved({"equipment_queue":[restored]})).is_empty()
-		P.advance(WorldSimulation.military,restored,.25)
-		assert_str(M.validate_job(restored,recipe)).is_empty()
-		assert_bool(restored.metallurgy_last.accepted).is_true()
-		assert_float(float(state.resource_stockpiles[recipe.output])).is_equal(1.0)
-		assert_float(float(state.resource_stockpiles["Spent Metallographic Sections"])).is_equal(.02)
-		assert_float(float(state.resource_stockpiles["Steel Section Etchant"])).is_equal(etchant)
-		var consumer:=I.product("normalized_plain_shaft_blanks")
-		state.known_discoveries.append(consumer.gate);state.discovery_adoption[consumer.gate]=1.0
-		for resource:String in consumer.tooling:state.resource_stockpiles[resource]=10.0
-		state.resource_stockpiles["Steel Tool Bits"]=10.0
-		WorldSimulation.military.equipment_queue.clear()
-		assert_bool(WorldSimulation.military.start_production_line("normalized_plain_shaft_blanks",1).get("ok",false)).is_true()
-		P.advance(WorldSimulation.military,WorldSimulation.military.equipment_queue.back(),3)
-		assert_float(float(state.resource_stockpiles[recipe.output])).is_equal(0.0)
-		assert_float(float(state.resource_stockpiles[consumer.output])).is_equal(1.0)
-	)
-
 func test_idle_calendar_cools_without_paying_or_satisfying_hot_work()->void:
 	WorldSimulation.scoped("thermal_workshop",func()->void:
 		var state=WorldSimulation.state

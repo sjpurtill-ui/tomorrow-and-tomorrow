@@ -187,27 +187,41 @@ func test_finished_conduits_travel_before_secondary_installation()->void:
 	for id:String in ["gravity_conduit_grade_control","joinery","clay_pipe_socket_jointing"]:
 		GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
 	GameState.water_metrics={"intake_ratio":1.0,"source_distance_km":0.0}
-	GameState.resource_stockpiles={"Wooden Conduits":10.0}
+	# A timber line's bill is raw materials and Civilian Goods; the capital holds it.
+	var cost:Dictionary={}
 	SettlementModel.with_city_resources("dawngate",func()->void:
 		GameState.simulation_metrics.labor_efficiency=1.0
 		GameState.water_metrics={"intake_ratio":.5,"source_distance_km":1.0}
-		GameState.resource_stockpiles={"Clay":2.0})
+		GameState.resource_stockpiles={"Clay":2.0}
+		SettlementModel.with_local_population(func()->void:
+			for option:Dictionary in planner.candidates():
+				if option.material=="timber":cost.merge(option.terms.cost,true)))
+	assert_dict(cost).is_not_empty()
+	assert_bool(cost.has("Wooden Conduits")).is_false()
+	# Dawngate already holds its clay; the capital holds ample goods and timber
+	# beyond its own reserves.
+	GameState.resource_stockpiles={}
+	for item:String in cost:
+		if item!="Clay":GameState.resource_stockpiles[item]=float(cost[item])*3.0
+	var capital:Dictionary=GameState.resource_stockpiles.duplicate()
 	SettlementModel.process_city_trade()
-	var shipped:=0.0
+	var shipped:Dictionary={}
 	for shipment:Dictionary in GameState.city_trade_shipments:
-		if shipment.resource=="Wooden Conduits":shipped+=float(shipment.quantity)
-	assert_float(shipped).is_equal(10.0)
-	assert_float(float(GameState.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+		shipped[shipment.resource]=float(shipped.get(shipment.resource,0.0))+float(shipment.quantity)
+	assert_bool(shipped.has("Clay")).is_false()
+	for item:String in capital:
+		assert_float(float(shipped.get(item,0.0))).is_equal_approx(float(cost[item]),.000001)
+		assert_float(float(GameState.resource_stockpiles.get(item,0.0))).is_equal_approx(float(capital[item])-float(cost[item]),.000001)
 	planner.recommendation()
 	var city:Dictionary=SettlementModel.settlement_record("dawngate")
 	assert_array(city.local_resources.water_conveyance.lines).is_empty()
 	GameState.elapsed_days=20
 	GameState.society_capacities.logistics=0.0
 	SettlementModel.process_city_trade()
-	assert_float(float(city.local_resources.resource_stockpiles.get("Wooden Conduits",0))).is_equal(10.0)
+	for item:String in cost:assert_float(float(city.local_resources.resource_stockpiles.get(item,0))).is_greater_equal(float(cost[item])-.000001)
 	planner.recommendation()
 	assert_int(city.local_resources.water_conveyance.lines.size()).is_equal(1)
-	assert_float(float(city.local_resources.resource_stockpiles["Wooden Conduits"])).is_equal(0.0)
+	for item:String in cost:assert_float(float(city.local_resources.resource_stockpiles.get(item,0))).is_less(float(cost[item]))
 	assert_array(water.data().lines).is_empty()
 	assert_bool("wooden_log_conduits" in GameState.known_discoveries).is_false()
 	WorldSimulation.context_provider=previous
@@ -217,10 +231,9 @@ func test_arrived_timber_is_available_to_daily_household_work()->void:
 	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	EconomySystem.reset_for_new_world();EconomySystem.initialize()
 	ConsequenceEngine.reset_for_new_world();ConsequenceEngine.initialize()
-	GameState.resource_stockpiles.Timber=0.0
-	GameState.resource_stockpiles["Hafted Tool Sets"]=0.0
-	GameState.resource_stockpiles["Flaked Stone Tools"]=10.0
-	GameState.resource_stockpiles["Cordage Bundles"]=10.0
+	# Household goods draw on the raw basket; only the arriving timber can feed it.
+	for item:String in preload("res://scripts/civilian_goods.gd").BASKET:GameState.resource_stockpiles[item]=0.0
+	GameState.resource_stockpiles["Civilian Goods"]=0.0
 	GameState.population_allocations.Crafting=20
 	var primary:=String(GameState.player_settlements[0].id)
 	GameState.city_trade_shipments=[{"id":999,"source_id":"dawngate","destination_id":primary,"resource":"Timber","quantity":2.0,"travel_days":1.0,"arrival_day":1.0}]
@@ -228,7 +241,7 @@ func test_arrived_timber_is_available_to_daily_household_work()->void:
 	var context:Dictionary=preload("res://scripts/civilization_day.gd").context(Vector2.ZERO)
 	context.settled=true;context.surface_water_distance_km=.1;context.surface_water_recognized=true
 	preload("res://scripts/civilization_day.gd").advance(1,context,func()->void:
-		if GameState.resource_settlement_id.is_empty():observed.tools_before_construction=float(GameState.resource_stockpiles.get("Hafted Tool Sets",0)))
+		if GameState.resource_settlement_id.is_empty():observed.tools_before_construction=float(GameState.resource_stockpiles.get("Civilian Goods",0)))
 	assert_float(float(observed.tools_before_construction)).is_greater(0.0)
 	var timber:=float(GameState.resource_stockpiles.Timber)
 	SettlementModel.receive_city_trade_arrivals()

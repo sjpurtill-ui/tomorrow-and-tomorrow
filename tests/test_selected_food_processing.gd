@@ -152,18 +152,6 @@ func test_selected_lot_validation_rejects_missing_and_nonfinite_provenance()->vo
 		assert_bool(B.valid(B.data())).is_true()
 		lot.source_origin[0]=INF;assert_bool(B.valid(B.data())).is_false()
 		lot.source_origin[0]=0;lot.erase("source_id");assert_bool(B.valid(B.data())).is_false())
-func test_actual_food_day_removes_collectors_from_legacy_harvest()->void:
-	WorldSimulation.scoped("selected",func()->void:
-		prepare();var state=WorldSimulation.state
-		var workers:=float(state.effective_workers("Food"))
-		var baseline:Dictionary=WorldSimulation.food._produce(workers,1,1,false)
-		var daily:Dictionary=WorldSimulation.food.process_day(context(),1,1)
-		var paid:=float(daily.selected_food_harvest.workers)
-		assert_float(paid).is_greater(0.0)
-		assert_float(paid).is_less_equal(workers*.08)
-		var expected:=float(baseline["Fresh plants"])*(1.0-paid/workers)
-		assert_float(float(daily.food_harvest["Fresh plants"])).is_equal_approx(expected,.000001)
-		assert_float(float(daily.food_batches.workers)+float(daily.grain_processing.workers)+float(daily.food_preparation.workers_reserved)).is_less_equal(float(state.effective_workers("Logistics"))))
 func test_automatic_equipment_requires_work_demand_and_pays_actual_tools()->void:
 	WorldSimulation.scoped("selected",func()->void:
 		prepare();B.data().tools.erase("nut_kernel_shelling")

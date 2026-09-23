@@ -239,13 +239,16 @@ func test_gathering_preserves_samples_explicit_priorities_and_needed_inputs()->v
 	GameState.resource_priorities["Copper Ore"]=2.0
 	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_false()
 	GameState.resource_priorities.clear()
-	MilitaryCampaign.equipment_queue=[{"job_type":"civilian","item":"refined_copper","materials":{"Copper Ore":2.0,"Timber":2.0},"persistent":true,"target_stock":5,"progress_days":0.0,"paused":false}]
+	# Only military lines remain; an axe line draws Copper Ore.
+	MilitaryCampaign.equipment_queue=[{"job_type":"production","item":"axe","materials":{"Copper Ore":.4,"Timber":.4,"Tin Ore":.08},"persistent":true,"target_stock":5,"progress_days":0.0,"paused":false}]
 	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_false()
 	MilitaryCampaign.equipment_queue[0].paused=true
 	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
 	MilitaryCampaign.equipment_queue[0].paused=false
-	GameState.resource_stockpiles["Refined Copper"]=5.0
+	var held:=MilitaryCampaign.military_inventory.duplicate(true);MilitaryCampaign.military_inventory["axe"]=5
 	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
+	MilitaryCampaign.military_inventory=held;MilitaryCampaign.equipment_queue=[]
+	GameState.resource_stockpiles.Coal=1000.0 # An overflowing store of fuel.
 	GameState.technology_operations={"plants":{"steam_generator":{"installed":1,"enabled":true}}}
 	assert_bool(ResourceSystem._storage_gathering_priorities().has("Coal")).is_false()
 	GameState.technology_operations.plants.steam_generator.enabled=false
