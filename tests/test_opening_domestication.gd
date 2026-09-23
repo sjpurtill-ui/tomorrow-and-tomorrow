@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 
 const Opportunities=preload("res://scripts/opening_opportunities.gd")
-const Craft=preload("res://scripts/opening_craft_practice.gd")
+const Craft=preload("res://scripts/civilian_goods.gd")
 
 func before_test()->void:
 	WorldSimulation.clear()
@@ -9,7 +9,7 @@ func before_test()->void:
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.ensure_population_total(100);GameState.settlement_site_committed=true
 	GameState.population_allocations.Food=10
-	GameState.food_stocks={"Fresh plants":100.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":100.0,"Preserved food":0.0}
+	GameState.food_stocks={"Fresh food":100.0,"Stored food":100.0}
 	GameState.known_discoveries.append("seasonal_patterns");GameState.discovery_adoption.seasonal_patterns=1.0
 
 func after_test()->void:
@@ -28,14 +28,14 @@ func suitable_game()->Dictionary:
 
 func test_selective_planting_requires_two_real_seed_cycles()->void:
 	GameState.resource_deposits=[fertile()]
-	var staples_before:=float(GameState.food_stocks["Dry staples"])
+	var staples_before:=float(GameState.food_stocks["Stored food"])
 	advance(0,91)
 	assert_bool(Opportunities.ready("seed_selection")).is_false()
 	assert_int(int(Opportunities.program_report().seed.harvests)).is_equal(1)
 	advance(91,91)
 	assert_bool(Opportunities.ready("seed_selection")).is_true()
 	assert_int(int(Opportunities.program_report().seed.harvests)).is_equal(2)
-	assert_float(float(GameState.food_stocks["Dry staples"])).is_less(staples_before)
+	assert_float(float(GameState.food_stocks["Stored food"])).is_less(staples_before)
 	assert_float(float(Opportunities.program_report().seed.retained)).is_greater(0.0)
 
 func test_planting_cannot_bootstrap_without_fertile_ground_and_seed()->void:
@@ -53,12 +53,12 @@ func test_taming_requires_a_suitable_population_and_sustained_feed()->void:
 	assert_bool(Opportunities.ready("animal_taming")).is_false()
 	assert_float(float(Opportunities.program_report().herd.animals)).is_equal(0.0)
 	GameState.resource_deposits=[suitable_game()]
-	var feed_before:=float(GameState.food_stocks["Fresh plants"])
+	var feed_before:=float(GameState.food_stocks["Fresh food"])
 	advance(70,60)
 	assert_bool(Opportunities.ready("animal_taming")).is_true()
 	assert_float(float(Opportunities.program_report().herd.animals)).is_greater_equal(4.0)
 	assert_float(float(GameState.resource_deposits[0].remaining)).is_equal(96.0)
-	assert_float(float(GameState.food_stocks["Fresh plants"])).is_less(feed_before)
+	assert_float(float(GameState.food_stocks["Fresh food"])).is_less(feed_before)
 
 func test_animal_knowledge_has_no_effect_without_a_living_herd()->void:
 	GameState.known_discoveries.append("animal_taming");GameState.discovery_adoption.animal_taming=1.0
@@ -71,7 +71,7 @@ func test_animal_knowledge_has_no_effect_without_a_living_herd()->void:
 	assert_float(DiscoverySystem.effect("food_output")).is_equal_approx(.004,.000001)
 	GameState.resource_deposits.clear();advance(1,1)
 	assert_float(Craft.factor("animal_taming")).is_equal(1.0)
-	GameState.food_stocks["Fresh plants"]=0.0;GameState.food_stocks["Dry staples"]=0.0;advance(2,1)
+	GameState.food_stocks["Fresh food"]=0.0;GameState.food_stocks["Stored food"]=0.0;advance(2,1)
 	DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("animal_taming")).is_equal(0.0)
 	assert_float(DiscoverySystem.effect("food_output")).is_equal(0.0)

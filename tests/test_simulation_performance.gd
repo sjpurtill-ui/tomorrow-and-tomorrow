@@ -107,7 +107,7 @@ func test_claim_shape_cache_keeps_exact_geometry_as_inputs_change()->void:
 	assert_array(model._claim_boundary(city,3.0,drivers)).is_equal(updated)
 	assert_bool(updated==cold).is_false()
 
-func test_overlapping_food_forecasts_reuse_only_climate_not_current_stocks()->void:
+func test_weekly_food_forecast_is_deterministic_and_reads_current_stocks()->void:
 	WorldSimulation.create_actor("food_cache",4242)
 	WorldSimulation.scoped("food_cache",func()->void:
 		var state:=WorldSimulation.state
@@ -118,17 +118,16 @@ func test_overlapping_food_forecasts_reuse_only_climate_not_current_stocks()->vo
 		var demand:={"total":55.0,"climate":2.0,"rationing":0.0}
 		for day in [0,1,91,365,6000]:
 			state.elapsed_days=day
-			state.food_stocks["Dry staples"]=float(day+25)
-			var warm:=food._forecast(90,harvest,demand,false)
-			food._forecast_climate_cache.clear()
-			assert_dict(food._forecast(90,harvest,demand,false)).is_equal(warm)
-			profile.precipitation=.2 if day%2==0 else .8
-			state.world_seed+=1
-			var changed:=food._forecast(90,harvest,demand,false)
-			food._forecast_climate_cache.clear()
-			assert_dict(food._forecast(90,harvest,demand,false)).is_equal(changed)
-			for days in food._forecast_climate_cache.values():assert_int(days.size()).is_less_equal(128)
-		assert_bool(SaveSystem._capture_reflected(food,SaveSystem.REFLECT_SKIP.FoodSystem).has("_forecast_climate_cache")).is_false()
+			state.food_stocks[food.STORED]=float(day+25)
+			var stocks:Dictionary=state.food_stocks.duplicate()
+			var warm:=food._forecast(harvest,demand)
+			assert_dict(food._forecast(harvest,demand)).is_equal(warm)
+			assert_dict(state.food_stocks).is_equal(stocks)
+			state.food_stocks[food.STORED]=float(day+2500)
+			var changed:=food._forecast(harvest,demand)
+			assert_float(float(changed[90].ending_rations)).is_greater(float(warm[90].ending_rations))
+		assert_bool(SaveSystem._capture_reflected(food,SaveSystem.REFLECT_SKIP.FoodSystem).has("_access_cache")).is_false()
+		assert_bool(SaveSystem._capture_reflected(food,SaveSystem.REFLECT_SKIP.FoodSystem).has("_lever_cache")).is_false()
 	)
 
 func test_society_presentation_cache_tracks_values_and_owns_its_results()->void:
@@ -171,32 +170,24 @@ func test_shared_troop_catalog_keeps_every_observer_and_owner_independent()->voi
 	assert_float(float(catalog.alpha[0].command_position.x)).is_equal(50.0)
 	WorldSimulation.scoped("alpha",func()->void:assert_float(float(WorldSimulation.world.scout_missions[0].route[0].x)).is_equal(0.0))
 
-func test_forecast_climate_cache_retains_all_supported_settlements_and_stays_bounded()->void:
-	WorldSimulation.create_actor("many_forecasts",4242)
-	WorldSimulation.scoped("many_forecasts",func()->void:
+func test_cached_weekly_forecast_ages_its_shortage_until_the_next_refresh()->void:
+	WorldSimulation.create_actor("aged_forecast",4242)
+	WorldSimulation.scoped("aged_forecast",func()->void:
 		var state:=WorldSimulation.state;var food:=WorldSimulation.food
-		var harvest:={"Fresh plants":30.0,"Fresh meat":10.0,"Fish":5.0,"Dry staples":12.0}
-		var demand:={"total":55.0,"climate":2.0,"rationing":0.0}
-		var limit:int=WorldSimulation.settlements.MAX_PLAYER_SETTLEMENTS
-		assert_int(food.FORECAST_SITE_LIMIT).is_equal(limit)
-		var first_key:Array=[]
-		for site in range(limit):
-			state.player_settlements.clear();state.player_settlements.append({"id":"home","primary":true,"environment_profile":{"position":Vector2(site*10,-80)}})
-			food._forecast(2,harvest,demand,false)
-			if site==0:first_key=food._forecast_climate_cache.keys()[0]
-		assert_int(food._forecast_climate_cache.size()).is_equal(limit)
-		assert_bool(food._forecast_climate_cache.has(first_key)).is_true()
-		state.elapsed_days+=1
-		state.player_settlements.clear();state.player_settlements.append({"id":"home","primary":true,"environment_profile":{"position":Vector2(0,-80)}})
-		var warm:Dictionary=food._forecast(2,harvest,demand,false)
-		# The old current date remains, proving the overlapping entry was reused.
-		assert_int(food._forecast_climate_cache[first_key].size()).is_equal(4)
-		state.player_settlements[0].environment_profile.position=Vector2(limit*10,-80)
-		food._forecast(2,harvest,demand,false)
-		assert_int(food._forecast_climate_cache.size()).is_equal(limit)
-		state.player_settlements[0].environment_profile.position=Vector2(0,-80)
-		food._forecast_climate_cache.clear()
-		assert_dict(food._forecast(2,harvest,demand,false)).is_equal(warm)
+		state.player_settlements=[{"id":"home","primary":true,"environment_profile":{"position":Vector2(0,-80)}}]
+		state.food_stocks={food.FRESH:0.0,food.STORED:3000.0}
+		var demand:={"total":55.0,"climate":0.0,"rationing":0.0}
+		state.elapsed_days=10
+		var fresh:=food._forecast({},demand)
+		assert_int(int(fresh[90].first_shortage_day)).is_greater(30)
+		state.simulation_metrics.food_forecast_day=10
+		state.simulation_metrics.food_forecast_30=fresh[30];state.simulation_metrics.food_forecast_90=fresh[90]
+		state.elapsed_days=13
+		var aged:=food._forecast({},demand)
+		assert_int(int(aged.day)).is_equal(10)
+		assert_int(int(aged[90].first_shortage_day)).is_equal(int(fresh[90].first_shortage_day)-3)
+		state.elapsed_days=17
+		assert_int(int(food._forecast({},demand).day)).is_equal(17)
 	)
 
 func test_navigation_yields_daily_work_without_catchup_debt()->void:

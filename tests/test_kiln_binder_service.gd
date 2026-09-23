@@ -2,7 +2,7 @@ extends GdUnitTestSuite
 
 const Ops=preload("res://scripts/technology_operations.gd")
 const Industry=preload("res://scripts/civilian_industry.gd")
-const Craft=preload("res://scripts/opening_craft_practice.gd")
+const Craft=preload("res://scripts/civilian_goods.gd")
 
 func before_test()->void:
 	WorldSimulation.clear();GameState.reset_for_new_world(7520)
@@ -12,7 +12,7 @@ func before_test()->void:
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.settlement_site_committed=true;GameState.convoy_traveling=false;GameState.resource_settlement_id="";GameState.ensure_population_total(100)
 	GameState.population_allocations.Crafting=10;GameState.population_health=1.0;GameState.simulation_metrics.labor_efficiency=1.0
-	GameState.resource_stockpiles={"Stone":20.0,"Clay":10.0,"Joined Timber Components":3.0,"Timber":4.0,"Limestone":10.0,"Unfired Clay Conduits":4.0}
+	GameState.resource_stockpiles={"Stone":20.0,"Clay":10.0,"Civilian Goods":3.0,"Timber":4.0,"Limestone":10.0,"Unfired Clay Conduits":4.0}
 
 func after_test()->void:
 	WorldSimulation.clear();GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
