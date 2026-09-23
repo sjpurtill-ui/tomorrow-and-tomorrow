@@ -4,7 +4,8 @@ extends RefCounted
 const LIMIT:=1000
 const WaterDrive=preload("res://scripts/water_hammer_site.gd")
 const Storage=preload("res://scripts/electrical_storage.gd")
-const PLANTS={
+## Plant specifications as authored; PLANTS holds them with bills flattened.
+const PLANTS_SOURCE={
 	"controlled_kiln":{"name":"Maintained controlled kiln","gate":"kiln_control","requires":[],"cost":{"Stone":12.0,"Clay":6.0,"Civilian Goods":2.0},"work":24.0,"workers":1.0,"inputs":{"Timber":0.5},"power":0.0,"services":{"kiln_heat":4.0}},
 	"sec_analytical_bench":{"name": "Aqueous size-exclusion bench", "gate": "size_exclusion_chromatography", "requires": ["electrical_measurement"], "cost": {"SEC Bench Assemblies": 1, "Steel": 2}, "work": 16, "workers": 1, "inputs": {"Freshwater": 1}, "power": 2, "services": {"sec_column_time": 1}},
 	"nmr_analytical_bench":{"name": "NMR analytical bench awaiting reference qualification", "gate": "nuclear_magnetic_resonance_spectroscopy", "requires": ["electrical_measurement"], "cost": {"Unqualified NMR Benches": 1, "Steel": 2}, "work": 24, "workers": 1, "inputs": {"Freshwater": 1, "Insulated Cable": 0.001}, "power": 8, "services": {"nmr_unqualified_time": 1}},
@@ -35,6 +36,8 @@ const PLANTS={
 	"battery_store":{"name": "Supervised battery store", "gate": "battery_bank_wiring", "requires": ["cable_insulation"], "cost": {"Battery Banks": 1.0, "Insulated Cable": 1.0}, "work": 12.0, "workers": 1.0, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 3.0, "discharge_rate": 3.0, "charge_efficiency": 0.8, "discharge_efficiency": 0.8, "self_discharge": 0.001}},
 	"regulated_battery_store":{"name": "Regulated battery store", "gate": "charge_regulation", "requires": ["battery_bank_wiring"], "cost": {"Battery Banks": 1.0, "Charge Controllers": 1.0, "Insulated Cable": 1.0}, "work": 16.0, "workers": 0.25, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 6.0, "discharge_rate": 6.0, "charge_efficiency": 0.9, "discharge_efficiency": 0.9, "self_discharge": 0.0005}}
 }
+## Costs and daily inputs name raw materials and Civilian Goods only (goods_bills.gd).
+static var PLANTS:=preload("res://scripts/goods_bills.gd").flatten_table(PLANTS_SOURCE,["cost","inputs"])
 static func empty_state()->Dictionary:return {"last_day":-1,"plants":{},"services":{},"workers":0.0,"inputs":{}}
 static func data()->Dictionary:return WorldSimulation.state.technology_operations
 static func quote(id:String,count:int=1)->Dictionary:
