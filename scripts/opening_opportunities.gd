@@ -91,7 +91,10 @@ static func valid(value:Variant)->bool:
 	return herd.get("source_id","") is String
 
 static func practice_factor(id:String)->float:
-	var programs:Dictionary=data().get("programs",{})
+	# Read-only and called per effect rebuild. Every writer keeps this record
+	# valid and loads validate it, so skip data()'s full structural check.
+	var current:Variant=WorldSimulation.state.opening_opportunities
+	var programs:Dictionary=(current if current is Dictionary else data()).get("programs",{})
 	if id=="seed_selection":
 		var seed:Dictionary=programs.get("seed",{})
 		return clampf(float(seed.get("retained",0.0))/_seed_target(),0.0,1.0)
