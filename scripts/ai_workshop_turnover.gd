@@ -1,19 +1,16 @@
 extends RefCounted
-## Managed workshops finish or set aside paid ordinary batches; trials stay in place.
+## Managed workshops finish or set aside paid ordinary batches of military items.
 const P=preload("res://scripts/persistent_production.gd")
-const I=preload("res://scripts/civilian_industry.gd")
-const ORDINARY_FIELDS=["name","output","gate","materials","days","tooling","co_products","power","daily_power","services"]
 
 static func authorized(id:String,host:Node,delegated:bool)->bool:
 	if delegated:return id=="player" and WorldSimulation.actor_id=="player" and host==WorldSimulation.military and bool(host.workshop.data.enabled)
 	return String(WorldSimulation.actors.get(id,{}).get("controller",""))=="ai"
 
 static func ordinary(job:Dictionary)->bool:
-	if not job.get("reserved_materials",{}).is_empty():return false
+	# Former civilian lines are retired on the production day, not retooled.
+	if String(job.get("job_type",""))=="civilian" or not job.get("reserved_materials",{}).is_empty():return false
 	for key:String in job:
 		if key.ends_with("pending") or key.ends_with("trial") or key=="formed_piece":return false
-	for key:String in I.product(String(job.item)):
-		if key not in ORDINARY_FIELDS:return false
 	return true
 
 static func can_suspend(host:Node,job:Dictionary)->bool:

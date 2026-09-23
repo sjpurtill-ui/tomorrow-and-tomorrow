@@ -1,6 +1,7 @@
 extends Node
 
 const PersistentProduction = preload("res://scripts/persistent_production.gd")
+const GoodsBills = preload("res://scripts/goods_bills.gd")
 var recruit_deploy=preload("res://scripts/recruit_deploy.gd").new(self)
 var training_staff=preload("res://scripts/military_training_staff.gd").new(self)
 var production_labor_share:float = .35
@@ -3026,6 +3027,7 @@ func _normalize_equipment_jobs()->void:
 		if int(job.get("id",0))<=0: job["id"]=fallback_id
 		fallback_id=maxi(fallback_id+1,int(job.id)+1)
 		if not job.has("job_type"): job["job_type"]="production"
+		PersistentProduction.flatten_saved(job)
 		job["allocation"]=clampf(float(job.get("allocation",1.0)),0.05,4.0)
 		job["efficiency"]=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
 		if bool(job.get("persistent",false)):
@@ -3832,6 +3834,7 @@ func _process_equipment_production_day()->void:
 	preload("res://scripts/routine_military_upkeep.gd").prepare(self)
 	var repair_work:=preload("res://scripts/field_repair.gd").prepare(self)*WorldSimulation.span
 	if equipment_queue.is_empty(): return
+	PersistentProduction.retire_civilian(self)
 	var crafting:=_production_rate()*WorldSimulation.span
 	var weight_total:=0.0
 	for job in equipment_queue:
@@ -4240,11 +4243,13 @@ const BASE_EQUIPMENT_RECIPES:={
 	"modern_field_gun":{"materials":{"Iron Ore":24.0,"Copper Ore":1.5,"Timber":2.0},"days":34.0}
 }
 
+## Military bills name raw materials and Civilian Goods only: civilian parts in
+## the authored tables (cloth, armor plates, cart gear, rope) are flattened.
 func _equipment_recipe(item:String)->Dictionary:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
-	if not joint.is_empty():return {"materials":joint.materials.duplicate(true),"days":float(joint.work_days)}
+	if not joint.is_empty():return {"materials":GoodsBills.flatten(joint.materials).duplicate(),"days":float(joint.work_days)}
 	var extension:Dictionary=preload("res://scripts/military_equipment_extension.gd").ITEMS.get(item,{})
-	if not extension.is_empty():return {"materials":extension.materials.duplicate(true),"days":float(extension.days)}
+	if not extension.is_empty():return {"materials":GoodsBills.flatten(extension.materials).duplicate(),"days":float(extension.days)}
 	# A fresh copy, as the literal table used to provide on every call.
 	return (BASE_EQUIPMENT_RECIPES[item] as Dictionary).duplicate(true) if BASE_EQUIPMENT_RECIPES.has(item) else {"materials":{},"days":1.0}
 
@@ -4259,8 +4264,17 @@ func _consumable_recipe(item:String)->Dictionary:
 	}.get(item,{"materials":{},"days":1.0})
 
 
+## The former running-gear kit and timber cart bed, as the cart line now builds
+## them from raw materials and Civilian Goods. Named explicitly: flattening
+## "Cart Assembly Kits" would follow the shortest (steel-panel) bed recipe.
+const CART_PARTS:={"Wheel Pairs":1.0,"Wooden Axles":1.0,"Axle Boxes":2.0,"Cart Linchpins":1.0,"Cart Drawbars":1.0,"Haul Harness":1.0,"Timber":5.0,"Treenails":0.5}
+## Workshop days of the former kit (5) and bed (4) recipes, charged as goods.
+const CART_ASSEMBLY_DAYS:=9.0
+
 func _transport_recipe()->Dictionary:
-	return {"materials":{"Cart Assembly Kits":1.0},"days":1.0}
+	var materials:=GoodsBills.flatten(CART_PARTS).duplicate()
+	materials[GoodsBills.Goods.GOODS]=float(materials.get(GoodsBills.Goods.GOODS,0.0))+GoodsBills.GOODS_PER_RECIPE_DAY*CART_ASSEMBLY_DAYS
+	return {"materials":materials,"days":1.0}
 
 
 func _unit_equipment_view()->Dictionary:

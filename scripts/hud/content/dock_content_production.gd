@@ -7,9 +7,13 @@ func _ensure_workshop()->void:
 	if workshop==null:workshop=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 func tab(sub:int)->Dictionary:
 	_ensure_workshop()
+	# Civilian manufactures are one Civilian Goods stock made by households;
+	# workshop lines and recipes are military only.
+	if sub==1:
+		var civilian:=_household_blocks()
+		return {"blocks":civilian if not civilian.is_empty() else [{"type":"text","heading":"CIVILIAN GOODS","text":"No city holds civilian goods yet."}]}
 	var snapshot:=MilitaryCampaign.production_lines_snapshot()
 	var lines:Array=snapshot.lines
-	if sub>0:lines=lines.filter(func(line:Dictionary)->bool:return (String(line.get("job_type",""))=="civilian")==(sub==1))
 	var stocks:Dictionary={}
 	for resource in ["Timber","Fiber Plants","Stone","Clay","Copper Ore"]:
 		if float(GameState.resource_stockpiles.get(resource,0))>0:stocks[resource]=GameState.resource_stockpiles[resource]
@@ -17,8 +21,8 @@ func tab(sub:int)->Dictionary:
 		"on_add":focused_action("ADD PRODUCTION LINE","Known products",workshop._equipment_catalog).on_press,
 		"on_manage":focused_action("WORKSHOP MANAGEMENT","Delegation",workshop._workshop_management_report).on_press,
 		"on_history":focused_action("PRODUCTION HISTORY","Completed output",_history).on_press},{"type":"actions","items":[focused_action("EQUIPMENT UPKEEP","Staff repairs and supply constraints",_repairs)]}]}
-	if sub!=2:result.blocks.append_array(_household_blocks())
-	result.blocks.append_array(_workshop_availability(sub))
+	if sub==0:result.blocks.append_array(_household_blocks())
+	result.blocks.append_array(_workshop_availability())
 	return result
 func _select(id:int)->void:
 	selected_line=-1 if selected_line==id else id;hud.request_immediate_dock_refresh()
@@ -79,13 +83,10 @@ static func _technique_rows()->Array:
 		rows.append({"name":String(DiscoverySystem.discovery_definition(id).get("name",id.capitalize())),"value":"%d%% adopted" % roundi(adoption*100.0),"sub":"Acting at %d%% of its benefit" % roundi(adoption*goods.factor(id)*100.0),"accent":Tokens.GREEN if adoption>=.5 else Tokens.AMBER})
 	return rows
 
-func _workshop_availability(sub:int)->Array:
+func _workshop_availability()->Array:
 	var production=preload("res://scripts/persistent_production.gd")
-	var industry=preload("res://scripts/civilian_industry.gd")
 	var items:Array=[]
 	for id:String in production.available_products(MilitaryCampaign):
-		var civilian:=not industry.product(id).is_empty()
-		if sub==1 and not civilian or sub==2 and civilian:continue
 		var blockers:Array=production.startup_blockers(MilitaryCampaign,id,{})
 		items.append({"name":production.product_name(id),"sub":" · ".join(blockers) if not blockers.is_empty() else "Ready to order when needed","accent":Tokens.AMBER if not blockers.is_empty() else Tokens.GREEN})
 		if items.size()>=6:break
