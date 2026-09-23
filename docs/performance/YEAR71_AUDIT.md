@@ -101,3 +101,29 @@ issued between steps take effect from the next phase rather than being queued to
 day boundary. Rival projections refresh civilization by civilization over a few
 frames. `scheduled_world_days_enabled=false` on the terrain restores the old
 whole-day frame. Probe: `--year71-profile --stepped` and `--frame-profile [--synchronous]`.
+
+### Follow-up checkpoints on codex/day-jobs
+
+Each keeps the eight-day year-71 saved state identical to the baseline (stepped and synchronous).
+"Warm" means after the first, cold day after load. Timings vary with other load on this
+machine; another headless worker ran throughout.
+
+| Commit | Change | Measured effect |
+|---|---|---|
+| 8dc4f9d | AI order selection, each civilian investment planner and each expansion site are separate steps | slowest warm step 136 → 52 ms; p99 13.9 → 10.6 ms |
+| 08012d8 | Owned-world civilization work and weekly scout route quotes split; review/civilian/expansion/scouting follow-up steps queued only when due | warm steps per 7 days 10,332 → 4,293; slowest warm step ~40 ms |
+| 74ad73f | Charted area cached by fog revision; nation-wide territory inputs computed once per network snapshot | projection steps 806 → 301 ms per 8 days; no warm step > 33 ms |
+| e4b3504 | Exact shared terrain samples for territory fills, borders and scout corridors | paused map snapshot work 148 → 123 ms per 36 frames |
+| 2fdc67d | Settlement network refresh runs half a period after marker refreshes (both still 10 Hz) | refresh-frame peaks 26–30 → 15–19 ms |
+
+Checked and not changed: observer views (~31 ms/day; exact reuse is complicated by
+per-observer controller localization), material flow (per-deposit work, no repeated
+nation-wide inputs), progression's domain limits (cold-cache cost on the first day
+after load only). Two-day `--detail` runs include that cold day; use eight-day `--stepped`
+runs for steady-state conclusions.
+
+Still open: total daily CPU is about 1.0–1.4 s. Roughly 450–500 ms of it is secondary
+settlements (consequences/food ~190, resources ~115, economy ~70 ms), spread across many
+small subsystems per city. Pan/zoom still rebuilds border and corridor meshes by view
+bucket. Width is baked into geometry, so retained geometry needs a shader or transform
+change with graphical verification.
