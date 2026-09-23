@@ -272,8 +272,9 @@ var rendered_settlement_lod := -1
 var rendered_architecture_signature := ""
 var rendered_settlement_view_signature := ""
 var rendered_morphology_visual_signature := ""
-var cached_morphology_visual_signature := ""
-var cached_morphology_visual_signature_key := ""
+## Visual signatures per city (keyed by resource settlement id), so drawing
+## several towns in one pass does not recompute each town's plot hash.
+var cached_morphology_visual_signatures:Dictionary={}
 var active_architecture_profile:Dictionary={}
 var rendered_settlement_aerial_lod:=-1.0
 var rendered_settlement_stage_radius:=0.0
@@ -4423,7 +4424,9 @@ func _refresh_settlement_network(force:=false)->void:
 	var signature:="%d:%s:%d:%d:%d:%d:%s:%s" % [GameState.settlement_network_revision,morphology_visual_signature,population_visual_bucket,GameState.player_settlements.size(),int(GameState.elapsed_days/30.0),defense_stage,architecture_signature,network_view_key]
 	if not force and signature==rendered_settlement_network_signature: return
 	rendered_settlement_network_signature=signature
+	var snapshot_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	var network:Dictionary=_settlement_model().settlement_network_snapshot()
+	preload("res://scripts/performance_trace.gd").mark("network_snapshot",snapshot_stamp)
 	if settlement_border_root: settlement_border_root.queue_free()
 	if settlement_network_marker_root: settlement_network_marker_root.queue_free()
 
@@ -4468,8 +4471,12 @@ func _refresh_settlement_network(force:=false)->void:
 		halo_color.a=0.32 if bool(settlement.get("primary",false)) else 0.24
 		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,boundary,core_width*2.8,halo_color,0.0045,samples)
 		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,color,0.0065,samples)
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	_create_secondary_settlement_markers(visible_secondary_settlements)
+	stamp=trace.mark("network_markers",stamp)
 	_create_secondary_settlement_footprints(visible_secondary_settlements,force)
+	stamp=trace.mark("network_footprints",stamp)
 	if ownership_triangle_count>0:
 		var ownership_mesh:=ownership_surface.commit()
 		var ownership_instance:=MeshInstance3D.new()
@@ -4515,6 +4522,10 @@ func _refresh_settlement_network(force:=false)->void:
 	_update_scale_lod()
 
 
+## Per-settlement geography sample keys (seed and position); see
+## _sync_settlement_territory_contexts.
+var sampled_settlement_territory_keys:Dictionary={}
+
 func _settlement_territory_sample_signature()->String:
 	var parts:=PackedStringArray([str(GameState.world_seed)])
 	for settlement_variant in GameState.player_settlements:
@@ -4533,6 +4544,11 @@ func _sync_settlement_territory_contexts()->void:
 		var position_value:Variant=settlement.get("position",Vector2.ZERO)
 		var center:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
 		if settlement_id=="": continue
+		# Geography is static: re-sample only a settlement that is new or moved
+		# (founding a town must not re-survey every existing one).
+		var sample_key:="%d:%d:%d" % [GameState.world_seed,roundi(center.x*1000.0),roundi(center.y*1000.0)]
+		if String(sampled_settlement_territory_keys.get(settlement_id,""))==sample_key and settlement.has("territory_context"): continue
+		sampled_settlement_territory_keys[settlement_id]=sample_key
 		var sample:=0.25
 		var east_west:=absf(_height_at(center.x+sample,center.y)-_height_at(center.x-sample,center.y))/(sample*2.0)
 		var north_south:=absf(_height_at(center.x,center.y+sample)-_height_at(center.x,center.y-sample))/(sample*2.0)
@@ -7867,14 +7883,15 @@ func _settlement_morphology_visual_signature()->String:
 	# rebuild every mesh because prosperity moved by a thousandth. The authoritative
 	# state remains continuous; this signature controls presentation work only.
 	var social_condition_key:="%d:%d:%d:%d:%d" % [
-		roundi(clampf(GameState.population_health,0.0,1.0)*20.0),
-		roundi(clampf(GameState.food_security,0.0,1.0)*20.0),
-		roundi(clampf(float(GameState.simulation_metrics.get("cohesion",0.58)),0.0,1.0)*20.0),
-		roundi(clampf(float(GameState.simulation_metrics.get("material_capacity",0.12)),0.0,1.0)*20.0),
-		roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)*20.0)
+		roundi(clampf(GameState.population_health,0.0,1.0)*5.0),
+		roundi(clampf(GameState.food_security,0.0,1.0)*5.0),
+		roundi(clampf(float(GameState.simulation_metrics.get("cohesion",0.58)),0.0,1.0)*5.0),
+		roundi(clampf(float(GameState.simulation_metrics.get("material_capacity",0.12)),0.0,1.0)*5.0),
+		roundi(clampf(float(GameState.simulation_metrics.get("legitimacy",0.62)),0.0,1.0)*5.0)
 	]
 	var cache_key:="%s:%d:%d:%s" % [GameState.resource_settlement_id,GameState.morphology_revision,int(GameState.elapsed_days/365.0),social_condition_key]
-	if cache_key==cached_morphology_visual_signature_key: return cached_morphology_visual_signature
+	var cached:Array=cached_morphology_visual_signatures.get(GameState.resource_settlement_id,[])
+	if not cached.is_empty() and cached[0]==cache_key: return cached[1]
 	var plot_hash:=0
 	for plot in GameState.settlement_plots:
 		var centroid:=Vector2(plot.get("centroid",Vector2.ZERO))
@@ -7882,10 +7899,11 @@ func _settlement_morphology_visual_signature()->String:
 			int(plot.get("id",0)),String(plot.get("land_use","")),String(plot.get("form","")),
 			String(plot.get("material_family","")),String(plot.get("roof_plan","")),String(plot.get("status","")),
 			String(plot.get("cultivation_phase","")),int(plot.get("fabric_generation",0)),int(plot.get("storeys",1)),
-			roundi(clampf(float(plot.get("condition",1.0)),0.0,1.0)*20.0),
-			roundi(clampf(float(plot.get("prosperity",0.4)),0.0,1.0)*20.0),
-			roundi(clampf(float(plot.get("service_access",0.35)),0.0,1.0)*20.0),
-			roundi(clampf(float(plot.get("maintenance_debt",0.0)),0.0,1.0)*20.0),
+			# Five tone steps: monthly drift of a few percent must not rebuild a town.
+			roundi(clampf(float(plot.get("condition",1.0)),0.0,1.0)*5.0),
+			roundi(clampf(float(plot.get("prosperity",0.4)),0.0,1.0)*5.0),
+			roundi(clampf(float(plot.get("service_access",0.35)),0.0,1.0)*5.0),
+			roundi(clampf(float(plot.get("maintenance_debt",0.0)),0.0,1.0)*5.0),
 			roundi(clampf(float(plot.get("reclamation",0.0)),0.0,1.0)*10.0),
 			roundi(centroid.x*1000.0),roundi(centroid.y*1000.0)
 		]
@@ -7903,9 +7921,9 @@ func _settlement_morphology_visual_signature()->String:
 	for nucleus in GameState.settlement_nuclei:
 		var position:=Vector2(nucleus.get("position",Vector2.ZERO))
 		nuclei_hash=nuclei_hash^hash("%d|%s|%d|%d|%d" % [int(nucleus.get("id",0)),String(nucleus.get("kind","")),int(bool(nucleus.get("active",true))),roundi(position.x*1000.0),roundi(position.y*1000.0)])
-	cached_morphology_visual_signature="%d:%d:%d:%d:%d:%d:%s" % [GameState.settlement_plots.size(),GameState.settlement_routes.size(),GameState.settlement_nuclei.size(),plot_hash,route_hash,nuclei_hash,social_condition_key]
-	cached_morphology_visual_signature_key=cache_key
-	return cached_morphology_visual_signature
+	var signature:="%d:%d:%d:%d:%d:%d:%s" % [GameState.settlement_plots.size(),GameState.settlement_routes.size(),GameState.settlement_nuclei.size(),plot_hash,route_hash,nuclei_hash,social_condition_key]
+	cached_morphology_visual_signatures[GameState.resource_settlement_id]=[cache_key,signature]
+	return signature
 
 func _settlement_civic_axis()->float:
 	# A civilization carries a persistent planning axis derived from its world seed.
@@ -11217,18 +11235,28 @@ func _process_settlement_convoy()->void:
 	_settlement_model().update_settlement_convoy(position,progress)
 	_refresh_settlement_convoy_marker()
 	if progress<1.0: return
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	var completed:Dictionary=_settlement_model().complete_settlement_convoy(destination)
+	trace.mark("found_complete_convoy",stamp)
 	_show_convoy_arrival(completed)
 
 func _show_convoy_arrival(completed:Dictionary)->void:
 	var destination:Vector2=completed.get("settlement",{}).get("position",Vector2.ZERO)
+	var trace=preload("res://scripts/performance_trace.gd")
+	var stamp:int=trace.start()
 	if route_mesh: route_mesh.visible=false
 	_refresh_settlement_convoy_marker()
-	_refresh_settlement_network(true)
+	# A new town changes the network signature; existing towns keep their
+	# drawn buildings and only the new one is built.
+	_refresh_settlement_network()
+	stamp=trace.mark("found_network",stamp)
 	if bool(completed.get("ok",false)):
 		var settlement:Dictionary=completed.settlement
 		_settlement_model().select_settlement(String(settlement.get("id","")))
+		stamp=trace.mark("found_select",stamp)
 		GovernmentPeopleSystem.process_day(int(GameState.elapsed_days))
+		stamp=trace.mark("found_government",stamp)
 		var event:={
 			"id":"settlement_founded_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),
 			"title":"New Settlement Seeded",
@@ -11238,7 +11266,9 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		GameState.simulation_events.push_front(event)
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 		_set_camera_target(Vector3(destination.x,_height_at(destination.x,destination.y),destination.y))
+		stamp=trace.mark("found_camera",stamp)
 		if hud: _on_hud_section_requested("settlement",0)
+		stamp=trace.mark("found_hud",stamp)
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
