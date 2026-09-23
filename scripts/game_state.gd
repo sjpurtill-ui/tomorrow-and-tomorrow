@@ -1281,6 +1281,9 @@ func _mortality_condition_factor(housing_ratio:float=-1.0)->float:
 	var shelter_factor:=lerpf(1.65,0.88,clampf(resolved_housing,0.0,1.0))
 	return health_factor*food_factor*shelter_factor
 
+# _baseline_mortality_hazard_at_age for ages 0-109, for the 110-year projection.
+const BASELINE_HAZARD_BY_AGE:Array[float]=[0.090,0.025,0.025,0.025,0.025,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.004,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.006,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.008,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.012,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.055,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.120,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.230,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380,0.380]
+
 func _baseline_mortality_hazard_at_age(age:int)->float:
 	if age==0: return 0.090
 	if age<5: return 0.025
@@ -1325,7 +1328,7 @@ func projected_life_expectancy() -> float:
 	var survival:=1.0
 	var expected_years:=0.0
 	for age in 110:
-		var baseline_hazard:=_baseline_mortality_hazard_at_age(age)
+		var baseline_hazard:=BASELINE_HAZARD_BY_AGE[age]
 		var annual_hazard:=clampf(baseline_hazard*condition_factor+exceptional_hazard,0.0001,0.98)
 		expected_years+=survival
 		survival*=1.0-annual_hazard
