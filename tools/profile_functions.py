@@ -1,5 +1,5 @@
 """Temporarily wrap every function in the given GDScript files with an inclusive
-timer (performance_trace.mark). timefuncs.py f.gd [...] | timefuncs.py --restore f.gd [...]
+timer (performance_trace.mark). profile_functions.py f.gd [...] | profile_functions.py --restore f.gd [...]
 Skips _init/_ready/_process/_notification, getters/setters, and functions whose
 signature spans lines."""
 import sys, os, re, shutil
@@ -13,6 +13,12 @@ for path in sys.argv[2 if restore else 1:]:
     shutil.copy(path, bk)
     tag = os.path.basename(path).split('.')[0]
     lines = open(path, encoding='utf-8').read().split('\n')
+    # Match the file's function-body indentation (some scripts use spaces).
+    ind = '\t'
+    for i, l in enumerate(lines[:-1]):
+        nxt = lines[i + 1]
+        if re.match(r'^(static\s+)?func\s', l) and nxt[:1] in (' ', '\t') and nxt.strip():
+            ind = nxt[:len(nxt) - len(nxt.lstrip())]; break
     out = []
     sig = re.compile(r'^(static\s+)?func\s+(\w+)\s*\((.*)\)\s*(->\s*([\w\[\]\.]+))?\s*:(.*)$')
     for line in lines:
@@ -37,14 +43,14 @@ for path in sys.argv[2 if restore else 1:]:
         call = '%s(%s)' % (orig, ','.join(names))
         wrapper = [
             '%sfunc %s(%s)%s:' % (static, name, args, ret_s),
-            '\tvar __tr=preload("res://scripts/performance_trace.gd");var __st:int=__tr.start()',
+            ind + 'var __tr=preload("res://scripts/performance_trace.gd");var __st:int=__tr.start()',
         ]
         if ret == 'void':
-            wrapper += ['\t' + call, '\t__tr.mark("%s.%s",__st)' % (tag, name)]
+            wrapper += [ind + call, ind + '__tr.mark("%s.%s",__st)' % (tag, name)]
         elif ret:
-            wrapper += ['\tvar __r:%s=%s' % (ret, call), '\t__tr.mark("%s.%s",__st)' % (tag, name), '\treturn __r']
+            wrapper += [ind + 'var __r:%s=%s' % (ret, call), ind + '__tr.mark("%s.%s",__st)' % (tag, name), ind + 'return __r']
         else:
-            wrapper += ['\tvar __r=%s' % call, '\t__tr.mark("%s.%s",__st)' % (tag, name), '\treturn __r']
+            wrapper += [ind + 'var __r=%s' % call, ind + '__tr.mark("%s.%s",__st)' % (tag, name), ind + 'return __r']
         out += wrapper
         out.append('%sfunc %s(%s)%s:%s' % (static, orig, args, ret_s, body))
     open(path, 'w', encoding='utf-8', newline='\n').write('\n'.join(out)); print('timed', path)
