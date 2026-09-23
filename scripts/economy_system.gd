@@ -63,12 +63,15 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	_update_benchmarks(events)
 	var previous_index:=float(WorldSimulation.state.economy_metrics.get("price_index",0.0))
-	var market_access:=_market_access(context)
+	# Foreign effects read relations, occupation and population commitments,
+	# none of which today's market steps below change; read them once.
+	var foreign_effects:=WorldSimulation.world.player_effects()
+	var market_access:=_market_access(context,foreign_effects)
 	var monetization:=_monetization(market_access)
 	var trade_volume:=_trade_volume(market_access,monetization)
 	_update_currency_demand(trade_volume,monetization)
 	var price_index:=_update_prices(market_access,trade_volume)
-	var active_trade_partners:=active_external_trade_partner_count()
+	var active_trade_partners:=maxi(0,int(foreign_effects.get("active_trade_partners",0)))
 	var external_trade:=_process_external_trade(market_access,trade_volume,active_trade_partners)
 	var recorded_comparison_today:=trade_volume>0.001 and _comparison_values_observable()
 	var market_volatility:=_market_volatility(price_index,30)
@@ -218,13 +221,13 @@ func _transition(next_stage:String,events:Array[Dictionary],reason:String)->void
 	WorldSimulation.state.economy_benchmarks[next_stage]={"day":int(WorldSimulation.state.elapsed_days),"from":prior}
 	events.append(_event("Exchange Benchmark Reached","%s begins. %s %s" % [STAGE_NAMES[next_stage],reason,("Resource payment remains valid." if next_stage==STAGE_METAL else "Barter and weighed metal remain valid settlement media.")],"major"))
 
-func _market_access(context:Dictionary)->float:
+func _market_access(context:Dictionary,foreign_effects:Dictionary={})->float:
 	if not WorldSimulation.state.settlement_site_committed or "Hearth Circle" not in WorldSimulation.state.settlement_completed: return 0.0
 	if float(WorldSimulation.state.water_metrics.get("intake_ratio",0.0))<0.98: return 0.0
 	var logistics:=float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))
 	var admin:=WorldSimulation.state.effective_workers("Administration")/maxf(1.0,WorldSimulation.state.population_exact*0.05)
 	var storage:=float(WorldSimulation.state.simulation_metrics.get("storage_function",0.0))
-	var foreign_access:=float(WorldSimulation.world.player_effects().market_access_bonus)
+	var foreign_access:=float((foreign_effects if not foreign_effects.is_empty() else WorldSimulation.world.player_effects()).market_access_bonus)
 	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access,0.0,1.0)
 
 func _monetization(market_access:float)->float:
