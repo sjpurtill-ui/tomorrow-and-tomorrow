@@ -2433,3 +2433,7 @@ Early World overview contact cards now reuse the known diplomatic leader image a
 ### Early shield-wall unit illustration
 
 Line Infantry now uses an early paper shield-wall training scene before year 300, replacing its later-looking legacy illustration in that interval. Shield-wall knowledge is present in the recorded 75-year same-site pacing comparison; this is tied to an existing unit and research gate, not a new unlock. Nine early unit types now have paper overrides. Both focused suites pass: 21 tests, zero errors, failures or orphans. Native generated source and exact prompt are retained; mipmapped import capped at 1024. No unit balance or pacing changed.
+
+### Material comparison research art
+
+Timber Grading and Clay Testing replace legacy realistic imagery with paper illustrations before year 300. Both discoveries occur in the recorded early pacing runs. The scenes show sound/crooked/rotten timber and distinct clay test outcomes rather than generic crafting. Thirteen focused tests pass; isolated GPU previews check the actual research painter at 490x280 and 260x112. Narrow timber framing prioritizes the wood samples. Forty explicit early research overrides are now installed; later-era mappings remain intact.

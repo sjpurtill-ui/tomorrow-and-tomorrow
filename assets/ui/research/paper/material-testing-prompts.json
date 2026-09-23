@@ -1,0 +1,16 @@
+{
+  "generator": "Built-in imagegen",
+  "style_reference": "assets/ui/research/paper/oral_epics.png",
+  "assets": [
+    {
+      "file": "timber_grading.png",
+      "source": "exec-735cf958-0189-4d1c-8136-1e72c1a1b54b.png",
+      "prompt": "Standalone landscape 4:3 research illustration TIMBER GRADING for an early civilization game. STYLE REFERENCE ONLY: flat matte dry gouache, charcoal silhouettes, ochre, muted sage and warm opaque ivory paper; spare shapes, restrained paper grain, broken vignette edges, not photographic realism. Subject is comparing the suitability of wood, NOT sawing or building. A lean weathered adult with ordinary asymmetrical face sits sideways on a low log, looking along a straight peeled pole to check its grain. In foreground three visibly different pieces lie parallel on two low supports: sound straight-grained pole, crooked knotty branch, short split piece exposing rot. One hand points to a knot. Small bark and stone flakes, simple stone blade; NO metal, axe, modern saw, measuring ruler or printed labels. Invented plain woven wrap and short practical hair, no recognizably national costume. Natural proportions, correctly jointed hands. Keep person and three wood samples in central horizontal band so the meaningful action survives a wide card crop. Abundant ivory margin above and around. Clear material textures rendered as flat painted marks. No title, text, UI, border or decorative symbols."
+    },
+    {
+      "file": "clay_testing.png",
+      "source": "exec-1d9307a1-eceb-467d-83b2-0742893d87d4.png",
+      "prompt": "Landscape 4:3 research artwork CLAY TESTING for an early civilization game. Match reference aesthetic only: flat dry matte gouache, warm opaque ivory paper, charcoal, ochre, gray-sage, restrained grain and irregular vignette edges; not a photograph. Close oblique overhead study of hands comparing fired clay test pieces on a reed mat. Five little plain test tiles and two pinched test cups: one tile deeply cracked from shrinkage, one warped, one crumbly coarse-grained, two sound with subtly different clay colors. One ordinary weathered hand lifts a broken tile so its coarse cross-section is visible; the other points at a shrinkage crack. Small raw clay lumps and a pinch of sand nearby. THIS IS MATERIAL TESTING, not decorative pottery-making: no potter wheel, finished ornate vessels, writing, numbers, modern measuring equipment, metal tools or laboratory glass. Hands belong to seated workers partly visible along upper edge in simple invented early woven wraps. No posed faces or glamour. Main test pieces and gestures all fit compact central horizontal band; ample paper margins. Strongly distinguish the different results through cracks, shape and texture rather than labels. No UI, text or border."
+    }
+  ]
+}
